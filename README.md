@@ -78,33 +78,38 @@ Follow these steps to set up the **Ingenious** package locally:
     pip install -r requirements.txt
     ```
 
-6. **Generate the local `.env` file** (Optional):
-    ```bash
-    ./generate-local-dotenv-file.ps1 -env "dev"
-    ```
-    > **Note:** On macOS or Linux, you may need to make the script executable:
-    ```bash
-    chmod +x ./generate-local-dotenv-file.ps1
-    ```
 
-## Running the Application
+[//]: # ()
+[//]: # (## Running the Application)
 
-Once everything is installed, you can start the **FastAPI** server using the command:
+[//]: # ()
+[//]: # (Once everything is installed, you can start the **FastAPI** server using the command:)
 
-```bash
-uvicorn app.main:app --reload
-```
+[//]: # ()
+[//]: # (```bash)
 
-This will start the development server, and the API will be accessible locally.
+[//]: # (uvicorn app.main:app --reload)
 
-### Accessing API Documentation
+[//]: # (```)
 
-After the server is running, you can view the interactive API documentation via:
+[//]: # ()
+[//]: # (This will start the development server, and the API will be accessible locally.)
 
-- **Swagger UI**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
-- **ReDoc**: [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
+[//]: # ()
+[//]: # (### Accessing API Documentation)
 
-## Conclusion
+[//]: # ()
+[//]: # (After the server is running, you can view the interactive API documentation via:)
 
-**Ingenious** provides the scaffolding and pre-tested conversation patterns necessary to accelerate your LLM applications. For more in-depth documentation, including examples and best practices, please refer to the MkDocs-powered documentation site [here](#).
+[//]: # ()
+[//]: # (- **Swagger UI**: [http://127.0.0.1:8000/docs]&#40;http://127.0.0.1:8000/docs&#41;)
 
+[//]: # (- **ReDoc**: [http://127.0.0.1:8000/redoc]&#40;http://127.0.0.1:8000/redoc&#41;)
+
+[//]: # ()
+[//]: # (## Conclusion)
+
+[//]: # ()
+[//]: # (**Ingenious** provides the scaffolding and pre-tested conversation patterns necessary to accelerate your LLM applications. For more in-depth documentation, including examples and best practices, please refer to the MkDocs-powered documentation site [here]&#40;#&#41;.)
+
+[//]: # ()
