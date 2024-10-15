@@ -1,0 +1,27 @@
+profile: dev
+models: 
+  - model: gpt-4-deployment
+    api_type: azure      
+    api_version: 2024-02-01
+logging: 
+  root_log_level: debug
+  log_level: debug
+chat_history:  
+  database_type: sqlite # cosmos or sqlite
+  database_path: tmp/high_level_logs.log.db # only used for sqlite
+  database_name: ToDoList # only used for cosmos
+  memory_path: tmp
+chat_service:
+  type: multi_agent
+tool_service:
+  enable: false
+azure_search_services:
+  - service: default    
+    endpoint: https://search-demo-eli.search.windows.net
+web_configuration:
+  type: fastapi #currently only fastapi is supported
+  ip_address: "127.0.0.1"
+  port: 8000
+  authentication: 
+    enable: false # true or false
+    type: basic # basic     

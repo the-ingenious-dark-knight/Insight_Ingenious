@@ -1,0 +1,172 @@
+from abc import ABC, abstractmethod
+import logging
+import importlib
+from ingenious.db.chat_history_repository import ChatHistoryRepository
+from ingenious.errors.content_filter_error import ContentFilterError
+from ingenious.external_services.openai_service import OpenAIService
+from ingenious.models.chat import Action, ChatRequest, ChatResponse, KnowledgeBaseLink, Product
+from ingenious.models.message import Message
+from ingenious.models.tool_call_result import ActionToolCallResult, KnowledgeBaseToolCallResult, ProductToolCallResult
+#from ingenious.services.tool_service import ToolService
+from ingenious.utils.conversation_builder import (
+    build_message, build_system_prompt,
+    build_user_message, build_assistant_message, build_tool_message)
+from ingenious.utils.token_counter import num_tokens_from_messages, get_max_tokens
+from openai.types.chat import ChatCompletionMessageParam
+import autogen.token_count_utils as token_count_utils
+
+logger = logging.getLogger(__name__)
+
+
+class IConversationPattern(ABC):
+    @abstractmethod
+    async def get_conversation_response(self, message: str, thread_chat_history: list = []) -> ChatResponse:
+        pass
+
+
+class multi_agent_chat_service:
+    def __init__(
+            self,
+            chat_history_repository: ChatHistoryRepository,
+            #openai_service: OpenAIService,
+            #tool_service: ToolService,
+            conversation_flow: str):
+        self.chat_history_repository = chat_history_repository
+        #self.openai_service = openai_service
+        #self.tool_service = tool_service
+        self.conversation_flow = conversation_flow
+
+    async def get_chat_response(self, chat_request: ChatRequest) -> ChatResponse:
+        
+        if not chat_request.conversation_flow:
+            raise ValueError(f"conversation_flow3 not set {chat_request}")
+        # Initialize messages list            
+        messages: list[ChatCompletionMessageParam] = []
+
+        # Initialize additional response fields - to be populated later
+        follow_up_questions: dict[str, str] = {}
+        actions: list[Action] = []
+        knowledge_base_links: list[KnowledgeBaseLink] = []
+        products: list[Product] = []
+        thread_chat_history = [{"role": "user", "content": ""}]
+
+
+        # Check if thread exists
+        if not chat_request.thread_id:
+            # Create thread
+            chat_request.thread_id = await self.chat_history_repository.create_thread()
+        else:
+            # Get thread messages & add to messages list
+            thread_messages = await self.chat_history_repository.get_thread_messages(chat_request.thread_id)
+           
+            for thread_message in thread_messages:
+                # Validate user_id
+                if thread_message.user_id != chat_request.user_id:
+                    raise ValueError("User ID does not match thread messages.")
+
+                # Validate content_filter_results not present
+                if thread_message.content_filter_results:
+                    raise ContentFilterError(content_filter_results=thread_message.content_filter_results)
+
+                # Add thread message to messages list
+                message = build_message(
+                    role=thread_message.role,
+                    content=thread_message.content,
+                    user_name=chat_request.user_name,
+                    tool_calls=thread_message.tool_calls,
+                    tool_call_id=thread_message.tool_call_id,
+                    tool_call_function=thread_message.tool_call_function)
+                messages.append(message)
+
+                thread_chat_history.append({"role": thread_message.role, "content": thread_message.content})
+
+        # If system prompt is not first message add it in the beginning
+        if not messages or messages[0]["role"] != "system":
+
+            # Add system prompt
+            system_prompt_message = build_system_prompt(user_name=chat_request.user_name)
+            messages.insert(0, system_prompt_message)
+
+            # Save system prompt message
+            await self.chat_history_repository.add_message(
+                Message(
+                    user_id=chat_request.user_id,
+                    thread_id=chat_request.thread_id,
+                    role=system_prompt_message["role"],
+                    content=system_prompt_message["content"])
+            )
+
+        # Add latest user message
+        user_message = build_user_message(chat_request.user_prompt, chat_request.user_name)
+        messages.append(user_message)
+
+        # Save user message
+        user_message_id = await self.chat_history_repository.add_message(
+            Message(
+                user_id=chat_request.user_id,
+                thread_id=chat_request.thread_id,
+                role=user_message["role"],
+                content=str(user_message["content"]))
+        )
+
+        # Get tool definitions
+        # tools = self.tool_service.get_tool_definitions()
+
+        # Get the
+        try:
+            # call specific agent flow here and get final response
+            if not self.conversation_flow:
+                self.conversation_flow = chat_request.conversation_flow
+            if not self.conversation_flow:
+                raise ValueError(f"conversation_flow4 not set {chat_request}")
+            module_name = f"ingenious.services.chat_services.multi_agent.conversation_flows.{self.conversation_flow.lower()}.{self.conversation_flow.lower()}"
+            class_name = "ConversationFlow"
+
+            try:
+                module = importlib.import_module(f"{module_name}")
+                service_class = getattr(module, class_name)
+            except (ImportError, AttributeError) as e:
+                raise ValueError(f"Unsupported chat conversation flow: {module_name}.{class_name}") from e
+
+            conversation_flow_service_class = service_class()
+            
+            response_task = conversation_flow_service_class.get_conversation_response(
+                                                                                    message=chat_request.user_prompt,
+                                                                                    thread_chat_history=thread_chat_history
+                                                                                    )
+            response = await response_task
+
+        except ContentFilterError as cfe:
+            # Update user message with content filter results
+            await self.chat_history_repository.update_message_content_filter_results(
+                user_message_id, chat_request.thread_id, cfe.content_filter_results)
+            raise
+
+        agent_response = response
+
+        # Save agent response
+        agent_message_id = await self.chat_history_repository.add_message(
+            Message(
+                user_id=chat_request.user_id,
+                thread_id=chat_request.thread_id,
+                role="assistant",
+                content=agent_response)
+        )
+
+        # Get token counts
+        # TODO: Update to get token count from the autogen token count utils
+        max_token_count = 100 # get_max_tokens(self.openai_service.model)        
+        token_count = 10 # num_tokens_from_messages(messages)
+        logger.debug(f"Token count: {token_count}/{max_token_count}")
+
+        return ChatResponse(
+            thread_id=chat_request.thread_id,
+            message_id=agent_message_id,
+            agent_response=agent_response or "Sorry we were unable to generate a response. Please try again.",
+            followup_questions=follow_up_questions,
+            actions=actions,
+            knowledge_base_links=[],  # deleted for now
+            products=products,
+            token_count=token_count,
+            max_token_count=max_token_count
+        )
