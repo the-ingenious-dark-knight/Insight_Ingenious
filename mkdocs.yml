@@ -5,7 +5,6 @@ repo_name: Insight_Ingenious
 edit_uri: edit/main/docs/
 theme:
   name : gitbook
-  custom_dir: docs/overrides
   logo: assets/insight_logo_only.png
   palette:
     scheme: insightdoc
