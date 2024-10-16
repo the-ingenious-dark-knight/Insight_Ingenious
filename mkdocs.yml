@@ -4,10 +4,10 @@ repo_url: https://github.com/Insight-Services-APAC/Insight_Ingenious
 repo_name: Insight_Ingenious
 edit_uri: edit/main/docs/
 theme:
-  name : gitbook
+  name : material
   logo: assets/insight_logo_only.png
   palette:
-    scheme: insightdoc
+    scheme: insight
     primary: custom
     accent: custom
   features:
