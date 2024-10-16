@@ -22,43 +22,16 @@ designed to guide you in developing and deploying Generative AI projects. Our go
    - **Middle Tier**: Python with FastAPI.
    - **AI Orchestrator**: Python, leveraging SmartSpace.Ai Workflow SDK.
    - **Data Tier**: Fabric as the back end.
-6. **Landing Zone Deployments**: Using Bicep or Terraform for automated deployments.
 
-## Essential Features
-
-- [x] **Multi-Agent Orchestrator** for managing Generative AI projects.
-- [x] **Rapid POC Deployment**: Fabric-based POCs with a full SaaS stack.
-- [x] **Tools for Rapid Implementation**.
-- [ ] **Long-Term Conversation History** tracking.
-- [ ] **Analytics & Usage Reporting** via Power BI.
-- [ ] **User Feedback** mechanisms for continuous improvement.
-
-## Nice-to-Have Features
+## Feature
 
 - [x] **Industry-Specific Workflow Solutions**: Pre-built workflows for common use cases (e.g., curriculum planning for education).
 
 ## Key Technologies
 
-- **No/Low Code Solutions**: Explore tools like Copilot Studio.
-- **Multi-Agent Orchestration Frameworks**:
-  - [CREW AI](https://www.crewai.com/)
-  - [Microsoft Autogen](https://microsoft.github.io/autogen/)
-  - [SmartSpace.Ai](https://smartspace.ai/)
-- **Front End Frameworks**:
-  - POCs: Consider AutoGen Studio or notebook-based UIs.
-  - Other options: React, Angular, Vue.
+- **[Microsoft Autogen](https://microsoft.github.io/autogen/)** – A robust orchestration framework designed to streamline the creation and deployment of multi-agent Generative AI systems.
 
-## Getting Started
+- **[Chainlit](https://docs.chainlit.io/get-started/overview)** – A framework for developing and deploying multi-agent systems with a focus on ease of use and rapid prototyping.
 
-<div class="grid cards" markdown>
-
--   :octicons-file-code-16:{ .lg .middle } __Documentation Guide__
-
-    ---
-
-    Interested in contributing? Start with our documentation guide to learn how to get involved.
-
-    [:octicons-arrow-right-24: Documentation Guide](./documentation_guide/index.md){ .md-button .md-button--primary }
-
-</div>
+6. **Landing Zone Deployments**: Using Bicep or Terraform for automated deployments.
 
