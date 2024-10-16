@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+<title>Applications Required for Development (Windows) - Generative AI Accelerator - By Insight</title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+<meta name="generator" content="mkdocs-1.6.0, mkdocs-gitbook-1.0.7">
+
+<link rel="shortcut icon" href="../../images/favicon.ico" type="image/x-icon">
+<meta name="HandheldFriendly" content="true"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta rel="next" href="" />
+<link href="../../css/style.min.css" rel="stylesheet">
+<link href="../../assets/stylesheets/extra.css" rel="stylesheet"> 
+</head>
+
+<body>
+<div class="book">
+<div class="book-summary">
+<div id="book-search-input" role="search">
+<input type="text" placeholder="Type to search" />
+</div> <!-- end of book-search-input -->
+
+<nav role="navigation">
+<ul class="summary">
+<li>
+<a href="../.." target="_blank" class="custom-link">Generative AI Accelerator - By Insight</a>
+</li>
+<li class="divider"></li>
+<li class="chapter" data-path="">
+<a href="../..">Home</a>
+<li class="header">User guide</li>
+
+<li>
+<a href="../../user_guide/" class="">User Guide</a>
+</li>
+
+<li>
+<a href="../../user_guide/initial_setup/" class="">Environment Setup</a>
+</li>
+
+<li>
+<a href="../../user_guide/dbt_project_setup/" class="">DBT Project Setup</a>
+</li>
+
+<li>
+<a href="../../user_guide/dbt_build_process/" class="">Dbt Build Process</a>
+</li>
+
+<li>
+<a href="../../user_guide/development_workflow/" class="">Development Workflow</a>
+</li>
+
+<li>
+<a href="../../user_guide/fabric_ci_cd_process/" class="">Fabric CI/CD with Git Deployment</a>
+</li>
+
+<li class="header">Developer guide</li>
+
+<li>
+<a href="../" class="">Developer Guide</a>
+</li>
+
+<li>
+<a href="./" class="active">Applications Required for Development (Windows)</a>
+</li>
+
+<li>
+<a href="../dbt_setup/" class="">Setting Up dbt</a>
+</li>
+
+<li>
+<a href="../folder_structure/" class="">Repo Folder Structure</a>
+</li>
+
+<li>
+<a href="../framework_setup/" class="">Framework Setup</a>
+</li>
+
+<li>
+<a href="../initial_setup/" class="">Initial setup</a>
+</li>
+
+<li class="header">Documentation guide</li>
+
+<li>
+<a href="../../documentation_guide/" class="">Documentation Guide</a>
+</li>
+
+<li class="divider"></li>
+
+
+
+<li><a href="http://www.mkdocs.org">
+Published with MkDocs
+</a></li>
+
+<li><a href="https://github.com/GitbookIO/theme-default">
+Theme by GitBook
+</a></li>
+</ul>
+
+</nav>
+
+</div> <!-- end of book-summary -->
+
+<div class="book-body">
+<div class="body-inner">
+<div class="book-header" role="navigation">
+
+<!-- Title -->
+<h1>
+<i class="fa fa-circle-o-notch fa-spin"></i>
+<a href="." ></a>
+</h1>
+
+</div> <!-- end of book-header -->
+
+<div class="page-wrapper" tabindex="-1" role="main">
+<div class="page-inner">
+<div id="book-search-results">
+<div class="search-noresults">
+
+<section class="normal markdown-section">
+
+
+
+<h1 id="applications-required-for-development-windows">Applications Required for Development (Windows)<a class="headerlink" href="#applications-required-for-development-windows" title="Permanent link">&para;</a></h1>
+<p>This section covers the applications required for developing using the dbt framework. The applications are:</p>
+<ul>
+<li>python (latest version available)</li>
+<li>Visual Studio Code</li>
+<li>GIT for Windows</li>
+<li>OneLake Explorer (Preview)</li>
+</ul>
+<h3 id="install-python">Install python<a class="headerlink" href="#install-python" title="Permanent link">&para;</a></h3>
+<p>First you need to install python. This can be done from this link <a href="https://www.python.org/downloads/">Download Python | Python.org</a> download the latest version and install it. </p>
+<p><strong>NOTE:</strong> Make sure to tick the box on the first window of the installation to Add Python.exe to PATH</p>
+<p>Use Install now for standard installation.</p>
+<p>Once installed, confirm installation by opening the command line. WindowsKey + R then enter “cmd” click OK. </p>
+<p>Type the following and you should get a reply similar to the screenshot below.
+<code>command prompt 
+“python --version”</code></p>
+<p><img alt="image info" src="../images/pythonversioncheck.png" /></p>
+<h3 id="install-visual-studio-code">Install Visual Studio Code<a class="headerlink" href="#install-visual-studio-code" title="Permanent link">&para;</a></h3>
+<p>Browse to website <a href="https://code.visualstudio.com/">Visual Studio Code - Code Editing. Redefined</a> and download Visual Studio Code and then open the file.</p>
+<p>Select the standard options and install.</p>
+<h3 id="install-git-for-windows">Install GIT for Windows<a class="headerlink" href="#install-git-for-windows" title="Permanent link">&para;</a></h3>
+<p>Browse to website <a href="https://git-scm.com/download/win">Git - Downloading Package (git-scm.com)</a> and download the latest by clicking “Click here to download” option. Open the file and install following the step examples.</p>
+<p><img alt="image info" src="../images/downloadgitforwindows.png" /></p>
+<p>Select the standard options until you get these next steps.</p>
+<p>This step will ask you about your default git application please change this to Use Visual Studio Code as Git default. </p>
+<p><img alt="image info" src="../images/defaulteditor.png" /></p>
+<p>This step will ask you about your default git console, please select Use Windows default console window.</p>
+<p><img alt="image info" src="../images/defaultconsole.png" /></p>
+<p>The rest of the installation options should be standard unless you need to change them for other reasons.</p>
+<h3 id="onelake-explorer-preview">OneLake Explorer (Preview)<a class="headerlink" href="#onelake-explorer-preview" title="Permanent link">&para;</a></h3>
+<p>Browse to website <a href="https://learn.microsoft.com/en-us/fabric/onelake/onelake-file-explorer">OneLake Explorer</a> and browse down the page to Installation instructions and download OneLake file explorer and then open the file.</p>
+<p>Click install and follow standard install options. </p>
+<p>Opening up for the first time will require you to login using your Fabric tenant details. You will then be able to access the Lakehouses from your Windows Explorer.</p>
+<p><img alt="image info" src="../images/onelake.png" /></p>
+<p>This concludes the required applications.</p>
+
+
+</section>
+</div> <!-- end of search-noresults -->
+<div class="search-results">
+<div class="has-results">
+
+<h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+<ul class="search-results-list"></ul>
+
+</div> <!-- end of has-results -->
+<div class="no-results">
+
+<h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+
+</div> <!-- end of no-results -->
+</div> <!-- end of search-results -->
+</div> <!-- end of book-search-results -->
+
+</div> <!-- end of page-inner -->
+</div> <!-- end of page-wrapper -->
+
+</div> <!-- end of body-inner -->
+
+</div> <!-- end of book-body -->
+<script src="../../js/main.js"></script>
+<script src="https://unpkg.com/tablesort@5.3.0/dist/tablesort.min.js"></script>
+<script src="../../javascripts/tablesort.js"></script>
+<script src="../../search/main.js"></script>
+<script src="../../js/gitbook.min.js"></script>
+<script src="../../js/theme.min.js"></script>
+</body>
+</html>
