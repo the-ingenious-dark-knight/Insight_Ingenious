@@ -1,12 +1,13 @@
 ---
     title: Home
 ---
-# Insight Services APAC - Generative AI Collateral
+# Insight Services APAC - AI Collateral
 
 <em><p style="text-align: center;"><b>"Accelerating time-to-value for Generative AI Projects."</b></p></em>
 
 ## Mission Statement
 
+This documentation is for 
 
 ### Guiding Principles
 
