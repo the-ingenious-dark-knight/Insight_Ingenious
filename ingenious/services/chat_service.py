@@ -17,8 +17,6 @@ class ChatService:
             self,
             chat_service_type: str,
             chat_history_repository: ChatHistoryRepository,
-            openai_service: OpenAIService,
-            #tool_service: ToolService,
             conversation_flow: str
             ):
 
@@ -33,8 +31,6 @@ class ChatService:
 
         self.service_class = service_class(
             chat_history_repository=chat_history_repository,
-            #openai_service=openai_service,
-            #tool_service=tool_service,
             conversation_flow=conversation_flow
         )
 

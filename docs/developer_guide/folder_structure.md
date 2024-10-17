@@ -4,6 +4,7 @@ The `__init__.py` enables namespace packages, a feature where multiple directori
 It essentially extends the package’s `__path__` to allow Python to combine code from different locations 
 in the file system under the same package name.
 
+
 ``` powershell title="View the Folder Structure"
 .
 ├── __init__.py
@@ -60,4 +61,26 @@ in the file system under the same package name.
     ├── conversation_builder.py
     ├── prompt_templates.py
     └── token_counter.py
+```
+
+The language model patterns are stored under `├── services ├── conversation_patterns`.
+
+
+```angular2html
+.
+├── __init__.py
+├── chat_service.py
+├── chat_services
+│  ├── __init__.py
+│  ├── fast_agent
+│  │  └── __init__.py
+│  └── multi_agent
+│      ├── __init__.py
+│      ├── tool_factory.py
+│      ├── agents
+│      ├── conversation_flows
+│      ├── conversation_patterns
+│      └── service.py
+├── message_feedback_service.py
+└── tool_service.py
 ```

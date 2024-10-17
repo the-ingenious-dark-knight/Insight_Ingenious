@@ -3,7 +3,7 @@ import autogen.retrieve_utils
 import autogen.runtime_logging
 from autogen.agentchat.contrib.retrieve_user_proxy_agent import RetrieveUserProxyAgent
 
-from ingenious.services.chat_services.multi_agent.agent_factory import ToolFunctions
+from ingenious.services.chat_services.multi_agent.tool_factory import ToolFunctions
 
 
 class ConversationPattern:

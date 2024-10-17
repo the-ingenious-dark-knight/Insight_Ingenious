@@ -4,7 +4,7 @@ import autogen.runtime_logging
 
 import ingenious.config.config as config
 from ingenious.models.chat import ChatResponse
-from ingenious.services.chat_services.multi_agent.agent_factory import ToolFunctions
+from ingenious.services.chat_services.multi_agent.tool_factory import ToolFunctions
 from ingenious.services.chat_services.multi_agent.conversation_patterns.knowledge_base_agent.knowledge_base_agent import \
     ConversationPattern
 

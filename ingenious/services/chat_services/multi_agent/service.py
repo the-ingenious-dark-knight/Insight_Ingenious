@@ -28,12 +28,8 @@ class multi_agent_chat_service:
     def __init__(
             self,
             chat_history_repository: ChatHistoryRepository,
-            #openai_service: OpenAIService,
-            #tool_service: ToolService,
             conversation_flow: str):
         self.chat_history_repository = chat_history_repository
-        #self.openai_service = openai_service
-        #self.tool_service = tool_service
         self.conversation_flow = conversation_flow
 
     async def get_chat_response(self, chat_request: ChatRequest) -> ChatResponse:

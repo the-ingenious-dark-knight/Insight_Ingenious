@@ -5,7 +5,7 @@ import uuid
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), './../../'))
 sys.path.append(parent_dir)
 
-from ingenious.services.chat_services.multi_agent.agent_factory import ToolFunctions
+from ingenious.services.chat_services.multi_agent.tool_factory import ToolFunctions
 import ingenious.dependencies as deps
 import asyncio
 from ingenious.models.chat import ChatRequest, ChatResponse
