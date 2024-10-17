@@ -7,12 +7,6 @@
 Welcome to the Insight Services APAC documentation, 
 designed to guide you in developing and deploying Generative AI projects. Our goal is to provide a clear roadmap to accelerate your time-to-value, with a strong focus on business outcomes and production-ready architectures.
 
-## Guiding Principles
-
-
-
-## Feature
-
 - [x] **Industry-Specific Workflow Solutions**: Pre-built workflows for common use cases (e.g., curriculum planning for education).
 
 ## Key Technologies

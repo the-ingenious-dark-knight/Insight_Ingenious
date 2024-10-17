@@ -63,24 +63,3 @@ in the file system under the same package name.
     └── token_counter.py
 ```
 
-The language model patterns are stored under `├── services ├── conversation_patterns`.
-
-
-```angular2html
-.
-├── __init__.py
-├── chat_service.py
-├── chat_services
-│  ├── __init__.py
-│  ├── fast_agent
-│  │  └── __init__.py
-│  └── multi_agent
-│      ├── __init__.py
-│      ├── tool_factory.py
-│      ├── agents
-│      ├── conversation_flows
-│      ├── conversation_patterns
-│      └── service.py
-├── message_feedback_service.py
-└── tool_service.py
-```
