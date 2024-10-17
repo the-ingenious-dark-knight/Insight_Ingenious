@@ -13,7 +13,12 @@ Documentation for this project is built using [mkdocs-material](https://squidfun
 
 ``` powershell title="Create and activate the Python environment"
 # Create and activate the Python environment
+#MacOS
 python -m venv .env_mkdocs
+source .env_mkdocs/bin/activate
+pip install -r ./requirements_mkdocs.txt
+
+Widnows
 .\.env_mkdocs\Scripts\activate.ps1
 pip install -r ./requirements_mkdocs.txt
 
@@ -45,5 +50,5 @@ git pull
 You can now publish the documentation to the repository by running the command below:
 
 ``` powershell title="Publish the documentation"
-mkdocs gh-deploy
+mkdocs gh-deploy  --remote-name "https://${GH_TOKEN}@github.com/Insight-Services-APAC/Insight_Ingenious.git"
 ```

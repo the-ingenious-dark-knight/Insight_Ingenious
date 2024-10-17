@@ -9,19 +9,7 @@ designed to guide you in developing and deploying Generative AI projects. Our go
 
 ## Guiding Principles
 
-1. **SaaS over PaaS** – We prioritize SaaS solutions to streamline and simplify Generative AI implementations.
-2. **Selection Criteria for GenAI** – A strategic approach is taken when selecting the most suitable GenAI solutions.
-3. **Business Value Focus** – Ensuring each project delivers tangible business value.
-4. **Four-Tier Architecture for Production-Ready AI Projects:**
-   - **Front End**: Integration with React and/or M365 (Teams).
-   - **Middle Tier**: Python or .NET.
-   - **GenAI Orchestrator**: Python-based.
-   - **Data Tier**: Back end powered by Microsoft Fabric.
-5. **Four-Tier Architecture for POCs:**
-   - **Front End**: React or similar frameworks.
-   - **Middle Tier**: Python with FastAPI.
-   - **AI Orchestrator**: Python, leveraging SmartSpace.Ai Workflow SDK.
-   - **Data Tier**: Fabric as the back end.
+
 
 ## Feature
 

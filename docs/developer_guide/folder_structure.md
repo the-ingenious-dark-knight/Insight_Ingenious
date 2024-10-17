@@ -1,8 +1,12 @@
 # Repo Folder Structure
 
+The `__init__.py` enables namespace packages, a feature where multiple directories can contribute to a single package. 
+It essentially extends the package’s `__path__` to allow Python to combine code from different locations 
+in the file system under the same package name.
+
+```
 .
 ├── __init__.py
-├── __pycache__
 │   ├── __init__.cpython-312.pyc
 │   └── dependencies.cpython-312.pyc
 ├── api
@@ -12,7 +16,6 @@
 │   └── datalayer.py
 ├── cli.py
 ├── config
-│   ├── __pycache__
 │   ├── config.py
 │   └── profile.py
 ├── core
@@ -20,7 +23,6 @@
 │   └── logging.py
 ├── db
 │   ├── __init__.py
-│   ├── __pycache__
 │   ├── chat_history_repository.py
 │   ├── cosmos
 │   ├── duckdb
@@ -49,14 +51,13 @@
 │   └── tool_call_result.py
 ├── services
 │   ├── __init__.py
-│   ├── __pycache__
 │   ├── chat_service.py
 │   ├── chat_services
 │   ├── message_feedback_service.py
 │   └── tool_service.py
 └── utils
     ├── __init__.py
-    ├── __pycache__
     ├── conversation_builder.py
     ├── prompt_templates.py
     └── token_counter.py
+```
