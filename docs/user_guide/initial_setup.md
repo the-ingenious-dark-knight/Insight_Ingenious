@@ -4,7 +4,9 @@
 # Environment Setup
 This section outlines the steps required to setup the development environment to use this dbt-adapter as part of a dbt data transformation project.
 
-To provide a common, cross-platform set of instructions we will first install Powershell. To facilitate the installation process we will use package managers such as [winget](https://learn.microsoft.com/en-us/windows/package-manager/winget/) for Windows, [brew](https://brew.sh/) for MacOS and `apt` for Linux.
+To provide a common, cross-platform set of instructions we will first install Powershell. 
+
+To facilitate the installation process we will use package managers such as [winget](https://learn.microsoft.com/en-us/windows/package-manager/winget/) for Windows, [brew](https://brew.sh/) for MacOS and `apt` for Linux.
 
 ## Core Tools Installation
 
@@ -21,10 +23,7 @@ To provide a common, cross-platform set of instructions we will first install Po
     brew install powershell/tap/powershell
     ```
 
-=== "Linux"
-    ```bash
-    # TBA
-    ```
+
 
 
 
@@ -59,10 +58,7 @@ Next we will install Python and development tools such as vscode.
 
     ```
 
-=== "Linux"
-    ```bash
-    # TBA
-    ```
+
 
 
 
