@@ -65,9 +65,9 @@ plugins:
         - bundle: docs/data/bundle.yml
   - redirects:
       redirect_maps:
-        'user_guide/index.md': 'user_guide/initial_setup.md'
+        'user_guide/index.md': 'user_guide/index.md'
         'developer_guide/index.md': 'developer_guide/initial_setup.md'
-        'documentation_guide/index.md': 'documentation_guide/initial_setup.md'
+        'documentation_guide/index.md': 'documentation_guide/index.md'
 exclude_docs: |
   data/*
 extra_javascript:
