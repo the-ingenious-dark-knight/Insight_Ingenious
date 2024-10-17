@@ -1,4 +1,10 @@
-# Applications Required for Development
+---
+
+    weight: 2
+
+---
+
+# Step 1 - System Setup
 
 This section outlines the applications required for developing using the dbt framework, and provides instructions for both macOS and Windows. The applications include:
 

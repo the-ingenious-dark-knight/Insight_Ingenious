@@ -1,4 +1,11 @@
-# Package Installation
+---
+
+    weight: 2
+
+---
+
+
+# Step 2 - Package Installation
 
 Follow these steps to set up the **Ingenious** package locally:
 

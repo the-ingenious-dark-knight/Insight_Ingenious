@@ -3,7 +3,6 @@
     weight: 3
 
 ---
-# Documentation Guide
 
 ## Building you environment 
 Documentation for this project is built using [mkdocs-material](https://squidfunk.github.io/mkdocs-material/). To contribute to the documentation you will need to create a separate python environment. I suggest that you call this `.env_mkdocs` to avoid confusion with the dbt environment. Create your environment and install the required packages as shown below:

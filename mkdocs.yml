@@ -65,9 +65,8 @@ plugins:
         - bundle: docs/data/bundle.yml
   - redirects:
       redirect_maps:
-        'user_guide/index.md': 'user_guide/initial_setup.md'
-        'developer_guide/index.md': 'developer_guide/initial_setup.md'
-        'documentation_guide/index.md': 'documentation_guide/initial_setup.md'
+        'developer_guide/index.md': 'developer_guide/overview.md'
+        'documentation_guide/index.md': 'documentation_guide/overview.md'
 exclude_docs: |
   data/*
 extra_javascript:
@@ -79,4 +78,6 @@ extra:
   site_url: https://github.com/Insight-Services-APAC/Insight_Ingenious
   client_organisation: "Insight Ingenious"
   project_start: "2024-07-01"
-  
+
+
+#        'user_guide/index.md': 'user_guide/overview.md'
