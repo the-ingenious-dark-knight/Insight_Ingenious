@@ -66,7 +66,7 @@ plugins:
   - redirects:
       redirect_maps:
         'user_guide/index.md': 'user_guide/initial_setup.md'
-        'developer_guide/index.md': 'developer_guide/index.md'
+        'developer_guide/index.md': 'developer_guide/initial_setup.md'
         'documentation_guide/index.md': 'documentation_guide/index.md'
 exclude_docs: |
   data/*
