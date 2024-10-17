@@ -1,30 +1,62 @@
 # Repo Folder Structure
 
 .
-├── code_assets
-│   ├── 1_frontend_layer
-│   ├── 2_api_presentation_layer
-│   ├── 3_api_ai_orchestration_layer
-│   ├── 4a_ai_solution_layer
-│   ├── 4b_api_custom_tools
-│   ├── 5_data_ingestion
-│   ├── 6_data_prep
-│   └── 7_data_serve
-├── docs
-│   ├── assets
-│   │   ├── diagrams
-│   │   ├── images
-│   │   └── stylesheets
-│   ├── developer_guide
-│   │   └── images
-│   ├── diagrams
-│   │   ├── drawio
-│   │   │   └── exports
-│   │   └── plantuml
-│   ├── documentation_guide
-│   ├── javascripts
-│   ├── overrides
-│   ├── user_guide
-│   └── zzz_archive
-
-
+├── __init__.py
+├── __pycache__
+│   ├── __init__.cpython-312.pyc
+│   └── dependencies.cpython-312.pyc
+├── api
+│   ├── __init__.py
+│   └── routes
+├── chainlit
+│   └── datalayer.py
+├── cli.py
+├── config
+│   ├── __pycache__
+│   ├── config.py
+│   └── profile.py
+├── core
+│   ├── __init__.py
+│   └── logging.py
+├── db
+│   ├── __init__.py
+│   ├── __pycache__
+│   ├── chat_history_repository.py
+│   ├── cosmos
+│   ├── duckdb
+│   └── sqlite
+├── dependencies.py
+├── errors
+│   ├── __init__.py
+│   ├── __pycache__
+│   ├── content_filter_error.py
+│   └── token_limit_exceeded_error.py
+├── external_services
+│   ├── __init__.py
+│   ├── __pycache__
+│   ├── openai_service.py
+│   └── search_service.py
+├── main.py
+├── models
+│   ├── __init__.py
+│   ├── __pycache__
+│   ├── chat.py
+│   ├── database_client.py
+│   ├── http_error.py
+│   ├── message.py
+│   ├── message_feedback.py
+│   ├── search.py
+│   └── tool_call_result.py
+├── services
+│   ├── __init__.py
+│   ├── __pycache__
+│   ├── chat_service.py
+│   ├── chat_services
+│   ├── message_feedback_service.py
+│   └── tool_service.py
+└── utils
+    ├── __init__.py
+    ├── __pycache__
+    ├── conversation_builder.py
+    ├── prompt_templates.py
+    └── token_counter.py
