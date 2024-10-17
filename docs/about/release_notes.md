@@ -1,4 +1,4 @@
-## Version 0.1.0 (2024-10-01)
+## Version 1.0.0 (2024-10-01)
 
 ### New Features:
 - **Service Prefab with Efficient RAG (Retrieve and Generate) Memory Unit**:  
