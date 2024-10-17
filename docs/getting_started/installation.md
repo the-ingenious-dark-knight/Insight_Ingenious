@@ -14,7 +14,7 @@ Follow these steps to set up the **Ingenious** package locally:
     git clone https://github.com/Insight-Services-APAC/Insight_Ingenious.git
     ```
 
-3**pip Install**:
+2. **pip Install**:
     ```bash
     pip install dist/ingenious-1.0.0-py3-none-any.whl
     ```
