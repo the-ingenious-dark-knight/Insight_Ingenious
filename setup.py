@@ -33,7 +33,6 @@ description = """A python library for accelerating Generative AI projects"""
 
 
 
-
 INSTALL_REQUIRES = [
     "aiofiles==23.2.1",
     "annotated-types==0.7.0",
