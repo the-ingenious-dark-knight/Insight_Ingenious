@@ -4,7 +4,7 @@ The `__init__.py` enables namespace packages, a feature where multiple directori
 It essentially extends the package’s `__path__` to allow Python to combine code from different locations 
 in the file system under the same package name.
 
-```
+``` powershell title="View the Folder Structure"
 .
 ├── __init__.py
 │   ├── __init__.cpython-312.pyc
