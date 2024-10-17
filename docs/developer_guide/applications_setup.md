@@ -1,57 +1,107 @@
-# Applications Required for Development (Windows)
+# Applications Required for Development
 
-This section covers the applications required for developing using the dbt framework. The applications are:
+This section outlines the applications required for developing using the dbt framework, and provides instructions for both macOS and Windows. The applications include:
 
-- python (latest version available)
-- Visual Studio Code
-- GIT for Windows
-- OneLake Explorer (Preview)
+- Python (latest version)
+- Visual Studio Code or PyCharm
+- Git for Windows/macOS
 
-### Install python
-First you need to install python. This can be done from this link [Download Python | Python.org](https://www.python.org/downloads/) download the latest version and install it. 
+## Install Python 3.12
 
-**NOTE:** Make sure to tick the box on the first window of the installation to Add Python.exe to PATH
+### macOS
 
-Use Install now for standard installation.
+1. Open your Terminal (you can find it by searching in Spotlight or navigating to `/Applications/Utilities/Terminal.app`).
+2. Install Python 3.12 using Homebrew (make sure Homebrew is installed). Run the following command:
+   ```bash
+   brew install python@3.12
+   ```
+3. Once installation is complete, verify the installation by running:
+   ```bash
+   python3 --version
+   ```
+   You should see `Python 3.12.x` as the output.
 
-Once installed, confirm installation by opening the command line. WindowsKey + R then enter “cmd” click OK. 
+### Windows
 
-Type the following and you should get a reply similar to the screenshot below.
-```command prompt 
-“python --version”
-```
+1. Open PowerShell as an Administrator (press `WindowsKey + X`, then select PowerShell (Admin)).
+2. Download and install Python 3.12 from the official Python website by running:
+   ```powershell
+   Invoke-WebRequest -Uri https://www.python.org/ftp/python/3.12.0/python-3.12.0-amd64.exe -OutFile python-3.12.0.exe
+   Start-Process -FilePath .\python-3.12.0.exe -ArgumentList '/quiet InstallAllUsers=1 PrependPath=1' -Wait
+   ```
+3. After installation, verify the installation by running:
+   ```powershell
+   python --version
+   ```
+   You should see `Python 3.12.x` as the output.
 
-![image info](./images/pythonversioncheck.png)
+## Install Visual Studio Code or PyCharm
 
-### Install Visual Studio Code
-Browse to website [Visual Studio Code - Code Editing. Redefined](https://code.visualstudio.com/) and download Visual Studio Code and then open the file.
+### macOS
 
-Select the standard options and install.
+1. Open Terminal and install Visual Studio Code using Homebrew:
+   ```bash
+   brew install --cask visual-studio-code
+   ```
+   Alternatively, you can download and install it manually from [Visual Studio Code](https://code.visualstudio.com/).
+2. To verify installation, launch Visual Studio Code from the Terminal:
+   ```bash
+   code .
+   ```
 
-### Install GIT for Windows
-Browse to website [Git - Downloading Package (git-scm.com)](https://git-scm.com/download/win) and download the latest by clicking “Click here to download” option. Open the file and install following the step examples.
+### Windows
 
-![image info](./images/downloadgitforwindows.png)
+1. Download Visual Studio Code from [Visual Studio Code](https://code.visualstudio.com/).
+2. Install it by following the default installation options.
+3. After installation, you can open PowerShell and type:
+   ```powershell
+   code .
+   ```
 
-Select the standard options until you get these next steps.
+## Install Git
 
-This step will ask you about your default git application please change this to Use Visual Studio Code as Git default. 
+### macOS
 
-![image info](./images/defaulteditor.png)
+1. Open Terminal and install Git using Homebrew:
+   ```bash
+   brew install git
+   ```
+2. After installation, confirm Git is installed by running:
+   ```bash
+   git --version
+   ```
 
-This step will ask you about your default git console, please select Use Windows default console window.
+### Windows
 
-![image info](./images/defaultconsole.png)
+1. Open PowerShell and download Git using the following command:
+   ```powershell
+   Invoke-WebRequest -Uri https://github.com/git-for-windows/git/releases/download/v2.42.0.windows.1/Git-2.42.0-64-bit.exe -OutFile git-installer.exe
+   Start-Process -FilePath .\git-installer.exe -ArgumentList '/SILENT' -Wait
+   ```
+2. Verify the installation by running:
+   ```powershell
+   git --version
+   ```
+
+Once Git is installed, configure it to use Visual Studio Code as your default editor and set the terminal to use PowerShell (on Windows) or Terminal (on macOS).
+
+### macOS Git Configuration
+
+1. Open Terminal and configure Git to use Visual Studio Code as the default editor:
+   ```bash
+   git config --global core.editor "code --wait"
+   ```
+   
+### Windows Git Configuration
+
+1. Open PowerShell and configure Git to use Visual Studio Code as the default editor:
+   ```powershell
+   git config --global core.editor "code --wait"
+   ```
+2. Ensure Git uses PowerShell by running:
+   ```powershell
+   git config --global core.autocrlf true
+   ```
 
 The rest of the installation options should be standard unless you need to change them for other reasons.
 
-### OneLake Explorer (Preview)
-Browse to website [OneLake Explorer](https://learn.microsoft.com/en-us/fabric/onelake/onelake-file-explorer) and browse down the page to Installation instructions and download OneLake file explorer and then open the file.
-
-Click install and follow standard install options. 
-
-Opening up for the first time will require you to login using your Fabric tenant details. You will then be able to access the Lakehouses from your Windows Explorer.
-
-![image info](./images/onelake.png)
-
-This concludes the required applications.

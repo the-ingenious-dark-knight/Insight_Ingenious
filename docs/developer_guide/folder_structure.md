@@ -28,4 +28,3 @@
 │   └── zzz_archive
 
 
-For documentation please go to [https://effective-adventure-2kplkoq.pages.github.io/](https://effective-adventure-2kplkoq.pages.github.io/)
