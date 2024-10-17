@@ -19,8 +19,10 @@ Welcome to the Insight Services APAC documentation. This guide is designed to as
 
 ## Highlight
 
+**Insight Service Prefabs**
 **Industry-Specific Conversation Pattern Solutions**:
-We provide LLM service prefabs tailored to common industry use cases, including curriculum planning for education and security solutions for the mining sector. These prefabs are designed to enable fast deployment of AI-powered solutions, allowing businesses to achieve their objectives more efficiently and effectively.
+
+
 
 ## Development Log
 

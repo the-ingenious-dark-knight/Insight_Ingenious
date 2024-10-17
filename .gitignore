@@ -3,3 +3,4 @@
 /.env_mkdocs/
 __pycache__
 /site/
+/.cache/
