@@ -1,4 +1,4 @@
-site_name: Generative AI Accelerator - By Insight
+site_name: Generative AI Accelerator - By Insight APAC
 site_url: https://sturdy-fiesta-oz8q5k4.pages.github.io/
 repo_url: https://github.com/Insight-Services-APAC/Insight_Ingenious
 repo_name: Insight_Ingenious
@@ -65,8 +65,11 @@ plugins:
         - bundle: docs/data/bundle.yml
   - redirects:
       redirect_maps:
+        'getting_started/index.md': 'getting_started/installation.md'
         'developer_guide/index.md': 'developer_guide/overview.md'
         'documentation_guide/index.md': 'documentation_guide/overview.md'
+        'about/index.md': 'about/release_notes.md'
+
 exclude_docs: |
   data/*
 extra_javascript:
@@ -80,4 +83,4 @@ extra:
   project_start: "2024-07-01"
 
 
-#        'user_guide/index.md': 'user_guide/overview.md'
+# 'user_guide/index.md': 'user_guide/installation.md'
