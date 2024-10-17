@@ -1,3 +1,4 @@
+import json
 import yaml
 import os
 from pathlib import Path
@@ -38,6 +39,8 @@ class Profiles:
         def __init__(self, type="", enable=True, username="", password=""):
             self.username = username
             self.password = password
+            self.enable = enable
+            self.type = type
 
     class WebConfig:
         def __init__(self, type="fastapi", ip_address="0.0.0.0", port: int = 80, authentication={}):
@@ -70,6 +73,16 @@ class Profiles:
 
     @staticmethod
     def _get_profiles(profiles_path=None):
+        # Check if os.getenv('INGENIOUS_PROFILE') is set
+        if os.getenv('APPSETTING_INGENIOUS_PROFILE'):
+
+            profile_string = os.getenv('APPSETTING_INGENIOUS_PROFILE', "{}")
+            profile_object = json.loads(profile_string)
+            # Convert the json string to a yaml string
+            profile_yml = yaml.dump(profile_object)
+            profile = Profiles.Profile.from_yaml_str(profile_yml)
+            return profile
+
         # Load the configuration from the YAML file
         if profiles_path is None:
             if os.getenv('INGENIOUS_PROFILE_PATH') is not None:

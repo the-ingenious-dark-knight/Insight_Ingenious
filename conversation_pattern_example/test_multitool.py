@@ -2,7 +2,7 @@ import os
 import sys
 import uuid
 
-parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), './../../'))
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), './../'))
 sys.path.append(parent_dir)
 
 from ingenious.services.chat_services.multi_agent.tool_factory import ToolFunctions
@@ -18,7 +18,7 @@ async def process_message(chat_request: ChatRequest) -> ChatResponse:
     print("user_id:", chat_request.user_id)
     print("user:", user)
     cs = deps.get_chat_service(
-        deps.get_chat_history_repository(),
+        chat_history_repository=deps.get_chat_history_repository(),
         conversation_flow=chat_request.conversation_flow
     )
     res = await cs.get_chat_response(chat_request)

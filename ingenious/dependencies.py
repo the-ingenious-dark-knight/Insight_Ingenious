@@ -94,7 +94,8 @@ def get_security_service(
             )
         return credentials.username
     else:
-        return ""
+        # Raise warning if authentication is disabled
+        logger.warning("Authentication is disabled. This is not recommended for production use.")        
     
 
 def get_chat_service(
@@ -106,7 +107,7 @@ def get_chat_service(
     return ChatService(
         chat_service_type=cs_type,
         chat_history_repository=chat_history_repository,
-        openai_service=cs_type,
+        #openai_service=cs_type,
         #tool_service=tool_service,
         conversation_flow=conversation_flow
     )

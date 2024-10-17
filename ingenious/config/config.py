@@ -1,3 +1,4 @@
+import json
 import yaml
 from pathlib import Path
 from ingenious.config.profile import Profiles
@@ -150,6 +151,16 @@ def get_kv_secret(secretName):
 
 @staticmethod
 def get_config(config_path=None):
+    
+    # Check if os.getenv('INGENIOUS_CONFIG') is set
+    if os.getenv('APPSETTING_INGENIOUS_CONFIG'):
+        config_string = os.getenv('APPSETTING_INGENIOUS_CONFIG', "")
+        config_object = json.loads(config_string)
+        # Convert the json string to a yaml string
+        config_yml = yaml.dump(config_object)
+        config = Config.from_yaml_str(config_yml)
+        return config
+    
     if config_path is None: 
         env_config_path = os.getenv('INGENIOUS_PROJECT_PATH')
         if env_config_path:
