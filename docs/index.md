@@ -3,7 +3,7 @@
 <p style="text-align: center;"><strong><em>"Accelerating time-to-value for Generative AI Projects."</em></strong></p>
 
 <p style="text-align: center;">
-    <img src="./developer_guide/images/home_image.png" alt="home image" width="150">
+    <img src="images/home_image.png" alt="home image" width="150">
 </p>
 
 Welcome to the Insight Services APAC documentation. This guide is designed to assist you in developing and deploying Generative AI projects with ease. Our goal is to provide a clear roadmap to help you accelerate time-to-value, with a strong emphasis on achieving business outcomes and implementing production-ready architectures.

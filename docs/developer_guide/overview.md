@@ -19,7 +19,10 @@ AutoGen abstracts and implements conversable agents designed to solve tasks thro
 - **Customizable:** Agents can be customized to integrate LLMs, humans, tools, or a combination of these.
 
 The figure below shows the built-in agents in AutoGen.
-![img.png](images/img.png)
+
+<p style="text-align: center;">
+    <img src="../images/img.png" alt="autogen image" width="500">
+</p>
 
 
 ## Solution Architecture
