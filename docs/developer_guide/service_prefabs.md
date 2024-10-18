@@ -4,7 +4,6 @@
 
 ---
 
-
 # Current Service Prefabs
 
 ## Classification Agent with Simple Efficient Memory Handling
@@ -76,10 +75,4 @@ The **Knowledge Retrieval Agent** excels in extracting specific information from
 
 ## Education Agent
 
-The **Education Agent** is in **early development** but aims to support structured learning experiences by leveraging **knowledge retrieval capabilities** and personalized **learning path generation**. This agent will eventually:
-
-- Assist in student queries by dynamically retrieving and summarizing educational content.
-- Employ smart prompts to guide learners through topics step-by-step, ensuring that responses align with predefined learning objectives.
-
-While still evolving, the Education Agent will work alongside other agents like the **Knowledge Retrieval Agent** to generate contextual responses for educational purposes.
-
+The **Education Agent** is in **early development** but aims to support structured learning experiences by leveraging **knowledge retrieval capabilities** and personalized **learning path generation**.
