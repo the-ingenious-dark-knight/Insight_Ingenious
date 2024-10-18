@@ -30,7 +30,8 @@ The figure below shows the built-in agents in AutoGen.
 We have designed a generic framework - **service prefabs** - that can let agents converse with each other through message exchanges to jointly finish a task.
 Different prefabs can perform different actions after receiving messages.
 
-You can find them under `services/chat_services`  [folder structure](./folder_structure).
+!!! tip
+    You can find them under `services/chat_services`  [folder structure](./folder_structure).
 
 
 ```powershell title="view service prefabs"
@@ -75,8 +76,9 @@ Each prefab has 2 components:
         - **`report_agent`**: An `AssistantAgent` tasked with reporting the summarized result of the conversation to the user in a clear and concise format. It also records the conversation summary using a registered memory function.
         - **`classification_agent`**: Another `AssistantAgent` responsible for classifying user messages into the predefined topics. It ensures proper routing of the conversation based on the user's input.
       
-      - **`add_topic_agent` Method**:
-        - This method allows adding additional topic-specific agents. Each agent is provided a tool (a callable function) to handle specific tasks. This method also registers the topic agents in the conversation flow, so they can interact properly with the researcher, proxy, and report agent.
+      - **`add_topic_agent`/`add_function_agent` Method**:
+        - This method allows adding additional function/topic-specific assistant agents. Each assistant agent is provided a tool/prompt (a callable function) to handle specific tasks. This method also registers the topic agents in the conversation flow, so they can interact properly with the researcher, proxy, and report agent.
+        
     
       - **`get_conversation_response` Method**:
         - This method orchestrates the entire conversation flow. It creates a `GroupChat` instance that handles multi-agent interactions, where agents work together to classify, research, and report back responses to the user.
