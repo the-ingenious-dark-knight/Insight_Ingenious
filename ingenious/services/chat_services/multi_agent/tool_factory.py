@@ -1,11 +1,8 @@
 # tool_factory.py
-from typing import Optional
-import autogen
-import asyncio
 from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
+
 import ingenious.config.config as config
-from ingenious.config.profile import Profiles
 
 
 class ToolFunctions:

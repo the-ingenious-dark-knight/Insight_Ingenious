@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from ingenious.dependencies import get_message_feedback_service
 from ingenious.models.http_error import HTTPError
 from ingenious.models.message_feedback import MessageFeedbackRequest, MessageFeedbackResponse
-from ingenious.services.message_feedback_service import MessageFeedbackService
+from ingenious.services_legacy.message_feedback_service import MessageFeedbackService
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

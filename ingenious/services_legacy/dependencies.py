@@ -8,9 +8,7 @@ from ingenious.db.chat_history_repository import ChatHistoryRepository
 from ingenious.db.chat_history_repository import DatabaseClientType
 
 from ingenious.external_services.openai_service import OpenAIService
-from ingenious.external_services.search_service import AzureSearchService
 from ingenious.services.chat_service import ChatService
-from ingenious.services_legacy.message_feedback_service import MessageFeedbackService
 import ingenious.config.config as Config
 
 logger = logging.getLogger(__name__)
@@ -31,21 +29,6 @@ def get_chat_history_repository():
     return chr
 
 
-def get_ai_search_manager(index_name: str):
-    return AzureSearchService(
-        endpoint=os.getenv("AI_SEARCH_ENDPOINT", ""),
-        key=os.getenv("AI_SEARCH_KEY", ""),
-        index_name=index_name
-    )
-
-
-def get_guideline_search_manager():
-    return get_ai_search_manager("vector-sample-guideline")
-
-
-def get_data_search_manager():
-    return get_ai_search_manager("vector-tabulated-data")
-
 
 def get_openai_service():
     model = config.models[0]
@@ -55,7 +38,6 @@ def get_openai_service():
         api_version=str(model.api_version),
         open_ai_model=str(model.api_version)
     )
-
 
 
 def get_security_service(
@@ -86,6 +68,7 @@ def get_security_service(
 
 def get_chat_service(
     chat_history_repository: Annotated[ChatHistoryRepository, Depends(get_chat_history_repository)],
+    #tool_service: Annotated[ToolService, Depends(get_tool_service)],
     conversation_flow: str = ""
 ):
     cs_type = config.chat_service.type
@@ -95,8 +78,3 @@ def get_chat_service(
         conversation_flow=conversation_flow
     )
 
-
-def get_message_feedback_service(
-    chat_history_repository: Annotated[ChatHistoryRepository, Depends(get_chat_history_repository)]
-):
-    return MessageFeedbackService(chat_history_repository)

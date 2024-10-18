@@ -1,19 +1,14 @@
-from abc import ABC, abstractmethod
-import logging
 import importlib
+import logging
+from abc import ABC, abstractmethod
+
+from openai.types.chat import ChatCompletionMessageParam
+
 from ingenious.db.chat_history_repository import ChatHistoryRepository
 from ingenious.errors.content_filter_error import ContentFilterError
-from ingenious.external_services.openai_service import OpenAIService
 from ingenious.models.chat import Action, ChatRequest, ChatResponse, KnowledgeBaseLink, Product
 from ingenious.models.message import Message
-from ingenious.models.tool_call_result import ActionToolCallResult, KnowledgeBaseToolCallResult, ProductToolCallResult
-#from ingenious.services.tool_service import ToolService
-from ingenious.utils.conversation_builder import (
-    build_message, build_system_prompt,
-    build_user_message, build_assistant_message, build_tool_message)
-from ingenious.utils.token_counter import num_tokens_from_messages, get_max_tokens
-from openai.types.chat import ChatCompletionMessageParam
-import autogen.token_count_utils as token_count_utils
+from ingenious.utils.conversation_builder import (build_message, build_system_prompt,build_user_message)
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +28,7 @@ class multi_agent_chat_service:
         self.conversation_flow = conversation_flow
 
     async def get_chat_response(self, chat_request: ChatRequest) -> ChatResponse:
-        
+
         if not chat_request.conversation_flow:
             raise ValueError(f"conversation_flow3 not set {chat_request}")
         # Initialize messages list            
@@ -46,7 +41,6 @@ class multi_agent_chat_service:
         products: list[Product] = []
         thread_chat_history = [{"role": "user", "content": ""}]
 
-
         # Check if thread exists
         if not chat_request.thread_id:
             # Create thread
@@ -54,7 +48,7 @@ class multi_agent_chat_service:
         else:
             # Get thread messages & add to messages list
             thread_messages = await self.chat_history_repository.get_thread_messages(chat_request.thread_id)
-           
+
             for thread_message in thread_messages:
                 # Validate user_id
                 if thread_message.user_id != chat_request.user_id:
@@ -78,7 +72,6 @@ class multi_agent_chat_service:
 
         # If system prompt is not first message add it in the beginning
         if not messages or messages[0]["role"] != "system":
-
             # Add system prompt
             system_prompt_message = build_system_prompt(user_name=chat_request.user_name)
             messages.insert(0, system_prompt_message)
@@ -105,10 +98,6 @@ class multi_agent_chat_service:
                 content=str(user_message["content"]))
         )
 
-        # Get tool definitions
-        # tools = self.tool_service.get_tool_definitions()
-
-        # Get the
         try:
             # call specific agent flow here and get final response
             if not self.conversation_flow:
@@ -125,11 +114,11 @@ class multi_agent_chat_service:
                 raise ValueError(f"Unsupported chat conversation flow: {module_name}.{class_name}") from e
 
             conversation_flow_service_class = service_class()
-            
+
             response_task = conversation_flow_service_class.get_conversation_response(
-                                                                                    message=chat_request.user_prompt,
-                                                                                    thread_chat_history=thread_chat_history
-                                                                                    )
+                message=chat_request.user_prompt,
+                thread_chat_history=thread_chat_history
+            )
             response = await response_task
 
         except ContentFilterError as cfe:
@@ -151,8 +140,8 @@ class multi_agent_chat_service:
 
         # Get token counts
         # TODO: Update to get token count from the autogen token count utils
-        max_token_count = 100 # get_max_tokens(self.openai_service.model)        
-        token_count = 10 # num_tokens_from_messages(messages)
+        max_token_count = 100  # get_max_tokens(self.openai_service.model)
+        token_count = 10  # num_tokens_from_messages(messages)
         logger.debug(f"Token count: {token_count}/{max_token_count}")
 
         return ChatResponse(

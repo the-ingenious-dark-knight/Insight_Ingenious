@@ -1,8 +1,6 @@
 from abc import ABC, abstractmethod
 from ingenious.models.chat import ChatRequest, ChatResponse
 from ingenious.db.chat_history_repository import ChatHistoryRepository
-from ingenious.services.tool_service import ToolService
-from ingenious.external_services.openai_service import OpenAIService
 import importlib
 
 

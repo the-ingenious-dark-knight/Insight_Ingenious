@@ -88,7 +88,7 @@ posthog==3.6.0
 protobuf==4.25.4
 pyasn1==0.6.0
 pyasn1_modules==0.4.0
-autogen-agentchat
+pyautogen==0.2.35
 pydantic==2.8.0
 pydantic-settings==2.3.4
 pydantic_core==2.20.0
