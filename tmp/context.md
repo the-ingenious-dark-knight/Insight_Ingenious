@@ -1,11 +1,10 @@
-User's question: Tell me about contact number?
+user: What is grand slam in tennis?
+tenis: In tennis, a "Grand Slam" refers to winning all four major championships (the Australian Open, French Open, Wimbledon, and the US Open) in a single calendar year. The tournaments are played on different surfaces: hard court (Australian Open, US Open), clay (French Open), and grass (Wimbledon).
+user: Who are the most celebrated stars?
+tennis: Some of the most celebrated tennis stars include:
 
-Context: new conversation, please derive context from question
-
-Classified topic: general
-
-Researcher note: AMBIGUOUS-contact number
-
-Search results: ['; - Stabilize the injured person using available safety equipment and contact emergency services if necessary 3 **Heat Stress and Hydration:**        - Encourage regular hydration breaks, especially in high temperatures - Provide shaded areas or cooling stations and educate personnel on the symptoms of heat stress, dehydration, and how to respond 4...', '; **Emergency Contact Numbers:**        - Display essential emergency contacts (e.g., 0412 133 777) for fire services, police, ambulance, and utilities prominently throughout the site - Ensure all personnel have ready access to these numbers via their phones or radios ---        ### **Evacuation Procedures:**      1 **Evacuation Plan:**        - Cle...']
-
-Search agent answer: Emergency contact numbers such as 0412 133 777 for fire services, police, ambulance, and utilities should be prominently displayed throughout the site. Ensure all personnel have ready access to these numbers via their phones or radios.
+- Roger Federer: Known for his elegant play and numerous records, including 20 Grand Slam titles.
+- Rafael Nadal: Famous for his dominance on clay courts and holding 22 Grand Slam titles.
+- Serena Williams: Iconic for her powerful game and 23 Grand Slam singles titles.
+- Novak Djokovic: Known for his all-around game and 24 Grand Slam titles.
+- Steffi Graf: Held a record for a long time with 22 Grand Slam titles and a Golden Slam in 1988.  
