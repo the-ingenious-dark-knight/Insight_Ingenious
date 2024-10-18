@@ -9,17 +9,14 @@
 
 Follow these steps to set up the **Ingenious** package locally:
 
-1. **Clone the repository**:
+
+
+1. **pip install from Git**:
     ```bash
-    git clone https://github.com/Insight-Services-APAC/Insight_Ingenious.git
+    pip install git+https://github.com/Insight-Services-APAC/Insight_Ingenious.git
     ```
 
-2. **pip Install**:
-    ```bash
-    pip install dist/ingenious*.whl
-    ```
-
-3. **Profile Setup**
+2. **Profile Setup**
 
 === "Windows"
       
