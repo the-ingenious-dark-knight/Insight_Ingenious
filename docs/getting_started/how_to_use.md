@@ -30,6 +30,9 @@
 
    If the test runs successfully, you will see a detailed conversation output like the one shown below:
 
+!!! tip
+      A content of doc <> is the vectorised version of our memory file under `tmp` folder. 
+
    ```bash
    Adding content of doc 48971743 to context.
    classifier (to chat_manager):
