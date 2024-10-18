@@ -108,8 +108,8 @@ Each prefab has 2 components:
         - **`search_agent`**:
           - This agent is specifically designed to handle search requests related to health and safety topics. It uses specific indices (`vector-health` and `vector-safety`) to retrieve information from a database. This agent does not add extra information or follow up on ambiguous queries but ensures that searches are performed accurately.
       
-        - **`add_function_agent` Method**:
-          - The search agent is added to the `ConversationPattern` using the `add_function_agent` method, similar to the `ConversationPattern` class. This allows the search agent to act within the conversation flow, performing factual retrieval when required.
+        - **`add_function_agent`/`add_topic_agent` Method**:
+          - The search function agent (as in a knowledge base retreival workflow)/ topic agent (as in a simple classification workflow) is added to the `ConversationPattern` using the `add_function_agent` method, similar to the `ConversationPattern` class. This allows the search agent to act within the conversation flow, performing factual retrieval when required.
       
         - **Response Handling**:
           - The `get_conversation_response` method asynchronously waits for the conversation flow to complete and returns the summarized response as a `ChatResponse`.
