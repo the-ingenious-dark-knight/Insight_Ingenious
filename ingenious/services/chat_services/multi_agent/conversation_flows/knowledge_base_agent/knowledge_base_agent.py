@@ -38,7 +38,7 @@ class ConversationFlow:
             llm_config=llm_config,
         )
 
-        agent_pattern.add_topic_agent(
+        agent_pattern.add_function_agent(
             topic_agent=search_agent,
             executor=agent_pattern.researcher,  # Use the same research proxy executor for safety searches
             tool=ToolFunctions.aisearch,

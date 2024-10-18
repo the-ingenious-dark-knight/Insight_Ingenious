@@ -93,7 +93,7 @@ class ConversationPattern:
 
         self.topic_agents = []
 
-    def add_topic_agent(self, topic_agent: autogen.ConversableAgent,
+    def add_function_agent(self, topic_agent: autogen.ConversableAgent,
                         executor: autogen.UserProxyAgent,
                         tool: callable,
                         tool_name: str = "",

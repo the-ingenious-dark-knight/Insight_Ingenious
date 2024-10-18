@@ -4,17 +4,16 @@
 
 ---
 
+# Step 2 - Setting Up the Repository
 
-# Step 2 - Repo Setup
-
-Follow these steps to set up the **Ingenious** package locally:
+Follow these instructions to set up the **Ingenious** package on your local machine:
 
 1. **Clone the repository**:
     ```bash
     git clone https://github.com/Insight-Services-APAC/Insight_Ingenious.git
     ```
 
-2. **Navigate to the repository**:
+2. **Navigate to the repository folder**:
     ```bash
     cd Insight_Ingenious
     ```
@@ -24,22 +23,19 @@ Follow these steps to set up the **Ingenious** package locally:
     python -m venv .venv
     ```
 
-4. **Activate the virtual environment**:
-    - On **Windows**:
+   4. **Activate the virtual environment**:
+   
+=== "Windows"
       ```bash
       .venv\Scripts\activate
       ```
-    - On **macOS/Linux**:
+=== "macOS"
       ```bash
       source .venv/bin/activate
       ```
 
-5. **Install the dependencies**:
+5. **Install the required dependencies**:
     ```bash
     pip install -r requirements.txt
     ```
-
-6. **Release a build**
-```bash
-python setup.py sdist bdist_wheel
-```
+Ensure you are using **pyautogen==0.2.35**, and confirm that **autogen-agents** is not already installed in your environment.
