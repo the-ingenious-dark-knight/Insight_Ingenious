@@ -21,7 +21,7 @@ AutoGen abstracts and implements conversable agents designed to solve tasks thro
 The figure below shows the built-in agents in AutoGen.
 
 <p style="text-align: center;">
-    <img src="../images/img.png" alt="autogen image" width="500">
+    <img src=" ../images/img.png" alt="autogen image" width="500">
 </p>
 
 
