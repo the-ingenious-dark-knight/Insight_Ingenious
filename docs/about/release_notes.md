@@ -22,5 +22,5 @@
 
 For any inquiries or assistance, please reach out to:
 
-- **Elliot Zhu**: [Elliot.Zhu@insight.com](mailto:Elliot.Zhu@insight.com)  
 - **John Rampono**: [John.Rampono@insight.com](mailto:John.Rampono@insight.com)
+- **Elliot Zhu**: [Elliot.Zhu@insight.com](mailto:Elliot.Zhu@insight.com)  
