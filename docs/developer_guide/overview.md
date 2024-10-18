@@ -3,7 +3,7 @@
     weight: 2
 
 ---
-# Insight Service Prefabs
+# Solution Overview
 
 ## AutoGen: Multi-Agent Conversation Framework
 
@@ -25,9 +25,8 @@ The figure below shows the built-in agents in AutoGen.
 </p>
 
 
-## Solution Architecture
 
-### Overview 
+## Service Prefabs 
 We have designed a generic framework - **service prefabs** - that can let agents converse with each other through message exchanges to jointly finish a task.
 Different prefabs can perform different actions after receiving messages.
 
