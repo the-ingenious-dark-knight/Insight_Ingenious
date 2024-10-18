@@ -1,0 +1,13 @@
+README.md
+setup.py
+ingenious/__init__.py
+ingenious/cli.py
+ingenious/dependencies.py
+ingenious/main.py
+ingenious.egg-info/PKG-INFO
+ingenious.egg-info/SOURCES.txt
+ingenious.egg-info/dependency_links.txt
+ingenious.egg-info/entry_points.txt
+ingenious.egg-info/not-zip-safe
+ingenious.egg-info/requires.txt
+ingenious.egg-info/top_level.txt
