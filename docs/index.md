@@ -19,8 +19,16 @@ Welcome to the Insight Services APAC documentation. This guide is designed to as
 
 ## Highlight
 
-**Insight Service Prefabs**
-**Industry-Specific Conversation Pattern Solutions**:
+The accelerator is designed to speed up the development of Generative AI applications by utilizing prebuilt agent patterns. 
+These patterns offer a robust foundation for rapid, efficient, and scalable AI project creation. With these patterns, you can:
+
+- **Reduce development time** by utilizing ready-made templates for common AI use cases, minimizing the need for custom code.
+- **Ensure consistency** across different AI projects with standardized architectures that promote best practices.
+- **Facilitate rapid prototyping** of multi-agent systems with reusable components that integrate seamlessly into production environments.
+- **Enhance scalability** by following patterns optimized for large-scale deployment, allowing for easy expansion as your project grows.
+- **Focus on business outcomes** with pre-configured industry-specific conversation patterns, enabling you to tailor AI solutions to meet domain-specific requirements quickly.
+
+By using these prefab patterns, your team can move from concept to deployment faster, without compromising on the quality or robustness of the solution.
 
 
 

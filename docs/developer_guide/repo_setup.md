@@ -38,3 +38,8 @@ Follow these steps to set up the **Ingenious** package locally:
     ```bash
     pip install -r requirements.txt
     ```
+
+6. **Release a build**
+```bash
+python setup.py sdist bdist_wheel
+```
