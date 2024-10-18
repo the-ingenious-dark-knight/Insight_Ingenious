@@ -32,7 +32,6 @@ print(f"printing version --------- {package_version}")
 description = """A python library for accelerating Generative AI projects"""
 
 
-
 INSTALL_REQUIRES = [
     "aiofiles==23.2.1",
     "annotated-types==0.7.0",
@@ -44,7 +43,6 @@ INSTALL_REQUIRES = [
     "azure-cosmos==4.7.0",
     "azure-search-documents==11.4.0",
     "azure-keyvault",
-    "azure-identity",
     "backoff==2.2.1",
     "bcrypt==4.2.0",
     "bidict==0.23.1",
@@ -139,6 +137,7 @@ INSTALL_REQUIRES = [
     "python-engineio==4.9.1",
     "python-multipart==0.0.9",
     "python-socketio==5.11.3",
+    "pywin32==306; sys_platform == 'win32'",
     "PyYAML==6.0.1",
     "regex==2024.7.24",
     "requests==2.32.3",
@@ -174,7 +173,10 @@ INSTALL_REQUIRES = [
     "zipp==3.20.1",
     "markdownify==0.13.1",
     "pypdf==4.3.1",
-    "ipython==8.27.0"
+    "ipython==8.27.0",
+    "azure-identity==1.17.1",
+    "azure-keyvault==4.2.0",
+    "sentence-transformers==3.1.1",
 ]
 
 

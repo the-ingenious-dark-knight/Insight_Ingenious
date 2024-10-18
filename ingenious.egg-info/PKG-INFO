@@ -24,7 +24,6 @@ Requires-Dist: azure-core==1.30.2
 Requires-Dist: azure-cosmos==4.7.0
 Requires-Dist: azure-search-documents==11.4.0
 Requires-Dist: azure-keyvault
-Requires-Dist: azure-identity
 Requires-Dist: backoff==2.2.1
 Requires-Dist: bcrypt==4.2.0
 Requires-Dist: bidict==0.23.1
@@ -119,6 +118,7 @@ Requires-Dist: python-dotenv==1.0.1
 Requires-Dist: python-engineio==4.9.1
 Requires-Dist: python-multipart==0.0.9
 Requires-Dist: python-socketio==5.11.3
+Requires-Dist: pywin32==306; sys_platform == "win32"
 Requires-Dist: PyYAML==6.0.1
 Requires-Dist: regex==2024.7.24
 Requires-Dist: requests==2.32.3
@@ -155,6 +155,9 @@ Requires-Dist: zipp==3.20.1
 Requires-Dist: markdownify==0.13.1
 Requires-Dist: pypdf==4.3.1
 Requires-Dist: ipython==8.27.0
+Requires-Dist: azure-identity==1.17.1
+Requires-Dist: azure-keyvault==4.2.0
+Requires-Dist: sentence-transformers==3.1.1
 
 
 # About
