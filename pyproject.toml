@@ -2,7 +2,6 @@
 requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
 
-<<<<<<< HEAD:pyproject.toml
 [project]
 name = "ingenious"
 version = "1.0.0"
@@ -50,46 +49,9 @@ dependencies = [
     "bidict==0.23.1",
     "build==1.2.1",
     "cachetools==5.5.0",
-=======
-# require python 3.12 or newer
-if sys.version_info < (3, 11):
-    print("Error: This Generative AI Accelerator does not support this version of Python.")
-    print("Please upgrade to Python 3.12 or higher.")
-    sys.exit(1)
-
-# require version of setuptools that supports find_namespace_packages
-from setuptools import setup
-
-try:
-    from setuptools import find_namespace_packages
-except ImportError:
-    # the user has a downlevel version of setuptools.
-    print("Error: This Generative AI  requires setuptools v40.1.0 or higher.")
-    print('Please upgrade setuptools with "pip install --upgrade setuptools" ' "and try again")
-    sys.exit(1)
-
-
-# pull long description from README
-this_directory = os.path.abspath(os.path.dirname(__file__))
-with open(os.path.join(this_directory, "README.md"), "r", encoding="utf8") as f:
-    long_description = f.read()
-
-package_name = "ingenious"
-package_version = "1.0.0"
-print(f"printing version --------- {package_version}")
-description = """A python library for accelerating Generative AI projects"""
-
-
-INSTALL_REQUIRES = [
-    "azure-core==1.31.0",
-    "azure-search-documents==11.4.0",
-    "azure-keyvault",
-    "azure-identity",
->>>>>>> 3bcfa28cb04cd50852b00a5f56baed28eadc4255:setup.py
     "certifi==2024.6.2",
     "chainlit==1.1.402",
     "chromadb==0.5.5",
-<<<<<<< HEAD:pyproject.toml
     "click==8.1.7",
     "colorama==0.4.6",
     "coloredlogs==15.0.1",
@@ -132,12 +94,8 @@ INSTALL_REQUIRES = [
     "mpmath==1.3.0",
     "mypy-extensions==1.0.0",
     "nest-asyncio==1.6.0",
-=======
-    "Jinja2==3.1.4",
->>>>>>> 3bcfa28cb04cd50852b00a5f56baed28eadc4255:setup.py
     "numpy==1.26.4",
     "openai==1.35.7",
-<<<<<<< HEAD:pyproject.toml
     "opentelemetry-api==1.27.0",
     "opentelemetry-exporter-otlp-proto-common==1.27.0",
     "opentelemetry-exporter-otlp-proto-grpc==1.27.0",
@@ -203,14 +161,6 @@ INSTALL_REQUIRES = [
     "wrapt==1.16.0",
     "wsproto==1.2.0",
     "zipp==3.20.1",
-=======
-    "pyautogen==0.2.35",
-    "pydantic==2.8.0",
-    "sentence-transformers==3.1.1",
-    "markdownify==0.13.1",
-    "pypdf==5.0.1",
-    "IPython==8.28.0",
->>>>>>> 3bcfa28cb04cd50852b00a5f56baed28eadc4255:setup.py
 ]
 
 [project.optional-dependencies]

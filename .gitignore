@@ -8,3 +8,4 @@ __pycache__
 /tmp/db/
 /tmp/context.md
 /tmp/high_level_logs.log.db
+/build
