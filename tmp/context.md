@@ -1,1 +1,0 @@
-User asked about contact number.
