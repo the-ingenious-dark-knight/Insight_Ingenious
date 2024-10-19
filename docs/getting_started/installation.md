@@ -15,6 +15,20 @@ Follow these steps to set up the **Ingenious** package locally:
     ```bash
     pip install git+https://github.com/Insight-Services-APAC/Insight_Ingenious.git
     ```
+    If you are using windows install the optional windows dependencies:
+    ```bash
+    pip install git+https://github.com/Insight-Services-APAC/Insight_Ingenious.git[windows]
+    ```
+
+    There are other optional dependencies that can be installed. For example, if you wish to include local chat summarization capabilities, you can install the optional `ChatHistorySummariser` dependencies. 
+
+    ```bash
+    pip install git+https://github.com/Insight-Services-APAC/Insight_Ingenious.git#[ChatHistorySummariser]
+    ```
+    These optional dependencies can be stacked together. For example, to install both the windows and chat summarization dependencies, you can run the following command:
+    ```bash
+    pip install git+https://github.com/Insight-Services-APAC/Insight_Ingenious.git#[windows,ChatHistorySummariser]
+    ```
 
 2. **Profile Setup**
 
