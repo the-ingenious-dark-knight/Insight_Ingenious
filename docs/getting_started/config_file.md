@@ -1,3 +1,11 @@
+---
+
+    weight: 4
+
+---
+
+
+
 This file contains the configuration settings for the application. The configuration file is written in YAML format. This file is designed to contain non-sensitive settings only. At run-time is is merged with the `profile.yml` information which contains the associated sensitive values. See the example below for a sample with detailed comments that explain the use of each configuration setting in the file.
 
 ```yaml

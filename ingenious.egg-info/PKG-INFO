@@ -13,6 +13,7 @@ Classifier: Programming Language :: Python :: 3.11
 Classifier: Programming Language :: Python :: 3.12
 Requires-Python: >=3.12
 Description-Content-Type: text/markdown
+<<<<<<< HEAD
 Requires-Dist: Deprecated==1.2.14
 Requires-Dist: FLAML==2.2.0
 Requires-Dist: Jinja2==3.1.4
@@ -39,12 +40,16 @@ Requires-Dist: bcrypt==4.2.0
 Requires-Dist: bidict==0.23.1
 Requires-Dist: build==1.2.1
 Requires-Dist: cachetools==5.5.0
+=======
+Requires-Dist: azure-core==1.30.2
+Requires-Dist: azure-search-documents==11.4.0
+Requires-Dist: azure-keyvault==4.2.0
+Requires-Dist: azure-identity==1.19.0
+>>>>>>> 3bcfa28cb04cd50852b00a5f56baed28eadc4255
 Requires-Dist: certifi==2024.6.2
 Requires-Dist: chainlit==1.1.402
-Requires-Dist: charset-normalizer==3.3.2
-Requires-Dist: chevron==0.14.0
-Requires-Dist: chroma-hnswlib==0.7.6
 Requires-Dist: chromadb==0.5.5
+<<<<<<< HEAD
 Requires-Dist: click==8.1.7
 Requires-Dist: colorama==0.4.6
 Requires-Dist: coloredlogs==15.0.1
@@ -87,10 +92,12 @@ Requires-Dist: monotonic==1.6
 Requires-Dist: mpmath==1.3.0
 Requires-Dist: mypy-extensions==1.0.0
 Requires-Dist: nest-asyncio==1.6.0
+=======
+Requires-Dist: Jinja2==3.1.4
+>>>>>>> 3bcfa28cb04cd50852b00a5f56baed28eadc4255
 Requires-Dist: numpy==1.26.4
-Requires-Dist: oauthlib==3.2.2
-Requires-Dist: onnxruntime==1.19.0
 Requires-Dist: openai==1.35.7
+<<<<<<< HEAD
 Requires-Dist: opentelemetry-api==1.27.0
 Requires-Dist: opentelemetry-exporter-otlp-proto-common==1.27.0
 Requires-Dist: opentelemetry-exporter-otlp-proto-grpc==1.27.0
@@ -160,6 +167,14 @@ Provides-Extra: windows
 Requires-Dist: pywin32==3.0.6; extra == "windows"
 Provides-Extra: chathistorysummariser
 Requires-Dist: sentence_transformers==3.1.1; extra == "chathistorysummariser"
+=======
+Requires-Dist: pyautogen==0.2.35
+Requires-Dist: pydantic==2.8.0
+Requires-Dist: sentence-transformers==3.1.1
+Requires-Dist: markdownify==0.13.1
+Requires-Dist: pypdf==5.0.1
+Requires-Dist: IPython==8.28.0
+>>>>>>> 3bcfa28cb04cd50852b00a5f56baed28eadc4255
 
 
 # About

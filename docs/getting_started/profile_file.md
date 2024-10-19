@@ -1,3 +1,11 @@
+---
+
+    weight: 4
+
+---
+
+
+
 This file contains the sensitive settings for the application. At run-time is is merged with the `config.yml` information which contains the associated non-sensitive values. See the example below for a sample with detailed comments that explain the use of each configuration setting in the file.
 
 ```yaml
