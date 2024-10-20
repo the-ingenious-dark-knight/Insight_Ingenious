@@ -36,11 +36,11 @@ chat_request: ChatRequest = ChatRequest(
 
 
 t = "tennis"
-chat_request.user_prompt = f"What is {t}?" 
+chat_request.user_prompt = f"Explain the game of {t} to me?" 
 j = chat_request.model_dump()
 response = requests.post(
-    #f"http://127.0.0.1:{_config.web_configuration.port}/api/v1/chat", 
-    f"http://localhost:9000/api/v1/chat", 
+    f"http://localhost:{_config.web_configuration.port}/api/v1/chat", 
+    #f"http://localhost:9000/api/v1/chat", 
     json=j,
     auth=HTTPBasicAuth(username, password)
 )

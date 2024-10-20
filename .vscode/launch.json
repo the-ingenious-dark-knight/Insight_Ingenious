@@ -17,6 +17,13 @@
             "request": "launch",
             "program": "./conversation_pattern_example/test_improved_memory.py",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Python Debugger: Run Tests",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "run_tests.py",
+            "console": "integratedTerminal"
         }
     ]
 }

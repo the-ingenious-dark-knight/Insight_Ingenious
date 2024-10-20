@@ -22,7 +22,6 @@ $envVars = $envFileContent | ConvertFrom-Yaml
 # Convert PowerShell object to JSON
 $envVarsJson_profile =  $envVars | ConvertTo-Json -Compress
 #$envVarsJson_profile = $envVarsJson_profile -replace '"', '""'
-# if first letter is not [ then add it
 if ($envVarsJson_profile[0] -ne "[") {
     $envVarsJson_profile = "[" + $envVarsJson_profile + "]"
 }
