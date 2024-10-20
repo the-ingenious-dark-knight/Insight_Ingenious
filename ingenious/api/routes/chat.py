@@ -10,6 +10,7 @@ from ingenious.models.chat import ChatRequest, ChatResponse
 from ingenious.models.http_error import HTTPError
 from ingenious.services.chat_service import ChatService
 import ingenious.dependencies as igen_deps
+import ingenious.utils.namespace_utils as ns_utils
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -21,7 +22,8 @@ router = APIRouter()
                         413: {"model": HTTPError, "description": "Payload Too Large"}})
 async def chat(
         chat_request: ChatRequest, chat_service: Annotated[ChatService, Depends(get_chat_service)], credentials: Annotated[HTTPBasicCredentials, Depends(igen_deps.get_security_service)]) -> ChatResponse:
-    try:
+    try:        
+        ns_utils.print_namespace_modules('ingenious.services.chat_services.multi_agent.conversation_flows')
         if not chat_request.conversation_flow:
             raise ValueError(f"conversation_flow not set {chat_request}")
         return await chat_service.get_chat_response(chat_request)
@@ -34,3 +36,6 @@ async def chat(
     except TokenLimitExceededError as tle:
         logger.exception(tle)
         raise HTTPException(status_code=413, detail=TokenLimitExceededError.DEFAULT_MESSAGE)
+    except Exception as e:
+        logger.exception(e)
+        raise HTTPException(status_code=500, detail=str(e))

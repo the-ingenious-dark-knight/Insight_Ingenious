@@ -1,0 +1,12 @@
+[flake8]
+max-line-length = 120
+exclude =
+    .git,
+    .env,
+    .venv,
+    env,
+    venv,
+    .python_packages,
+    .pytest_cache,
+    __pycache__,
+    templates

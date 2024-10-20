@@ -181,4 +181,4 @@ include-package-data = true
 zip-safe = false
 
 [tool.setuptools.package-data]
-ingenious = ["**/*.py", "**/*.md"]
+ingenious = ["**/*.py", "**/*.md", "**/*.jinja"]

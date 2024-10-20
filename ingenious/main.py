@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
-from ingenious.api.routes import chat, message_feedback, conversation, search
+from ingenious.api.routes import chat, message_feedback  # conversation, search
 from ingenious.core.logging import setup_logging
 from fastapi import Depends, FastAPI, status, HTTPException
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
@@ -26,12 +26,13 @@ if os.environ["LOADENV"] == "True":
 else:
     print("Skipping load of environment file")
 
+os.chdir(os.environ["INGENIOUS_WORKING_DIR"])
 app = FastAPI(title="FastAgent API", version="1.0.0")
 
 app.include_router(chat.router, prefix="/api/v1", tags=["Chat"])
 app.include_router(message_feedback.router, prefix="/api/v1", tags=["Message Feedback"])
-app.include_router(conversation.router, prefix="/api/v1", tags=["Conversation"])
-app.include_router(search.router, prefix="/api/v1", tags=["Search"])
+#app.include_router(conversation.router, prefix="/api/v1", tags=["Conversation"])
+#app.include_router(search.router, prefix="/api/v1", tags=["Search"])
 
 # Instrument HTTPX - required for OpenAI SDK
 # https://github.com/open-telemetry/opentelemetry-python/issues/3693#issuecomment-2014923261

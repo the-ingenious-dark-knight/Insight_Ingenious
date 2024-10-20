@@ -35,10 +35,12 @@ ingenious/external_services/openai_service.py
 ingenious/external_services/search_service.py
 ingenious/models/__init__.py
 ingenious/models/chat.py
+ingenious/models/config.py
 ingenious/models/database_client.py
 ingenious/models/http_error.py
 ingenious/models/message.py
 ingenious/models/message_feedback.py
+ingenious/models/profile.py
 ingenious/models/search.py
 ingenious/models/tool_call_result.py
 ingenious/services/__init__.py
@@ -75,5 +77,8 @@ ingenious/services_legacy/tool_service.py
 ingenious/services_legacy/fast_agent/__init__.py
 ingenious/utils/__init__.py
 ingenious/utils/conversation_builder.py
+ingenious/utils/namespace_utils.py
 ingenious/utils/prompt_templates.py
 ingenious/utils/token_counter.py
+ingenious/utils/templates/prompts/follow_up_prompt.jinja
+ingenious/utils/templates/prompts/system_prompt.jinja

@@ -11,6 +11,9 @@ class ConversationPattern:
     def __init__(self, default_llm_config: dict):
         self.default_llm_config = default_llm_config
         self.topics = []
+
+        print("Warning this pattern requires optional dependencies: 'ChatHistorySummariser'.")
+
         self.termination_msg = lambda x: x.get("content", "") is not None and "TERMINATE" in x.get("content",
                                                                                                    "").rstrip().upper()
 

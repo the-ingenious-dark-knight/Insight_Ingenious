@@ -14,6 +14,7 @@ import pkgutil
 import ingenious.config.config as ingen_config
 
 
+
 app = typer.Typer(no_args_is_help=True)
 
 custom_theme = Theme({"info": "dim cyan", "warning": "dark_orange", "danger": "bold red", "error": "bold red", "debug": "khaki1"})
@@ -35,7 +36,7 @@ def run_all(
         typer.Argument(
             help="The path to the config file. "
         ),
-    ],
+    ] = None,
     profile_dir: Annotated[
         str,
         typer.Argument(
@@ -64,12 +65,14 @@ def run_all(
     """
     This command will run all elements of the project. 
     """    
-    os.environ["INGENIOUS_PROJECT_PATH"] = project_dir
+    if (project_dir is not None):
+        os.environ["INGENIOUS_PROJECT_PATH"] = project_dir
     
     if profile_dir is None:
         # get home directory
         home_dir = os.path.expanduser("~")
         profile_dir = Path(home_dir) / Path(".ingenious") / Path("profiles.yml")
+    
     os.environ["INGENIOUS_PROFILE_PATH"] = str(profile_dir).replace("\\", "/")
 
     config = ingen_config.get_config()
@@ -91,8 +94,8 @@ def run_all(
                 print(f"Found module: {module_info.name}")
         else:
             print(f"{namespace} is not a package")
-    
-    os.chdir(os.getcwd())
+    os.environ["INGENIOUS_WORKING_DIR"] = str(Path(os.getcwd()))
+    os.chdir(str(Path(os.getcwd())))
     print_namespace_modules('ingenious.services.chat_services.multi_agent.conversation_flows')
 
     # run fast api cli by launching a subprocess

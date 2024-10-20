@@ -8,7 +8,8 @@ from ingenious.db.chat_history_repository import ChatHistoryRepository
 from ingenious.errors.content_filter_error import ContentFilterError
 from ingenious.models.chat import Action, ChatRequest, ChatResponse, KnowledgeBaseLink, Product
 from ingenious.models.message import Message
-from ingenious.utils.conversation_builder import (build_message, build_system_prompt,build_user_message)
+from ingenious.utils.conversation_builder import (build_message, build_system_prompt, build_user_message)
+from ingenious.utils.namespace_utils import import_module_safely
 
 logger = logging.getLogger(__name__)
 
@@ -107,13 +108,7 @@ class multi_agent_chat_service:
             module_name = f"ingenious.services.chat_services.multi_agent.conversation_flows.{self.conversation_flow.lower()}.{self.conversation_flow.lower()}"
             class_name = "ConversationFlow"
 
-            try:
-                module = importlib.import_module(f"{module_name}")
-                service_class = getattr(module, class_name)
-            except (ImportError, AttributeError) as e:
-                raise ValueError(f"Unsupported chat conversation flow: {module_name}.{class_name}") from e
-
-            conversation_flow_service_class = service_class()
+            conversation_flow_service_class = import_module_safely(module_name, class_name)                        
 
             response_task = conversation_flow_service_class.get_conversation_response(
                 message=chat_request.user_prompt,

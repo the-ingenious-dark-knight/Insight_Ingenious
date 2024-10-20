@@ -1,81 +1,26 @@
+import dataclasses as dataclass
+from typing import List
 import json
 import yaml
 from pathlib import Path
 from ingenious.config.profile import Profiles
+from ingenious.models import config as config_models
+from ingenious.models import profile as profile_models
 import os
 from azure.keyvault.secrets import SecretClient
 from azure.identity import DefaultAzureCredential
 
 
-class ChatHistoryConfig:
-    def __init__(self, database_type: str, database_path: str = "", database_connection_string: str = "", database_name: str = "", memory_path: str = ""):
-        self.database_type = database_type
-        self.database_path = database_path
-        self.database_connection_string = database_connection_string
-        self.database_name = database_name
-        self.memory_path = memory_path
-
-
-class ModelConfig:
-    def __init__(self, model, api_type, api_version):
-        self.model = model
-        self.api_type = api_type
-        self.api_version = api_version
-        self.base_url = ""
-        #self.api_rate_limit = 60
-        self.api_key = ""
-
-
-class ChatServiceConfig:
-    def __init__(self, type):
-        self.type = type
-
-
-class ToolServiceConfig:
-    def __init__(self, enable):
-        self.enable = enable
-
-
-class LoggingConfig:
-    def __init__(self, root_log_level, log_level):
-        
-        self.root_log_level = root_log_level
-        self.log_level = log_level
-
-
-class AzureSearchConfig:
-    def __init__(self, service, endpoint, key=""):
-        self.service = service
-        self.endpoint = endpoint
-        self.key = key
-
-
-class WebAuthConfig:
-    def __init__(self, type="", enable=True, username="", password=""):
-        self.type = type
-        self.enable = enable
-        self.username = username
-        self.password = password
-
-
-class WebConfig:
-    def __init__(self, type="fastapi", ip_address="0.0.0.0", port: int = 80, authentication={}):
-        self.type = type
-        self.ip_address = ip_address
-        self.port = port
-        self.authentication = Profiles.WebAuthConfig(**authentication)
-
-
-class Config:
+class Config(config_models.Config):
     def __init__(self, profile, models, chat_history, logging, tool_service, chat_service, azure_search_services=[], web_configuration={}):
-        self.chat_history: ChatHistoryConfig = chat_history
+        self.chat_history: config_models.ChatHistoryConfig = chat_history
         self.profile = profile
-        self.models: list[ModelConfig] = models
-        self.logging: LoggingConfig = logging
+        self.models: list[config_models.ModelConfig] = models
+        self.logging: config_models.LoggingConfig = logging
         self.tool_service = tool_service
         self.chat_service = chat_service
-        self.azure_search_services: list[AzureSearchConfig] = azure_search_services
-        self.web_configuration: WebConfig = web_configuration
+        self.azure_search_services: list[config_models.AzureSearchConfig] = azure_search_services
+        self.web_configuration: config_models.WebConfig = web_configuration
 
     @staticmethod
     def from_yaml(file_path):
@@ -86,14 +31,14 @@ class Config:
     @staticmethod
     def from_yaml_str(config_yml):
         data = yaml.safe_load(config_yml)            
-        models = [ModelConfig(**model) for model in data['models']]
+        models = [config_models.ModelConfig(**model) for model in data['models']]
         profile = data['profile']
-        chat_service = ChatServiceConfig(**data['chat_service'])
-        tool_service = ToolServiceConfig(**data['tool_service'])
-        azure_search_services = [AzureSearchConfig(**as_config) for as_config in data['azure_search_services']]
-        web_configuration = WebConfig(**data['web_configuration'])
+        chat_service = config_models.ChatServiceConfig(**data['chat_service'])
+        tool_service = config_models.ToolServiceConfig(**data['tool_service'])
+        azure_search_services = [config_models.AzureSearchConfig(**as_config) for as_config in data['azure_search_services']]
+        web_configuration = config_models.WebConfig(**data['web_configuration'])
         # Get the sensitive model information from the profile
-        profile_data = Profiles()
+        profile_data: profile_models.Profiles = Profiles()
         profile_object = profile_data.get_profile_by_name(profile)
         if profile_object is None:
             raise ValueError(f"Profile {profile} not found in profiles.yml")
@@ -118,12 +63,12 @@ class Config:
             setattr(web_configuration, key, value)
 
         chat_history_data = data['chat_history']            
-        chat_history = ChatHistoryConfig(**chat_history_data)
+        chat_history = config_models.ChatHistoryConfig(**chat_history_data)
         for key, value in profile_object.chat_history.__dict__.items():
             setattr(chat_history, key, value)
 
         logging_data = data['logging']
-        logging_config = LoggingConfig(**logging_data) 
+        logging_config = config_models.LoggingConfig(**logging_data) 
         return Config(
             profile=profile,
             models=models,
@@ -150,7 +95,7 @@ def get_kv_secret(secretName):
 
 
 @staticmethod
-def get_config(config_path=None):
+def get_config(config_path=None) -> Config:
     
     # Check if os.getenv('INGENIOUS_CONFIG') is set
     if os.getenv('APPSETTING_INGENIOUS_CONFIG'):

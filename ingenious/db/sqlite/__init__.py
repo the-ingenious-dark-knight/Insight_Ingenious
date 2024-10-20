@@ -14,6 +14,10 @@ from types import SimpleNamespace
 class sqlite_ChatHistoryRepository(IChatHistoryRepository):
     def __init__(self, config: Config.Config):
         self.db_path = config.chat_history.database_path
+        # Check if the directory exists, if not, create it
+        db_dir_check = os.path.dirname(self.db_path)
+        if not os.path.exists(db_dir_check):
+            os.makedirs(db_dir_check)
         self.connection = sqlite3.connect(self.db_path, check_same_thread=False)
         self._create_table()
 
