@@ -12,7 +12,7 @@ import uvicorn
 import importlib
 import pkgutil
 import ingenious.config.config as ingen_config
-
+from ingenious.main import FastAgentAPI
 
 
 app = typer.Typer(no_args_is_help=True)
@@ -98,10 +98,13 @@ def run_all(
     os.chdir(str(Path(os.getcwd())))
     print_namespace_modules('ingenious.services.chat_services.multi_agent.conversation_flows')
 
-    # run fast api cli by launching a subprocess
-    import ingenious.main as fastapi_app
+    fast_agent_api = FastAgentAPI()
+
+    # Access the FastAPI app instance
+    app = fast_agent_api.app
+    
     # change directory to project dir    
-    uvicorn.run(fastapi_app.get_app(), host=config.web_configuration.ip_address, port=config.web_configuration.port)
+    uvicorn.run(app, host=config.web_configuration.ip_address, port=config.web_configuration.port)
     #import subprocess
     #subprocess.run(["fastapi", "dev", "./ingenious/main.py"])
 

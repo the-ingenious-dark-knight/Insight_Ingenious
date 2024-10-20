@@ -5,10 +5,17 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python Debugger: Current File",
+            "name": "Python Debugger: ingen_cli",
             "type": "debugpy",
             "request": "launch",
             "program": "run_ingen_cli.py",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Python Debugger: test_improved_memory",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "./conversation_pattern_example/test_improved_memory.py",
             "console": "integratedTerminal"
         }
     ]

@@ -158,15 +158,14 @@ class ConversationPattern:
 
         manager = autogen.GroupChatManager(groupchat=groupchat,
                                            llm_config=self.default_llm_config,
-                                           is_termination_msg=self.termination_msg,
-                                           code_execution_config=False, )
-
-        # Start chatting with the boss as this is the user proxy agent.
+                                           is_termination_msg=self.termination_msg,                                           
+                                           code_execution_config=False)
+        
         res = await self.user_proxy.a_initiate_chat(
             manager,
             message=self.user_proxy.message_generator,
             problem=input_message,
-            summary_method="last_msg",
+            summary_method="last_msg"
         )
 
         # Send a response back to the user

@@ -9,7 +9,7 @@ def print_namespace_modules(namespace):
         for module_info in pkgutil.iter_modules(package.__path__):
             print(f"Found module: {module_info.name}")
     else:
-        print(f"{namespace} is not a package")
+        print(f"{namespace} is not a package. Importing now...")
 
 
 def import_module_safely(module_name, class_name):
@@ -24,5 +24,6 @@ def import_module_safely(module_name, class_name):
         except Exception as e:
             raise ValueError(f"An unexpected error occurred while importing {module_name}.{class_name}: {e}") from e
     else:
-        pass
-        # raise ValueError(f"Module {module_name} is already imported.")
+        module = importlib.import_module(f"{module_name}")
+        service_class = getattr(module, class_name)   
+        return service_class

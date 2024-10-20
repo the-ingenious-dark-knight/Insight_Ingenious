@@ -36,7 +36,7 @@ chat_request: ChatRequest = ChatRequest(
 
 
 t = "tennis"
-chat_request.user_prompt = f"What is grand slam in {t}?" 
+chat_request.user_prompt = f"What is {t}?" 
 j = chat_request.model_dump()
 response = requests.post(
     #f"http://127.0.0.1:{_config.web_configuration.port}/api/v1/chat", 

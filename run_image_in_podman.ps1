@@ -47,10 +47,10 @@ $envVarsJson_config = $envVars | ConvertTo-Json -Compress
 
 # Define the container name and image
 $containerName = "my_python_container"
-$imageName = "localhost/ingen"
+$imageName = "localhost/ingen_dev"
 
 # Run the container with the environment variables
-$podmanRunCommand = "podman run -d --publish 9000:80  --mount type=bind,src=/var/db,target=/data1 --name $containerName --env 'APPSETTING_INGENIOUS_PROFILE=$envVarsJson_profile' --env 'APPSETTING_INGENIOUS_CONFIG=$envVarsJson_config' $imageName"
+$podmanRunCommand = "podman run -d --publish 9000:80  --mount type=bind,src=/mnt/c/Users/jramp/source/gitjr/Insight_Ingenious/dist,target=/ingen_dist --name $containerName --env 'APPSETTING_INGENIOUS_PROFILE=$envVarsJson_profile' --env 'APPSETTING_INGENIOUS_CONFIG=$envVarsJson_config' $imageName sleep 1000"
 Invoke-Expression $podmanRunCommand
 
 # Output the command for debugging purposes

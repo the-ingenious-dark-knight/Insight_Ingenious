@@ -11,6 +11,7 @@ from ingenious.models.message import Message
 from ingenious.utils.conversation_builder import (build_message, build_system_prompt, build_user_message)
 from ingenious.utils.namespace_utils import import_module_safely
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -108,6 +109,7 @@ class multi_agent_chat_service:
             module_name = f"ingenious.services.chat_services.multi_agent.conversation_flows.{self.conversation_flow.lower()}.{self.conversation_flow.lower()}"
             class_name = "ConversationFlow"
 
+             
             conversation_flow_service_class = import_module_safely(module_name, class_name)                        
 
             response_task = conversation_flow_service_class.get_conversation_response(
@@ -121,6 +123,9 @@ class multi_agent_chat_service:
             await self.chat_history_repository.update_message_content_filter_results(
                 user_message_id, chat_request.thread_id, cfe.content_filter_results)
             raise
+        except Exception as e:
+            logger.error(f"Error occurred while processing conversation flow: {e}")
+            raise e
 
         agent_response = response
 

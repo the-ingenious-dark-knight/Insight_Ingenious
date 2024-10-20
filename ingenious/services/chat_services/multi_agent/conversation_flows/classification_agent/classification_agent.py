@@ -1,4 +1,3 @@
-import autogen.retrieve_utils
 import autogen.runtime_logging
 import autogen
 import ingenious.config.config as config
@@ -50,7 +49,6 @@ class ConversationFlow:
         )
 
         _classification_agent_pattern.add_topic_agent(basketball_agent)
-
 
 
         res = await _classification_agent_pattern.get_conversation_response(message, thread_chat_history)
