@@ -1,6 +1,7 @@
 import os
 import sys
 import uuid
+from pydoc_data.topics import topics
 
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), './../'))
 sys.path.append(parent_dir)
@@ -32,15 +33,10 @@ chat_request: ChatRequest = ChatRequest(
     user_id="elliot",  # Assuming the user_id is "elliot"
     user_prompt="",
     user_name="elliot",
-    conversation_flow="knowledge_base_agent"  # Using the classification agent flow
+    conversation_flow="knowledge_base_agent",  # Using the classification agent flow
+    topic = ['health', 'safety'],
+    memory_record = True,
 )
-
-#reset memory
-_config = config.get_config()
-memory_path = _config.chat_history.memory_path
-with open(f"{memory_path}/context.md", "w") as memory_file:
-    memory_file.write("new conversation, please derive context from question")
-
 
 
 # Example 1 search knowledge base under one ambiguous topic with memory

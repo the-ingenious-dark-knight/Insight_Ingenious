@@ -24,6 +24,7 @@ class ConversationFlow:
                                             memory_path = memory_path,
                                             thread_memory = thread_memory)
 
+        #please revise index name in this section.
         search_agent = autogen.AssistantAgent(
             name="search_agent",
             system_message="I am a search agent responsible for retrieve result from search and pass to the researcher."
@@ -31,14 +32,13 @@ class ConversationFlow:
                            "without introducing any additional or external details. "
                            "When the research says AMBIGUOUS, please pass the query keywords without alternation."
                            "Tool Usage Rules:\n"
-                           "if search health related information, please use argument: search_query str, index_name: 'vector-health'; "
+                           "if search health related information, please use argument: search_query str, index_name: 'vector-health'; " #Update
                            "if search safety/emergency related information, please use argument: search_query str, index_name: 'vector-safety' "
                            "if the query quiet is ambiguous, try search in all index;"
                            "DO NOT do repeated search"
                            "DO NOT add extra information to search results."
                            "DO NOT ask follow up question."
                            "Only ask which index to search, or all index.",
-            #add defined index here.
             description="I am a search agent focused on providing accurate information for search results.",
             llm_config=llm_config,
         )

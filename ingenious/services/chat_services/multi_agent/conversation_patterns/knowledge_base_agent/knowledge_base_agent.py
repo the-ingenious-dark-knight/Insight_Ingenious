@@ -53,11 +53,11 @@ class ConversationPattern:
 
         self.classification_agent = autogen.AssistantAgent(
             name="classifier",
-            system_message=f"I am a classifier responsible for classifying messages into predefined topics: {', '.join(self.topics)}. "
+            system_message=(f"I am a classifier responsible for classifying messages into predefined topics: {', '.join(self.topics)}. "
                            "If the topic is ambiguous please return 'general', if it covers multiple topics, return mentioned topics. "
                            "I am **ONLY** permitted to respond **immediately** after `user_proxy`. "
                            "I do not classify for messages like 'Hi!'."
-                           "The current question's context should always take priority over any retrieved context.",
+                           "The current question's context should always take priority over any retrieved context."),
             description="I **ONLY** classify user messages to a appropriate topic and record in the conversation",
             llm_config=self.default_llm_config,
             is_termination_msg=self.termination_msg,
@@ -66,16 +66,17 @@ class ConversationPattern:
 
         self.researcher = autogen.ConversableAgent(
             name="researcher",
-            system_message="I am a research planner,  "
+            system_message=("I am a research planner,  "
                            "First task: "
                            "I decide if the task involve calling the search agent for any factual information retrieval."
                            "If yes, I write a query to the search agent, wait for its response, and gather information."
                            f"If the user question is not directly related with {', '.join(self.topics)}, write a query start with 'AMBIGUOUS-' and follow keyword from the user (remove stop words like what, is.). "
                            "If no, I talk to the reporter to give user a response without searching the database."
-                           "Second task: I ask report_agent to give a summary using chat_memory_recorder and return TERMINATE."
+                           "if a question is short, like 'for safety', it should be interpreted with previous context like previous question is about manager, then the new question should be about manager for safety"
+                           "Second task: I ask report_agent to give a summary using chat_memory_recorder."
                            "I do not do repeated search after the first round;"
-                           "I do not talk to myself or send empty queries."
-                           "I can TERMINATE the conversation if no useful information is available.",
+                           "I do not talk to myself or send empty queries.")
+                           ,
             description="I am a researcher planning the query and resource,I cannot provide direct answers, add extra info, or call functions.",
             llm_config=self.default_llm_config,
             human_input_mode="NEVER",
@@ -87,10 +88,11 @@ class ConversationPattern:
         self.report_agent = autogen.AssistantAgent(
             name="reporter",
             system_message=("I report the conversation result to the user in a concise and formatted way. "
-                            f"{'At the end of conversation, I call and execute chat_memory_recorder to record user '
+                            f"{'At the end of conversation, I ALWAYS call and execute chat_memory_recorder to record user '
                                'question and the summarised conversation in one sentence. The function takes 2 argument: '
-                               'conversation_text: str, last_response: str' if self.memory_record_switch else ''} "
-                            "I do not add extra information."),
+                               'conversation_text: str, last_response: str' if self.memory_record_switch else ''};"
+                            "I do not add extra information."
+                            "I can TERMINATE the conversation if no useful information is available."),
             description="I **ONLY** report conversation result",
             llm_config=self.default_llm_config,
             is_termination_msg=self.termination_msg,
@@ -103,8 +105,8 @@ class ConversationPattern:
                 caller=self.report_agent,
                 executor=self.report_agent,
                 name="chat_memory_recorder",
-                description="A function responsible for recording and updating summarized conversation memory. "
-                            "It ensures that the conversation history is accurately and concisely saved to a specified location for future reference."
+                description=("A function responsible for recording and updating summarized conversation memory. "
+                            "It ensures that the conversation history is accurately and concisely saved to a specified location for future reference.")
             )
 
 
@@ -170,6 +172,7 @@ class ConversationPattern:
                 "pass the query to the search agent. "
                 "after receiving the response, select 'report' to summarize, "
                 "then use 'researcher' send the next query, repeating the process. "
+                "as the report ro record the conversation"
                 "Stop the chat when all selected topics have been queried."
             )
         )
