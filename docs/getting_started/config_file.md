@@ -26,7 +26,7 @@ logging:
 # Chat History Configuration
 chat_history:  
   database_type: sqlite  # Defines the type of database for storing chat history (e.g., sqlite or cosmos)
-  database_path: tmp/high_level_logs.log.db  # Path to SQLite database file for storing chat logs (used only for SQLite)
+  database_path: tmp/high_level_logs.db  # Path to SQLite database file for storing chat logs (used only for SQLite)
   database_name: ToDoList  # Name of the database (used only for Cosmos DB, irrelevant for SQLite)
   memory_path: tmp         # Location for temporary memory or cache files (used by chroma db)
 

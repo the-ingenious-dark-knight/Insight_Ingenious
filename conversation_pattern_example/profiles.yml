@@ -15,6 +15,7 @@
       github_secret:  ###### 
       github_client_id:  ######
   web_configuration:
-    authentication: 
+    authentication:
+      enable: false
       username:  # used for basic authentication
       password:  # used for basic authentication

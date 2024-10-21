@@ -20,17 +20,14 @@ username = _config.web_configuration.authentication.username
 password = _config.web_configuration.authentication.password
 
 
-memory_path = _config.chat_history.memory_path
-with open(f"{memory_path}/context.md", "w") as memory_file:
-    memory_file.write("new conversation, please derive context from question")
-
 new_guid = uuid.uuid4()
 chat_request: ChatRequest = ChatRequest(
         thread_id=str(new_guid),
         user_id="elliot123",
         user_prompt="",
         user_name="elliot",
-        topic=None,
+        topic=['tennis', 'basketball'],
+        memory_record = True,
         conversation_flow="classification_agent"
     )
 
@@ -45,6 +42,14 @@ response = requests.post(
     auth=HTTPBasicAuth(username, password)
 )
 
+# chat_request.user_prompt = f"Who is the most famous star?"
+# j = chat_request.model_dump()
+# response = requests.post(
+#     f"http://localhost:{_config.web_configuration.port}/api/v1/chat",
+#     #f"http://localhost:9000/api/v1/chat",
+#     json=j,
+#     auth=HTTPBasicAuth(username, password)
+# )
 
 print(response.status_code)
 print(response.json())

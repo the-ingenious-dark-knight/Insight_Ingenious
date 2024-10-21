@@ -6,7 +6,7 @@ from openai.types.chat import ChatCompletionMessageParam
 
 from ingenious.db.chat_history_repository import ChatHistoryRepository
 from ingenious.errors.content_filter_error import ContentFilterError
-from ingenious.models.chat import Action, ChatRequest, ChatResponse, KnowledgeBaseLink, Product
+from ingenious.models.chat import Action, ChatRequest, ChatResponse, Product
 from ingenious.models.message import Message
 from ingenious.utils.conversation_builder import (build_message, build_system_prompt, build_user_message)
 from ingenious.utils.namespace_utils import import_module_safely
@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 class IConversationPattern(ABC):
     @abstractmethod
-    async def get_conversation_response(self, message: str, thread_chat_history: list = []) -> ChatResponse:
+    async def get_conversation_response(self, message: str, thread_memory: str) -> ChatResponse:
         pass
 
 
@@ -39,9 +39,10 @@ class multi_agent_chat_service:
         # Initialize additional response fields - to be populated later
         follow_up_questions: dict[str, str] = {}
         actions: list[Action] = []
-        knowledge_base_links: list[KnowledgeBaseLink] = []
         products: list[Product] = []
         thread_chat_history = [{"role": "user", "content": ""}]
+        thread_memory = ''
+        # await self.chat_history_repository.update_sql_memory()
 
         # Check if thread exists
         if not chat_request.thread_id:
@@ -50,6 +51,12 @@ class multi_agent_chat_service:
         else:
             # Get thread messages & add to messages list
             thread_messages = await self.chat_history_repository.get_thread_messages(chat_request.thread_id)
+            thread_memory_list = await self.chat_history_repository.get_thread_memory(chat_request.thread_id)
+
+            for thread_memory in thread_memory_list:
+                thread_memory = thread_memory.content #only one row is retrieved per thread
+            if thread_memory == '':
+                thread_memory = 'New conversation'
 
             for thread_message in thread_messages:
                 # Validate user_id
@@ -71,6 +78,7 @@ class multi_agent_chat_service:
                 messages.append(message)
 
                 thread_chat_history.append({"role": thread_message.role, "content": thread_message.content})
+
 
         # If system prompt is not first message add it in the beginning
         if not messages or messages[0]["role"] != "system":
@@ -114,15 +122,16 @@ class multi_agent_chat_service:
 
             response_task = conversation_flow_service_class.get_conversation_response(
                 message=chat_request.user_prompt,
-                thread_chat_history=thread_chat_history
+                memory_record_switch = chat_request.memory_record,
+                thread_memory = thread_memory,
+                topics = chat_request.topic
             )
             response = await response_task
-
-        except ContentFilterError as cfe:
-            # Update user message with content filter results
-            await self.chat_history_repository.update_message_content_filter_results(
-                user_message_id, chat_request.thread_id, cfe.content_filter_results)
-            raise
+        # except ContentFilterError as cfe:
+        #     # Update user message with content filter results
+        #     await self.chat_history_repository.update_message_content_filter_results(
+        #         user_message_id, chat_request.thread_id, cfe.content_filter_results)
+        #     raise
         except Exception as e:
             logger.error(f"Error occurred while processing conversation flow: {e}")
             raise e
@@ -135,7 +144,16 @@ class multi_agent_chat_service:
                 user_id=chat_request.user_id,
                 thread_id=chat_request.thread_id,
                 role="assistant",
-                content=agent_response)
+                content=agent_response[0])
+        )
+
+        print("the response:", agent_response)
+        _ = await self.chat_history_repository.add_memory(
+            Message(
+                user_id=chat_request.user_id,
+                thread_id=chat_request.thread_id,
+                role="memory_assistant",
+                content=agent_response[1]),
         )
 
         # Get token counts
@@ -147,11 +165,11 @@ class multi_agent_chat_service:
         return ChatResponse(
             thread_id=chat_request.thread_id,
             message_id=agent_message_id,
-            agent_response=agent_response or "Sorry we were unable to generate a response. Please try again.",
+            agent_response=agent_response[0] or "Sorry we were unable to generate a response. Please try again.",
             followup_questions=follow_up_questions,
             actions=actions,
-            knowledge_base_links=[],  # deleted for now
             products=products,
             token_count=token_count,
-            max_token_count=max_token_count
+            max_token_count=max_token_count,
+            memory_summary = agent_response[1]
         )

@@ -8,11 +8,23 @@ from ingenious.services.chat_services.multi_agent.tool_factory import ToolFuncti
 
 class ConversationPattern:
 
-    def __init__(self, default_llm_config: dict):
+    def __init__(self, default_llm_config: dict, topics: list, memory_record_switch: bool, memory_path: str, thread_memory: str):
         self.default_llm_config = default_llm_config
-        self.topics = []
+        self.topics = topics
+        self.memory_record_switch = memory_record_switch
+        self.memory_path = memory_path
+        self.thread_memory = thread_memory
+        self.topic_agents: list[autogen.AssistantAgent] = []
 
-        print("Warning this pattern requires optional dependencies: 'ChatHistorySummariser'.")
+        if self.thread_memory == None or self.thread_memory == '':
+            with open(f"{self.memory_path}/context.md", "w") as memory_file:
+                memory_file.write("This is a new conversation, please continue the conversation given user question")
+
+        if self.memory_record_switch and self.thread_memory != None and self.thread_memory != '':
+            print("Warning: if memory_record = True, the pattern requires optional dependencies: 'ChatHistorySummariser'.")
+            with open(f"{self.memory_path}/context.md", "w") as memory_file:
+                memory_file.write(self.thread_memory)
+
 
         self.termination_msg = lambda x: x.get("content", "") is not None and "TERMINATE" in x.get("content",
                                                                                                    "").rstrip().upper()
@@ -23,14 +35,13 @@ class ConversationPattern:
             is_termination_msg=self.termination_msg,
             human_input_mode="NEVER",
             max_consecutive_auto_reply=2,
-            system_message="I am a proxy for the user, ensuring that their messages are properly routed through the system. "
-                           "When there is not context, just tell the researcher to send a message to the user.",
+            system_message="I am a proxy for the user, give the context to the researcher.",
             retrieve_config={
                 "task": "qa",
                 "docs_path": [
-                    "tmp/context.md"
+                    f"{self.memory_path}/context.md"
                 ],
-                "chunk_token_size": 4000,
+                "chunk_token_size": 2000,
                 "model": self.default_llm_config["model"],
                 "vector_db": "chroma",
                 "overwrite": True,  # set to True if you want to overwrite an existing collection
@@ -40,127 +51,108 @@ class ConversationPattern:
             silent=True
         )
 
-        self.researcher = autogen.ConversableAgent(
-            name="researcher",
-            system_message="I do not call tools other than chat_memory_recorder."
-                           "I talk to relevant topic agents and gather their response. "
-                           "I compile and relay summary to user without adding extra details. "
-                           "I do not derive new topics out of the original user question. "
-                           "After talking with the topic agents,"
-                           "I record a concise chat history by calling chat_memory_recorder at the end of each conversation with "
-                           "2 arguments: conversation_text: str, last_response: str"
-                           "Return TERMINATE when no new information is received.",
-            description="I select and delegate tasks to topic agents, compiling and relaying their findings in a final summary. "
-                        "I cannot provide direct answers, add extra info, or call functions.",
-            llm_config=self.default_llm_config,
-            human_input_mode="NEVER",
-            code_execution_config=False,
-            is_termination_msg=self.termination_msg
-        )
+        # Update the system message of the classification agent to include the topics
 
         self.classification_agent = autogen.AssistantAgent(
             name="classifier",
-            system_message="I am an assistant agent responsible for classifying messages into appropriate topics. "
+            system_message=f"I am a classifier responsible for classifying messages into below topics: {', '.join(self.topics)}. "
+                           "If the topic is ambiguous please return 'ambiguous', if it covers multiple topics, return all mentioned topics. "
                            "I am **ONLY** permitted to respond **immediately** after `user_proxy`. "
+                           "I do not classify for messages like 'Hi!'."
                            "The current question's context should always take priority over any retrieved context.",
             description="I **ONLY** classify user messages to a appropriate topic and record in the conversation",
+            llm_config=self.default_llm_config,
+            is_termination_msg=self.termination_msg,
+
+        )
+
+        self.researcher = autogen.ConversableAgent(
+            name="researcher",
+            system_message="I am a research planner,  "
+                           "First task: "
+                           "I decide if the task involve calling the topic agent."
+                           "If yes, I write a query to the topic agent, wait for its response, and gather information."
+                           "If no, I talk to the reporter to give user a response without asking the topic agent."
+                           "Second task: I ask report_agent to give a summary and record the conversation."
+                           "I do not do repeated call after the first round;"
+                           "I do not talk to myself or send empty queries.",
+            description="I am a researcher planning the query and resource,I cannot provide direct answers, add extra info, or call functions.",
+            llm_config=self.default_llm_config,
+            human_input_mode="NEVER",
+            code_execution_config=False,
+            is_termination_msg=self.termination_msg,
+
+        )
+
+        self.report_agent = autogen.AssistantAgent(
+            name="reporter",
+            system_message=("I report the conversation result to the user in a concise and formatted way. "
+                            f"{'At the end of conversation, I ALWAYS call and execute chat_memory_recorder to record user '
+                               'question and the summarised conversation in one sentence. The function takes 2 argument: '
+                               'conversation_text: str, last_response: str' if self.memory_record_switch else ''} "
+                            "I do not add extra information."
+                            "I can TERMINATE the conversation if no useful information is available."),
+            description="I **ONLY** report conversation result",
             llm_config=self.default_llm_config,
             is_termination_msg=self.termination_msg,
         )
 
 
+        if self.memory_record_switch:
+            print("chat_memory_recorder registered")
+            autogen.register_function(
+                ToolFunctions.update_memory,
+                caller=self.report_agent,
+                executor=self.report_agent,
+                name="chat_memory_recorder",
+                description=("A function responsible for recording and updating summarized conversation memory. "
+                            "It ensures that the conversation history is accurately and concisely saved to a specified location for future reference.")
+            )
 
-        autogen.register_function(
-            ToolFunctions.update_memory,
-            caller=self.researcher,
-            executor=self.researcher,
-            name="chat_memory_recorder",
-            description="A function responsible for recording and updating summarized conversation memory. "
-                        "It ensures that the conversation history is accurately saved to a specified location for future reference."
-        )
 
-
-
-        self.topic_agents: list[autogen.AssistantAgent] = []
 
     def add_topic_agent(self, agent: autogen.AssistantAgent):
         self.topic_agents.append(agent)
 
-    async def get_conversation_response(self, input_message: str, thread_chat_history: list = []) -> str:
+    async def get_conversation_response(self, input_message: str) -> [str, str]:
         """
         This function is the main entry point for the conversation pattern. It takes a message as input and returns a 
         response. Make sure that you have added the necessary topic agents and agent topic chats before 
         calling this function.
         """
-        # chat_history_json = json.dumps(thread_chat_history)
-
-        topics = []
-        for agent in self.topic_agents:
-            topics.append(agent.name)
-
-        # get distinct topics
-        topics = list(set(topics))
-
-        # Update the system message of the classification agent to include the topics
-        system_message = "I am an assistant agent responsible for classifying messages to a topic. " \
-                         "I am **ONLY** allowed to respond **immediately** after `user_proxy`."
-        system_message += f" Classify the message strictly into provided topics: {', '.join(topics)}. " \
-                          "Do not provide any responses beyond the classification. Focus on the user's overall intent, even if terms seem out of place. " \
-                          "Use prior messages to guide classification. If unclear, return 'neither'; if related to both, return 'both'."
-
-        self.classification_agent.update_system_message(system_message)
-
         graph_dict = {}
         graph_dict[self.user_proxy] = [self.classification_agent]
         graph_dict[self.classification_agent] = [self.researcher]
         graph_dict[self.researcher] = self.topic_agents
         for topic_agent in self.topic_agents:
-            graph_dict[topic_agent] = [self.researcher]
+            graph_dict[topic_agent] = [self.report_agent]
+        graph_dict[self.report_agent] = [self.researcher]
 
-
-        # Define the GroupChat with the agent transitions
         groupchat = autogen.GroupChat(
-            agents=[self.user_proxy, self.classification_agent, self.researcher] + self.topic_agents,
+            agents=[self.user_proxy, self.classification_agent, self.researcher, self.report_agent] + self.topic_agents,
             messages=[],
-            max_round=10,
+            max_round=6,
             speaker_selection_method="auto",
             send_introductions=True,
             select_speaker_auto_verbose=False,
             allowed_or_disallowed_speaker_transitions=graph_dict,
             speaker_transitions_type="allowed",
-            select_speaker_auto_multiple_template=(
-                "You provided more than one name in your text, please return just the name of the next speaker. "
-                "To determine the speaker use these prioritised rules:\n"
-                "1. If the context refers to themselves as a speaker e.g. 'As the...' , choose that speaker's name.\n"
-                "2. If it refers to the 'next' speaker name, choose that name.\n"
-                "3. Otherwise, choose the first provided speaker's name in the context.\n"
-                "The names are case-sensitive and should not be abbreviated or changed, classifier is not accepted\n"
-                "Respond with ONLY the name of the speaker and DO NOT provide a reason."
-            ),
-            select_speaker_auto_none_template=(
-                "You didn't choose a speaker. As a reminder, to determine the speaker use these prioritised rules:\n"
-                "1. If the context refers to themselves as a speaker e.g. 'As the...' , choose that speaker's name.\n"
-                "2. If it refers to the 'next' speaker name, choose that name.\n"
-                "3. Otherwise, choose the first provided speaker's name in the context.\n"
-                "The names are case-sensitive and should not be abbreviated or changed.\n"
-                "The only names that are accepted are {agentlist}, classifier is not accepted.\n"
-                "Respond with ONLY the name of the speaker and DO NOT provide a reason."
-            ),
             select_speaker_prompt_template=(
                 "Route the conversation to the 'classifier' if the topic is not available. "
-                "Once classified, pass it to the 'researcher' to decide which topic ageng to choose"
-                "according to the response from 'researcher' select the first topic agent. "
-                "After receiving the response, the 'researcher' summarizes for the user, then queries the next topic agent, repeating the process. "
-                "Do not select any agent for two consecutive responses."
-                "After hearing from all topic agents, the 'researcher' compiles a final summary. "
+                "once classified, select 'researcher' to choose the query "
+                "pass the query to the topic agent. "
+                "after receiving the response, select 'reporter' to summarize, "
+                "then use 'researcher' send the next query, repeating the process. "
+                "then select report to report the final response or record the memory"
+                "Stop the chat after memory recorded ."
             )
         )
 
         manager = autogen.GroupChatManager(groupchat=groupchat,
                                            llm_config=self.default_llm_config,
-                                           is_termination_msg=self.termination_msg,                                           
+                                           is_termination_msg=self.termination_msg,
                                            code_execution_config=False)
-        
+
         res = await self.user_proxy.a_initiate_chat(
             manager,
             message=self.user_proxy.message_generator,
@@ -168,5 +160,8 @@ class ConversationPattern:
             summary_method="last_msg"
         )
 
+        with open(f"{self.memory_path}/context.md", "r") as memory_file:
+            context = memory_file.read()
+
         # Send a response back to the user
-        return res.summary
+        return res.summary, context

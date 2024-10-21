@@ -12,7 +12,6 @@ os.environ["INGENIOUS_WORKING_DIR"] = str(Path(os.getcwd()))
 # Make sure you have set the environment variables 
 _config: config.Config = config.get_config()
 
-
 def run_cli():
     cli.run_all(
         profile_dir=None,  # This is set by your environment variables

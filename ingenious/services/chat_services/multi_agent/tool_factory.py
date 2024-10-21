@@ -1,7 +1,6 @@
 # tool_factory.py
 from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
-
 import ingenious.config.config as config
 
 
@@ -32,11 +31,10 @@ class ToolFunctions:
                     title = ""
         return text_results
 
-    def update_memory(conversation_text: str, last_response: str) -> str:
+    def update_memory(context: str, last_response: str) -> str:
         _config = config.get_config()
         memory_path = _config.chat_history.memory_path
         with open(f"{memory_path}/context.md", "w") as memory_file:
-            memory_file.write(conversation_text)
-        print("Memory Updated:", conversation_text)
+            memory_file.write(context)
         return last_response
 

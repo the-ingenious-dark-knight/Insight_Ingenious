@@ -269,6 +269,7 @@ class ChatHistoryRepository:
             metadata=metadata,
         )
 
+
     async def add_user(self, identifier: str) -> IChatHistoryRepository.User:
         return await self.repository.add_user(identifier)
 
@@ -281,11 +282,23 @@ class ChatHistoryRepository:
     async def add_message(self, message: Message) -> str:
         return await self.repository.add_message(message)
 
+    async def add_memory(self, memory: Message) -> str:
+        return await self.repository.add_memory(memory)
+
     async def get_message(self, message_id: str, thread_id: str) -> Message | None:
         return await self.repository.get_message(message_id, thread_id)
 
+    async def get_memory(self, message_id: str, thread_id: str) -> Message | None:
+        return await self.repository.get_memory(message_id, thread_id)
+
+    async def update_sql_memory(self) -> Message | None:
+        return await self.repository.update_sql_memory()
+
     async def get_thread_messages(self, thread_id: str) -> Optional[list[IChatHistoryRepository.ThreadDict]]:
         return await self.repository.get_thread_messages(thread_id)
+
+    async def get_thread_memory(self, thread_id: str) -> Optional[list[IChatHistoryRepository.ThreadDict]]:
+        return await self.repository.get_thread_memory(thread_id)
     
     async def get_threads_for_user(self, identifier: str, thread_id: Optional[str]) -> Optional[List[IChatHistoryRepository.ThreadDict]]:
         return await self.repository.get_threads_for_user(identifier, thread_id)
@@ -293,9 +306,19 @@ class ChatHistoryRepository:
     async def update_message_feedback(self, message_id: str, thread_id: str, positive_feedback: bool | None) -> None:
         return await self.repository.update_message_feedback(message_id, thread_id, positive_feedback)
 
+    async def update_memory_feedback(self, message_id: str, thread_id: str, positive_feedback: bool | None) -> None:
+        return await self.repository.update_memory_feedback(message_id, thread_id, positive_feedback)
+
     async def update_message_content_filter_results(
             self, message_id: str, thread_id: str, content_filter_results: dict[str, object]) -> None:
         return await self.repository.update_message_content_filter_results(message_id, thread_id, content_filter_results)
 
+    async def update_memory_content_filter_results(
+            self, message_id: str, thread_id: str, content_filter_results: dict[str, object]) -> None:
+        return await self.repository.update_memory_content_filter_results(message_id, thread_id, content_filter_results)
+
     async def delete_thread(self, thread_id: str) -> None:
         return await self.repository.delete_thread(thread_id)
+
+    async def delete_thread_memory(self, thread_id: str) -> None:
+        return await self.repository.delete_thread_memory(thread_id)

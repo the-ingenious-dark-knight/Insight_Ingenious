@@ -6,11 +6,23 @@ from ingenious.services.chat_services.multi_agent.tool_factory import ToolFuncti
 
 
 class ConversationPattern:
-    def __init__(self, default_llm_config: dict, topics: list):
+    def __init__(self, default_llm_config: dict, topics: list, memory_record: bool, memory_path: str):
         self.default_llm_config = default_llm_config
         self.topics = topics
+        self.memory_record = memory_record
+        self.memory_path = memory_path
 
-        self.termination_msg = lambda x: x.get("content", "") is not None and "TERMINATE" in x.get("content", "").rstrip().upper()
+        try:
+            with open(f"{self.memory_path}/context.md", "r") as memory_file:
+                _ = memory_file.read()
+        except:
+            with open(f"{self.memory_path}/context.md", "w") as memory_file:
+                memory_file.write("No conversation context.")
+
+        print("Warning: if memory_record = True, the pattern requires optional dependencies: 'ChatHistorySummariser'.")
+
+        self.termination_msg = lambda x: x.get("content", "") is not None and "TERMINATE" in x.get("content",
+                                                                                                   "").rstrip().upper()
 
         # Initialize agents
         self.user_proxy = RetrieveUserProxyAgent(
@@ -22,7 +34,7 @@ class ConversationPattern:
             retrieve_config={
                 "task": "qa",
                 "docs_path": [
-                    "tmp/context.md"
+                    f"{self.memory_path}/context.md"
                 ],
                 "chunk_token_size": 4000,
                 "model": self.default_llm_config["model"],
@@ -34,6 +46,20 @@ class ConversationPattern:
             silent=True
         )
 
+        # Update the system message of the classification agent to include the topics
+
+        self.classification_agent = autogen.AssistantAgent(
+            name="classifier",
+            system_message=f"I am a classifier responsible for classifying messages into predefined topics: {', '.join(self.topics)}. "
+                           "If the topic is ambiguous please return 'general', if it covers multiple topics, return mentioned topics. "
+                           "I am **ONLY** permitted to respond **immediately** after `user_proxy`. "
+                           "I do not classify for messages like 'Hi!'."
+                           "The current question's context should always take priority over any retrieved context.",
+            description="I **ONLY** classify user messages to a appropriate topic and record in the conversation",
+            llm_config=self.default_llm_config,
+            is_termination_msg=self.termination_msg,
+
+        )
 
         self.researcher = autogen.ConversableAgent(
             name="researcher",
@@ -57,41 +83,28 @@ class ConversationPattern:
 
         self.report_agent = autogen.AssistantAgent(
             name="reporter",
-            system_message="I report the conversation result to the user in a concise and formatted way. "
-                           "At the end of conversation, I call and execute chat_memory_recorder to record "
-                           "user question and the summarised conversation in one sentence."
-                           "The function takes 2 argument: conversation_text: str, last_response: str"
-                           "I do not add extra information.",
+            system_message=("I report the conversation result to the user in a concise and formatted way. "
+                            f"{'At the end of conversation, I call and execute chat_memory_recorder to record user '
+                               'question and the summarised conversation in one sentence. The function takes 2 argument: '
+                               'conversation_text: str, last_response: str' if self.memory_record else ''} "
+                            "I do not add extra information."),
             description="I **ONLY** report conversation result",
             llm_config=self.default_llm_config,
             is_termination_msg=self.termination_msg,
-
         )
 
-        self.classification_agent = autogen.AssistantAgent(
-            name="classifier",
-            system_message=f"I am a classifier responsible for classifying messages into predefined topics: {', '.join(self.topics)}. "
-                           "If the topic is ambiguous please return 'general', if it covers multiple topics, return mentioned topics. "
-                           "I am **ONLY** permitted to respond **immediately** after `user_proxy`. "
-                           "I do not classify for messages like 'Hi!'."
-                           "The current question's context should always take priority over any retrieved context.",
-            description="I **ONLY** classify user messages to a appropriate topic and record in the conversation",
-            llm_config=self.default_llm_config,
-            is_termination_msg=self.termination_msg,
+        if self.memory_record:
+            print("chat_memory_recorder registered")
+            autogen.register_function(
+                ToolFunctions.update_memory,
+                caller=self.report_agent,
+                executor=self.report_agent,
+                name="chat_memory_recorder",
+                description="A function responsible for recording and updating summarized conversation memory. "
+                            "It ensures that the conversation history is accurately and concisely saved to a specified location for future reference."
+            )
 
-        )
-
-
-        autogen.register_function(
-            ToolFunctions.update_memory,
-            caller=self.report_agent,
-            executor=self.report_agent,
-            name="chat_memory_recorder",
-            description="A function responsible for recording and updating summarized conversation memory. "
-                        "It ensures that the conversation history is accurately and concisely saved to a specified location for future reference."
-        )
-
-        self.topic_agents = []
+        self.topic_agents: list[autogen.AssistantAgent] = []
 
     def add_function_agent(self, topic_agent: autogen.ConversableAgent,
                         executor: autogen.UserProxyAgent,
