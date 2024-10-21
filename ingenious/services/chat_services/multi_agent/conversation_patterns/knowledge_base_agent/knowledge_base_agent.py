@@ -6,20 +6,23 @@ from ingenious.services.chat_services.multi_agent.tool_factory import ToolFuncti
 
 
 class ConversationPattern:
-    def __init__(self, default_llm_config: dict, topics: list, memory_record: bool, memory_path: str):
+    def __init__(self, default_llm_config: dict, topics: list, memory_record_switch: bool, memory_path: str, thread_memory: str):
         self.default_llm_config = default_llm_config
         self.topics = topics
-        self.memory_record = memory_record
+        self.memory_record_switch = memory_record_switch
         self.memory_path = memory_path
+        self.thread_memory = thread_memory
+        self.topic_agents: list[autogen.AssistantAgent] = []
 
-        try:
-            with open(f"{self.memory_path}/context.md", "r") as memory_file:
-                _ = memory_file.read()
-        except:
+        if self.thread_memory == None or self.thread_memory == '':
             with open(f"{self.memory_path}/context.md", "w") as memory_file:
-                memory_file.write("No conversation context.")
+                memory_file.write("This is a new conversation, please continue the conversation given user question")
 
-        print("Warning: if memory_record = True, the pattern requires optional dependencies: 'ChatHistorySummariser'.")
+        if self.memory_record_switch and self.thread_memory != None and self.thread_memory != '':
+            print(
+                "Warning: if memory_record = True, the pattern requires optional dependencies: 'ChatHistorySummariser'.")
+            with open(f"{self.memory_path}/context.md", "w") as memory_file:
+                memory_file.write(self.thread_memory)
 
         self.termination_msg = lambda x: x.get("content", "") is not None and "TERMINATE" in x.get("content",
                                                                                                    "").rstrip().upper()
@@ -36,7 +39,7 @@ class ConversationPattern:
                 "docs_path": [
                     f"{self.memory_path}/context.md"
                 ],
-                "chunk_token_size": 4000,
+                "chunk_token_size": 2000,
                 "model": self.default_llm_config["model"],
                 "vector_db": "chroma",
                 "overwrite": True,  # set to True if you want to overwrite an existing collection
@@ -86,14 +89,14 @@ class ConversationPattern:
             system_message=("I report the conversation result to the user in a concise and formatted way. "
                             f"{'At the end of conversation, I call and execute chat_memory_recorder to record user '
                                'question and the summarised conversation in one sentence. The function takes 2 argument: '
-                               'conversation_text: str, last_response: str' if self.memory_record else ''} "
+                               'conversation_text: str, last_response: str' if self.memory_record_switch else ''} "
                             "I do not add extra information."),
             description="I **ONLY** report conversation result",
             llm_config=self.default_llm_config,
             is_termination_msg=self.termination_msg,
         )
 
-        if self.memory_record:
+        if self.memory_record_switch:
             print("chat_memory_recorder registered")
             autogen.register_function(
                 ToolFunctions.update_memory,
@@ -104,7 +107,6 @@ class ConversationPattern:
                             "It ensures that the conversation history is accurately and concisely saved to a specified location for future reference."
             )
 
-        self.topic_agents: list[autogen.AssistantAgent] = []
 
     def add_function_agent(self, topic_agent: autogen.ConversableAgent,
                         executor: autogen.UserProxyAgent,
@@ -139,7 +141,7 @@ class ConversationPattern:
 
 
 
-    async def get_conversation_response(self, input_message: str, thread_chat_history: list = []) -> str:
+    async def get_conversation_response(self, input_message: str) -> [str, str]:
         """
         Main entry point for the conversation pattern. Takes a message as input and returns a response.
         """
@@ -185,4 +187,7 @@ class ConversationPattern:
             summary_method="last_msg",
         )
 
-        return res.summary
+        with open(f"{self.memory_path}/context.md", "r") as memory_file:
+            context = memory_file.read()
+
+        return res.summary, context

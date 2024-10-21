@@ -11,13 +11,18 @@ from ingenious.services.chat_services.multi_agent.conversation_patterns.knowledg
 
 class ConversationFlow:
     @staticmethod
-    async def get_conversation_response(message: str, thread_chat_history: list = [], topics: list = [],  memory_record = True) -> ChatResponse:
+    async def get_conversation_response(message: str, topics: list = [], thread_memory: str='', memory_record_switch = True) -> ChatResponse:
         # Get configuration for the LLM
         _config = config.get_config()
         llm_config = _config.models[0].__dict__
+        memory_path = _config.chat_history.memory_path
 
         # Initialize the knowledge base agent pattern, you only need to add defined topics here
-        agent_pattern = ConversationPattern(default_llm_config=llm_config, topics=topics, memory_record = memory_record)
+        agent_pattern = ConversationPattern(default_llm_config=llm_config,
+                                            topics= topics,
+                                            memory_record_switch = memory_record_switch,
+                                            memory_path = memory_path,
+                                            thread_memory = thread_memory)
 
         search_agent = autogen.AssistantAgent(
             name="search_agent",
@@ -48,6 +53,6 @@ class ConversationFlow:
 
 
         # Get the conversation response using the pattern
-        res = await agent_pattern.get_conversation_response(message, thread_chat_history)
+        res, memory_summary = await agent_pattern.get_conversation_response(message)
 
-        return res
+        return res, memory_summary
