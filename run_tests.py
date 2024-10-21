@@ -1,4 +1,4 @@
-+import ingenious.cli as cli
+import ingenious.cli as cli
 import ingenious.config.config as config
 from ingenious.models.chat import ChatRequest, ChatResponse
 import threading
