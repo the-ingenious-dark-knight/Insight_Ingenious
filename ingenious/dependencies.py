@@ -15,7 +15,7 @@ import ingenious.config.config as Config
 
 logger = logging.getLogger(__name__)
 security = HTTPBasic()
-config = Config.get_config(os.getenv("INGENIOUS_PROJECT_PATH"))
+config = Config.get_config(os.getenv("INGENIOUS_PROJECT_PATH", ""))
 
 
 def get_chat_history_repository():
