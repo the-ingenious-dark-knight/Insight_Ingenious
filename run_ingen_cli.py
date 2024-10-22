@@ -6,7 +6,7 @@ import uvicorn
 
 import os
 from pathlib import Path
-from ingenious.main import FastAgentAPI
+
 
 os.environ["INGENIOUS_WORKING_DIR"] = str(Path(os.getcwd()))
 # Make sure you have set the environment variables 
@@ -21,6 +21,7 @@ def run_cli():
     )
 
 
+from ingenious.main import FastAgentAPI
 # Start the cli.run_all function in a separate thread
 run_cli()
 
