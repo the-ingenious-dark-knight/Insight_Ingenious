@@ -38,7 +38,7 @@ class Config(config_models.Config):
         azure_search_services = [config_models.AzureSearchConfig(**as_config) for as_config in data['azure_search_services']]
         web_configuration = config_models.WebConfig(**data['web_configuration'])
         # Get the sensitive model information from the profile
-        profile_data: profile_models.Profiles = Profiles()
+        profile_data: profile_models.Profiles = Profiles(os.environ["INGENIOUS_PROFILE_PATH"])
         profile_object = profile_data.get_profile_by_name(profile)
         if profile_object is None:
             raise ValueError(f"Profile {profile} not found in profiles.yml")
@@ -80,7 +80,7 @@ class Config(config_models.Config):
             web_configuration=web_configuration
         )
 
-
+@staticmethod
 def get_kv_secret(secretName):
     # check if the key vault name is set in the environment variables
     if "KEY_VAULT_NAME" in os.environ:

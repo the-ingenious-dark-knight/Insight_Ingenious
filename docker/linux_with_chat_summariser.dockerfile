@@ -9,19 +9,15 @@ ENV PYTHONDONTWRITEBYTECODE=1
 # Turns off buffering for easier container logging
 ENV PYTHONUNBUFFERED=1
 
+RUN mkdir /ingen_app
 # Create and set the working directory
+
+COPY ingenious-1.0.0-py3-none-any.whl ./ingen_app/ingenious-1.0.0-py3-none-any.whl
+# In bash create a directory and copy the app into it
+
 WORKDIR /ingen_app
 
-# Copy pyproject.toml and poetry.lock (if available) into the container
-COPY pyproject.toml poetry.lock* /ingen_app/
-
-# Install dependencies using Poetry
-RUN pip install poetry && \
-    poetry config virtualenvs.create false && \
-    poetry install --no-root --without dev
-
-# Copy the rest of the application files
-COPY . /ingen_app
+RUN pip install ./ingenious-1.0.0-py3-none-any.whl[ChatHistorySummariser]
 
 # Set the command to run the app
 CMD ["ingen_cli", "config.yml", "profile.yml"]

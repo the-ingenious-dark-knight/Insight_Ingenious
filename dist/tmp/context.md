@@ -1,0 +1,1 @@
+User asked for the names of famous tennis players, but the search tool configuration was incorrect.

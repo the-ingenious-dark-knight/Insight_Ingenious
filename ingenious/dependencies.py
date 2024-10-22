@@ -57,7 +57,6 @@ def get_openai_service():
     )
 
 
-
 def get_security_service(
         credentials: Annotated[HTTPBasicCredentials, Depends(security)]
 ):

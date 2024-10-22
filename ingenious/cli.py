@@ -12,7 +12,6 @@ import uvicorn
 import importlib
 import pkgutil
 import ingenious.config.config as ingen_config
-from ingenious.main import FastAgentAPI
 
 
 app = typer.Typer(no_args_is_help=True)
@@ -73,9 +72,14 @@ def run_all(
         home_dir = os.path.expanduser("~")
         profile_dir = Path(home_dir) / Path(".ingenious") / Path("profiles.yml")
     
+    print(f"Profile path: {profile_dir}")
     os.environ["INGENIOUS_PROFILE_PATH"] = str(profile_dir).replace("\\", "/")
 
     config = ingen_config.get_config()
+    
+    # We need to clean this up and probrably separate overall system config from fast api, eg. set the config here in cli and then pass it to FastAgentAPI
+    # As soon as we import FastAgentAPI, config will be loaded hence to ensure that the environment variables above are loaded first we need to import FastAgentAPI after setting the environment variables
+    from ingenious.main import FastAgentAPI
 
     os.environ["LOADENV"] = "False"
     console.print(f"Running all elements of the project in {project_dir}", style="info")

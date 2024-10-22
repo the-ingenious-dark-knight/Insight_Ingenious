@@ -62,8 +62,8 @@ class Profiles(profile_models.Profiles):
                 return profile
         return None
 
-
-def get_kv_secret(self, secretName):
+@staticmethod
+def get_kv_secret(secretName):
     keyVaultName = os.environ["KEY_VAULT_NAME"]
     KVUri = f"https://{keyVaultName}.vault.azure.net"
     credential = DefaultAzureCredential()
