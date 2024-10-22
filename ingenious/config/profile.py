@@ -27,7 +27,7 @@ class Profiles(profile_models.Profiles):
     @staticmethod
     def _get_profiles(profiles_path=None):
         # Check if os.getenv('INGENIOUS_PROFILE') is set
-        if os.getenv('APPSETTING_INGENIOUS_PROFILE'):
+        if os.getenv('APPSETTING_INGENIOUS_PROFILE', '') != '':
             print("Profile JSON loaded from environment variable")
             profile_string = os.getenv('APPSETTING_INGENIOUS_PROFILE', "{}")
             profile_object = json.loads(profile_string)
@@ -38,7 +38,7 @@ class Profiles(profile_models.Profiles):
 
         # Load the configuration from the YAML file
         if profiles_path is None:
-            if os.getenv('INGENIOUS_PROFILE_PATH') is not None:
+            if os.getenv('INGENIOUS_PROFILE_PATH', '') != '':
                 print("Profile Path loaded from environment variable")
                 profiles_path = Path(os.getenv('INGENIOUS_PROFILE_PATH'))
             else:
