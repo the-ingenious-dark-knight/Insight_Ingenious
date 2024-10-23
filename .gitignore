@@ -13,3 +13,4 @@ __pycache__
 /.env_mkdocs/
 .flake8
 /.vscode/
+.DS_store
