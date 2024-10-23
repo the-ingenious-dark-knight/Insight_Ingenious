@@ -11,3 +11,5 @@ __pycache__
 /tmp/high_level_logs.log.db
 /build
 /.venv_mkdocs
+/.vscode/
+.flake8
