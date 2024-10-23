@@ -15,8 +15,14 @@
 
     Install PowerShell using the Windows Package Manager (Winget):
 
-    ```powershell
+    ```bash
     winget install --id Microsoft.PowerShell --source winget
+    ```
+    
+    Verify installation PowerShell 7.4.5:
+
+    ```bash
+    pwsh --version
     ```
 
 === "macOS"
@@ -27,7 +33,7 @@
     brew install --cask powershell
     ```
 
-    Verify installation:
+    Verify installation PowerShell 7.4.5:
 
     ```bash
     pwsh --version
@@ -44,7 +50,7 @@
     2. Run the installer and follow the on-screen instructions to complete the setup.
     3. After installation, run below command in your terminal:
 
-    ```bash    
+    ```powershell    
     podman machine init
     ```
 
@@ -121,7 +127,7 @@ There are two methods to build and run the Docker image:
 
     Build the development Docker image using Podman:
 
-    ```bash
+    ```powershell
     podman build -f ./docker/linux_development_image.dockerfile -t localhost/ingen_dev2 ./docker/
     ```
 
@@ -134,7 +140,7 @@ There are two methods to build and run the Docker image:
 
     Check the status of your containers to ensure everything is running correctly:
       
-      ```bash
+      ```powershell
       podman ps -a
       ```
     This command displays a list of all running and stopped containers.
@@ -164,7 +170,7 @@ The following steps will be optional.
 
     You can access the running container directly via the command line:
 
-    ```bash
+    ```powershell
     podman exec -it <container-id> /bin/bash
     ```
 
