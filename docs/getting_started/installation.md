@@ -125,17 +125,18 @@ There are two methods to build and run the Docker image:
     ```powershell
     pwsh .\run_container_installation.ps1
     ```
+    !!! tip
+        The default parameter for the installer is:
 
-    The default parameter for the installer is, you can modify it for difference images and base container. 
-
-    ```powershell
-    param (
-    [string]$podman_path = "C:\Program Files\Podman\bin\podman.exe",
-    [string]$image_name = "localhost/ingen_dev_ubuntu",
-    [string]$container_name = "ingen_dev_ubuntu",
-    [string]$dockerfile_path = "./docker/development_images/linux_development_image_ubuntu.dockerfile"
-
-    ```
+        ```powershell
+            param (
+            [string]$podman_path = "C:\Program Files\Podman\bin\podman.exe",
+            [string]$image_name = "localhost/ingen_dev_ubuntu",
+            [string]$container_name = "ingen_dev_ubuntu",
+            [string]$dockerfile_path = "./docker/development_images/linux_development_image_ubuntu.dockerfile"
+        
+        ```
+         you can modify it for difference images and base container. 
 
 === "Alternative Method"
 
