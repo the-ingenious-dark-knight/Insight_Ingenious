@@ -27,7 +27,7 @@ RUN apt install -y  wget
 RUN apt install zsh git fonts-font-awesome -y 
 RUN sh -c "$(wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)"
 #RUN . ./.venv/bin/activate && python3 -c "from transformers import AutoTokenizer, AutoModel; \
-#        AutoTokenizer.from_pretrained('sentence-transformers/all-MiniLM-L6-v2'); \
-#        AutoModel.from_pretrained('sentence-transformers/all-MiniLM-L6-v2')"
+#           AutoTokenizer.from_pretrained('sentence-transformers/all-MiniLM-L6-v2'); \
+#           AutoModel.from_pretrained('sentence-transformers/all-MiniLM-L6-v2')"
 
 CMD ["cat"]
