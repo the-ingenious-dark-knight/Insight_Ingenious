@@ -132,7 +132,10 @@ There are two methods to build and run the Docker image:
 
 
 
-### Access the Container
+### Access the Container (Optional)
+
+If you use the simple `Simple SH` deployment, the script will automatically SSH into the container.
+The following steps will be optional. 
 
 === "Windows (VSCode)"
 
@@ -158,9 +161,10 @@ There are two methods to build and run the Docker image:
 
     Replace `<container-id>` with the ID or name of your running container.
 
+
 ### Run the Python Script Inside the Container
 
-Now you can test your container setup by running the Python CLI:
+Now you can test your container setup by running the Python CLI (Fast API):
 
 ```bash
 Write-Output "Running the Python CLI..."
@@ -174,4 +178,6 @@ Open your browser and navigate to:
 ```
 http://localhost:9000/docs
 ```
+
+Or follow [how to use guide](./getting_started/how_to_use) for your first conversation in Python. 
 
