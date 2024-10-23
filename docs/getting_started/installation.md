@@ -18,6 +18,11 @@
     2. Run the installer and follow the on-screen instructions to complete the setup.
     3. After installation, add Podman to your system PATH for easy command-line access.
 
+    ```bash    
+    podman machine init
+    ```
+
+
 === "macOS"
 
     Install Podman using Homebrew:

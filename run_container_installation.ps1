@@ -1,6 +1,5 @@
 # Build the Podman image
-Write-Output "Init Podman and Building the Podman image..."
-podman machine init
+Write-Output "Start Podman and Building the Podman image..."
 podman machine start
 podman build -f ./docker/linux_development_image.dockerfile -t localhost/ingen_dev2 ./docker/
 if ($LASTEXITCODE -ne 0) {
