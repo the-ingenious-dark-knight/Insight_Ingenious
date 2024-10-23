@@ -18,7 +18,6 @@
     ```bash
     winget install --id Microsoft.PowerShell --source winget
     ```
-    
     Verify installation PowerShell 7+:
 
     ```bash
