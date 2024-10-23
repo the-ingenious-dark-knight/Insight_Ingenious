@@ -35,7 +35,8 @@ class multi_agent_chat_service:
         if not chat_request.conversation_flow:
             raise ValueError(f"conversation_flow not set {chat_request}")
 
-        chat_request.topic = [topic.strip() for topic in chat_request.topic.split(',')]
+        if isinstance(chat_request.topic, str):
+            chat_request.topic = [topic.strip() for topic in chat_request.topic.split(',')]
         messages: list[ChatCompletionMessageParam] = []
 
         # Initialize additional response fields - to be populated later
