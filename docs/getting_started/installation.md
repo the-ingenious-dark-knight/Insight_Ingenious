@@ -73,7 +73,7 @@
     ```
 
 
-### Repository Setup
+## Repository Setup
 
 Clone the repository from GitHub:
 
@@ -114,7 +114,7 @@ cd Insight_Ingenious
     code $INGENIOUS_PROFILE
     ```
 
-### Build the Docker Image
+## Build the Docker Image
 
 There are two methods to build and run the Docker image:
 
@@ -180,7 +180,7 @@ The following steps will be optional.
     Replace `<container-id>` with the ID or name of your running container.
 
 
-### Run Tests
+## Run Tests
 
 Now you can test your container setup:
 
