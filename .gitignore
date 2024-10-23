@@ -4,7 +4,6 @@ __pycache__
 /site/
 /.cache/
 /env_mkdocs/
-/tmp
 /tmp/db/
 /tmp/context.md
 /tmp/high_level_logs.log.db
