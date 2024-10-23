@@ -11,6 +11,8 @@ import json
 from dataclasses import asdict
 import subprocess
 
+from ingenious.utils.namespace_utils import print_namespace_modules
+
 # Make sure you have set the environment variables 
 _config: config.Config = config.get_config()
 
@@ -27,16 +29,22 @@ chat_request: ChatRequest = ChatRequest(
         user_prompt="",
         user_name="elliot",
         memory_record = True,
+        topic = "tennis, basketball",
         conversation_flow="classification_agent"
     )
 
+print(new_guid)
 
 t = "tennis"
-chat_request.user_prompt = f"Explain the game of {t} to me?" 
+chat_request.user_prompt = f"Explain the game of {t} to me?"
+print(chat_request.user_prompt)
+
 j = chat_request.model_dump()
+print(j)
+
 response = requests.post(
-    f"http://localhost:{_config.web_configuration.port}/api/v1/chat", 
-    #f"http://localhost:9000/api/v1/chat", 
+    f"http://localhost:{_config.web_configuration.port}/api/v1/chat",
+    #f"http://localhost:9000/api/v1/chat",
     json=j,
     auth=HTTPBasicAuth(username, password)
 )

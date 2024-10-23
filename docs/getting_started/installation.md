@@ -209,9 +209,12 @@ Now you can test your container setup:
 
 
 === "Http Test"
+    In one Terminal:
+  
+    While your session from run_ingen_cli.py is still active, **OPEN** another Terminal and SSH into the container:
 
     ```powershell
-    python run_test_http.py
+    python run_tests_http.py
     ```
 
 === "Python Test File"

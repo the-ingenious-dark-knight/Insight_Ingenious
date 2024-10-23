@@ -6,7 +6,7 @@ __pycache__
 /env_mkdocs/
 /tmp/db/
 /tmp/context.md
-/tmp/high_level_logs.log.db
+/tmp/.db
 /build
 /.venv_mkdocs
 /.env_mkdocs/
