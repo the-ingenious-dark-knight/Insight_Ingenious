@@ -34,6 +34,7 @@ class ConversationFlow:
                            "if search health related information, please use argument: search_query str, index_name: 'vector-health'; " #Update
                            "if search safety/emergency related information, please use argument: search_query str, index_name: 'vector-safety' "
                            "if the query quiet is ambiguous, try search in all index;"
+                           "DO NOT say UPDATE CONTEXT"
                            "DO NOT do repeated search"
                            "DO NOT add extra information to search results."
                            "DO NOT ask follow up question."

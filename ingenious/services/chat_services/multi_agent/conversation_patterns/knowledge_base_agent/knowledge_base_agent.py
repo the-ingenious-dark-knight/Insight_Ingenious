@@ -70,11 +70,12 @@ class ConversationPattern:
         self.researcher = autogen.ConversableAgent(
             name="researcher",
             system_message=("I am a planner. "
-                            "Determine if the question requires interacting with the search agent. "
+                            "decide if the question requires interacting with the search agent. "
                             "If yes, I compose a query for the search agent to do AI search, wait for its response, and collect the necessary information. "
                             "If no, I engage with the reporter to provide the user with a response without involving the search agent. "
-                            "If the context does not fall into the predefined topics, end the conversation in less than 20 words with proper response. "
-                            "I do not send commands like 'UPDATE context'. "
+                            "If the context does not fall into the predefined topics, "
+                            "i pass the user query as AMBIGUOUS + keywords and ask the search agent to search (for example, what is contact number, the keyword is AMBIGUOUS contact number)."
+                            "I do not say UPDATE CONTEXT"
                             "I only initiate search once, without repeating them after the first round. "
                             "I do not communicate with myself or send empty queries."),
             description="I am a researcher planning the query and resource,I cannot provide direct answers, add extra info, or call functions.",
