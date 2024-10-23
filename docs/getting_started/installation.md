@@ -37,6 +37,9 @@
     ```bash
     pwsh --version
     ```
+!!! tip
+    Please run all command using the latest version of PowerShell (pwsh) to ensure cross-platform compatibility. 
+
 
 
 ### Container Setup (Podman)
@@ -87,7 +90,7 @@ cd Insight_Ingenious
 ### Profile Setup
 1. Please set up your OpenAI API by visiting [https://oai.azure.com/](https://oai.azure.com/).
 
-2. **Create Your Profile.yaml:**
+2. Create Your [profiles.yml](./getting_started/profile_file/):
 
 === "Windows"
 
