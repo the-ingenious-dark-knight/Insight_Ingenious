@@ -88,9 +88,9 @@ cd Insight_Ingenious
 ```
 
 ### Profile Setup
-1. Please set up your OpenAI API by visiting [https://oai.azure.com/](https://oai.azure.com/) and [developer_guide](./developer_guide/step_2_repo_setup/)
+1. Please set up your OpenAI API by visiting [https://oai.azure.com/](https://oai.azure.com/) and [developer_guide](/developer_guide/step_2_repo_setup)
 
-2. Create Your [profiles.yml](./profile_file):
+2. Create Your [profiles.yml](../profile_file):
 
 === "Windows"
 
@@ -207,7 +207,7 @@ Now you can test your container setup:
       "conversation_flow": "classification_agent"
     }
     ```
-    Please refer to [service prefabs](./developer_guide/service_prefabs) for available conversation flows. 
+    Please refer to [service prefabs](/developer_guide/service_prefabs) for available conversation flows. 
 
 
 === "Http Test"
