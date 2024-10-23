@@ -1,3 +1,8 @@
+param (
+    [string]$container_name = "ingen_dev_ubuntu",
+    [string]$image_name = "localhost/ingen_dev_ubuntu"
+)
+
 # Install the powershell-yaml module if not already installed
 if (-not (Get-Module -ListAvailable -Name powershell-yaml)) {
     Install-Module -Name powershell-yaml -Scope CurrentUser -Force
@@ -45,8 +50,8 @@ $envVarsJson_config = $envVars | ConvertTo-Json -Compress
 # Write-Output $envVarsJson
 
 # Define the container name and image
-$containerName = "my_python_container"
-$imageName = "localhost/ingen_dev2"
+$containerName = "$container_name"
+$imageName = "$image_name"
 
 # Run the container with the environment variables
 $scriptRoot = $PSScriptRoot
