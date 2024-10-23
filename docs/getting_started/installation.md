@@ -88,9 +88,9 @@ cd Insight_Ingenious
 ```
 
 ### Profile Setup
-1. Please set up your OpenAI API by visiting [https://oai.azure.com/](https://oai.azure.com/).
+1. Please set up your OpenAI API by visiting [https://oai.azure.com/](https://oai.azure.com/) and [developer_guide](./developer_guide/step_2_repo_setup/)
 
-2. Create Your [profiles.yml](./getting_started/profile_file/):
+2. Create Your [profiles.yml](./profile_file):
 
 === "Windows"
 
