@@ -11,3 +11,4 @@ __pycache__
 /build
 /.venv_mkdocs
 /.env_mkdocs/
+.flake8
