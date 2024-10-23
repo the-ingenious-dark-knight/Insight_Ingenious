@@ -41,14 +41,6 @@ response = requests.post(
     auth=HTTPBasicAuth(username, password)
 )
 
-# chat_request.user_prompt = f"Who is the most famous star?"
-# j = chat_request.model_dump()
-# response = requests.post(
-#     f"http://localhost:{_config.web_configuration.port}/api/v1/chat",
-#     #f"http://localhost:9000/api/v1/chat",
-#     json=j,
-#     auth=HTTPBasicAuth(username, password)
-# )
 
 print(response.status_code)
 print(response.json())

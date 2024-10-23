@@ -57,17 +57,11 @@ git clone git+https://github.com/Insight-Services-APAC/Insight_Ingenious.git
 
 ### Profile Setup
 
-1. **Set Environment Variables:**
+1. **Create Your Profile.yaml:**
 
 === "Windows"
     
     ```powershell
-    # Set the project path environment variable
-    $env:INGENIOUS_PROJECT_PATH = "C:/<your_project_folder>/Insight_Ingenious/conversation_pattern_example/config.yml"
-    
-    # Disable parallelism for tokenizers to avoid potential issues
-    $env:TOKENIZERS_PARALLELISM = "false"
-    
     # Create or edit profiles.yml using your default code editor
     # Please follow template at /conversation_pattern_example/profile.yml
     code $home/.ingenious/profiles.yml
@@ -76,16 +70,10 @@ git clone git+https://github.com/Insight-Services-APAC/Insight_Ingenious.git
 === "MacOS"
     
     ```bash
-    # Set the project path environment variable
-    export INGENIOUS_PROJECT_PATH="/<your_project_folder>/Insight_Ingenious/conversation_pattern_example/config.yml"
-    
-    # Disable parallelism for tokenizers to avoid potential issues
-    export TOKENIZERS_PARALLELISM=false
-    
-    # Set the path for profiles.yml
+    # Create or Set the path for profiles.yml
     export INGENIOUS_PROFILE="$HOME/.ingenious/profiles.yml"
     
-    # Create or edit profiles.yml using your preferred editor (e.g., nano, vim, or code)
+    # edit profiles.yml using your preferred editor (e.g., nano, vim, or code)
     # Please follow template at /conversation_pattern_example/profile.yml
     code $INGENIOUS_PROFILE
     ```
