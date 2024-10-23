@@ -50,14 +50,17 @@ class ConversationPattern:
         )
 
         # Update the system message of the classification agent to include the topics
-
         self.classification_agent = autogen.AssistantAgent(
             name="classifier",
-            system_message=(f"I am a classifier responsible for classifying messages into predefined topics: {', '.join(self.topics)}. "
-                           "If the topic is ambiguous please return 'general', if it covers multiple topics, return mentioned topics. "
-                           "I am **ONLY** permitted to respond **immediately** after `user_proxy`. "
-                           "I do not classify for messages like 'Hi!'."
-                           "The current question's context should always take priority over any retrieved context."),
+            system_message=(
+                f"I am a classifier tasked with categorizing messages into the predefined topics: {', '.join(self.topics)}. "
+                "I classify based on the intent of the question and prioritise the topic of current question rather than exisiting context."
+                "if multiple topics are applicable, list all relevant topics."
+                "If the topic is unclear, please first check the context and try classification "
+                "if still cannot be classified please return 'ambiguous'. "
+                "I am **ONLY** allowed to respond once **immediately** after `user_proxy` for one session."
+                "I do not classify casual greetings such as 'Hi!'. and will return 'general conversation'"
+                ),
             description="I **ONLY** classify user messages to a appropriate topic and record in the conversation",
             llm_config=self.default_llm_config,
             is_termination_msg=self.termination_msg,
@@ -66,17 +69,14 @@ class ConversationPattern:
 
         self.researcher = autogen.ConversableAgent(
             name="researcher",
-            system_message=("I am a research planner,  "
-                           "First task: "
-                           "I decide if the task involve calling the search agent for any factual information retrieval."
-                           "If yes, I write a query to the search agent, wait for its response, and gather information."
-                           f"If the user question is not directly related with {', '.join(self.topics)}, write a query start with 'AMBIGUOUS-' and follow keyword from the user (remove stop words like what, is.). "
-                           "If no, I talk to the reporter to give user a response without searching the database."
-                           "if a question is short, like 'for safety', it should be interpreted with previous context like previous question is about manager, then the new question should be about manager for safety"
-                           "Second task: I ask report_agent to give a summary using chat_memory_recorder."
-                           "I do not do repeated search after the first round;"
-                           "I do not talk to myself or send empty queries.")
-                           ,
+            system_message=("I am a planner. "
+                            "Determine if the question requires interacting with the search agent. "
+                            "If yes, I compose a query for the search agent to do AI search, wait for its response, and collect the necessary information. "
+                            "If no, I engage with the reporter to provide the user with a response without involving the search agent. "
+                            "If the context does not fall into the predefined topics, end the conversation in less than 20 words with proper response. "
+                            "I do not send commands like 'UPDATE context'. "
+                            "I only initiate search once, without repeating them after the first round. "
+                            "I do not communicate with myself or send empty queries."),
             description="I am a researcher planning the query and resource,I cannot provide direct answers, add extra info, or call functions.",
             llm_config=self.default_llm_config,
             human_input_mode="NEVER",
@@ -84,6 +84,7 @@ class ConversationPattern:
             is_termination_msg=self.termination_msg,
 
         )
+
 
         self.report_agent = autogen.AssistantAgent(
             name="reporter",
@@ -167,13 +168,11 @@ class ConversationPattern:
             allowed_or_disallowed_speaker_transitions=graph_dict,
             speaker_transitions_type="allowed",
             select_speaker_prompt_template=(
-                "Route the conversation to the 'classifier' if the topic is not available. "
-                "once classified, select 'researcher' to choose the query "
-                "pass the query to the search agent. "
-                "after receiving the response, select 'report' to summarize, "
-                "then use 'researcher' send the next query, repeating the process. "
-                "as the report ro record the conversation"
-                "Stop the chat when all selected topics have been queried."
+                "First, route the conversation to the 'classifier', "
+                "next select 'researcher' to choose the query, "
+                "next select the search agent as requested the researcher,"
+                "next select 'reporter' to summarize, "
+                "finally select 'reporter' to record memory and TERMINATE."
             )
         )
 

@@ -34,7 +34,7 @@ chat_request: ChatRequest = ChatRequest(
     user_prompt="",
     user_name="elliot",
     conversation_flow="knowledge_base_agent",  # Using the classification agent flow
-    topic = ['health', 'safety'],
+    topic = "health, 'safety",
     memory_record = True,
 )
 

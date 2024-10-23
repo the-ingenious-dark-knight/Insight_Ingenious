@@ -49,7 +49,7 @@ $containerName = "my_python_container"
 $imageName = "localhost/ingen_dev2"
 
 # Run the container with the environment variables
-$podmanRunCommand = "podman run -d --publish 9000:80  --mount type=bind,src=/Users/johnrampono/source/Insight_Ingenious,target=/ingen_app --name $containerName --env 'APPSETTING_INGENIOUS_PROFILE=$envVarsJson_profile' --env 'APPSETTING_INGENIOUS_CONFIG=$envVarsJson_config' $imageName sleep 1000"
+$podmanRunCommand = "podman run -d --publish 9000:80  --mount type=bind,src=C:\Users\ezhu\PycharmProjects\Insight_Ingenious,target=/ingen_app --name $containerName --env 'APPSETTING_INGENIOUS_PROFILE=$envVarsJson_profile' --env 'APPSETTING_INGENIOUS_CONFIG=$envVarsJson_config' $imageName sleep 1000"
 Invoke-Expression $podmanRunCommand
 
 # Output the command for debugging purposes

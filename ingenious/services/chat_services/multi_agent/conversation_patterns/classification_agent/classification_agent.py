@@ -75,7 +75,8 @@ class ConversationPattern:
                             "Determine if the question requires interacting with a topic agent. "
                             "If yes, I compose a query for the topic agent, wait for its response, and collect the necessary information. "
                             "If no, I engage with the reporter to provide the user with a response without involving the topic agent. "
-                            "I do not send commands like 'UPDATE context'. "
+                            "I do not send commands like UPDATE CONTEXT."
+                            "If the context does not fall into the predefined topics, end the conversation in less than 20 words with proper response. "
                             "I only initiate calls once, without repeating them after the first round. "
                             "I do not communicate with myself or send empty queries."),
             description="I am a researcher planning the query and resource,I cannot provide direct answers, add extra info, or call functions.",
