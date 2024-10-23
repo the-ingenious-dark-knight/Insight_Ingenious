@@ -26,8 +26,8 @@ RUN apt install -y  wget
 #RUN wget https://github.com/PowerShell/PowerShell/releases/download/v7.4.5/powershell_7.4.5-1.deb_amd64.deb && dpkg -i powershell_7.#4.5-1.deb_amd64.deb && apt-get install -f && rm powershell_7.4.5-1.deb_amd64.deb
 RUN apt install zsh git fonts-font-awesome -y 
 RUN sh -c "$(wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)"
-#RUN . ./.venv/bin/activate && python3 -c "from transformers import AutoTokenizer, AutoModel; \
-#           AutoTokenizer.from_pretrained('sentence-transformers/all-MiniLM-L6-v2'); \
-#           AutoModel.from_pretrained('sentence-transformers/all-MiniLM-L6-v2')"
+RUN . ./.venv/bin/activate && python3 -c "from transformers import AutoTokenizer, AutoModel; \
+           AutoTokenizer.from_pretrained('sentence-transformers/all-MiniLM-L6-v2'); \
+           AutoModel.from_pretrained('sentence-transformers/all-MiniLM-L6-v2')"
 
 CMD ["cat"]
