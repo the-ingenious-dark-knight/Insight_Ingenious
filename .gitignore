@@ -12,3 +12,4 @@ __pycache__
 /.venv_mkdocs
 /.env_mkdocs/
 .flake8
+/.vscode/
