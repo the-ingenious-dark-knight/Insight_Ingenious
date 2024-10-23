@@ -28,6 +28,6 @@ Write-Output "Container ID: $container_id"
 Write-Output "SSH into the container..."
 podman exec -it $container_id bash
 if ($LASTEXITCODE -ne 0) {
-    Write-Output "Error: Failed to SSH into the container."
+    Write-Output "Exited SSH into the container."
     exit 1
 }

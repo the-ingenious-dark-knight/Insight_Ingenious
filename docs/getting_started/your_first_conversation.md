@@ -7,12 +7,11 @@
 
 ## Your First Conversation
 
-**Navigate to the `Insight_Ingenious` root folder**:
-   After the package installation, the first step is to navigate to the `Insight_Ingenious` root directory. This folder contains all the necessary files required to run the conversation test script. By moving to this folder, you ensure that you're in the correct environment where the test files are located.
-
+**Navigate to the `Insight_Ingenious` root folder of the container**:
+   This is the folder contains all the necessary files required to run the conversation test script.
    Use the following command:
 
-   ```bash
+   ```powershell
    cd ..
    ```
 
@@ -24,8 +23,8 @@
 
    Run the following command:
 
-   ```bash
-   python3 ./conversation_pattern_example/test_multitool.py
+   ```powershell
+   python ./conversation_pattern_example/test_improved_memory.py
    ```
 
    If the test runs successfully, you will see a detailed conversation output like the one shown below:
@@ -33,7 +32,7 @@
 !!! tip
       A content of doc <> is the vectorised version of our memory file under `tmp` folder. 
 
-   ```bash
+   ```powershell
    Adding content of doc 48971743 to context.
    classifier (to chat_manager):
 

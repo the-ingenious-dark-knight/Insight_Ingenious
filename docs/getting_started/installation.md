@@ -86,8 +86,9 @@ cd Insight_Ingenious
 ```
 
 ### Profile Setup
+1. Please set up your OpenAI API by visiting [https://oai.azure.com/](https://oai.azure.com/).
 
-1. **Create Your Profile.yaml:**
+2. **Create Your Profile.yaml:**
 
 === "Windows"
 
@@ -186,12 +187,28 @@ Now you can test your container setup:
     python run_ingen_cli.py
     ```
 
-    Open your browser and navigate to:
+    Open your browser and navigate to, to authenticate, click `Authorize`, and using Web Configuration credentials in profile.yaml.
     
     ```
     http://localhost:9000/docs
     ```
-    or 
+    
+    Click on `POST`, then select `Try it Out`, and enter the following request for testing:
+    ```
+    {
+      "thread_id": "sample",
+      "user_prompt": "Tell me about basketball?",
+      "user_id": "testuser123",
+      "user_name": "testuser",
+      "topic": "basketball, tennis, soccer",
+      "memory_record": true,
+      "conversation_flow": "classification_agent"
+    }
+    ```
+    Please refer to [service prefabs](./developer_guide/service_prefabs) for available conversation flows. 
+
+
+=== "Http Test"
 
     ```powershell
     python run_test_http.py
