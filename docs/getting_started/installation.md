@@ -177,22 +177,27 @@ The following steps will be optional.
     Replace `<container-id>` with the ID or name of your running container.
 
 
-### Run the Python Script Inside the Container
+### Run Tests
 
-Now you can test your container setup by running the Python CLI (Fast API):
+Now you can test your container setup:
 
-```bash
-Write-Output "Running the Python CLI..."
-python run_ingen_cli.py
-```
+=== "Fast API"
+    ```powershell
+    python run_ingen_cli.py
+    ```
 
-### Open the Localhost URL
+    Open your browser and navigate to:
+    
+    ```
+    http://localhost:9000/docs
+    ```
+    or 
 
-Open your browser and navigate to:
+    ```powershell
+    python run_test_http.py
+    ```
 
-```
-http://localhost:9000/docs
-```
+=== "Python Test File"
 
-Or follow [how to use guide](./getting_started/how_to_use) for your first conversation in Python. 
+     Follow [how to use guide](./getting_started/how_to_use) for your first conversation in Python. 
 
