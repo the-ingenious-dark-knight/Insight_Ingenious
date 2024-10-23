@@ -5,5 +5,5 @@
 
 The core focus of this repository is the use of **conversation patterns** within the `multi_agent` architecture, allowing for rapid iteration and deployment of agents that support conversational tasks.
 
-For detailed documentation: https://sturdy-fiesta-oz8q5k4.pages.github.io/
+For detailed documentation: https://sturdy-fiesta-oz8nz94.pages.github.io/
 
