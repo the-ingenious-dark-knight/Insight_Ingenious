@@ -127,7 +127,8 @@ There are two methods to build and run the Docker image:
     ```
 
     The default parameter for the installer is, you can modify it for difference images and base container. 
-    ```
+
+    ```powershell
     param (
     [string]$podman_path = "C:\Program Files\Podman\bin\podman.exe",
     [string]$image_name = "localhost/ingen_dev_ubuntu",
