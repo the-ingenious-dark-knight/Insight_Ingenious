@@ -8,34 +8,6 @@
 
 ## System Setup
 
-### Container Setup (Podman)
-
-=== "Windows"
-
-    To install Podman on Windows, follow these steps:
-
-    1. Download the Podman installer from the official website: [Podman Windows Installer](https://podman.io/getting-started/installation).
-    2. Run the installer and follow the on-screen instructions to complete the setup.
-    3. After installation, add Podman to your system PATH for easy command-line access.
-
-    ```bash    
-    podman machine init
-    ```
-
-
-=== "macOS"
-
-    Install Podman using Homebrew:
-
-    ```bash
-    brew install podman
-    ```
-
-    After installation, ensure Podman is added to your PATH by verifying it:
-
-    ```bash
-    podman --version
-    ```
 
 ### PowerShell Installation
 
@@ -60,6 +32,38 @@
     ```bash
     pwsh --version
     ```
+
+
+### Container Setup (Podman)
+
+=== "Windows"
+
+    To install Podman on Windows, follow these steps:
+
+    1. Download the Podman installer from the official website: [Podman Windows Installer](https://podman.io/getting-started/installation).
+    2. Run the installer and follow the on-screen instructions to complete the setup.
+    3. After installation, run below command in your terminal:
+
+    ```bash    
+    podman machine init
+    ```
+
+
+=== "macOS"
+
+    Install Podman using Homebrew:
+
+    ```bash
+    brew install podman
+    ```
+
+    After installation, ensure Podman is added to your PATH by verifying it:
+
+    ```bash
+    podman --version
+    podman machine init
+    ```
+
 
 ### Repository Setup
 
