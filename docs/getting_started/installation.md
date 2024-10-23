@@ -1,10 +1,8 @@
 ---
 
     weight: 2
-
+    
 ---
-
-
 
 # Installation Guide
 
@@ -12,146 +10,168 @@
 
 ### Container Setup (Podman)
 
-#### Windows
-To install Podman on Windows, follow these steps:
+=== "Windows"
 
-1. **Download the Podman installer:**  
-   Visit [Podman Windows Installer](https://podman.io/getting-started/installation) and download the installer.
-2. **Run the installer:**  
-   Follow the on-screen installation instructions.
-3. **Add Podman to your PATH:**  
-   Ensure Podman is accessible from the command line by adding it to your PATH.
+    To install Podman on Windows, follow these steps:
 
-#### MacOS
-Install Podman using Homebrew:
+    1. Download the Podman installer from the official website: [Podman Windows Installer](https://podman.io/getting-started/installation).
+    2. Run the installer and follow the on-screen instructions to complete the setup.
+    3. After installation, add Podman to your system PATH for easy command-line access.
 
-```bash
-brew install podman
-```
+=== "macOS"
 
-After installation, verify Podman is in your PATH.
+    Install Podman using Homebrew:
+
+    ```bash
+    brew install podman
+    ```
+
+    After installation, ensure Podman is added to your PATH by verifying it:
+
+    ```bash
+    podman --version
+    ```
 
 ### PowerShell Installation
 
-#### Windows
-Install PowerShell using the Windows Package Manager:
+=== "Windows"
 
-```powershell
-winget install --id Microsoft.PowerShell --source winget
-```
+    Install PowerShell using the Windows Package Manager (Winget):
 
-#### MacOS
-Install PowerShell using Homebrew:
+    ```powershell
+    winget install --id Microsoft.PowerShell --source winget
+    ```
 
-```bash
-brew install --cask powershell
-```
+=== "macOS"
+
+    Install PowerShell using Homebrew:
+
+    ```bash
+    brew install --cask powershell
+    ```
+
+    Verify installation:
+
+    ```bash
+    pwsh --version
+    ```
 
 ### Repository Setup
 
 Clone the repository from GitHub:
 
 ```bash
-git clone git+https://github.com/Insight-Services-APAC/Insight_Ingenious.git
+git clone https://github.com/Insight-Services-APAC/Insight_Ingenious.git
+```
+
+Navigate to the project directory:
+
+```bash
+cd Insight_Ingenious
 ```
 
 ### Profile Setup
 
-1. **Create Your Profile.yaml**
+1. **Create Your Profile.yaml:**
 
-#### Windows
+=== "Windows"
 
-```powershell
-# Create or edit profiles.yml using your default code editor
-# Follow the template at /conversation_pattern_example/profile.yml
-code $home/.ingenious/profiles.yml
-```
+    Use PowerShell to create or edit `profiles.yml`:
 
-#### MacOS
+    ```powershell
+    # Create or edit profiles.yml using your default code editor
+    # Follow the template at /conversation_pattern_example/profile.yml
+    code $home\.ingenious\profiles.yml
+    ```
 
-```bash
-# Set the path for profiles.yml
-export INGENIOUS_PROFILE="$HOME/.ingenious/profiles.yml"
+=== "macOS"
 
-# Edit profiles.yml using your preferred editor (e.g., nano, vim, code)
-# Follow the template at /conversation_pattern_example/profile.yml
-code $INGENIOUS_PROFILE
-```
+    Set up the path for `profiles.yml`:
+
+    ```bash
+    export INGENIOUS_PROFILE="$HOME/.ingenious/profiles.yml"
+    
+    # Create or edit profiles.yml using a preferred text editor (e.g., nano, vim, or code)
+    # Follow the template at /conversation_pattern_example/profile.yml
+    code $INGENIOUS_PROFILE
+    ```
 
 ### Build the Docker Image
 
-=== Simple Installation
+There are two methods to build and run the Docker image:
+
+=== "Simple SH"
+
+    Run the installation script using PowerShell:
+
+    ```powershell
+    pwsh .\container_installation.ps1
+    ```
+
+=== "Alternative Method"
+
+    Build the development Docker image using Podman:
+
+    ```bash
+    podman build -f ./docker/linux_development_image.dockerfile -t localhost/ingen_dev2 ./docker/
+    ```
+
+    After building the image, run the container using the PowerShell script:
+
+    ```powershell
+    pwsh .\run_image_in_podman.ps1
+    ```
+    ### Verify Running Containers
+
+    Check the status of your containers to ensure everything is running correctly:
       
-      Run the installation script:
-      
-      ```powershell
-      pwsh .\run_container_installation.ps1
+      ```bash
+      podman ps -a
       ```
+    This command displays a list of all running and stopped containers.
 
-=== Alternative Method
-      
-      Build and run the development Docker image manually:
-      
-      1. **Build the image:**
-      
-          ```bash
-          podman build -f ./docker/linux_development_image.dockerfile -t localhost/ingen_dev2 ./docker/
-          ```
-      
-      2. **Run the container:**
-      
-          ```powershell
-          pwsh .\run_image_in_podman.ps1
-          ```
-      
-      3. **Verify the running containers:**
-
-       ```bash
-       podman ps -a
-       ```
-
-      This command will show all running and stopped containers, helping you ensure that everything is functioning correctly.
 
 
 ### Access the Container
 
-#### Windows (VSCode)
+=== "Windows (VSCode)"
 
-Use the "Dev Containers" extension in Visual Studio Code to attach to the running container:
+    To use Podman with the "Dev Containers" extension in Visual Studio Code:
 
-1. **Open VSCode settings:**
-   - Press `Ctrl + ,` (or `Cmd + ,` on Mac) to access settings.
-   - Search for `Dev Containers: Docker Path` and change it from `docker` to `podman`.
-2. **Attach to container:**
-   - Open the Command Palette (`Ctrl + Shift + P` or `Cmd + Shift + P` on Mac).
-   - Type `Dev Containers: Attach to Running Container...` and select the Podman container.
+    1. Open VSCode and navigate to Settings:
+       - Press `Ctrl + ,` or `Cmd + ,` (on macOS) to open settings.
+       - Search for `Dev Containers: Docker Path`.
+       - Change the path from `docker` to `podman`.
+    
+    2. Open the Command Palette (`Ctrl + Shift + P` or `Cmd + Shift + P` on macOS).
+       - Type `Dev Containers: Attach to Running Container...` and select your running Podman container.
 
-This allows Podman to act as the container runtime within the "Dev Containers" extension in VSCode.
+    This configuration enables you to use Podman as the container runtime within VSCode's "Dev Containers" extension.
 
-#### Non-VSCode
+=== "Non-VSCode"
 
-You can access the container using Podman from the command line:
+    You can access the running container directly via the command line:
+
+    ```bash
+    podman exec -it <container-id> /bin/bash
+    ```
+
+    Replace `<container-id>` with the ID or name of your running container.
+
+### Run the Python Script Inside the Container
+
+Now you can test your container setup by running the Python CLI:
 
 ```bash
-podman exec -it <container-id> /bin/bash
+Write-Output "Running the Python CLI..."
+python run_ingen_cli.py
 ```
 
-Replace `<container-id>` with your running container's ID or name.
+### Open the Localhost URL
 
-This command provides direct shell access, similar to using `docker exec`.
+Open your browser and navigate to:
 
-## Running the Python Script Inside the Container
-
-1. **Start the Python CLI:**
-
-    ```powershell
-    Write-Output "Running the Python CLI..."
-    python run_ingen_cli.py
-    ```
-
-2. **Open the localhost URL in your browser:**
-
-    ```plaintext
-    Opening http://localhost:9000/docs
-    ```
+```
+http://localhost:9000/docs
+```
 
