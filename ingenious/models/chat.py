@@ -20,7 +20,7 @@ class ChatRequest(BaseModel):
     user_prompt: str
     user_id: Optional[str] = None
     user_name: Optional[str] = None
-    topic: Optional[list] = []
+    topic: Optional[str] = None
     memory_record: Optional[bool] = True
     conversation_flow: str
 
@@ -34,5 +34,5 @@ class ChatResponse(BaseModel):
     products: Optional[list[Product]] = []
     token_count: int
     max_token_count: int
-    topic: Optional[list] = []
+    topic: Optional[str] = None
     memory_summary: Optional[str]  = None

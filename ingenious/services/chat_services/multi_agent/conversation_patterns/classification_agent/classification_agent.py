@@ -35,7 +35,7 @@ class ConversationPattern:
             is_termination_msg=self.termination_msg,
             human_input_mode="NEVER",
             max_consecutive_auto_reply=2,
-            system_message="I am a proxy for the user, give the context to the researcher.",
+            system_message="I am a proxy for the user, give the context to the researcher and classifier.",
             retrieve_config={
                 "task": "qa",
                 "docs_path": [
@@ -55,11 +55,14 @@ class ConversationPattern:
 
         self.classification_agent = autogen.AssistantAgent(
             name="classifier",
-            system_message=f"I am a classifier responsible for classifying messages into below topics: {', '.join(self.topics)}. "
-                           "If the topic is ambiguous please return 'ambiguous', if it covers multiple topics, return all mentioned topics. "
-                           "I am **ONLY** permitted to respond **immediately** after `user_proxy`. "
-                           "I do not classify for messages like 'Hi!'."
-                           "The current question's context should always take priority over any retrieved context.",
+            system_message=(f"I am a classifier tasked with categorizing messages into the predefined topics: {', '.join(self.topics)}. "
+                            "I classify based on the intent of the question and prioritise the topic of current question rather than exisiting context."
+                            "if multiple topics are applicable, list all relevant topics."
+                            "If the topic is unclear, please first check the context and try classification "
+                            "if still cannot be classified please return 'ambiguous'. "
+                            "I am **ONLY** allowed to respond once **immediately** after `user_proxy` for one session."
+                            "I do not classify casual greetings such as 'Hi!'. and will return 'general conversation'"
+                            ),
             description="I **ONLY** classify user messages to a appropriate topic and record in the conversation",
             llm_config=self.default_llm_config,
             is_termination_msg=self.termination_msg,
@@ -68,14 +71,13 @@ class ConversationPattern:
 
         self.researcher = autogen.ConversableAgent(
             name="researcher",
-            system_message="I am a research planner,  "
-                           "First task: "
-                           "I decide if the task involve calling the topic agent."
-                           "If yes, I write a query to the topic agent, wait for its response, and gather information."
-                           "If no, I talk to the reporter to give user a response without asking the topic agent."
-                           "Second task: I ask report_agent to give a summary and record the conversation."
-                           "I do not do repeated call after the first round;"
-                           "I do not talk to myself or send empty queries.",
+            system_message= ("I am a planner. "
+                            "Determine if the question requires interacting with a topic agent. "
+                            "If yes, I compose a query for the topic agent, wait for its response, and collect the necessary information. "
+                            "If no, I engage with the reporter to provide the user with a response without involving the topic agent. "
+                            "I do not send commands like 'UPDATE context'. "
+                            "I only initiate calls once, without repeating them after the first round. "
+                            "I do not communicate with myself or send empty queries."),
             description="I am a researcher planning the query and resource,I cannot provide direct answers, add extra info, or call functions.",
             llm_config=self.default_llm_config,
             human_input_mode="NEVER",
@@ -138,13 +140,12 @@ class ConversationPattern:
             allowed_or_disallowed_speaker_transitions=graph_dict,
             speaker_transitions_type="allowed",
             select_speaker_prompt_template=(
-                "Route the conversation to the 'classifier' if the topic is not available. "
-                "once classified, select 'researcher' to choose the query "
-                "pass the query to the topic agent. "
-                "after receiving the response, select 'reporter' to summarize, "
-                "then use 'researcher' send the next query, repeating the process. "
-                "then select report to report the final response or record the memory"
-                "Stop the chat after memory recorded ."
+                "First, route the conversation to the 'classifier', "
+                "next select 'researcher' to choose the query, "
+                "next select the topic agent chosen by  researcher,"
+                "next select 'reporter' to summarize, "
+                "next select 'researcher' to choose the next topic agent, repeating the process. "
+                "finally select 'reporter' to record memory and TERMINATE."
             )
         )
 

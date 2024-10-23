@@ -33,7 +33,7 @@ chat_request: ChatRequest = ChatRequest(
         user_id="elliot",
         user_prompt="",
         user_name="elliot",
-        topic=['tennis', 'basketball'],
+        topic= "tennis, basketball",
         memory_record = True,
         conversation_flow="classification_agent"
     )
