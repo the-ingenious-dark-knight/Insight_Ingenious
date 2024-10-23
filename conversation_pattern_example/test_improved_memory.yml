@@ -1,7 +1,0 @@
-- conversation_flow: classification_agent
-  user_name: elliot
-  user_id: elliot
-  thread_id: 1
-  user_prompt: "What is  {t}?"
-  topic: ['tennis', 'basketball']
-  memory_record: true
