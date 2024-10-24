@@ -10,7 +10,7 @@ from ingenious.services.chat_services.multi_agent.conversation_patterns.knowledg
 
 class ConversationFlow:
     @staticmethod
-    async def get_conversation_response(message: str, topics: list = [], thread_memory: str='', memory_record_switch = True) -> ChatResponse:
+    async def get_conversation_response(message: str, topics: list = [], thread_memory: str='', memory_record_switch = True, thread_chat_history: list[str, str] = []) -> ChatResponse:
         # Get configuration for the LLM
         _config = config.get_config()
         llm_config = _config.models[0].__dict__

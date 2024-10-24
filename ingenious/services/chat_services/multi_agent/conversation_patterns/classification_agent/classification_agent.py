@@ -1,169 +1,122 @@
-import autogen
 import autogen.retrieve_utils
 import autogen.runtime_logging
-from autogen.agentchat.contrib.retrieve_user_proxy_agent import RetrieveUserProxyAgent
-
-from ingenious.services.chat_services.multi_agent.tool_factory import ToolFunctions
+import autogen
+import ingenious.config.config as config
+import ingenious.dependencies as deps
+from ingenious.services.chat_services.multi_agent.agent_factory import AgentFactory
+from ingenious.models.chat import Action, ChatRequest, ChatResponse, KnowledgeBaseLink, Product
 
 
 class ConversationPattern:
 
-    def __init__(self, default_llm_config: dict, topics: list, memory_record_switch: bool, memory_path: str, thread_memory: str):
+    class Request:
+        def __init__(
+                self,
+                message: str, 
+                agents: list[autogen.ConversableAgent] = [],
+                agent_chats: list[AgentFactory.agent_chat] = [],
+                classifier_agent_name: str = "Classifier", 
+                classifier_prompt: str = "Classify this message..",
+                reporter_agent_name: str = "Reporter",
+                summary_agent_name: str = "Summarizer"):
+            self.message = message
+            self.agents = agents
+            self.agent_chats = agent_chats
+            self.classifier_agent_name = classifier_agent_name
+            self.classifier_prompt = classifier_prompt            
+            self.reporter_agent_name = reporter_agent_name
+            self.summary_agent_name = summary_agent_name
+            
+    def __init__(self, default_llm_config: dict):
         self.default_llm_config = default_llm_config
-        self.topics = topics
-        self.memory_record_switch = memory_record_switch
-        self.memory_path = memory_path
-        self.thread_memory = thread_memory
-        self.topic_agents: list[autogen.AssistantAgent] = []
 
-        if self.thread_memory == None or self.thread_memory == '':
-            with open(f"{self.memory_path}/context.md", "w") as memory_file:
-                memory_file.write("This is a new conversation, please continue the conversation given user question")
-
-        if self.memory_record_switch and self.thread_memory != None and self.thread_memory != '':
-            print("Warning: if memory_record = True, the pattern requires optional dependencies: 'ChatHistorySummariser'.")
-            with open(f"{self.memory_path}/context.md", "w") as memory_file:
-                memory_file.write(self.thread_memory)
-
-
-        self.termination_msg = lambda x: x.get("content", "") is not None and "TERMINATE" in x.get("content",
-                                                                                                   "").rstrip().upper()
-
-        # Initialize agents
-        self.user_proxy = RetrieveUserProxyAgent(
-            name="user_proxy",
-            is_termination_msg=self.termination_msg,
-            human_input_mode="NEVER",
-            max_consecutive_auto_reply=2,
-            system_message="I am a proxy for the user, give the context to the researcher and classifier.",
-            retrieve_config={
-                "task": "qa",
-                "docs_path": [
-                    f"{self.memory_path}/context.md"
-                ],
-                "chunk_token_size": 2000,
-                "model": self.default_llm_config["model"],
-                "vector_db": "chroma",
-                "overwrite": True,  # set to True if you want to overwrite an existing collection
-                "get_or_create": True,  # set to False if don't want to reuse an existing collection
-            },
-            code_execution_config=False,  # we don't want to execute code in this case.
-            silent=True
+        self.classification_agent: autogen.ConversableAgent = autogen.ConversableAgent(
+            name="Classifier",
+            system_message="You analyse a message and determine its topics. If it is about one or the other you simply return the topic as a single word. If it is about neither simply return 'neither'. if it is about both return 'both'.",
+            llm_config=self.default_llm_config
         )
 
-        # Update the system message of the classification agent to include the topics
-
-        self.classification_agent = autogen.AssistantAgent(
-            name="classifier",
-            system_message=(f"I am a classifier tasked with categorizing messages into the predefined topics: {', '.join(self.topics)}. "
-                            "I classify based on the intent of the question and prioritise the topic of current question rather than exisiting context."
-                            "if multiple topics are applicable, list all relevant topics."
-                            "If the topic is unclear, please first check the context and try classification "
-                            "if still cannot be classified please return 'ambiguous'. "
-                            "I am **ONLY** allowed to respond once **immediately** after `user_proxy` for one session."
-                            "I do not classify casual greetings such as 'Hi!'. and will return 'general conversation'"
-                            ),
-            description="I **ONLY** classify user messages to a appropriate topic and record in the conversation",
-            llm_config=self.default_llm_config,
-            is_termination_msg=self.termination_msg,
-
+        self.summary_agent: autogen.ConversableAgent = autogen.ConversableAgent(
+            name="Summarizer",
+            system_message="You create succinct summaries.",
+            llm_config=self.default_llm_config
         )
 
-        self.researcher = autogen.ConversableAgent(
-            name="researcher",
-            system_message= ("I am a planner. "
-                            "Determine if the question requires interacting with a topic agent. "
-                            "If yes, I compose a query for the topic agent, wait for its response, and collect the necessary information. "
-                            "If no, I engage with the reporter to provide the user with a response without involving the topic agent. "
-                            "I do not send commands like UPDATE CONTEXT."
-                            "If the context does not fall into the predefined topics, end the conversation in less than 20 words with proper response. "
-                            "I only initiate calls once, without repeating them after the first round. "
-                            "I do not communicate with myself or send empty queries."),
-            description="I am a researcher planning the query and resource,I cannot provide direct answers, add extra info, or call functions.",
-            llm_config=self.default_llm_config,
-            human_input_mode="NEVER",
-            code_execution_config=False,
-            is_termination_msg=self.termination_msg,
-
+        self.reporter_agent: autogen.ConversableAgent = autogen.ConversableAgent(
+            name="Reporter",
+            system_message="You generate a final result.",
+            llm_config=self.default_llm_config
         )
 
-        self.report_agent = autogen.AssistantAgent(
-            name="reporter",
-            system_message=("I report the conversation result to the user in a concise and formatted way. "
-                            f"{'At the end of conversation, I ALWAYS call and execute chat_memory_recorder to record user '
-                               'question and the summarised conversation in one sentence. The function takes 2 argument: '
-                               'conversation_text: str, last_response: str' if self.memory_record_switch else ''} "
-                            "I do not add extra information."
-                            "I can TERMINATE the conversation if no useful information is available."),
-            description="I **ONLY** report conversation result",
-            llm_config=self.default_llm_config,
-            is_termination_msg=self.termination_msg,
-        )
+        self.agent_topic_chats: list[AgentFactory.agent_chat] = []
+        self.topic_agents: list[autogen.ConversableAgent] = []
 
-
-        if self.memory_record_switch:
-            print("chat_memory_recorder registered")
-            autogen.register_function(
-                ToolFunctions.update_memory,
-                caller=self.report_agent,
-                executor=self.report_agent,
-                name="chat_memory_recorder",
-                description=("A function responsible for recording and updating summarized conversation memory. "
-                            "It ensures that the conversation history is accurately and concisely saved to a specified location for future reference.")
+    def add_topic_agent_chat(self, topic_agent: autogen.ConversableAgent, topic: str, max_turns: int = 1, clear_history: bool = True, message: str = "", summary_method: str = "reflection_with_llm"):
+        self.agent_topic_chats.append(
+            AgentFactory.agent_chat(
+                    question_agent=self.summary_agent,
+                    answer_agent=topic_agent,
+                    max_turns=max_turns,
+                    clear_history=clear_history,
+                    message=message,
+                    summary_method=summary_method,
+                    topic=topic
+                )
             )
 
-
-
-    def add_topic_agent(self, agent: autogen.AssistantAgent):
+    def add_topic_agent(self, agent: autogen.ConversableAgent):
         self.topic_agents.append(agent)
 
-    async def get_conversation_response(self, input_message: str) -> [str, str]:
+    async def get_conversation_response(self, 
+                                        message: str,
+                                        memory_record_switch=None,
+                                        thread_memory=None,
+                                        topics=None
+                                        ) -> str:
         """
         This function is the main entry point for the conversation pattern. It takes a message as input and returns a 
         response. Make sure that you have added the necessary topic agents and agent topic chats before 
         calling this function.
-        """
-        graph_dict = {}
-        graph_dict[self.user_proxy] = [self.classification_agent]
-        graph_dict[self.classification_agent] = [self.researcher]
-        graph_dict[self.researcher] = self.topic_agents
-        for topic_agent in self.topic_agents:
-            graph_dict[topic_agent] = [self.report_agent]
-        graph_dict[self.report_agent] = [self.researcher]
+        """        
+        input_message = message
+    
+        topics = []
+        for agent_chat in self.agent_topic_chats:
+            topics.append(agent_chat.topic)
+        
+        # get distinct topics
+        topics = list(set(topics))
+ 
+        # Check if the question is related to the topics of the agents
+        msg = "Classify this message as one of the following topics: " + ", ".join(topics) + "." + "\n"
+        msg = msg + str(input_message)
+        res = self.reporter_agent.initiate_chat(
+                                                    self.classification_agent, 
+                                                    clear_history=False, 
+                                                    message=msg, 
+                                                    max_turns=1, 
+                                                    summary_method="reflection_with_llm"
+                                                )
+        topic = res.chat_history[1]["content"]
+        
+        if (res.chat_history[1]["content"] == "neither"):
+            return "The message is not related to the topics of the agents."
+        
+        agent_fac = AgentFactory()
+        agent_fac.agents = self.topic_agents + [self.summary_agent, self.reporter_agent]
+        chat_responses = await agent_fac.run_agents_async(chats=self.agent_topic_chats, topics=[topic])
 
-        groupchat = autogen.GroupChat(
-            agents=[self.user_proxy, self.classification_agent, self.researcher, self.report_agent] + self.topic_agents,
-            messages=[],
-            max_round=6,
-            speaker_selection_method="auto",
-            send_introductions=True,
-            select_speaker_auto_verbose=False,
-            allowed_or_disallowed_speaker_transitions=graph_dict,
-            speaker_transitions_type="allowed",
-            select_speaker_prompt_template=(
-                "First, route the conversation to the 'classifier', "
-                "next select 'researcher' to choose the query, "
-                "next select the topic agent chosen by  researcher,"
-                "next select 'reporter' to summarize, "
-                "next select 'researcher' to choose the next topic agent, repeating the process. "
-                "finally select 'reporter' to record memory and TERMINATE."
-            )
-        )
-
-        manager = autogen.GroupChatManager(groupchat=groupchat,
-                                           llm_config=self.default_llm_config,
-                                           is_termination_msg=self.termination_msg,
-                                           code_execution_config=False)
-
-        res = await self.user_proxy.a_initiate_chat(
-            manager,
-            message=self.user_proxy.message_generator,
-            problem=input_message,
-            summary_method="last_msg"
-        )
-
-        with open(f"{self.memory_path}/context.md", "r") as memory_file:
-            context = memory_file.read()
+        msg = "Summarize this conversation.."
+        for r in chat_responses:
+            msg = msg + "\n" + r.summary
+        res = self.reporter_agent.initiate_chat(
+                                                    self.summary_agent, 
+                                                    clear_history=False, 
+                                                    message=msg, 
+                                                    max_turns=1, 
+                                                    summary_method="reflection_with_llm"
+                                                )
+        print(res.summary)
 
         # Send a response back to the user
-        return res.summary, context
+        return res.summary
