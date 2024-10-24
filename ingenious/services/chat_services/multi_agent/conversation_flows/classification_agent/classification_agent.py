@@ -13,14 +13,7 @@ class ConversationFlow:
     @staticmethod
     async def get_conversation_response(message: str, topics: list = [], thread_memory: str='', memory_record_switch=True, thread_chat_history: list[str, str] = []):
         _config = config.get_config()
-        
-        deps.get_chat_service(
-            deps.get_chat_history_repository(),
-            deps.get_openai_service(),
-            deps.get_tool_service(
-                deps.get_product_search_manager(),
-                deps.get_knowledge_base_search_manager())
-        )
+               
         llm_config = _config.models[0].__dict__
 
         chat_history_json = json.dumps(thread_chat_history)
