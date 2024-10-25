@@ -127,7 +127,8 @@ class multi_agent_chat_service:
                 message=chat_request.user_prompt,
                 memory_record_switch = chat_request.memory_record,
                 thread_memory = thread_memory,
-                topics = chat_request.topic
+                topics = chat_request.topic,
+                thread_chat_history = thread_chat_history
             )
             response = await response_task
         # except ContentFilterError as cfe:
