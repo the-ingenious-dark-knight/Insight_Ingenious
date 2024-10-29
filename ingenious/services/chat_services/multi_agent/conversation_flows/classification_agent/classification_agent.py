@@ -4,7 +4,7 @@ import ingenious.config.config as config
 #import ingenious.dependencies as deps
 #from ingenious.services.chat_services.multi_agent.agent_factory import AgentFactory #Agent factory is not used in the current pattern, group chat has been adopted
 from ingenious.models.chat import Action, ChatRequest, ChatResponse, KnowledgeBaseLink, Product
-from ingenious.services.chat_services.multi_agent.conversation_patterns.classification_agent_v2.classification_agent_v2 import ConversationPattern
+from ingenious.services.chat_services.multi_agent.conversation_patterns.classification_agent.classification_agent import ConversationPattern
 
 
 class ConversationFlow:
