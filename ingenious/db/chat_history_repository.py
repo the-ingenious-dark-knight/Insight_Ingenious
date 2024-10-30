@@ -322,3 +322,7 @@ class ChatHistoryRepository:
 
     async def delete_thread_memory(self, thread_id: str) -> None:
         return await self.repository.delete_thread_memory(thread_id)
+
+
+    async def delete_user_memory(self, user_id: str) -> None:
+        return await self.repository.delete_user_memory(user_id)

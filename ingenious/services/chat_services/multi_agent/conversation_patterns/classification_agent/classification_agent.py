@@ -35,7 +35,8 @@ class ConversationPattern:
                                                                                                    "").rstrip().upper()
 
         # Initialize agents
-        self.user_proxy = RetrieveUserProxyAgent(
+        if self.memory_record_switch:
+            self.user_proxy = RetrieveUserProxyAgent(
             name="user_proxy",
             is_termination_msg=self.termination_msg,
             human_input_mode="NEVER",
@@ -54,7 +55,17 @@ class ConversationPattern:
             },
             code_execution_config=False,  # we don't want to execute code in this case.
             silent=True
-        )
+            )
+        else:
+            self.user_proxy = autogen.UserProxyAgent(
+                name="user_proxy",
+                is_termination_msg=self.termination_msg,
+                human_input_mode="NEVER",
+                max_consecutive_auto_reply=2,
+                system_message="I am a proxy for the user, give the context to the researcher.",
+                code_execution_config=False,
+                silent=True
+            )
 
 
         self.researcher = autogen.ConversableAgent(
@@ -72,7 +83,8 @@ class ConversationPattern:
                             "Rules: "
                             "- I do not send commands like UPDATE CONTEXT."
                             "- I do not repeating the same call. "
-                            "- I do not communicate with myself or send empty queries."),
+                            "- I do not communicate with myself or send empty queries."
+                            "- I return TERMINATE if no new information"),
             description="I am a researcher planning the query and resource,I cannot provide direct answers, add extra info, or call functions.",
             llm_config=self.default_llm_config,
             human_input_mode="NEVER",
@@ -89,6 +101,7 @@ class ConversationPattern:
                                'conversation_text: str, last_response: str' if self.memory_record_switch else ''} "
                             "I keep the memory concise with factual information."
                             "I do not talk to my self."
+                            "I do not talk to my topic agent multiple times."
                             "I can TERMINATE the conversation if no useful information is available."),
             description="I **ONLY** report conversation result",
             llm_config=self.default_llm_config,
@@ -119,7 +132,8 @@ class ConversationPattern:
         graph_dict[self.user_proxy] = [self.researcher]
         graph_dict[self.researcher] = self.topic_agents
         for topic_agent in self.topic_agents:
-            graph_dict[topic_agent] = [self.report_agent]
+            graph_dict[topic_agent] = [self.researcher]
+        graph_dict[self.researcher] = [self.report_agent]
         graph_dict[self.report_agent] = [self.researcher]
 
         groupchat = autogen.GroupChat(
@@ -134,9 +148,9 @@ class ConversationPattern:
             select_speaker_prompt_template=(
                 "First, route the conversation to the 'researcher', "
                 "next select the topic agent chosen by  researcher,"
-                "next select 'reporter' to summarize, "
-                "next select 'researcher' to choose the next topic agent, repeating the process. "
-                "finally select 'reporter' to record memory and TERMINATE."
+                "next select researcher to chose next topic agent if necessary,"
+                "after talk to all required topic agent, "
+                "select 'reporter' record memory and end the conversation with the summarized information."
             )
         )
 
@@ -144,13 +158,19 @@ class ConversationPattern:
                                            llm_config=self.default_llm_config,
                                            is_termination_msg=self.termination_msg,
                                            code_execution_config=False)
-
-        res = await self.user_proxy.a_initiate_chat(
-            manager,
-            message=self.user_proxy.message_generator,
-            problem=input_message,
-            summary_method="last_msg"
-        )
+        if self.memory_record_switch:
+            res = await self.user_proxy.a_initiate_chat(
+                manager,
+                message=self.user_proxy.message_generator,
+                problem=input_message,
+                summary_method="last_msg"
+            )
+        else:
+            res = await self.user_proxy.a_initiate_chat(
+                manager,
+                message=input_message,
+                summary_method="last_msg"
+            )
 
         with open(f"{self.memory_path}/context.md", "r") as memory_file:
             context = memory_file.read()

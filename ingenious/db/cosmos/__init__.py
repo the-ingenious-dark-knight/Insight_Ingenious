@@ -255,3 +255,13 @@ class cosmos_ChatHistoryRepository(IChatHistoryRepository):
         for item in items:
             self.container_memory.delete_item(item=item['id'], partition_key=thread_id)
 
+
+    async def delete_user_memory(self, user_id: str) -> None:
+        # Query to find all memory records for the user
+        query = "SELECT c.id FROM c WHERE c.user_id = @user_id AND c.is_memory = true"
+        parameters = [{"name": "@thread_id", "value": user_id}]
+        items = list(self.container_memory.query_items(query=query, parameters=parameters, enable_cross_partition_query=True))
+
+        # Delete each memory record found
+        for item in items:
+            self.container_memory.delete_item(item=item['id'], partition_key=user_id)
