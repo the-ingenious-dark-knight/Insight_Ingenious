@@ -66,6 +66,9 @@ class multi_agent_chat_service:
             else:
                 thread_memory = 'New conversation'
 
+            msg = f'current_memory: {thread_memory}'
+            logger.log(level=logging.INFO, msg=msg)
+            print(msg)
 
             for thread_message in thread_messages:
                 # Validate user_id
@@ -137,11 +140,13 @@ class multi_agent_chat_service:
                 thread_chat_history = thread_chat_history
             )
             response = await response_task
+
         # except ContentFilterError as cfe:
         #     # Update user message with content filter results
         #     await self.chat_history_repository.update_message_content_filter_results(
         #         user_message_id, chat_request.thread_id, cfe.content_filter_results)
         #     raise
+
         except Exception as e:
             logger.error(f"Error occurred while processing conversation flow: {e}")
             raise e

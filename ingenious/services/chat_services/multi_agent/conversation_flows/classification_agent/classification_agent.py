@@ -1,8 +1,6 @@
 import autogen.runtime_logging
 import autogen
 import ingenious.config.config as config
-#import ingenious.dependencies as deps
-#from ingenious.services.chat_services.multi_agent.agent_factory import AgentFactory #Agent factory is not used in the current pattern, group chat has been adopted
 from ingenious.models.chat import Action, ChatRequest, ChatResponse, KnowledgeBaseLink, Product
 from ingenious.services.chat_services.multi_agent.conversation_patterns.classification_agent.classification_agent import ConversationPattern
 
@@ -20,7 +18,6 @@ class ConversationFlow:
                                                             memory_record_switch = memory_record_switch,
                                                             memory_path = memory_path,
                                                             thread_memory = thread_memory)
-        print(_classification_agent_pattern.classification_agent.system_message)
 
 
         # Add the topic agents to the classification agent pattern
