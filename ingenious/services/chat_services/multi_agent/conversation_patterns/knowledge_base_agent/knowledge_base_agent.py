@@ -3,6 +3,9 @@ import autogen.retrieve_utils
 import autogen.runtime_logging
 from autogen.agentchat.contrib.retrieve_user_proxy_agent import RetrieveUserProxyAgent
 from ingenious.services.chat_services.multi_agent.tool_factory import ToolFunctions
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class ConversationPattern:
@@ -19,8 +22,7 @@ class ConversationPattern:
                 memory_file.write("This is a new conversation, please continue the conversation given user question")
 
         if self.memory_record_switch and self.thread_memory != None and self.thread_memory != '':
-            print(
-                "Warning: if memory_record = True, the pattern requires optional dependencies: 'ChatHistorySummariser'.")
+            logger.log(level=logging.DEBUG, msg = "Warning: if memory_record = True, the pattern requires optional dependencies: 'ChatHistorySummariser'.")
             with open(f"{self.memory_path}/context.md", "w") as memory_file:
                 memory_file.write(self.thread_memory)
 
@@ -28,56 +30,62 @@ class ConversationPattern:
                                                                                                    "").rstrip().upper()
 
         # Initialize agents
-        self.user_proxy = RetrieveUserProxyAgent(
-            name="user_proxy",
-            is_termination_msg=self.termination_msg,
-            human_input_mode="NEVER",
-            max_consecutive_auto_reply=2,
-            system_message="I am a proxy for the user, give the context to the researcher.",
-            retrieve_config={
-                "task": "qa",
-                "docs_path": [
-                    f"{self.memory_path}/context.md"
-                ],
-                "chunk_token_size": 2000,
-                "model": self.default_llm_config["model"],
-                "vector_db": "chroma",
-                "overwrite": True,  # set to True if you want to overwrite an existing collection
-                "get_or_create": True,  # set to False if don't want to reuse an existing collection
-            },
-            code_execution_config=False,  # we don't want to execute code in this case.
-            silent=True
-        )
-
-        # Update the system message of the classification agent to include the topics
-        self.classification_agent = autogen.AssistantAgent(
-            name="classifier",
-            system_message=(
-                f"I am a classifier tasked with categorizing messages into the predefined topics: {', '.join(self.topics)}. "
-                "I classify based on the intent of the question and prioritise the topic of current question rather than exisiting context."
-                "if multiple topics are applicable, list all relevant topics."
-                "If the topic is unclear, please first check the context and try classification "
-                "if still cannot be classified please return 'ambiguous'. "
-                "I am **ONLY** allowed to respond once **immediately** after `user_proxy` for one session."
-                "I do not classify casual greetings such as 'Hi!'. and will return 'general conversation'"
-                ),
-            description="I **ONLY** classify user messages to a appropriate topic and record in the conversation",
-            llm_config=self.default_llm_config,
-            is_termination_msg=self.termination_msg,
-
-        )
+        if self.memory_record_switch:
+            self.user_proxy = RetrieveUserProxyAgent(
+                name="user_proxy",
+                is_termination_msg=self.termination_msg,
+                human_input_mode="NEVER",
+                max_consecutive_auto_reply=2,
+                system_message="I am a proxy for the user, give the context to the researcher.",
+                retrieve_config={
+                    "task": "qa",
+                    "docs_path": [
+                        f"{self.memory_path}/context.md"
+                    ],
+                    "chunk_token_size": 2000,
+                    "model": self.default_llm_config["model"],
+                    "vector_db": "chroma",
+                    "overwrite": True,  # set to True if you want to overwrite an existing collection
+                    "get_or_create": True,  # set to False if don't want to reuse an existing collection
+                },
+                code_execution_config=False,  # we don't want to execute code in this case.
+                silent=True
+            )
+        else:
+            self.user_proxy = autogen.UserProxyAgent(
+                name="user_proxy",
+                is_termination_msg=self.termination_msg,
+                human_input_mode="NEVER",
+                max_consecutive_auto_reply=2,
+                system_message="I am a proxy for the user, give the context to the researcher.",
+                code_execution_config=False,
+                silent=True
+            )
 
         self.researcher = autogen.ConversableAgent(
             name="researcher",
-            system_message=("I am a planner. "
-                            "decide if the question requires interacting with the search agent. "
-                            "If yes, I compose a query for the search agent to do AI search, wait for its response, and collect the necessary information. "
-                            "If no, I engage with the reporter to provide the user with a response without involving the search agent. "
-                            "If the context does not fall into the predefined topics, "
-                            "i pass the user query as AMBIGUOUS + keywords and ask the search agent to search (for example, what is contact number, the keyword is AMBIGUOUS contact number)."
-                            "I do not say UPDATE CONTEXT"
-                            "I only initiate search once, without repeating them after the first round. "
-                            "I do not communicate with myself or send empty queries."),
+            system_message=("I am a research planner. "
+                            "Tasks: "
+                            " - I write a query to the search agent to retrieve more information."
+                            " - I report to user with summarised information before end the conversation."
+                            " - I can TERMINATE the conversation after receive the information."
+                            "Rules for the query: "
+                            f"- IF the question is in predefined topics: {', '.join(self.topics)}, "
+                            f"  I will ask search agent to search using the relevant index with simple search query derived from user question. "
+                            f"- IF the question is not in predefined topics: {', '.join(self.topics)}, "
+                            f"  I will pass the following query: AMBIGUOUS +' '+ simple keywords derived from the user question."
+                            " - In order to match predefined topics, I follow rules below: "
+                            " - IF there is no recorded context, I decide the topic purely based on the current question."
+                            " - IF there RAG context, i derive the topic by combining the current question with the context, "
+                            " - for example, if in the RAG user asks about topic A in the previous question, then context will be about topic A."
+                            " - IF current question is very different from the RAG context, derive the topic using the current question. "
+                            "Other Rules: "
+                            "- Talk search_agent only once per chat. "
+                            "- Do NOT says things like Terminating the conversation now to the user."
+                            "- DO NOT do repeated search. "
+                            "- DO NOT repeating the same call. "
+                            "- DO NOT communicate with myself or send empty queries."
+                            "- TERMINATE if no new information"),
             description="I am a researcher planning the query and resource,I cannot provide direct answers, add extra info, or call functions.",
             llm_config=self.default_llm_config,
             human_input_mode="NEVER",
@@ -86,16 +94,20 @@ class ConversationPattern:
 
         )
 
-
         self.report_agent = autogen.AssistantAgent(
             name="reporter",
-            system_message=("I report the conversation result to the user in a concise and formatted way. "
-                            f"{'At the end of conversation, I ALWAYS call and execute chat_memory_recorder to record user '
-                               'question and the summarised conversation in one sentence. The function takes 2 argument: '
-                               'conversation_text: str, last_response: str' if self.memory_record_switch else ''};"
-                            "I do not add extra information."
-                            "I can TERMINATE the conversation if no useful information is available."),
-            description="I **ONLY** report conversation result",
+            system_message=("I am a reporter,"
+                            "Tasks: "
+                            "- I record and conduct a summary of the information received to the researcher to report to the user. "
+                            f"- {'I MUST use `chat_memory_recorder` to update the context of conversation,'
+                                 'the short summary will be used to derive the context of future conversation, so please limit it in 50 words.'
+                                 'The function takes 1 argument: context: str' if self.memory_record_switch else ''} "
+                            "Other Rules: "
+                            "- I record and report with factual information."
+                            "- I do not do interpretation."
+                            "- DO NOT call reporter. "
+                            "- When no new information is available, I say 'no new information'"),
+            description="I report conversation result and record using chat_memory_recorder",
             llm_config=self.default_llm_config,
             is_termination_msg=self.termination_msg,
         )
@@ -151,29 +163,28 @@ class ConversationPattern:
         """
 
         graph_dict = {}
-        graph_dict[self.user_proxy] = [self.classification_agent]
-        graph_dict[self.classification_agent] = [self.researcher]
+        graph_dict[self.user_proxy] = [self.researcher]
         graph_dict[self.researcher] = self.topic_agents
         for topic_agent in self.topic_agents:
             graph_dict[topic_agent] = [self.report_agent]
-        graph_dict[self.report_agent] = [self.researcher]
-
+        graph_dict[self.report_agent] = [self.researcher] + self.topic_agents
 
         groupchat = autogen.GroupChat(
-            agents=[self.user_proxy, self.classification_agent, self.researcher, self.report_agent ] + self.topic_agents,
+            agents=[self.user_proxy, self.researcher, self.report_agent] + self.topic_agents,
             messages=[],
             max_round=10,
             speaker_selection_method="auto",
             send_introductions=True,
             select_speaker_auto_verbose=False,
             allowed_or_disallowed_speaker_transitions=graph_dict,
+            max_retries_for_selecting_speaker=1,
             speaker_transitions_type="allowed",
             select_speaker_prompt_template=(
-                "First, route the conversation to the 'classifier', "
-                "next select 'researcher' to choose the query, "
-                "next select the search agent as requested the researcher,"
-                "next select 'reporter' to summarize, "
-                "finally select 'reporter' to record memory and TERMINATE."
+                "First, select user_proxy, "
+                "next select 'researcher', "
+                "next select 'search_agent',"
+                "next select 'report_agent' "
+                "end the conversation with 'researcher' "
             )
         )
 
@@ -182,13 +193,19 @@ class ConversationPattern:
                                            is_termination_msg=self.termination_msg,
                                            code_execution_config=False, )
 
-        #This pattern is required for RAG
-        res = await self.user_proxy.a_initiate_chat(
-            manager,
-            message=self.user_proxy.message_generator,
-            problem=input_message,
-            summary_method="last_msg",
-        )
+        if self.memory_record_switch:
+            res = await self.user_proxy.a_initiate_chat(
+                manager,
+                message=self.user_proxy.message_generator,
+                problem=input_message,
+                summary_method="last_msg"
+            )
+        else:
+            res = await self.user_proxy.a_initiate_chat(
+                manager,
+                message=input_message,
+                summary_method="last_msg"
+            )
 
         with open(f"{self.memory_path}/context.md", "r") as memory_file:
             context = memory_file.read()

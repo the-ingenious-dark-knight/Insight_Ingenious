@@ -16,8 +16,8 @@ chat_service:
 tool_service:
   enable: false
 azure_search_services:
-  - service: default    
-    endpoint: https://search-demo-eli.search.windows.net
+  - service: search-index-demo
+    endpoint: https://search-index-demo.search.windows.net
 web_configuration:
   type: fastapi #currently only fastapi is supported
   ip_address: "0.0.0.0"

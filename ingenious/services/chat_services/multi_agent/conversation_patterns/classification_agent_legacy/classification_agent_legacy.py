@@ -72,7 +72,7 @@ class ConversationPattern:
                                         memory_record_switch=None,
                                         thread_memory=None,
                                         topics=None
-                                        ) -> str:
+                                        ) -> [str, str]:
         """
         This function is the main entry point for the conversation pattern. It takes a message as input and returns a 
         response. Make sure that you have added the necessary topic agents and agent topic chats before 
@@ -119,4 +119,4 @@ class ConversationPattern:
         print(res.summary)
 
         # Send a response back to the user
-        return res.summary
+        return res.summary, ''
