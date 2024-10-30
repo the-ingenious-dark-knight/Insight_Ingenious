@@ -10,7 +10,8 @@ from ingenious.models.chat import Action, ChatRequest, ChatResponse, Product
 from ingenious.models.message import Message
 from ingenious.utils.conversation_builder import (build_message, build_system_prompt, build_user_message)
 from ingenious.utils.namespace_utils import import_module_safely
-
+from autogen.token_count_utils import count_token, get_max_token_limit
+from ingenious.dependencies import get_openai_service
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +29,7 @@ class multi_agent_chat_service:
             conversation_flow: str):
         self.chat_history_repository = chat_history_repository
         self.conversation_flow = conversation_flow
+        self.openai_service = get_openai_service()
 
     async def get_chat_response(self, chat_request: ChatRequest) -> ChatResponse:
 
@@ -164,10 +166,14 @@ class multi_agent_chat_service:
         )
 
         # Get token counts
-        # TODO: Update to get token count from the autogen token count utils
-        max_token_count = 100  # get_max_tokens(self.openai_service.model)
-        token_count = 10  # num_tokens_from_messages(messages)
-        logger.debug(f"Token count: {token_count}/{max_token_count}")
+        try:
+            max_token_count = get_max_token_limit(self.openai_service.model)
+            token_count = count_token(agent_response, self.openai_service.model)
+            logger.debug(f"Token count: {token_count}/{max_token_count}")
+        except Exception as e:
+            logger.error(f"Error getting token count: {e}")
+            max_token_count = 0
+            token_count = 0
 
         return ChatResponse(
             thread_id=chat_request.thread_id,
