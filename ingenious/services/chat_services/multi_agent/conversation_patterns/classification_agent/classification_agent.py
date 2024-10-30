@@ -73,14 +73,15 @@ class ConversationPattern:
             system_message=("I am a planner. "
                             f"I determine if the question requires interacting with the predefined topic agents: {', '.join(self.topics)}. "
                             "Tasks: "
-                            " - I classify the question based on the intent of the question and prioritise the topic of current question."
-                            " - if the topic of the current question is ambiguous, i derive the topic from context."
-                            " - if the context also does not fall into the predefined topics, ask the reporter to end the conversation."
-                            "When talk with the topic agent:"
-                            " - I compose a query for the topic agent, wait for its response, and collect the necessary information. "
-                            "To end the group chat:"
-                            " - I ask the reporter to provide the user with a response without involving the topic agent. "
-                            "Rules: "
+                            " - I decide question topic based on the intent of the question."
+                            " - I talk with topic agent to retrieve information."
+                            " - I get the summary from report agent and report to user."
+                            "Rules for deciding the topic: "
+                            " - IF the topic of the current question is ambiguous, i derive the topic from RAG context."
+                            " - for example, if in the RAG user asks about topic A in the previous question, then context will be about topic A."
+                            " - IF there is no recorded context, I decide the topic purely based on the current question."
+                            " - IF cannot find any topic from context and current question, I end the conversation with 'Your question is out of my scope.' and TERMINATE."
+                            "Other Rules: "
                             "- I do not send commands like UPDATE CONTEXT."
                             "- I do not repeating the same call. "
                             "- I do not communicate with myself or send empty queries."
@@ -95,14 +96,20 @@ class ConversationPattern:
 
         self.report_agent = autogen.AssistantAgent(
             name="reporter",
-            system_message=("I report the conversation result to the user in a concise and formatted way. "
-                            f"{'At the end of conversation, I ALWAYS call and execute chat_memory_recorder to record user '
-                               'question/intention and the summarised conversation in one sentence. The function takes 2 argument: '
-                               'conversation_text: str, last_response: str' if self.memory_record_switch else ''} "
-                            "I keep the memory concise with factual information."
-                            "I do not talk to my self."
-                            "I do not talk to my topic agent multiple times."
-                            "I can TERMINATE the conversation if no useful information is available."),
+            system_message=("I am a reporter,"
+                            " the conversation result to the user in a concise and formatted way. "
+                            "Tasks: "
+                            "- I summarize the information for researcher to report to the user. "
+                            f"- {'I always call and execute chat_memory_recorder to update the context of conversation,'
+                                 'the short summary will be used to derive the context of future conversation, so please limit it in 50 words.'
+                                 'The function takes 1 argument: context: str' if self.memory_record_switch else ''} "
+                             "- I summarize the information for researcher to report to the user. "
+                            "Other Rules: "
+                            "- I record and report with factual information."
+                            "- I do not do interpretation."
+                            "- I do not talk to my self."
+                            "- I do not talk to my topic agent multiple times."
+                            "- When no new information is available, I say 'no new information'"),
             description="I **ONLY** report conversation result",
             llm_config=self.default_llm_config,
             is_termination_msg=self.termination_msg,
@@ -132,9 +139,8 @@ class ConversationPattern:
         graph_dict[self.user_proxy] = [self.researcher]
         graph_dict[self.researcher] = self.topic_agents
         for topic_agent in self.topic_agents:
-            graph_dict[topic_agent] = [self.researcher]
-        graph_dict[self.researcher] = [self.report_agent]
-        graph_dict[self.report_agent] = [self.researcher]
+            graph_dict[topic_agent] = [self.report_agent]
+        graph_dict[self.report_agent] = [self.researcher] + self.topic_agents
 
         groupchat = autogen.GroupChat(
             agents=[self.user_proxy, self.researcher, self.report_agent] + self.topic_agents,
@@ -144,13 +150,13 @@ class ConversationPattern:
             send_introductions=True,
             select_speaker_auto_verbose=False,
             allowed_or_disallowed_speaker_transitions=graph_dict,
+            max_retries_for_selecting_speaker = 1,
             speaker_transitions_type="allowed",
             select_speaker_prompt_template=(
-                "First, route the conversation to the 'researcher', "
-                "next select the topic agent chosen by  researcher,"
-                "next select researcher to chose next topic agent if necessary,"
-                "after talk to all required topic agent, "
-                "select 'reporter' record memory and end the conversation with the summarized information."
+                "First, select user_proxy "
+                "next select 'researcher', "
+                "next select the topic agents chosen by researcher,"
+                "after talk to all required topic agent, select 'researcher' "
             )
         )
 

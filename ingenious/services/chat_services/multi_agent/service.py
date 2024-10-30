@@ -51,7 +51,6 @@ class multi_agent_chat_service:
 
         # Check if thread exists
         if not chat_request.thread_id:
-            # Create thread
             chat_request.thread_id = await self.chat_history_repository.create_thread()
         else:
             # Get thread messages & add to messages list
@@ -176,7 +175,10 @@ class multi_agent_chat_service:
         # Get token counts
         try:
             max_token_count = get_max_token_limit(self.openai_service.model)
-            token_count = count_token(agent_response, self.openai_service.model)
+            if isinstance(agent_response, str):
+                token_count = count_token(agent_response, self.openai_service.model)
+            else:
+                token_count = count_token(agent_response[0], self.openai_service.model)
             logger.debug(f"Token count: {token_count}/{max_token_count}")
         except Exception as e:
             logger.error(f"Error getting token count: {e}")
