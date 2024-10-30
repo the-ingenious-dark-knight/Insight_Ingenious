@@ -34,12 +34,12 @@ chat_request: ChatRequest = ChatRequest(
         user_prompt="",
         user_name="elliot",
         topic= "tennis, basketball",
-        memory_record = True,
+        memory_record = False,
         conversation_flow="classification_agent"
     )
 
 
-t = "tennis"
+t = "basketball"
 chat_request.user_prompt = f"What is {t}?" #if I change this question to things other than grand slams it works.
 res = ChatResponse = asyncio.run(process_message(chat_request=chat_request))
 
