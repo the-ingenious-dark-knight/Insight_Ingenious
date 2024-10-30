@@ -3,6 +3,7 @@ azure-core==1.30.2
 azure-search-documents==11.4.0
 azure.keyvault
 azure.identity
+azure.cosmos
 certifi==2024.6.2
 chainlit==1.1.402
 chromadb==0.5.5
@@ -30,4 +31,4 @@ opentelemetry-instrumentation==0.48b0
 opentelemetry-proto==1.27.0
 opentelemetry-sdk==1.27.0
 opentelemetry-semantic-conventions==0.48b0
-opentelemetry-util-http==0.48b0
+opentelemetry-util-http==0.48b0python3 ./conversation_pattern_example/test_legacy_conversation_pattern.py

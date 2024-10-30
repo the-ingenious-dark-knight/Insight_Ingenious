@@ -91,9 +91,8 @@ class cosmos_ChatHistoryRepository(IChatHistoryRepository):
                 return None
             raise
 
-    async def update_sql_memory(self) -> Optional[Message]:
-        """Update SQL-based memory storage."""
-        # Implement the logic to update SQL-based memory here
+    async def update_memory(self) -> Optional[Message]:
+        """Update memory storage."""
         pass
 
     async def get_thread_memory(self, thread_id: str) -> Optional[List[Message]]:
@@ -133,4 +132,7 @@ class cosmos_ChatHistoryRepository(IChatHistoryRepository):
     async def delete_thread_memory(self, thread_id: str) -> None:
         """Delete memory associated with a thread."""
         await self.delete_thread(thread_id)
-   
+
+    async def add_memory(self, message: Message) -> str:
+        pass
+

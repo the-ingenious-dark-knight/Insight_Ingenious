@@ -292,7 +292,7 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
             usr = await self.add_user(identifier)
             return usr
 
-    async def update_sql_memory(self) ->  None:
+    async def update_memory(self) ->  None:
         cursor = self.connection.cursor()
 
         # Create a temporary table for the latest records
