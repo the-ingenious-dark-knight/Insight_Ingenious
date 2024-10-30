@@ -353,6 +353,56 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
             )
         return None
 
+    async def get_thread_memory(self, thread_id: str) -> list[Message]:
+        cursor = self.connection.cursor()
+        cursor.execute('''
+            SELECT user_id, thread_id, message_id, positive_feedback, timestamp, role, content, 
+                   content_filter_results, tool_calls, tool_call_id, tool_call_function
+            FROM chat_history_summary
+            WHERE thread_id = ?
+            ORDER BY timestamp DESC
+            LIMIT 1
+        ''', (thread_id,))
+        rows = cursor.fetchall()
+        return [Message(
+            user_id=row[0],
+                thread_id=row[1],
+                message_id=row[2],
+                positive_feedback=row[3],
+                timestamp=row[4],
+                role=row[5],
+                content=row[6],
+                content_filter_results=row[7],
+                tool_calls=row[8],
+                tool_call_id=row[9],
+                tool_call_function=row[10]
+                ) for row in rows]
+
+    async def update_memory_feedback(self, message_id: str, thread_id: str, positive_feedback: bool | None) -> None:
+        with self.connection:
+            self.connection.execute('''
+                UPDATE chat_history_summary
+                SET positive_feedback = ?
+                WHERE id = ? AND thread_id = ?
+            ''', (positive_feedback, message_id, thread_id))
+
+    async def update_memory_content_filter_results(
+            self, message_id: str, thread_id: str, content_filter_results: dict[str, object]) -> None:
+        with self.connection:
+            self.connection.execute('''
+                UPDATE chat_history_summary
+                SET content_filter_results = ?
+                WHERE id = ? AND thread_id = ?
+            ''', (str(content_filter_results), message_id, thread_id))
+
+    async def delete_thread_memory(self, thread_id: str) -> None:
+        with self.connection:
+            self.connection.execute('''
+                DELETE FROM chat_history_summary
+                WHERE thread_id = ?
+            ''', (thread_id,))
+
+
     async def get_message(self, message_id: str, thread_id: str) -> Message | None:
         cursor = self.connection.cursor()
         cursor.execute('''
@@ -598,31 +648,6 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
                 tool_call_function=row[10]
                 ) for row in rows]
 
-    async def get_thread_memory(self, thread_id: str) -> list[Message]:
-        cursor = self.connection.cursor()
-        cursor.execute('''
-            SELECT user_id, thread_id, message_id, positive_feedback, timestamp, role, content, 
-                   content_filter_results, tool_calls, tool_call_id, tool_call_function
-            FROM chat_history_summary
-            WHERE thread_id = ?
-            ORDER BY timestamp DESC
-            LIMIT 1
-        ''', (thread_id,))
-        rows = cursor.fetchall()
-        return [Message(
-            user_id=row[0],
-                thread_id=row[1],
-                message_id=row[2],
-                positive_feedback=row[3],
-                timestamp=row[4],
-                role=row[5],
-                content=row[6],
-                content_filter_results=row[7],
-                tool_calls=row[8],
-                tool_call_id=row[9],
-                tool_call_function=row[10]
-                ) for row in rows]
-
     async def get_thread(self, thread_id: str) -> list[IChatHistoryRepository.Thread]:
         cursor = self.connection.cursor()
         cursor.execute('''
@@ -641,14 +666,6 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
             metadata=row[6]
         ) for row in rows]
 
-    async def update_memory_feedback(self, message_id: str, thread_id: str, positive_feedback: bool | None) -> None:
-        with self.connection:
-            self.connection.execute('''
-                UPDATE chat_history_summary
-                SET positive_feedback = ?
-                WHERE id = ? AND thread_id = ?
-            ''', (positive_feedback, message_id, thread_id))
-
     async def update_message_feedback(self, message_id: str, thread_id: str, positive_feedback: bool | None) -> None:
         with self.connection:
             self.connection.execute('''
@@ -656,15 +673,6 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
                 SET positive_feedback = ?
                 WHERE id = ? AND thread_id = ?
             ''', (positive_feedback, message_id, thread_id))
-
-    async def update_memory_content_filter_results(
-            self, message_id: str, thread_id: str, content_filter_results: dict[str, object]) -> None:
-        with self.connection:
-            self.connection.execute('''
-                UPDATE chat_history_summary
-                SET content_filter_results = ?
-                WHERE id = ? AND thread_id = ?
-            ''', (str(content_filter_results), message_id, thread_id))
 
     async def update_message_content_filter_results(
             self, message_id: str, thread_id: str, content_filter_results: dict[str, object]) -> None:
@@ -675,12 +683,6 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
                 WHERE id = ? AND thread_id = ?
             ''', (str(content_filter_results), message_id, thread_id))
 
-    async def delete_thread_memory(self, thread_id: str) -> None:
-        with self.connection:
-            self.connection.execute('''
-                DELETE FROM chat_history_summary
-                WHERE thread_id = ?
-            ''', (thread_id,))
 
     async def delete_thread(self, thread_id: str) -> None:
         with self.connection:
