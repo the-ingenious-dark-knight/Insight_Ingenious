@@ -36,7 +36,7 @@ chat_request: ChatRequest = ChatRequest(
         conversation_flow="web_critic_agent"
     )
 
-chat_request.user_prompt = ("Write me a short story based on the following: "
+chat_request.user_prompt = ("Write me a short story in 100 words based on the following: "
                             "The Australia men's national cricket team represents "
                             "Australia in men's international cricket. "
                             "It is the joint oldest team in Test cricket history,"
