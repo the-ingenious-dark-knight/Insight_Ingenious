@@ -31,8 +31,11 @@ class ConversationFlow:
             ("""I am **ONLY** allowed to speak **immediately** after `researcher`.
             I **ALWAYS** using web search to check all information mentioned by `researcher` is a fact or not.
             Suggest complete removal or replacement for non-factual information to `researcher`.
-            The next speaker is **ALWAYS** `researcher`. 
-            I can not TERMINATE a conversation"""),
+            Rules:
+            - The next speaker is **ALWAYS** `researcher`. 
+            - I can not be the last speaker. 
+            - I do not speak things other than critic feedback. 
+            - I can not TERMINATE a conversation"""),
             llm_config=llm_config,
         )
 
