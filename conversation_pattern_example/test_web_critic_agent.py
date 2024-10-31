@@ -32,11 +32,11 @@ chat_request: ChatRequest = ChatRequest(
         user_prompt="",
         user_name="elliot",
         topic= "",
-        memory_record = True,
+        memory_record = False,
         conversation_flow="web_critic_agent"
     )
 
-chat_request.user_prompt = ("Please summarize: "
+chat_request.user_prompt = ("Write me a short story based on the following: "
                             "The Australia men's national cricket team represents "
                             "Australia in men's international cricket. "
                             "It is the joint oldest team in Test cricket history,"

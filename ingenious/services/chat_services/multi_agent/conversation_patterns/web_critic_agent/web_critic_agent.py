@@ -79,7 +79,7 @@ class ConversationPattern:
             description=(
                 "I only speak after `user_proxy`, `reporter`, or `web_critic_agent`. "
                 "If `web_critic_agent` identifies inaccuracies, the next speaker must be `researcher`."
-                "I compose the final response to the user (removing any internal conversation from the agents.)."
+                "I compose the final response to the user according to the original request."
                 "Only I can TERMINATE the conversation, ."
             )
         )

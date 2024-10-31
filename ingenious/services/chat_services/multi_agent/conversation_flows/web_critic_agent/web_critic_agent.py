@@ -27,11 +27,12 @@ class ConversationFlow:
         critic_agent = autogen.AssistantAgent(
             name="web_critic_agent",
             system_message=(agent_pattern.task),
-            description="""I am **ONLY** allowed to speak **immediately** after `researcher`.
+            description=
+            ("""I am **ONLY** allowed to speak **immediately** after `researcher`.
             I **ALWAYS** using web search to check all information mentioned by `researcher` is a fact or not.
-            I provide the correction feedback to `researcher`.
-            The next speaker can only be `researcher`. 
-            I can not TERMINATE a conversation""",
+            Suggest complete removal or replacement for non-factual information to `researcher`.
+            The next speaker is **ALWAYS** `researcher`. 
+            I can not TERMINATE a conversation"""),
             llm_config=llm_config,
         )
 
