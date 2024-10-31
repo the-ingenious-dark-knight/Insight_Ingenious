@@ -38,7 +38,7 @@ class ConversationPattern:
             is_termination_msg=self.termination_msg,
             human_input_mode="NEVER",
             max_consecutive_auto_reply=2,
-            system_message=self.task,
+            system_message=self.task + " I pass the conversation context to other speakers.",
             retrieve_config={
                 "task": "qa",
                 "docs_path": [f"{self.memory_path}/context.md"],
@@ -50,7 +50,7 @@ class ConversationPattern:
             },
             code_execution_config=False,
             silent=True,
-            description=""" Provides context to the user question, never selects as a speaker."""
+            description="""Never select as a speaker."""
         ) if self.memory_record_switch else autogen.UserProxyAgent(
             name="user_proxy",
             is_termination_msg=self.termination_msg,
@@ -59,23 +59,25 @@ class ConversationPattern:
             system_message=self.task,
             code_execution_config=False,
             silent=True,
-            description="Never selects as a speaker."
+            description="Never select as a speaker."
         )
 
-        # Researcher and reporter agents with critic validation
         self.researcher = autogen.ConversableAgent(
             name="researcher",
             system_message=
             (self.task +
                 "Rules:"
-                "Stop the conversation with the response to the `user_proxy`."
+                "Before compose the final response, "
+                f"check conversation history record: {self.memory_record_switch}, "
+                f"if true, call `chat_memory_recorder` to record the conversation."
+                "If false, just compose the final response and stop the conversation."
                 "Only I can TERMINATE the conversation."),
             llm_config=self.default_llm_config,
             human_input_mode="NEVER",
             code_execution_config=False,
             is_termination_msg=self.termination_msg,
             description=(
-                "I only speak after `user_proxy`, `reporter`, or `web_critic_agent`. "
+                "I **ONLY** speak after `user_proxy` or `web_critic_agent`. "
                 "If `web_critic_agent` identifies inaccuracies, the next speaker must be `researcher`."
             )
         )
@@ -83,26 +85,12 @@ class ConversationPattern:
 
         # Register memory recording function if memory switch is on
         if self.memory_record_switch:
-            self.report_agent = autogen.ConversableAgent(
-                name="reporter",
-                system_message=(
-                    "I record conversation summary in 50 words using `chat_memory_recorder`"
-                    "I do not talk with other speakers."
-                    "I do not share the summary with other speakers."
-                    "I cannot TERMINATE the conversation,"
-                ),
-                llm_config=self.default_llm_config,
-                human_input_mode="NEVER",
-                code_execution_config=False,
-                is_termination_msg=self.termination_msg,
-                description="I only speak after `researcher`, the next speaker must be `researcher`. "
-            )
 
             print("chat_memory_recorder registered")
             autogen.register_function(
                 ToolFunctions.update_memory,
-                caller=self.report_agent,
-                executor=self.report_agent,
+                caller=self.researcher,
+                executor=self.researcher,
                 name="chat_memory_recorder",
                 description="Records and updates summarized conversation memory for future use."
             )
@@ -115,23 +103,14 @@ class ConversationPattern:
         Main entry point for the conversation pattern.
         Takes a user message as input and returns a response.
         """
-        if self.memory_record_switch:
-            graph_dict = {}
-            graph_dict[self.user_proxy] = [self.researcher]
-            graph_dict[self.researcher] = self.assistant_agents
-            for assistant in self.assistant_agents:
-                graph_dict[assistant] = [self.report_agent]
-            graph_dict[self.report_agent] = [self.researcher]
 
-            agent_lists = [self.user_proxy, self.researcher, self.report_agent] + self.assistant_agents
-        else:
-            graph_dict = {}
-            graph_dict[self.user_proxy] = [self.researcher]
-            graph_dict[self.researcher] = self.assistant_agents
-            for assistant in self.assistant_agents:
-                graph_dict[assistant] = [self.researcher]
+        graph_dict = {}
+        graph_dict[self.user_proxy] = [self.researcher]
+        graph_dict[self.researcher] = self.assistant_agents
+        for assistant in self.assistant_agents:
+            graph_dict[assistant] = [self.researcher]
 
-            agent_lists = [self.user_proxy, self.researcher] + self.assistant_agents
+        agent_lists = [self.user_proxy, self.researcher] + self.assistant_agents
 
 
         groupchat = autogen.GroupChat(
@@ -144,8 +123,8 @@ class ConversationPattern:
             allowed_or_disallowed_speaker_transitions=graph_dict,
             max_retries_for_selecting_speaker=1,
             speaker_transitions_type="allowed",
-            select_speaker_message_template="start from `researcher` then assistant agents,"
-                                            "end the conversation with `researcher`"
+            # select_speaker_message_template="start from `researcher` next assistant agents, next `reporter` if available"
+            #                                 "end the conversation with `researcher`"
         )
 
         manager = autogen.GroupChatManager(
