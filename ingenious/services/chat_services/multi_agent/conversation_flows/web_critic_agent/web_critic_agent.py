@@ -31,7 +31,7 @@ class ConversationFlow:
             I always conduct web search to check all information mentioned by `researcher` is a fact or not.
             I provide the correction feedback to `researcher`.
             The next speaker can only be `researcher`. 
-            I do not terminate a conversation""",
+            I can not TERMINATE a conversation""",
             llm_config=llm_config,
         )
 

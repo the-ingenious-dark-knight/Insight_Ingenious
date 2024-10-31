@@ -18,7 +18,7 @@ class ConversationPattern:
         self.memory_path = memory_path
         self.thread_memory = thread_memory
         self.assistant_agents: list[autogen.AssistantAgent] = []
-        self.task = """Process the request from the user, the final output should be align with user request"""
+        self.task = """Process the request from the user, the final output should be align with user request."""
 
         # Initialize memory file
         if not self.thread_memory:
@@ -72,7 +72,8 @@ class ConversationPattern:
             description=(
                 "I only speak after `user_proxy` or `web_critic_agent`. "
                 "If `web_critic_agent` identifies inaccuracies, the next speaker must be `researcher`."
-                "I can TERMINATE the conversation, when the final answer is ready to share with the user."
+                "I compose the final response to the user (removing any internal conversation from the agents.)."
+                "I can TERMINATE the conversation, ."
             )
         )
 
@@ -84,6 +85,7 @@ class ConversationPattern:
             code_execution_config=False,
             is_termination_msg=self.termination_msg,
             description="I **ALWAYS** verify the final answer with `web_critic_agent` and record memory if enabled."
+                        "I can not TERMINATE the conversation,"
         )
 
         # Register memory recording function if memory switch is on
