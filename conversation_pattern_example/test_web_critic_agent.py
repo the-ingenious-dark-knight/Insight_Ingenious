@@ -32,7 +32,7 @@ chat_request: ChatRequest = ChatRequest(
         user_prompt="",
         user_name="elliot",
         topic= "",
-        memory_record = False,
+        memory_record = True,
         conversation_flow="web_critic_agent"
     )
 
@@ -40,7 +40,7 @@ chat_request.user_prompt = ("Please summarize: "
                             "The Australia men's national cricket team represents "
                             "Australia in men's international cricket. "
                             "It is the joint oldest team in Test cricket history,"
-                            " playing in the first ever Test match in 1860;"
+                            " playing in the first ever Test match in 1999;"
                             " the team current coach is Elliot Zhu.")
 res = ChatResponse = asyncio.run(process_message(chat_request=chat_request))
 

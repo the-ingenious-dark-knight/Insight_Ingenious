@@ -56,7 +56,7 @@ class multi_agent_chat_service:
             # Get thread messages & add to messages list
             thread_messages = await self.chat_history_repository.get_thread_messages(chat_request.thread_id)
             thread_memory_list = await self.chat_history_repository.get_thread_memory(chat_request.thread_id)
-            thread_memory = 'refer to current question'
+            thread_memory = 'nothing in addition to current user question. '
 
             if chat_request.memory_record:
                 if thread_memory_list:

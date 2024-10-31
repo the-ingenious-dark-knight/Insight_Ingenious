@@ -28,7 +28,7 @@ class ConversationFlow:
             name="web_critic_agent",
             system_message=(agent_pattern.task),
             description="""I am **ONLY** allowed to speak **immediately** after `researcher`.
-            I always conduct web search to check all information mentioned by `researcher` is a fact or not.
+            I **ALWAYS** using web search to check all information mentioned by `researcher` is a fact or not.
             I provide the correction feedback to `researcher`.
             The next speaker can only be `researcher`. 
             I can not TERMINATE a conversation""",
