@@ -20,6 +20,7 @@ class ConversationPattern:
         self.memory_path = memory_path
         self.thread_memory = thread_memory
         self.topic_agents: list[autogen.AssistantAgent] = []
+        self.task = 'Process user request using group chat.'
 
         if self.thread_memory == None or self.thread_memory == '':
             with open(f"{self.memory_path}/context.md", "w") as memory_file:
@@ -37,24 +38,24 @@ class ConversationPattern:
         # Initialize agents
         if self.memory_record_switch:
             self.user_proxy = RetrieveUserProxyAgent(
-            name="user_proxy",
-            is_termination_msg=self.termination_msg,
-            human_input_mode="NEVER",
-            max_consecutive_auto_reply=2,
-            system_message="I am a proxy for the user, give the context to the researcher.",
-            retrieve_config={
-                "task": "qa",
-                "docs_path": [
-                    f"{self.memory_path}/context.md"
-                ],
-                "chunk_token_size": 2000,
-                "model": self.default_llm_config["model"],
-                "vector_db": "chroma",
-                "overwrite": True,  # set to True if you want to overwrite an existing collection
-                "get_or_create": True,  # set to False if don't want to reuse an existing collection
-            },
-            code_execution_config=False,  # we don't want to execute code in this case.
-            silent=True
+                name="user_proxy",
+                is_termination_msg=self.termination_msg,
+                human_input_mode="NEVER",
+                max_consecutive_auto_reply=2,
+                system_message=self.task,
+                retrieve_config={
+                    "task": "qa",
+                    "docs_path": [
+                        f"{self.memory_path}/context.md"
+                    ],
+                    "chunk_token_size": 2000,
+                    "model": self.default_llm_config["model"],
+                    "vector_db": "chroma",
+                    "overwrite": True,  # set to True if you want to overwrite an existing collection
+                    "get_or_create": True,  # set to False if don't want to reuse an existing collection
+                },
+                code_execution_config=False,  # we don't want to execute code in this case.
+                silent=True
             )
         else:
             self.user_proxy = autogen.UserProxyAgent(
@@ -62,31 +63,37 @@ class ConversationPattern:
                 is_termination_msg=self.termination_msg,
                 human_input_mode="NEVER",
                 max_consecutive_auto_reply=2,
-                system_message="I am a proxy for the user, give the context to the researcher.",
+                system_message=self.task,
                 code_execution_config=False,
                 silent=True
             )
 
-
         self.researcher = autogen.ConversableAgent(
             name="researcher",
-            system_message=("I am a planner. "
-                            f"I determine if the question requires interacting with the predefined topic agents: {', '.join(self.topics)}. "
-                            "Tasks: "
-                            " - I decide question topic based on the intent of the question."
-                            " - I talk with topic agent to retrieve information."
-                            " - I get the summary from report agent and report to user."
+            system_message=("Tasks: "
+                            " - step 1, i decide the topic of user question, I do not ask question. "
+                            " - step 2,  "
+                            f"check whether to record conversation: {self.memory_record_switch}, "
+                            f"if true, call `chat_memory_recorder` to record the conversation in 100 words and go to next step, if false, go to the next step."
+                            " - step 3, I compose a concise final response to share with the user. "
+                            " - step 4, I TERMINATE the conversation."
+
                             "Rules for deciding the topic: "
-                            " - IF the topic of the current question is ambiguous, i derive the topic from RAG context."
-                            " - for example, if in the RAG user asks about topic A in the previous question, then context will be about topic A."
-                            " - IF there is no recorded context, I decide the topic purely based on the current question."
-                            " - IF cannot find any topic from context and current question, I end the conversation with 'Your question is out of my scope.' and TERMINATE."
+                            f"If the user question or intent falls in to the predefined topcis:  {', '.join(self.topics)}, then the topic is defined."
+                            "If no, try check if there is existing context, derive the new context by combining the current question with the existing context. "
+                            " - For example, if in the RAG user asks about topic A in the previous question, then context will be about topic A."
+                            " - if current question is very different from the existing context or no context, derive the topic using the current question. "
+                            " - if there is no way to decide the context, say 'the question is out of my scope'."
+
                             "Other Rules: "
-                            "- I do not send commands like UPDATE CONTEXT."
-                            "- I do not repeating the same call. "
-                            "- I do not communicate with myself or send empty queries."
-                            "- I return TERMINATE if no new information"),
-            description="I am a researcher planning the query and resource,I cannot provide direct answers, add extra info, or call functions.",
+                            "- Do not give empty response. "
+                            "- I only have one tool: `chat_memory_recorder`."
+                            "- TERMINATE if no new information"),
+            description=(
+                "I **ONLY** speak after `user_proxy`, `researcher` or topic agents"
+                "I can do self reflection by speak to my self."
+                "Only I can TERMINATE the conversation."
+            ),
             llm_config=self.default_llm_config,
             human_input_mode="NEVER",
             code_execution_config=False,
@@ -94,33 +101,12 @@ class ConversationPattern:
 
         )
 
-        self.report_agent = autogen.AssistantAgent(
-            name="reporter",
-            system_message=("I am a reporter,"
-                            " the conversation result to the user in a concise and formatted way. "
-                            "Tasks: "
-                            "- I summarize the information for researcher to report to the user. "
-                            f"- {'I always call and execute chat_memory_recorder to update the context of conversation,'
-                                 'the short summary will be used to derive the context of future conversation, so please limit it in 50 words.'
-                                 'The function takes 1 argument: context: str' if self.memory_record_switch else ''} "
-                             "- I summarize the information for researcher to report to the user. "
-                            "Other Rules: "
-                            "- I record and report with factual information."
-                            "- I do not do interpretation."
-                            "- I do not talk to my self."
-                            "- I do not talk to my topic agent multiple times."
-                            "- When no new information is available, I say 'no new information'"),
-            description="I **ONLY** report conversation result",
-            llm_config=self.default_llm_config,
-            is_termination_msg=self.termination_msg,
-        )
-
         if self.memory_record_switch:
             print("chat_memory_recorder registered")
             autogen.register_function(
                 ToolFunctions.update_memory,
-                caller=self.report_agent,
-                executor=self.report_agent,
+                caller=self.researcher,
+                executor=self.researcher,
                 name="chat_memory_recorder",
                 description=("A function responsible for recording and updating summarized conversation memory. "
                              "It ensures that the conversation history is accurately and concisely saved to a specified location for future reference.")
@@ -139,11 +125,10 @@ class ConversationPattern:
         graph_dict[self.user_proxy] = [self.researcher]
         graph_dict[self.researcher] = self.topic_agents
         for topic_agent in self.topic_agents:
-            graph_dict[topic_agent] = [self.report_agent]
-        graph_dict[self.report_agent] = [self.researcher] + self.topic_agents
+            graph_dict[topic_agent] = [self.researcher]
 
         groupchat = autogen.GroupChat(
-            agents=[self.user_proxy, self.researcher, self.report_agent] + self.topic_agents,
+            agents=[self.user_proxy, self.researcher] + self.topic_agents,
             messages=[],
             max_round=6,
             speaker_selection_method="auto",
@@ -152,12 +137,12 @@ class ConversationPattern:
             allowed_or_disallowed_speaker_transitions=graph_dict,
             max_retries_for_selecting_speaker = 1,
             speaker_transitions_type="allowed",
-            select_speaker_prompt_template=(
-                "First, select user_proxy "
-                "next select 'researcher', "
-                "next select the topic agents chosen by researcher,"
-                "after talk to all required topic agent, select 'researcher' "
-            )
+            # select_speaker_prompt_template=(
+            #     "First, select user_proxy "
+            #     "next select 'researcher', "
+            #     "next select the topic agents chosen by researcher,"
+            #     "after talk to all required topic agent, select 'researcher' "
+            # )
         )
 
         manager = autogen.GroupChatManager(groupchat=groupchat,
