@@ -27,13 +27,12 @@ class ConversationFlow:
         critic_agent = autogen.AssistantAgent(
             name="web_critic_agent",
             system_message=("""
-            I **ALWAYS** use web search to check all information mentioned by `researcher` is a fact or not.
+            I **ALWAYS** use internet to check all information mentioned by `researcher` is a fact or not.
             I **ONLY** suggest complete removal or replacement for non-factual information to `researcher`.
             Rules:
-            - The next speaker is **ALWAYS** `researcher`. 
-            - If there is no feedback, i say 'No feedback, factual information has been checked'.
+            - If there is no feedback, just pass to `researcher` to compose the final response.
             - Do not talk things other than the suggestion from web search. 
-            - Do not TERMINATE a conversation"""),
+            """),
             description = ("""I am **ONLY** allowed to speak **immediately** after `researcher`."""),
             llm_config=llm_config,
         )

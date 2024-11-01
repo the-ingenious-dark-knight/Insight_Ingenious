@@ -32,7 +32,7 @@ chat_request: ChatRequest = ChatRequest(
         user_prompt="",
         user_name="elliot",
         topic= "",
-        memory_record = False,
+        memory_record = True,
         conversation_flow="web_critic_agent"
     )
 
