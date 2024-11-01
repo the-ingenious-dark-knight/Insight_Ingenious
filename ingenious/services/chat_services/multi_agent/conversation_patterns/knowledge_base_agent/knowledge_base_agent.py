@@ -70,32 +70,30 @@ class ConversationPattern:
         self.researcher = autogen.ConversableAgent(
             name="researcher",
             system_message=("Tasks: "
-                            " - step 1, I write a search_query to the `search_agent` to retrieve information to solve user request."
-                            " - step 2,  "
+                            " - step 1, i decide the context of user question, I do not ask question. "
+                            " - step 2, i talk to the search_agent to retrieve information to solve user request by sharing the user question and the context."
+                            " - step 3,  "
                                 f"check whether to record conversation: {self.memory_record_switch}, "
-                                f"if true, call `chat_memory_recorder` to record the conversation in 100 words and go to next step, "
-                                "if false, just go to the next step."
-                            " - step 3, I read the response from `search_agent` and compose a concise final response to share with the user. "
-                            " - step 4, I TERMINATE the conversation."
-                            "Rules for the query: "
-                            f"- if the question is in predefined topics: {', '.join(self.topics)}, "
-                            f"  I will ask search agent to search using the relevant index using query from user question. "
-                            f"- if the question is not in predefined topics: {', '.join(self.topics)}, "
-                            f"  I will pass the following query: AMBIGUOUS +' '+ keywords derived from the user question."
-                            "Rules for deciding the topic: "
-                            " - if there is context, I derive the topic by combining the current question with the context. "
+                                f"if true, call `chat_memory_recorder` to record the conversation in 100 words and go to next step, if false, go to the next step."
+                            " - step 4, I read the response from `search_agent` and compose a concise final response to share with the user. "
+                            " - step 5, I TERMINATE the conversation."
+                            
+                            "Rules for deciding the context: "
+                            " - if there is existing context, I derive the new context by combining the current question with the existing context. "
                             " - For example, if in the RAG user asks about topic A in the previous question, then context will be about topic A."
-                            " - if current question is very different from the RAG context or no context, derive the topic using the current question. "
-                            " - if there is no way to decide the topic, then it is classified as not in predefined topics. "
+                            " - if current question is very different from the existing context or no context, derive the topic using the current question. "
+                            " - if there is no way to decide the context, then tell the `search_agent` conduct a search without context."
+                            
                             "Other Rules: "
-                            "- Do not call `search_agent` more than one time."
-                            "- Call only once per chat. "
+                            "- Do not give empty response. "
+                            "- search_agent is an agent not a tool."
+                            "- I only have one tool: `chat_memory_recorder`."
                             "- TERMINATE if no new information"),
             description=(
-                "I **ONLY** speak after `user_proxy` or `search_agent`, the next speaker must be `researcher`"
+                "I **ONLY** speak after `user_proxy`, `researcher` or `search_agent`"
                 "I can do self reflection by speak to my self."
-                "I call `search_agent` one time per conversation. "
-                "Only I can TERMINATE the conversation."),
+                "Only I can TERMINATE the conversation."
+            ),
             llm_config=self.default_llm_config,
             human_input_mode="NEVER",
             code_execution_config=False,

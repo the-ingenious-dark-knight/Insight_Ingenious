@@ -71,7 +71,8 @@ class ConversationPattern:
                 f"check conversation history record: {self.memory_record_switch}, "
                 f"if true, call `chat_memory_recorder` to record the conversation."
                 "If false, just compose the final response and stop the conversation."
-                "Only I can TERMINATE the conversation."),
+                "Only I can TERMINATE the conversation.")
+            ,
             llm_config=self.default_llm_config,
             human_input_mode="NEVER",
             code_execution_config=False,

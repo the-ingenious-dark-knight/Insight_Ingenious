@@ -27,16 +27,23 @@ class ConversationFlow:
         search_agent = autogen.AssistantAgent(
             name="search_agent",
             system_message=("Tasks: "
-                            " - I use search_query given by `researcher` to conduct an AI search. "
+                            " - I derive search_query from the information given by `researcher`. "
+                            " - I make my own decision on conducting the search."
                             " - I can use the below arguments for the `search_tool`: "
                             " - if the query is about health, please use argument: search_query str, index_name: 'index-document-set-1'; "
                             " - if the query is about safety, please use argument: search_query str, index_name: 'index-document-set-2' "
-                            " - if the query contains AMBIGUOUS, I will search all index for a keyword match using the keyword provided by the researcher."
-                            "Rules: "
-                            " - The response MUST be based on the information found in the search results, without introducing any additional or external details. "
-                            " - I can delete the keyword AMBIGUOUS and conduct the search just based on meaningful keywords."
+                
+                            "Rules for compose the query: "
+                            f"- if the context is in predefined topics: {', '.join(agent_pattern.topics)}, "
+                            f"  I will compose query using the relevant index. "
+                            f"- if the question is not in predefined topics: {', '.join(agent_pattern.topics)} or lacks specific context,  "
+                            f"  I will use keywords derived from the user question and search all indexes: 'index-document-set-1', 'index-document-set-2'."
+                            
+                           
+                            "Other Rules: "
+                            " - My response MUST be based on the information found in the search results, without introducing any additional or external details. "
                             " - If there is no result from search, say 'no information can be found'. "
-                            " - I **ALWAYS** call `search_tool` if being select for speak."
+                            " - DO NOT give empty response. "
                             " - DO NOT do repeated search."
                             " - DO NOT terminate conversation."
                             " - DO NOT ask questions."),
