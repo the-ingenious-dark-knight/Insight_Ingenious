@@ -40,12 +40,11 @@ chat_request: ChatRequest = ChatRequest(
 
 
 # Example 1 search knowledge base under one ambiguous topic with memory
-chat_request.user_prompt = f"Tell me about contact number?"
+chat_request.user_prompt = f"Tell me about contact number in safety management?"
 res: ChatResponse = asyncio.run(process_message(chat_request=chat_request))
 
-chat_request.user_prompt = f"for safety?"
-res = asyncio.run(process_message(chat_request=chat_request))
-
+# chat_request.user_prompt = f"for safety?"
+# res = asyncio.run(process_message(chat_request=chat_request))
 
 
 # Example 2 search knowledge base under known topic(s)

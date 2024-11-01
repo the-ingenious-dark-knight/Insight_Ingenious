@@ -26,20 +26,20 @@ class ConversationFlow:
         #please revise index name in this section.
         search_agent = autogen.AssistantAgent(
             name="search_agent",
-            system_message=("I am a search agent."
-                            "Tasks: "
-                            " - I use search_query given by researcher to conduct an AI search. "
-                            " - I can use the below arguments for the search_tool: "
+            system_message=("Tasks: "
+                            " - I use search_query given by `researcher` to conduct an AI search. "
+                            " - I can use the below arguments for the `search_tool`: "
                             " - if the query is about health, please use argument: search_query str, index_name: 'index-document-set-1'; "
                             " - if the query is about safety and emergency, please use argument: search_query str, index_name: 'index-document-set-2' "
                             " - if the query contains AMBIGUOUS, I will search all index for a keyword match using the keyword provided by the researcher."
                             "Rules: "
-                            " - The response must be based strictly on the information found in the search results or guidelines, without introducing any additional or external details. "
+                            " - The response MUST be based on the information found in the search results, without introducing any additional or external details. "
                             " - I can delete the keyword AMBIGUOUS, but DO NOT change/refine the query passed by the researcher."
-                            " - DO NOT say anything more than the result from the search"
-                            " - DO NOT do repeated search"
+                            " - If there is no result from search, say 'no information can be found'. "
+                            " - DO NOT do repeated search."
+                            " - DO NOT terminate conversation."
                             " - DO NOT ask follow up question."),
-            description="I am a search agent focused on providing accurate information for search results.",
+            description= ("""I am **ONLY** allowed to speak **immediately** after `researcher`."""),
             llm_config=llm_config,
         )
 
