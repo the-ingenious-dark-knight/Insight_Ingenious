@@ -61,10 +61,8 @@ class ConversationPattern:
             name="researcher",
             system_message=(
                 "Tasks:\n"
-                "- ask the `search_agent` to retrieve information to solve user request by sharing the user question and the context.\n"
-                "- Compose a final response for the user.\n"
-                "Rules:\n"
-                "- after talk to `search_agent`, if there is no meaningful result, I respond with 'The question is out of my scope.' ."
+                "- Ask the `search_agent` to retrieve information to solve user request by sharing the user question and the context.\n"
+                "- Compose a final response for the user and TERMINATE.\n"
 
             ),
             description="I **ONLY** speak after `planner` or `search_agent`.",
@@ -81,11 +79,9 @@ class ConversationPattern:
                 "- Step 1: Pass the question and context to `researcher`.\n"
                 "- Step 2: TERMINATE conversation if no additional input is expected.\n\n"
                 "Notes:\n"
-                "Repeat the user's question if the tool response is empty."
                 "I cannot answer user questions directly, I need pass the question `researcher`."
             ),
-            description="Responds after `user_proxy` or `researcher` and controls conversation termination."
-                        "I ignore `UPDATE CONTEXT` ",
+            description="Responds after `user_proxy` and controls conversation termination.",
             llm_config=self.default_llm_config,
             human_input_mode="NEVER",
             code_execution_config=False,
