@@ -167,13 +167,13 @@ class ConversationPattern:
                          "Context: " + doc_contents +
                          "\nUser question: " + input_message,
                 problem= input_message,
-                summary_method="reflection_with_llm"
+                summary_method="last_msg"
             )
         else:
             res = await self.user_proxy.a_initiate_chat(
                 manager,
                 message=input_message,
-                summary_method="reflection_with_llm"
+                summary_method="last_msg"
             )
 
         with open(f"{self.memory_path}/context.md", "w") as memory_file:
