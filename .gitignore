@@ -5,8 +5,8 @@ __pycache__
 /site/
 /.cache/
 /env_mkdocs/
-/tmp/db/
-/tmp/context.md
+/ingenious/tmp/db/
+/ingenious/tmp/context.md
 /tmp/*.db
 /build
 /.venv_mkdocs
