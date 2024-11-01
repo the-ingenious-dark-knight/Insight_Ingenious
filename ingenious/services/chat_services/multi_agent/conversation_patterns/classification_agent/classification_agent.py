@@ -131,7 +131,8 @@ class ConversationPattern:
             doc_contents = self.user_proxy._get_context(self.user_proxy._results)
             res = await self.user_proxy.a_initiate_chat(
                 manager,
-                message="When there is no context, just focus on user question. \n "
+                message="Using group chat to solve user question. Keep the final answer concise."
+                        "When there is no context, just focus on user question. \n "
                         "Context: " + doc_contents +
                         "\nUser question: " + input_message,
                 problem=input_message,
