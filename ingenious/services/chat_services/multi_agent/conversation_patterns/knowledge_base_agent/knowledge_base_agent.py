@@ -79,7 +79,7 @@ class ConversationPattern:
                             " - step 3, I read the response from `search_agent` and compose a concise and factual final response and end the conversation."
                             "Rules for the query: "
                             f"- if the question is in predefined topics: {', '.join(self.topics)}, "
-                            f"  I will ask search agent to search using the relevant index with query derived from user question. "
+                            f"  I will ask search agent to search using the relevant index using query from user question. "
                             f"- if the question is not in predefined topics: {', '.join(self.topics)}, "
                             f"  I will pass the following query: AMBIGUOUS +' '+ keywords derived from the user question."
                             "Rules for deciding the topic: "
