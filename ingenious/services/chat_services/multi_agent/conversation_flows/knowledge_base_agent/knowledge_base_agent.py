@@ -36,7 +36,9 @@ class ConversationFlow:
                             " - The response MUST be based on the information found in the search results, without introducing any additional or external details. "
                             " - I can delete the keyword AMBIGUOUS and conduct the search just based on meaningful keywords."
                             " - If there is no result from search, say 'no information can be found'. "
+                            " - I **ALWAYS** call `search_tool` if being select for speak."
                             " - DO NOT do repeated search."
+                            " - DO NOT participate conversation other than provide search result.."
                             " - DO NOT terminate conversation."
                             " - DO NOT ask follow up question."),
             description= ("""I am **ONLY** allowed to speak **immediately** after `researcher`."""),

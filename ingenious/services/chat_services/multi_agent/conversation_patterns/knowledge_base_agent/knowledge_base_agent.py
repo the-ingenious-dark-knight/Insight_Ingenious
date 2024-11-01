@@ -76,7 +76,7 @@ class ConversationPattern:
                                 f"check whether to record conversation: {self.memory_record_switch}, "
                                 f"if true, call `chat_memory_recorder` to record the conversation in 100 words and go to next step, "
                                 "if false, just go to the next step."
-                            " - step 3, I read the response from `search_agent` and compose the final response and end the conversation."
+                            " - step 3, I read the response from `search_agent` and compose a concise and factual final response and end the conversation."
                             "Rules for the query: "
                             f"- if the question is in predefined topics: {', '.join(self.topics)}, "
                             f"  I will ask search agent to search using the relevant index with query derived from user question. "
