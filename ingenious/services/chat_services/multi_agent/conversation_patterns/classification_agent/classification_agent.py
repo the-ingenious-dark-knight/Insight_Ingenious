@@ -18,7 +18,6 @@ class ConversationPattern:
         self.memory_path = memory_path
         self.thread_memory = thread_memory
         self.topic_agents: list[autogen.AssistantAgent] = []
-        self.task = 'Processing user group chat requests.'
 
         if not self.thread_memory:
             with open(f"{self.memory_path}/context.md", "w") as memory_file:
@@ -39,7 +38,7 @@ class ConversationPattern:
             is_termination_msg=self.termination_msg,
             human_input_mode="NEVER",
             max_consecutive_auto_reply=2,
-            system_message=self.task,
+            system_message= "I enhance the user question with context",
             retrieve_config={
                 "task": "qa",
                 "docs_path": [f"{self.memory_path}/context.md"],
@@ -50,7 +49,7 @@ class ConversationPattern:
                 "get_or_create": True,
             } if self.memory_record_switch else None,
             code_execution_config=False,
-            silent=True
+            silent=False
         )
 
         self.researcher = autogen.ConversableAgent(
@@ -77,12 +76,14 @@ class ConversationPattern:
             name="planner",
             system_message=(
                 "Tasks:\n"
-                "- Step 1: Talk to `researcher` to answer the user’s question.\n"
+                "- Step 1: Pass the question and context to `researcher`.\n"
                 "- Step 2: TERMINATE conversation if no additional input is expected.\n\n"
                 "Notes:\n"
                 "Repeat the user's question if the tool response is empty."
+                "I cannot answer user questions directly, I need pass the question `researcher`."
             ),
-            description="Responds after `user_proxy` or `researcher` and controls conversation termination.",
+            description="Responds after `user_proxy` or `researcher` and controls conversation termination."
+                        "I ignore `UPDATE CONTEXT` ",
             llm_config=self.default_llm_config,
             human_input_mode="NEVER",
             code_execution_config=False,
@@ -129,7 +130,7 @@ class ConversationPattern:
             res = await self.user_proxy.a_initiate_chat(
                 manager,
                 message=self.user_proxy.message_generator,
-                problem=input_message,
+                problem=input_message + ' **User question should be prioritised**',
                 summary_method="last_msg"
             )
         else:
@@ -141,7 +142,7 @@ class ConversationPattern:
 
         with open(f"{self.memory_path}/context.md", "w") as memory_file:
             memory_file.write(res.summary)
-            context = memory_file.read()
+            context = res.summary
 
         # Send a response back to the user
         return res.summary, context
