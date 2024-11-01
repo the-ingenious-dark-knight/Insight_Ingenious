@@ -30,7 +30,7 @@ class ConversationFlow:
                             " - I use search_query given by `researcher` to conduct an AI search. "
                             " - I can use the below arguments for the `search_tool`: "
                             " - if the query is about health, please use argument: search_query str, index_name: 'index-document-set-1'; "
-                            " - if the query is about safety and emergency, please use argument: search_query str, index_name: 'index-document-set-2' "
+                            " - if the query is about safety, please use argument: search_query str, index_name: 'index-document-set-2' "
                             " - if the query contains AMBIGUOUS, I will search all index for a keyword match using the keyword provided by the researcher."
                             "Rules: "
                             " - The response MUST be based on the information found in the search results, without introducing any additional or external details. "
@@ -38,9 +38,8 @@ class ConversationFlow:
                             " - If there is no result from search, say 'no information can be found'. "
                             " - I **ALWAYS** call `search_tool` if being select for speak."
                             " - DO NOT do repeated search."
-                            " - DO NOT participate conversation other than provide search result.."
                             " - DO NOT terminate conversation."
-                            " - DO NOT ask follow up question."),
+                            " - DO NOT ask questions."),
             description= ("""I am **ONLY** allowed to speak **immediately** after `researcher`."""),
             llm_config=llm_config,
         )
