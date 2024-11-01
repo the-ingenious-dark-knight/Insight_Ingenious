@@ -127,11 +127,14 @@ class ConversationPattern:
                                            code_execution_config=False)
 
         if self.memory_record_switch:
+            self.user_proxy.retrieve_docs(input_message, 2, '')
+            self.user_proxy.n_results = 2
+            doc_contents = self.user_proxy._get_context(self.user_proxy._results)
             res = await self.user_proxy.a_initiate_chat(
                 manager,
-                message=self.user_proxy.message_generator,
-                problem=input_message + ' **User question should be prioritised**',
-                summary_method="last_msg"
+                message="Context: " + doc_contents + " User question: " + input_message,
+                problem=input_message,
+                summary_method="reflection_with_llm"
             )
         else:
             res = await self.user_proxy.a_initiate_chat(

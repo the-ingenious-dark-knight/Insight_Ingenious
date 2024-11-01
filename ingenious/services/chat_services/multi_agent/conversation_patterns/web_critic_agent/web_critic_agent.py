@@ -137,6 +137,15 @@ class ConversationPattern:
 
         # Initiate chat with or without memory recording
         if self.memory_record_switch:
+            self.user_proxy.retrieve_docs(input_message, 2, '')
+            self.user_proxy.n_results = 2
+            doc_contents = self.user_proxy._get_context(self.user_proxy._results)
+            res = await self.user_proxy.a_initiate_chat(
+                manager,
+                message="Context: " + doc_contents + " User question: " + input_message,
+                problem=input_message,
+                summary_method="reflection_with_llm"
+            )
             res = await self.user_proxy.a_initiate_chat(
                 manager,
                 message=self.user_proxy.message_generator,
