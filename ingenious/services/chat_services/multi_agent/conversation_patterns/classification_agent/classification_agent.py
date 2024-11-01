@@ -62,7 +62,6 @@ class ConversationPattern:
                 f"If the user's question matches any predefined topic ({', '.join(self.topics)}), select the relevant topic agents. "
                 "Otherwise, determine the context based on current or previous interactions.\n"
                 "- Example: If a user asked about Topic A before, continue with Topic A.\n"
-                "- If I cannot find a relevant topic agent, I respond with 'The question is out of my scope.'\n"
 
             ),
             description="Responds after `planner` or `topic_agents`.",
