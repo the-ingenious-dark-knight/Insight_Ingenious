@@ -142,15 +142,11 @@ class ConversationPattern:
             doc_contents = self.user_proxy._get_context(self.user_proxy._results)
             res = await self.user_proxy.a_initiate_chat(
                 manager,
-                message="Context: " + doc_contents + " User question: " + input_message,
+                message="When there is no context, just focus on user question. \n "
+                        "Context: " + doc_contents +
+                        "\nUser question: " + input_message,
                 problem=input_message,
                 summary_method="reflection_with_llm"
-            )
-            res = await self.user_proxy.a_initiate_chat(
-                manager,
-                message=self.user_proxy.message_generator,
-                problem=input_message,
-                summary_method="last_msg"
             )
         else:
             res = await self.user_proxy.a_initiate_chat(
