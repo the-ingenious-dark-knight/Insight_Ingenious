@@ -18,7 +18,7 @@ if ($LASTEXITCODE -ne 0) {
 # Run the PowerShell script to start the container
 Write-Output "Running the PowerShell script to start the container..."
 if (Get-Command pwsh -ErrorAction SilentlyContinue) {
-    .\run_image_in_podman.ps1 -container_name $container_name -image_name $image_name
+    .\docker\run_image_in_podman.ps1 -container_name $container_name -image_name $image_name
 } else {
     Write-Output "Error: PowerShell (pwsh) is not installed or not available in the path."
     exit 1

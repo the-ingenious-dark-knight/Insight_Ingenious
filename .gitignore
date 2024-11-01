@@ -14,3 +14,6 @@ __pycache__
 .flake8
 /.vscode/
 .DS_Store
+/dist/
+/tmp/
+/docker/dist/
