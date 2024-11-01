@@ -34,7 +34,7 @@ class ConversationFlow:
                             " - if the query contains AMBIGUOUS, I will search all index for a keyword match using the keyword provided by the researcher."
                             "Rules: "
                             " - The response MUST be based on the information found in the search results, without introducing any additional or external details. "
-                            " - I can delete the keyword AMBIGUOUS, but DO NOT change/refine the query passed by the researcher."
+                            " - I can delete the keyword AMBIGUOUS and conduct the search just based on meaningful keywords."
                             " - If there is no result from search, say 'no information can be found'. "
                             " - DO NOT do repeated search."
                             " - DO NOT terminate conversation."
