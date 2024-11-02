@@ -4,7 +4,7 @@ FROM ubuntu:24.04
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    VIRTUAL_ENV=/venv
+    VIRTUAL_ENV=.venv
 
 # Expose port 80
 EXPOSE 80
