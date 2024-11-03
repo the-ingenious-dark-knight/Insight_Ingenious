@@ -1,5 +1,4 @@
-name: Docker Image CI
-
+name: Push triggered Build and Deploy
 on:
   push:
     branches: [ "jrampono-adding-actions" ]
