@@ -1,11 +1,12 @@
-import logging
-
 import autogen
 import autogen.retrieve_utils
 import autogen.runtime_logging
 from autogen.agentchat.contrib.retrieve_user_proxy_agent import RetrieveUserProxyAgent
+from ingenious.services.chat_services.multi_agent.tool_factory import ToolFunctions
 
+import logging
 logger = logging.getLogger(__name__)
+
 
 
 class ConversationPattern:
@@ -17,7 +18,8 @@ class ConversationPattern:
         self.memory_record_switch = memory_record_switch
         self.memory_path = memory_path
         self.thread_memory = thread_memory
-        self.topic_agents: list[autogen.AssistantAgent] = []
+        self.assistant_agents: list[autogen.AssistantAgent] = []
+
 
         if not self.thread_memory:
             with open(f"{self.memory_path}/context.md", "w") as memory_file:
@@ -33,12 +35,12 @@ class ConversationPattern:
 
         # Initialize agents
         if self.memory_record_switch:
-            self.user_proxy = RetrieveUserProxyAgent(
+            self.user_proxy =  RetrieveUserProxyAgent(
                 name="user_proxy",
                 is_termination_msg=self.termination_msg,
                 human_input_mode="NEVER",
                 max_consecutive_auto_reply=2,
-                system_message="I enhance the user question with context",
+                system_message= "I enhance the user question with context",
                 retrieve_config={
                     "task": "qa",
                     "docs_path": [f"{self.memory_path}/context.md"],
@@ -62,46 +64,45 @@ class ConversationPattern:
                 silent=False
             )
 
+
+
         self.researcher = autogen.ConversableAgent(
             name="researcher",
             system_message=(
                 "Tasks:\n"
-                "- Decide the user's question topic and speak with the relevant topic agent.\n"
-                "- Compose a final response for the user.\n"
-                "Rules:\n"
-                f"If the user's question matches any predefined topic ({', '.join(self.topics)}), select the relevant topic agents. "
-                "Otherwise, determine the context based on current or previous interactions.\n"
-                "- Example: If a user asked about Topic A before, continue with Topic A.\n"
-
+                "- Solve the user question and fact check with the `web_critic_agent`.\n"
+                "- Compose a final response send to the user."
             ),
-            description="Responds after `planner` or `topic_agents`.",
+            description="I **ONLY** speak after `planner` or `web_critic_agent`.",
             llm_config=self.default_llm_config,
             human_input_mode="NEVER",
             code_execution_config=False,
             is_termination_msg=self.termination_msg,
         )
 
-        self.planner = autogen.ConversableAgent(
+
+
+
+        self.planner = autogen.AssistantAgent(
             name="planner",
             system_message=(
                 "Tasks:\n"
-                "- Step 1: Pass the question and context to `researcher`.\n"
-                "- Step 2: TERMINATE conversation if no additional input is expected.\n\n"
+                "- Pass the question and context to `researcher`.\n"
+                "- I can TERMINATE the conversation"
                 "Notes:\n"
-                "Repeat the user's question if the tool response is empty."
                 "I cannot answer user questions directly, I need pass the question `researcher`."
             ),
-            description="Responds after `user_proxy` or `researcher` and controls conversation termination."
-                        "I ignore `UPDATE CONTEXT` ",
+            description="Responds after `user_proxy` or `web_critic_agent`.",
             llm_config=self.default_llm_config,
             human_input_mode="NEVER",
             code_execution_config=False,
             is_termination_msg=self.termination_msg,
         )
 
+    def add_assistant_agent(self, agent: autogen.AssistantAgent):
+        self.assistant_agents.append(agent)
 
-    def add_topic_agent(self, agent: autogen.AssistantAgent):
-        self.topic_agents.append(agent)
+
 
     async def get_conversation_response(self, input_message: str) -> [str, str]:
         """
@@ -112,13 +113,13 @@ class ConversationPattern:
         graph_dict = {}
         graph_dict[self.user_proxy] = [self.planner]
         graph_dict[self.planner] = [self.researcher]
-        graph_dict[self.researcher] = self.topic_agents
-        for topic_agent in self.topic_agents:
-            graph_dict[topic_agent] = [self.researcher]
+        graph_dict[self.researcher] = self.assistant_agents
+        for assistant_agent in self.assistant_agents:
+            graph_dict[assistant_agent] = [self.researcher, self.planner]
 
 
         groupchat = autogen.GroupChat(
-            agents=[self.user_proxy, self.researcher, self.planner] + self.topic_agents,
+            agents=[self.user_proxy, self.researcher, self.planner] + self.assistant_agents,
             messages=[],
             max_round=6,
             speaker_selection_method="auto",
@@ -135,14 +136,17 @@ class ConversationPattern:
                                            is_termination_msg=self.termination_msg,
                                            code_execution_config=False)
 
+
+
         if self.memory_record_switch:
             self.user_proxy.retrieve_docs(input_message, 2, '')
             self.user_proxy.n_results = 2
             doc_contents = self.user_proxy._get_context(self.user_proxy._results)
             res = await self.user_proxy.a_initiate_chat(
                 manager,
-                message="Using group chat to solve user question. Keep the final answer concise."
-                        "When there is no context, just focus on user question. \n "
+                message="Use group chat to solve user question. Keep the final answer concise."
+                        "When there is no context, just focus on user question. "
+                        "\n "
                         "Context: " + doc_contents +
                         "\nUser question: " + input_message,
                 problem=input_message,

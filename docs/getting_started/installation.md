@@ -81,10 +81,12 @@ Clone the repository from GitHub:
 git clone https://github.com/Insight-Services-APAC/Insight_Ingenious.git
 ```
 
-Navigate to the project directory:
+Navigate to the project directory and get the latest release:
 
 ```bash
 cd Insight_Ingenious
+
+git checkout v0.0.1
 ```
 
 ### Profile Setup
@@ -123,8 +125,16 @@ There are two methods to build and run the Docker image:
     Run the installation script using PowerShell:
 
     ```powershell
-    pwsh .\run_container_installation.ps1
+    pwsh .\run_container_installation_dev.ps1
     ```
+    or 
+
+    ```powershell
+    pwsh .\run_container_installation_prod.ps1
+    ```
+    if want deploy with a client site. 
+
+
     !!! tip
         The default parameter for the installer is:
 
