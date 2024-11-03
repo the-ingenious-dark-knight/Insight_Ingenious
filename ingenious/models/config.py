@@ -1,81 +1,97 @@
-import dataclasses as dataclass
-from typing import List, Dict
-from dataclasses import dataclass, field
-from typing import List, Dict
+from typing import List, Dict, Optional
+from pydantic import BaseModel, Field, ValidationError
+from ingenious.models import profile as profile_models
+from ingenious.models import config as config_models
+from ingenious.models import config_ns as config_ns_models
 
 
+class ChatHistoryConfig(config_ns_models.ChatHistoryConfig):
+    database_connection_string: str = Field("", description="Connection string for the database. Only used for cosmosdb")
 
-@dataclass
-class ChatHistoryConfig:
-    database_type: str
-    database_path: str = ""
-    database_connection_string: str = ""
-    database_name: str = ""
-    memory_path: str = ""
-
-
-@dataclass
-class ModelConfig:
-    model: str
-    api_type: str
-    api_version: str
-    base_url: str = ""
-    api_key: str = ""
+    def __init__(self, config: config_ns_models.ChatHistoryConfig, profile: profile_models.ChatHistoryConfig):
+        super().__init__(
+            database_type=config.database_type, 
+            database_path=config.database_path, 
+            database_connection_string=profile.database_connection_string, 
+            database_name=config.database_name, 
+            memory_path=config.memory_path)
 
 
-@dataclass
-class ChatServiceConfig:
-    type: str
+class ModelConfig(config_ns_models.ModelConfig):
+    api_key: str
+    base_url: str
+
+    def __init__(self, config: config_ns_models.ModelConfig, profile: profile_models.ModelConfig):
+        super().__init__(model=config.model, api_type=config.api_type, api_version=config.api_version, base_url=profile.base_url, api_key=profile.api_key)
 
 
-@dataclass
-class ToolServiceConfig:
-    enable: bool
+class ChainlitConfig(config_ns_models.ChainlitConfig):
+    authentication: profile_models.ChainlitAuthConfig = Field(default_factory=profile_models.ChainlitAuthConfig)
+
+    def __init__(self, config: config_ns_models.ChainlitConfig, profile: profile_models.ChainlitConfig):
+        super().__init__(enable=config.enable, authentication=profile.authentication)
 
 
-@dataclass
-class LoggingConfig:
-    root_log_level: str
-    log_level: str
+class ChatServiceConfig(config_ns_models.ChatServiceConfig):
+    def __init__(self, config: config_ns_models.ChatServiceConfig, profile: profile_models.ChatServiceConfig):
+        super().__init__(type=config.type)
 
 
-@dataclass
-class AzureSearchConfig:
-    service: str
-    endpoint: str
+class ToolServiceConfig(config_ns_models.ToolServiceConfig):
+    def __init__(self, config: config_ns_models.ToolServiceConfig, profile: profile_models.ToolServiceConfig):
+        super().__init__(enable=config.enable)
+
+
+class LoggingConfig(config_ns_models.LoggingConfig):
+    def __init__(self, config: config_ns_models.LoggingConfig, profile: profile_models.LoggingConfig):
+        super().__init__(root_log_level=config.root_log_level, log_level=config.log_level)
+
+
+class AzureSearchConfig(config_ns_models.AzureSearchConfig):
     key: str = ""
+    def __init__(self, config: config_ns_models.AzureSearchConfig, profile: profile_models.AzureSearchConfig):
+        super().__init__(service=config.service, endpoint=config.endpoint, key=profile.key)
+
+class WebConfig(config_ns_models.WebConfig):
+    authentication: profile_models.WebAuthConfig = {}
+
+    def __init__(self, config: config_ns_models.WebConfig, profile: profile_models.WebConfig):
+        super().__init__(ip_address=config.ip_address, port=config.port, type=config.type, authentication=profile.authentication)
 
 
-@dataclass
-class WebAuthConfig:
-    type: str = ""
-    enable: bool = True
-    username: str = ""
-    password: str = ""
-
-
-@dataclass
-class WebConfig:
-    ip_address: str
-    port: int 
-    authentication: WebAuthConfig = field(default_factory=WebAuthConfig)
-    type: str = "fastapi"
-
-    def __init__(self, ip_address: str, port: int,  type="fastapi", authentication={}):
-        self.port = port
-        self.ip_address = ip_address
-        self.type = type
-        self.authentication = WebAuthConfig(**authentication)
-
-
-
-@dataclass
-class Config:
+class Config(BaseModel):
     chat_history: ChatHistoryConfig
-    profile: 'Profiles.Profile'
     models: List[ModelConfig]
     logging: LoggingConfig
     tool_service: ToolServiceConfig
     chat_service: ChatServiceConfig
+    chainlit_configuration: ChainlitConfig
     azure_search_services: List[AzureSearchConfig]
     web_configuration: WebConfig
+
+    def __init__(self, config: config_ns_models.Config, profile: profile_models.Profile):
+        super().__init__(
+            chat_history=ChatHistoryConfig(config.chat_history, profile.chat_history),
+            models=[],
+            logging=LoggingConfig(config.logging, profile.logging),
+            tool_service=ToolServiceConfig(config.tool_service, profile.tool_service),
+            chat_service=ChatServiceConfig(config.chat_service, profile.chat_service),
+            chainlit_configuration=ChainlitConfig(config.chainlit_configuration, profile.chainlit_configuration),
+            azure_search_services=[],
+            web_configuration=WebConfig(config.web_configuration, profile.web_configuration)
+        )
+
+        models: List[config_models.ModelConfig] = []
+        for config_model in config.models:
+            for profile_model in profile.models:
+                if config_model.model == profile_model.model:
+                    models.append(config_models.ModelConfig(config_model, profile_model))      
+        self.models = models
+
+        self.azure_search_services = []
+        for as_config in config.azure_search_services:
+            for profile_as_config in profile.azure_search_services:
+                if as_config.service == profile_as_config.service: 
+                    self.azure_search_services.append(config_models.AzureSearchConfig(as_config, profile_as_config))
+        
+

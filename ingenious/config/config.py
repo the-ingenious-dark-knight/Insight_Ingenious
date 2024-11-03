@@ -1,9 +1,10 @@
-import dataclasses as dataclass
 from typing import List
 import json
 import yaml
 from pathlib import Path
 from ingenious.config.profile import Profiles
+
+from ingenious.models import config_ns as config_ns_models
 from ingenious.models import config as config_models
 from ingenious.models import profile as profile_models
 import os
@@ -12,16 +13,6 @@ from azure.identity import DefaultAzureCredential
 
 
 class Config(config_models.Config):
-    def __init__(self, profile, models, chat_history, logging, tool_service, chat_service, azure_search_services=[], web_configuration={}):
-        self.chat_history: config_models.ChatHistoryConfig = chat_history
-        self.profile = profile
-        self.models: list[config_models.ModelConfig] = models
-        self.logging: config_models.LoggingConfig = logging
-        self.tool_service = tool_service
-        self.chat_service = chat_service
-        self.azure_search_services: list[config_models.AzureSearchConfig] = azure_search_services
-        self.web_configuration: config_models.WebConfig = web_configuration
-
     @staticmethod
     def from_yaml(file_path):
         with open(file_path, 'r') as file:
@@ -30,55 +21,27 @@ class Config(config_models.Config):
         
     @staticmethod
     def from_yaml_str(config_yml):
-        data = yaml.safe_load(config_yml)            
-        models = [config_models.ModelConfig(**model) for model in data['models']]
-        profile = data['profile']
-        chat_service = config_models.ChatServiceConfig(**data['chat_service'])
-        tool_service = config_models.ToolServiceConfig(**data['tool_service'])
-        azure_search_services = [config_models.AzureSearchConfig(**as_config) for as_config in data['azure_search_services']]
-        web_configuration = config_models.WebConfig(**data['web_configuration'])
-        # Get the sensitive model information from the profile
+        yaml_data = yaml.safe_load(config_yml) 
+        json_data = json.dumps(yaml_data)   
+        config_ns: config_ns_models.Config       
+        try:
+            config_ns = config_ns_models.Config.model_validate_json(json_data)
+        except config_models.ValidationError as e:
+            print(f"Validation error: {e}")
+            raise e
+        except Exception as e:
+            print(f"Error: {e}")
+            raise e
+        
         profile_data: profile_models.Profiles = Profiles(os.getenv("INGENIOUS_PROFILE_PATH", ''))
-        profile_object = profile_data.get_profile_by_name(profile)
+        profile_object: profile_models.Profile = profile_data.get_profile_by_name(config_ns.profile)
         if profile_object is None:
-            raise ValueError(f"Profile {profile} not found in profiles.yml")
+            raise ValueError(f"Profile {config_ns.profile} not found in profiles.yml")
         
-        for config_model in models:
-            for profile_model in profile_object.models:
-                if config_model.model == profile_model.model:
-                    # add all attribites from the profile model to the config model
-                    for key, value in profile_model.__dict__.items():
-                        setattr(config_model, key, value)
-                    break
-        
-        for as_config in azure_search_services:
-            for profile_as_config in profile_object.azure_search_services:
-                if as_config.service == profile_as_config.service:
-                    # add all attribites from the profile model to the config model
-                    for key, value in profile_as_config.__dict__.items():
-                        setattr(as_config, key, value)
-                    break
-        
-        for key, value in profile_object.web_configuration.__dict__.items():
-            setattr(web_configuration, key, value)
+        config: config_models.Config = config_models.Config(config_ns, profile_object)
 
-        chat_history_data = data['chat_history']            
-        chat_history = config_models.ChatHistoryConfig(**chat_history_data)
-        for key, value in profile_object.chat_history.__dict__.items():
-            setattr(chat_history, key, value)
+        return config
 
-        logging_data = data['logging']
-        logging_config = config_models.LoggingConfig(**logging_data) 
-        return Config(
-            profile=profile,
-            models=models,
-            chat_history=chat_history,
-            logging=logging_config,
-            tool_service=tool_service,
-            chat_service=chat_service,
-            azure_search_services=azure_search_services,
-            web_configuration=web_configuration
-        )
 
 @staticmethod
 def get_kv_secret(secretName):
