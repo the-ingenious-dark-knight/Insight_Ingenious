@@ -1,0 +1,55 @@
+name: Docker Image CI
+
+on: workflow_dispatch
+  
+permissions:
+  id-token: write
+  contents: read
+
+  
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+    environment:
+      name: 'demo'
+
+    steps:
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Checkout
+        uses: actions/checkout@v4.2.2 
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5.3.0
+        with:
+          python-version: 3.12.4          
+          cache: 'pip'
+      - run: |
+          pip install -r requirements.txt
+      - run: |
+          python -m build
+      - name: Publish Container Image
+        uses: Azure/cli@v2.1.0
+        with:  
+          azcliversion: latest
+          inlineScript: 
+            # az acr build --registry acrsydingdevkfpqjli23em5m --image ingen_dev:0.0.1 --file ./docker/development_images/linux_development_image_ubuntu.dockerfile ./docker/
+            az acr build --registry ${{ secrets.CONTAINER_REGISTRY }} --image ingen_prd:0.0.1 --file ./docker/production_images/linux_with_chat_summariser.dockerfile ./dist/
+      - name: Update Container App
+        uses: Azure/cli@v2.1.0
+        with:  
+         azcliversion: latest
+         inlineScript:             
+            az containerapp update -n ingenca -g DefaultResourceGroup-EAU --image acrsydingdevkfpqjli23em5m.azurecr.io/ingen_prd:0.0.1 --set-env-vars APPSETTING_INGENIOUS_CONFIG=secretref:config APPSETTING_INGENIOUS_PROFILE=secretref:profile
+       
+            
+            
+      
+     
