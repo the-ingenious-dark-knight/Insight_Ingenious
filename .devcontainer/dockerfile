@@ -11,8 +11,11 @@ RUN apt install -y python3
 RUN apt install -y python3-pip
 RUN apt install -y python3.12-venv
 
-RUN python3 -m venv .venv
-#RUN . ./.venv/bin/activate && pip3 install -r ./installs/requirements.txt
+ENV VIRTUAL_ENV=/opt/venv
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+COPY ./requirements.txt requirements.txt
+RUN pip3 install -r ./requirements.txt
 RUN apt install -y  wget
 RUN apt install zsh git fonts-font-awesome -y 
 # RUN sh -c "$(wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)"
