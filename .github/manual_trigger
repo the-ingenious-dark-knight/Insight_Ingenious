@@ -2,6 +2,10 @@ name: Manually triggered Build and Deploy
 
 on: workflow_dispatch
 
+environment:
+      name: 'demo'
+
+
 permissions:
   id-token: write
   contents: read
