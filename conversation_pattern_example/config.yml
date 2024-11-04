@@ -8,9 +8,9 @@ logging:
   log_level: debug
 chat_history:  
   database_type: cosmos # cosmos or sqlite
-  database_path: tmp/high_level_logs.db # only used for sqlite
+  database_path: /tmp/high_level_logs.db # only used for sqlite
   database_name: ToDoList # only used for cosmos
-  memory_path: tmp
+  memory_path: /tmp
 chat_service:
   type: multi_agent
 tool_service:
