@@ -31,17 +31,18 @@ chat_request: ChatRequest = ChatRequest(
         user_id="elliot",
         user_prompt="",
         user_name="elliot",
-        topic= "tennis, basketball",
+        topic= "",
         memory_record = True,
-        conversation_flow="classification_agent"
+        conversation_flow="web_critic_agent"
     )
 
-
-t = "basketball"
-chat_request.user_prompt = f"What is {t}?" #if I change this question to things other than grand slams it works.
+chat_request.user_prompt = ("Write me a short story in 100 words based on the following: "
+                            "The Australia men's national cricket team represents "
+                            "Australia in men's international cricket. "
+                            "It is the joint oldest team in Test cricket history,"
+                            " playing in the first ever Test match in 1999;"
+                            " the team current coach is Elliot Zhu.")
 res = ChatResponse = asyncio.run(process_message(chat_request=chat_request))
 
-# chat_request.user_prompt = f"Who are the most celebrated stars?"
-# res = asyncio.run(process_message(chat_request=chat_request))
 
 print(res)
