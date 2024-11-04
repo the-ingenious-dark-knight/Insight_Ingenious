@@ -12,14 +12,10 @@ __pycache__
 /build
 /.venv_mkdocs
 /.env_mkdocs/
-<<<<<<< HEAD
 .DS_Store
 .chainlit
-=======
-.flake8
-/.vscode/
 .DS_Store
 /dist/
 /tmp/
 /docker/dist/
->>>>>>> 14d8d71d9fc0f1a9e5cabc606eef85b59647b6e5
+
