@@ -1,75 +1,66 @@
-from dataclasses import dataclass, field
+from pydantic import BaseModel, Field, ValidationError, RootModel
 from typing import List, Dict, Optional
 
 
-@dataclass
-class ModelConfig:
+class ModelConfig(BaseModel):
     model: str
     api_key: str
     base_url: str
 
 
-@dataclass
-class ChatHistoryConfig:
+class ChatHistoryConfig(BaseModel):
     database_connection_string: str = ""
 
 
-@dataclass
-class AzureSearchConfig:
+class AzureSearchConfig(BaseModel):
     service: str
     key: str
 
 
-@dataclass
-class ChainlitAuthConfig:
+class ChainlitAuthConfig(BaseModel):
     enable: bool = False
     github_secret: str = ""
     github_client_id: str = ""
 
 
-@dataclass
-class ChainlitConfig:
-    enable: bool = False
-    authentication: ChainlitAuthConfig = field(default_factory=ChainlitAuthConfig)
-
-    def __init__(self, enable=False, authentication={}):
-        authentication = ChainlitAuthConfig(**authentication)
+class ChainlitConfig(BaseModel):
+    authentication: ChainlitAuthConfig = Field(default_factory=ChainlitAuthConfig)
 
 
-@dataclass
-class WebAuthConfig:
+class ToolServiceConfig(BaseModel):
+    pass
+
+
+class ChatServiceConfig(BaseModel):
+    pass
+
+
+class WebAuthConfig(BaseModel):
     type: str = ""
     enable: bool = True
     username: str = ""
     password: str = ""
 
 
-@dataclass
-class WebConfig:    
-    authentication: WebAuthConfig = field(default_factory=WebAuthConfig)
-
-    def __init__(self, authentication={}):
-        self.authentication = WebAuthConfig(**authentication)
+class WebConfig(BaseModel):    
+    authentication: WebAuthConfig = Field(default_factory=WebAuthConfig)
 
 
-@dataclass
-class Profile:
+class LoggingConfig(BaseModel):
+    pass
+
+
+class Profile(BaseModel):
     name: str
     models: List[ModelConfig]
     chat_history: ChatHistoryConfig
+    chat_service: ChatServiceConfig = Field(default_factory=ChatServiceConfig, description="Chat service configuration")
     azure_search_services: List[AzureSearchConfig]
     web_configuration: WebConfig
     chainlit_configuration: ChainlitConfig
-
-    def __init__(self, name, models, chat_history, azure_search_services, web_configuration, chainlit_configuration):
-        self.name = name
-        self.models = [ModelConfig(**model) for model in models]
-        self.chat_history = ChatHistoryConfig(**chat_history)
-        self.azure_search_services: list[AzureSearchConfig] = [AzureSearchConfig(**as_config) for as_config in azure_search_services]
-        self.web_configuration = WebConfig(**web_configuration)
-        self.chainlit_configuration = ChainlitConfig(**chainlit_configuration)
+    tool_service: ToolServiceConfig = Field(default_factory=ToolServiceConfig, description="Tool service configuration")
+    logging: LoggingConfig = Field(default_factory=LoggingConfig, description="Logging configuration")
 
 
-@dataclass
-class Profiles:
-    profiles: List[Profile] = field(default_factory=list)
+class Profiles(RootModel[List[Profile]]):
+    pass

@@ -10,7 +10,8 @@ async def main(message: cl.Message):
         user_id="123",
         user_prompt=message.content,
         user_name="test",
-        conversation_flow="test_flow"
+        topic="tennis, basketball",
+        conversation_flow="classification_agent"
     )
 
     cs = deps.get_chat_service(

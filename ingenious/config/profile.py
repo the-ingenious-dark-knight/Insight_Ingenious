@@ -1,3 +1,5 @@
+from pydantic_core import from_json
+from pydantic import ValidationError
 import json
 import yaml
 import os
@@ -7,22 +9,30 @@ from azure.keyvault.secrets import SecretClient
 from azure.identity import DefaultAzureCredential
 
 
-class Profiles(profile_models.Profiles):
+class Profiles():
     def __init__(self, profiles_path=None):
-        self.profiles = Profiles._get_profiles(profiles_path)
+        self.profiles: profile_models.Profiles = Profiles._get_profiles(profiles_path)
+
+    @staticmethod
+    def from_yaml_str(profile_yml):
+        yaml_data = yaml.safe_load(profile_yml)
+        json_data = json.dumps(yaml_data)
+        try:
+            profiles = profile_models.Profiles.model_validate_json(json_data).root
+        except ValidationError as e:
+            print(f"Validation error: {e}")
+            raise e
+        except Exception as e:
+            print(f"Error: {e}")
+            raise e
+        return profiles
 
     @staticmethod
     def from_yaml(file_path):
         with open(file_path, 'r') as file:
-            data = yaml.safe_load(file)
-            profiles = [profile_models.Profile(**profile) for profile in data]
+            file_str = file.read()
+            profiles = Profiles.from_yaml_str(file_str)
             return profiles
-    
-    @staticmethod
-    def from_yaml_str(profile_yml):
-        data = yaml.safe_load(profile_yml)
-        profiles = [profile_models.Profile(**profile) for profile in data]
-        return profiles
 
     @staticmethod
     def _get_profiles(profiles_path=None):

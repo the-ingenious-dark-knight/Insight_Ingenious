@@ -1,4 +1,5 @@
 /.venv/
+/.chainlit/
 /.venv*/
 /.idea/
 __pycache__
@@ -11,9 +12,10 @@ __pycache__
 /build
 /.venv_mkdocs
 /.env_mkdocs/
-.flake8
-/.vscode/
+.DS_Store
+.chainlit
 .DS_Store
 /dist/
 /tmp/
 /docker/dist/
+

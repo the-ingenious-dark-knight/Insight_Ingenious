@@ -1,9 +1,11 @@
 import os
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from chainlit.utils import mount_chainlit
 from dotenv import load_dotenv
 from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
 import logging
+import ingenious.config.config as ingen_config
 
 # Import your routers
 import ingenious.api.routes.chat as chat
@@ -17,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 class FastAgentAPI:
-    def __init__(self):
+    def __init__(self, config: ingen_config.Config ):
         # Set the working directory
         os.chdir(os.environ["INGENIOUS_WORKING_DIR"])
 
@@ -39,6 +41,10 @@ class FastAgentAPI:
 
         # Add root endpoint
         self.app.get("/", tags=["Root"])(self.root)
+
+        # Mount ChainLit
+        if config.chainlit_configuration.enable:
+            mount_chainlit(app=self.app, target="ingenious/chainlit/app.py", path="/chainlit")
 
     async def generic_exception_handler(self, request: Request, exc: Exception):
         if os.environ.get("LOADENV") == "True":
