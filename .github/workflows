@@ -2,9 +2,9 @@ name: Push triggered Build and Deploy
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "demo" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "demo" ]
 
 permissions:
   id-token: write
