@@ -14,7 +14,7 @@ WORKDIR /ingen_app
 RUN python -m venv /ingen_app/venv
 
 # Copy the built wheel and requirements file into the container
-COPY dist/ingenious-*.whl /ingen_app/ingenious-1.0.0-py3-none-any.whl
+COPY dist/ingenious-1.0.0-py3-none-any.whl /ingen_app/ingenious-1.0.0-py3-none-any.whl
 COPY requirements.txt /ingen_app/installs/requirements.txt
 
 # Activate virtual environment and install dependencies
