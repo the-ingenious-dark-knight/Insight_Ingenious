@@ -85,11 +85,4 @@ def get_message_feedback_service(
 
 
 
-# def get_guideline_search_manager():
-#     return get_ai_search_manager("vector-sample-guideline")
-#
-#
-# def get_data_search_manager():
-#     return get_ai_search_manager("vector-tabulated-data")
-#
-#
+
