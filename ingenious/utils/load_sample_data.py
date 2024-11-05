@@ -4,19 +4,17 @@ import sqlite3
 import pandas as pd  # Import pandas for CSV handling
 import uuid
 from ingenious.models.message import Message
-from ingenious.db.chat_history_repository import IChatHistoryRepository
 import ingenious.config.config as Config
 
-class sqlite_ChatHistoryRepository(IChatHistoryRepository):
-    def __init__(self, config: Config.Config):
-        self.db_path = config.chat_history.database_path
-        # Check if the directory exists, if not, create it
+class sqlite_sample_db():
+    def __init__(self):
+        self.db_path = "./tmp/sample_sql_db"
         db_dir_check = os.path.dirname(self.db_path)
         if not os.path.exists(db_dir_check):
             os.makedirs(db_dir_check)
         self.connection = sqlite3.connect(self.db_path, check_same_thread=False)
         self._create_table()
-        self._load_csv_data()  # Load CSV data when initializing the repository
+        self._load_csv_data()
 
     def execute_sql(self, sql, params=[], expect_results=True):
         connection = None
@@ -57,27 +55,11 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
                     writing_score INTEGER
                 );
             ''')
-            # Create other tables as per original code
-            self.connection.execute('''
-                CREATE TABLE IF NOT EXISTS chat_history (
-                    user_id TEXT,
-                    thread_id TEXT,
-                    message_id TEXT, 
-                    positive_feedback BOOLEAN, 
-                    timestamp TEXT,
-                    role TEXT,
-                    content TEXT,
-                    content_filter_results TEXT,
-                    tool_calls TEXT,
-                    tool_call_id TEXT, 
-                    tool_call_function TEXT                
-                );
-            ''')
-            # Add other tables as needed (omitted for brevity)
+
 
     def _load_csv_data(self):
         # Load CSV file into a DataFrame
-        csv_path = '/Users/elliott/Insight/Insight_Ingenious/ingenious/sample_dataset/cleaned_students_performance.csv'
+        csv_path = './ingenious/sample_dataset/cleaned_students_performance.csv'
         if os.path.exists(csv_path):
             df = pd.read_csv(csv_path)
             # Load data into the students_performance table
