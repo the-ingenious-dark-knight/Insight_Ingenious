@@ -61,8 +61,8 @@ class ConversationFlow:
             llm_config=llm_config,
             is_termination_msg=agent_pattern.termination_msg,
         )
-        #
-        #
+
+
         # agent_pattern.analyst_agent = analyst_agent
         # autogen.register_function(
         #     PandasExecutor.plot_bar_chart,
