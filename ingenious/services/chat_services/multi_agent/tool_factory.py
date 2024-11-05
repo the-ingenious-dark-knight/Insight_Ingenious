@@ -1,14 +1,15 @@
 import os
-import pyodbc, struct
 import tempfile
 from concurrent.futures import ThreadPoolExecutor, TimeoutError
 from typing import Dict
 
 import matplotlib.pyplot as plt
 import pandas as pd
+import pyodbc
+import struct
+from azure import identity
 from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
-from azure import identity
 
 import ingenious.config.config as config
 from ingenious.utils.load_sample_data import sqlite_sample_db
@@ -121,20 +122,31 @@ class SQL_ToolFunctions:
         token_bytes = credential.get_token("https://database.windows.net/.default").token.encode("UTF-16-LE")
         token_struct = struct.pack(f'<I{len(token_bytes)}s', len(token_bytes), token_bytes)
         SQL_COPT_SS_ACCESS_TOKEN = 1256  # This connection option is defined by microsoft in msodbcsql.h
-        conn = pyodbc.connect(connection_string, attrs_before={SQL_COPT_SS_ACCESS_TOKEN: token_struct})
 
-        def run_query(sql: str):
-            return test_db.execute_sql(sql)
+        # Establish database connection
+        try:
+            conn = pyodbc.connect(connection_string, attrs_before={SQL_COPT_SS_ACCESS_TOKEN: token_struct})
+        except Exception as conn_err:
+            return f"Connection Error: {conn_err}"
 
-        with ThreadPoolExecutor() as executor:
-            future = executor.submit(run_query, sql)  # Pass 'sql' as an argument
+        # Function to execute SQL query
+        def run_query(connection, sql_query):
             try:
-                # Wait for the query to complete within the specified timeout
+                with connection.cursor() as cursor:
+                    cursor.execute(sql_query)
+                    return cursor.fetchall()
+            except Exception as query_err:
+                return f"Query Error: {query_err}"
+
+        # Run query in a separate thread with a timeout
+        with ThreadPoolExecutor() as executor:
+            future = executor.submit(run_query, conn, sql)
+            try:
                 result = future.result(timeout=timeout)
                 return result
             except TimeoutError:
-                # Handle case where the query execution exceeded the timeout
-                return ""
+                return "Query timed out."
             except Exception as e:
-                # Handle any other exceptions that may arise during query execution
-                return str(e)
+                return f"Execution Error: {e}"
+            finally:
+                conn.close()
