@@ -30,7 +30,7 @@ chat_request: ChatRequest = ChatRequest(
         user_name="elliot",
         memory_record = True,
         topic = "tennis, basketball",
-        conversation_flow="classification_agent_legacy"
+        conversation_flow="classification_agent"
     )
 
 print(new_guid)

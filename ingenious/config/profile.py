@@ -47,7 +47,7 @@ class Profiles():
             return profile
 
         # Load the configuration from the YAML file
-        if profiles_path is None or profiles_path is '':
+        if profiles_path is None or profiles_path == '':
             if os.getenv('INGENIOUS_PROFILE_PATH', '') != '':
                 print("Profile Path loaded from environment variable")
                 profiles_path = Path(os.getenv('INGENIOUS_PROFILE_PATH'))

@@ -8,9 +8,7 @@ sys.path.append(parent_dir)
 import ingenious.dependencies as deps
 from ingenious.models.chat import ChatRequest, ChatResponse
 import asyncio
-import ingenious.config.config as config
 
-#Classification agent with improved memory using RAG user proxy.
 async def process_message(chat_request: ChatRequest) -> ChatResponse:
 
     user = await deps.get_chat_history_repository().get_user(chat_request.user_name)

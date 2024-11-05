@@ -7,16 +7,20 @@ logging:
   root_log_level: debug
   log_level: debug
 chat_history:  
-  database_type: cosmos # cosmos or sqlite
+  database_type: sqlite # cosmos or sqlite
   database_path: /tmp/high_level_logs.db # only used for sqlite
   database_name: ToDoList # only used for cosmos
-  memory_path: tmp
+  memory_path: /tmp
 chainlit_configuration:
   enable: true
 chat_service:
   type: multi_agent
 tool_service:
   enable: false
+local_sql_db:
+  database_path: ./tmp/sample_sql.db
+  sample_csv_path: ./ingenious/sample_dataset/cleaned_students_performance.csv
+  sample_database_name: sample_data
 azure_search_services:
   - service: search-index-demo
     endpoint: https://search-index-demo.search.windows.net

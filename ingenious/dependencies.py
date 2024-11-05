@@ -8,7 +8,6 @@ from ingenious.db.chat_history_repository import ChatHistoryRepository
 from ingenious.db.chat_history_repository import DatabaseClientType
 
 from ingenious.external_services.openai_service import OpenAIService
-from ingenious.external_services.search_service import AzureSearchService
 from ingenious.services.chat_service import ChatService
 from ingenious.services.message_feedback_service import MessageFeedbackService
 import ingenious.config.config as Config
@@ -86,11 +85,4 @@ def get_message_feedback_service(
 
 
 
-# def get_guideline_search_manager():
-#     return get_ai_search_manager("vector-sample-guideline")
-#
-#
-# def get_data_search_manager():
-#     return get_ai_search_manager("vector-tabulated-data")
-#
-#
+

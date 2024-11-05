@@ -6,8 +6,8 @@ parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), './../'))
 sys.path.append(parent_dir)
 
 import ingenious.dependencies as deps
-import asyncio
 from ingenious.models.chat import ChatRequest, ChatResponse
+import asyncio
 
 
 async def process_message(chat_request: ChatRequest) -> ChatResponse:
@@ -29,14 +29,13 @@ chat_request: ChatRequest = ChatRequest(
     user_id="elliot",  # Assuming the user_id is "elliot"
     user_prompt="",
     user_name="elliot",
-    conversation_flow="knowledge_base_agent",  # Using the classification agent flow
-    topic = "health, safety",
+    conversation_flow="sql_manipulation_agent",  # Using the classification agent flow
+    topic = "",
     memory_record = True,
 )
 
-
-# Example 1 search knowledge base under one ambiguous topic
-chat_request.user_prompt = f"give me contact number?"
+# Example: using SQL for question solving
+chat_request.user_prompt = f"Can I have a count of all observations with gender 0?"
 res: ChatResponse = asyncio.run(process_message(chat_request=chat_request))
 
 

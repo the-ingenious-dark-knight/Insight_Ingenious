@@ -1,17 +1,16 @@
-import importlib
 import logging
 from abc import ABC, abstractmethod
 
+from autogen.token_count_utils import count_token, get_max_token_limit
 from openai.types.chat import ChatCompletionMessageParam
 
 from ingenious.db.chat_history_repository import ChatHistoryRepository
+from ingenious.dependencies import get_openai_service
 from ingenious.errors.content_filter_error import ContentFilterError
 from ingenious.models.chat import Action, ChatRequest, ChatResponse, Product
 from ingenious.models.message import Message
 from ingenious.utils.conversation_builder import (build_message, build_system_prompt, build_user_message)
 from ingenious.utils.namespace_utils import import_module_safely
-from autogen.token_count_utils import count_token, get_max_token_limit
-from ingenious.dependencies import get_openai_service
 
 logger = logging.getLogger(__name__)
 
