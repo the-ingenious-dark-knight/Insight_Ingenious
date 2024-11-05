@@ -1,17 +1,13 @@
 import os
 import sys
 import uuid
-from pydoc_data.topics import topics
 
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), './../'))
 sys.path.append(parent_dir)
 
-from ingenious.services.chat_services.multi_agent.tool_factory import ToolFunctions
 import ingenious.dependencies as deps
 import asyncio
 from ingenious.models.chat import ChatRequest, ChatResponse
-import ingenious.config.config as config
-
 
 
 async def process_message(chat_request: ChatRequest) -> ChatResponse:
@@ -42,9 +38,6 @@ chat_request: ChatRequest = ChatRequest(
 # Example 1 search knowledge base under one ambiguous topic
 chat_request.user_prompt = f"give me contact number?"
 res: ChatResponse = asyncio.run(process_message(chat_request=chat_request))
-
-# chat_request.user_prompt = f"for safety?"
-# res = asyncio.run(process_message(chat_request=chat_request))
 
 
 # Print the final response

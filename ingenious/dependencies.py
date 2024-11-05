@@ -8,7 +8,6 @@ from ingenious.db.chat_history_repository import ChatHistoryRepository
 from ingenious.db.chat_history_repository import DatabaseClientType
 
 from ingenious.external_services.openai_service import OpenAIService
-from ingenious.external_services.search_service import AzureSearchService
 from ingenious.services.chat_service import ChatService
 from ingenious.services.message_feedback_service import MessageFeedbackService
 import ingenious.config.config as Config

@@ -438,7 +438,7 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
                     userId=thread["user_id"],
                     userIdentifier=thread["user_identifier"],
                     tags=thread["thread_tags"],
-                    metadata=json.loads(thread["thread_metadata"]),
+                    metadata=thread["thread_id"], #TODO: this gives NONE json.loads(thread["thread_metadata"]),
                     steps=[],
                     elements=[],
                 )

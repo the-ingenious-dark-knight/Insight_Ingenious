@@ -1,9 +1,10 @@
-import sys
 import os
+import sys
 from typing import Dict, Optional
+import uuid
+
 import chainlit as cl
 import chainlit.data as cl_data
-#from chainlit.data.sql_alchemy import SQLAlchemyDataLayer
 
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), './../../'))
 sys.path.append(parent_dir)
@@ -14,7 +15,6 @@ import ingenious.chainlit.datalayer as cl_data_custom
 from chainlit.types import ThreadDict
 
 user = {}
-
 config = ig_config.get_config()
 data_layer = cl_data_custom.DataLayer()
 cl_data._data_layer = data_layer
@@ -22,19 +22,13 @@ cl_data._data_layer = data_layer
 
 @cl.on_chat_resume
 async def on_chat_resume(thread: ThreadDict):
-    #memory = ConversationBufferMemory(return_messages=True)
     print(f"Resuming chat session!: {thread['id']}")
     root_messages = [m for m in thread["steps"] if m["parentId"] == None]
     for message in root_messages:
         if message["type"] == "user_message":
             pass
-            #memory.chat_memory.add_user_message(message["output"])
         else:
             pass
-            #memory.chat_memory.add_ai_message(message["output"])
-
-    #cl.user_session.set("memory", memory)
-
 
 @cl.on_chat_start
 async def on_chat_start():
@@ -43,11 +37,7 @@ async def on_chat_start():
     user: cl.User = cl.user_session.get('user')
     await data_layer.set_user(user)
     if user:
-        print(f"User ID: {user.identifier}")    
-    #m = cl.Message("Hello! I'm here to help you with your morning routine. Let's get started!")
-    #await m.send()
-
-
+        print(f"User ID: {user.identifier}")
 
 @cl.on_stop
 def on_stop():
@@ -60,25 +50,23 @@ def on_chat_end():
 @cl.on_message
 async def main(message: cl.Message):
     user: cl.User = cl.user_session.get('user')
+    new_guid = uuid.uuid4()
     chat_request: ChatRequest = ChatRequest(
-        thread_id=cl.user_session.get('id'),
-        user_id=user.identifier,
-        user_prompt=message.content,
+        thread_id=str(new_guid),
+        user_id="test",
+        user_prompt="",
         user_name="test",
-        conversation_flow="classification_agent"
+        topic="",
+        memory_record=True,
+        conversation_flow="web_critic_agent"
     )
-    
-    
 
     cs = deps.get_chat_service(
-            deps.get_chat_history_repository(),
-            deps.get_openai_service(),
-            deps.get_tool_service(
-                deps.get_product_search_manager(),
-                deps.get_knowledge_base_search_manager()),
-            conversation_flow=chat_request.conversation_flow
+        deps.get_chat_history_repository(),
+        conversation_flow=chat_request.conversation_flow
     )
-    
+
+    chat_request.user_prompt = (message.content)
     ret = await cs.get_chat_response(chat_request)
 
     await cl.Message(
@@ -89,17 +77,22 @@ async def main(message: cl.Message):
 async def set_starters():
     return [
         cl.Starter(
-            label="Morning routine ideation",
-            message="Can you help me create a personalized morning routine that would help increase my productivity throughout the day? Start by asking me about my current habits and what activities energize me in the morning.",
+            label="Let's do a test.",
+            message="Write me a short story in 100 words based on the following: "
+                            "The Australia men's national cricket team represents "
+                            "Australia in men's international cricket. "
+                            "It is the joint oldest team in Test cricket history,"
+                            " playing in the first ever Test match in 1999;"
+                            " the team current coach is Elliot Zhu.",
             icon="/public/idea.png",
-            )
-        ]
+        )
+    ]
 
 @cl.oauth_callback
 def oauth_callback(
-  provider_id: str,
-  token: str,
-  raw_user_data: Dict[str, str],
-  default_user: cl.User,
-) -> Optional[cl.User]:   
+        provider_id: str,
+        token: str,
+        raw_user_data: Dict[str, str],
+        default_user: cl.User,
+) -> Optional[cl.User]:
     return default_user
