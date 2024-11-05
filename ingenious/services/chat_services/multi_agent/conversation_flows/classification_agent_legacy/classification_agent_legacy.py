@@ -149,6 +149,6 @@ class ConversationFlow:
                                                         )
 
         # Send a response back to the user
-        return res.summary
+        return res.summary, ''
 
 
