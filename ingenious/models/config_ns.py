@@ -39,6 +39,11 @@ class AzureSearchConfig(BaseModel):
     endpoint: str = Field(..., description="Endpoint of the service")
 
 
+class AzureSqlConfig(BaseModel):
+    database_name: str = Field("", description="Name of the database.")
+    database_connection_string: str = Field("", description="azure SQL Connection string")
+
+
 class WebConfig(BaseModel):
     ip_address: str = Field("0.0.0.0", description="IP address of the web server")
     port: int = Field(80, description="Port of the web server")
@@ -62,3 +67,4 @@ class Config(BaseModel):
     azure_search_services: List[AzureSearchConfig]
     web_configuration: WebConfig
     local_sql_db:LocaldbConfig
+    azure_sql_services: AzureSqlConfig

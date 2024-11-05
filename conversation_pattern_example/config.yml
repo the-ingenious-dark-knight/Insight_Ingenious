@@ -21,6 +21,8 @@ local_sql_db:
   database_path: ./tmp/sample_sql.db
   sample_csv_path: ./ingenious/sample_dataset/cleaned_students_performance.csv
   sample_database_name: sample_data
+azure_sql_services:
+  database_name: dbo
 azure_search_services:
   - service: search-index-demo
     endpoint: https://search-index-demo.search.windows.net
