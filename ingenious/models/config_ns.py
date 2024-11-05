@@ -41,6 +41,7 @@ class AzureSearchConfig(BaseModel):
 
 class AzureSqlConfig(BaseModel):
     database_name: str = Field("", description="Name of the database.")
+    table_name: str = Field("", description="Name of the table.")
     database_connection_string: str = Field("", description="azure SQL Connection string")
 
 

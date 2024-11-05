@@ -25,23 +25,42 @@ class ConversationFlow:
                                             memory_path=memory_path,
                                             thread_memory=thread_memory)
 
-        table_name, column_names = SQL_ToolFunctions.get_db_attr(_config)
+        #table_name, column_names = SQL_ToolFunctions.get_db_attr(_config) #enable this for local sql
+        # sql_writer = autogen.AssistantAgent(
+        #     "sql_writer",
+        #     llm_config=llm_config,
+        #     system_message=(
+        #         f"""
+        #             - You are skilled in writing SQL queries. Always respond by calling `sql_query_tool`
+        #               with a SQL query formatted as "SELECT ... FROM {table_name}", including grouping or aggregation as needed.
+        #             - The target table contains the following columns: {", ".join(column_names)}.
+        #             - Format your output based on the number of rows:
+        #               - **Single Row**: Use the format `{{column_name: value, column_name: value}}`.
+        #               - **Multiple Rows**: Use a list format with each row as a dictionary, e.g., `[{{column_name: value}}, {{column_name: value}}]`.
+        #             """),
+        #     description=("""I am **ONLY** allowed to speak **immediately** after `researcher`."""),
+        #     is_termination_msg=agent_pattern.termination_msg,
+        # )
 
+
+        database_name, table_name, column_names = SQL_ToolFunctions.get_azure_db_attr(_config) #enable this for azure sql
         sql_writer = autogen.AssistantAgent(
             "sql_writer",
             llm_config=llm_config,
             system_message=(
-            f"""
-            - You are skilled in writing SQL queries. Always respond by calling `sql_query_tool` 
-              with a SQL query formatted as "SELECT ... FROM {table_name}", including grouping or aggregation as needed.
-            - The target table contains the following columns: {", ".join(column_names)}.
-            - Format your output based on the number of rows:
-              - **Single Row**: Use the format `{{column_name: value, column_name: value}}`.
-              - **Multiple Rows**: Use a list format with each row as a dictionary, e.g., `[{{column_name: value}}, {{column_name: value}}]`.
-            """),
+                f"""
+                    - You are skilled in writing SQL queries. Always respond by calling `sql_query_tool` 
+                      with a SQL query formatted as "SELECT ... FROM {database_name}.{table_name}", including grouping or aggregation as needed.
+                    - The target table contains the following columns: {", ".join(column_names)}.
+                    - Format your output based on the number of rows:
+                      - **Single Row**: Use the format `{{column_name: value, column_name: value}}`.
+                      - **Multiple Rows**: Use a list format with each row as a dictionary, e.g., `[{{column_name: value}}, {{column_name: value}}]`.
+                    """),
             description=("""I am **ONLY** allowed to speak **immediately** after `researcher`."""),
             is_termination_msg=agent_pattern.termination_msg,
         )
+
+
         agent_pattern.sql_writer = sql_writer
         autogen.register_function(
             SQL_ToolFunctions.execute_sql_local,

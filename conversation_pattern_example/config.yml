@@ -23,6 +23,7 @@ local_sql_db:
   sample_database_name: sample_data
 azure_sql_services:
   database_name: dbo
+  table_name: cleaned_students_performance
 azure_search_services:
   - service: search-index-demo
     endpoint: https://search-index-demo.search.windows.net

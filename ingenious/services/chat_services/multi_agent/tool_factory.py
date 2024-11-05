@@ -1,4 +1,3 @@
-import os
 import tempfile
 from concurrent.futures import ThreadPoolExecutor, TimeoutError
 from typing import Dict
@@ -6,19 +5,17 @@ from typing import Dict
 import matplotlib.pyplot as plt
 import pandas as pd
 import pyodbc
-import struct
-from azure import identity
 from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
 
-import ingenious.config.config as config
+import ingenious.config.config as Config
 from ingenious.utils.load_sample_data import sqlite_sample_db
 
 
 class ToolFunctions:
     @staticmethod
     def aisearch(search: str, index_name: str) -> str:
-        _config = config.get_config()
+        _config = Config.get_config()
         credential = AzureKeyCredential(_config.azure_search_services[0].key)
         client = SearchClient(
             endpoint=_config.azure_search_services[0].endpoint,
@@ -44,7 +41,7 @@ class ToolFunctions:
 
     @staticmethod
     def update_memory(context: str) -> None:
-        _config = config.get_config()
+        _config = Config.get_config()
         memory_path = _config.chat_history.memory_path
         with open(f"{memory_path}/context.md", "w") as memory_file:
             memory_file.write(context)
@@ -83,6 +80,17 @@ class PandasExecutor:
 test_db = sqlite_sample_db()
 
 
+def get_conn(_config):
+    connection_string = _config.azure_sql_services.database_connection_string
+    # credential = identity.DefaultAzureCredential(exclude_interactive_browser_credential=False)
+    # token_bytes = credential.get_token("https://database.windows.net/.default").token.encode("UTF-16-LE")
+    # token_struct = struct.pack(f'<I{len(token_bytes)}s', len(token_bytes), token_bytes)
+    # SQL_COPT_SS_ACCESS_TOKEN = 1256  # This connection option is defined by microsoft in msodbcsql.h
+    conn = pyodbc.connect(connection_string)
+    cursor = conn.cursor()
+    return conn, cursor
+
+
 class SQL_ToolFunctions:
     @staticmethod
     def get_db_attr(_config):
@@ -113,34 +121,42 @@ class SQL_ToolFunctions:
                 return str(e)
 
     @staticmethod
-    def execute_sql_azure(sql: str,
+    def get_azure_db_attr(_config):
+        database_name = _config.azure_sql_services.database_name
+        table_name = _config.azure_sql_services.table_name
+        conn, cursor = get_conn(_config)
+        cursor.execute(f"""
+            SELECT COLUMN_NAME 
+            FROM INFORMATION_SCHEMA.COLUMNS 
+            WHERE TABLE_NAME = '{table_name}'
+        """)
+        column_names = [row[0] for row in cursor.fetchall()]
+        cursor.close()
+        conn.close()
+
+        return database_name, table_name, column_names
+
+    @staticmethod
+    def execute_sql_azure(_config: Config,
+                          sql: str,
                           timeout: int = 15  # Timeout in seconds
                           ) -> str:
 
-        connection_string = os.environ["AZURE_SQL_CONNECTIONSTRING"]
-        credential = identity.DefaultAzureCredential(exclude_interactive_browser_credential=False)
-        token_bytes = credential.get_token("https://database.windows.net/.default").token.encode("UTF-16-LE")
-        token_struct = struct.pack(f'<I{len(token_bytes)}s', len(token_bytes), token_bytes)
-        SQL_COPT_SS_ACCESS_TOKEN = 1256  # This connection option is defined by microsoft in msodbcsql.h
-
-        # Establish database connection
-        try:
-            conn = pyodbc.connect(connection_string, attrs_before={SQL_COPT_SS_ACCESS_TOKEN: token_struct})
-        except Exception as conn_err:
-            return f"Connection Error: {conn_err}"
-
         # Function to execute SQL query
-        def run_query(connection, sql_query):
+        def run_query(sql_query):
             try:
-                with connection.cursor() as cursor:
-                    cursor.execute(sql_query)
-                    return cursor.fetchall()
+                conn, cursor = get_conn(_config)
+                cursor.execute(sql_query)
+                result = cursor.fetchall()
+                cursor.close()
+                conn.close()
+                return result
             except Exception as query_err:
                 return f"Query Error: {query_err}"
 
         # Run query in a separate thread with a timeout
         with ThreadPoolExecutor() as executor:
-            future = executor.submit(run_query, conn, sql)
+            future = executor.submit(run_query, sql)
             try:
                 result = future.result(timeout=timeout)
                 return result
@@ -148,5 +164,3 @@ class SQL_ToolFunctions:
                 return "Query timed out."
             except Exception as e:
                 return f"Execution Error: {e}"
-            finally:
-                conn.close()

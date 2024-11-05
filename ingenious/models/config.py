@@ -57,6 +57,7 @@ class AzureSqlConfig(config_ns_models.AzureSqlConfig):
     database_connection_string: str = Field("", description="azure SQL Connection string")
     def __init__(self, config: config_ns_models.AzureSqlConfig, profile: profile_models.AzureSqlConfig):
         super().__init__(
+            table_name=config.table_name,
             database_name=config.database_name,
             database_connection_string=profile.database_connection_string,
             )
