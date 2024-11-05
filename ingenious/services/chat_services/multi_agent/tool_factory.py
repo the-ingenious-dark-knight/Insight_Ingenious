@@ -1,3 +1,5 @@
+import os
+import pyodbc, struct
 import tempfile
 from concurrent.futures import ThreadPoolExecutor, TimeoutError
 from typing import Dict
@@ -6,6 +8,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
+from azure import identity
 
 import ingenious.config.config as config
 from ingenious.utils.load_sample_data import sqlite_sample_db
@@ -76,13 +79,12 @@ class PandasExecutor:
         return temp_file.name
 
 
-
-
 test_db = sqlite_sample_db()
+
 
 class SQL_ToolFunctions:
     @staticmethod
-    def get_db_attr(_config) :
+    def get_db_attr(_config):
         table_name = _config.local_sql_db.sample_database_name
         result = test_db.execute_sql(f"""SELECT * FROM {table_name} LIMIT 1""")
         column_names = [key for key in result[0]]
@@ -92,6 +94,34 @@ class SQL_ToolFunctions:
     def execute_sql_local(sql: str,
                           timeout: int = 10  # Timeout in seconds
                           ) -> str:
+
+        def run_query(sql: str):
+            return test_db.execute_sql(sql)
+
+        with ThreadPoolExecutor() as executor:
+            future = executor.submit(run_query, sql)  # Pass 'sql' as an argument
+            try:
+                # Wait for the query to complete within the specified timeout
+                result = future.result(timeout=timeout)
+                return result
+            except TimeoutError:
+                # Handle case where the query execution exceeded the timeout
+                return ""
+            except Exception as e:
+                # Handle any other exceptions that may arise during query execution
+                return str(e)
+
+    @staticmethod
+    def execute_sql_azure(sql: str,
+                          timeout: int = 10  # Timeout in seconds
+                          ) -> str:
+
+        connection_string = os.environ["AZURE_SQL_CONNECTIONSTRING"]
+        credential = identity.DefaultAzureCredential(exclude_interactive_browser_credential=False)
+        token_bytes = credential.get_token("https://database.windows.net/.default").token.encode("UTF-16-LE")
+        token_struct = struct.pack(f'<I{len(token_bytes)}s', len(token_bytes), token_bytes)
+        SQL_COPT_SS_ACCESS_TOKEN = 1256  # This connection option is defined by microsoft in msodbcsql.h
+        conn = pyodbc.connect(connection_string, attrs_before={SQL_COPT_SS_ACCESS_TOKEN: token_struct})
 
         def run_query(sql: str):
             return test_db.execute_sql(sql)
