@@ -8,7 +8,9 @@ import ingenious.config.config as Config
 
 class sqlite_sample_db():
     def __init__(self):
-        self.db_path = "./tmp/sample_sql_db"
+        self._config = Config.get_config()
+
+        self.db_path =  self._config.local_sql_db.database_path
         db_dir_check = os.path.dirname(self.db_path)
         if not os.path.exists(db_dir_check):
             os.makedirs(db_dir_check)
@@ -59,12 +61,12 @@ class sqlite_sample_db():
 
     def _load_csv_data(self):
         # Load CSV file into a DataFrame
-        csv_path = './ingenious/sample_dataset/cleaned_students_performance.csv'
+        csv_path =  self._config.local_sql_db.sample_csv_path
         if os.path.exists(csv_path):
             df = pd.read_csv(csv_path)
             # Load data into the students_performance table
             with self.connection:
-                df.to_sql('students_performance', self.connection, if_exists='replace', index=False)
-            print("CSV data loaded into students_performance table.")
+                df.to_sql('sample_data', self.connection, if_exists='replace', index=False)
+            print("CSV data loaded into sample_data table.")
         else:
             print(f"CSV file not found at {csv_path}.")

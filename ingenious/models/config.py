@@ -59,6 +59,12 @@ class WebConfig(config_ns_models.WebConfig):
         super().__init__(ip_address=config.ip_address, port=config.port, type=config.type, authentication=profile.authentication)
 
 
+class LocaldbConfig(config_ns_models.LocaldbConfig):
+    def __init__(self, config: config_ns_models.LocaldbConfig):
+        super().__init__(database_path=config.database_path, sample_csv_path=config.sample_csv_path,
+                         sample_database_name=config.sample_database_name)
+
+
 class Config(BaseModel):
     chat_history: ChatHistoryConfig
     models: List[ModelConfig]
@@ -68,6 +74,7 @@ class Config(BaseModel):
     chainlit_configuration: ChainlitConfig
     azure_search_services: List[AzureSearchConfig]
     web_configuration: WebConfig
+    local_sql_db:LocaldbConfig
 
     def __init__(self, config: config_ns_models.Config, profile: profile_models.Profile):
         super().__init__(
@@ -78,7 +85,8 @@ class Config(BaseModel):
             chat_service=ChatServiceConfig(config.chat_service, profile.chat_service),
             chainlit_configuration=ChainlitConfig(config.chainlit_configuration, profile.chainlit_configuration),
             azure_search_services=[],
-            web_configuration=WebConfig(config.web_configuration, profile.web_configuration)
+            web_configuration=WebConfig(config.web_configuration, profile.web_configuration),
+            local_sql_db=LocaldbConfig(config.local_sql_db)
         )
 
         models: List[config_models.ModelConfig] = []

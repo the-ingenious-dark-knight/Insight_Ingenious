@@ -17,6 +17,10 @@ chat_service:
   type: multi_agent
 tool_service:
   enable: false
+local_sql_db:
+  database_path: ./tmp/sample_sql.db
+  sample_csv_path: ./ingenious/sample_dataset/cleaned_students_performance.csv
+  sample_database_name: sample_data
 azure_search_services:
   - service: search-index-demo
     endpoint: https://search-index-demo.search.windows.net

@@ -45,6 +45,12 @@ class WebConfig(BaseModel):
     type: str = Field("fastapi", description="Type of the web server (e.g. fastapi)")
 
 
+class LocaldbConfig(BaseModel):
+    database_path: str = Field("/tmp/sample_sql_db", description="Database path")
+    sample_csv_path: str = Field("", description="Sample csv path")
+    sample_database_name: str = Field("sample_sql_db", description="Sample database name")
+
+
 class Config(BaseModel):
     chat_history: ChatHistoryConfig
     profile: str
@@ -55,3 +61,4 @@ class Config(BaseModel):
     chainlit_configuration: ChainlitConfig
     azure_search_services: List[AzureSearchConfig]
     web_configuration: WebConfig
+    local_sql_db:LocaldbConfig
