@@ -114,7 +114,7 @@ class SQL_ToolFunctions:
 
     @staticmethod
     def execute_sql_azure(sql: str,
-                          timeout: int = 10  # Timeout in seconds
+                          timeout: int = 15  # Timeout in seconds
                           ) -> str:
 
         connection_string = os.environ["AZURE_SQL_CONNECTIONSTRING"]
