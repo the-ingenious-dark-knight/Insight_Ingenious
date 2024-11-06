@@ -42,6 +42,15 @@ class ConversationFlow:
         #     is_termination_msg=agent_pattern.termination_msg,
         # )
 
+        # agent_pattern.sql_writer = sql_writer
+        # autogen.register_function(
+        #     SQL_ToolFunctions.execute_sql_local,
+        #     caller=agent_pattern.sql_writer,
+        #     executor=agent_pattern.researcher,
+        #     name="sql_query_tool",
+        #     description="Use this tool to perform sql query."
+        # )
+
 
         database_name, table_name, column_names = SQL_ToolFunctions.get_azure_db_attr(_config) #enable this for azure sql
         sql_writer = autogen.AssistantAgent(
@@ -60,10 +69,9 @@ class ConversationFlow:
             is_termination_msg=agent_pattern.termination_msg,
         )
 
-
         agent_pattern.sql_writer = sql_writer
         autogen.register_function(
-            SQL_ToolFunctions.execute_sql_local,
+            SQL_ToolFunctions.execute_sql_azure,
             caller=agent_pattern.sql_writer,
             executor=agent_pattern.researcher,
             name="sql_query_tool",

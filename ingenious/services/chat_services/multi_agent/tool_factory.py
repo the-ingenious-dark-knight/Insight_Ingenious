@@ -7,7 +7,7 @@ import pandas as pd
 import pyodbc
 from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
-
+import json
 import ingenious.config.config as Config
 from ingenious.utils.load_sample_data import sqlite_sample_db
 
@@ -76,9 +76,8 @@ class PandasExecutor:
         plt.close()  # Close the figure to release memory
         return temp_file.name
 
-
-test_db = sqlite_sample_db()
-
+#SQL Tools TODO: need a better way to wrap these functions
+test_db = sqlite_sample_db() #this is for local sql initialisation
 
 def get_conn(_config):
     connection_string = _config.azure_sql_services.database_connection_string
@@ -90,6 +89,7 @@ def get_conn(_config):
     cursor = conn.cursor()
     return conn, cursor
 
+conn, cursor = get_conn(Config.get_config())
 
 class SQL_ToolFunctions:
     @staticmethod
@@ -124,33 +124,31 @@ class SQL_ToolFunctions:
     def get_azure_db_attr(_config):
         database_name = _config.azure_sql_services.database_name
         table_name = _config.azure_sql_services.table_name
-        conn, cursor = get_conn(_config)
         cursor.execute(f"""
             SELECT COLUMN_NAME 
             FROM INFORMATION_SCHEMA.COLUMNS 
             WHERE TABLE_NAME = '{table_name}'
         """)
         column_names = [row[0] for row in cursor.fetchall()]
-        cursor.close()
-        conn.close()
-
+        # cursor.close()
+        # conn.close()
         return database_name, table_name, column_names
 
     @staticmethod
-    def execute_sql_azure(_config: Config,
-                          sql: str,
+    def execute_sql_azure(sql: str,
                           timeout: int = 15  # Timeout in seconds
                           ) -> str:
+
 
         # Function to execute SQL query
         def run_query(sql_query):
             try:
-                conn, cursor = get_conn(_config)
                 cursor.execute(sql_query)
-                result = cursor.fetchall()
-                cursor.close()
-                conn.close()
-                return result
+                r = [dict((cursor.description[i][0], value) \
+                          for i, value in enumerate(row)) for row in cursor.fetchall()]
+                # cursor.close()
+                # conn.close()
+                return json.dumps(r)
             except Exception as query_err:
                 return f"Query Error: {query_err}"
 
