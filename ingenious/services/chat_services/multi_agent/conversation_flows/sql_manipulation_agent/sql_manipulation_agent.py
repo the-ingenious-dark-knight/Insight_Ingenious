@@ -84,7 +84,6 @@ class ConversationFlow:
 
 
 
-
         # Get the conversation response using the pattern
         res, memory_summary = await agent_pattern.get_conversation_response(message)
         return res, memory_summary
