@@ -10,12 +10,12 @@ from azure.search.documents import SearchClient
 import json
 import ingenious.config.config as Config
 from ingenious.utils.load_sample_data import sqlite_sample_db
+_config = Config.get_config()
 
 
 class ToolFunctions:
     @staticmethod
     def aisearch(search: str, index_name: str) -> str:
-        _config = Config.get_config()
         credential = AzureKeyCredential(_config.azure_search_services[0].key)
         client = SearchClient(
             endpoint=_config.azure_search_services[0].endpoint,
@@ -41,11 +41,9 @@ class ToolFunctions:
 
     @staticmethod
     def update_memory(context: str) -> None:
-        _config = Config.get_config()
         memory_path = _config.chat_history.memory_path
         with open(f"{memory_path}/context.md", "w") as memory_file:
             memory_file.write(context)
-
 
 class PandasExecutor:
     @staticmethod
@@ -76,9 +74,9 @@ class PandasExecutor:
         plt.close()  # Close the figure to release memory
         return temp_file.name
 
-#SQL Tools TODO: need a better way to wrap these functions
-test_db = sqlite_sample_db() #this is for local sql initialisation
 
+
+#SQL Tools TODO: need a better way to wrap these functions
 def get_conn(_config):
     connection_string = _config.azure_sql_services.database_connection_string
     # credential = identity.DefaultAzureCredential(exclude_interactive_browser_credential=False)
@@ -89,7 +87,10 @@ def get_conn(_config):
     cursor = conn.cursor()
     return conn, cursor
 
-conn, cursor = get_conn(Config.get_config())
+if _config.azure_sql_services.database_name == 'skip':
+    test_db = sqlite_sample_db() #this is for local sql initialisation
+else:
+    conn, cursor = get_conn(_config)
 
 class SQL_ToolFunctions:
     @staticmethod
@@ -99,66 +100,68 @@ class SQL_ToolFunctions:
         column_names = [key for key in result[0]]
         return table_name, column_names
 
-    @staticmethod
-    def execute_sql_local(sql: str,
-                          timeout: int = 10  # Timeout in seconds
-                          ) -> str:
+    if _config.azure_sql_services.database_name == 'skip':
+        @staticmethod
+        def execute_sql_local(sql: str,
+                              timeout: int = 10  # Timeout in seconds
+                              ) -> str:
 
-        def run_query(sql: str):
-            return test_db.execute_sql(sql)
+            def run_query(sql: str):
+                return test_db.execute_sql(sql)
 
-        with ThreadPoolExecutor() as executor:
-            future = executor.submit(run_query, sql)  # Pass 'sql' as an argument
-            try:
-                # Wait for the query to complete within the specified timeout
-                result = future.result(timeout=timeout)
-                return result
-            except TimeoutError:
-                # Handle case where the query execution exceeded the timeout
-                return ""
-            except Exception as e:
-                # Handle any other exceptions that may arise during query execution
-                return str(e)
+            with ThreadPoolExecutor() as executor:
+                future = executor.submit(run_query, sql)  # Pass 'sql' as an argument
+                try:
+                    # Wait for the query to complete within the specified timeout
+                    result = future.result(timeout=timeout)
+                    return result
+                except TimeoutError:
+                    # Handle case where the query execution exceeded the timeout
+                    return ""
+                except Exception as e:
+                    # Handle any other exceptions that may arise during query execution
+                    return str(e)
 
-    @staticmethod
-    def get_azure_db_attr(_config):
-        database_name = _config.azure_sql_services.database_name
-        table_name = _config.azure_sql_services.table_name
-        cursor.execute(f"""
-            SELECT COLUMN_NAME 
-            FROM INFORMATION_SCHEMA.COLUMNS 
-            WHERE TABLE_NAME = '{table_name}'
-        """)
-        column_names = [row[0] for row in cursor.fetchall()]
-        # cursor.close()
-        # conn.close()
-        return database_name, table_name, column_names
+    else:
+        @staticmethod
+        def get_azure_db_attr(_config):
+            database_name = _config.azure_sql_services.database_name
+            table_name = _config.azure_sql_services.table_name
+            cursor.execute(f"""
+                SELECT COLUMN_NAME 
+                FROM INFORMATION_SCHEMA.COLUMNS 
+                WHERE TABLE_NAME = '{table_name}'
+            """)
+            column_names = [row[0] for row in cursor.fetchall()]
+            # cursor.close()
+            # conn.close()
+            return database_name, table_name, column_names
 
-    @staticmethod
-    def execute_sql_azure(sql: str,
-                          timeout: int = 15  # Timeout in seconds
-                          ) -> str:
+        @staticmethod
+        def execute_sql_azure(sql: str,
+                              timeout: int = 15  # Timeout in seconds
+                              ) -> str:
 
 
-        # Function to execute SQL query
-        def run_query(sql_query):
-            try:
-                cursor.execute(sql_query)
-                r = [dict((cursor.description[i][0], value) \
-                          for i, value in enumerate(row)) for row in cursor.fetchall()]
-                # cursor.close()
-                # conn.close()
-                return json.dumps(r)
-            except Exception as query_err:
-                return f"Query Error: {query_err}"
+            # Function to execute SQL query
+            def run_query(sql_query):
+                try:
+                    cursor.execute(sql_query)
+                    r = [dict((cursor.description[i][0], value) \
+                              for i, value in enumerate(row)) for row in cursor.fetchall()]
+                    # cursor.close()
+                    # conn.close()
+                    return json.dumps(r)
+                except Exception as query_err:
+                    return f"Query Error: {query_err}"
 
-        # Run query in a separate thread with a timeout
-        with ThreadPoolExecutor() as executor:
-            future = executor.submit(run_query, sql)
-            try:
-                result = future.result(timeout=timeout)
-                return result
-            except TimeoutError:
-                return "Query timed out."
-            except Exception as e:
-                return f"Execution Error: {e}"
+            # Run query in a separate thread with a timeout
+            with ThreadPoolExecutor() as executor:
+                future = executor.submit(run_query, sql)
+                try:
+                    result = future.result(timeout=timeout)
+                    return result
+                except TimeoutError:
+                    return "Query timed out."
+                except Exception as e:
+                    return f"Execution Error: {e}"
