@@ -16,10 +16,6 @@ class ConversationPattern:
         self.memory_record_switch = memory_record_switch
         self.memory_path = memory_path
         self.thread_memory = thread_memory
-        self.assistant_agents: list[autogen.AssistantAgent] = []
-        self.sql_writer = None
-        self.analyst_agent = None
-
 
         if not self.thread_memory:
             with open(f"{self.memory_path}/context.md", "w") as memory_file:
@@ -33,7 +29,12 @@ class ConversationPattern:
 
         self.termination_msg = lambda x: "TERMINATE" in x.get("content", "").upper()
 
-        # Initialize agents
+
+        # Initialize customised agents for the group chat.
+        self.sql_writer = None
+        self.analyst_agent = None
+
+        # Initialize core agents.
         if self.memory_record_switch:
             self.user_proxy =  RetrieveUserProxyAgent(
                 name="user_proxy",
