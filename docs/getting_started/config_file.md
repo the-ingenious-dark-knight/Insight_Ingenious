@@ -43,6 +43,11 @@ azure_search_services:
   - service: default    # Default Azure Search service configuration
     endpoint: https://search-demo-eli.search.windows.net  # Azure Search endpoint for queries
 
+# Azure SQL Services Configuration
+azure_sql_services:
+  database_name: dbo
+  table_name: sample_table
+  
 # Web Server Configuration
 web_configuration:
   type: fastapi  # Framework being used for web services (currently only FastAPI is supported)

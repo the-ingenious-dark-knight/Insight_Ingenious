@@ -12,7 +12,7 @@ This file contains the sensitive settings for the application. At run-time is is
 # Environment/Deployment Configuration
 - name: dev  # Specifies the environment or deployment profile (e.g., dev, prod). NOTE this must match the profile in the config.yml file
   models:
-    - model: gpt-4-deployment  # Model being deployed (GPT-4)
+    - model: gpt-4o  # Model being deployed (GPT-4)
       api_key: "12345abcd67890xyz"  # Example API key for accessing the GPT-4 model
       base_url: "https://api.openai.com/v1/gpt4"  # Example base URL for the model deployment API
 
@@ -26,6 +26,10 @@ This file contains the sensitive settings for the application. At run-time is is
     - service: default  # Defines the default Azure search service
       key: "AZURE_SEARCH_API_KEY"  # Example API key for the Azure search service
 
+# Azure SQL Services Configuration
+  azure_sql_services:
+    database_connection_string: "<Your Connection String>"
+      
 # Chainlit Configuration
   chainlit_configuration:
     enable: true  # Enables Chainlit integration

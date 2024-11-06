@@ -1,21 +1,23 @@
 - name: dev
   models:
-    - model: gpt-4-deployment        
-      api_key: ######
-      base_url: ######
-  chat_history:        
-    database_connection_string: AccountEndpoint=https://yourconnection; # only used for cosmos
+    - model: gpt-4o
+      api_key: #####
+      base_url: #####
+  chat_history:
+    database_connection_string: #####
   azure_search_services:
-  - service: default
-    key: # your key
+  - service: search-index-demo
+    key: #####
+  azure_sql_services:
+    database_connection_string: #####
   chainlit_configuration:
     enable: true
-    authentication: 
-      enable: true
-      github_secret:  ###### 
-      github_client_id:  ######
+    authentication:
+      enable: false
+      github_secret: #####
+      github_client_id: #####
   web_configuration:
     authentication:
       enable: false
-      username:  # used for basic authentication
-      password:  # used for basic authentication
+      username:  "#####"
+      password:  "#####"
