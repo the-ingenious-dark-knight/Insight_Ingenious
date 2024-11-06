@@ -33,7 +33,7 @@ class ConversationFlow:
                 llm_config=llm_config,
                 system_message=(
                     f"""Finish all tasks:
-                        - **ALWAYS** Send SQL query to `sql_query_tool` in the format of "SELECT ... FROM {table_name}", including grouping or aggregation as needed.
+                        - **ALWAYS** Send SQL query to `sql_writer` the tool in the format of "SELECT ... FROM {table_name}", including grouping or aggregation as needed.
                         - DO not change schema and table names,
                         - The target table contains the following columns: {", ".join(column_names)}.
                         - Format your output based on the number of rows:
@@ -49,7 +49,7 @@ class ConversationFlow:
                 SQL_ToolFunctions.execute_sql_local,
                 caller=agent_pattern.sql_writer,
                 executor=agent_pattern.researcher,
-                name="sql_query_tool",
+                name="sql_writer",
                 description="Use this tool to perform sql query."
             )
 
@@ -60,7 +60,7 @@ class ConversationFlow:
                 llm_config=llm_config,
                 system_message=(
                     f"""Finish all tasks:
-                        - **ALWAYS** Send SQL query to `sql_query_tool` in the format of "SELECT ... FROM {table_name}", including grouping or aggregation as needed.
+                        - **ALWAYS** Send SQL query to `sql_writer` in the format of "SELECT ... FROM {table_name}", including grouping or aggregation as needed.
                         - DO not change schema and table names,
                         - The target table contains the following columns: {", ".join(column_names)}.
                         - Format your output based on the number of rows:
@@ -76,7 +76,7 @@ class ConversationFlow:
                 SQL_ToolFunctions.execute_sql_azure,
                 caller=agent_pattern.sql_writer,
                 executor=agent_pattern.researcher,
-                name="sql_query_tool",
+                name="sql_writer",
                 description="Use this tool to perform sql query."
             )
 

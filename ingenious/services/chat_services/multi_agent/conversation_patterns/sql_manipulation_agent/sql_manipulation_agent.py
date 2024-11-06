@@ -88,12 +88,12 @@ class ConversationPattern:
             name="researcher",
             system_message=(
                 "Tasks:\n"
-                "- Pass the user question to`sql_writer`, do not suggest query and table to use.\n"
+                "- Pass the user question to `sql_writer`, do not suggest query and table to use.\n"
                 "- After receive the SQL result,l ask `analyst` to do a summary in nature language."
                 "- Compose a final response and send to the user.\n"
                 "- I do not write query, I interpret the result.\n"
             ),
-            description="I **ONLY** speak after `planner`, `analyst` or `sql_writer",
+            description="I **ONLY** speak after `planner`, `analyst` or `sql_writer`",
             llm_config=self.default_llm_config,
             human_input_mode="NEVER",
             code_execution_config=False,
