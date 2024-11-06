@@ -100,8 +100,6 @@ class ConversationPattern:
         )
 
 
-
-
     async def get_conversation_response(self, input_message: str) -> [str, str]:
         """
         This function is the main entry point for the conversation pattern. It takes a message as input and returns a
