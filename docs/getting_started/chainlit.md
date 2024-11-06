@@ -32,18 +32,18 @@ Make sure to replace `<secret>` and `<client_id>` with your actual GitHub OAuth 
 Next, locate the `chainlit_test.py` file. You will need to modify the conversation pattern used in the script. Open the file and look for the following code snippet:
 
 ```python
-    async def main(message: cl.Message):
-        user: cl.User = cl.user_session.get('user')
-        new_guid = uuid.uuid4()
-        chat_request: ChatRequest = ChatRequest(
-            thread_id=str(new_guid),
-            user_id="test",
-            user_prompt="",
-            user_name="test",
-            topic="",
-            memory_record=True,
-            conversation_flow=<pattern>  # Change the pattern here
-        )
+async def main(message: cl.Message):
+    user: cl.User = cl.user_session.get('user')
+    new_guid = uuid.uuid4()
+    chat_request: ChatRequest = ChatRequest(
+        thread_id=str(new_guid),
+        user_id="test",
+        user_prompt="",
+        user_name="test",
+        topic="",
+        memory_record=True,
+        conversation_flow=<pattern>  # Change the pattern here
+    )
 ```
 
 Replace `<pattern>` with the desired conversation flow pattern you wish to implement.
