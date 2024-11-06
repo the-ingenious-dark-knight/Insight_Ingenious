@@ -84,6 +84,7 @@ class ConversationFlow:
         agent_pattern.analyst_agent = autogen.AssistantAgent(
             name="analyst",
             system_message=("Check if the result contains number, do not suggest query or table to use. "
+                            "I only say below: "
                             "if yes, return 'Please compose the final result.'"
                             "if no, return 'The query result need to be examined.'"),
             description="I am **ONLY** allowed to respond **immediately** after `researcher`.",
