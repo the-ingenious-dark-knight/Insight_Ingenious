@@ -36,3 +36,9 @@ pandas==2.2.3
 seaborn==0.13.2
 matplotlib==3.9.2
 pyodbc==5.2.0
+
+[ChatHistorySummariser]
+sentence_transformers==3.1.1
+
+[windows]
+pywin32==3.0.6

@@ -70,13 +70,12 @@ class ConversationPattern:
             system_message=(
                 "Tasks:\n"
                 "- Pass the question and context to `researcher`, do not suggest query.\n"
-                "- If receive 'Please compose the final result', ask `researcher` to compose the final response "
-                "- If receive 'The query result need to be examined', ask `researcher` to compose the final response and say the data need extra attention."
-                "- I say TERMINATE after the final answer is received from `researcher`."
+                "- I only select the next speaker. "
+                "- after `researcher` compose the final response, I say TERMINATE."
                 "Notes:\n"
                 "I cannot answer user questions directly, I need pass the question `researcher`."
             ),
-            description="Responds after `user_proxy` or `analyst`",
+            description="Responds after `user_proxy` or `researcher`",
             llm_config=self.default_llm_config,
             human_input_mode="NEVER",
             code_execution_config=False,
@@ -89,18 +88,16 @@ class ConversationPattern:
             system_message=(
                 "Tasks:\n"
                 "- Pass the user question to `sql_writer`, do not suggest query and table to use.\n"
-                "- After receive the SQL result,l ask `analyst` to do a summary in nature language."
                 "- Compose a final response and send to the user.\n"
                 "- I do not write query, I interpret the result.\n"
+                "- I can say TERMINATE when necessary.\n"
             ),
-            description="I **ONLY** speak after `planner`, `analyst` or `sql_writer`",
+            description="I **ONLY** speak after `planner` or `sql_writer`",
             llm_config=self.default_llm_config,
             human_input_mode="NEVER",
             code_execution_config=False,
             is_termination_msg=self.termination_msg,
         )
-
-
 
 
     async def get_conversation_response(self, input_message: str) -> [str, str]:
@@ -112,13 +109,12 @@ class ConversationPattern:
         graph_dict = {}
         graph_dict[self.user_proxy] = [self.planner]
         graph_dict[self.planner] = [self.researcher]
-        graph_dict[self.researcher] = [self.sql_writer, self.analyst_agent]
+        graph_dict[self.researcher] = [self.sql_writer]
         graph_dict[self.sql_writer] = [self.researcher]
-        graph_dict[self.analyst_agent] = [self.researcher, self.planner]
 
 
         groupchat = autogen.GroupChat(
-            agents=[self.user_proxy, self.researcher, self.planner, self.sql_writer, self.analyst_agent],
+            agents=[self.user_proxy, self.researcher, self.planner, self.sql_writer],
             messages=[],
             max_round=10,
             speaker_selection_method="auto",

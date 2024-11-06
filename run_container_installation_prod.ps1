@@ -9,7 +9,7 @@ param (
 # Build the Python wheel package using pyproject.toml
 Write-Output "Building the Python wheel package using pyproject.toml..."
 python -m pip install --upgrade build
-python -m build --outdir ./docker/dist
+python -m build --outdir ./dist
 if ($LASTEXITCODE -ne 0) {
     Write-Output "Error: Failed to build the wheel package."
     exit 1
@@ -19,7 +19,7 @@ if ($LASTEXITCODE -ne 0) {
 # Build the Podman image
 Write-Output "Start Podman and Building the Podman image..."
 podman machine start
-podman build -f $dockerfile_path -t $image_name ./docker/
+podman build -f $dockerfile_path -t $image_name ./
 if ($LASTEXITCODE -ne 0) {
     Write-Output "Error: Failed to build the Podman image."
     exit 1
@@ -28,7 +28,7 @@ if ($LASTEXITCODE -ne 0) {
 # Run the PowerShell script to start the container
 Write-Output "Running the PowerShell script to start the container..."
 if (Get-Command pwsh -ErrorAction SilentlyContinue) {
-    .\docker\run_image_in_podman.ps1 -container_name $container_name -image_name $image_name
+    .\run_image_in_podman.ps1 -container_name $container_name -image_name $image_name
 } else {
     Write-Output "Error: PowerShell (pwsh) is not installed or not available in the path."
     exit 1

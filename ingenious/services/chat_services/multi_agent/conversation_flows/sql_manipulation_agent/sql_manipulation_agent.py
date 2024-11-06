@@ -33,8 +33,9 @@ class ConversationFlow:
                 llm_config=llm_config,
                 system_message=(
                     f"""Finish all tasks:
-                        - **ALWAYS** Send SQL query to `sql_writer` the tool in the format of "SELECT ... FROM {table_name}", including grouping or aggregation as needed.
+                        - Send SQL query to `sql_writer` the tool in the format of "SELECT ... FROM {table_name}", including grouping or aggregation as needed.
                         - DO not change schema and table names,
+                        - When composing summary statistics just do the mean.
                         - The target table contains the following columns: {", ".join(column_names)}.
                         - Format your output based on the number of rows:
                           - **Single Row**: Use the format `{{column_name: value, column_name: value}}`.
@@ -59,9 +60,10 @@ class ConversationFlow:
                 "sql_writer",
                 llm_config=llm_config,
                 system_message=(
-                    f"""Finish all tasks:
-                        - **ALWAYS** Send SQL query to `sql_writer` in the format of "SELECT ... FROM {table_name}", including grouping or aggregation as needed.
+                    f"""Finish below tasks:
+                        - Send SQL query to `sql_writer` in the format of "SELECT ... FROM {database_name}.{table_name}", including grouping or aggregation as needed.
                         - DO not change schema and table names,
+                        - When composing summary statistics just do the mean.
                         - The target table contains the following columns: {", ".join(column_names)}.
                         - Format your output based on the number of rows:
                           - **Single Row**: Use the format `{{column_name: value, column_name: value}}`.
@@ -80,16 +82,6 @@ class ConversationFlow:
                 description="Use this tool to perform sql query."
             )
 
-
-        agent_pattern.analyst_agent = autogen.AssistantAgent(
-            name="analyst",
-            system_message=("Check if the result contains number, do not suggest query or table to use. "
-                            "if yes, return 'Please compose the final result.'"
-                            "if no, return 'The query result need to be examined.'"),
-            description="I am **ONLY** allowed to respond **immediately** after `researcher`.",
-            llm_config=llm_config,
-            is_termination_msg=agent_pattern.termination_msg,
-        )
 
 
 
