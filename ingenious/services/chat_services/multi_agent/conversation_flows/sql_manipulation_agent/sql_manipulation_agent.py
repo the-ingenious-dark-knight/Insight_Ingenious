@@ -49,7 +49,7 @@ class ConversationFlow:
             autogen.register_function(
                 SQL_ToolFunctions.execute_sql_local,
                 caller=agent_pattern.sql_writer,
-                executor=agent_pattern.researcher,
+                executor=agent_pattern.planner,
                 name="sql_writer",
                 description="Use this tool to perform sql query."
             )
@@ -77,11 +77,10 @@ class ConversationFlow:
             autogen.register_function(
                 SQL_ToolFunctions.execute_sql_azure,
                 caller=agent_pattern.sql_writer,
-                executor=agent_pattern.researcher,
+                executor=agent_pattern.planner,
                 name="sql_writer",
                 description="Use this tool to perform sql query."
             )
-
 
 
 
