@@ -58,7 +58,7 @@ async def main(message: cl.Message):
         user_name="test",
         topic="",
         memory_record=True,
-        conversation_flow="web_critic_agent"
+        conversation_flow="sql_manipulation_agent"
     )
 
     cs = deps.get_chat_service(
@@ -78,12 +78,7 @@ async def set_starters():
     return [
         cl.Starter(
             label="Let's do a test.",
-            message="Write me a short story in 100 words based on the following: "
-                            "The Australia men's national cricket team represents "
-                            "Australia in men's international cricket. "
-                            "It is the joint oldest team in Test cricket history,"
-                            " playing in the first ever Test match in 1999;"
-                            " the team current coach is Elliot Zhu.",
+            message=f"Can I have a count of all observations by gender?",
             icon="/public/idea.png",
         )
     ]

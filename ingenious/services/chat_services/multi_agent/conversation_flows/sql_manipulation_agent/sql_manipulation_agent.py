@@ -32,9 +32,9 @@ class ConversationFlow:
                 "sql_writer",
                 llm_config=llm_config,
                 system_message=(
-                    f"""
-                        - You are skilled in writing SQL queries. Always respond by calling `sql_query_tool`
-                          with a SQL query formatted as "SELECT ... FROM {table_name}", including grouping or aggregation as needed.
+                    f"""Finish all tasks:
+                        - **ALWAYS** Send SQL query to `sql_query_tool` in the format of "SELECT ... FROM {table_name}", including grouping or aggregation as needed.
+                        - DO not change schema and table names,
                         - The target table contains the following columns: {", ".join(column_names)}.
                         - Format your output based on the number of rows:
                           - **Single Row**: Use the format `{{column_name: value, column_name: value}}`.
@@ -54,15 +54,14 @@ class ConversationFlow:
             )
 
         else:
-
             database_name, table_name, column_names = SQL_ToolFunctions.get_azure_db_attr(_config) #enable this for azure sql
             sql_writer = autogen.AssistantAgent(
                 "sql_writer",
                 llm_config=llm_config,
                 system_message=(
-                    f"""
-                        - You are skilled in writing SQL queries. Always respond by calling `sql_query_tool` 
-                          with a SQL query formatted as "SELECT ... FROM {database_name}.{table_name}", including grouping or aggregation as needed.
+                    f"""Finish all tasks:
+                        - **ALWAYS** Send SQL query to `sql_query_tool` in the format of "SELECT ... FROM {table_name}", including grouping or aggregation as needed.
+                        - DO not change schema and table names,
                         - The target table contains the following columns: {", ".join(column_names)}.
                         - Format your output based on the number of rows:
                           - **Single Row**: Use the format `{{column_name: value, column_name: value}}`.
@@ -84,7 +83,7 @@ class ConversationFlow:
 
         agent_pattern.analyst_agent = autogen.AssistantAgent(
             name="analyst",
-            system_message=("Check if the result makes sense in mathematics, "
+            system_message=("Check if the result makes sense in mathematics, do not suggest query or table to use. "
                             "if yes, return 'Please compose the final result.'"
                             "if no, return 'The query result need to be examined.'"),
             description="I am **ONLY** allowed to respond **immediately** after `researcher`.",
@@ -92,15 +91,6 @@ class ConversationFlow:
             is_termination_msg=agent_pattern.termination_msg,
         )
 
-
-        # agent_pattern.analyst_agent = analyst_agent
-        # autogen.register_function(
-        #     PandasExecutor.plot_bar_chart,
-        #     caller=agent_pattern.analyst_agent,
-        #     executor=agent_pattern.researcher,
-        #     name="matplotlib_tool",
-        #     description="Use this tool to perform analysis and visualisation with matplotlib."
-        # )
 
 
         # Get the conversation response using the pattern
