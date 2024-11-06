@@ -72,8 +72,8 @@ class ConversationPattern:
                 "- Pass the question and context to `researcher`, do not suggest query.\n"
                 "- If receive 'Please compose the final result', ask `researcher` to compose the final response "
                 "- If receive 'The query result need to be examined', ask `researcher` to compose the final response and say the data need extra attention."
-                "- I do not do summary. "
-                "- I say TERMINATE after the final answer is received from `researcher`."
+                "- I wait for the  final answer from `researcher`."
+                "- I say TERMINATE."
                 "Notes:\n"
                 "I cannot answer user questions directly, I need pass the question `researcher`."
             ),
