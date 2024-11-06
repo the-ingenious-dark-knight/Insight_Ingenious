@@ -40,7 +40,6 @@ class ConversationPattern:
                 name="user_proxy",
                 is_termination_msg=self.termination_msg,
                 human_input_mode="NEVER",
-                max_consecutive_auto_reply=2,
                 system_message= "I enhance the user question with context",
                 retrieve_config={
                     "task": "qa",
@@ -59,7 +58,6 @@ class ConversationPattern:
                 name="user_proxy",
                 is_termination_msg=self.termination_msg,
                 human_input_mode="NEVER",
-                max_consecutive_auto_reply=2,
                 system_message="I enhance the user question with context",
                 code_execution_config=False,
                 silent=False
@@ -70,12 +68,9 @@ class ConversationPattern:
             system_message=(
                 "Tasks:\n"
                 "- Pass the question and context to `researcher`, do not suggest query.\n"
-                "- I only select the next speaker. "
-                "- after `researcher` compose the final response, I say TERMINATE."
-                "Notes:\n"
-                "I cannot answer user questions directly, I need pass the question `researcher`."
+                "- Wait `researcher` compose the final response and then say TERMINATE ."
             ),
-            description="Responds after `user_proxy` or `researcher`",
+            description="Responds after `user_proxy` or `sql_writer`",
             llm_config=self.default_llm_config,
             human_input_mode="NEVER",
             code_execution_config=False,
@@ -88,9 +83,9 @@ class ConversationPattern:
             system_message=(
                 "Tasks:\n"
                 "- Pass the user question to `sql_writer`, do not suggest query and table to use.\n"
-                "- Compose a final response and send to the user.\n"
-                "- I do not write query, I interpret the result.\n"
-                "- I can say TERMINATE when necessary.\n"
+                "- Compose a final response.\n"
+                "Note:"
+                "- Never ask follow up question."
             ),
             description="I **ONLY** speak after `planner` or `sql_writer`",
             llm_config=self.default_llm_config,
@@ -109,8 +104,8 @@ class ConversationPattern:
         graph_dict = {}
         graph_dict[self.user_proxy] = [self.planner]
         graph_dict[self.planner] = [self.researcher]
-        graph_dict[self.researcher] = [self.sql_writer]
-        graph_dict[self.sql_writer] = [self.researcher]
+        graph_dict[self.researcher] = [self.sql_writer, self.planner]
+        graph_dict[self.sql_writer] = [self.planner]
 
 
         groupchat = autogen.GroupChat(
@@ -139,6 +134,7 @@ class ConversationPattern:
             res = await self.user_proxy.a_initiate_chat(
                 manager,
                 message="Use group chat to solve user question. Keep the final answer concise."
+                        "The last speaker should be `planner`."
                         "\nUser question: " + input_message,
                 problem=input_message,
                 summary_method="last_msg"
