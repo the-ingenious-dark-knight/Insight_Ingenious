@@ -52,6 +52,16 @@ class AzureSearchConfig(config_ns_models.AzureSearchConfig):
     def __init__(self, config: config_ns_models.AzureSearchConfig, profile: profile_models.AzureSearchConfig):
         super().__init__(service=config.service, endpoint=config.endpoint, key=profile.key)
 
+
+class AzureSqlConfig(config_ns_models.AzureSqlConfig):
+    database_connection_string: str = Field("", description="azure SQL Connection string")
+    def __init__(self, config: config_ns_models.AzureSqlConfig, profile: profile_models.AzureSqlConfig):
+        super().__init__(
+            table_name=config.table_name,
+            database_name=config.database_name,
+            database_connection_string=profile.database_connection_string,
+            )
+
 class WebConfig(config_ns_models.WebConfig):
     authentication: profile_models.WebAuthConfig = {}
 
@@ -75,6 +85,7 @@ class Config(BaseModel):
     azure_search_services: List[AzureSearchConfig]
     web_configuration: WebConfig
     local_sql_db:LocaldbConfig
+    azure_sql_services: AzureSqlConfig
 
     def __init__(self, config: config_ns_models.Config, profile: profile_models.Profile):
         super().__init__(
@@ -86,7 +97,8 @@ class Config(BaseModel):
             chainlit_configuration=ChainlitConfig(config.chainlit_configuration, profile.chainlit_configuration),
             azure_search_services=[],
             web_configuration=WebConfig(config.web_configuration, profile.web_configuration),
-            local_sql_db=LocaldbConfig(config.local_sql_db)
+            local_sql_db=LocaldbConfig(config.local_sql_db),
+            azure_sql_services=AzureSqlConfig(config.azure_sql_services, profile.azure_sql_services)
         )
 
         models: List[config_models.ModelConfig] = []

@@ -12,10 +12,13 @@ class ChatHistoryConfig(BaseModel):
     database_connection_string: str = ""
 
 
+class AzureSqlConfig(BaseModel):
+    database_connection_string: str = ""
+
+
 class AzureSearchConfig(BaseModel):
     service: str
     key: str
-
 
 class ChainlitAuthConfig(BaseModel):
     enable: bool = False
@@ -56,6 +59,7 @@ class Profile(BaseModel):
     chat_history: ChatHistoryConfig
     chat_service: ChatServiceConfig = Field(default_factory=ChatServiceConfig, description="Chat service configuration")
     azure_search_services: List[AzureSearchConfig]
+    azure_sql_services: AzureSqlConfig
     web_configuration: WebConfig
     chainlit_configuration: ChainlitConfig
     tool_service: ToolServiceConfig = Field(default_factory=ToolServiceConfig, description="Tool service configuration")
