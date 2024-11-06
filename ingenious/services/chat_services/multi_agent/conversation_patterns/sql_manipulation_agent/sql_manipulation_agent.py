@@ -69,9 +69,9 @@ class ConversationPattern:
             name="planner",
             system_message=(
                 "Tasks:\n"
-                "- Pass the question and context to `researcher`.\n"
-                "- If receive Please compose the final result, ask `researcher` to compose the final response "
-                "- If receive The query result need to be examined, ask `researcher` to compose the final response and say the data need extra attention."
+                "- Pass the question and context to `researcher`, do not suggest query.\n"
+                "- If receive 'Please compose the final result', ask `researcher` to compose the final response "
+                "- If receive 'The query result need to be examined', ask `researcher` to compose the final response and say the data need extra attention."
                 "- I TERMINATE the conversation after the final answer is received from `researcher`."
                 "Notes:\n"
                 "I cannot answer user questions directly, I need pass the question `researcher`."
@@ -88,9 +88,8 @@ class ConversationPattern:
             name="researcher",
             system_message=(
                 "Tasks:\n"
-                "- Solve the user question using the response from `sql_writer`.\n"
-                "- When the SQL result is - **Single Row**: such as `{{column_name: value, column_name: value}}`, "
-                "- I can call `analyst` to do a summary."
+                "- Pass the user question to`sql_writer`, do not suggest query and table to use.\n"
+                "- After receive the SQL result,l ask `analyst` to do a summary in nature language."
                 "- Compose a final response and send to the user.\n"
                 "- I do not write query, I interpret the result.\n"
             ),
@@ -100,7 +99,6 @@ class ConversationPattern:
             code_execution_config=False,
             is_termination_msg=self.termination_msg,
         )
-
 
 
 

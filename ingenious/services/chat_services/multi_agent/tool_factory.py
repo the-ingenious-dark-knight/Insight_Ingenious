@@ -75,7 +75,6 @@ class PandasExecutor:
         return temp_file.name
 
 
-
 #SQL Tools TODO: need a better way to wrap these functions
 def get_conn(_config):
     connection_string = _config.azure_sql_services.database_connection_string
@@ -93,14 +92,15 @@ else:
     conn, cursor = get_conn(_config)
 
 class SQL_ToolFunctions:
-    @staticmethod
-    def get_db_attr(_config):
-        table_name = _config.local_sql_db.sample_database_name
-        result = test_db.execute_sql(f"""SELECT * FROM {table_name} LIMIT 1""")
-        column_names = [key for key in result[0]]
-        return table_name, column_names
 
     if _config.azure_sql_services.database_name == 'skip':
+        @staticmethod
+        def get_db_attr(_config):
+            table_name = _config.local_sql_db.sample_database_name
+            result = test_db.execute_sql(f"""SELECT * FROM {table_name} LIMIT 1""")
+            column_names = [key for key in result[0]]
+            return table_name, column_names
+
         @staticmethod
         def execute_sql_local(sql: str,
                               timeout: int = 10  # Timeout in seconds
@@ -142,8 +142,6 @@ class SQL_ToolFunctions:
                               timeout: int = 15  # Timeout in seconds
                               ) -> str:
 
-
-            # Function to execute SQL query
             def run_query(sql_query):
                 try:
                     cursor.execute(sql_query)

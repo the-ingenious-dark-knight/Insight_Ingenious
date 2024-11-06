@@ -31,8 +31,8 @@ class ConversationFlow:
             llm_config=llm_config,
             system_message=(
                 f"""
-                    - You are skilled in writing SQL queries. Always respond by calling `sql_query_tool`
-                      with a SQL query formatted as "SELECT ... FROM {table_name}", including grouping or aggregation as needed.
+                    - You are skilled in writing SQL queries. **ALWAYS** process the SQL query by calling `sql_query_tool`
+                    - The format of SQL query is like "SELECT ... FROM {table_name}", including grouping or aggregation as needed.
                     - The target table contains the following columns: {", ".join(column_names)}.
                     - Format your output based on the number of rows:
                       - **Single Row**: Use the format `{{column_name: value, column_name: value}}`.
