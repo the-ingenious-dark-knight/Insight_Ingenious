@@ -23,23 +23,25 @@ class ConversationFlow:
                                             memory_path = memory_path,
                                             thread_memory = thread_memory)
 
-        #please revise index name in this section.
-        search_agent = autogen.AssistantAgent(
+
+        agent_pattern.search_agent = autogen.AssistantAgent(
             name="search_agent",
             system_message=("Tasks: "
-                            " - I derive search_query from the information given by `researcher`. "
+                            " - I write search_query from the information given by `researcher`. "
+                            " - I **Always** suggest call function `search_tool`."
                             " - I make my own decision on conducting the search."
                             " - I can use the below arguments for the `search_tool`: "
                             " - if the query is about health, please use argument: search_query str, index_name: 'index-document-set-1'; "
                             " - if the query is about safety, please use argument: search_query str, index_name: 'index-document-set-2' "
+                            
                 
                             "Rules for compose the query: "
                             f"- if the context is in predefined topics: {', '.join(agent_pattern.topics)}, "
                             f"  I will compose query using the relevant index. "
                             f"- if the question is not in predefined topics: {', '.join(agent_pattern.topics)} or lacks specific context,  "
-                            f"  I will use keywords derived from the user question and search all indexes: 'index-document-set-1', 'index-document-set-2'."
+                            f"  I will use keywords derived from the user question and search in all indexes: 'index-document-set-1', 'index-document-set-2'."
                             
-                           
+
                             "Other Rules: "
                             " - My response MUST be based on the information found in the search results, without introducing any additional or external details. "
                             " - If there is no result from search, say 'no information can be found'. "
@@ -51,12 +53,12 @@ class ConversationFlow:
             llm_config=llm_config,
         )
 
-        agent_pattern.add_function_agent(
-            topic_agent=search_agent,
-            executor=agent_pattern.researcher,  # Use the same research proxy executor for safety searches
-            tool=ToolFunctions.aisearch,
-            tool_name="search_tool",
-            tool_description="Use this tool to perform AI searches"
+        autogen.register_function(
+            ToolFunctions.aisearch,
+            caller=agent_pattern.search_agent,
+            executor=agent_pattern.planner,
+            name="search_tool",
+            description="Use this tool to perform ai search."
         )
 
 
