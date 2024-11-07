@@ -36,7 +36,7 @@ chat_request: ChatRequest = ChatRequest(
 
 
 # Example 1 search knowledge base under one ambiguous topic
-chat_request.user_prompt = f"give me contact number?"
+chat_request.user_prompt = f"Who is the first aider?"
 res: ChatResponse = asyncio.run(process_message(chat_request=chat_request))
 
 

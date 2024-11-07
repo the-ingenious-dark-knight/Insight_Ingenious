@@ -15,14 +15,14 @@ _config = Config.get_config()
 
 class ToolFunctions:
     @staticmethod
-    def aisearch(search: str, index_name: str) -> str:
+    def aisearch(search_query: str, index_name: str) -> str:
         credential = AzureKeyCredential(_config.azure_search_services[0].key)
         client = SearchClient(
             endpoint=_config.azure_search_services[0].endpoint,
             index_name=index_name,
             credential=credential,
         )
-        results = client.search(search_text=search, top=5,
+        results = client.search(search_text=search_query, top=5,
                                 query_type="semantic",  # semantic, full or simple
                                 query_answer="extractive",
                                 query_caption="extractive",

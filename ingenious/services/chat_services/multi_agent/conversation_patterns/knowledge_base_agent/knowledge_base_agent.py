@@ -20,7 +20,7 @@ class ConversationPattern:
         self.memory_record_switch = memory_record_switch
         self.memory_path = memory_path
         self.thread_memory = thread_memory
-        self.topic_agents: list[autogen.AssistantAgent] = []
+        self.search_agent = None
 
 
         if not self.thread_memory:
@@ -69,9 +69,10 @@ class ConversationPattern:
         self.researcher = autogen.ConversableAgent(
             name="researcher",
             system_message=(
-                "Tasks:\n"
-                "- Ask the `search_agent` to retrieve information to solve user request by sharing the user question and the context.\n"
-                "- Compose a final response for the user and TERMINATE.\n"
+                "- I speak to `search_agent` to conduct AI search with the received keywords and context.\n"
+                "- Compose a concise final response.\n"
+                "Note:"
+                "- Never ask follow up question."
 
             ),
             description="I **ONLY** speak after `planner` or `search_agent`.",
@@ -81,51 +82,20 @@ class ConversationPattern:
             is_termination_msg=self.termination_msg,
         )
 
-        self.planner = autogen.ConversableAgent(
+        self.planner = autogen.AssistantAgent(
             name="planner",
             system_message=(
                 "Tasks:\n"
-                "- Step 1: Pass the question and context to `researcher`.\n"
-                "- Step 2: TERMINATE conversation if no additional input is expected.\n\n"
-                "Notes:\n"
-                "I cannot answer user questions directly, I need pass the question `researcher`."
+                "- Pass the original user question and context to `researcher` in the format: 'user question:, context:' to start the group chat.\n"
+                "- Wait `researcher` compose the final response and then say TERMINATE ."
             ),
-            description="Responds after `user_proxy` and controls conversation termination.",
+            description="Responds after `user_proxy` or `search_agent`",
             llm_config=self.default_llm_config,
             human_input_mode="NEVER",
             code_execution_config=False,
             is_termination_msg=self.termination_msg,
         )
 
-    def add_function_agent(self, topic_agent: autogen.ConversableAgent,
-                           executor: autogen.UserProxyAgent,
-                           tool: callable,
-                           tool_name: str = "",
-                           tool_description: str = ""):
-        """
-        Adds a topic-specific agent to the list of topic agents and registers a tool (function)
-        that the agent can invoke using the provided executor.
-        """
-
-        self.topic_agents.append(topic_agent)
-        autogen.register_function(
-            tool,  # The callable tool function that the agent will use
-            caller=topic_agent,  # The agent that will invoke the tool
-            executor=executor,  # The executor responsible for running the tool
-            name=tool_name,  # Name of the tool being registered
-            description=tool_description  # Description of the tool for documentation
-        )
-
-        topic_agent.register_nested_chats(
-            trigger=self.researcher,
-            chat_queue=[
-                {
-                    "sender": self.user_proxy,
-                    "recipient": self.researcher,
-                    "summary_method": "last_msg",
-                }
-            ],
-        )
 
 
     async def get_conversation_response(self, input_message: str) -> [str, str]:
@@ -137,15 +107,14 @@ class ConversationPattern:
         graph_dict = {}
         graph_dict[self.user_proxy] = [self.planner]
         graph_dict[self.planner] = [self.researcher]
-        graph_dict[self.researcher] = self.topic_agents
-        for topic_agent in self.topic_agents:
-            graph_dict[topic_agent] = [self.researcher, self.planner]
+        graph_dict[self.researcher] = [self.search_agent]
+        graph_dict[self.search_agent] = [self.planner]
 
 
         groupchat = autogen.GroupChat(
-            agents=[self.user_proxy, self.researcher, self.planner] + self.topic_agents,
+            agents=[self.user_proxy, self.researcher, self.search_agent , self.planner],
             messages=[],
-            max_round=6,
+            max_round=10,
             speaker_selection_method="auto",
             send_introductions=True,
             select_speaker_auto_verbose=False,
@@ -168,8 +137,9 @@ class ConversationPattern:
             doc_contents = self.user_proxy._get_context(self.user_proxy._results)
             res = await self.user_proxy.a_initiate_chat(
                 manager,
-                message="Use group chat to solve user question. Keep the final answer concise."
-                        "When there is no context, just focus on user question. "
+                message="Use group chat to solve user question."
+                        "When the question has no context, just focus on the keyword of the user question."
+                        "End the conversation with `planner`."
                         "\n "
                         "Context: " + doc_contents +
                         "\nUser question: " + input_message,
