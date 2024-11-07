@@ -45,14 +45,14 @@ jobs:
       - run: |
           pip install -r requirements.txt
       - run: |
-          python -m build
+          python -m build --outdir ./docker/dist
       - name: Publish Container Image
         uses: Azure/cli@v2.1.0
         with:  
           azcliversion: latest
           inlineScript: 
             # az acr build --registry acrsydingdevkfpqjli23em5m --image ingen_dev:0.0.1 --file ./docker/development_images/linux_development_image_ubuntu.dockerfile ./docker/
-            az acr build --registry ${{ secrets.CONTAINER_REGISTRY }} --image ingen_prd:0.0.1 --file ./docker/production_images/linux_with_chat_summariser.dockerfile ./dist/
+            az acr build --registry ${{ secrets.CONTAINER_REGISTRY }} --image ingen_prd:0.0.1 --file ./docker/production_images/linux_with_chat_summariser.dockerfile ./docker/
       - name: Update Container App
         uses: Azure/cli@v2.1.0
         with:  
