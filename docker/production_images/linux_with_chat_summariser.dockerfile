@@ -28,4 +28,4 @@ COPY dist/ingenious-1.0.0-py3-none-any.whl /ingen_app/ingenious-1.0.0-py3-none-a
 RUN pip install ./ingenious-1.0.0-py3-none-any.whl[ChatHistorySummariser]
 
 # Set the command to run the app
-# CMD ["ingen_cli", "config.yml", "profile.yml"]
+CMD ["ingen_cli", "config.yml", "profile.yml", "chainlit"]
