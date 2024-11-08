@@ -19,7 +19,7 @@ if ($LASTEXITCODE -ne 0) {
 # Build the Podman image
 Write-Output "Start Podman and Building the Podman image..."
 podman machine start
-podman build -f $dockerfile_path -t $image_name ./
+podman build --platform -f $dockerfile_path -t $image_name ./
 if ($LASTEXITCODE -ne 0) {
     Write-Output "Error: Failed to build the Podman image."
     exit 1

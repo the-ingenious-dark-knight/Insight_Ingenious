@@ -42,6 +42,12 @@ def run_all(
             help="The path to the profile file. If left blank it will use '$HOME/.ingenious/profiles.yml'"
         ),
     ] = None,
+    ext_path: Annotated[
+        str,
+        typer.Argument(
+            help="The base path for the application. Default is ''."
+        ),
+    ] = "",
     host: Annotated[
         str,
         typer.Argument(
@@ -102,7 +108,7 @@ def run_all(
     os.chdir(str(Path(os.getcwd())))
     print_namespace_modules('ingenious.services.chat_services.multi_agent.conversation_flows')
 
-    fast_agent_api = FastAgentAPI(config)
+    fast_agent_api = FastAgentAPI(config, ext_path = ext_path)
 
     # Access the FastAPI app instance
     app = fast_agent_api.app
