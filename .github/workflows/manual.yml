@@ -19,9 +19,7 @@ permissions:
 
   
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
     environment:
       name: 'demo'
@@ -59,7 +57,8 @@ jobs:
          azcliversion: latest
          inlineScript:             
             az containerapp update -n ingenca -g DefaultResourceGroup-EAU --image acrsydingdevkfpqjli23em5m.azurecr.io/ingen_prd:0.0.1 --set-env-vars APPSETTING_INGENIOUS_CONFIG=secretref:config APPSETTING_INGENIOUS_PROFILE=secretref:profile
-       
+      - run: | 
+          ingen_cli chainlit
             
             
       
