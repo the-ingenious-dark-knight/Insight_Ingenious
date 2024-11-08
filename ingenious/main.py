@@ -39,12 +39,14 @@ class FastAgentAPI:
         # Add exception handler
         self.app.add_exception_handler(Exception, self.generic_exception_handler)
 
-        # Add root endpoint
-        self.app.get(f"/{ext_path}", tags=["Root"])(self.root)
-
         # Mount ChainLit
         if config.chainlit_configuration.enable:
             mount_chainlit(app=self.app, target="ingenious/chainlit/app.py", path="/chainlit")
+
+        # Add root endpoint
+        self.app.get(f"/{ext_path}", tags=["Root"])(self.root)
+
+
 
     async def generic_exception_handler(self, request: Request, exc: Exception):
         if os.environ.get("LOADENV") == "True":

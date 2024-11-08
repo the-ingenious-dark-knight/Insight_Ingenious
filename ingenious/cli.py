@@ -36,18 +36,18 @@ def run_all(
             help="The path to the config file. "
         ),
     ] = None,
-    profile_dir: Annotated[
-        str,
-        typer.Argument(
-            help="The path to the profile file. If left blank it will use '$HOME/.ingenious/profiles.yml'"
-        ),
-    ] = None,
     ext_path: Annotated[
         str,
         typer.Argument(
             help="The base path for the application. Default is ''."
         ),
     ] = "",
+    profile_dir: Annotated[
+        str,
+        typer.Argument(
+            help="The path to the profile file. If left blank it will use '$HOME/.ingenious/profiles.yml'"
+        ),
+    ] = None,
     host: Annotated[
         str,
         typer.Argument(
