@@ -34,7 +34,5 @@ COPY ingenious/sample_dataset/cleaned_students_performance.csv /ingen_app/ingeni
 RUN pip install ./ingenious-1.0.0-py3-none-any.whl[ChatHistorySummariser]
 
 
-
-
 # Set the command to run the app
 CMD ["ingen_cli"]
