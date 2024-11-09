@@ -15,6 +15,7 @@ WORKDIR /ingen_app
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         sudo \
+        lsof \
         unixodbc \
         unixodbc-dev \
         libodbc2 \
