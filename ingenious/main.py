@@ -43,8 +43,8 @@ class FastAgentAPI:
         self.app.get("/", tags=["Root"])(self.root)
 
         # Mount ChainLit
-        if config.chainlit_configuration.enable:
-            mount_chainlit(app=self.app, target="./ingenious/chainlit/app.py", path="/chainlit")
+        # if config.chainlit_configuration.enable:
+        #     mount_chainlit(app=self.app, target="./ingenious/chainlit/app.py", path="/chainlit")
 
 
 
