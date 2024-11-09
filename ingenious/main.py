@@ -68,7 +68,7 @@ class FastAgentAPI:
 
     async def root(self):
         # Locate the HTML file in ingenious.api
-        html_path = pkg_resources.files("ingenious.api") / "index.html"
+        html_path = pkg_resources.files("ingenious.chainlit") / "index.html"
         with html_path.open("r") as file:
             html_content = file.read()
         return HTMLResponse(content=html_content)
