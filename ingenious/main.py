@@ -1,6 +1,6 @@
 import os
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
 from chainlit.utils import mount_chainlit
 from dotenv import load_dotenv
 from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
@@ -12,7 +12,7 @@ import ingenious.api.routes.chat as chat
 import ingenious.api.routes.message_feedback as message_feedback
 # import conversation
 # import search
-import ingenious.chainlit.app
+import ingenious.chainlit.app_sql
 import importlib.resources as pkg_resources
 
 # Configure logging
@@ -46,8 +46,11 @@ class FastAgentAPI:
 
         #Mount ChainLit
         if config.chainlit_configuration.enable:
-            chainlit_path = pkg_resources.files("ingenious.chainlit") / "app.py"
-            mount_chainlit(app=self.app, target=str(chainlit_path), path="/chainlit")
+            chainlit_path = pkg_resources.files("ingenious.chainlit") / "app_sql.py"
+            mount_chainlit(app=self.app, target=str(chainlit_path), path="/chainlit_sql")
+
+            chainlit_path = pkg_resources.files("ingenious.chainlit") / "app_classification.py"
+            mount_chainlit(app=self.app, target=str(chainlit_path), path="/chainlit_classification")
             #mount_chainlit(app=self.app, target="ingenious/chainlit/app.py", path="/chainlit")
 
 
@@ -64,4 +67,8 @@ class FastAgentAPI:
         )
 
     async def root(self):
-        return {"message": "Welcome to the FastAgent API"}
+        # Locate the HTML file in ingenious.api
+        html_path = pkg_resources.files("ingenious.api") / "index.html"
+        with html_path.open("r") as file:
+            html_content = file.read()
+        return HTMLResponse(content=html_content)

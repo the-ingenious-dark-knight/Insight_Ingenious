@@ -14,12 +14,13 @@ cl_data._data_layer = data_layer
 async def main(message: cl.Message):
     new_guid = uuid.uuid4()
     chat_request: ChatRequest = ChatRequest(
-        thread_id= "demo_"+str(new_guid),
+        thread_id="demo_" + str(new_guid),
         user_id="Demo",
         user_prompt=message.content,
         user_name="Demo",
-        topic="",
-        conversation_flow="sql_manipulation_agent"
+        topic="tennis, basketball",
+        memory_record=True,
+        conversation_flow="classification_agent"
     )
 
     cs = deps.get_chat_service(
@@ -39,7 +40,7 @@ async def set_starters():
     return [
         cl.Starter(
             label="Let's do a test.",
-            message=f"Can I have a count of all observations by gender?",
+            message=f"Can you tell me about basketball?",
             icon="/public/idea.png",
         )
     ]
