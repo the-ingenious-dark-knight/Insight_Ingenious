@@ -28,8 +28,8 @@ COPY dist/ingenious-1.0.0-py3-none-any.whl /ingen_app/ingenious-1.0.0-py3-none-a
 RUN pip install ./ingenious-1.0.0-py3-none-any.whl[ChatHistorySummariser]
 
 # Expose the package content by copying the installed files to /ingen_app/ingenious
-RUN mkdir -p /ingen_app/ingenious && \
-    cp -r $(pip show -f ingenious | grep 'Location:' | awk '{print $2}')/ingenious/* /ingen_app/ingenious/
+#RUN mkdir -p /ingen_app/ingenious && \
+#    cp -r $(pip show -f ingenious | grep 'Location:' | awk '{print $2}')/ingenious/* /ingen_app/ingenious/
 
 # Set the command to run the app
 CMD ["ingen_cli"]

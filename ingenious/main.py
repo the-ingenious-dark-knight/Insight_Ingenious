@@ -12,6 +12,8 @@ import ingenious.api.routes.chat as chat
 import ingenious.api.routes.message_feedback as message_feedback
 # import conversation
 # import search
+import ingenious.chainlit.app
+import importlib.resources as pkg_resources
 
 # Configure logging
 logging.basicConfig(level=logging.ERROR)
@@ -44,8 +46,9 @@ class FastAgentAPI:
 
         #Mount ChainLit
         if config.chainlit_configuration.enable:
-            mount_chainlit(app=self.app, target="ingenious/chainlit/app.py", path="/chainlit")
-
+            chainlit_path = pkg_resources.files("ingenious.chainlit") / "app.py"
+            mount_chainlit(app=self.app, target=str(chainlit_path), path="/chainlit")
+            #mount_chainlit(app=self.app, target="ingenious/chainlit/app.py", path="/chainlit")
 
 
     async def generic_exception_handler(self, request: Request, exc: Exception):
