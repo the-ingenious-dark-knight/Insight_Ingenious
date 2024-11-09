@@ -42,6 +42,16 @@ if (-not $container_id) {
 }
 Write-Output "Container ID: $container_id"
 
+
+
+# Set the external path and run the Chainlit command
+Write-Output "Running Chainlit with the specified extension path..."
+podman exec -it $container_id bash -c "ingen_cli chainlit"
+if ($LASTEXITCODE -ne 0) {
+    Write-Output "Chainlit command execution failed."
+    exit 1
+}
+
 # SSH into the container
 Write-Output "SSH into the container..."
 podman exec -it $container_id bash

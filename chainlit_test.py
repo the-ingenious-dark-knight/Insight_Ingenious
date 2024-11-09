@@ -15,7 +15,6 @@ import ingenious.chainlit.datalayer as cl_data_custom
 from chainlit.types import ThreadDict
 
 user = {}
-config = ig_config.get_config()
 data_layer = cl_data_custom.DataLayer()
 cl_data._data_layer = data_layer
 

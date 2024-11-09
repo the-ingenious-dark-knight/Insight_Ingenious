@@ -22,3 +22,4 @@ __pycache__
 /.files/
 /.github/
 /my_venv/
+/ingenious.egg-info/
