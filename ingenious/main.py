@@ -46,12 +46,11 @@ class FastAgentAPI:
 
         #Mount ChainLit
         if config.chainlit_configuration.enable:
-            chainlit_path = pkg_resources.files("ingenious.chainlit") / "app_sql.py"
-            mount_chainlit(app=self.app, target=str(chainlit_path), path="/chainlit_sql")
+            chainlit_path_1 = pkg_resources.files("ingenious.chainlit") / "app_sql.py"
+            mount_chainlit(app=self.app, target=str(chainlit_path_1), path="/chainlit_sql")
 
-            chainlit_path = pkg_resources.files("ingenious.chainlit") / "app_classification.py"
-            mount_chainlit(app=self.app, target=str(chainlit_path), path="/chainlit_classification")
-            #mount_chainlit(app=self.app, target="ingenious/chainlit/app.py", path="/chainlit")
+            # chainlit_path_2 = pkg_resources.files("ingenious.chainlit") / "app_classification.py"
+            # mount_chainlit(app=self.app, target=str(chainlit_path_2), path="/chainlit_classification")
 
 
     async def generic_exception_handler(self, request: Request, exc: Exception):
