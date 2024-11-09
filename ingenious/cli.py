@@ -102,7 +102,7 @@ def run_all(
     os.chdir(str(Path(os.getcwd())))
     print_namespace_modules('ingenious.services.chat_services.multi_agent.conversation_flows')
 
-    fast_agent_api = FastAgentAPI(config, ext_path = ext_path)
+    fast_agent_api = FastAgentAPI(config)
 
     # Access the FastAPI app instance
     app = fast_agent_api.app

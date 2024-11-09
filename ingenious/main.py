@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 class FastAgentAPI:
-    def __init__(self, config: ingen_config.Config, ext_path: str  = '' ):
+    def __init__(self, config: ingen_config.Config):
         # Set the working directory
         os.chdir(os.environ["INGENIOUS_WORKING_DIR"])
 
@@ -40,7 +40,7 @@ class FastAgentAPI:
         self.app.add_exception_handler(Exception, self.generic_exception_handler)
 
         # Add root endpoint
-        self.app.get(f"/{ext_path}", tags=["Root"])(self.root)
+        self.app.get("/", tags=["Root"])(self.root)
 
         # Mount ChainLit
         if config.chainlit_configuration.enable:
