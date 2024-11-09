@@ -44,7 +44,7 @@ class FastAgentAPI:
 
         # Mount ChainLit
         if config.chainlit_configuration.enable:
-            mount_chainlit(app=self.app, target="ingenious/chainlit/app.py", path="/chainlit")
+            mount_chainlit(app=self.app, target="./ingenious/chainlit/app.py", path="/chainlit")
 
 
 
