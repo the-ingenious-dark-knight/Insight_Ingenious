@@ -77,9 +77,10 @@ ingen_cli = "ingenious.cli:app"
 where = ["."]
 include = ["ingenious*"]
 
+
 [tool.setuptools]
 include-package-data = true
 zip-safe = false
 
 [tool.setuptools.package-data]
-ingenious = ["**/*.py", "**/*.md", "**/*.jinja"]
+ingenious = ["**/*.py", "**/*.md", "**/*.jinja", "**/*.csv", "**/*.html"]
