@@ -14,6 +14,7 @@ WORKDIR /ingen_app
 # Add deadsnakes PPA and install Python 3.12
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
+        sudo \
         unixodbc \
         unixodbc-dev \
         libodbc2 \
