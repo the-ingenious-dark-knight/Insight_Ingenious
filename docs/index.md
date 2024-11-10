@@ -16,6 +16,7 @@ Welcome to the Insight Services APAC documentation. This guide is designed to as
 
 - **[Chainlit](https://docs.chainlit.io/get-started/overview)** – A framework for developing and deploying multi-agent systems with a focus on ease of use and rapid prototyping.
 
+- **[Our Open App](https://ingen-app.ambitiousriver-e696f55c.australiaeast.azurecontainerapps.io/)** - An open-source app for pattern demonstration.
 
 ## Highlight
 

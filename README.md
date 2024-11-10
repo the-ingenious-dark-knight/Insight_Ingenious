@@ -6,3 +6,6 @@ It provides pre-built conversation patterns and agent services that can be custo
 
 For detailed documentation: https://cuddly-fiesta-oz8nm4n.pages.github.io/.
 
+- **[Our Open App](https://ingen-app.ambitiousriver-e696f55c.australiaeast.azurecontainerapps.io/)** - An open-source app for pattern demonstration.
+
+
