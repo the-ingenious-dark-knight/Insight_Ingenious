@@ -85,7 +85,9 @@ class ConversationPattern:
                 "- Pass the user question to `sql_writer`, do not suggest query and table to use.\n"
                 "- Compose a final response.\n"
                 "Note:"
+                "- Never give the query code."
                 "- Never ask follow up question."
+                "- When the user prompt is general greetings like Hi, tell him my function concisely."
             ),
             description="I **ONLY** speak after `planner` or `sql_writer`",
             llm_config=self.default_llm_config,

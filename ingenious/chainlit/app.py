@@ -1,39 +1,57 @@
-import chainlit as cl
-import chainlit.data as cl_data
-from chainlit.input_widget import Select
-
-from ingenious.models.chat import ChatRequest
-import ingenious.dependencies as deps
 import uuid
 
+import chainlit as cl
+import chainlit.data as cl_data
+
 import ingenious.chainlit.datalayer as cl_data_custom
+import ingenious.dependencies as deps
+from ingenious.models.chat import ChatRequest
 
 data_layer = cl_data_custom.DataLayer()
 cl_data._data_layer = data_layer
 
 
+@cl.set_chat_profiles
+async def chat_profile():
+    return [
+        cl.ChatProfile(
+            name="classification_agent",
+            markdown_description="The underlying LLM model is optimised for topic classification and memory,"
+                                 "you can ask me question like 'Can you tell me about basketball?'",
+            icon="https://picsum.photos/200",
+        ),
+        cl.ChatProfile(
+            name="sql_manipulation_agent",
+            markdown_description="The underlying LLM model is optimised for sample sql database manipulation."
+                                 "you can ask me question like 'what are the columns?', 'can you give me the count by gender?'",
+            icon="https://picsum.photos/250",
+        ),
+        cl.ChatProfile(
+            name="web_critic_agent",
+            markdown_description="The underlying LLM model is optimised for sample sql database manipulation."
+                                 "you can ask me question like 'Write me a short story in 100 words based on the following: "
+                                 "The Australia men's national cricket team represents "
+                                 "Australia in men's international cricket. "
+                                 "It is the joint oldest team in Test cricket history,"
+                                 " playing in the first ever Test match in 1999;"
+                                 " the team current coach is Elliot Zhu.?'",
+            icon="https://picsum.photos/300",
+        ),
+    ]
+
+
 @cl.on_message
 async def main(message: cl.Message):
-    settings = await cl.ChatSettings(
-        [
-            Select(
-                id="Pattern",
-                label="Ingenious Pattern",
-                values=["classification_agent", "sql_manipulation_agent"],
-                initial_index=0,
-            ),
-        ]
-    ).send()
-
+    chat_profile = cl.user_session.get("chat_profile")
     new_guid = uuid.uuid4()
     chat_request: ChatRequest = ChatRequest(
         thread_id="demo_" + str(new_guid),
         user_id="Demo",
         user_prompt=message.content,
         user_name="Demo",
-        topic="",
+        topic="basketball, tennis" if chat_profile == "classification_agent" else "",
         memory_record=True,
-        conversation_flow= settings["Pattern"]
+        conversation_flow=chat_profile
     )
 
     cs = deps.get_chat_service(
@@ -43,15 +61,14 @@ async def main(message: cl.Message):
 
     ret = await cs.get_chat_response(chat_request)
 
-    await cl.Message(
-        content=ret.agent_response,
-    ).send()
+    await cl.Message(content=ret.agent_response).send()
 
 
 # Setting starters based on selected pattern
 # @cl.set_starters
 # async def set_starters():
-#     if settings["Pattern"] == "classification_agent":
+#     chat_profile = cl.user_session.get("chat_profile")
+#     if chat_profile == "classification_agent":
 #         return [
 #             cl.Starter(
 #                 label="Let's do a test.",
@@ -59,7 +76,7 @@ async def main(message: cl.Message):
 #                 icon="/public/idea.png",
 #             )
 #         ]
-#     elif settings["Pattern"] == "sql_manipulation_agent":
+#     elif chat_profile == "sql_manipulation_agent":
 #         return [
 #             cl.Starter(
 #                 label="Let's do a test.",
@@ -68,7 +85,7 @@ async def main(message: cl.Message):
 #             )
 #         ]
 
-#cl.on_chat_resume
+# cl.on_chat_resume
 @cl.on_chat_start
 async def on_chat_start():
     print("A new chat session has started!")
@@ -78,19 +95,7 @@ async def on_chat_start():
     if user:
         print(f"User ID: {user.identifier}")
 
-    global settings
-    settings = await cl.ChatSettings(
-        [
-            Select(
-                id="Pattern",
-                label="Ingenious Pattern",
-                values=["classification_agent", "sql_manipulation_agent"],
-                initial_index=0,
-            ),
-        ]
-    ).send()
-    print(f"Selected Pattern: {settings['Pattern']}")
-    #value = settings["Pattern"]
+    # value = settings["Pattern"]
 
 
 @cl.on_stop

@@ -72,6 +72,7 @@ class ConversationPattern:
                 "Tasks:\n"
                 "- Solve the user question and fact check with the `web_critic_agent`.\n"
                 "- Compose a final response send to the user."
+                "- When the user prompt is general greetings like Hi, tell him my function concisely."
             ),
             description="I **ONLY** speak after `planner` or `web_critic_agent`.",
             llm_config=self.default_llm_config,

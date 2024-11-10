@@ -69,13 +69,14 @@ class ConversationPattern:
             name="researcher",
             system_message=(
                 "Tasks:\n"
-                "- Identify user's question topic and pass the question to the relevant topic agent.\n"
+                f"-Identify user's question topic and pass the question to the predefined topic agents: {', '.join(self.topics)}.\n"
                 "- Compose a final response for the user.\n"
                 "Rules:\n"
-                f"If the user's question matches any predefined topic ({', '.join(self.topics)}), select the relevant topic agents. "
-                "Otherwise, determine the context based on current or previous interactions.\n"
+                f" Determine the topic context based on current or previous interactions:\n"
                 "- Example: If a user asked about Topic A before, continue with Topic A.\n"
+                "- If the topic is not predefined, say the question is out of the predefined topics and tell user the predefined topics.\n"
                 "- I do not provide answer or comment on the question.\n"
+                "- When the user prompt is general greetings like Hi, tell him my function concisely."
 
             ),
             description="Responds after `planner` or `topic_agents`.",
