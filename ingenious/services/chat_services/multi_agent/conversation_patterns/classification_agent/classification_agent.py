@@ -20,15 +20,15 @@ class ConversationPattern:
         self.topic_agents: list[autogen.AssistantAgent] = []
         self.termination_msg = lambda x: "TERMINATE" in x.get("content", "").upper()
 
-        # if not self.thread_memory:
-        #     with open(f"{self.memory_path}/context.md", "w") as memory_file:
-        #         memory_file.write("New conversation. Continue based on user question.")
-        #
-        # if self.memory_record_switch and self.thread_memory:
-        #     logger.log(level=logging.DEBUG,
-        #                msg="Memory recording enabled. Requires `ChatHistorySummariser` for optional dependency.")
-        #     with open(f"{self.memory_path}/context.md", "w") as memory_file:
-        #         memory_file.write(self.thread_memory)
+        if not self.thread_memory:
+            with open(f"{self.memory_path}/context.md", "w") as memory_file:
+                memory_file.write("New conversation. Continue based on user question.")
+
+        if self.memory_record_switch and self.thread_memory:
+            logger.log(level=logging.DEBUG,
+                       msg="Memory recording enabled. Requires `ChatHistorySummariser` for optional dependency.")
+            with open(f"{self.memory_path}/context.md", "w") as memory_file:
+                memory_file.write(self.thread_memory)
 
         with open(f"{self.memory_path}/context.md", "r") as memory_file:
             self.context = memory_file.read()

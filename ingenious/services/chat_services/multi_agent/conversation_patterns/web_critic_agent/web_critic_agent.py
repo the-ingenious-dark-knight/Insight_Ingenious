@@ -31,6 +31,9 @@ class ConversationPattern:
             with open(f"{self.memory_path}/context.md", "w") as memory_file:
                 memory_file.write(self.thread_memory)
 
+        with open(f"{self.memory_path}/context.md", "r") as memory_file:
+            self.context = memory_file.read()
+
         self.termination_msg = lambda x: "TERMINATE" in x.get("content", "").upper()
 
         # Initialize agents
@@ -162,7 +165,7 @@ class ConversationPattern:
 
         with open(f"{self.memory_path}/context.md", "w") as memory_file:
             memory_file.write(res.summary)
-            context = res.summary
+            self.context = res.summary
 
         # Send a response back to the user
-        return res.summary, context
+        return res.summary, self.context
