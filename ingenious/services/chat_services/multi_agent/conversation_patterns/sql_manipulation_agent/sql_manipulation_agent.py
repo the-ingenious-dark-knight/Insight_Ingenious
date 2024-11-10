@@ -38,33 +38,33 @@ class ConversationPattern:
         self.analyst_agent = None
 
         # Initialize core agents.
-        if self.memory_record_switch:
-            self.user_proxy =  RetrieveUserProxyAgent(
-                name="user_proxy",
-                is_termination_msg=self.termination_msg,
-                human_input_mode="NEVER",
-                system_message= "I enhance the user question with context",
-                retrieve_config={
-                    "task": "qa",
-                    "docs_path": [f"{self.memory_path}/context.md"],
-                    "chunk_token_size": 2000,
-                    "model": self.default_llm_config["model"],
-                    "vector_db": "chroma",
-                    "overwrite": True,
-                    "get_or_create": True,
-                },
-                code_execution_config=False,
-                silent=False
-            )
-        else:
-            self.user_proxy = autogen.UserProxyAgent(
-                name="user_proxy",
-                is_termination_msg=self.termination_msg,
-                human_input_mode="NEVER",
-                system_message="I enhance the user question with context",
-                code_execution_config=False,
-                silent=False
-            )
+        # if self.memory_record_switch:
+        #     self.user_proxy =  RetrieveUserProxyAgent(
+        #         name="user_proxy",
+        #         is_termination_msg=self.termination_msg,
+        #         human_input_mode="NEVER",
+        #         system_message= "I enhance the user question with context",
+        #         retrieve_config={
+        #             "task": "qa",
+        #             "docs_path": [f"{self.memory_path}/context.md"],
+        #             "chunk_token_size": 2000,
+        #             "model": self.default_llm_config["model"],
+        #             "vector_db": "chroma",
+        #             "overwrite": True,
+        #             "get_or_create": True,
+        #         },
+        #         code_execution_config=False,
+        #         silent=False
+        #     )
+        # else:
+        self.user_proxy = autogen.UserProxyAgent(
+            name="user_proxy",
+            is_termination_msg=self.termination_msg,
+            human_input_mode="NEVER",
+            system_message="I enhance the user question with context",
+            code_execution_config=False,
+            silent=False
+        )
 
         self.planner = autogen.AssistantAgent(
             name="planner",
@@ -133,14 +133,15 @@ class ConversationPattern:
 
 
         if self.memory_record_switch:
-            self.user_proxy.retrieve_docs(input_message, 2, '')
-            self.user_proxy.n_results = 2
-            doc_contents = self.user_proxy._get_context(self.user_proxy._results)
+            # self.user_proxy.retrieve_docs(input_message, 2, '')
+            # self.user_proxy.n_results = 2
+            # doc_contents = self.user_proxy._get_context(self.user_proxy._results)
             res = await self.user_proxy.a_initiate_chat(
                 manager,
-                message="Use group chat to solve user question. Keep the final answer concise."
+                message=("Use group chat to solve user question. Keep the final answer concise."
                         "The last speaker should be `planner`."
-                        "\nUser question: " + input_message,
+                        "context:" + self.context +
+                        "\nUser question: " + input_message),
                 problem=input_message,
                 summary_method="last_msg"
             )
