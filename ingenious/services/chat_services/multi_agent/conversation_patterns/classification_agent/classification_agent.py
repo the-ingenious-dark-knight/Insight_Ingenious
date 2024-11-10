@@ -72,6 +72,7 @@ class ConversationPattern:
                 f"If the user's question matches any predefined topic ({', '.join(self.topics)}), select the relevant topic agents. "
                 "Otherwise, determine the context based on current or previous interactions.\n"
                 "- Example: If a user asked about Topic A before, continue with Topic A.\n"
+                "- I do not provide answer directly.\n"
 
             ),
             description="Responds after `planner` or `topic_agents`.",
@@ -85,14 +86,10 @@ class ConversationPattern:
             name="planner",
             system_message=(
                 "Tasks:\n"
-                "- Step 1: Pass the question and context to `researcher`.\n"
-                "- Step 2: TERMINATE conversation if no additional input is expected.\n\n"
-                "Notes:\n"
-                "Repeat the user's question if the tool response is empty."
-                "I cannot answer user questions directly, I need pass the question `researcher`."
+                "- Pass the question and context to `researcher`, do not suggest query.\n"
+                "- Wait `researcher` compose the final response and then say TERMINATE ."
             ),
-            description="Responds after `user_proxy` or `researcher` and controls conversation termination."
-                        "I ignore `UPDATE CONTEXT` ",
+            description="Responds after `user_proxy` or topic agents",
             llm_config=self.default_llm_config,
             human_input_mode="NEVER",
             code_execution_config=False,
@@ -112,15 +109,15 @@ class ConversationPattern:
         graph_dict = {}
         graph_dict[self.user_proxy] = [self.planner]
         graph_dict[self.planner] = [self.researcher]
-        graph_dict[self.researcher] = self.topic_agents
+        graph_dict[self.researcher] = self.topic_agents +  [self.planner]
         for topic_agent in self.topic_agents:
-            graph_dict[topic_agent] = [self.researcher]
+            graph_dict[topic_agent] = [self.planner]
 
 
         groupchat = autogen.GroupChat(
             agents=[self.user_proxy, self.researcher, self.planner] + self.topic_agents,
             messages=[],
-            max_round=6,
+            max_round=9,
             speaker_selection_method="auto",
             send_introductions=True,
             select_speaker_auto_verbose=False,

@@ -29,8 +29,7 @@ class ConversationFlow:
                                "I do not provide memory or update context."
                                "When topic is not my domain, I say not my domain."
                                "Do not print empty string."),
-                description=f"I **ONLY** talk if requested by `researcher`."
-                            f"I focus on providing information about {topic}.",
+                description=f"I **ONLY** talk after `researcher`, focus on providing information about {topic}.",
                 llm_config=llm_config,
             )
 

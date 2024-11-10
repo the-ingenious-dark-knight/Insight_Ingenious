@@ -12,7 +12,6 @@ import ingenious.api.routes.chat as chat
 import ingenious.api.routes.message_feedback as message_feedback
 # import conversation
 # import search
-import ingenious.chainlit.app_sql
 import importlib.resources as pkg_resources
 
 # Configure logging
@@ -46,8 +45,8 @@ class FastAgentAPI:
 
         #Mount ChainLit
         if config.chainlit_configuration.enable:
-            chainlit_path_1 = pkg_resources.files("ingenious.chainlit") / "app_sql.py"
-            mount_chainlit(app=self.app, target=str(chainlit_path_1), path="/chainlit_sql")
+            chainlit_path = pkg_resources.files("ingenious.chainlit") / "app.py"
+            mount_chainlit(app=self.app, target=str(chainlit_path), path="/chainlit")
 
             # chainlit_path_2 = pkg_resources.files("ingenious.chainlit") / "app_classification.py"
             # mount_chainlit(app=self.app, target=str(chainlit_path_2), path="/chainlit_classification")
