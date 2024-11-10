@@ -136,13 +136,14 @@ class ConversationPattern:
             # self.user_proxy.retrieve_docs(input_message, 2, '')
             # self.user_proxy.n_results = 2
             # doc_contents = self.user_proxy._get_context(self.user_proxy._results)
+
             res = await self.user_proxy.a_initiate_chat(
                 manager,
                 message=("Use group chat to solve user question. Keep the final answer concise."
                         "The last speaker should be `planner`."
-                        "context:" + self.context +
+                        "Conversation context:" + self.context +
                         "\nUser question: " + input_message),
-                problem=input_message,
+                #problem=input_message,
                 summary_method="last_msg"
             )
         else:
