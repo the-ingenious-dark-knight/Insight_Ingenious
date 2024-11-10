@@ -40,6 +40,15 @@ jobs:
         with:
           python-version: 3.12.4          
           cache: 'pip'
+
+      - run: |
+         mkdir -p ./docker/ingenious/sample_dataset
+         cp ingenious/sample_dataset/cleaned_students_performance.csv ./docker/ingenious/sample_dataset/cleaned_students_performance.csv
+
+      - run: |
+          mkdir -p ./docker/public
+          cp -r public/* ./docker/public
+
       - run: |
           pip install -r requirements.txt
       - run: |

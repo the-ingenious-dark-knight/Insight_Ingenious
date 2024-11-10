@@ -26,11 +26,9 @@ class ConversationFlow:
                 name= topic,
                 system_message=(f"I am a topic agent responsible for answering queries about {topic}. "
                                "I provide accurate and concise answers and formatted for easy readability."
-                               "I do not provide memory or update context."
-                               "When topic is not my domain, I say not my domain."
+                               "When the terminology is not align with topic, I point put the misalignment."
                                "Do not print empty string."),
-                description=f"I **ONLY** talk if requested by `researcher`."
-                            f"I focus on providing information about {topic}.",
+                description=f"I **ONLY** talk after `researcher`, focus on providing information about {topic}.",
                 llm_config=llm_config,
             )
 

@@ -25,13 +25,16 @@ RUN apt-get update && \
 
 # Copy files into the container
 COPY dist/ingenious-1.0.0-py3-none-any.whl /ingen_app/ingenious-1.0.0-py3-none-any.whl
+RUN mkdir -p /ingen_app/ingenious/sample_dataset
+RUN mkdir -p /ingen_app/ingenious/tmp
+RUN mkdir -p /ingen_app/tmp
+RUN mkdir -p /ingen_app/public
+COPY public /ingen_app/public
+COPY ingenious/sample_dataset/cleaned_students_performance.csv /ingen_app/ingenious/sample_dataset/cleaned_students_performance.csv
 
 # Install dependencies
 RUN pip install ./ingenious-1.0.0-py3-none-any.whl[ChatHistorySummariser]
 
-# Expose the package content by copying the installed files to /ingen_app/ingenious
-#RUN mkdir -p /ingen_app/ingenious && \
-#    cp -r $(pip show -f ingenious | grep 'Location:' | awk '{print $2}')/ingenious/* /ingen_app/ingenious/
 
 # Set the command to run the app
 CMD ["ingen_cli"]

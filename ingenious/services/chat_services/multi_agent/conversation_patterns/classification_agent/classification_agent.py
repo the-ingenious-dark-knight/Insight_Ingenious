@@ -18,60 +18,65 @@ class ConversationPattern:
         self.memory_path = memory_path
         self.thread_memory = thread_memory
         self.topic_agents: list[autogen.AssistantAgent] = []
-
-        if not self.thread_memory:
-            with open(f"{self.memory_path}/context.md", "w") as memory_file:
-                memory_file.write("New conversation. Continue based on user question.")
-
-        if self.memory_record_switch and self.thread_memory:
-            logger.log(level=logging.DEBUG,
-                       msg="Memory recording enabled. Requires `ChatHistorySummariser` for optional dependency.")
-            with open(f"{self.memory_path}/context.md", "w") as memory_file:
-                memory_file.write(self.thread_memory)
-
         self.termination_msg = lambda x: "TERMINATE" in x.get("content", "").upper()
 
+        # if not self.thread_memory:
+        #     with open(f"{self.memory_path}/context.md", "w") as memory_file:
+        #         memory_file.write("New conversation. Continue based on user question.")
+        #
+        # if self.memory_record_switch and self.thread_memory:
+        #     logger.log(level=logging.DEBUG,
+        #                msg="Memory recording enabled. Requires `ChatHistorySummariser` for optional dependency.")
+        #     with open(f"{self.memory_path}/context.md", "w") as memory_file:
+        #         memory_file.write(self.thread_memory)
+
+        with open(f"{self.memory_path}/context.md", "r") as memory_file:
+            self.context = memory_file.read()
+
+
         # Initialize agents
-        if self.memory_record_switch:
-            self.user_proxy = RetrieveUserProxyAgent(
-                name="user_proxy",
-                is_termination_msg=self.termination_msg,
-                human_input_mode="NEVER",
-                max_consecutive_auto_reply=2,
-                system_message="I enhance the user question with context",
-                retrieve_config={
-                    "task": "qa",
-                    "docs_path": [f"{self.memory_path}/context.md"],
-                    "chunk_token_size": 2000,
-                    "model": self.default_llm_config["model"],
-                    "vector_db": "chroma",
-                    "overwrite": True,
-                    "get_or_create": True,
-                },
-                code_execution_config=False,
-                silent=False
-            )
-        else:
-            self.user_proxy = autogen.UserProxyAgent(
-                name="user_proxy",
-                is_termination_msg=self.termination_msg,
-                human_input_mode="NEVER",
-                max_consecutive_auto_reply=2,
-                system_message="I enhance the user question with context",
-                code_execution_config=False,
-                silent=False
-            )
+        # if self.memory_record_switch:
+        #     self.user_proxy = RetrieveUserProxyAgent(
+        #         name="user_proxy",
+        #         is_termination_msg=self.termination_msg,
+        #         human_input_mode="NEVER",
+        #         max_consecutive_auto_reply=2,
+        #         system_message="I enhance the user question with context",
+        #         retrieve_config={
+        #             "task": "qa",
+        #             "docs_path": [f"{self.memory_path}/context.md"],
+        #             "chunk_token_size": 2000,
+        #             "model": self.default_llm_config["model"],
+        #             "vector_db": "chroma",
+        #             "overwrite": True,
+        #             "get_or_create": True,
+        #         },
+        #         code_execution_config=False,
+        #         silent=False
+        #     )
+        # else:
+        self.user_proxy = autogen.UserProxyAgent(
+            name="user_proxy",
+            is_termination_msg=self.termination_msg,
+            human_input_mode="NEVER",
+            max_consecutive_auto_reply=2,
+            system_message="I enhance the user question with context",
+            code_execution_config=False,
+            silent=False
+        )
 
         self.researcher = autogen.ConversableAgent(
             name="researcher",
             system_message=(
                 "Tasks:\n"
-                "- Decide the user's question topic and speak with the relevant topic agent.\n"
+                f"-Identify user's question topic and pass the question to the predefined topic agents: {', '.join(self.topics)}.\n"
                 "- Compose a final response for the user.\n"
                 "Rules:\n"
-                f"If the user's question matches any predefined topic ({', '.join(self.topics)}), select the relevant topic agents. "
-                "Otherwise, determine the context based on current or previous interactions.\n"
+                f" Determine the topic context based on current or previous interactions:\n"
                 "- Example: If a user asked about Topic A before, continue with Topic A.\n"
+                "- If the topic is not predefined, say the question is out of the predefined topics and tell user the predefined topics.\n"
+                "- I do not provide answer or comment on the question.\n"
+                "- When the user prompt is general greetings like Hi, tell him my function concisely."
 
             ),
             description="Responds after `planner` or `topic_agents`.",
@@ -85,14 +90,11 @@ class ConversationPattern:
             name="planner",
             system_message=(
                 "Tasks:\n"
-                "- Step 1: Pass the question and context to `researcher`.\n"
-                "- Step 2: TERMINATE conversation if no additional input is expected.\n\n"
-                "Notes:\n"
-                "Repeat the user's question if the tool response is empty."
-                "I cannot answer user questions directly, I need pass the question `researcher`."
+                "- Pass the question and context to `researcher`, do not suggest query.\n"
+                "- Wait `researcher` compose the final response and then say TERMINATE ."
+                "- I do not provide answer to user question.\n"
             ),
-            description="Responds after `user_proxy` or `researcher` and controls conversation termination."
-                        "I ignore `UPDATE CONTEXT` ",
+            description="Responds after `user_proxy` or topic agents",
             llm_config=self.default_llm_config,
             human_input_mode="NEVER",
             code_execution_config=False,
@@ -112,15 +114,15 @@ class ConversationPattern:
         graph_dict = {}
         graph_dict[self.user_proxy] = [self.planner]
         graph_dict[self.planner] = [self.researcher]
-        graph_dict[self.researcher] = self.topic_agents
+        graph_dict[self.researcher] = self.topic_agents +  [self.planner]
         for topic_agent in self.topic_agents:
-            graph_dict[topic_agent] = [self.researcher]
+            graph_dict[topic_agent] = [self.planner]
 
 
         groupchat = autogen.GroupChat(
             agents=[self.user_proxy, self.researcher, self.planner] + self.topic_agents,
             messages=[],
-            max_round=6,
+            max_round=9,
             speaker_selection_method="auto",
             send_introductions=True,
             select_speaker_auto_verbose=False,
@@ -136,16 +138,17 @@ class ConversationPattern:
                                            code_execution_config=False)
 
         if self.memory_record_switch:
-            self.user_proxy.retrieve_docs(input_message, 2, '')
-            self.user_proxy.n_results = 2
-            doc_contents = self.user_proxy._get_context(self.user_proxy._results)
+            # self.user_proxy.retrieve_docs(input_message, 2, '')
+            # self.user_proxy.n_results = 2
+            # doc_contents = self.user_proxy._get_context(self.user_proxy._results)
+            # print('doc_contents', doc_contents)
             res = await self.user_proxy.a_initiate_chat(
                 manager,
                 message="Using group chat to solve user question. Keep the final answer concise."
                         "When there is no context, just focus on user question. \n "
-                        "Context: " + doc_contents +
+                        "Context: " + self.context +
                         "\nUser question: " + input_message,
-                problem=input_message,
+                #problem=input_message,
                 summary_method="last_msg"
             )
         else:
@@ -157,7 +160,7 @@ class ConversationPattern:
 
         with open(f"{self.memory_path}/context.md", "w") as memory_file:
             memory_file.write(res.summary)
-            context = res.summary
+            self.context = res.summary
 
         # Send a response back to the user
-        return res.summary, context
+        return res.summary, self.context

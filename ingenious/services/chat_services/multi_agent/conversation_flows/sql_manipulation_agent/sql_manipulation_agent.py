@@ -35,8 +35,9 @@ class ConversationFlow:
                     f"""Finish all tasks:
                         - Send SQL query to `sql_writer` the tool in the format of "SELECT ... FROM {table_name}", including grouping or aggregation as needed.
                         - DO not change schema and table names,
-                        - When composing summary statistics just do the mean.
                         - The target table contains the following columns: {", ".join(column_names)}.
+                        - When composing summary statistics just do the mean.
+                        - When user asks what columns are available, just give them the list, no sql query is needed.
                         - Format your output based on the number of rows:
                           - **Single Row**: Use the format `{{column_name: value, column_name: value}}`.
                           - **Multiple Rows**: Use a list format with each row as a dictionary, e.g., `[{{column_name: value}}, {{column_name: value}}]`.
