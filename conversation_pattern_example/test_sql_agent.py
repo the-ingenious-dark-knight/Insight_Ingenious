@@ -35,7 +35,7 @@ chat_request: ChatRequest = ChatRequest(
 )
 
 # Example: using SQL for question solving
-chat_request.user_prompt = f"Can I have a count of observations by gender?"
+chat_request.user_prompt = f"What are the columns?"
 res: ChatResponse = asyncio.run(process_message(chat_request=chat_request))
 
 
