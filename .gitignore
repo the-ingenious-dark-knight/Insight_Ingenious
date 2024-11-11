@@ -24,3 +24,4 @@ __pycache__
 /my_venv/
 /ingenious.egg-info/
 /guardrail/.guard_venv/
+/guardrail/.venv/
