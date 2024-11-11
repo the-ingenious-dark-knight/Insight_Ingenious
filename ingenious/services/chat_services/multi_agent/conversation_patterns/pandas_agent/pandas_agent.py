@@ -6,16 +6,33 @@ from autogen.agentchat.contrib.retrieve_user_proxy_agent import RetrieveUserProx
 import logging
 logger = logging.getLogger(__name__)
 
+import shutil
+import os
 
 class ConversationPattern:
 
     def __init__(self, default_llm_config: dict, topics: list, memory_record_switch: bool, memory_path: str,
                  thread_memory: str):
+
+        tmp_folder_path = 'tmp/code'
+        if os.path.exists(tmp_folder_path):
+            # Delete everything under the tmp folder
+            for item in os.listdir(tmp_folder_path):
+                item_path = os.path.join(tmp_folder_path, item)
+                if os.path.isfile(item_path) or os.path.islink(item_path):
+                    os.unlink(item_path)  # Delete file or symlink
+                elif os.path.isdir(item_path):
+                    shutil.rmtree(item_path)  # Delete directory
+            print("All files and folders under /tmp have been deleted.")
+        else:
+            print(f"The path {tmp_folder_path} does not exist.")
+
         self.default_llm_config = default_llm_config
         self.topics = topics
         self.memory_record_switch = memory_record_switch
         self.memory_path = memory_path
         self.thread_memory = thread_memory
+
 
         if not self.thread_memory:
             with open(f"{self.memory_path}/context.md", "w") as memory_file:

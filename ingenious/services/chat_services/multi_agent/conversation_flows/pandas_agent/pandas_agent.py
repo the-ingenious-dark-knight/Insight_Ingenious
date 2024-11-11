@@ -11,7 +11,7 @@ from PIL import Image
 import os
 import chainlit
 
-working_dir = "tmp/"
+working_dir = "tmp/code/"
 class FigureCreator(autogen.ConversableAgent):
     def __init__(self, n_iters=2, user_name='', **kwargs):
         """
@@ -71,6 +71,7 @@ class FigureCreator(autogen.ConversableAgent):
             coder.system_message
             + f"ALWAYS save the figure in `{self.file_name}` file. "
               f"Tell other agents it is in the <img {self.file_name}> file location."
+              f"Set plt.show(block=False) plt.pause(0.1)."
         )
 
         # Data flow begins
