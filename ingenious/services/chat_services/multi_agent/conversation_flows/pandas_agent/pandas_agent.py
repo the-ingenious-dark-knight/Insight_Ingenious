@@ -26,8 +26,8 @@ class FigureCreator(autogen.ConversableAgent):
         super().__init__(**kwargs)
         self.register_reply([autogen.Agent, None], reply_func=FigureCreator._reply_user, position=0)
         self._n_iters = n_iters
-        self.file_name = 'image_'+str(user_name) + ".png"
-
+        self.file_name = 'demo_result.jpg'
+        self.termination_msg = lambda x: "TERMINATE" in x.get("content", "").upper()
 
     def _reply_user(self, messages=None, sender=None, config=None):
         if all((messages is None, sender is None)):
@@ -43,7 +43,7 @@ class FigureCreator(autogen.ConversableAgent):
         commander = autogen.AssistantAgent(
             name="Commander",
             human_input_mode="NEVER",
-            max_consecutive_auto_reply=8,
+            max_consecutive_auto_reply=4,
             system_message=f"Help me run the code, and tell other agents it is in the <img {self.file_name}> file location.",
             is_termination_msg=lambda x: x.get("content", "").rstrip().endswith("TERMINATE"),
             code_execution_config={"last_n_messages": 3, "work_dir": working_dir, "use_docker": False},
@@ -54,7 +54,7 @@ class FigureCreator(autogen.ConversableAgent):
             name="Critics",
             system_message="""Criticize the input figure. How to replot the figure so it will be better? Find bugs and issues for the figure.
             Pay attention to the color, format, and presentation. Keep in mind of the reader-friendliness.
-            If you think the figures is good enough, then simply say NO_ISSUES""",
+            If you think the figures is good enough, then simply say NO_ISSUES.""",
             llm_config=self.llm_config,
             human_input_mode="NEVER",
             max_consecutive_auto_reply=1,
@@ -64,24 +64,25 @@ class FigureCreator(autogen.ConversableAgent):
         coder = autogen.AssistantAgent(
             name="Coder",
             llm_config=self.llm_config,
+            human_input_mode="NEVER",
         )
 
         coder.update_system_message(
             coder.system_message
-            + f"ALWAYS save the figure in `{self.file_name}` file. Tell other agents it is in the <img {self.file_name}> file location."
+            + f"ALWAYS save the figure in `{self.file_name}` file. "
+              f"Tell other agents it is in the <img {self.file_name}> file location."
         )
 
         # Data flow begins
-        commander.a_initiate_chat(coder, message=user_question)
-
+        commander.initiate_chat(coder, message=user_question)
         #img = Image.open(os.path.join(working_dir, self.file_name))
         #plt.imshow(img)
-        plt.axis("off")  # Hide the axes
+        #plt.axis("off")  # Hide the axes
         #plt.show()
 
         for i in range(self._n_iters):
             commander.send(
-                message=f"Improve <img {os.path.join(working_dir, self.file_name)}>",
+                message=f"Improve <img {os.path.join(working_dir, f'{self.file_name}')}>",
                 recipient=critics,
                 request_reply=True,
             )
@@ -90,18 +91,17 @@ class FigureCreator(autogen.ConversableAgent):
             if feedback.find("NO_ISSUES") >= 0:
                 break
             commander.send(
-                message=f"Here is the feedback to your figure. Please improve! Save the result to {self.file_name}\n"
+                message=f"Here is the feedback to your figure. Please improve! Save the result to `{self.file_name}`\n"
                 + feedback,
                 recipient=coder,
                 request_reply=True,
             )
-            img = Image.open(os.path.join(working_dir, self.file_name))
-            plt.imshow(img)
-            plt.axis("off")  # Hide the axes
+            #img = Image.open(os.path.join(working_dir, f"{self.file_name}"))
+            #plt.imshow(img)
+            #plt.axis("off")  # Hide the axes
             #plt.show()
 
-        image_path = os.path.join(working_dir, self.file_name)
-        return True, image_path #or just path
+        return True, os.path.join(working_dir, f"{self.file_name}")
 
 
 class ConversationFlow:
@@ -114,7 +114,8 @@ class ConversationFlow:
             topics: list = [],
             thread_memory: str = '',
             memory_record_switch=True,
-            user_name: str = '',
+            thread_chat_history: str = '',
+            user_name: str = 'demo_result',
     ) -> ChatResponse:
         # Retrieve the application configuration
         _config = config.get_config()
@@ -131,9 +132,8 @@ class ConversationFlow:
             thread_memory=thread_memory
         )
 
-
         agent_pattern.creator = FigureCreator(name="Figure Creator~", llm_config=llm_config, user_name = user_name)
 
-        # Get the conversation response using the configured conversation pattern
         res, memory_summary = await agent_pattern.get_conversation_response(message)
+
         return res, memory_summary

@@ -27,6 +27,9 @@ class ConversationPattern:
             with open(f"{self.memory_path}/context.md", "w") as memory_file:
                 memory_file.write(self.thread_memory)
 
+        with open(f"{self.memory_path}/context.md", "r") as memory_file:
+            self.context = memory_file.read()
+
         self.termination_msg = lambda x: "TERMINATE" in x.get("content", "").upper()
 
 
@@ -35,33 +38,11 @@ class ConversationPattern:
         self.creator = None
 
         # Initialize core agents.
-        if self.memory_record_switch:
-            self.user_proxy =  RetrieveUserProxyAgent(
-                name="user_proxy",
-                is_termination_msg=self.termination_msg,
-                human_input_mode="NEVER",
-                system_message= "I enhance the user question with context",
-                retrieve_config={
-                    "task": "qa",
-                    "docs_path": [f"{self.memory_path}/context.md"],
-                    "chunk_token_size": 2000,
-                    "model": self.default_llm_config["model"],
-                    "vector_db": "chroma",
-                    "overwrite": True,
-                    "get_or_create": True,
-                },
-                code_execution_config=False,
-                silent=False
-            )
-        else:
-            self.user_proxy = autogen.UserProxyAgent(
-                name="user_proxy",
-                is_termination_msg=self.termination_msg,
-                human_input_mode="NEVER",
-                system_message="I enhance the user question with context",
-                code_execution_config=False,
-                silent=False
-            )
+        self.user_proxy = autogen.UserProxyAgent(
+            name="user_proxy", human_input_mode="NEVER", max_consecutive_auto_reply=0,
+            code_execution_config={"use_docker": False}
+        )
+
 
         # self.planner = autogen.AssistantAgent(
         #     name="planner",
@@ -159,7 +140,7 @@ class ConversationPattern:
 
         with open(f"{self.memory_path}/context.md", "w") as memory_file:
             memory_file.write(res.summary)
-            context = res.summary
+            self.context = res.summary
 
         # Send a response back to the user
-        return res.summary, context
+        return res.summary, self.context
