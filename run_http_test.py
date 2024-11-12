@@ -29,7 +29,7 @@ chat_request: ChatRequest = ChatRequest(
         user_prompt="",
         user_name="elliot",
         memory_record = True,
-        topic = "tennis, basketball",
+        topic = "scorecard, option_2, option3",
         conversation_flow="classification_agent"
     )
 
@@ -41,6 +41,8 @@ print(chat_request.user_prompt)
 
 j = chat_request.model_dump()
 print(j)
+
+#classify
 
 response = requests.post(
     f"http://localhost:{_config.web_configuration.port}/api/v1/chat",
