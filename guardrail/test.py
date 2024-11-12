@@ -1,6 +1,8 @@
 import os
 from openai import AzureOpenAI
 
+#Current guardrail does not support azure in server mode.
+
 # Set your API key and base URL
 os.environ["OPENAI_API_KEY"] = "sk-your_openai_api_key"  # Set the API key here if not set in the environment
 api_key = os.environ["OPENAI_API_KEY"]
