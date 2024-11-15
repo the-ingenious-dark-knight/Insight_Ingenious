@@ -1,11 +1,12 @@
+import uuid
 from datetime import datetime
 from typing import Dict, List, Optional
-import uuid
-import os
-from azure.cosmos import DatabaseProxy, PartitionKey, exceptions, CosmosClient, DatabaseProxy
-from ingenious.models.message import Message
-from ingenious.db.chat_history_repository import IChatHistoryRepository
+
+from azure.cosmos import PartitionKey, exceptions, CosmosClient
+
 import ingenious.config.config as Config
+from ingenious.db.chat_history_repository import IChatHistoryRepository
+from ingenious.models.message import Message
 
 
 class cosmos_ChatHistoryRepository(IChatHistoryRepository):
