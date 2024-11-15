@@ -37,7 +37,6 @@ class multi_agent_chat_service:
 
         if isinstance(chat_request.topic, str):
             chat_request.topic = [topic.strip() for topic in chat_request.topic.split(',')]
-        messages: list[ChatCompletionMessageParam] = []
 
         # Initialize additional response fields - to be populated later
         thread_chat_history = [{"role": "user", "content": ""}]

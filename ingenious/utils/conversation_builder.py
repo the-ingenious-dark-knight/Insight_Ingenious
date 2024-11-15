@@ -5,7 +5,6 @@ from openai.types.chat import (
     ChatCompletionUserMessageParam,
     ChatCompletionAssistantMessageParam,
 )
-from ingenious.utils.prompt_templates import system_prompt_template, follow_up_prompt_template
 
 logger = logging.getLogger(__name__)
 
