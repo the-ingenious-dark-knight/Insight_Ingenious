@@ -1,6 +1,5 @@
 # Add parameters
 param (
-    [string]$podman_path = "C:\Program Files\Podman\bin\podman.exe",
     [string]$image_name = "localhost/ingen_prod_python",
     [string]$container_name = "ingen_prod_python",
     [string]$dockerfile_path = "./docker/production_images/linux_with_chat_summariser.dockerfile"
