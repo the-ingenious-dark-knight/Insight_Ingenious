@@ -24,7 +24,6 @@ response = client.Completion.create(
 print(response.choices[0].text)
 
 
-from openai import OpenAI
 from openai import AzureOpenAI
 
 client = AzureOpenAI(

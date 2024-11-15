@@ -2,18 +2,6 @@ from typing import Optional
 from pydantic import BaseModel
 
 
-class Action(BaseModel):
-    action: str
-
-
-class KnowledgeBaseLink(BaseModel):
-    title: str
-    url: str
-
-
-class Product(BaseModel):
-    sku: str
-
 
 class ChatRequest(BaseModel):
     thread_id: Optional[str] = None
@@ -30,9 +18,8 @@ class ChatResponse(BaseModel):
     message_id: str
     agent_response: str
     followup_questions: Optional[dict[str, str]] = {}
-    actions: Optional[list[Action]] = []
-    products: Optional[list[Product]] = []
     token_count: int
     max_token_count: int
     topic: Optional[str] = None
     memory_summary: Optional[str]  = None
+    event_type: Optional[str] = None

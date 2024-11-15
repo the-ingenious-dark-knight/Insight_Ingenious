@@ -1,7 +1,6 @@
 import autogen.runtime_logging
 import autogen
 import ingenious.config.config as config
-from ingenious.models.chat import Action, ChatRequest, ChatResponse, KnowledgeBaseLink, Product
 from ingenious.services.chat_services.multi_agent.conversation_patterns.classification_agent.classification_agent import ConversationPattern
 
 

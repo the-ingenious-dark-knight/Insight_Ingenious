@@ -17,7 +17,6 @@ class ChatService:
             chat_history_repository: ChatHistoryRepository,
             conversation_flow: str
             ):
-
         module_name = f"ingenious.services.chat_services.{chat_service_type.lower()}.service"
         class_name = f"{chat_service_type.lower()}_chat_service"
 
