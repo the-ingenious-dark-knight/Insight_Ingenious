@@ -1,4 +1,5 @@
 import logging
+import uuid
 from abc import ABC, abstractmethod
 
 from autogen.token_count_utils import count_token, get_max_token_limit
@@ -7,9 +8,9 @@ from openai.types.chat import ChatCompletionMessageParam
 from ingenious.db.chat_history_repository import ChatHistoryRepository
 from ingenious.dependencies import get_openai_service
 from ingenious.errors.content_filter_error import ContentFilterError
-from ingenious.models.chat import Action, ChatRequest, ChatResponse, Product
+from ingenious.models.chat import ChatRequest, ChatResponse
 from ingenious.models.message import Message
-from ingenious.utils.conversation_builder import (build_message, build_system_prompt, build_user_message)
+from ingenious.utils.conversation_builder import (build_user_message)
 from ingenious.utils.namespace_utils import import_module_safely
 
 logger = logging.getLogger(__name__)
@@ -31,26 +32,20 @@ class multi_agent_chat_service:
         self.openai_service = get_openai_service()
 
     async def get_chat_response(self, chat_request: ChatRequest) -> ChatResponse:
-
-
         if not chat_request.conversation_flow:
             raise ValueError(f"conversation_flow not set {chat_request}")
 
         if isinstance(chat_request.topic, str):
             chat_request.topic = [topic.strip() for topic in chat_request.topic.split(',')]
-        messages: list[ChatCompletionMessageParam] = []
 
         # Initialize additional response fields - to be populated later
-        follow_up_questions: dict[str, str] = {}
-        actions: list[Action] = []
-        products: list[Product] = []
         thread_chat_history = [{"role": "user", "content": ""}]
         thread_memory = ''
-        # await self.chat_history_repository.update_sql_memory()
+        await self.chat_history_repository.update_memory()
 
         # Check if thread exists
         if not chat_request.thread_id:
-            chat_request.thread_id = await self.chat_history_repository.create_thread()
+            chat_request.thread_id = str(uuid.uuid4())
         else:
             # Get thread messages & add to messages list
             thread_messages = await self.chat_history_repository.get_thread_messages(chat_request.thread_id)
@@ -79,40 +74,12 @@ class multi_agent_chat_service:
                 if thread_message.content_filter_results:
                     raise ContentFilterError(content_filter_results=thread_message.content_filter_results)
 
-                # Add thread message to messages list
-                message = build_message(
-                    role=thread_message.role,
-                    content=thread_message.content,
-                    user_name=chat_request.user_name,
-                    tool_calls=thread_message.tool_calls,
-                    tool_call_id=thread_message.tool_call_id,
-                    tool_call_function=thread_message.tool_call_function)
-                messages.append(message)
-
                 thread_chat_history.append({"role": thread_message.role, "content": thread_message.content})
 
 
-        # If system prompt is not first message add it in the beginning
-        if not messages or messages[0]["role"] != "system":
-            # Add system prompt
-            system_prompt_message = build_system_prompt(user_name=chat_request.user_name)
-            messages.insert(0, system_prompt_message)
-
-            # Save system prompt message
-            await self.chat_history_repository.add_message(
-                Message(
-                    user_id=chat_request.user_id,
-                    thread_id=chat_request.thread_id,
-                    role=system_prompt_message["role"],
-                    content=system_prompt_message["content"])
-            )
-
         # Add latest user message
         user_message = build_user_message(chat_request.user_prompt, chat_request.user_name)
-        messages.append(user_message)
-
-        # Save user message
-        user_message_id = await self.chat_history_repository.add_message(
+        _ = await self.chat_history_repository.add_message(
             Message(
                 user_id=chat_request.user_id,
                 thread_id=chat_request.thread_id,
@@ -139,7 +106,7 @@ class multi_agent_chat_service:
                 topics = chat_request.topic,
                 thread_chat_history = thread_chat_history
             )
-            response = await response_task
+            agent_response = await response_task
 
         # except ContentFilterError as cfe:
         #     # Update user message with content filter results
@@ -151,7 +118,6 @@ class multi_agent_chat_service:
             logger.error(f"Error occurred while processing conversation flow: {e}")
             raise e
 
-        agent_response = response
 
         # Save agent response
         agent_message_id = await self.chat_history_repository.add_message(
@@ -188,9 +154,6 @@ class multi_agent_chat_service:
             thread_id=chat_request.thread_id,
             message_id=agent_message_id,
             agent_response=agent_response[0] or "Sorry we were unable to generate a response. Please try again.",
-            followup_questions=follow_up_questions,
-            actions=actions,
-            products=products,
             token_count=token_count,
             max_token_count=max_token_count,
             memory_summary = agent_response[1]

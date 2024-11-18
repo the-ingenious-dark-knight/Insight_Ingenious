@@ -1,25 +1,20 @@
-from datetime import datetime, timezone
 import importlib
-import uuid
-from ingenious.models.database_client import DatabaseClientType
-from ingenious.models.message import Message
-import ingenious.config.config as Config
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from datetime import datetime, timezone
 from typing import (
-    TYPE_CHECKING,
-    Any,
     Dict,
-    Generic,
     List,
     Literal,
     Optional,
-    Protocol,
     TypedDict,
-    TypeVar,
     Union,
 )
 from uuid import UUID
-from dataclasses import dataclass
+
+import ingenious.config.config as Config
+from ingenious.models.database_client import DatabaseClientType
+from ingenious.models.message import Message
 
 
 class IChatHistoryRepository(ABC):
