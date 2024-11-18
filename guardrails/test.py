@@ -42,7 +42,36 @@ completion = client.chat.completions.create(
     ]
 )
 
+
+from openai import AzureOpenAI
+
+client = AzureOpenAI(
+  azure_endpoint = 'http://127.0.0.1:8000/guards/name-case/openai/v1',
+  api_key="1146698f66254e789bb81fa11517ebac",
+  api_version="2024-08-01-preview"
+)
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{
+        "role": "user",
+        "content": "Make up some gibberish for me please!"
+    }]
+)
+
 print(completion.choices[0].message.content)
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 from openai import OpenAI
