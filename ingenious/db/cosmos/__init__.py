@@ -70,15 +70,15 @@ class cosmos_ChatHistoryRepository(IChatHistoryRepository):
             self.container.delete_item(item=item['id'], partition_key=item['id'])
 
     async def update_thread(
-        self,
-        thread_id: str,
-        name: Optional[str] = None,
-        user_id: Optional[str] = None,
-        metadata: Optional[Dict] = None,
-        tags: Optional[List[str]] = None
+            self,
+            thread_id: str,
+            name: Optional[str] = None,
+            user_id: Optional[str] = None,
+            metadata: Optional[Dict] = None,
+            tags: Optional[List[str]] = None
     ) -> str:
         pass
-    
+
     async def add_user(self, identifier: str) -> IChatHistoryRepository.User:
         user_id = uuid.uuid4()
         user_data = {
@@ -98,7 +98,8 @@ class cosmos_ChatHistoryRepository(IChatHistoryRepository):
     async def get_user(self, identifier: str) -> IChatHistoryRepository.User | None:
         query = "SELECT * FROM c WHERE c.identifier = @identifier"
         parameters = [{"name": "@identifier", "value": identifier}]
-        results = list(self.container.query_items(query=query, parameters=parameters, enable_cross_partition_query=True))
+        results = list(
+            self.container.query_items(query=query, parameters=parameters, enable_cross_partition_query=True))
         if results:
             user_data = results[0]
             return IChatHistoryRepository.User(
@@ -108,7 +109,6 @@ class cosmos_ChatHistoryRepository(IChatHistoryRepository):
                 metadata=user_data.get("metadata", {})
             )
         return None
-
 
     async def get_threads_for_user(self, identifier: str, thread_id: Optional[str]) -> Optional[List[Dict]]:
         """Retrieve threads associated with a specific user."""
@@ -166,14 +166,14 @@ class cosmos_ChatHistoryRepository(IChatHistoryRepository):
                 {"name": "@thread_id", "value": thread_id},
                 {"name": "@message_id", "value": message_id}
             ]
-            items = list(self.container_memory.query_items(query=query, parameters=parameters, enable_cross_partition_query=True))
+            items = list(self.container_memory.query_items(query=query, parameters=parameters,
+                                                           enable_cross_partition_query=True))
             if items:
                 return Message(**items[0])
         except exceptions.CosmosHttpResponseError as e:
             if e.status_code == 404:
                 return None
             raise
-
 
     async def update_memory(self) -> None:
         # Query to find the latest record for each thread
@@ -209,16 +209,15 @@ class cosmos_ChatHistoryRepository(IChatHistoryRepository):
             except exceptions.CosmosHttpResponseError as e:
                 raise RuntimeError(f"Failed to update memory in CosmosDB: {e}")
 
-
     async def get_thread_memory(self, thread_id: str) -> list[Message]:
         query = """
             SELECT * FROM c WHERE c.thread_id = @thread_id 
             AND c.is_memory = true ORDER BY c.timestamp DESC
         """
         parameters = [{"name": "@thread_id", "value": thread_id}]
-        items = list(self.container_memory.query_items(query=query, parameters=parameters, enable_cross_partition_query=True))
+        items = list(
+            self.container_memory.query_items(query=query, parameters=parameters, enable_cross_partition_query=True))
         return [Message(**item) for item in items] if items else []
-
 
     async def update_memory_feedback(self, message_id: str, thread_id: str, positive_feedback: bool | None) -> None:
         try:
@@ -233,7 +232,8 @@ class cosmos_ChatHistoryRepository(IChatHistoryRepository):
                 raise ValueError("Memory not found")
             raise
 
-    async def update_memory_content_filter_results(self, message_id: str, thread_id: str, content_filter_results: dict[str, object]) -> None:
+    async def update_memory_content_filter_results(self, message_id: str, thread_id: str,
+                                                   content_filter_results: dict[str, object]) -> None:
         try:
             # Retrieve the memory record
             item = self.container_memory.read_item(item=message_id, partition_key=thread_id)
@@ -250,18 +250,19 @@ class cosmos_ChatHistoryRepository(IChatHistoryRepository):
         # Query to find all memory records for the thread
         query = "SELECT c.id FROM c WHERE c.thread_id = @thread_id AND c.is_memory = true"
         parameters = [{"name": "@thread_id", "value": thread_id}]
-        items = list(self.container_memory.query_items(query=query, parameters=parameters, enable_cross_partition_query=True))
+        items = list(
+            self.container_memory.query_items(query=query, parameters=parameters, enable_cross_partition_query=True))
 
         # Delete each memory record found
         for item in items:
             self.container_memory.delete_item(item=item['id'], partition_key=thread_id)
 
-
     async def delete_user_memory(self, user_id: str) -> None:
         # Query to find all memory records for the user
         query = "SELECT c.id FROM c WHERE c.user_id = @user_id AND c.is_memory = true"
         parameters = [{"name": "@thread_id", "value": user_id}]
-        items = list(self.container_memory.query_items(query=query, parameters=parameters, enable_cross_partition_query=True))
+        items = list(
+            self.container_memory.query_items(query=query, parameters=parameters, enable_cross_partition_query=True))
 
         # Delete each memory record found
         for item in items:

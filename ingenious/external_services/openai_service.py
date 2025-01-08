@@ -27,18 +27,22 @@ class OpenAIService:
         )
         self.model = open_ai_model
 
-    async def generate_response(self,
-                                messages: list[ChatCompletionMessageParam],
-                                tools: list[ChatCompletionToolParam] | None = None,
-                                json_mode=False) -> ChatCompletionMessage:
+    async def generate_response(
+        self,
+        messages: list[ChatCompletionMessageParam],
+        tools: list[ChatCompletionToolParam] | None = None,
+        tool_choice: str | dict | None = None,
+        json_mode=False
+    ) -> ChatCompletionMessage:
         logger.debug(f"Generating OpenAI response for messages: {messages}")
         try:
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=messages,
                 tools=tools or NOT_GIVEN,
-                tool_choice="auto" if tools else NOT_GIVEN,
+                tool_choice=tool_choice or ("auto" if tools else NOT_GIVEN),
                 response_format={"type": "json_object"} if json_mode else NOT_GIVEN,
+                temperature=0.2,
             )
             return response.choices[0].message
         except BadRequestError as error:
@@ -54,19 +58,33 @@ class OpenAIService:
 
                 # Check for content filter specific errors
                 if error.code == "content_filter" and "innererror" in error.body:
-                    content_filter_results = error.body["innererror"].get("content_filter_result", {})
+                    content_filter_results = error.body["innererror"].get(
+                        "content_filter_result", {}
+                    )
                     raise ContentFilterError(message, content_filter_results)
 
                 # Check for token limit errors
-                token_error_pattern = r"This model's maximum context length is (\d+) tokens, however you requested (\d+) tokens \((\d+) in your prompt; (\d+) for the completion\). Please reduce your prompt; or completion length."  # noqa E501
+                token_error_pattern = (
+                    r"This model's maximum context length is (\d+) tokens, "
+                    r"however you requested (\d+) tokens \((\d+) in your prompt; "
+                    r"(\d+) for the completion\). Please reduce your prompt; or "
+                    r"completion length."
+                )
                 token_error_match = re.match(token_error_pattern, message)
                 if token_error_match:
-                    max_context_length, requested_tokens, prompt_tokens, completion_tokens = token_error_match.groups()
+                    (
+                        max_context_length,
+                        requested_tokens,
+                        prompt_tokens,
+                        completion_tokens
+                    ) = token_error_match.groups()
                     raise TokenLimitExceededError(
-                        message=message, max_context_length=int(max_context_length),
+                        message=message,
+                        max_context_length=int(max_context_length),
                         requested_tokens=int(requested_tokens),
                         prompt_tokens=int(prompt_tokens),
-                        completion_tokens=int(completion_tokens))
+                        completion_tokens=int(completion_tokens)
+                    )
 
             raise Exception(message)
         except Exception as e:

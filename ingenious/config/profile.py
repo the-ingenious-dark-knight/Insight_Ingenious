@@ -11,19 +11,25 @@ from azure.identity import DefaultAzureCredential
 
 class Profiles():
     def __init__(self, profiles_path=None):
-        self.profiles: profile_models.Profiles = Profiles._get_profiles(profiles_path)
+        self.profiles: profile_models.Profiles = \
+            Profiles._get_profiles(profiles_path)
 
     @staticmethod
     def from_yaml_str(profile_yml):
         yaml_data = yaml.safe_load(profile_yml)
         json_data = json.dumps(yaml_data)
         try:
-            profiles = profile_models.Profiles.model_validate_json(json_data).root
-        except ValidationError as e:
-            print(f"Validation error: {e}")
+            profiles = \
+                profile_models.Profiles.model_validate_json(json_data).root
+        except profile_models.ValidationError as e:
+            for error in e.errors():
+                print(
+                    f"Validation error in \
+                    field '{error['loc']}': {error['msg']}"
+                )
             raise e
         except Exception as e:
-            print(f"Error: {e}")
+            print(f"Unexpected error during validation: {e}")
             raise e
         return profiles
 
@@ -50,31 +56,46 @@ class Profiles():
         if profiles_path is None or profiles_path == '':
             if os.getenv('INGENIOUS_PROFILE_PATH', '') != '':
                 print("Profile Path loaded from environment variable")
-                profiles_path = Path(os.getenv('INGENIOUS_PROFILE_PATH'))
+                profiles_path_object = Path(os.getenv('INGENIOUS_PROFILE_PATH'))
             else:
                 print("Profile loaded from default path")
                 home_directory = os.path.expanduser('~')
-                profiles_path = Path(home_directory) / Path('.ingenious') / Path('profiles.yml')
-
-        if Path(profiles_path).is_file(): #this might need to change to
-            print("Profile loaded from file")
-            profiles = Profiles.from_yaml(file_path=profiles_path)
+                profiles_path_object = \
+                    Path(
+                        home_directory
+                        ) / Path(
+                            '.ingenious'
+                            ) / Path(
+                                'profiles.yml'
+                                )
         else:
-            print("Profile loaded from key vault")
-            profiles_yml = get_kv_secret(secretName="profileymlconfig")
+            profiles_path_object = Path(profiles_path)
+
+        if profiles_path_object.is_file():
+            print("Profile loaded from file")
+            profiles = Profiles.from_yaml(file_path=str(profiles_path_object))
+        else:
+            print(f"Profile not found at {profiles_path}")
+            print("Trying to load profile from key vault")
+            profiles_yml = get_kv_secret(secretName="profile")
             profiles = Profiles.from_yaml_str(profiles_yml)
 
         return profiles
-    
+
     def get_profile_by_name(self, name):
         for profile in self.profiles:
             if profile.name == name:
                 return profile
         return None
 
+
 @staticmethod
 def get_kv_secret(secretName):
-    keyVaultName = os.environ["KEY_VAULT_NAME"]
+    try:
+        keyVaultName = os.environ["KEY_VAULT_NAME"]
+    except KeyError:
+        raise ValueError("KEY_VAULT_NAME environment variable not set")
+    
     KVUri = f"https://{keyVaultName}.vault.azure.net"
     credential = DefaultAzureCredential()
     client = SecretClient(vault_url=KVUri, credential=credential)

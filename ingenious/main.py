@@ -14,6 +14,15 @@ import ingenious.api.routes.message_feedback as message_feedback
 # import search
 import importlib.resources as pkg_resources
 
+# Import your routers
+config = Config.get_config(os.getenv("INGENIOUS_PROJECT_PATH", ""))
+print("config.web_configuration.asynchronous", config.web_configuration.asynchronous)
+if config.web_configuration.asynchronous:
+    import ingenious.api.routes.chat_async as chat
+else:
+    import ingenious.api.routes.chat as chat
+
+import ingenious.api.routes.chat_async_test as chat_test
 # Configure logging
 logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
@@ -28,6 +37,7 @@ class FastAgentAPI:
         self.app = FastAPI(title="FastAgent API", version="1.0.0")
 
         # Include routers
+        self.app.include_router(chat_test.router, prefix="/api/v1", tags=["ChatTest"])
         self.app.include_router(chat.router, prefix="/api/v1", tags=["Chat"])
         self.app.include_router(message_feedback.router, prefix="/api/v1", tags=["Message Feedback"])
         # self.app.include_router(conversation.router, prefix="/api/v1", tags=["Conversation"])

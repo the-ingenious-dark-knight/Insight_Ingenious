@@ -49,12 +49,14 @@ class LoggingConfig(config_ns_models.LoggingConfig):
 
 class AzureSearchConfig(config_ns_models.AzureSearchConfig):
     key: str = ""
+
     def __init__(self, config: config_ns_models.AzureSearchConfig, profile: profile_models.AzureSearchConfig):
         super().__init__(service=config.service, endpoint=config.endpoint, key=profile.key)
 
 
 class AzureSqlConfig(config_ns_models.AzureSqlConfig):
     database_connection_string: str = Field("", description="azure SQL Connection string")
+
     def __init__(self, config: config_ns_models.AzureSqlConfig, profile: profile_models.AzureSqlConfig):
         super().__init__(
             table_name=config.table_name,
@@ -62,20 +64,61 @@ class AzureSqlConfig(config_ns_models.AzureSqlConfig):
             database_connection_string=profile.database_connection_string,
             )
 
+
+class ReceiverConfig(profile_models.ReceiverConfig):
+    def __init__(self, profile: profile_models.ReceiverConfig):
+        super().__init__(
+            enable=profile.enable,
+            api_url=profile.api_url,
+            api_key=profile.api_key,
+            )
+
+
 class WebConfig(config_ns_models.WebConfig):
     authentication: profile_models.WebAuthConfig = {}
 
-    def __init__(self, config: config_ns_models.WebConfig, profile: profile_models.WebConfig):
-        super().__init__(ip_address=config.ip_address, port=config.port, type=config.type, authentication=profile.authentication)
+    def __init__(
+            self,
+            config: config_ns_models.WebConfig,
+            profile: profile_models.WebConfig
+            ):
+        super().__init__(
+            ip_address=config.ip_address,
+            port=config.port,
+            type=config.type,
+            asynchronous=config.asynchronous,
+            authentication=profile.authentication
+        )
 
 
 class LocaldbConfig(config_ns_models.LocaldbConfig):
     def __init__(self, config: config_ns_models.LocaldbConfig):
-        super().__init__(database_path=config.database_path, sample_csv_path=config.sample_csv_path,
-                         sample_database_name=config.sample_database_name)
+        super().__init__(
+            database_path=config.database_path,
+            sample_csv_path=config.sample_csv_path,
+            sample_database_name=config.sample_database_name)
+
+
+class FileStorage(config_ns_models.FileStorage):
+    url: str = Field("", description="File Storage URL")
+
+    def __init__(
+            self,
+            config: config_ns_models.FileStorage, 
+            profile: profile_models.FileStorage):
+        super().__init__(
+            enable=config.enable,
+            storage_type=config.storage_type,
+            container_name=config.container_name,
+            path=config.path
+        )
+        self.url = profile.url
 
 
 class Config(BaseModel):
+    """
+        This is the constructor class that brings together the configuration and profile classes.
+    """
     chat_history: ChatHistoryConfig
     models: List[ModelConfig]
     logging: LoggingConfig
@@ -84,8 +127,10 @@ class Config(BaseModel):
     chainlit_configuration: ChainlitConfig
     azure_search_services: List[AzureSearchConfig]
     web_configuration: WebConfig
-    local_sql_db:LocaldbConfig
+    receiver_configuration: ReceiverConfig
+    local_sql_db: LocaldbConfig
     azure_sql_services: AzureSqlConfig
+    file_storage: FileStorage
 
     def __init__(self, config: config_ns_models.Config, profile: profile_models.Profile):
         super().__init__(
@@ -97,8 +142,10 @@ class Config(BaseModel):
             chainlit_configuration=ChainlitConfig(config.chainlit_configuration, profile.chainlit_configuration),
             azure_search_services=[],
             web_configuration=WebConfig(config.web_configuration, profile.web_configuration),
+            receiver_configuration=ReceiverConfig(profile.receiver_configuration),
             local_sql_db=LocaldbConfig(config.local_sql_db),
-            azure_sql_services=AzureSqlConfig(config.azure_sql_services, profile.azure_sql_services)
+            azure_sql_services=AzureSqlConfig(config.azure_sql_services, profile.azure_sql_services),
+            file_storage=FileStorage(config.file_storage, profile.file_storage)
         )
 
         models: List[config_models.ModelConfig] = []

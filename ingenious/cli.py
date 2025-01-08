@@ -1,10 +1,13 @@
 import shutil
 from sysconfig import get_paths
+import time
 from typing import Optional
 import typer
+import asyncio
 from typing_extensions import Annotated
 from rich.console import Console
 from rich.theme import Theme
+from rich import panel
 from rich import print
 from pathlib import Path
 import os
@@ -12,6 +15,9 @@ import uvicorn
 import importlib
 import pkgutil
 import ingenious.config.config as ingen_config
+from ingenious.utils.log_levels import LogLevel
+from ingenious.utils.namespace_utils import import_class_with_fallback
+import ingenious.utils.stage_executor as stage_executor_module
 
 
 app = typer.Typer(no_args_is_help=True)
@@ -113,11 +119,42 @@ def run_all(
     #subprocess.run(["fastapi", "dev", "./ingenious/main.py"])
 
 
+@app.command()
+def run_test_batch(
+        log_level: Annotated[
+        Optional[str],
+        typer.Option(
+            help="The option to set the log level. This controls the verbosity of the output. Allowed values are `DEBUG`, `INFO`, `WARNING`, `ERROR`. Default is `WARNING`.",
+        ),
+        ] = "WARNING"
+):
+    """
+        This command will run all the tests in the project
+        """
+    _log_level: LogLevel = LogLevel.from_string(log_level)    
+    
+    se: stage_executor_module.stage_executor = stage_executor_module.stage_executor(log_level=_log_level, console=console)
+    
+    asyncio.run(se.perform_stage(option=True, action_callables=[CliFunctions.RunTestBatch()], stage_name="Batch Tests"))
+
+
 if __name__ == "__cli__":
     app()
 
 
 class CliFunctions:
+    class RunTestBatch(stage_executor_module.IActionCallable):
+        async def __call__(self, progress, task_id, **kwargs):
+            module_name = f"tests.run_tests"
+            class_name = "RunBatches"
+            try:                
+                repository_class_import = import_class_with_fallback(module_name, class_name)
+                repository_class = repository_class_import(progress=progress, task_id=task_id)
+                await repository_class.run()
+
+            except (ImportError, AttributeError) as e:
+                raise ValueError(f"Batch Run Failed: {module_name}") from e
+    
     @staticmethod
     def PureLibIncludeDirExists():
         ChkPath = Path(get_paths()['purelib']) / Path(f'ingenious/')

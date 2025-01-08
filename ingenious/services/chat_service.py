@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from ingenious.models.chat import ChatRequest, ChatResponse
 from ingenious.db.chat_history_repository import ChatHistoryRepository
+from ingenious.utils.conversation_builder import Sync_Prompt_Templates
+from ingenious.config.config import Config
 import importlib
 
 
@@ -15,14 +17,22 @@ class ChatService:
             self,
             chat_service_type: str,
             chat_history_repository: ChatHistoryRepository,
-            conversation_flow: str
+            conversation_flow: str,
+            config: Config
             ):
-        module_name = f"ingenious.services.chat_services.{chat_service_type.lower()}.service"
+        
         class_name = f"{chat_service_type.lower()}_chat_service"
+        self.config = config
 
-        try:
-            module = importlib.import_module(f"{module_name}")
+        try:            
+            # First look for the module in the extensions namespace
+            module_name = f"ingenious_extensions.services.chat_services.{chat_service_type.lower()}.service"
+            if importlib.util.find_spec(module_name) is None:
+                module = importlib.import_module(f"{module_name}")
+            else:
+                module = importlib.import_module(f"ingenious.services.chat_services.{chat_service_type.lower()}.service")
             service_class = getattr(module, class_name)
+            
         except (ImportError, AttributeError) as e:
             raise ValueError(f"Unsupported chat service type: {module_name}.{class_name}") from e
 
@@ -32,6 +42,11 @@ class ChatService:
         )
 
     async def get_chat_response(self,  chat_request: ChatRequest) -> ChatResponse:
+        # Sync the prompt templates
+        await Sync_Prompt_Templates(self.config)
+
         if not chat_request.conversation_flow:
             raise ValueError(f"conversation_flow not set {chat_request}")
         return await self.service_class.get_chat_response(chat_request)
+    
+    

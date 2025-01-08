@@ -11,7 +11,7 @@ from ingenious.errors.content_filter_error import ContentFilterError
 from ingenious.models.chat import ChatRequest, ChatResponse
 from ingenious.models.message import Message
 from ingenious.utils.conversation_builder import (build_user_message)
-from ingenious.utils.namespace_utils import import_module_safely
+from ingenious.utils.namespace_utils import import_class_with_fallback
 
 logger = logging.getLogger(__name__)
 
@@ -60,22 +60,20 @@ class multi_agent_chat_service:
             else:
                 await self.chat_history_repository.delete_user_memory(user_id=chat_request.user_id)
 
-
             msg = f'current_memory: {thread_memory}'
             logger.log(level=logging.INFO, msg=msg)
             print(msg)
 
             for thread_message in thread_messages:
                 # Validate user_id
-                if thread_message.user_id != chat_request.user_id:
-                    raise ValueError("User ID does not match thread messages.")
+                # if thread_message.user_id != chat_request.user_id:
+                #     raise ValueError("User ID does not match thread messages.")
 
                 # Validate content_filter_results not present
                 if thread_message.content_filter_results:
                     raise ContentFilterError(content_filter_results=thread_message.content_filter_results)
 
                 thread_chat_history.append({"role": thread_message.role, "content": thread_message.content})
-
 
         # Add latest user message
         user_message = build_user_message(chat_request.user_prompt, chat_request.user_name)
@@ -93,18 +91,17 @@ class multi_agent_chat_service:
                 self.conversation_flow = chat_request.conversation_flow
             if not self.conversation_flow:
                 raise ValueError(f"conversation_flow4 not set {chat_request}")
-            module_name = f"ingenious.services.chat_services.multi_agent.conversation_flows.{self.conversation_flow.lower()}.{self.conversation_flow.lower()}"
+            module_name = f"services.chat_services.multi_agent.conversation_flows.{self.conversation_flow.lower()}.{self.conversation_flow.lower()}"
             class_name = "ConversationFlow"
 
-             
-            conversation_flow_service_class = import_module_safely(module_name, class_name)                        
+            conversation_flow_service_class = import_class_with_fallback(module_name, class_name)
 
             response_task = conversation_flow_service_class.get_conversation_response(
                 message=chat_request.user_prompt,
-                memory_record_switch = chat_request.memory_record,
-                thread_memory = thread_memory,
-                topics = chat_request.topic,
-                thread_chat_history = thread_chat_history
+                event_type=chat_request.event_type,
+                memory_record_switch=chat_request.memory_record,
+                thread_memory=thread_memory,
+                thread_chat_history=thread_chat_history
             )
             agent_response = await response_task
 
@@ -117,7 +114,6 @@ class multi_agent_chat_service:
         except Exception as e:
             logger.error(f"Error occurred while processing conversation flow: {e}")
             raise e
-
 
         # Save agent response
         agent_message_id = await self.chat_history_repository.add_message(
@@ -156,5 +152,6 @@ class multi_agent_chat_service:
             agent_response=agent_response[0] or "Sorry we were unable to generate a response. Please try again.",
             token_count=token_count,
             max_token_count=max_token_count,
-            memory_summary = agent_response[1]
+            memory_summary=agent_response[1],
         )
+
