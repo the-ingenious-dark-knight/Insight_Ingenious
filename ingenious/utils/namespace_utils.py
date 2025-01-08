@@ -55,6 +55,10 @@ def import_module_with_fallback(module_name):
             module_name (str): The name of the module to import (excluding the top level of ingenious or ingenious_extensions).            
     """
     module_full_name = f"ingenious_extensions.{module_name}"
+    working_dir = Path(os.getcwd())
+    # Check if sys.path contains the working directory
+    if working_dir not in sys.path:
+        sys.path.append(str(working_dir))
     if importlib.util.find_spec(module_full_name) is not None:
         module = importlib.import_module(f"{module_full_name}")
     else:
@@ -99,7 +103,7 @@ def get_file_from_namespace_with_fallback(module_name, file_name):
             return file.read()
 
 
-def get_path_from_namespace_with_fallback(path:str):
+def get_path_from_namespace_with_fallback(path: str):
     """
         This function tries to import a file from the Ingenious Extensions package and falls back to the Ingenious package if the file is not found.
 

@@ -75,7 +75,8 @@ ingen_cli = "ingenious.cli:app"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["ingenious*"]
+include = ["ingenious", "ingenious/**"]
+exclude = ["ingenious_extensions", "ingenious_extensions/**"]
 
 
 [tool.setuptools]
