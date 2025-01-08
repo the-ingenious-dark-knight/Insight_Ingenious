@@ -18,7 +18,6 @@ from ingenious.models.message import Message
 
 
 class IChatHistoryRepository(ABC):
-    
     TrueStepType = Literal["run", "tool", "llm", "embedding", "retrieval", "rerank", "undefined"]
 
     MessageStepType = Literal["user_message", "assistant_message", "system_message"]
@@ -132,7 +131,7 @@ class IChatHistoryRepository(ABC):
         threadId: UUID
         value: int
         comment: Optional[str]
-    
+
     @dataclass
     class FeedbackDict(TypedDict):
         forId: str
@@ -175,24 +174,24 @@ class IChatHistoryRepository(ABC):
         metadata: Optional[Dict]
         steps: List['IChatHistoryRepository.StepDict']
         elements: Optional[List['IChatHistoryRepository.ElementDict']]
-    
+
     def get_now(self):
         return datetime.now(timezone.utc)
 
     def get_now_as_string(self):
         return self.get_now().strftime("%Y-%m-%d %H:%M:%S.%f%z")
-    
+
     @abstractmethod
     async def update_thread(
-        self,
-        thread_id: str,
-        name: Optional[str] = None,
-        user_id: Optional[str] = None,
-        metadata: Optional[Dict] = None,
-        tags: Optional[List[str]] = None
+            self,
+            thread_id: str,
+            name: Optional[str] = None,
+            user_id: Optional[str] = None,
+            metadata: Optional[Dict] = None,
+            tags: Optional[List[str]] = None
     ) -> str:
         pass
-    
+
     @abstractmethod
     async def add_message(self, message: Message) -> str:
         """ adds a message to the chat history """
@@ -216,9 +215,10 @@ class IChatHistoryRepository(ABC):
     @abstractmethod
     async def get_thread_messages(self, thread_id: str) -> list[Message]:
         pass
-    
+
     @abstractmethod
-    async def get_threads_for_user(self, identifier: str, thread_id: Optional[str]) -> Optional[List['IChatHistoryRepository.ThreadDict']]:
+    async def get_threads_for_user(self, identifier: str, thread_id: Optional[str]) -> Optional[
+        List['IChatHistoryRepository.ThreadDict']]:
         pass
 
     @abstractmethod
@@ -236,7 +236,7 @@ class IChatHistoryRepository(ABC):
 
 
 class ChatHistoryRepository:
-    
+
     def __init__(self, db_type: DatabaseClientType, config: Config.Config):
         module_name = f"ingenious.db.{db_type.value.lower()}"
         class_name = f"{db_type.value.lower()}_ChatHistoryRepository"
@@ -264,7 +264,6 @@ class ChatHistoryRepository:
             metadata=metadata,
         )
 
-
     async def add_user(self, identifier: str) -> IChatHistoryRepository.User:
         return await self.repository.add_user(identifier)
 
@@ -273,7 +272,7 @@ class ChatHistoryRepository:
 
     async def get_user(self, identifier: str) -> IChatHistoryRepository.User | None:
         return await self.repository.get_user(identifier)
-    
+
     async def add_message(self, message: Message) -> str:
         return await self.repository.add_message(message)
 
@@ -294,8 +293,9 @@ class ChatHistoryRepository:
 
     async def get_thread_memory(self, thread_id: str) -> Optional[list[IChatHistoryRepository.ThreadDict]]:
         return await self.repository.get_thread_memory(thread_id)
-    
-    async def get_threads_for_user(self, identifier: str, thread_id: Optional[str]) -> Optional[List[IChatHistoryRepository.ThreadDict]]:
+
+    async def get_threads_for_user(self, identifier: str, thread_id: Optional[str]) -> Optional[
+        List[IChatHistoryRepository.ThreadDict]]:
         return await self.repository.get_threads_for_user(identifier, thread_id)
 
     async def update_message_feedback(self, message_id: str, thread_id: str, positive_feedback: bool | None) -> None:
@@ -306,7 +306,8 @@ class ChatHistoryRepository:
 
     async def update_message_content_filter_results(
             self, message_id: str, thread_id: str, content_filter_results: dict[str, object]) -> None:
-        return await self.repository.update_message_content_filter_results(message_id, thread_id, content_filter_results)
+        return await self.repository.update_message_content_filter_results(message_id, thread_id,
+                                                                           content_filter_results)
 
     async def update_memory_content_filter_results(
             self, message_id: str, thread_id: str, content_filter_results: dict[str, object]) -> None:
@@ -317,7 +318,6 @@ class ChatHistoryRepository:
 
     async def delete_thread_memory(self, thread_id: str) -> None:
         return await self.repository.delete_thread_memory(thread_id)
-
 
     async def delete_user_memory(self, user_id: str) -> None:
         return await self.repository.delete_user_memory(user_id)

@@ -27,9 +27,9 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
             connection = sqlite3.connect(self.db_path)
             connection.row_factory = sqlite3.Row  # Set row factory to sqlite3.Row
             cursor = connection.cursor()
-            #print("Executing SQL: ", sql)
-            #print("Params: ", params)
-            
+            # print("Executing SQL: ", sql)
+            # print("Params: ", params)
+
             if expect_results:
                 res = cursor.execute(sql, params)
                 rows = res.fetchall()
@@ -144,7 +144,7 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
                     "forId" UUID,
                     "mime" TEXT
                 );
-                
+
             ''')
 
             self.connection.execute('''
@@ -190,18 +190,18 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
                                     tool_call_function)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
-                    message.user_id,
-                    message.thread_id,
-                    message.message_id,
-                    message.positive_feedback,
-                    message.timestamp,
-                    message.role,
-                    message.content,
-                    message.content_filter_results,
-                    message.tool_calls,
-                    message.tool_call_id,
-                    message.tool_call_function
-                )
+                message.user_id,
+                message.thread_id,
+                message.message_id,
+                message.positive_feedback,
+                message.timestamp,
+                message.role,
+                message.content,
+                message.content_filter_results,
+                message.tool_calls,
+                message.tool_call_id,
+                message.tool_call_function
+            )
                                     )
 
         return message.message_id
@@ -226,22 +226,22 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
                                     tool_call_function)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
-                    message.user_id, 
-                    message.thread_id, 
-                    message.message_id, 
-                    message.positive_feedback, 
-                    message.timestamp, 
-                    message.role, 
-                    message.content, 
-                    message.content_filter_results, 
-                    message.tool_calls, 
-                    message.tool_call_id, 
-                    message.tool_call_function
-                )
+                message.user_id,
+                message.thread_id,
+                message.message_id,
+                message.positive_feedback,
+                message.timestamp,
+                message.role,
+                message.content,
+                message.content_filter_results,
+                message.tool_calls,
+                message.tool_call_id,
+                message.tool_call_function
+            )
                                     )
 
         return message.message_id
-    
+
     async def add_user(self, identifier, metadata: dict = {}) -> IChatHistoryRepository.User:
         now = self.get_now()
         new_id = str(uuid.uuid4())
@@ -255,12 +255,12 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
                                     )
                 VALUES (?, ?, ?, ?)
             ''', (
-                    new_id,
-                    identifier,
-                    json.dumps(metadata),
-                    now
-                )
+                new_id,
+                identifier,
+                json.dumps(metadata),
+                now
             )
+                                    )
         return IChatHistoryRepository.User(
             id=uuid.UUID(new_id),
             identifier=identifier,
@@ -279,7 +279,7 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
             FROM users
             WHERE identifier = ?
         ''', (identifier,))
-        row = cursor.fetchone() 
+        row = cursor.fetchone()
         if row:
             # Convert the dictionary to an object
             return IChatHistoryRepository.User(
@@ -287,7 +287,7 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
                 identifier=row[1],
                 metadata=row[2],
                 createdAt=row[3]
-            )            
+            )
         else:
             usr = await self.add_user(identifier)
             return usr
@@ -301,7 +301,6 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
         ''', (message_id, thread_id))
         row = cursor.fetchone()
         if row:
-
             return Message(
                 user_id=row[0],
                 thread_id=row[1],
@@ -317,7 +316,8 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
             )
         return None
 
-    async def get_threads_for_user(self, identifier: str, thread_id: Optional[str]) -> Optional[List[IChatHistoryRepository.ThreadDict]]:
+    async def get_threads_for_user(self, identifier: str, thread_id: Optional[str]) -> Optional[
+        List[IChatHistoryRepository.ThreadDict]]:
         """Fetch all user threads up to self.user_thread_limit, or one thread by id if thread_id is provided."""
         if thread_id is None:
             user_threads_query = """
@@ -333,15 +333,15 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
                 WHERE "userIdentifier" = ?
                 ORDER BY "createdAt" DESC
                 LIMIT ?
-            """       
-            
+            """
+
             user_threads = self.execute_sql(
                 user_threads_query,
                 (
                     identifier, 100
                 )
             )
-        else: 
+        else:
             user_threads_query = """
                 SELECT
                     "id" AS thread_id,
@@ -355,15 +355,15 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
                 WHERE "userIdentifier" = ? AND "id" = ?
                 ORDER BY "createdAt" DESC
                 LIMIT ?
-            """       
-            
+            """
+
             user_threads = self.execute_sql(
                 user_threads_query,
                 (
                     identifier, thread_id, 100
                 )
             )
-        
+
         if not isinstance(user_threads, list):
             return None
         if not user_threads:
@@ -438,7 +438,7 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
                     userId=thread["user_id"],
                     userIdentifier=thread["user_identifier"],
                     tags=thread["thread_tags"],
-                    metadata=thread["thread_id"], #TODO: this gives NONE json.loads(thread["thread_metadata"]),
+                    metadata=thread["thread_id"],  # TODO: this gives NONE json.loads(thread["thread_metadata"]),
                     steps=[],
                     elements=[],
                 )
@@ -473,7 +473,7 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
                         input=(
                             step_feedback.get("step_input", "")
                             if step_feedback.get("step_showinput")
-                            not in [None, "false"]
+                               not in [None, "false"]
                             else ""
                         ),
                         output=step_feedback.get("step_output", ""),
@@ -511,7 +511,7 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
                         mime=element.get("element_mime"),
                     )
                     thread_dicts[thread_id]["elements"].append(element_dict)  # type: ignore
-        #print("Thread Dicts: ", thread_dicts)
+        # print("Thread Dicts: ", thread_dicts)
         return list(thread_dicts.values())
 
     async def get_thread_messages(self, thread_id: str) -> list[Message]:
@@ -525,17 +525,17 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
         rows = cursor.fetchall()
         return [Message(
             user_id=row[0],
-                thread_id=row[1],
-                message_id=row[2],
-                positive_feedback=row[3],
-                timestamp=row[4],
-                role=row[5],
-                content=row[6],
-                content_filter_results=row[7],
-                tool_calls=row[8],
-                tool_call_id=row[9],
-                tool_call_function=row[10]
-                ) for row in rows]
+            thread_id=row[1],
+            message_id=row[2],
+            positive_feedback=row[3],
+            timestamp=row[4],
+            role=row[5],
+            content=row[6],
+            content_filter_results=row[7],
+            tool_calls=row[8],
+            tool_call_id=row[9],
+            tool_call_function=row[10]
+        ) for row in rows]
 
     async def get_thread(self, thread_id: str) -> list[IChatHistoryRepository.Thread]:
         cursor = self.connection.cursor()
@@ -572,19 +572,18 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
                 WHERE id = ? AND thread_id = ?
             ''', (str(content_filter_results), message_id, thread_id))
 
-
     async def delete_thread(self, thread_id: str) -> None:
         with self.connection:
             self.connection.execute('''
                 DELETE FROM chat_history
                 WHERE thread_id = ?
             ''', (thread_id,))
-    
+
     async def add_step(self, step_dict: IChatHistoryRepository.StepDict):
         print("Creating step: ", step_dict)
 
         # If disableFeedback is not provided, default to False
-        step_dict["disableFeedback"] = step_dict.get("disableFeedback", False)        
+        step_dict["disableFeedback"] = step_dict.get("disableFeedback", False)
 
         step_dict["showInput"] = (
             str(step_dict.get("showInput", "")).lower()
@@ -599,24 +598,24 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
         parameters["metadata"] = json.dumps(step_dict.get("metadata", {}))
         parameters["generation"] = json.dumps(step_dict.get("generation", {}))
         columns = ", ".join(f'"{key}"' for key in parameters.keys())
-        values = ", ".join("?" for key in parameters.keys())       
+        values = ", ".join("?" for key in parameters.keys())
         query = f"""
             INSERT INTO steps ({columns})
             VALUES ({values});
-        """        
+        """
         self.execute_sql(
-            sql=query, 
+            sql=query,
             params=tuple(parameters.values()),
             expect_results=False
         )
 
     async def update_thread(
-        self,
-        thread_id: str,
-        name: Optional[str] = None,
-        user_id: Optional[str] = None,
-        metadata: Optional[Dict] = None,
-        tags: Optional[List[str]] = None,
+            self,
+            thread_id: str,
+            name: Optional[str] = None,
+            user_id: Optional[str] = None,
+            metadata: Optional[Dict] = None,
+            tags: Optional[List[str]] = None,
     ) -> str:
         print("Updating thread: ", thread_id)
         user_identifier = None
@@ -654,7 +653,7 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
             VALUES ({values})
             ON CONFLICT ("id") DO UPDATE
             SET {updates};
-        """       
+        """
         self.execute_sql(
             sql=query,
             params=tuple(parameters.values()),
@@ -663,8 +662,7 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
 
         return ""
 
-
-    async def update_memory(self) ->  None:
+    async def update_memory(self) -> None:
         cursor = self.connection.cursor()
 
         # Create a temporary table for the latest records
@@ -738,17 +736,17 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
         rows = cursor.fetchall()
         return [Message(
             user_id=row[0],
-                thread_id=row[1],
-                message_id=row[2],
-                positive_feedback=row[3],
-                timestamp=row[4],
-                role=row[5],
-                content=row[6],
-                content_filter_results=row[7],
-                tool_calls=row[8],
-                tool_call_id=row[9],
-                tool_call_function=row[10]
-                ) for row in rows]
+            thread_id=row[1],
+            message_id=row[2],
+            positive_feedback=row[3],
+            timestamp=row[4],
+            role=row[5],
+            content=row[6],
+            content_filter_results=row[7],
+            tool_calls=row[8],
+            tool_call_id=row[9],
+            tool_call_function=row[10]
+        ) for row in rows]
 
     async def update_memory_feedback(self, message_id: str, thread_id: str, positive_feedback: bool | None) -> None:
         with self.connection:
@@ -773,7 +771,6 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
                 DELETE FROM chat_history_summary
                 WHERE thread_id = ?
             ''', (thread_id,))
-
 
     async def delete_user_memory(self, user_id: str) -> None:
         with self.connection:

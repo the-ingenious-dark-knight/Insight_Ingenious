@@ -6,6 +6,7 @@ from pydantic import BaseModel
 class ChatRequest(BaseModel):
     thread_id: Optional[str] = None
     user_prompt: str
+    event_type: Optional[str]
     user_id: Optional[str] = None
     user_name: Optional[str] = None
     topic: Optional[str] = None

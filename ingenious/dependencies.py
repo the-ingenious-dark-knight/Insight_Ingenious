@@ -11,10 +11,12 @@ from ingenious.external_services.openai_service import OpenAIService
 from ingenious.services.chat_service import ChatService
 from ingenious.services.message_feedback_service import MessageFeedbackService
 import ingenious.config.config as Config
+import ingenious.models.config as config_models
+from ingenious.files.files_repository import FileStorage
 
 logger = logging.getLogger(__name__)
 security = HTTPBasic()
-config = Config.get_config(os.getenv("INGENIOUS_PROJECT_PATH", ""))
+config: config_models.Config = Config.get_config(os.getenv("INGENIOUS_PROJECT_PATH", ""))
 
 
 def get_openai_service():
@@ -74,7 +76,8 @@ def get_chat_service(
     return ChatService(
         chat_service_type=cs_type,
         chat_history_repository=chat_history_repository,
-        conversation_flow=conversation_flow
+        conversation_flow=conversation_flow,
+        config=config
     )
 
 
@@ -84,5 +87,23 @@ def get_message_feedback_service(
     return MessageFeedbackService(chat_history_repository)
 
 
+def sync_templates():
+    if config.file_storage.storage_type == "local":
+        return
+    else:
+        fs = FileStorage(config)
+        working_dir = os.getcwd()
+        template_path = os.path.join(working_dir, "ingenious", "templates")
+        template_files = fs.list_files(file_path=template_path)
+        for file in template_files:
+            file_name = os.path.basename(file)
+            file_contents = fs.read_file(file_name=file_name, file_path=template_path)
+            file_path = os.path.join(working_dir, "ingenious", "templates", file_name)
+            with open(file_path, "w") as f:
+                f.write(file_contents)
+
+
+def get_config():
+    return config
 
 

@@ -1,6 +1,5 @@
 from typing import List, Dict, Optional
 from pydantic import BaseModel, Field, ValidationError
-from ingenious.models import profile as profile_model
 
 
 class ChatHistoryConfig(BaseModel):
@@ -49,6 +48,7 @@ class WebConfig(BaseModel):
     ip_address: str = Field("0.0.0.0", description="IP address of the web server")
     port: int = Field(80, description="Port of the web server")
     type: str = Field("fastapi", description="Type of the web server (e.g. fastapi)")
+    asynchronous: bool = Field(False, description="Enables or Disables the Asynchronous Response")
 
 
 class LocaldbConfig(BaseModel):
@@ -57,7 +57,29 @@ class LocaldbConfig(BaseModel):
     sample_database_name: str = Field("sample_sql_db", description="Sample database name")
 
 
+class FileStorage(BaseModel):
+    enable: bool = Field(
+        True,
+        description="Enables or Disables File Storage"
+    ),
+    storage_type: str = Field(
+        "local",
+        description="Type of the File Storage"
+    ),
+    container_name: str = Field(
+        default="",
+        description="Name of the container. Used for Azure storage. Not used for local storage."
+    ),
+    path: str = Field(
+        "./",
+        description="Path to the file storage. Used for local storage and Azure storage."
+    )
+
+
 class Config(BaseModel):
+    """
+        This is the configuration class for the config.yml file. It contains only non-secret information.
+    """
     chat_history: ChatHistoryConfig
     profile: str
     models: List[ModelConfig]
@@ -67,5 +89,6 @@ class Config(BaseModel):
     chainlit_configuration: ChainlitConfig
     azure_search_services: List[AzureSearchConfig]
     web_configuration: WebConfig
-    local_sql_db:LocaldbConfig
+    local_sql_db: LocaldbConfig
     azure_sql_services: AzureSqlConfig
+    file_storage: FileStorage = Field(default_factory=lambda: FileStorage(enable=True, storage_type='local', container_name="", path="./"), description="File Storage configuration")

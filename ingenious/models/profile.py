@@ -20,6 +20,7 @@ class AzureSearchConfig(BaseModel):
     service: str
     key: str
 
+
 class ChainlitAuthConfig(BaseModel):
     enable: bool = False
     github_secret: str = ""
@@ -45,15 +46,33 @@ class WebAuthConfig(BaseModel):
     password: str = ""
 
 
+
 class WebConfig(BaseModel):    
     authentication: WebAuthConfig = Field(default_factory=WebAuthConfig)
+
+
+class ReceiverConfig(BaseModel):
+    enable: bool = True
+    api_url: str = ""
+    api_key: str = ""
 
 
 class LoggingConfig(BaseModel):
     pass
 
 
+class FileStorage(BaseModel):
+    url: str = Field(
+        "",
+        description="File Storage URL"
+    )
+
+
 class Profile(BaseModel):
+    """
+        This is the class for the profiles.yml file. It contains only secret information.
+    """
+
     name: str
     models: List[ModelConfig]
     chat_history: ChatHistoryConfig
@@ -61,9 +80,11 @@ class Profile(BaseModel):
     azure_search_services: List[AzureSearchConfig]
     azure_sql_services: AzureSqlConfig
     web_configuration: WebConfig
+    receiver_configuration: ReceiverConfig
     chainlit_configuration: ChainlitConfig
     tool_service: ToolServiceConfig = Field(default_factory=ToolServiceConfig, description="Tool service configuration")
     logging: LoggingConfig = Field(default_factory=LoggingConfig, description="Logging configuration")
+    file_storage: FileStorage = Field(default_factory=FileStorage, description="File Storage configuration")
 
 
 class Profiles(RootModel[List[Profile]]):
