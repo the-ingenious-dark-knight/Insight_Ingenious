@@ -144,6 +144,7 @@ def generate_template_folders():
     """Generate 'docker' and 'ingenious_extensions' folders in the current working directory."""
     base_path = Path(__file__).parent
     templates_paths = {
+        "ingenious": base_path / "ingenious",
         "docker": base_path / "docker_template",
         "ingenious_extensions": base_path / "ingenious_extensions_template",
     }
