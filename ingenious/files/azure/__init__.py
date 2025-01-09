@@ -10,13 +10,13 @@ class azure_FileStorageRepository(IFileStorage):
     def __init__(self):
         self.config = ig_deps.config
         self.url = self.config.file_storage.url
+        self.token  = self.config.file_storage.token
         self.container_name = self.config.file_storage.container_name
-        self.blob_service_client = BlobServiceClient(account_url=self.url, credential=DefaultAzureCredential())
-        self.token = self.config.file_storage.token
         if self.token == "":
             self.blob_service_client = BlobServiceClient(account_url=self.url, credential= DefaultAzureCredential())
         else:
             self.blob_service_client = BlobServiceClient(account_url=self.url, credential=self.token)
+
 
     async def write_file(self, contents: str, file_name: str, file_path: str):
         """
@@ -30,11 +30,12 @@ class azure_FileStorageRepository(IFileStorage):
         Example:
             await write_file("Hello, World!", "example.txt", "path/to/directory")
         """
+
         try:
             path = Path(self.config.file_storage.path) / Path(file_path) / Path(file_name)
             # Create the container if it does not exist
             container_client = self.blob_service_client.get_container_client(self.container_name)
-            if not container_client.exists():
+            if not container_client.container_name:
                 container_client.create_container()
 
             # Create a blob client
