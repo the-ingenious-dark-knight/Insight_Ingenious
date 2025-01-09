@@ -62,10 +62,8 @@ class LoggingConfig(BaseModel):
 
 
 class FileStorage(BaseModel):
-    url: str = Field(
-        "",
-        description="File Storage URL"
-    )
+    url: str = Field("", description="File Storage SAS URL")
+    token: str = Field("", description="File Storage SAS Token")
 
 
 class Profile(BaseModel):

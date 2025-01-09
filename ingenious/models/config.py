@@ -6,14 +6,15 @@ from ingenious.models import config_ns as config_ns_models
 
 
 class ChatHistoryConfig(config_ns_models.ChatHistoryConfig):
-    database_connection_string: str = Field("", description="Connection string for the database. Only used for cosmosdb")
+    database_connection_string: str = Field("",
+                                            description="Connection string for the database. Only used for cosmosdb")
 
     def __init__(self, config: config_ns_models.ChatHistoryConfig, profile: profile_models.ChatHistoryConfig):
         super().__init__(
-            database_type=config.database_type, 
-            database_path=config.database_path, 
-            database_connection_string=profile.database_connection_string, 
-            database_name=config.database_name, 
+            database_type=config.database_type,
+            database_path=config.database_path,
+            database_connection_string=profile.database_connection_string,
+            database_name=config.database_name,
             memory_path=config.memory_path)
 
 
@@ -22,7 +23,8 @@ class ModelConfig(config_ns_models.ModelConfig):
     base_url: str
 
     def __init__(self, config: config_ns_models.ModelConfig, profile: profile_models.ModelConfig):
-        super().__init__(model=config.model, api_type=config.api_type, api_version=config.api_version, base_url=profile.base_url, api_key=profile.api_key)
+        super().__init__(model=config.model, api_type=config.api_type, api_version=config.api_version,
+                         base_url=profile.base_url, api_key=profile.api_key)
 
 
 class ChainlitConfig(config_ns_models.ChainlitConfig):
@@ -62,7 +64,7 @@ class AzureSqlConfig(config_ns_models.AzureSqlConfig):
             table_name=config.table_name,
             database_name=config.database_name,
             database_connection_string=profile.database_connection_string,
-            )
+        )
 
 
 class ReceiverConfig(profile_models.ReceiverConfig):
@@ -71,7 +73,7 @@ class ReceiverConfig(profile_models.ReceiverConfig):
             enable=profile.enable,
             api_url=profile.api_url,
             api_key=profile.api_key,
-            )
+        )
 
 
 class WebConfig(config_ns_models.WebConfig):
@@ -81,7 +83,7 @@ class WebConfig(config_ns_models.WebConfig):
             self,
             config: config_ns_models.WebConfig,
             profile: profile_models.WebConfig
-            ):
+    ):
         super().__init__(
             ip_address=config.ip_address,
             port=config.port,
@@ -101,10 +103,11 @@ class LocaldbConfig(config_ns_models.LocaldbConfig):
 
 class FileStorage(config_ns_models.FileStorage):
     url: str = Field("", description="File Storage URL")
+    token: str = Field("", description="File Storage token")
 
     def __init__(
             self,
-            config: config_ns_models.FileStorage, 
+            config: config_ns_models.FileStorage,
             profile: profile_models.FileStorage):
         super().__init__(
             enable=config.enable,
@@ -113,6 +116,7 @@ class FileStorage(config_ns_models.FileStorage):
             path=config.path
         )
         self.url = profile.url
+        self.token = profile.token
 
 
 class Config(BaseModel):
@@ -152,13 +156,13 @@ class Config(BaseModel):
         for config_model in config.models:
             for profile_model in profile.models:
                 if config_model.model == profile_model.model:
-                    models.append(config_models.ModelConfig(config_model, profile_model))      
+                    models.append(config_models.ModelConfig(config_model, profile_model))
         self.models = models
 
         self.azure_search_services = []
         for as_config in config.azure_search_services:
             for profile_as_config in profile.azure_search_services:
-                if as_config.service == profile_as_config.service: 
+                if as_config.service == profile_as_config.service:
                     self.azure_search_services.append(config_models.AzureSearchConfig(as_config, profile_as_config))
-        
+
 
