@@ -105,3 +105,4 @@ ingenious/utils/model_utils.py
 ingenious/utils/namespace_utils.py
 ingenious/utils/stage_executor.py
 ingenious/utils/token_counter.py
+ingenious_extensions_template/__init__.py
