@@ -138,6 +138,51 @@ def run_test_batch(
     asyncio.run(se.perform_stage(option=True, action_callables=[CliFunctions.RunTestBatch()], stage_name="Batch Tests"))
 
 
+
+@app.command()
+def generate_template_folders():
+    """Generate 'docker' and 'ingenious_extensions' folders in the current working directory."""
+    base_path = Path(__file__).parent
+    templates_paths = {
+        "docker": base_path / "docker_template",
+        "ingenious_extensions": base_path / "ingenious_extensions_template",
+    }
+
+    for folder_name, template_path in templates_paths.items():
+        destination = Path.cwd() / folder_name
+
+        # Check if the destination folder already exists
+        if destination.exists():
+            console.print(f"[warning]Folder '{folder_name}' already exists.[/warning]")
+            continue
+
+        # Create the destination folder
+        destination.mkdir(parents=True, exist_ok=True)
+
+        if not template_path.exists():
+            console.print(f"[error]Template directory '{template_path}' not found.[/error]")
+            continue
+
+        try:
+            # Copy template contents
+            for item in template_path.iterdir():
+                src_path = template_path / item
+                dst_path = destination / item.name
+
+                if src_path.is_dir():
+                    shutil.copytree(src_path, dst_path)
+                else:
+                    shutil.copy2(src_path, dst_path)
+
+            console.print(f"[info]Copied template from '{template_path}' to '{destination}'.[/info]")
+
+        except Exception as e:
+            console.print(f"[error]Error copying template from '{template_path}': {e}[/error]")
+
+    console.print(f"[info]Generated folder structure in the current working directory.[/info]")
+
+
+
 if __name__ == "__cli__":
     app()
 
