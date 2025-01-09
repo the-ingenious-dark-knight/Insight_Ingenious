@@ -13,7 +13,6 @@ __pycache__
 .DS_Store
 .chainlit
 .DS_Store
-/dist/
 /docker_template/dist/
 /.devcontainer/
 /.files/
