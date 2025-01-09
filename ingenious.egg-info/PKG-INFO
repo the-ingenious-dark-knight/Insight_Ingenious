@@ -20,6 +20,7 @@ Requires-Dist: azure-search-documents==11.4.0
 Requires-Dist: azure.cosmos
 Requires-Dist: azure.identity
 Requires-Dist: azure.keyvault
+Requires-Dist: azure.storage.blob
 Requires-Dist: certifi==2024.6.2
 Requires-Dist: chainlit==1.1.402
 Requires-Dist: chromadb==0.5.5

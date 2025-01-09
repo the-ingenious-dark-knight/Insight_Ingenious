@@ -30,6 +30,7 @@ dependencies = [
     "azure.cosmos",
     "azure.identity",
     "azure.keyvault",
+    "azure.storage.blob",
     "certifi==2024.6.2",
     "chainlit==1.1.402",
     "chromadb==0.5.5",

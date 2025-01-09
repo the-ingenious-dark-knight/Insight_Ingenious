@@ -4,6 +4,7 @@ azure-search-documents==11.4.0
 azure.keyvault
 azure.identity
 azure.cosmos
+azure.storage.blob
 certifi==2024.6.2
 chainlit==1.1.402
 chromadb==0.5.5
