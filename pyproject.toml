@@ -81,7 +81,9 @@ ingen_cli = "ingenious.cli:app"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["ingenious", "ingenious/**"]
+include = ["ingenious", "ingenious/**",
+           "docker_template", "docker_template/**",
+           "ingenious_extensions_template", "ingenious_extensions_template/**"]
 exclude = ["ingenious_extensions", "ingenious_extensions/**"]
 
 
@@ -91,3 +93,5 @@ zip-safe = false
 
 [tool.setuptools.package-data]
 ingenious = ["**/*.py", "**/*.md", "**/*.jinja", "**/*.csv", "**/*.html"]
+ingenious_extensions = ["**/*.py", "**/*.json", "**/*.yaml"]
+docker = ["**/*.dockerfile", "**/*.sh"]
