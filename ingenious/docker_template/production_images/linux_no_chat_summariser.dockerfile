@@ -23,18 +23,12 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy the local `ingenious` and `ingenious_extensions` directories into the container
-COPY ./ingenious /ingen_app/ingenious
+# Use pip to install the `ingenious` package from the GitHub repository
+RUN pip install git+https://github.com/Insight-Services-APAC/Insight_Ingenious.git#egg=ingenious --force-reinstall
+
+# Copy the application files into the container
 COPY ./ingenious_extensions /ingen_app/ingenious_extensions
-
-# Copy the `pyproject.toml` file into the container's working directory
 COPY ./pyproject.toml /ingen_app/
-
-# Update the `pyproject.toml` file to reference the `ingenious` package
-WORKDIR /ingen_app/ingenious
-
-# Use pip to install the project dependencies
-RUN pip install ..
 
 # Set the command to run the app
 CMD ["python", "/ingen_app/ingenious_extensions/tests/run_fask_app.py"]
