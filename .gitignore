@@ -22,6 +22,5 @@ __pycache__
 /.files/
 /.github/
 /my_venv/
-/ingenious.egg-info/
 /guardrails/.guard_venv/
 /guardrails/.venv/
