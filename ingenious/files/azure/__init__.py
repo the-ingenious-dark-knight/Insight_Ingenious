@@ -12,6 +12,11 @@ class azure_FileStorageRepository(IFileStorage):
         self.url = self.config.file_storage.url
         self.container_name = self.config.file_storage.container_name
         self.blob_service_client = BlobServiceClient(account_url=self.url, credential=DefaultAzureCredential())
+        self.token = self.config.file_storage.token
+        if self.token == "":
+            self.blob_service_client = BlobServiceClient(account_url=self.url, credential= DefaultAzureCredential())
+        else:
+            self.blob_service_client = BlobServiceClient(account_url=self.url, credential=self.token)
 
     async def write_file(self, contents: str, file_name: str, file_path: str):
         """
