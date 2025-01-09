@@ -31,6 +31,8 @@ ingenious/db/chat_history_repository.py
 ingenious/db/cosmos/__init__.py
 ingenious/db/duckdb/__init__.py
 ingenious/db/sqlite/__init__.py
+ingenious/docker_template/production_images/linux_no_chat_summariser.dockerfile
+ingenious/docker_template/production_images/linux_no_chat_summariser_uat_test.dockerfile
 ingenious/errors/__init__.py
 ingenious/errors/content_filter_error.py
 ingenious/errors/token_limit_exceeded_error.py
@@ -41,6 +43,11 @@ ingenious/files/__init__.py
 ingenious/files/files_repository.py
 ingenious/files/azure/__init__.py
 ingenious/files/local/__init__.py
+ingenious/ingenious_extensions_template/__init__.py
+ingenious/ingenious_extensions_template/local_files/tmp/context.md
+ingenious/ingenious_extensions_template/templates/prompts/__init__.py
+ingenious/ingenious_extensions_template/tests/flask_app_index.html
+ingenious/ingenious_extensions_template/tests/run_fask_app.py
 ingenious/models/__init__.py
 ingenious/models/chat.py
 ingenious/models/config.py
@@ -105,4 +112,3 @@ ingenious/utils/model_utils.py
 ingenious/utils/namespace_utils.py
 ingenious/utils/stage_executor.py
 ingenious/utils/token_counter.py
-ingenious_extensions_template/__init__.py

@@ -1,3 +1,1 @@
-docker_template
 ingenious
-ingenious_extensions_template
