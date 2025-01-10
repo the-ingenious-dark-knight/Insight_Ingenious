@@ -47,7 +47,8 @@ ingenious/ingenious_extensions_template/__init__.py
 ingenious/ingenious_extensions_template/local_files/tmp/context.md
 ingenious/ingenious_extensions_template/templates/prompts/__init__.py
 ingenious/ingenious_extensions_template/tests/flask_app_index.html
-ingenious/ingenious_extensions_template/tests/run_fask_app.py
+ingenious/ingenious_extensions_template/tests/run_flask_app.py
+ingenious/ingenious_extensions_template/tests/run_tests.py
 ingenious/models/__init__.py
 ingenious/models/chat.py
 ingenious/models/config.py
