@@ -1,15 +1,4 @@
-
-# About
-
-**Ingenious** is a multi-agent accelerator designed to streamline the development and deployment of use cases for Large Language Models (LLMs). 
-It provides pre-built conversation patterns and agent services that can be customized and extended for various LLM-driven applications.
-
-For detailed documentation: https://insight-services-apac.github.io/Insight_Ingenious/.
-
-- **[Our Open App](https://ingen-app.ambitiousriver-e696f55c.australiaeast.azurecontainerapps.io/)** - An open-source app for pattern demonstration.
-
-
-## Setup Development Environment
+# Setup Development Environment
 
 To set up the development environment, follow these steps:
 
@@ -31,9 +20,11 @@ To set up the development environment, follow these steps:
    pip install git+https://github.com/Insight-Services-APAC/Insight_Ingenious.git#egg=ingenious --force-reinstall
    ```
 
-4. **Add the Ingenious Extensions Folder**:
-   Place the `ingenious_extensions` folder into your project root directory. Ensure it contains the following structure:
+4. **Add the Ingenious Extensions and tmp Folder**:
+   Place the `ingenious_extensions` and `tmp` folder into your project root directory. Ensure it contains the following structure:
    ```
+   tmp/
+   ├── context.md
    ingenious_extensions/
    ├── local_files/
    ├── models/
@@ -56,6 +47,7 @@ To set up the development environment, follow these steps:
     /env_mkdocs/
     /ingenious_extensions/local_files/tmp/context.md
     /ingenious_extensions/local_files/tmp/*.db
+    /dist/
     /functional_test_outputs/
    __pycache__" > .gitignore
    ```
@@ -64,8 +56,123 @@ To set up the development environment, follow these steps:
 
 ### 6. **Create Profile and Configure Environment Variables**
 
-Set up the environment variables following the provided insight documentation.
+Set up the `APPSETTING_INGENIOUS_CONFIG` and `APPSETTING_INGENIOUS_PROFILE` environment variables with the following configuration:
 
+#### **`APPSETTING_INGENIOUS_CONFIG`**
+```json
+{
+    "profile": "dev",
+    "models": [
+        {
+            "model": "model-name",
+            "api_type": "azure",
+            "api_version": "2024-08-01-preview"
+        }
+    ],
+    "logging": {
+        "root_log_level": "debug",
+        "log_level": "debug"
+    },
+    "chat_history": {
+        "database_type": "sqlite",
+        "database_path": "./tmp/chat_history.db",
+        "database_name": "ChatHistoryDB",
+        "memory_path": "./tmp"
+    },
+    "chainlit_configuration": {
+        "enable": false
+    },
+    "chat_service": {
+        "type": "multi_agent"
+    },
+    "tool_service": {
+        "enable": false
+    },
+    "local_sql_db": {
+        "database_path": "./tmp/local_database.db",
+        "sample_csv_path": "./data/sample_data.csv",
+        "sample_database_name": "LocalSampleData"
+    },
+    "azure_sql_services": {
+        "database_name": "skip",
+        "table_name": "sample_table"
+    },
+    "azure_search_services": [
+        {
+            "service": "search-demo-service",
+            "endpoint": "https://example.search.windows.net"
+        }
+    ],
+    "web_configuration": {
+        "type": "fastapi",
+        "asynchronous": true,
+        "ip_address": "0.0.0.0",
+        "port": 80,
+        "authentication": {
+            "enable": false,
+            "type": "basic"
+        }
+    },
+    "file_storage": {
+        "enable": true,
+        "storage_type": "azure", #option: local or azure
+        "container_name": "example-container",
+        "path": "."
+    }
+}
+```
+
+#### **`APPSETTING_INGENIOUS_PROFILE`**
+```json
+[
+    {
+        "name": "dev",
+        "models": [
+            {
+                "model": "model-name",
+                "api_key": "your-api-key",
+                "base_url": "https://example.azure.com/openai/deployments/model-name/chat/completions?api-version=2024-08-01-preview"
+            }
+        ],
+        "chat_history": {
+            "database_connection_string": "Your_Database_Connection_String_Here"
+        },
+        "azure_search_services": [
+            {
+                "service": "Your_Search_Service_Name",
+                "key": "Your_Search_Service_Key"
+            }
+        ],
+        "azure_sql_services": {
+            "database_connection_string": "Your_SQL_Connection_String_Here"
+        },
+        "receiver_configuration": {
+            "enable": true,
+            "api_url": "https://example-web.azurewebsites.net/api/ai-response/publish",
+            "api_key": "ReceiverApiKey"
+        },
+        "chainlit_configuration": {
+            "enable": false,
+            "authentication": {
+                "enable": false,
+                "github_secret": "",
+                "github_client_id": ""
+            }
+        },
+        "web_configuration": {
+            "authentication": {
+                "enable": false,
+                "username": "example-user",
+                "password": "hashed-password-here"
+            }
+        },
+        "file_storage": {
+            "url": "https://example.blob.core.windows.net/",
+            "token": "your-access-token"
+        }
+    }
+]
+```
 
 ### 7. **Create Extension Templates (If not provided)**
 ```bash
@@ -78,3 +185,5 @@ Execute the test batch using the following command:
 ingen_cli run-test-batch
 ```
 
+
+You are now ready to begin development using the `ingenious` package and with CA extensions!
