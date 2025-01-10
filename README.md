@@ -20,22 +20,10 @@ To set up the development environment, follow these steps:
    pip install git+https://github.com/Insight-Services-APAC/Insight_Ingenious.git#egg=ingenious --force-reinstall
    ```
 
-4. **Add the Ingenious Extensions and tmp Folder**:
-   Place the `ingenious_extensions` and `tmp` folder into your project root directory. Ensure it contains the following structure:
-   ```
-   tmp/
-   ├── context.md
-   ingenious_extensions/
-   ├── local_files/
-   ├── models/
-   ├── services/
-   ├── templates/
-   └── tests/
-   ```
 
    This folder includes custom extensions such as models, services, and templates required for extending the base `ingenious` package.
 
-5. **Create a `.gitignore` File**:
+4. **Create a `.gitignore` File**:
    Generate a `.gitignore` file to exclude unnecessary files and directories from version control:
    ```bash
       echo "
@@ -53,8 +41,7 @@ To set up the development environment, follow these steps:
    ```
 
 
-
-### 6. **Create Profile and Configure Environment Variables**
+### 5. **Create Profile and Configure Environment Variables**
 
 Set up the `APPSETTING_INGENIOUS_CONFIG` and `APPSETTING_INGENIOUS_PROFILE` environment variables with the following configuration:
 
@@ -174,12 +161,24 @@ Set up the `APPSETTING_INGENIOUS_CONFIG` and `APPSETTING_INGENIOUS_PROFILE` envi
 ]
 ```
 
-### 7. **Create Extension Templates (If not provided)**
-```bash
-ingen_cli generate-template-folders
-```
+### 6. **Add/Create Template Folders (If not provided)**
+   ```bash
+   ingen_cli generate-template-folders
+   ```
 
-### 8. **Run Tests**
+   Check the `ingenious_extensions` and `tmp` folder in your project root directory. Ensure it contains the following structure:
+   ```
+   tmp/
+   ├── context.md
+   ingenious_extensions/
+   ├── local_files/
+   ├── models/
+   ├── services/
+   ├── templates/
+   └── tests/
+   ```
+
+### 7. **Run Tests**
 Execute the test batch using the following command:
 ```bash
 ingen_cli run-test-batch
