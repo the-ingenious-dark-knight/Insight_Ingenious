@@ -4,18 +4,19 @@ from flask import Flask, render_template_string, request, redirect, url_for, jso
 from functools import wraps
 import sys
 import io
+
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../'))
 sys.path.append(parent_dir)
 import ingenious.dependencies as ig_deps
 
 app = Flask(__name__)
 
-
 app.secret_key = ig_deps.config.web_configuration.authentication.password
 
-TEMPLATE_FOLDER = os.path.join(os.path.dirname(__file__), '../ingenious', 'templates', 'prompts')
-RESPONSES_FILE = os.path.join(os.path.dirname(__file__), '../functional_test_outputs/20241221144853/responses.html')
+TEMPLATE_FOLDER = os.path.join(parent_dir, 'templates', 'prompts')
 
+output_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
+functional_test_dir = os.path.join(output_dir, 'functional_test_outputs')
 
 # Simple username and password
 USERNAME = ig_deps.config.web_configuration.authentication.username
@@ -40,6 +41,7 @@ def requires_auth(f):
         if 'logged_in' not in session:
             return redirect(url_for('login'))
         return f(*args, **kwargs)
+
     return decorated
 
 
@@ -76,7 +78,7 @@ def home():
     html = ""
     with open(os.path.join(os.path.dirname(__file__), './flask_app_index.html'), 'r') as f:
         html = f.read()
-    
+
     try:
         files = sorted([f for f in os.listdir(TEMPLATE_FOLDER) if f.endswith(('.md', '.jinja'))])
     except FileNotFoundError:
@@ -89,6 +91,13 @@ def home():
 @requires_auth
 def get_responses():
     """Route to read the responses.html file server-side and return its contents."""
+    latest_folder = max(
+        [os.path.join(functional_test_dir, d) for d in os.listdir(functional_test_dir)],
+        key=os.path.getmtime
+    )
+    print(latest_folder)
+    RESPONSES_FILE = os.path.join(latest_folder, 'responses.html')
+
     if os.path.exists(RESPONSES_FILE):
         with open(RESPONSES_FILE, 'r', encoding='utf-8') as rf:
             return rf.read()
@@ -117,7 +126,7 @@ def run_simple_tests():
     """Route to run tests/run_local_test_simple.py."""
     try:
         result = subprocess.run(
-            ["python", "tests/run_local_test_simple.py"],
+            ["ingen_cli", "run-test-batch"],
             capture_output=True,
             text=True,
             check=False
@@ -143,26 +152,27 @@ def edit_file(filename):
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
         html = f"""
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Editing: {filename}</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-</head>
-<body class="p-3">
-    <div class="container">
-        <h1>Editing: {filename}</h1>
-        <form method="POST">
-            <textarea name="file_content" rows="25" class="form-control">{content}</textarea>
-            <br>
-            <button type="submit" class="btn btn-primary">Save</button>
-            <a href="{url_for('home')}" class="btn btn-secondary">Back</a>
-        </form>
-    </div>
-</body>
-</html>
-"""
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Editing: {filename}</title>
+                    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+                </head>
+                <body class="p-3">
+                    <div class="container">
+                        <h1>Editing: {filename}</h1>
+                        <form method="POST">
+                            <textarea name="file_content" rows="25" class="form-control">{content}</textarea>
+                            <br>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                            <a href="{url_for('home')}" class="btn btn-secondary">Back</a>
+                        </form>
+                    </div>
+                </body>
+                </html>
+                """
         return html
+
 
 if __name__ == '__main__':
     app.run(debug=True, host=HOST, port=PORT)
