@@ -19,7 +19,8 @@ RUN apt-get update && \
         unixodbc \
         unixodbc-dev \
         libodbc2 \
-        libodbccr2 && \
+        libodbccr2 \
+        git && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -28,7 +29,7 @@ RUN pip install git+https://github.com/Insight-Services-APAC/Insight_Ingenious.g
 
 # Copy the application files into the container
 COPY ./ingenious_extensions /ingen_app/ingenious_extensions
-COPY ./pyproject.toml /ingen_app/
+COPY ./tmp /ingen_app/tmp
 
 # Set the command to run the app
 CMD ["ingen_cli"]
