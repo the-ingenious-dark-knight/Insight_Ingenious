@@ -33,8 +33,8 @@ To set up the development environment, follow these steps:
     /.idea
     /.cache
     /env_mkdocs/
-    /ingenious_extensions/local_files/tmp/context.md
-    /ingenious_extensions/local_files/tmp/*.db
+    /tmp/context.md
+    /tmp/*.db
     /dist/
     /functional_test_outputs/
    __pycache__" > .gitignore
