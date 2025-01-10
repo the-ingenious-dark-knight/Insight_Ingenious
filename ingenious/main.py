@@ -15,7 +15,7 @@ import ingenious.api.routes.message_feedback as message_feedback
 import importlib.resources as pkg_resources
 
 # Import your routers
-config = Config.get_config(os.getenv("INGENIOUS_PROJECT_PATH", ""))
+config = ingen_config.get_config(os.getenv("INGENIOUS_PROJECT_PATH", ""))
 print("config.web_configuration.asynchronous", config.web_configuration.asynchronous)
 if config.web_configuration.asynchronous:
     import ingenious.api.routes.chat_async as chat
