@@ -10,7 +10,7 @@ chainlit==1.1.402
 chromadb==0.5.5
 Jinja2==3.1.4
 numpy==1.26.4
-openai==1.35.7
+openai==1.59.6
 pyautogen==0.2.35
 pydantic==2.8.0
 sentence_transformers==3.1.1

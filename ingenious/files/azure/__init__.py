@@ -82,7 +82,7 @@ class azure_FileStorageRepository(IFileStorage):
             blob_client = self.blob_service_client.get_blob_client(container=self.container_name, blob=path)
 
             # Delete the blob
-            await blob_client.delete_blob()
+            blob_client.delete_blob()
             print(f"Successfully deleted {path} from container {self.container_name}.")
         except Exception as e:
             print(f"Failed to delete {path} from container {self.container_name}: {e}")
