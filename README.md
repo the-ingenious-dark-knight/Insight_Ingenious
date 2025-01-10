@@ -43,123 +43,8 @@ To set up the development environment, follow these steps:
 
 ### 5. **Create Profile and Configure Environment Variables**
 
-Set up the `APPSETTING_INGENIOUS_CONFIG` and `APPSETTING_INGENIOUS_PROFILE` environment variables with the following configuration:
+Set up the `APPSETTING_INGENIOUS_CONFIG` and `APPSETTING_INGENIOUS_PROFILE` environment variables.
 
-#### **`APPSETTING_INGENIOUS_CONFIG`**
-```json
-{
-    "profile": "dev",
-    "models": [
-        {
-            "model": "model-name",
-            "api_type": "azure",
-            "api_version": "2024-08-01-preview"
-        }
-    ],
-    "logging": {
-        "root_log_level": "debug",
-        "log_level": "debug"
-    },
-    "chat_history": {
-        "database_type": "sqlite",
-        "database_path": "./tmp/chat_history.db",
-        "database_name": "ChatHistoryDB",
-        "memory_path": "./tmp"
-    },
-    "chainlit_configuration": {
-        "enable": false
-    },
-    "chat_service": {
-        "type": "multi_agent"
-    },
-    "tool_service": {
-        "enable": false
-    },
-    "local_sql_db": {
-        "database_path": "./tmp/local_database.db",
-        "sample_csv_path": "./data/sample_data.csv",
-        "sample_database_name": "LocalSampleData"
-    },
-    "azure_sql_services": {
-        "database_name": "skip",
-        "table_name": "sample_table"
-    },
-    "azure_search_services": [
-        {
-            "service": "search-demo-service",
-            "endpoint": "https://example.search.windows.net"
-        }
-    ],
-    "web_configuration": {
-        "type": "fastapi",
-        "asynchronous": true,
-        "ip_address": "0.0.0.0",
-        "port": 80,
-        "authentication": {
-            "enable": false,
-            "type": "basic"
-        }
-    },
-    "file_storage": {
-        "enable": true,
-        "storage_type": "azure", #option: local or azure
-        "container_name": "example-container",
-        "path": "."
-    }
-}
-```
-
-#### **`APPSETTING_INGENIOUS_PROFILE`**
-```json
-[
-    {
-        "name": "dev",
-        "models": [
-            {
-                "model": "model-name",
-                "api_key": "your-api-key",
-                "base_url": "https://example.azure.com/openai/deployments/model-name/chat/completions?api-version=2024-08-01-preview"
-            }
-        ],
-        "chat_history": {
-            "database_connection_string": "Your_Database_Connection_String_Here"
-        },
-        "azure_search_services": [
-            {
-                "service": "Your_Search_Service_Name",
-                "key": "Your_Search_Service_Key"
-            }
-        ],
-        "azure_sql_services": {
-            "database_connection_string": "Your_SQL_Connection_String_Here"
-        },
-        "receiver_configuration": {
-            "enable": true,
-            "api_url": "https://example-web.azurewebsites.net/api/ai-response/publish",
-            "api_key": "ReceiverApiKey"
-        },
-        "chainlit_configuration": {
-            "enable": false,
-            "authentication": {
-                "enable": false,
-                "github_secret": "",
-                "github_client_id": ""
-            }
-        },
-        "web_configuration": {
-            "authentication": {
-                "enable": false,
-                "username": "example-user",
-                "password": "hashed-password-here"
-            }
-        },
-        "file_storage": {
-            "url": "https://example.blob.core.windows.net/",
-            "token": "your-access-token"
-        }
-    }
-]
-```
 
 ### 6. **Add/Create Template Folders (If not provided)**
    ```bash
@@ -185,4 +70,16 @@ ingen_cli run-test-batch
 ```
 
 
-You are now ready to begin development using the `ingenious` package and with CA extensions!
+### 8. **AI Test Harness**
+
+```bash
+python ingenious_extensions/tests/run_flask_app.py
+```
+
+### 9. **CLI Test Harness**
+
+```bash
+python ingenious_extensions/tests/run_ingen_cli.py
+```
+
+You are now ready to begin development using the `ingenious` package!
