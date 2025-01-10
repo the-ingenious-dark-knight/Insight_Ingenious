@@ -10,18 +10,15 @@ from ingenious.models.chat import ChatRequest
 from ingenious.models.http_error import HTTPError
 from ingenious.services.chat_service import ChatService
 import ingenious.dependencies as igen_deps
-import asyncio
-import requests
 import json
-import ingenious.config.config as Config
-
-
-config = Config.get_config(os.getenv("INGENIOUS_PROJECT_PATH", ""))
 
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
+import sys
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../../../..'))
+sys.path.append(parent_dir)
 
 def send_response(response, thread_id, api_key=None):
     """

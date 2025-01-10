@@ -13,12 +13,14 @@ import ingenious.dependencies as igen_deps
 import asyncio
 import requests
 import json
-import ingenious.config.config as Config
+import ingenious.config.config as ingen_config
+
+import sys
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../../../..'))
+sys.path.append(parent_dir)
 
 
-config = Config.get_config(os.getenv("INGENIOUS_PROJECT_PATH", ""))
-
-
+config = ingen_config.get_config(os.getenv("INGENIOUS_PROJECT_PATH", ""))
 logger = logging.getLogger(__name__)
 router = APIRouter()
 

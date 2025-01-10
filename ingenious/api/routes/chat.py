@@ -15,6 +15,11 @@ import ingenious.utils.namespace_utils as ns_utils
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
+import sys
+import os
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../../../..'))
+sys.path.append(parent_dir)
+
 
 @router.post("/chat",
              responses={400: {"model": HTTPError, "description": "Bad Request"},
