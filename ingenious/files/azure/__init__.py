@@ -79,13 +79,14 @@ class azure_FileStorageRepository(IFileStorage):
         try:
             path = Path(self.config.file_storage.path) / Path(file_path) / Path(file_name)
             # Create a blob client
-            blob_client = self.blob_service_client.get_blob_client(container=self.container_name, blob=path)
+            blob_client = self.blob_service_client.get_blob_client(container=self.container_name, blob=str(path))
 
             # Delete the blob
             blob_client.delete_blob()
             print(f"Successfully deleted {path} from container {self.container_name}.")
         except Exception as e:
             print(f"Failed to delete {path} from container {self.container_name}: {e}")
+
 
     async def list_files(self, file_path: str):
         """
