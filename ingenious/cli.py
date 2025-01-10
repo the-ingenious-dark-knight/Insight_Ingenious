@@ -146,7 +146,8 @@ def generate_template_folders():
     templates_paths = {
         "docker": base_path / "docker_template",
         "ingenious_extensions": base_path / "ingenious_extensions_template",
-        "tmp": None  # No template, just create the folder
+        "tmp": None,  # No template, just create the folder
+        "functional_test_outputs": None  # No template, just create the folder
     }
 
     for folder_name, template_path in templates_paths.items():
