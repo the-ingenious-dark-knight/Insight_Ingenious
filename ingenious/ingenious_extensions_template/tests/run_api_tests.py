@@ -1,6 +1,5 @@
 import json
 import jsonpickle
-import asyncio
 from pathlib import Path
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from ingenious.utils.stage_executor import ProgressConsoleWrapper
@@ -8,13 +7,12 @@ from ingenious.utils.log_levels import LogLevel
 import ingenious.config.config as ingen_config
 import ingenious.dependencies as ingen_deps
 from ingenious.files.files_repository import FileStorage
-import ingenious_extensions.models.ca_raw_fixture_data as gm
+#import ingenious_extensions.models.ca_raw_fixture_data as gm
 from ingenious.utils.model_utils import Object_To_Yaml
-from ingenious.services.chat_service import ChatService
 from ingenious.models.chat import ChatRequest
 import datetime
+import asyncio
 import requests
-
 
 # Ensure environment variables are set
 config = ingen_config.get_config()
@@ -34,46 +32,45 @@ raw_progress = Progress(
 # Wrap the Progress object with ProgressConsoleWrapper
 progress = ProgressConsoleWrapper(progress=raw_progress, log_level=log_level)
 
+# File storage and directory setup
+fs = FileStorage(config=config)
+raw_directory = "example_payload/raw"
+history_directory = "----"
 
-async def process_json_files():
-    # File storage and directory setup
-    fs = FileStorage(config=config)
-    directory = "example_payload/raw"
+async def process_files():
+    message_object = None
 
-    # Get a sorted list of JSON files
-    json_files = sorted([f for f in await fs.list_files(file_path=directory) if f.endswith(".json")])
+    return message_object
 
-    # Task for processing JSON files
-    task_id = progress.add_task(description="[Initializing] Processing JSON files", total=len(json_files))
+async def main():
+    message_object = await process_files()
 
-    history_files = sorted([f for f in await fs.list_files(file_path='ball_history') if f.endswith(".json")])
-    for j in history_files:
-        file_name = Path(j).name
-        await fs.delete_file(file_name=file_name, file_path='ball_history')
+    if message_object:
+        thread_id = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+        user_prompt = jsonpickle.dumps(message_object, unpicklable=False)
+        event_type = 'is_wicket_ball'
+        chat_request = ChatRequest(
+            thread_id=thread_id,
+            user_prompt=user_prompt,
+            conversation_flow="-----",
+            event_type=event_type
+        )
 
-    for json_file in json_files:
-        file_name = Path(json_file).name
-        file_contents = await fs.read_file(file_name=file_name, file_path=directory)
-        message_object = '{json}'
+        try:
+            response = requests.post(
+                url="http://localhost:80/api/v1/chat_test",
+                json=chat_request.model_dump(),
+                auth=(USERNAME, PASSWORD)
+            )
 
+            response_content = json.loads(
+                json.loads(
+                    response.text
+                )["response"]["content"]
+            )
+            print("Response received:", response_content)
+            return response_content
+        except Exception as e:
+            print(f"Error sending chat request: {str(e)}")
 
-    thread_id = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-    user_prompt = jsonpickle.dumps(message_object, unpicklable=False)
-    event_type = '_____'
-    chat_request = ChatRequest(
-        thread_id=thread_id,
-        user_prompt=user_prompt,
-        conversation_flow="____",
-        event_type=event_type)
-
-    response = requests.post(
-        url="http://localhost:80/api/v1/chat_test",
-        json=chat_request.model_dump(),
-        auth=(USERNAME, PASSWORD)
-    )
-
-
-# Main execution block
-if __name__ == "__main__":
-    asyncio.run(process_json_files())
-
+response_content = asyncio.run(main())
