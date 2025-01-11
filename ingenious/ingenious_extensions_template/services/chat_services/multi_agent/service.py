@@ -11,7 +11,7 @@ from ingenious.errors.content_filter_error import ContentFilterError
 from ingenious.models.chat import ChatRequest, ChatResponse
 from ingenious.models.message import Message
 from ingenious.utils.conversation_builder import (build_user_message)
-from ingenious.utils.namespace_utils import import_class_with_fallback
+from ingenious.utils.namespace_utils import import_module_safely
 
 logger = logging.getLogger(__name__)
 
@@ -91,26 +91,17 @@ class multi_agent_chat_service:
                 self.conversation_flow = chat_request.conversation_flow
             if not self.conversation_flow:
                 raise ValueError(f"conversation_flow4 not set {chat_request}")
-            module_name = f"services.chat_services.multi_agent.conversation_flows.{self.conversation_flow.lower()}.{self.conversation_flow.lower()}"
+            module_name = f"ingenious.services.chat_services.multi_agent.conversation_flows.{self.conversation_flow.lower()}.{self.conversation_flow.lower()}"
             class_name = "ConversationFlow"
 
-            conversation_flow_service_class = import_class_with_fallback(module_name, class_name)
+            conversation_flow_service_class = import_module_safely(module_name, class_name)
 
-            if chat_request.event_type:
-                response_task = conversation_flow_service_class.get_conversation_response(
-                    message=chat_request.user_prompt,
-                    memory_record_switch=chat_request.memory_record,
-                    event_type=chat_request.event_type,
-                    thread_memory=thread_memory,
-                    thread_chat_history=thread_chat_history
-                )
-            else:
-                response_task = conversation_flow_service_class.get_conversation_response(
-                    message=chat_request.user_prompt,
-                    memory_record_switch=chat_request.memory_record,
-                    thread_memory=thread_memory,
-                    thread_chat_history=thread_chat_history
-                )
+            response_task = conversation_flow_service_class.get_conversation_response(
+                message=chat_request.user_prompt,
+                memory_record_switch=chat_request.memory_record,
+                thread_memory=thread_memory,
+                thread_chat_history = thread_chat_history
+            )
             agent_response = await response_task
 
         # except ContentFilterError as cfe:
