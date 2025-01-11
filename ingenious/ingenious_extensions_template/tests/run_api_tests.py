@@ -48,13 +48,11 @@ async def main():
     if message_object:
         thread_id = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
         user_prompt = jsonpickle.dumps(message_object, unpicklable=False)
-        event_type = 'is_wicket_ball'
+
         chat_request = ChatRequest(
             thread_id=thread_id,
             user_prompt=user_prompt,
-            conversation_flow="-----",
-            event_type=event_type
-        )
+            conversation_flow="-----"        )
 
         try:
             response = requests.post(
