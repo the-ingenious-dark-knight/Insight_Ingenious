@@ -96,13 +96,21 @@ class multi_agent_chat_service:
 
             conversation_flow_service_class = import_class_with_fallback(module_name, class_name)
 
-            response_task = conversation_flow_service_class.get_conversation_response(
-                message=chat_request.user_prompt,
-                event_type=chat_request.event_type,
-                memory_record_switch=chat_request.memory_record,
-                thread_memory=thread_memory,
-                thread_chat_history=thread_chat_history
-            )
+            if chat_request.event_type:
+                response_task = conversation_flow_service_class.get_conversation_response(
+                    message=chat_request.user_prompt,
+                    memory_record_switch=chat_request.memory_record,
+                    event_type=chat_request.event_type,
+                    thread_memory=thread_memory,
+                    thread_chat_history=thread_chat_history
+                )
+            else:
+                response_task = conversation_flow_service_class.get_conversation_response(
+                    message=chat_request.user_prompt,
+                    memory_record_switch=chat_request.memory_record,
+                    thread_memory=thread_memory,
+                    thread_chat_history=thread_chat_history
+                )
             agent_response = await response_task
 
         # except ContentFilterError as cfe:
