@@ -56,9 +56,10 @@ Requires-Dist: pydantic==2.8.0
 Requires-Dist: pyodbc==5.2.0
 Requires-Dist: pypdf==4.3.1
 Requires-Dist: seaborn==0.13.2
-Requires-Dist: sentence_transformers==3.1.1
 Provides-Extra: windows
 Requires-Dist: pywin32==3.0.6; extra == "windows"
+Provides-Extra: chathistorysummariser
+Requires-Dist: sentence_transformers==3.1.1; extra == "chathistorysummariser"
 
 # Setup Development Environment
 

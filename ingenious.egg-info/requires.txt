@@ -41,6 +41,8 @@ pydantic==2.8.0
 pyodbc==5.2.0
 pypdf==4.3.1
 seaborn==0.13.2
+
+[ChatHistorySummariser]
 sentence_transformers==3.1.1
 
 [windows]

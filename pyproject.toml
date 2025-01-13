@@ -66,15 +66,13 @@ dependencies = [
     "pyodbc==5.2.0",
     "pypdf==4.3.1",
     "seaborn==0.13.2",
-    "sentence_transformers==3.1.1",
 ]
-
 
 [project.optional-dependencies]
 windows = ["pywin32==3.0.6"]
-#ChatHistorySummariser = [
-#    "sentence_transformers==3.1.1"
-#]
+ChatHistorySummariser = [
+    "sentence_transformers==3.1.1"
+]
 
 [project.scripts]
 ingen_cli = "ingenious.cli:app"
