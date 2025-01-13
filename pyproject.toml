@@ -68,7 +68,6 @@ dependencies = [
     "seaborn==0.13.2",
 ]
 
-
 [project.optional-dependencies]
 windows = ["pywin32==3.0.6"]
 ChatHistorySummariser = [
