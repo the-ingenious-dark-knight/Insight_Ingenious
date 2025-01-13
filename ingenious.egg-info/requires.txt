@@ -43,8 +43,5 @@ pypdf==4.3.1
 seaborn==0.13.2
 sentence_transformers==3.1.1
 
-[ChatHistorySummariser]
-sentence_transformers==3.1.1
-
 [windows]
 pywin32==3.0.6
