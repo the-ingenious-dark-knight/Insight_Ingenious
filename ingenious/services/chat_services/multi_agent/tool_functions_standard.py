@@ -8,9 +8,9 @@ import pyodbc
 from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
 import json
-import ingenious.config.config as Config
+import ingenious.config.config as ingen_config
 from ingenious.utils.load_sample_data import sqlite_sample_db
-_config = Config.get_config()
+_config = ingen_config.get_config()
 
 
 class ToolFunctions:
