@@ -44,7 +44,7 @@ class Profiles():
     def _get_profiles(profiles_path=None):
         # Check if os.getenv('INGENIOUS_PROFILE') is set
         if os.getenv('APPSETTING_INGENIOUS_PROFILE', '') != '':
-            print("Profile JSON loaded from environment variable")
+            #print("Profile JSON loaded from environment variable")
             profile_string = os.getenv('APPSETTING_INGENIOUS_PROFILE', "{}")
             profile_object = json.loads(profile_string)
             # Convert the json string to a yaml string
