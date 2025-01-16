@@ -30,7 +30,6 @@ class ChatService:
             if importlib.util.find_spec(module_name) is None:
                 module = importlib.import_module( f"ingenious.services.chat_services.{chat_service_type.lower()}.service")
             else:
-                print("Module found in extensions namespace:",module_name)
                 module = importlib.import_module(f"{module_name}")
             service_class = getattr(module, class_name)
             
