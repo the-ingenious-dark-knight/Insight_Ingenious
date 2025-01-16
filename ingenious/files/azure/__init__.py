@@ -43,7 +43,7 @@ class azure_FileStorageRepository(IFileStorage):
 
             # Upload the data
             blob_client.upload_blob(contents, overwrite=True)
-            print(f"Successfully uploaded {path} to container {self.container_name}.")
+            #print(f"Successfully uploaded {path} to container {self.container_name}.")
         except Exception as e:
             print(f"Failed to upload {path} to container {self.container_name}: {e}")
 
@@ -63,7 +63,7 @@ class azure_FileStorageRepository(IFileStorage):
             downloader = blob_client.download_blob(max_concurrency=1, encoding='UTF-8')
             data = downloader.readall()
 
-            print(f"Successfully downloaded {path} from container {self.container_name}.")
+            #print(f"Successfully downloaded {path} from container {self.container_name}.")
             return data
         except Exception as e:
             print(f"Failed to download {path} from container {self.container_name}: {e}")
@@ -83,7 +83,7 @@ class azure_FileStorageRepository(IFileStorage):
 
             # Delete the blob
             blob_client.delete_blob()
-            print(f"Successfully deleted {path} from container {self.container_name}.")
+            #print(f"Successfully deleted {path} from container {self.container_name}.")
         except Exception as e:
             print(f"Failed to delete {path} from container {self.container_name}: {e}")
 
@@ -101,7 +101,7 @@ class azure_FileStorageRepository(IFileStorage):
             # List blobs in the container with the specified prefix
             container_client = self.blob_service_client.get_container_client(self.container_name)
             blobs = [blob.name for blob in container_client.list_blobs(name_starts_with=prefix)]
-            print(f"Blobs in container {self.container_name} with prefix {prefix}: {blobs}")
+            #print(f"Blobs in container {self.container_name} with prefix {prefix}: {blobs}")
             return blobs
         except Exception as e:
             print(f"Failed to list blobs in container {self.container_name} with prefix {prefix}: {e}")
@@ -121,7 +121,7 @@ class azure_FileStorageRepository(IFileStorage):
             # Create a blob client
             blob_client = self.blob_service_client.get_blob_client(container=self.container_name, blob=str(path))
             exists = blob_client.exists()
-            print(f"Blob {path} exists in container {self.container_name}: {exists}")
+            #print(f"Blob {path} exists in container {self.container_name}: {exists}")
             return exists
         except Exception as e:
             print(f"Failed to check if blob {path} exists in container {self.container_name}: {e}")
