@@ -20,7 +20,7 @@ from ingenious.utils.namespace_utils import import_class_with_fallback
 import ingenious.utils.stage_executor as stage_executor_module
 
 
-app = typer.Typer(no_args_is_help=True)
+app = typer.Typer(no_args_is_help=True, pretty_exceptions_show_locals=False)
 
 custom_theme = Theme({"info": "dim cyan", "warning": "dark_orange", "danger": "bold red", "error": "bold red", "debug": "khaki1"})
 
@@ -126,7 +126,13 @@ def run_test_batch(
         typer.Option(
             help="The option to set the log level. This controls the verbosity of the output. Allowed values are `DEBUG`, `INFO`, `WARNING`, `ERROR`. Default is `WARNING`.",
         ),
-        ] = "WARNING"
+        ] = "WARNING",
+        run_args: Annotated[
+        Optional[str],
+        typer.Option(
+            help="Key value pairs to pass to the test runner. For example, `--run_args='--test_name=TestName --test_type=TestType'`",
+        ),
+        ] = ""
 ):
     """
         This command will run all the tests in the project
@@ -135,7 +141,23 @@ def run_test_batch(
     
     se: stage_executor_module.stage_executor = stage_executor_module.stage_executor(log_level=_log_level, console=console)
     
-    asyncio.run(se.perform_stage(option=True, action_callables=[CliFunctions.RunTestBatch()], stage_name="Batch Tests"))
+    # Parse the run_args string into a dictionary
+    kwargs = {}
+    if run_args:
+        for arg in run_args.split("--"):
+            if not arg:
+                continue
+            key, value = arg.split("=")
+            kwargs[key] = value
+
+    asyncio.run(
+        se.perform_stage(
+            option=True,
+            action_callables=[CliFunctions.RunTestBatch()],
+            stage_name="Batch Tests",
+            **kwargs
+        )
+    )
 
 
 
@@ -202,7 +224,7 @@ class CliFunctions:
             try:                
                 repository_class_import = import_class_with_fallback(module_name, class_name)
                 repository_class = repository_class_import(progress=progress, task_id=task_id)
-                await repository_class.run()
+                await repository_class.run(progress, task_id, **kwargs)
 
             except (ImportError, AttributeError) as e:
                 raise ValueError(f"Batch Run Failed: {module_name}") from e
