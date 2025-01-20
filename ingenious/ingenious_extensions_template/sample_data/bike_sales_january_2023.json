@@ -1,0 +1,1023 @@
+{
+    "stores": [
+        {
+            "name": "Bike World Sydney",
+            "location": "NSW",
+            "bike_sales": [
+                {
+                    "product_code": "MB-TREK-2021-XC",
+                    "quantity_sold": 4,
+                    "sale_date": "2023-01-01",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 4.5,
+                        "comment": "Great bike for daily commutes, highly recommend!"
+                    }
+                },
+                {
+                    "product_code": "RB-GIANT-2022-DEFY",
+                    "quantity_sold": 3,
+                    "sale_date": "2023-01-02",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 2.0,
+                        "comment": "Not what I expected, faced several issues."
+                    }
+                },
+                {
+                    "product_code": "EB-SPECIALIZED-2023-TV",
+                    "quantity_sold": 2,
+                    "sale_date": "2023-01-02",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 4.5,
+                        "comment": "Great bike for daily commutes, highly recommend!"
+                    }
+                },
+                {
+                    "product_code": "MB-TREK-2021-XC",
+                    "quantity_sold": 1,
+                    "sale_date": "2023-01-03",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 5.0,
+                        "comment": "Outstanding bike, exceeded my expectations!"
+                    }
+                },
+                {
+                    "product_code": "RB-GIANT-2022-DEFY",
+                    "quantity_sold": 2,
+                    "sale_date": "2023-01-03",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 4.8,
+                        "comment": "Love the performance and build quality!"
+                    }
+                },
+                {
+                    "product_code": "MB-TREK-2021-XC",
+                    "quantity_sold": 2,
+                    "sale_date": "2023-01-04",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 4.0,
+                        "comment": "Good bike, but could be more comfortable."
+                    }
+                },
+                {
+                    "product_code": "EB-SPECIALIZED-2023-TV",
+                    "quantity_sold": 5,
+                    "sale_date": "2023-01-04",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 2.0,
+                        "comment": "Not what I expected, faced several issues."
+                    }
+                },
+                {
+                    "product_code": "RB-GIANT-2022-DEFY",
+                    "quantity_sold": 2,
+                    "sale_date": "2023-01-05",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 2.0,
+                        "comment": "Not what I expected, faced several issues."
+                    }
+                },
+                {
+                    "product_code": "EB-SPECIALIZED-2023-TV",
+                    "quantity_sold": 4,
+                    "sale_date": "2023-01-06",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 1.5,
+                        "comment": "Very disappointing, would not recommend."
+                    }
+                },
+                {
+                    "product_code": "EB-SPECIALIZED-2023-TV",
+                    "quantity_sold": 3,
+                    "sale_date": "2023-01-08",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 4.8,
+                        "comment": "Love the performance and build quality!"
+                    }
+                },
+                {
+                    "product_code": "MB-TREK-2021-XC",
+                    "quantity_sold": 3,
+                    "sale_date": "2023-01-09",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 2.0,
+                        "comment": "Not what I expected, faced several issues."
+                    }
+                },
+                {
+                    "product_code": "RB-GIANT-2022-DEFY",
+                    "quantity_sold": 4,
+                    "sale_date": "2023-01-09",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 3.0,
+                        "comment": "An average experience, room for improvement."
+                    }
+                },
+                {
+                    "product_code": "MB-TREK-2021-XC",
+                    "quantity_sold": 2,
+                    "sale_date": "2023-01-10",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 4.5,
+                        "comment": "Great bike for daily commutes, highly recommend!"
+                    }
+                },
+                {
+                    "product_code": "RB-GIANT-2022-DEFY",
+                    "quantity_sold": 5,
+                    "sale_date": "2023-01-10",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 5.0,
+                        "comment": "Outstanding bike, exceeded my expectations!"
+                    }
+                },
+                {
+                    "product_code": "MB-TREK-2021-XC",
+                    "quantity_sold": 2,
+                    "sale_date": "2023-01-13",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 5.0,
+                        "comment": "Outstanding bike, exceeded my expectations!"
+                    }
+                },
+                {
+                    "product_code": "MB-TREK-2021-XC",
+                    "quantity_sold": 1,
+                    "sale_date": "2023-01-14",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 5.0,
+                        "comment": "Outstanding bike, exceeded my expectations!"
+                    }
+                },
+                {
+                    "product_code": "EB-SPECIALIZED-2023-TV",
+                    "quantity_sold": 4,
+                    "sale_date": "2023-01-14",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 3.5,
+                        "comment": "Decent value for the price, but some issues."
+                    }
+                },
+                {
+                    "product_code": "RB-GIANT-2022-DEFY",
+                    "quantity_sold": 2,
+                    "sale_date": "2023-01-16",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 4.8,
+                        "comment": "Love the performance and build quality!"
+                    }
+                },
+                {
+                    "product_code": "MB-TREK-2021-XC",
+                    "quantity_sold": 4,
+                    "sale_date": "2023-01-17",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 5.0,
+                        "comment": "Outstanding bike, exceeded my expectations!"
+                    }
+                },
+                {
+                    "product_code": "RB-GIANT-2022-DEFY",
+                    "quantity_sold": 3,
+                    "sale_date": "2023-01-17",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 5.0,
+                        "comment": "Outstanding bike, exceeded my expectations!"
+                    }
+                },
+                {
+                    "product_code": "MB-TREK-2021-XC",
+                    "quantity_sold": 4,
+                    "sale_date": "2023-01-19",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 5.0,
+                        "comment": "Outstanding bike, exceeded my expectations!"
+                    }
+                },
+                {
+                    "product_code": "MB-TREK-2021-XC",
+                    "quantity_sold": 5,
+                    "sale_date": "2023-01-20",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 4.0,
+                        "comment": "Good bike, but could be more comfortable."
+                    }
+                },
+                {
+                    "product_code": "RB-GIANT-2022-DEFY",
+                    "quantity_sold": 2,
+                    "sale_date": "2023-01-20",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 1.5,
+                        "comment": "Very disappointing, would not recommend."
+                    }
+                },
+                {
+                    "product_code": "EB-SPECIALIZED-2023-TV",
+                    "quantity_sold": 5,
+                    "sale_date": "2023-01-20",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 2.0,
+                        "comment": "Not what I expected, faced several issues."
+                    }
+                },
+                {
+                    "product_code": "EB-SPECIALIZED-2023-TV",
+                    "quantity_sold": 2,
+                    "sale_date": "2023-01-21",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 2.0,
+                        "comment": "Not what I expected, faced several issues."
+                    }
+                },
+                {
+                    "product_code": "RB-GIANT-2022-DEFY",
+                    "quantity_sold": 1,
+                    "sale_date": "2023-01-22",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 5.0,
+                        "comment": "Outstanding bike, exceeded my expectations!"
+                    }
+                },
+                {
+                    "product_code": "EB-SPECIALIZED-2023-TV",
+                    "quantity_sold": 4,
+                    "sale_date": "2023-01-24",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 3.0,
+                        "comment": "An average experience, room for improvement."
+                    }
+                },
+                {
+                    "product_code": "RB-GIANT-2022-DEFY",
+                    "quantity_sold": 4,
+                    "sale_date": "2023-01-25",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 2.0,
+                        "comment": "Not what I expected, faced several issues."
+                    }
+                },
+                {
+                    "product_code": "EB-SPECIALIZED-2023-TV",
+                    "quantity_sold": 4,
+                    "sale_date": "2023-01-27",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 4.8,
+                        "comment": "Love the performance and build quality!"
+                    }
+                },
+                {
+                    "product_code": "RB-GIANT-2022-DEFY",
+                    "quantity_sold": 2,
+                    "sale_date": "2023-01-28",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 4.8,
+                        "comment": "Love the performance and build quality!"
+                    }
+                },
+                {
+                    "product_code": "MB-TREK-2021-XC",
+                    "quantity_sold": 1,
+                    "sale_date": "2023-01-30",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 4.0,
+                        "comment": "Good bike, but could be more comfortable."
+                    }
+                },
+                {
+                    "product_code": "RB-GIANT-2022-DEFY",
+                    "quantity_sold": 4,
+                    "sale_date": "2023-01-31",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 4.8,
+                        "comment": "Love the performance and build quality!"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Bike World Melbourne",
+            "location": "VIC",
+            "bike_sales": [
+                {
+                    "product_code": "EB-SPECIALIZED-2023-TV",
+                    "quantity_sold": 4,
+                    "sale_date": "2023-01-02",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 2.0,
+                        "comment": "Not what I expected, faced several issues."
+                    }
+                },
+                {
+                    "product_code": "EB-SPECIALIZED-2023-TV",
+                    "quantity_sold": 5,
+                    "sale_date": "2023-01-05",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 3.5,
+                        "comment": "Decent value for the price, but some issues."
+                    }
+                },
+                {
+                    "product_code": "MB-TREK-2021-XC",
+                    "quantity_sold": 5,
+                    "sale_date": "2023-01-07",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 5.0,
+                        "comment": "Outstanding bike, exceeded my expectations!"
+                    }
+                },
+                {
+                    "product_code": "MB-TREK-2021-XC",
+                    "quantity_sold": 1,
+                    "sale_date": "2023-01-09",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 1.5,
+                        "comment": "Very disappointing, would not recommend."
+                    }
+                },
+                {
+                    "product_code": "EB-SPECIALIZED-2023-TV",
+                    "quantity_sold": 5,
+                    "sale_date": "2023-01-09",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 4.8,
+                        "comment": "Love the performance and build quality!"
+                    }
+                },
+                {
+                    "product_code": "RB-GIANT-2022-DEFY",
+                    "quantity_sold": 3,
+                    "sale_date": "2023-01-10",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 1.5,
+                        "comment": "Very disappointing, would not recommend."
+                    }
+                },
+                {
+                    "product_code": "MB-TREK-2021-XC",
+                    "quantity_sold": 2,
+                    "sale_date": "2023-01-12",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 4.8,
+                        "comment": "Love the performance and build quality!"
+                    }
+                },
+                {
+                    "product_code": "EB-SPECIALIZED-2023-TV",
+                    "quantity_sold": 1,
+                    "sale_date": "2023-01-12",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 1.5,
+                        "comment": "Very disappointing, would not recommend."
+                    }
+                },
+                {
+                    "product_code": "EB-SPECIALIZED-2023-TV",
+                    "quantity_sold": 4,
+                    "sale_date": "2023-01-14",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 5.0,
+                        "comment": "Outstanding bike, exceeded my expectations!"
+                    }
+                },
+                {
+                    "product_code": "EB-SPECIALIZED-2023-TV",
+                    "quantity_sold": 3,
+                    "sale_date": "2023-01-15",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 3.5,
+                        "comment": "Decent value for the price, but some issues."
+                    }
+                },
+                {
+                    "product_code": "MB-TREK-2021-XC",
+                    "quantity_sold": 4,
+                    "sale_date": "2023-01-17",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 4.5,
+                        "comment": "Great bike for daily commutes, highly recommend!"
+                    }
+                },
+                {
+                    "product_code": "RB-GIANT-2022-DEFY",
+                    "quantity_sold": 5,
+                    "sale_date": "2023-01-18",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 4.8,
+                        "comment": "Love the performance and build quality!"
+                    }
+                },
+                {
+                    "product_code": "EB-SPECIALIZED-2023-TV",
+                    "quantity_sold": 2,
+                    "sale_date": "2023-01-19",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 3.5,
+                        "comment": "Decent value for the price, but some issues."
+                    }
+                },
+                {
+                    "product_code": "EB-SPECIALIZED-2023-TV",
+                    "quantity_sold": 3,
+                    "sale_date": "2023-01-20",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 4.8,
+                        "comment": "Love the performance and build quality!"
+                    }
+                },
+                {
+                    "product_code": "RB-GIANT-2022-DEFY",
+                    "quantity_sold": 1,
+                    "sale_date": "2023-01-21",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 4.8,
+                        "comment": "Love the performance and build quality!"
+                    }
+                },
+                {
+                    "product_code": "RB-GIANT-2022-DEFY",
+                    "quantity_sold": 1,
+                    "sale_date": "2023-01-22",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 4.0,
+                        "comment": "Good bike, but could be more comfortable."
+                    }
+                },
+                {
+                    "product_code": "EB-SPECIALIZED-2023-TV",
+                    "quantity_sold": 1,
+                    "sale_date": "2023-01-24",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 3.5,
+                        "comment": "Decent value for the price, but some issues."
+                    }
+                },
+                {
+                    "product_code": "RB-GIANT-2022-DEFY",
+                    "quantity_sold": 3,
+                    "sale_date": "2023-01-25",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 3.0,
+                        "comment": "An average experience, room for improvement."
+                    }
+                },
+                {
+                    "product_code": "MB-TREK-2021-XC",
+                    "quantity_sold": 3,
+                    "sale_date": "2023-01-26",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 4.0,
+                        "comment": "Good bike, but could be more comfortable."
+                    }
+                },
+                {
+                    "product_code": "EB-SPECIALIZED-2023-TV",
+                    "quantity_sold": 3,
+                    "sale_date": "2023-01-26",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 4.8,
+                        "comment": "Love the performance and build quality!"
+                    }
+                },
+                {
+                    "product_code": "RB-GIANT-2022-DEFY",
+                    "quantity_sold": 4,
+                    "sale_date": "2023-01-28",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 3.5,
+                        "comment": "Decent value for the price, but some issues."
+                    }
+                },
+                {
+                    "product_code": "MB-TREK-2021-XC",
+                    "quantity_sold": 4,
+                    "sale_date": "2023-01-29",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 5.0,
+                        "comment": "Outstanding bike, exceeded my expectations!"
+                    }
+                },
+                {
+                    "product_code": "RB-GIANT-2022-DEFY",
+                    "quantity_sold": 2,
+                    "sale_date": "2023-01-29",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 4.5,
+                        "comment": "Great bike for daily commutes, highly recommend!"
+                    }
+                },
+                {
+                    "product_code": "RB-GIANT-2022-DEFY",
+                    "quantity_sold": 3,
+                    "sale_date": "2023-01-30",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 4.5,
+                        "comment": "Great bike for daily commutes, highly recommend!"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Bike World Brisbane",
+            "location": "QLD",
+            "bike_sales": [
+                {
+                    "product_code": "MB-TREK-2021-XC",
+                    "quantity_sold": 2,
+                    "sale_date": "2023-01-02",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 5.0,
+                        "comment": "Outstanding bike, exceeded my expectations!"
+                    }
+                },
+                {
+                    "product_code": "MB-TREK-2021-XC",
+                    "quantity_sold": 1,
+                    "sale_date": "2023-01-03",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 3.5,
+                        "comment": "Decent value for the price, but some issues."
+                    }
+                },
+                {
+                    "product_code": "RB-GIANT-2022-DEFY",
+                    "quantity_sold": 5,
+                    "sale_date": "2023-01-03",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 5.0,
+                        "comment": "Outstanding bike, exceeded my expectations!"
+                    }
+                },
+                {
+                    "product_code": "MB-TREK-2021-XC",
+                    "quantity_sold": 2,
+                    "sale_date": "2023-01-04",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 2.0,
+                        "comment": "Not what I expected, faced several issues."
+                    }
+                },
+                {
+                    "product_code": "EB-SPECIALIZED-2023-TV",
+                    "quantity_sold": 4,
+                    "sale_date": "2023-01-04",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 1.5,
+                        "comment": "Very disappointing, would not recommend."
+                    }
+                },
+                {
+                    "product_code": "MB-TREK-2021-XC",
+                    "quantity_sold": 2,
+                    "sale_date": "2023-01-05",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 2.0,
+                        "comment": "Not what I expected, faced several issues."
+                    }
+                },
+                {
+                    "product_code": "EB-SPECIALIZED-2023-TV",
+                    "quantity_sold": 4,
+                    "sale_date": "2023-01-05",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 1.5,
+                        "comment": "Very disappointing, would not recommend."
+                    }
+                },
+                {
+                    "product_code": "RB-GIANT-2022-DEFY",
+                    "quantity_sold": 5,
+                    "sale_date": "2023-01-07",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 5.0,
+                        "comment": "Outstanding bike, exceeded my expectations!"
+                    }
+                },
+                {
+                    "product_code": "MB-TREK-2021-XC",
+                    "quantity_sold": 3,
+                    "sale_date": "2023-01-08",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 3.0,
+                        "comment": "An average experience, room for improvement."
+                    }
+                },
+                {
+                    "product_code": "EB-SPECIALIZED-2023-TV",
+                    "quantity_sold": 2,
+                    "sale_date": "2023-01-08",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 4.5,
+                        "comment": "Great bike for daily commutes, highly recommend!"
+                    }
+                },
+                {
+                    "product_code": "RB-GIANT-2022-DEFY",
+                    "quantity_sold": 4,
+                    "sale_date": "2023-01-10",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 4.5,
+                        "comment": "Great bike for daily commutes, highly recommend!"
+                    }
+                },
+                {
+                    "product_code": "RB-GIANT-2022-DEFY",
+                    "quantity_sold": 3,
+                    "sale_date": "2023-01-11",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 4.5,
+                        "comment": "Great bike for daily commutes, highly recommend!"
+                    }
+                },
+                {
+                    "product_code": "EB-SPECIALIZED-2023-TV",
+                    "quantity_sold": 5,
+                    "sale_date": "2023-01-11",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 2.0,
+                        "comment": "Not what I expected, faced several issues."
+                    }
+                },
+                {
+                    "product_code": "RB-GIANT-2022-DEFY",
+                    "quantity_sold": 5,
+                    "sale_date": "2023-01-12",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 2.0,
+                        "comment": "Not what I expected, faced several issues."
+                    }
+                },
+                {
+                    "product_code": "RB-GIANT-2022-DEFY",
+                    "quantity_sold": 1,
+                    "sale_date": "2023-01-13",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 5.0,
+                        "comment": "Outstanding bike, exceeded my expectations!"
+                    }
+                },
+                {
+                    "product_code": "RB-GIANT-2022-DEFY",
+                    "quantity_sold": 3,
+                    "sale_date": "2023-01-14",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 4.5,
+                        "comment": "Great bike for daily commutes, highly recommend!"
+                    }
+                },
+                {
+                    "product_code": "EB-SPECIALIZED-2023-TV",
+                    "quantity_sold": 2,
+                    "sale_date": "2023-01-14",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 5.0,
+                        "comment": "Outstanding bike, exceeded my expectations!"
+                    }
+                },
+                {
+                    "product_code": "MB-TREK-2021-XC",
+                    "quantity_sold": 2,
+                    "sale_date": "2023-01-15",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 4.5,
+                        "comment": "Great bike for daily commutes, highly recommend!"
+                    }
+                },
+                {
+                    "product_code": "EB-SPECIALIZED-2023-TV",
+                    "quantity_sold": 3,
+                    "sale_date": "2023-01-15",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 4.5,
+                        "comment": "Great bike for daily commutes, highly recommend!"
+                    }
+                },
+                {
+                    "product_code": "EB-SPECIALIZED-2023-TV",
+                    "quantity_sold": 5,
+                    "sale_date": "2023-01-16",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 1.5,
+                        "comment": "Very disappointing, would not recommend."
+                    }
+                },
+                {
+                    "product_code": "MB-TREK-2021-XC",
+                    "quantity_sold": 5,
+                    "sale_date": "2023-01-19",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 4.5,
+                        "comment": "Great bike for daily commutes, highly recommend!"
+                    }
+                },
+                {
+                    "product_code": "EB-SPECIALIZED-2023-TV",
+                    "quantity_sold": 5,
+                    "sale_date": "2023-01-19",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 4.8,
+                        "comment": "Love the performance and build quality!"
+                    }
+                },
+                {
+                    "product_code": "MB-TREK-2021-XC",
+                    "quantity_sold": 5,
+                    "sale_date": "2023-01-21",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 5.0,
+                        "comment": "Outstanding bike, exceeded my expectations!"
+                    }
+                },
+                {
+                    "product_code": "EB-SPECIALIZED-2023-TV",
+                    "quantity_sold": 3,
+                    "sale_date": "2023-01-21",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 3.0,
+                        "comment": "An average experience, room for improvement."
+                    }
+                },
+                {
+                    "product_code": "MB-TREK-2021-XC",
+                    "quantity_sold": 2,
+                    "sale_date": "2023-01-22",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 3.5,
+                        "comment": "Decent value for the price, but some issues."
+                    }
+                },
+                {
+                    "product_code": "EB-SPECIALIZED-2023-TV",
+                    "quantity_sold": 3,
+                    "sale_date": "2023-01-24",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 3.0,
+                        "comment": "An average experience, room for improvement."
+                    }
+                },
+                {
+                    "product_code": "RB-GIANT-2022-DEFY",
+                    "quantity_sold": 5,
+                    "sale_date": "2023-01-25",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 4.5,
+                        "comment": "Great bike for daily commutes, highly recommend!"
+                    }
+                },
+                {
+                    "product_code": "EB-SPECIALIZED-2023-TV",
+                    "quantity_sold": 2,
+                    "sale_date": "2023-01-25",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 4.8,
+                        "comment": "Love the performance and build quality!"
+                    }
+                },
+                {
+                    "product_code": "MB-TREK-2021-XC",
+                    "quantity_sold": 4,
+                    "sale_date": "2023-01-26",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 5.0,
+                        "comment": "Outstanding bike, exceeded my expectations!"
+                    }
+                },
+                {
+                    "product_code": "RB-GIANT-2022-DEFY",
+                    "quantity_sold": 5,
+                    "sale_date": "2023-01-26",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 1.5,
+                        "comment": "Very disappointing, would not recommend."
+                    }
+                },
+                {
+                    "product_code": "RB-GIANT-2022-DEFY",
+                    "quantity_sold": 5,
+                    "sale_date": "2023-01-28",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 3.5,
+                        "comment": "Decent value for the price, but some issues."
+                    }
+                },
+                {
+                    "product_code": "MB-TREK-2021-XC",
+                    "quantity_sold": 4,
+                    "sale_date": "2023-01-29",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 3.5,
+                        "comment": "Decent value for the price, but some issues."
+                    }
+                },
+                {
+                    "product_code": "EB-SPECIALIZED-2023-TV",
+                    "quantity_sold": 1,
+                    "sale_date": "2023-01-30",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 3.5,
+                        "comment": "Decent value for the price, but some issues."
+                    }
+                },
+                {
+                    "product_code": "MB-TREK-2021-XC",
+                    "quantity_sold": 2,
+                    "sale_date": "2023-01-31",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 1.5,
+                        "comment": "Very disappointing, would not recommend."
+                    }
+                },
+                {
+                    "product_code": "EB-SPECIALIZED-2023-TV",
+                    "quantity_sold": 3,
+                    "sale_date": "2023-01-31",
+                    "year": 2023,
+                    "month": "January",
+                    "customer_review": {
+                        "rating": 4.5,
+                        "comment": "Great bike for daily commutes, highly recommend!"
+                    }
+                }
+            ]
+        }
+    ]
+}

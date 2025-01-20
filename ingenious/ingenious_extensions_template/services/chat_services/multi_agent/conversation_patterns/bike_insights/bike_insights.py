@@ -7,11 +7,12 @@ from jinja2 import Environment, FileSystemLoader
 from pathlib import Path
 import jsonpickle
 from ingenious.utils.namespace_utils import get_path_from_namespace_with_fallback
+from ingenious.services.chat_services.multi_agent.service import IConversationPattern
 
 logger = logging.getLogger(__name__)
 
 
-class ConversationPattern:
+class ConversationPattern(IConversationPattern):
     def __init__(
                 self,
                 default_llm_config: dict,

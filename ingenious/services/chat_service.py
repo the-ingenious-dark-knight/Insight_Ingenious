@@ -7,12 +7,14 @@ import importlib
 
 
 class IChatService(ABC):
+    service_class = None
+
     @abstractmethod
     async def get_chat_response(self, chat_request: ChatRequest) -> ChatResponse:
         pass
 
 
-class ChatService:
+class ChatService(IChatService):
     def __init__(
             self,
             chat_service_type: str,
