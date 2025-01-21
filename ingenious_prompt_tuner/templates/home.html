@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+
+{% block head %}
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/2.2.1/css/dataTables.dataTables.min.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/3.0.0/css/select.dataTables.min.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/2.2.1/css/dataTables.bootstrap5.css">
+{% endblock %}
+
+{% block title %}Home - Ingenious Prompt Tuner{% endblock %}
+
+{% block content %}
+<br/>
+<div class="alert alert-primary" role="alert">
+    <h4 class="alert-heading">Welcome</h4>
+    <p> This is the the home page of the Ingenious prompt tuning application. It is a development tool designed to help you iterate and ideate on AI agent prompts quickly and efficiently.</p>
+</div>
+
+<p></p>
+<p class="lead" id="selectedRevisionNotice">To begin select a revision from the list below. </p>
+<button id="createRevisionButton" onclick=javascript:window.open('{{ url_for('index.create_revision') }}') class="btn btn-outline-primary" disabled>
+    <i class="bi bi-copy"></i>  Copy Selected Revision
+</button>
+
+<table id="revisionsTable" class="display">
+    <thead>
+        <tr>
+            <th>Revision Name</th>
+            <th>Revision Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for revision in files %}
+        <tr>
+            <td>{{ revision.name }}</td>
+            <td>{{ revision.description }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/2.2.1/js/dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/select/3.0.0/js/dataTables.select.min.js"></script>
+<script src="https://cdn.datatables.net/select/3.0.0/js/select.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/2.2.1/js/dataTables.bootstrap5.js"></script>
+        
+<script>
+    
+    function UpdateButtonState(){
+        // Automatically select the record if a revision is stored in cookies
+        var selectedRevision = getCookie('selected_revision');
+
+        if (selectedRevision) {
+            $('#createRevisionButton').removeAttr('disabled');
+        }
+        else {
+            $('#createRevisionButton').prop('disabled',true);
+        }
+    }
+
+    function OpenUrl(url){
+            window.location.href(url);
+        }
+
+    // Function to get cookie value by name
+    function getCookie(name) {
+        var value = "; " + document.cookie;
+        var parts = value.split("; " + name + "=");
+        if (parts.length == 2) return parts.pop().split(";").shift();
+    }
+
+    var selectedRevision = getCookie('selected_revision');
+
+    $(document).ready(function() {
+        table = $('#revisionsTable').DataTable({
+            select: {
+                style: 'single'
+            },
+            pageLength: 100
+        });
+
+        table.on('select', function (e, dt, type, indexes) {
+                let rowData = table
+                    .rows(indexes)
+                    .data()
+                    .toArray();
+
+                    var revisionName = rowData[0][0];
+                    var revisionTitle = rowData[0][1];
+                    document.cookie = "selected_revision=" + revisionName + "; path=/";
+                    notice = 'The currently selected revision is <mark>'+revisionName + " -- " + revisionTitle+'</mark>'
+                    $('#selectedRevisionNotice').html(notice)
+                    UpdateButtonState()
+
+        
+                
+        });
+
+
+
+        if (selectedRevision) {
+            table.rows().every(function() {
+                var data = this.data();
+                if (data[0] === selectedRevision) {
+                    this.select();
+                    UpdateButtonState();
+                }
+            });
+        }        
+
+
+            
+    });
+
+    
+
+</script>
+
+{% endblock %}
+
+
+
+

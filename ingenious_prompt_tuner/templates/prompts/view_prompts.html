@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Markdown - Markdown Editor & Responses{% endblock %}
+
+{% block content %}
+<br/>
+<div class="alert alert-primary" role="alert">
+    <h4 class="alert-heading">Prompts</h4>
+    <p> Use this page to view and edit the agent prompts.</p>
+</div>
+<div class="list-group">
+    {% for file in files %}
+        <a href="{{ url_for('prompts.edit', filename=file) }}" class="list-group-item list-group-item-action">
+            <i class="bi bi-file-earmark-text"></i> {{ file }}
+        </a>
+    {% endfor %}
+</div>
+{% endblock %}

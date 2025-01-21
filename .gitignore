@@ -19,3 +19,4 @@ __pycache__
 /.github/
 /guardrails/.guard_venv/
 /guardrails/.venv/
+config.yml

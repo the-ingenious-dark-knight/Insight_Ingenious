@@ -211,7 +211,6 @@ def generate_template_folders():
     console.print("[info]Folder generation process completed.[/info]")
 
 
-
 if __name__ == "__cli__":
     app()
 
@@ -224,6 +223,7 @@ class CliFunctions:
             try:                
                 repository_class_import = import_class_with_fallback(module_name, class_name)
                 repository_class = repository_class_import(progress=progress, task_id=task_id)
+                
                 await repository_class.run(progress, task_id, **kwargs)
 
             except (ImportError, AttributeError) as e:

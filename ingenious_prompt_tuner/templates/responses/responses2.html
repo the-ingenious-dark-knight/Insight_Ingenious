@@ -1,0 +1,38 @@
+<h2 id="responses">Responses</h2>
+
+    <ul>
+        {% for file in files %}
+            <li><a href='#{{ file["ball_identifier"] }}_{{ file["event_type"] }}''>{{ file["file_name"] }} - {{ file["ball_identifier"] }} - {{ file["event_type"] }}</a></li>
+        {% endfor %}
+    </ul>
+
+    {% for file in files %}
+        <div class="event" id='{{ file["ball_identifier"] }}_{{ file["event_type"] }}'>
+            <h4 class="data_file_heading" >Payload: {{ file["file_name"] }}</h4>
+            <p class="event_type"><strong>Event Type:</strong> {{ file["event_type"] }}</p>
+            <p class="ball_identifier"><strong>Ball Identifier:</strong> {{ file["ball_identifier"] }} </p>
+            <div class="markdown-content"></div>
+            <p><strong>Insight Generation Actions:</strong></p> 
+            <div class="btn-group w-100 mb-3" role="group">
+                <button class="btn btn-outline-primary" onclick="reRunEventAsync('{{ file["ball_identifier"]  }}', '{{ file["event_type"] }}', '{{ file["file_name"] }}')">
+                    <i class="bi bi-arrow-repeat all icon"></i> Generate or Regenerate
+                </button>
+            </div>
+
+            <p><strong>Use Buttons Below to View Additional Response Details</strong>:</p>
+            <div class="btn-group w-100 mb-3" role="group">
+                <button class="btn btn-outline-primary" onclick="get_agent_response('{{ file["ball_identifier"]  }}', '{{ file["event_type"] }}', 'batsman')">
+                    <i class="bi bi-0-square"></i> Batsman
+                </button>
+                <button class="btn btn-outline-primary" onclick="get_agent_response('{{ file["ball_identifier"]  }}', '{{ file["event_type"] }}', 'bowler')">
+                    <i class="bi bi-1-square all icon"></i> Bowler
+                </button>
+                <button class="btn btn-outline-primary" onclick="get_agent_response('{{ file["ball_identifier"]  }}', '{{ file["event_type"] }}', 'trivia')">
+                    <i class="bi bi-2-square all icon"></i> Trivia
+                </button>
+                <button class="btn btn-outline-primary" onclick="renderPayload('{{ file["ball_identifier"] }}', '{{ file["event_type"] }}')">
+                    <i class="bi bi-markdown icon"></i> Payload
+                </button>
+            </div>
+        </div>
+    {% endfor %}
