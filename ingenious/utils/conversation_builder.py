@@ -64,10 +64,10 @@ def build_message(
         raise ValueError("Invalid message role.")
 
 
-async def Sync_Prompt_Templates(_config: Config):
+async def Sync_Prompt_Templates(_config: Config, revision = "dfe19b62-07f1-4cb5-ae9a-561a253e4b04"):
     fs = FileStorage(_config)
     # Check the storage type and handle Jinja files accordingly
-    azure_template_dir = "prompts"
+    azure_template_dir = "prompts/"+revision
     if _config.file_storage.storage_type != 'local':
         # Define the file path in Azure storage
         jinja_files = sorted([
