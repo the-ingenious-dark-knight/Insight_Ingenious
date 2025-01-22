@@ -20,11 +20,13 @@ class ChatService(IChatService):
             chat_service_type: str,
             chat_history_repository: ChatHistoryRepository,
             conversation_flow: str,
-            config: Config
+            config: Config,
+            revision: str = "dfe19b62-07f1-4cb5-ae9a-561a253e4b04"
             ):
         
         class_name = f"{chat_service_type.lower()}_chat_service"
         self.config = config
+        self.revision = revision
 
         try:            
             # First look for the module in the extensions namespace
@@ -45,7 +47,7 @@ class ChatService(IChatService):
 
     async def get_chat_response(self,  chat_request: ChatRequest) -> ChatResponse:
         # Sync the prompt templates
-        await Sync_Prompt_Templates(self.config)
+        await Sync_Prompt_Templates(self.config, revision=self.revision)
 
         if not chat_request.conversation_flow:
             raise ValueError(f"conversation_flow not set {chat_request}")
