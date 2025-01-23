@@ -11,22 +11,21 @@ from ingenious.errors.content_filter_error import ContentFilterError
 from ingenious.errors.token_limit_exceeded_error import TokenLimitExceededError
 from ingenious.models.http_error import HTTPError
 
-try:
-    import ingenious_extensions.tests.run_tests as rt
-except:
-    pass
-import rich.progress as rp
-from ingenious.utils.stage_executor import ProgressConsoleWrapper
-
 
 import sys
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../../../..'))
 sys.path.append(parent_dir)
+print("parent_dir:", parent_dir)
 
 
 config = ingen_config.get_config(os.getenv("INGENIOUS_PROJECT_PATH", ""))
 logger = logging.getLogger(__name__)
 router = APIRouter()
+
+import ingenious.run_tests as rt
+import rich.progress as rp
+from ingenious.utils.stage_executor import ProgressConsoleWrapper
+
 
 
 def send_response(response, thread_id):
