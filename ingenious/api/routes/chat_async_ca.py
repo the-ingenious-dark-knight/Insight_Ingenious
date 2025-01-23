@@ -15,6 +15,7 @@ from ingenious.models.http_error import HTTPError
 import sys
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../../../..'))
 sys.path.append(parent_dir)
+print("parent_dir:", parent_dir)
 
 
 config = ingen_config.get_config(os.getenv("INGENIOUS_PROJECT_PATH", ""))
