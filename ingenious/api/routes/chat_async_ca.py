@@ -22,7 +22,7 @@ config = ingen_config.get_config(os.getenv("INGENIOUS_PROJECT_PATH", ""))
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
-import ingenious_extensions.tests.run_tests as rt
+import ingenious.run_tests as rt
 import rich.progress as rp
 from ingenious.utils.stage_executor import ProgressConsoleWrapper
 
