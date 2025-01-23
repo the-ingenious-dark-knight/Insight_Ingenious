@@ -4,6 +4,14 @@ import ingenious_prompt_tuner.utilities as uti
 from flask import Flask
 from functools import wraps
 from pathlib import Path
+from ingenious.utils.namespace_utils import import_class_with_fallback
+from ingenious.ingenious_extensions_template.models.agent import ProjectAgents
+
+
+from ingenious_prompt_tuner.templates import home
+from ingenious_prompt_tuner.templates.responses import responses
+from ingenious_prompt_tuner.templates.prompts import prompts
+from ingenious_prompt_tuner import auth
 
 config = ig_deps.get_config()
 
@@ -30,8 +38,13 @@ def create_app():
     app.config["prompt_template_folder"] = os.path.join(
         "ingenious_extensions", "templates", "prompts"
     )
+    # Get the list of agents -- note this should preference the Agents class in the project level extensions dir
+    # Note the Agents module and ProjectAgents class must be defined in the project level extensions dir
+    Agents = import_class_with_fallback('models.agent', "ProjectAgents")
+    app.config["agents"] = Agents(config).get_agents()
+    
     app.config["test_output_path"] = str(Path("functional_test_outputs"))
-
+    # Set utils so that downstream blueprints have access to the config
     app.utils = uti.utils_class(config)
 
     # ensure the instance folder exists
@@ -41,10 +54,8 @@ def create_app():
     except OSError:
         pass
 
-    from . import auth, index, prompts, responses
-
     app.register_blueprint(auth.bp)
-    app.register_blueprint(index.bp)
+    app.register_blueprint(home.bp)
     app.register_blueprint(prompts.bp)
     app.register_blueprint(responses.bp)
 

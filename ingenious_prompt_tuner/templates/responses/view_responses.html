@@ -12,13 +12,6 @@ hr {
     margin: 2rem 0;
 }
 
-.data_file_heading {
-    margin-top: 1.5rem;
-    margin-bottom: 1rem;
-    font-weight: bold;
-    border-bottom: 2px solid #e0e0e0;
-    padding-bottom: 0.5rem;
-}
 
 /* Markdown Content Styling */
 .markdown-content {
@@ -152,34 +145,45 @@ hr {
 
 <!-- End Modal -->
 
-<h3 class="header-space">View Responses</h3>
-<div class="row mb-3">
-    <div class="col-md-6">
-        <div class="btn-group w-100 mb-3" role="group">
-            <button class="btn btn-secondary" onclick="refreshResponses()">
-                <i class="bi bi-arrow-clockwise icon"></i> Show Responses
-            </button>
-            <button class="btn btn-danger" id="runTestsBtn" onclick="runLocalTest()">
-                <i class="bi bi-play-circle icon"></i> Re-Run
-            </button>
-            <button class="btn btn-outline-dark" id="showConsole" data-bs-toggle="modal" data-bs-target="#myModal">
-                <i class="bi bi-download icon"></i> View Console
-            </button>
+<br/>
+<div class="alert alert-primary" role="alert">
+    <h4 class="alert-heading">Agent Responses</h4>
+    <p> Use this page to view and regenerate agent responses.</p>
+</div>
+<div class="collapse" id="advSettingsSection">
+    <div class="card-body">
+        <p class="card-text"> Edit advanced settings here!</p>
+        <hr/>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="btn-group w-100 mb-3" role="group">
+                    <button class="btn btn-secondary" onclick="refreshResponses()">
+                        <i class="bi bi-arrow-clockwise icon"></i> Show Responses
+                    </button>
+                    <button class="btn btn-danger" id="runTestsBtn" onclick="runLocalTest()">
+                        <i class="bi bi-play-circle icon"></i> Re-Run
+                    </button>
+                    <button class="btn btn-outline-dark" id="showConsole" data-bs-toggle="modal" data-bs-target="#myModal">
+                        <i class="bi bi-download icon"></i> View Console
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="input-group">
+                    <label for="maxProcessedEvents" class="input-group-text">Max Processed Events</label>
+                    <input type="number" class="form-control" id="maxProcessedEvents" value="1">
+                    <label for="eventType" class="input-group-text ms-3">Event Type</label>
+                    <select class="form-select" id="eventType">
+                        <option value="all">All</option>
+                        <option value="iswicket">Wicket</option>
+                        <option value="score">Scorecard</option>
+                        <option value="status">Status Change</option>
+                    </select>
+                </div>
+                <span id="testStatusSpan" class="ms-3"></span>
+            </div>
         </div>
-    </div>
-    <div class="col-md-6">
-        <div class="input-group">
-            <label for="maxProcessedEvents" class="input-group-text">Max Processed Events</label>
-            <input type="number" class="form-control" id="maxProcessedEvents" value="1">
-            <label for="eventType" class="input-group-text ms-3">Event Type</label>
-            <select class="form-select" id="eventType">
-                <option value="all">All</option>
-                <option value="iswicket">Wicket</option>
-                <option value="score">Scorecard</option>
-                <option value="status">Status Change</option>
-            </select>
-        </div>
-        <span id="testStatusSpan" class="ms-3"></span>
     </div>
 </div>
 <div id="responsesContainer"></div>
@@ -191,8 +195,8 @@ hr {
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 
-    function get_agent_response(ball_identifier, event_type, agent_name) {
-        fetch(`{{ url_for('responses.get_agent_response') }}?ball_identifier=${ball_identifier}&agent_name=${agent_name}&event_type=${event_type}`)
+    function get_agent_response(identifier, event_type, agent_name) {
+        fetch(`{{ url_for('responses.get_agent_response') }}?identifier=${identifier}&agent_name=${agent_name}&event_type=${event_type}`)
         .then(response => response.text())
         .then(html => {
         const modal = document.createElement('div');
@@ -248,9 +252,11 @@ hr {
                 responsesContainer.innerHTML = html;
                 $('.event').each(function() {
                     var eventType = $(this).find('.event_type').text().split(':')[1].trim();
-                    var ballIdentifier = $(this).find('.ball_identifier').text().split(':')[1].trim();
+                    var ballIdentifier = $(this).find('.identifier').text().split(':')[1].trim();
                     getFileContent(ballIdentifier, eventType);
                 });
+                const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+                const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
             })
             .catch(err => {
                 responsesContainer.innerHTML = "<p class='text-danger'>Error loading responses. Please try again later.</p>";
@@ -270,22 +276,22 @@ hr {
         }
     }
 
-    function renderPayload(ball_identifier, event_type)
+    function renderPayload(identifier, event_type)
     {
-        window.open(`{{ url_for('responses.get_payload') }}?&ball_identifier=${ball_identifier}&event_type=${event_type}`, '_blank');
+        window.open(`{{ url_for('responses.get_payload') }}?&identifier=${identifier}&event_type=${event_type}`, '_blank');
 
     }
 
-    function getFileContent(ball_identifier, event_type) {
+    function getFileContent(identifier, event_type) {
         $.ajax({
-            url: '/get_agent_response_from_file',
+            url: '{{ url_for("responses.get_agent_response_from_file") }}',
             type: 'POST',
             data: { 
-                ball_identifier: ball_identifier,
+                identifier: identifier,
                 event_type: event_type
             },
             success: function(response) {
-                $('#' + ball_identifier + '_' + event_type + ' .markdown-content').html(response);
+                $('#' + identifier + '_' + event_type + ' .markdown-content').html(response);
             },
             error: function(error) {
                 console.error('Error fetching file content:', error);
@@ -293,8 +299,8 @@ hr {
         });
     }
 
-    function reRunEventAsync(ball_identifier, event_type, file_name) {
-        const contentElement = $('#' + ball_identifier + '_' + event_type + ' .markdown-content');
+    function reRunEventAsync(identifier, event_type, file_name) {
+        const contentElement = $('#' + identifier + '_' + event_type + ' .markdown-content');
         contentElement.html(`
         <div class="d-flex align-items-center">
             <strong role="status">Loading...</strong>
@@ -303,10 +309,10 @@ hr {
         `);
 
         $.ajax({
-            url: `/rerun_event?&ball_identifier=${ball_identifier}&event_type=${event_type}&file_name=${file_name}`,
+            url: `{{ url_for("responses.rerun_event") }}?&identifier=${identifier}&event_type=${event_type}&file_name=${file_name}`,
             type: 'GET',
             success: function(response) {
-                getFileContent(ball_identifier, event_type);
+                getFileContent(identifier, event_type);
             },
             error: function(error) {
                 console.error('Error fetching file content:', error);
@@ -319,9 +325,9 @@ hr {
     document.addEventListener('DOMContentLoaded', function() {
         refreshResponses();
         $('.event').each(function() {
-            // Get the event type and ball identifier from the p tags with the class event_type and ball_identifier inside the event div
+            // Get the event type and ball identifier from the p tags with the class event_type and identifier inside the event div
             var eventType = $(this).find('.event_type').text().split(':')[1].trim();
-            var ballIdentifier = $(this).find('.ball_identifier').text().split(':')[1].trim();
+            var ballIdentifier = $(this).find('.identifier').text().split(':')[1].trim();
             getFileContent(ballIdentifier, eventType);
         });
     });

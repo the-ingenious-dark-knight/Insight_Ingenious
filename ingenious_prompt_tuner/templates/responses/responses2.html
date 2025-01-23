@@ -1,38 +1,41 @@
-<h2 id="responses">Responses</h2>
-
+    <div>
+    <h2 id="responses">Summary of Responses</h2>
+    <p>Use the links below to quickly navigate to specific event / response </p>
     <ul>
         {% for file in files %}
-            <li><a href='#{{ file["ball_identifier"] }}_{{ file["event_type"] }}''>{{ file["file_name"] }} - {{ file["ball_identifier"] }} - {{ file["event_type"] }}</a></li>
+            <li><a href='#{{ file["identifier"] }}_{{ file["event_type"] }}''>{{ file["file_name"] }} - {{ file["identifier"] }} - {{ file["event_type"] }}</a></li>
         {% endfor %}
     </ul>
+    </div>
 
+    <div id="response_details" >
     {% for file in files %}
-        <div class="event" id='{{ file["ball_identifier"] }}_{{ file["event_type"] }}'>
-            <h4 class="data_file_heading" >Payload: {{ file["file_name"] }}</h4>
-            <p class="event_type"><strong>Event Type:</strong> {{ file["event_type"] }}</p>
-            <p class="ball_identifier"><strong>Ball Identifier:</strong> {{ file["ball_identifier"] }} </p>
-            <div class="markdown-content"></div>
-            <p><strong>Insight Generation Actions:</strong></p> 
-            <div class="btn-group w-100 mb-3" role="group">
-                <button class="btn btn-outline-primary" onclick="reRunEventAsync('{{ file["ball_identifier"]  }}', '{{ file["event_type"] }}', '{{ file["file_name"] }}')">
-                    <i class="bi bi-arrow-repeat all icon"></i> Generate or Regenerate
-                </button>
+        <div class="event card border-primary" id='{{ file["identifier"] }}_{{ file["event_type"] }}'>
+            <div class="data_file_heading card-header" >{{ file["file_name"] }}
+                <span class="event_type badge text-bg-warning">Event Type: {{ file["event_type"] }}</span>
+                <span class="identifier badge text-bg-secondary">Ball Identifier: {{ file["identifier"] }} </span>
             </div>
-
-            <p><strong>Use Buttons Below to View Additional Response Details</strong>:</p>
-            <div class="btn-group w-100 mb-3" role="group">
-                <button class="btn btn-outline-primary" onclick="get_agent_response('{{ file["ball_identifier"]  }}', '{{ file["event_type"] }}', 'batsman')">
-                    <i class="bi bi-0-square"></i> Batsman
-                </button>
-                <button class="btn btn-outline-primary" onclick="get_agent_response('{{ file["ball_identifier"]  }}', '{{ file["event_type"] }}', 'bowler')">
-                    <i class="bi bi-1-square all icon"></i> Bowler
-                </button>
-                <button class="btn btn-outline-primary" onclick="get_agent_response('{{ file["ball_identifier"]  }}', '{{ file["event_type"] }}', 'trivia')">
-                    <i class="bi bi-2-square all icon"></i> Trivia
-                </button>
-                <button class="btn btn-outline-primary" onclick="renderPayload('{{ file["ball_identifier"] }}', '{{ file["event_type"] }}')">
-                    <i class="bi bi-markdown icon"></i> Payload
-                </button>
+            <div class="card-body">
+                <div class="markdown-content"></div>
+                <p><strong>Insight Generation Actions:</strong></p> 
+                <div class="btn-group w-100 mb-3" role="group">
+                    <button class="btn btn-outline-primary" onclick="reRunEventAsync('{{ file["identifier"]  }}', '{{ file["event_type"] }}', '{{ file["file_name"] }}')">
+                        <i class="bi bi-arrow-repeat all icon"></i> Generate or Regenerate
+                    </button>
+                </div>                               
+                <div class="btn-group w-100 mb-3" role="group">
+                    {% for agent in agents %}    
+                    <button class="btn btn-outline-primary" 
+                            data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="View the response for the {{ agent['name'] }}"
+                            onclick="get_agent_response('{{ file["identifier"]  }}', '{{ file["event_type"] }}', '{{ agent.agent_name }}')">
+                        <i class="bi bi-0-square"></i> {{ agent.agent_name }}
+                    </button>
+                    {% endfor %}
+                    <button class="btn btn-outline-primary" onclick="renderPayload('{{ file["identifier"] }}', 'blah')">
+                        <i class="bi bi-markdown icon"></i> Payload
+                    </button>
+                </div>
             </div>
         </div>
     {% endfor %}
+    </div>

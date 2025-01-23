@@ -21,6 +21,9 @@
 <button id="createRevisionButton" onclick=javascript:window.open('{{ url_for('index.create_revision') }}') class="btn btn-outline-primary" disabled>
     <i class="bi bi-copy"></i>  Copy Selected Revision
 </button>
+<button id="clearCookiesButton" onclick="clearCookies()" class="btn btn-outline-danger">
+    <i class="bi bi-trash"></i>  Clear Selection
+</button>
 
 <table id="revisionsTable" class="display">
     <thead>
@@ -51,18 +54,32 @@
 <script src="https://cdn.datatables.net/2.2.1/js/dataTables.bootstrap5.js"></script>
         
 <script>
-    
+    function clearCookies() {
+        document.cookie.split(";").forEach(function(c) {
+            document.cookie = c.trim().split("=")[0] + '=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/';
+        });
+        location.reload();
+    }
+
     function UpdateButtonState(){
         // Automatically select the record if a revision is stored in cookies
         var selectedRevision = getCookie('selected_revision');
 
         if (selectedRevision) {
             $('#createRevisionButton').removeAttr('disabled');
+            document.getElementById('editPromptsNav').style.display = 'block';
+            document.getElementById('runTestsNav').style.display = 'block';
         }
         else {
             $('#createRevisionButton').prop('disabled',true);
+            document.getElementById('editPromptsNav').style.display = 'none';
+            document.getElementById('runTestsNav').style.display = 'none';
         }
+
+
     }
+
+    
 
     function OpenUrl(url){
             window.location.href(url);
@@ -112,9 +129,10 @@
                     UpdateButtonState();
                 }
             });
-        }        
-
-
+        }
+        else {
+            UpdateButtonState();
+        }       
             
     });
 

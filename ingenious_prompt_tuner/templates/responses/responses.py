@@ -16,6 +16,7 @@ import asyncio
 import yaml
 import json
 import uuid as guid
+from ingenious_prompt_tuner.event_processor import functional_tests
 import subprocess
 import markdown
 from pathlib import Path
@@ -55,7 +56,7 @@ def get_test_data_files():
         files.sort(
             key=lambda x: json.loads(
                 asyncio.run(utils.fs.read_file(file_name=x, file_path=output_path))
-            )["ball_identifier"]
+            )["identifier"]
         )
     else:
         files = []
@@ -73,14 +74,14 @@ def get_test_data_files():
 @requires_selected_revision
 def get_payload():
     utils: utils_class = current_app.utils
-    ball_identifier = request.args.get("ball_identifier", type=str)
+    identifier = request.args.get("identifier", type=str)
     event_type = request.args.get("event_type", type=str)
     output_dir = (
         current_app.config["test_output_path"]
         + f"/{get_selected_revision_direct_call()}"
     )
     return asyncio.run(
-        rp1.render_payload(ball_identifier, utils.fs, output_dir, event_type)
+        rp1.render_payload(identifier, utils.fs, output_dir, event_type)
     )
 
 
@@ -89,16 +90,19 @@ def get_payload():
 @requires_selected_revision
 def rerun_event():
     utils: utils_class = current_app.utils
+    ft = functional_tests(config=current_app.config)
+    agents = current_app.config["agents"] 
     try:
-        ball_identifier = request.args.get("ball_identifier", type=str)
+        identifier = request.args.get("identifier", type=str)
         event_type = request.args.get("event_type", type=str)
         file_name = request.args.get("file_name", type=str)
         asyncio.run(
-            run_tests.rerun_single_event(
-                ball_identifier=ball_identifier,
+            ft.run_event_from_pre_processed_file(
+                identifier=identifier,
                 event_type=event_type,
                 file_name=file_name,
-                session_id=get_selected_revision_direct_call(),
+                revision_id=get_selected_revision_direct_call(),
+                agents=agents
             )
         )
 
@@ -114,11 +118,11 @@ def rerun_event():
 @requires_selected_revision
 def get_agent_response():
     utils: utils_class = current_app.utils
-    ball_identifier = request.args.get("ball_identifier", type=str)
+    identifier = request.args.get("identifier", type=str)
     event_type = request.args.get("event_type", type=str)
     agent_name = request.args.get("agent_name", type=str)
     # Return mock html page
-    file_name = f"agent_response_{event_type}_{agent_name}_{ball_identifier.strip()}.md"
+    file_name = f"agent_response_{event_type}_{agent_name}_{identifier.strip()}.md"
     output_path = (
         current_app.config["test_output_path"]
         + f"/{get_selected_revision_direct_call()}"
@@ -141,6 +145,7 @@ def get_agent_response():
 @requires_selected_revision
 def get_responses():
     utils: utils_class = current_app.utils
+    agents = current_app.config["agents"]
     try:
         output_path = (
             current_app.config["test_output_path"]
@@ -161,7 +166,7 @@ def get_responses():
         return "<p>No responses folder found.</p>"
 
     # render the responses2.html file
-    return render_template("responses/responses2.html", files=files)
+    return render_template("responses/responses2.html", files=files, agents=agents)
 
 
 @bp.route("/get_agent_response_from_file", methods=["post"])
@@ -169,10 +174,10 @@ def get_responses():
 @requires_selected_revision
 def get_agent_response_from_file():
     utils: utils_class = current_app.utils
-    ball_identifier = request.form.get("ball_identifier", type=str).replace("#", "")
+    identifier = request.form.get("identifier", type=str).replace("#", "")
     event_type = request.form.get("event_type", type=str)
 
-    file_name = f"agent_response_{event_type}_summary_{ball_identifier.strip()}.md"
+    file_name = f"agent_response_{event_type}_summary_agent_{identifier.strip()}.md"
     output_path = (
         current_app.config["test_output_path"]
         + f"/{get_selected_revision_direct_call()}"
@@ -180,6 +185,8 @@ def get_agent_response_from_file():
     file_contents = asyncio.run(
         utils.fs.read_file(file_name=file_name, file_path=output_path)
     )
+    if file_contents is None:
+        return "No response found"
     html_content = markdown.markdown(
         file_contents,
         extensions=["extra", "md_in_html", "toc", "fenced_code", "codehilite"],

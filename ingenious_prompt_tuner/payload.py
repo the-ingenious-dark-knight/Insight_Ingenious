@@ -1,6 +1,6 @@
 import csv
 from io import StringIO
-from flask import render_template_string
+from flask import render_template_string, render_template
 import markdown
 from ingenious.utils.namespace_utils import get_file_from_namespace_with_fallback
 import re
@@ -35,6 +35,9 @@ def convert_csv_to_md_tables(content):
     # Use regex to find and replace only ``` csv ... ``` blocks
     pattern = r'``` csv\s*(.*?)\s*```'
     print(f"Regex pattern: {pattern}")
+    if content is None:
+        return ""
+    
     matches = re.findall(pattern, content, flags=re.DOTALL)
     # Find all CSV blocks and their preceding headings
     pattern_with_heading = r'(#+\s[^\n]+)\n+``` csv\s*(.*?)\s*```'
@@ -67,6 +70,6 @@ def csv_to_md(csv_content):
 
 
 def payload_base_template(content):
-    ret = render_template_string('/responses/payload_template.html')
+    ret = render_template('/responses/payload_template.html')
     ret = ret.replace("/@content@/", content)
     return ret
