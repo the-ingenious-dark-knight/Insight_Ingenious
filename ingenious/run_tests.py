@@ -17,7 +17,7 @@ from ingenious.files.files_repository import FileStorage
 import ingenious.dependencies as ingen_deps
 from ingenious.utils.stage_executor import ProgressConsoleWrapper
 from ingenious.utils.namespace_utils import get_file_from_namespace_with_fallback, get_path_from_namespace_with_fallback
-import ingenious_extensions.models.ca_raw_fixture_data as gm
+import ingenious.models.ca_raw_fixture_data as gm
 
 
 class Event(BaseModel):
