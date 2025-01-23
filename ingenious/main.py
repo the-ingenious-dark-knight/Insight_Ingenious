@@ -15,6 +15,10 @@ import ingenious.api.routes.message_feedback as message_feedback
 config = ingen_config.get_config(os.getenv("INGENIOUS_PROJECT_PATH", ""))
 print("config.web_configuration.asynchronous", config.web_configuration.asynchronous)
 
+# Configure logging
+logging.basicConfig(level=logging.ERROR)
+logger = logging.getLogger(__name__)
+
 if config.web_configuration.asynchronous:
     import ingenious.api.routes.chat_async as chat
 else:
@@ -23,12 +27,9 @@ else:
 import ingenious.api.routes.chat_async_test as chat_test
 try:
     import ingenious_extensions.api.routes.chat_client as chat_client
-except:
-    pass
+except Exception as e:
+    logger.exception(f"Error while importing chat_client: {e}")
 
-# Configure logging
-logging.basicConfig(level=logging.ERROR)
-logger = logging.getLogger(__name__)
 
 
 class FastAgentAPI:
