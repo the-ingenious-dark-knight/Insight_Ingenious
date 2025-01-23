@@ -20,11 +20,10 @@ logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
 
 if config.web_configuration.asynchronous:
-    import ingenious.api.routes.chat_async as chat
+    import ingenious.api.routes.chat_async_ca as chat
 else:
     import ingenious.api.routes.chat as chat
 
-import ingenious.api.routes.chat_async_test as chat_test
 try:
     import ingenious_extensions.api.routes.chat_client as chat_client
 except Exception as e:
@@ -45,7 +44,6 @@ class FastAgentAPI:
             self.app.include_router(chat_client.router, prefix="/api/v1", tags=["ChatClient"])
         except:
             pass
-        self.app.include_router(chat_test.router, prefix="/api/v1", tags=["ChatTest"])
         self.app.include_router(chat.router, prefix="/api/v1", tags=["Chat"])
         self.app.include_router(message_feedback.router, prefix="/api/v1", tags=["Message Feedback"])
 
