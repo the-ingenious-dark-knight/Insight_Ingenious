@@ -16,6 +16,7 @@ import asyncio
 import yaml
 import json
 import uuid as guid
+from ingenious.models.agent import Agents
 from ingenious_prompt_tuner.event_processor import functional_tests
 import subprocess
 import markdown
@@ -145,7 +146,7 @@ def get_agent_response():
 @requires_selected_revision
 def get_responses():
     utils: utils_class = current_app.utils
-    agents = current_app.config["agents"]
+    agents: Agents = current_app.config["agents"]
     try:
         output_path = (
             current_app.config["test_output_path"]
@@ -166,7 +167,7 @@ def get_responses():
         return "<p>No responses folder found.</p>"
 
     # render the responses2.html file
-    return render_template("responses/responses2.html", files=files, agents=agents)
+    return render_template("responses/responses2.html", files=files, agents=agents.get_agents())
 
 
 @bp.route("/get_agent_response_from_file", methods=["post"])

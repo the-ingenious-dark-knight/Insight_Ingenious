@@ -16,24 +16,31 @@
                     <div class="col">
                         {{ file["file_name"] }}
                         <span class="event_type badge text-bg-warning">Event Type: {{ file["event_type"] }}</span>
-                        <span class="identifier badge text-bg-secondary">Ball Identifier: {{ file["identifier"] }} </span>
+                        <span class="identifier badge text-bg-secondary">Identifier: {{ file["identifier"] }} </span>
                     </div>
                     <div class="col ">
                         <div class="btn-toolbar justify-content-end" role="toolbar" aria-label="Toolbar with button groups">
                             <div class="btn-group me-2" role="group">
-                                <button class="btn btn-outline-danger" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Generate or Regenerate Response" 
+                                <button class="btn btn-danger" 
+                                        data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Generate or Regenerate Response" 
                                         onclick="reRunEventAsync('{{ file["identifier"]  }}', '{{ file["event_type"] }}', '{{ file["file_name"] }}')">
-                                    <i class="bi bi-arrow-repeat all icon"></i>
+                                    <i class="fa-solid fa-repeat"></i>
                                 </button>
+                            </div>
+                            <div class="btn-group me-2" role="group">
+                                <button class="btn btn-warning" onclick="renderPayload('{{ file["identifier"] }}', 'default')">
+                                    <i class="bi bi-markdown"></i>
+                                </button>
+                            </div>
+                            <div class="btn-group me-2" role="group">        
                                 {% for agent in agents %}    
-                                <button class="btn btn-outline-primary" 
-                                        data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="View the response for the {{ agent['name'] }}"
+                                <button class="btn btn-primary" 
+                                        data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="View the response for the {{ agent.agent_name }}"
                                         onclick="get_agent_response('{{ file["identifier"]  }}', '{{ file["event_type"] }}', '{{ agent.agent_name }}')">
-                                    <i class="fa-solid fa-robot"></i></button>
-                                {% endfor %}
-                                <button class="btn btn-outline-warning" onclick="renderPayload('{{ file["identifier"] }}', 'blah')">
-                                    <i class="bi bi-markdown icon"></i> Payload
+                                    <i class="fa-solid fa-comment-dots icon"></i>{{ loop.index }}
                                 </button>
+                                {% endfor %}
+                                
                             </div>
                         </div>
                     </div>

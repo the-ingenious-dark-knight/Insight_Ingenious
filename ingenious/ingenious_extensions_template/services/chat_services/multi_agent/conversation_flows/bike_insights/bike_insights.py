@@ -36,7 +36,7 @@ from ingenious.utils.namespace_utils import get_path_from_namespace_with_fallbac
 # Custom class import from ingenious_extensions 
 from ingenious.services.chat_services.multi_agent.service import IConversationFlow
 from ingenious.ingenious_extensions_template.models.agent import ProjectAgents
-from ingenious.models.agent import AgentChat, Agent, LLMUsageTracker
+from ingenious.models.agent import AgentChat, Agent, AgentMessage, LLMUsageTracker, AgentChats
 import logging
 
 
@@ -57,8 +57,10 @@ class ConversationFlow(IConversationFlow):
         logger.handlers = [llm_usage]
         
         message = json.loads(message)
-        #  Get your agents from your custom class in models folder
-        agents = ProjectAgents(self._config)
+        #  Get your agents and agent chats from your custom class in models folder
+        project_agents = ProjectAgents()
+        agents = project_agents.Get_Project_Agents(self._config)
+
         # Note you can access llm models from the configuration array
         llm_config = self.Get_Models()[0]
         # Note the base IConversationFlow gives you a logger for logging purposes
@@ -66,76 +68,80 @@ class ConversationFlow(IConversationFlow):
 
         # Now add your system prompts to your agents from the prompt templates
         # Modify this if you want to modfiy the pattern used to correlate the agent name to the prompt template
-        for agent in agents._agents:
+        for agent in agents.get_agents():
             template_name = f"{agent.agent_name}_prompt.jinja"
             agent.system_prompt = await self.Get_Template(file_name=template_name, revision_id=message['revision_id'])
 
-        # Create wrappers around the autogen chat agent classes to allow routing
-        @dataclass
-        class Message:
-            content: str    
-        
+        # Create wrappers around the autogen chat agent classes to allow routing of messages to the correct agents
         queue = asyncio.Queue[AgentChat]()
-
-        async def output_result(_ctx: ClosureContext, message: Message, ctx: MessageContext) -> None:
-            await queue.put(message)
 
         ## Class for topic reasearcher agents
         @type_subscription(topic_type="researcher")
         class ReceivingAgent(RoutedAgent):
-            def __init__(self, model_client: AzureOpenAIChatCompletionClient, assistant_agent: AssistantAgent, agent_chats: List[AgentChat]) -> None:
+            def __init__(self, model_client: AzureOpenAIChatCompletionClient, assistant_agent: AssistantAgent, agent: Agent) -> None:
                 super().__init__("DestinationAgent")
                 model_client = model_client
                 self._delegate = assistant_agent
+                self._agent: Agent = agent
             
             @message_handler
-            async def handle_my_message_type(self, agent_chat: AgentChat, ctx: MessageContext) -> None:               
+            async def handle_my_message_type(self, message: AgentMessage, ctx: MessageContext) -> None:                  
+                agent_chat = self._agent.get_agent_chat(content=message.content, ctx=ctx)
                 agent_chat.chat_response = await self._delegate.on_messages(
-                    [TextMessage(content=agent_chat.user_message, source="user")], ctx.cancellation_token
+                    [TextMessage(content=message.user_message, source="user")], ctx.cancellation_token
                 )
+                # Post the now complete incoming message into the queue if required
+                # This is important if you want to log the message to the prompt tuner
+                # It is also important if you want to return the message in the final response
+                self._agent.log(agent_chat, queue)
                 
-
-                # Post chat in queue if required
-                if agent_chat.post_chat_in_queue:
-                    queue.put(agent_chat)
-                
-                # Publish the response to the next agent
+                # Publish the outgoing message to the next agent
                 await self.publish_message(
-                    agent_chat,
+                    AgentMessage(content=agent_chat.chat_response),
                     topic_id=TopicId(type="user_proxy", source=self.id.key)
                 )
         
         # # Class for agent that will relay messages to other agents without summarization
         @type_subscription(topic_type="user_proxy")
         class UserProxyAgent(RoutedAgent):
-            responses: List[str] = []
+            _response_count: int = 0
+            _agent: Agent
+            _agent_message: AgentMessage
 
             def __init__(self) -> None:
                 super().__init__("UserProxyAgent")
+                self._agent = agents.get_agent_chat_by_name("user_proxy")
+                self._agent_message = AgentMessage(content="")
 
             @message_handler
-            async def handle_user_message(self, agent_chat: AgentChat, topic: str) -> None:
-                self.responses.append(agent_chat.chat_response)
+            async def handle_user_message(self, message: AgentMessage, ctx: MessageContext) -> None:
+                self._response_count += 1
+                self._agent_message.content += message.content + "\n"
+                self._agent.get_agent_chat(content=message.content, ctx=MessageContext())
+                self._agent.log(message, queue)
 
-                if len(self.responses) == 2:
+                if self._response_count >= 2:
                     await self.publish_message(
-                        Message("\n".join(self.responses)),
+                        self._agent_message,
                         topic_id=TopicId(type="summary_agent", source=self.id.key)
                     )
 
         # # Class for agent that will receive responses from other agents and provide final insights
         @type_subscription(topic_type="summary_agent")
         class SummaryAgent(RoutedAgent):
-            def __init__(self, model_client: AzureOpenAIChatCompletionClient, assistant_agent: AssistantAgent) -> None:
+            def __init__(self, model_client: AzureOpenAIChatCompletionClient, assistant_agent: AssistantAgent, agent: Agent) -> None:
                 super().__init__("SummaryAgent")
                 model_client = model_client
                 self._delegate = assistant_agent
+                self._agent: AgentChat = agent
 
             @message_handler
-            async def handle_summary_message(self, message: Message, ctx: MessageContext) -> None:
-                response = await self._delegate.on_messages([TextMessage(content=message.content, source="summary_agent")], ctx.cancellation_token)
-                print(f"SUMMARY Response: {response}")
-                await queue.put(response)
+            async def handle_summary_message(self, message: AgentMessage, ctx: MessageContext) -> None:
+                self._agent.get_agent_chat(content=message.content, ctx=ctx)
+                self._agent.chat_response = await self._delegate.on_messages(
+                    [TextMessage(content=message.content, source="summary_agent")], ctx.cancellation_token
+                )
+                self._agent.log(self._agent, queue)
 
         # Now construct your autogen conversation pattern the way you want
         # In this sample I'll first define my topic agents
@@ -149,10 +155,10 @@ class ConversationFlow(IConversationFlow):
                 description="I am an AI assistant that helps with research.",
                 model_client=model_client
             )
-            topic_agent = await ReceivingAgent.register(runtime, sub_agent.agent_name, lambda: ReceivingAgent(model_client=model_client, assistant_agent=assistant_agent, agent_chats=project_agent_chats))
+            topic_agent = await ReceivingAgent.register(runtime, sub_agent.agent_name, lambda: ReceivingAgent(model_client=model_client, assistant_agent=assistant_agent, agent_chats=agent_chats))
             ag_topic_agents.append(topic_agent)
 
-        await UserProxyAgent.register(runtime, "user_proxy", lambda: UserProxyAgent())
+        await UserProxyAgent.register(runtime, "user_proxy", lambda: UserProxyAgent(agent_chat=agent_chats.get_agent_chat_by_name("user_proxy")))
         
         agent = agents.get_agent_by_name(agent_name="summary_agent")
         model_client = AzureOpenAIChatCompletionClient(**agent.model.__dict__)
@@ -162,66 +168,20 @@ class ConversationFlow(IConversationFlow):
             description="I collect and and present insights.",
             model_client=AzureOpenAIChatCompletionClient(**agent.model.__dict__)
         )
-        await SummaryAgent.register(runtime, "summary_agent", lambda: SummaryAgent(model_client=model_client, assistant_agent=ag_summary_agent))
-        # Now I will create the user proxy agent that will relay messages to other agents without summarization
-        # self.user_proxy = UserProxyAgent(
-        #    name="user_proxy",            
-        #    input_func=lambda x: "I relay messages to other agents without summarization. Do not relay the reply from chat 0 to chat 2"
-        # )
 
-        # Now I will create the summary agent that will summarize the insights from the topic agents
-        
+        await SummaryAgent.register(runtime, "summary_agent", lambda: SummaryAgent(model_client=model_client, assistant_agent=ag_summary_agent))
 
         topic_agent: AssistantAgent = ag_topic_agents[0]
         results = []
         tasks = []
 
-        
-        # @dataclass
-        # class Message:
-        #     content: str
-
-        # @type_subscription(topic_type="default")
-        # class ReceivingAgent(RoutedAgent):
-        #     def __init__(self, model_client: AzureOpenAIChatCompletionClient) -> None:
-        #         super().__init__("DestinationAgent")
-        #         self._system_messages: List[LLMMessage] = [
-        #             SystemMessage("You are a helpful AI assistant that helps with destination information.")
-        #         ]
-        #         self._model_client = model_client
-        #     @message_handler
-        #     async def on_my_message(self, message: Message, ctx: MessageContext) -> None:
-        #         print(f"Received a message: {message.content}")
-        #         self.on_message
-                
-    
-        # class BroadcastingAgent(RoutedAgent):
-        #     @message_handler
-        #     async def on_my_message(self, message: Message, ctx: MessageContext) -> None:
-        #         await self.publish_message(
-        #             Message("Publishing a message from broadcasting agent!"),
-        #             topic_id=TopicId(type="default", source=self.id.key),
-        #         )
-        
-        # for i, topic_agent in enumerate(ag_topic_agents):
-        #     task = topic_agent.on_messages(
-        #         messages=[
-        #             TextMessage(
-        #                 source="User", 
-        #                 content=(
-        #                     "Extract insights from attached payload: \n" 
-        #                     + json.dumps(message)
-        #                 )
-        #             )
-        #         ],
-        #         cancellation_token=CancellationToken()
-        #     )
-        #     tasks.append(task)
-            #await ReceivingAgent.register(runtime, topic_agent.name, lambda: ReceivingAgent("Receiving Agent"))
-            
         runtime.start()
+
+        message: AgentChat = agent_chats.get_agent_chat_by_name("user_proxy")
+
         await runtime.publish_message(Message(json.dumps(message)), topic_id=TopicId(type="researcher", source="default"))
         await runtime.stop_when_idle()
+
         res = await queue.get()
         responses = (await asyncio.gather(*tasks))
         for i, response in enumerate(responses):

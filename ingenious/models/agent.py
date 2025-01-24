@@ -1,8 +1,69 @@
+from abc import ABC, abstractmethod
+import asyncio
+from autogen_core import MessageContext
 from pydantic import BaseModel
 from ingenious.models.config import Config, ModelConfig
 from typing import List, Optional
 import logging
 from autogen_core.logging import LLMCallEvent
+
+
+
+class AgentChat(BaseModel):
+    """
+    A class used to represent a chat between an agent and a user or between agents
+
+    Attributes
+    ----------
+    agent_name : str
+        The name of the agent.
+    user_message : str
+        The message sent by the user.
+    system_prompt : str
+        The message sent by the agent.
+    """
+    chat_name: str
+    target_agent_name: str
+    source_agent_name: str
+    user_message: str
+    system_prompt: str
+    chat_response: str
+
+
+class AgentChats(BaseModel):
+    """
+    A class used to represent a list of AgentChats.
+
+    Attributes
+    ----------
+    agent_chats : List[AgentChat]
+        A list of AgentChat objects.
+    """
+
+    _agent_chats: List[AgentChat] = []
+
+    def __init__(self):
+        super().__init__()
+
+    def add_agent_chat(self, agent_chat: AgentChat):
+        self._agent_chats.append(agent_chat)
+
+    def get_agent_chats(self):
+        return self._agent_chats
+
+    def get_agent_chat_by_name(self, agent_name: str) -> AgentChat:
+        for agent_chat in self._agent_chats:
+            if agent_chat.agent_name == agent_name:
+                return agent_chat
+        raise ValueError(f"AgentChat with name {agent_name} not found")
+    
+    def get_agent_chats_by_name(self, agent_name: str) -> List[AgentChat]:
+        agent_chats = []
+        for agent_chat in self._agent_chats:
+            if agent_chat.agent_name == agent_name:
+                agent_chats.append(agent_chat)
+        return agent_chats
+
 
 
 class Agent(BaseModel):
@@ -29,6 +90,22 @@ class Agent(BaseModel):
     agent_type: str
     model: Optional[ModelConfig] = None
     system_prompt: Optional[str] = None
+    log_to_prompt_tuner: bool = True
+    return_in_response: bool = False
+
+    def get_agent_chat(self, content: str,  ctx: MessageContext):
+        agent_chat: AgentChat = AgentChat(
+            source_agent_name=ctx.topic_id.source,
+            target_agent_name=self.agent_name,
+            chat_name=self.agent_name + "",
+            user_message=content,
+            chat_response="UNDEFINED"
+        )
+        return agent_chat
+
+    def log(self, agent_chat: AgentChat, queue: asyncio.Queue[AgentChat]):
+        if self.log_to_prompt_tuner or self.return_in_response:
+            queue.put(agent_chat)
 
 
 class Agents(BaseModel):
@@ -63,60 +140,10 @@ class Agents(BaseModel):
                 return agent
         raise ValueError(f"Agent with name {agent_name} not found")
     
-
-class AgentChat(BaseModel):
-    """
-    A class used to represent a chat between an agent and a user or between agents
-
-    Attributes
-    ----------
-    agent_name : str
-        The name of the agent.
-    user_message : str
-        The message sent by the user.
-    system_prompt : str
-        The message sent by the agent.
-    """
-    chat_name: str
-    agent_name: str
-    user_message: str
-    system_prompt: str
-    chat_response: str
-    log_to_prompt_tuner: bool = True
-    return_in_response: bool = False
-
-
-class AgentChats(BaseModel):
-    """
-    A class used to represent a list of AgentChats.
-
-    Attributes
-    ----------
-    agent_chats : List[AgentChat]
-        A list of AgentChat objects.
-    """
-
-    _agent_chats: List[AgentChat]
-
-    def __init__(self, agent_chats: List[AgentChat]):
-        super().__init__()
-        self._agent_chats = agent_chats
-
-    def get_agent_chats(self):
-        return self._agent_chats
-
-    def get_agent_chat_by_name(self, agent_name: str) -> AgentChat:
-        for agent_chat in self._agent_chats:
-            if agent_chat.agent_name == agent_name:
-                return agent_chat
-        raise ValueError(f"AgentChat with name {agent_name} not found")
     
-    def get_agent_chats_by_name(self, agent_name: str) -> List[AgentChat]:
-        agent_chats = []
-        for agent_chat in self._agent_chats:
-            if agent_chat.agent_name == agent_name:
-                agent_chats.append(agent_chat)
-        return agent_chats
+
+class AgentMessage(BaseModel):
+    content: str
 
 
 class LLMUsageTracker(logging.Handler):
@@ -152,3 +179,12 @@ class LLMUsageTracker(logging.Handler):
                 self._completion_tokens += event.completion_tokens
         except Exception:
             self.handleError(record)
+
+
+class IProjectAgents(ABC):
+    def __init__(self):
+        pass
+
+    @abstractmethod
+    def Get_Project_Agents(self, config: Config) -> Agents:
+        pass

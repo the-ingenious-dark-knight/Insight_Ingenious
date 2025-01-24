@@ -93,9 +93,18 @@ def import_class_with_fallback(module_name, class_name):
         module_name (str): The name of the module to import (excluding the top level of ingenious or ingenious_extensions).
         class_name (str): The name of the class to import.
     """
-    module = import_module_with_fallback(module_name)
-    class_object = getattr(module, class_name)
-    return class_object
+    try:
+        module = import_module_with_fallback(module_name)
+        class_object = getattr(module, class_name)
+        return class_object
+    except ModuleNotFoundError as e:
+        raise ValueError(f"Module {module_name} not found in any namespace: {e}") from e
+    except AttributeError as e:
+        raise ValueError(f"Class {class_name} not found in module {module_name}: {e}") from e
+    except ImportError as e:
+        raise ValueError(f"ImportError occurred while importing module {module_name}: {e}") from e
+    except Exception as e:
+        raise ValueError(f"An unexpected error occurred while importing {module_name}.{class_name}: {e}") from e
 
 
 def get_file_from_namespace_with_fallback(module_name, file_name):

@@ -1,20 +1,11 @@
 from typing import List
-from ingenious.models.agent import Agent, AgentChat, AgentChats, Agents
+from ingenious.models.agent import Agent, AgentChat, AgentChats, Agents, IProjectAgents
 from pydantic import BaseModel
 from ingenious.models.config import Config
 
 
-class ProjectAgents(Agents):
-    """
-    A class used to represent a your sample list of agents.
-
-    Attributes
-    ----------
-    agents : List[Agent]
-        A list of Agent objects.
-    """
-
-    def __init__(self, config: Config):        
+class ProjectAgents(IProjectAgents):
+    def Get_Project_Agents(self, config: Config) -> Agents:        
         local_agents = []
         local_agents.append(
             Agent(
@@ -23,6 +14,11 @@ class ProjectAgents(Agents):
                 agent_display_name="Customer Sentiment",
                 agent_description="A sample agent.",
                 agent_type="researcher",
+                model=None,
+                system_prompt=None,
+                log_to_prompt_tuner=True,
+                return_in_response=False
+
             )
         )
         local_agents.append(
@@ -32,6 +28,10 @@ class ProjectAgents(Agents):
                 agent_display_name="Fiscal Analysis",
                 agent_description="A sample agent.",
                 agent_type="researcher",
+                model=None,
+                system_prompt=None,
+                log_to_prompt_tuner=True,
+                return_in_response=False
             )
         )
         local_agents.append(
@@ -41,63 +41,24 @@ class ProjectAgents(Agents):
                 agent_display_name="Summarizer",
                 agent_description="A sample agent.",
                 agent_type="summary",
-            )
-        )
-
-        super().__init__(local_agents, config)
-            
-
-class ProjectAgentChats(AgentChats):
-    """
-    A class used to represent a list of agent chats.
-
-    Attributes
-    ----------
-    agent_chats : List[AgentChat]
-        A list of AgentChat objects.
-    """
-
-    _local_agent_chats: AgentChats
-
-    def __init__(self, config: Config):
-        local_agent_chats = []
-        local_agent_chats.append(
-            AgentChat(
-                agent_name="customer_sentiment_agent",
-                chat_name="customer_sentiment_chat",
-                user_message="To Be Populated",
-                system_prompt="To Be Populated",
-                chat_response="To Be Populated"
-            )
-        )
-        local_agent_chats.append(
-            AgentChat(
-                agent_name="fiscal_analysis_agent",
-                chat_name="fiscal_analysis_chat",
-                user_message="To Be Populated",
-                system_prompt="To Be Populated",
-                chat_response="To Be Populated"
-            )
-        )
-        local_agent_chats.append(
-            AgentChat(
-                agent_name="user_proxy",
-                chat_name="user_proxy_chat",
-                user_message="To Be Populated",
-                system_prompt="To Be Populated",
-                chat_response="To Be Populated",
-                log_to_prompt_tuner=False,
+                model=None,
+                system_prompt=None,
+                log_to_prompt_tuner=True,
                 return_in_response=False
             )
         )
-        local_agent_chats.append(
-            AgentChat(
-                agent_name="summary_agent",
-                chat_name="summary_chat",
-                user_message="To Be Populated",
-                system_prompt="To Be Populated",
-                chat_response="To Be Populated",
+        local_agents.append(
+            Agent(
+                agent_name="user_proxy_agent",
+                agent_model_name="gpt-4o",
+                agent_display_name="user_proxy_agent",
+                agent_description="A sample agent.",
+                agent_type="user_proxy",
+                model=None,
+                system_prompt=None,
                 log_to_prompt_tuner=True,
-                return_in_response=True
+                return_in_response=False
             )
         )
+
+        return Agents(agents=local_agents, config=config)

@@ -5,9 +5,7 @@ from flask import Flask
 from functools import wraps
 from pathlib import Path
 from ingenious.utils.namespace_utils import import_class_with_fallback
-from ingenious.ingenious_extensions_template.models.agent import ProjectAgents
-
-
+from ingenious.models.agent import AgentChats, Agents, IProjectAgents
 from ingenious_prompt_tuner.templates import home
 from ingenious_prompt_tuner.templates.responses import responses
 from ingenious_prompt_tuner.templates.prompts import prompts
@@ -40,9 +38,12 @@ def create_app():
     )
     # Get the list of agents -- note this should preference the Agents class in the project level extensions dir
     # Note the Agents module and ProjectAgents class must be defined in the project level extensions dir
-    Agents = import_class_with_fallback('models.agent', "ProjectAgents")
-    app.config["agents"] = Agents(config).get_agents()
-    
+    agents_class: IProjectAgents = import_class_with_fallback('models.agent', "ProjectAgents")
+    agents_instance = agents_class()
+    agents: Agents = agents_instance.Get_Project_Agents(config)
+    agent_chats: AgentChats = agents_instance.Get_Project_Agent_Chats(config)
+    app.config["agents"] = agents
+    app.config["agent_chats"] = agent_chats
     app.config["test_output_path"] = str(Path("functional_test_outputs"))
     # Set utils so that downstream blueprints have access to the config
     app.utils = uti.utils_class(config)
