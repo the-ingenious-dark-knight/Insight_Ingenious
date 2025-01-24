@@ -18,12 +18,14 @@
 
 <p></p>
 <p class="lead" id="selectedRevisionNotice">To begin select a revision from the list below. </p>
-<button id="createRevisionButton" onclick=javascript:window.open('{{ url_for('index.create_revision') }}') class="btn btn-outline-primary" disabled>
-    <i class="bi bi-copy"></i>  Copy Selected Revision
-</button>
-<button id="clearCookiesButton" onclick="clearCookies()" class="btn btn-outline-danger">
-    <i class="bi bi-trash"></i>  Clear Selection
-</button>
+<div class="btn-group" role="group" aria-label="Revision Actions">
+    <button id="createRevisionButton" onclick=javascript:window.open('{{ url_for('index.create_revision') }}') class="btn btn-outline-primary" disabled>
+        <i class="bi bi-copy"></i>  Copy Selected Revision
+    </button>
+    <button id="clearCookiesButton" onclick="clearCookies()" class="btn btn-outline-danger">
+        <i class="bi bi-trash"></i>  Clear Selection
+    </button>
+</div>
 
 <table id="revisionsTable" class="display">
     <thead>

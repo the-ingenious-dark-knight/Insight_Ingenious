@@ -11,31 +11,38 @@
     <div id="response_details" >
     {% for file in files %}
         <div class="event card border-primary" id='{{ file["identifier"] }}_{{ file["event_type"] }}'>
-            <div class="data_file_heading card-header" >{{ file["file_name"] }}
-                <span class="event_type badge text-bg-warning">Event Type: {{ file["event_type"] }}</span>
-                <span class="identifier badge text-bg-secondary">Ball Identifier: {{ file["identifier"] }} </span>
-            </div>
+            <div class="data_file_heading card-header">
+                <div class="row">
+                    <div class="col">
+                        {{ file["file_name"] }}
+                        <span class="event_type badge text-bg-warning">Event Type: {{ file["event_type"] }}</span>
+                        <span class="identifier badge text-bg-secondary">Ball Identifier: {{ file["identifier"] }} </span>
+                    </div>
+                    <div class="col ">
+                        <div class="btn-toolbar justify-content-end" role="toolbar" aria-label="Toolbar with button groups">
+                            <div class="btn-group me-2" role="group">
+                                <button class="btn btn-outline-danger" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Generate or Regenerate Response" 
+                                        onclick="reRunEventAsync('{{ file["identifier"]  }}', '{{ file["event_type"] }}', '{{ file["file_name"] }}')">
+                                    <i class="bi bi-arrow-repeat all icon"></i>
+                                </button>
+                                {% for agent in agents %}    
+                                <button class="btn btn-outline-primary" 
+                                        data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="View the response for the {{ agent['name'] }}"
+                                        onclick="get_agent_response('{{ file["identifier"]  }}', '{{ file["event_type"] }}', '{{ agent.agent_name }}')">
+                                    <i class="fa-solid fa-robot"></i></button>
+                                {% endfor %}
+                                <button class="btn btn-outline-warning" onclick="renderPayload('{{ file["identifier"] }}', 'blah')">
+                                    <i class="bi bi-markdown icon"></i> Payload
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>    
+            </div>    
             <div class="card-body">
                 <div class="markdown-content"></div>
-                <p><strong>Insight Generation Actions:</strong></p> 
-                <div class="btn-group w-100 mb-3" role="group">
-                    <button class="btn btn-outline-primary" onclick="reRunEventAsync('{{ file["identifier"]  }}', '{{ file["event_type"] }}', '{{ file["file_name"] }}')">
-                        <i class="bi bi-arrow-repeat all icon"></i> Generate or Regenerate
-                    </button>
-                </div>                               
-                <div class="btn-group w-100 mb-3" role="group">
-                    {% for agent in agents %}    
-                    <button class="btn btn-outline-primary" 
-                            data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="View the response for the {{ agent['name'] }}"
-                            onclick="get_agent_response('{{ file["identifier"]  }}', '{{ file["event_type"] }}', '{{ agent.agent_name }}')">
-                        <i class="bi bi-0-square"></i> {{ agent.agent_name }}
-                    </button>
-                    {% endfor %}
-                    <button class="btn btn-outline-primary" onclick="renderPayload('{{ file["identifier"] }}', 'blah')">
-                        <i class="bi bi-markdown icon"></i> Payload
-                    </button>
-                </div>
             </div>
         </div>
+        <hr>
     {% endfor %}
     </div>
