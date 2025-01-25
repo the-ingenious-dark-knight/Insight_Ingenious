@@ -1,5 +1,11 @@
 <div class="markdown-content" markdown='1'>
-{{ agent_response }}
+    <div class="row">
+        <div class="col">
+            <span class="event_type badge text-bg-warning">Event Type: </span>
+            <span class="identifier badge text-bg-secondary">Identifier:</span>
+        </div>
+    </div>
+{{ agent_response|safe }}
 </div>
 
 

@@ -16,7 +16,7 @@ import asyncio
 import yaml
 import json
 import uuid as guid
-from ingenious.models.agent import Agents
+from ingenious.models.agent import AgentChat, Agents
 from ingenious_prompt_tuner.event_processor import functional_tests
 import subprocess
 import markdown
@@ -123,7 +123,7 @@ def get_agent_response():
     event_type = request.args.get("event_type", type=str)
     agent_name = request.args.get("agent_name", type=str)
     # Return mock html page
-    file_name = f"agent_response_{event_type}_{agent_name}_{identifier.strip()}.md"
+    file_name = f"agent_response_{event_type}_default_{agent_name}_{identifier.strip()}.md"
     output_path = (
         current_app.config["test_output_path"]
         + f"/{get_selected_revision_direct_call()}"
@@ -131,14 +131,17 @@ def get_agent_response():
     agent_response_md = asyncio.run(
         utils.fs.read_file(file_name=file_name, file_path=output_path)
     )
-    agent_response_md1 = render_template(
-        "responses/agent_response.html", agent_response=agent_response_md
-    )
+    agent_chat: AgentChat = AgentChat(**json.loads(agent_response_md))
+    
     html_content = markdown.markdown(
-        agent_response_md1,
+        agent_chat.chat_response.chat_message.content,
         extensions=["extra", "md_in_html", "toc", "fenced_code", "codehilite"],
     )
-    return html_content
+
+    agent_response_md1 = render_template(
+        "responses/agent_response.html", agent_response=html_content
+    )
+    return agent_response_md1
 
 
 @bp.route("/get_responses", methods=["GET"])
@@ -178,7 +181,7 @@ def get_agent_response_from_file():
     identifier = request.form.get("identifier", type=str).replace("#", "")
     event_type = request.form.get("event_type", type=str)
 
-    file_name = f"agent_response_{event_type}_summary_agent_{identifier.strip()}.md"
+    file_name = f"agent_response_{event_type}_default_summary_agent_{identifier.strip()}.md"
     output_path = (
         current_app.config["test_output_path"]
         + f"/{get_selected_revision_direct_call()}"
@@ -188,11 +191,17 @@ def get_agent_response_from_file():
     )
     if file_contents is None:
         return "No response found"
+    
+    agent_chat: AgentChat = AgentChat(**json.loads(file_contents))
     html_content = markdown.markdown(
-        file_contents,
+        agent_chat.chat_response.chat_message.content,
         extensions=["extra", "md_in_html", "toc", "fenced_code", "codehilite"],
     )
-    return html_content
+
+    agent_response_md1 = render_template(
+        "responses/agent_response.html", agent_response=html_content
+    )
+    return agent_response_md1
 
 
 @bp.route("/run_live_progress", methods=["GET"])

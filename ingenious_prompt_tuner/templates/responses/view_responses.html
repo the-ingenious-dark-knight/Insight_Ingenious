@@ -291,7 +291,7 @@ hr {
                 event_type: event_type
             },
             success: function(response) {
-                $('#' + identifier + '_' + event_type + ' .markdown-content').html(response);
+                $('#' + identifier + '_' + event_type + ' .markdown-content').replaceWith(response);
             },
             error: function(error) {
                 console.error('Error fetching file content:', error);

@@ -3,6 +3,7 @@ from dataclasses import dataclass
 import json
 import os
 from pathlib import Path
+import threading
 import time
 from typing import List
 from autogen_core import (
@@ -28,7 +29,7 @@ from autogen_agentchat.teams import RoundRobinGroupChat
 from autogen_agentchat.ui import Console
 
 from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
-from autogen_agentchat.messages import TextMessage
+from autogen_agentchat.messages import TextMessage, ChatMessage
 from autogen_agentchat.base import Response
 from jinja2 import Environment, FileSystemLoader
 import jsonpickle
@@ -56,17 +57,25 @@ class ConversationFlow(IConversationFlow):
         thread_chat_history: list = [],
         event_type: str = None,
     ) -> tuple[str, str]:
-
-        # Logging for autogen
-        logger = logging.getLogger(EVENT_LOGGER_NAME)
-        logger.setLevel(logging.INFO)
-        llm_usage = LLMUsageTracker()
-        logger.handlers = [llm_usage]
-
         message = json.loads(message)
         #  Get your agents and agent chats from your custom class in models folder
         project_agents = ProjectAgents()
         agents = project_agents.Get_Project_Agents(self._config)
+
+
+        # Instantiate the logger and handler
+        logger = logging.getLogger(EVENT_LOGGER_NAME)
+        logger.setLevel(logging.INFO)
+
+        llm_logger = LLMUsageTracker(
+            agents=agents,
+            config=self._config,
+            revision_id=message["revision_id"],
+            identifier=message["identifier"],
+            event_type="default"
+        )
+
+        logger.handlers = [llm_logger]
 
         # Note you can access llm models from the configuration array
         llm_config = self.Get_Models()[0]
@@ -82,7 +91,6 @@ class ConversationFlow(IConversationFlow):
             )
 
         # Create wrappers around the autogen chat agent classes to allow routing of messages to the correct agents
-        queue = asyncio.Queue[AgentChat]()
 
         ## Class for topic reasearcher agents
         class ReceivingAgent(RoutedAgent):
@@ -112,19 +120,13 @@ class ConversationFlow(IConversationFlow):
                 # Post the now complete incoming message into the queue if required
                 # This is important if you want to log the message to the prompt tuner
                 # It is also important if you want to return the message in the final response
-                await self._agent.log(agent_chat, queue)
+                #await self._agent.log(agent_chat, queue)
 
                 # Publish the outgoing message to the next agent
                 await self.publish_message(
                     AgentMessage(content=agent_chat.chat_response.chat_message.content),
                     topic_id=TopicId(type="user_proxy", source=self.id.key),
                 )
-
-        class SentimentAgent(ReceivingAgent):
-            pass
-
-        class FiscalAgent(ReceivingAgent):
-            pass
 
         # # Class for agent that will relay messages to other agents without summarization
         @type_subscription(topic_type="user_proxy")
@@ -147,7 +149,7 @@ class ConversationFlow(IConversationFlow):
                 agent_chat = self._agent.get_agent_chat(
                     content=message.content, ctx=ctx
                 )
-                await self._agent.log(agent_chat=agent_chat, queue=queue)
+                #await self._agent.log(agent_chat=agent_chat, queue=queue)
 
                 if self._response_count >= 2:
                     await self.publish_message(
@@ -180,7 +182,7 @@ class ConversationFlow(IConversationFlow):
                     [TextMessage(content=message.content, source="summary_agent")],
                     ctx.cancellation_token,
                 )
-                await self._agent.log(agent_chat=agent_chat, queue=queue)
+                #await self._agent.log(agent_chat=agent_chat, queue=queue)
 
         # Now construct your autogen conversation pattern the way you want
         # In this sample I'll first define my topic agents
@@ -197,35 +199,8 @@ class ConversationFlow(IConversationFlow):
                 TypeSubscription(topic_type=agent_name, agent_type=reg_agent.type)
             )
 
-        async def register_sentiment_agent():
-            agent_name = "customer_sentiment_agent"
-            agent = agents.get_agent_by_name(agent_name=agent_name)
-            reg_agent = await SentimentAgent.register(
-                runtime=runtime,
-                type=agent.agent_name,
-                factory=lambda: SentimentAgent(agent=agent),
-            )
-            await runtime.add_subscription(
-                TypeSubscription(topic_type=agent_name, agent_type=reg_agent.type)
-            )
-
-        #await register_sentiment_agent()
         await register_research_agent(agent_name="customer_sentiment_agent")
         await register_research_agent(agent_name="fiscal_analysis_agent")
-
-        async def fiscal_analysis_agent():
-            agent_name = "fiscal_analysis_agent"
-            agent = agents.get_agent_by_name(agent_name=agent_name)
-            reg_agent = await FiscalAgent.register(
-                runtime=runtime,
-                type=agent.agent_name,
-                factory=lambda: FiscalAgent(agent=agent),
-            )
-            await runtime.add_subscription(
-                TypeSubscription(topic_type=agent_name, agent_type=reg_agent.type)
-            )
-
-        #await fiscal_analysis_agent()
 
         await UserProxyAgent.register(
             runtime,
@@ -233,22 +208,25 @@ class ConversationFlow(IConversationFlow):
             lambda: UserProxyAgent(agents.get_agent_by_name("user_proxy")),
         )
 
-        agent = agents.get_agent_by_name(agent_name="summary_agent")
-        model_client = AzureOpenAIChatCompletionClient(**agent.model.__dict__)
-        ag_summary_agent = AssistantAgent(
-            name=agent.agent_name,
-            system_message=agent.system_prompt,
-            description="I collect and and present insights.",
-            model_client=AzureOpenAIChatCompletionClient(**agent.model.__dict__),
-        )
+        async def register_summary_agent(agent_name: str):
+            agent = agents.get_agent_by_name(agent_name="summary_agent")
+            model_client = AzureOpenAIChatCompletionClient(**agent.model.__dict__)
+            ag_summary_agent = AssistantAgent(
+                name=agent.agent_name,
+                system_message=agent.system_prompt,
+                description="I collect and and present insights.",
+                model_client=AzureOpenAIChatCompletionClient(**agent.model.__dict__),
+            )
 
-        await SummaryAgent.register(
-            runtime,
-            "summary_agent",
-            lambda: SummaryAgent(
-                model_client=model_client, assistant_agent=ag_summary_agent, agent=agent
-            ),
-        )
+            await SummaryAgent.register(
+                runtime,
+                "summary_agent",
+                lambda: SummaryAgent(
+                    model_client=model_client, assistant_agent=ag_summary_agent, agent=agent
+                ),
+            )
+
+        await register_summary_agent(agent_name="summary_agent")
 
         results = []
         tasks = []
@@ -266,15 +244,15 @@ class ConversationFlow(IConversationFlow):
                 topic_id=TopicId(type="fiscal_analysis_agent", source="default"),
             ),
         )
+        
         await runtime.stop_when_idle()
 
-        responses:List[AgentChat] = []
-        while not queue.empty():
-            responses.append(await queue.get())
-        for i, response in enumerate(responses):
-            response: AgentChat = AgentChat(**response.__dict__)
+        await llm_logger.write_llm_responses_to_file()
+
+        for i, response in enumerate(llm_logger._queue):
+            agent_chat: AgentChat = AgentChat(**response.__dict__)
             if response.chat_response is not None:
-                response_object = Response(chat_message=response.chat_response.chat_message.content)
+                response_object: Response = Response(**agent_chat.chat_response.__dict__)
                 results.append(response_object.chat_message)
 
         response_array = []
@@ -289,12 +267,5 @@ class ConversationFlow(IConversationFlow):
                 "chat_input": message,
             }
             response_array.append(response_chat)
-
-        await self.write_llm_responses_to_file(
-            response_array=response_array,
-            event_type="default",
-            revison_id=message["revision_id"],
-            identifier=message["identifier"],
-        )
 
         return jsonpickle.encode(unpicklable=False, value=response_array), ""

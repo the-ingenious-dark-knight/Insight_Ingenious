@@ -2,11 +2,14 @@ from abc import ABC, abstractmethod
 import asyncio
 from autogen_core import MessageContext
 from pydantic import BaseModel
+from ingenious.files.files_repository import FileStorage
 from ingenious.models.config import Config, ModelConfig
+import ingenious.config.config as ig_config
 from typing import List, Optional
 import logging
 from autogen_core.logging import LLMCallEvent
 from autogen_agentchat.base import Response
+from autogen_agentchat.messages import TextMessage, ChatMessage
 
 
 class AgentChat(BaseModel):
@@ -28,6 +31,8 @@ class AgentChat(BaseModel):
     user_message: str
     system_prompt: str
     chat_response: Optional[Response] = None
+    completion_tokens: int = 0
+    prompt_tokens: int = 0
 
 
 class AgentChats(BaseModel):
@@ -92,14 +97,17 @@ class Agent(BaseModel):
     log_to_prompt_tuner: bool = True
     return_in_response: bool = False
 
-    def get_agent_chat(self, content: str,  ctx: MessageContext):
+    def get_agent_chat(self, content: str,  ctx: MessageContext = None, source=None) -> AgentChat:
+        if ctx:
+            source = ctx.topic_id.source
+        
         agent_chat: AgentChat = AgentChat(
             chat_name=self.agent_name + "",
             target_agent_name=self.agent_name,
-            source_agent_name=ctx.topic_id.source,
+            source_agent_name=source,
             user_message=content,
             system_prompt=self.system_prompt,
-            chat_response=None
+            chat_response=Response(chat_message=TextMessage(content=content, source=source))
         )
         return agent_chat
 
@@ -146,11 +154,17 @@ class AgentMessage(BaseModel):
 
 
 class LLMUsageTracker(logging.Handler):
-    def __init__(self) -> None:
+    def __init__(self, agents: Agents, config: ig_config.Config, revision_id: str, identifier: str, event_type: str) -> None:
         """Logging handler that tracks the number of tokens used in the prompt and completion."""
         super().__init__()
         self._prompt_tokens = 0
+        self._agents = agents
         self._completion_tokens = 0
+        self._queue: List[AgentChat] = []
+        self._config = config
+        self._revision_id: str = revision_id
+        self._identifier: str = identifier
+        self._event_type: str = event_type
 
     @property
     def tokens(self) -> int:
@@ -168,15 +182,44 @@ class LLMUsageTracker(logging.Handler):
         self._prompt_tokens = 0
         self._completion_tokens = 0
 
+    async def write_llm_responses_to_file(
+            self
+    ):
+        for agent_chat in self._queue:
+            agent = self._agents.get_agent_by_name(agent_chat.target_agent_name)
+            if agent.log_to_prompt_tuner:
+                output_path = f"functional_test_outputs/{self._revision_id}"
+                fs = FileStorage(self._config)
+                content = agent_chat.model_dump_json()
+                await fs.write_file(
+                    content,
+                    f"agent_response_{self._event_type}_{agent_chat.source_agent_name}_{agent_chat.target_agent_name}_{self._identifier}.md",
+                    output_path
+                )
+
+    async def post_chats_to_queue(self, target_queue: asyncio.Queue[AgentChat]):
+        for agent_chat in self._queue:
+            agent = self._agents.get_agent_by_name(agent_chat.target_agent_name)
+            await agent.log(agent_chat, target_queue) 
+
     def emit(self, record: logging.LogRecord) -> None:
-        """Emit the log record. To be used by the logging module."""
+        """Emit the log record."""
         try:
-            # Use the StructuredMessage if the message is an instance of it
             if isinstance(record.msg, LLMCallEvent):
-                event = record.msg
+                event: LLMCallEvent = record.msg
+                agent_name = event.kwargs["agent_id"].split("/")[0]
+                source_name = event.kwargs["agent_id"].split("/")[1]
+                agent = self._agents.get_agent_by_name(agent_name)
+                response = "\n\n".join([r['message']['content'] for r in event.kwargs['response']['choices']])
+                chat = agent.get_agent_chat(content=response, source=source_name)
                 self._prompt_tokens += event.prompt_tokens
                 self._completion_tokens += event.completion_tokens
-        except Exception:
+                chat.prompt_tokens = event.prompt_tokens
+                chat.completion_tokens = event.completion_tokens
+                self._queue.append(chat)
+                
+        except Exception as e:
+            print(e)
             self.handleError(record)
 
 

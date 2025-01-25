@@ -56,7 +56,7 @@ class ProjectAgents(IProjectAgents):
                 agent_type="user_proxy",
                 model=None,
                 system_prompt=None,
-                log_to_prompt_tuner=True,
+                log_to_prompt_tuner=False,
                 return_in_response=False
             )
         )
