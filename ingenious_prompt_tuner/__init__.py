@@ -41,9 +41,7 @@ def create_app():
     agents_class: IProjectAgents = import_class_with_fallback('models.agent', "ProjectAgents")
     agents_instance = agents_class()
     agents: Agents = agents_instance.Get_Project_Agents(config)
-    agent_chats: AgentChats = agents_instance.Get_Project_Agent_Chats(config)
     app.config["agents"] = agents
-    app.config["agent_chats"] = agent_chats
     app.config["test_output_path"] = str(Path("functional_test_outputs"))
     # Set utils so that downstream blueprints have access to the config
     app.utils = uti.utils_class(config)

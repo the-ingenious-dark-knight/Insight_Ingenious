@@ -49,7 +49,7 @@ class ProjectAgents(IProjectAgents):
         )
         local_agents.append(
             Agent(
-                agent_name="user_proxy_agent",
+                agent_name="user_proxy",
                 agent_model_name="gpt-4o",
                 agent_display_name="user_proxy_agent",
                 agent_description="A sample agent.",

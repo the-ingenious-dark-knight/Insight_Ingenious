@@ -247,6 +247,9 @@ class IConversationFlow(ABC):
 
         fs = FileStorage(self._config)
         content = await fs.read_file(file_name=file_name, file_path=template_path)
+        if content is None:
+            print(f"Prompt file {file_name} not found in {template_path}")
+            return ""
         env = Environment()
         template = env.from_string(content)
         return template.render()

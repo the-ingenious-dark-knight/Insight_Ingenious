@@ -6,7 +6,7 @@ from ingenious.models.config import Config, ModelConfig
 from typing import List, Optional
 import logging
 from autogen_core.logging import LLMCallEvent
-
+from autogen_agentchat.base import Response
 
 
 class AgentChat(BaseModel):
@@ -27,7 +27,7 @@ class AgentChat(BaseModel):
     source_agent_name: str
     user_message: str
     system_prompt: str
-    chat_response: str
+    chat_response: Optional[Response] = None
 
 
 class AgentChats(BaseModel):
@@ -65,7 +65,6 @@ class AgentChats(BaseModel):
         return agent_chats
 
 
-
 class Agent(BaseModel):
     """
     A class used to represent an Agent.
@@ -95,17 +94,18 @@ class Agent(BaseModel):
 
     def get_agent_chat(self, content: str,  ctx: MessageContext):
         agent_chat: AgentChat = AgentChat(
-            source_agent_name=ctx.topic_id.source,
-            target_agent_name=self.agent_name,
             chat_name=self.agent_name + "",
+            target_agent_name=self.agent_name,
+            source_agent_name=ctx.topic_id.source,
             user_message=content,
-            chat_response="UNDEFINED"
+            system_prompt=self.system_prompt,
+            chat_response=None
         )
         return agent_chat
 
-    def log(self, agent_chat: AgentChat, queue: asyncio.Queue[AgentChat]):
+    async def log(self, agent_chat: AgentChat, queue: asyncio.Queue[AgentChat]):
         if self.log_to_prompt_tuner or self.return_in_response:
-            queue.put(agent_chat)
+            await queue.put(agent_chat)
 
 
 class Agents(BaseModel):
@@ -139,8 +139,7 @@ class Agents(BaseModel):
             if agent.agent_name == agent_name:
                 return agent
         raise ValueError(f"Agent with name {agent_name} not found")
-    
-    
+
 
 class AgentMessage(BaseModel):
     content: str
