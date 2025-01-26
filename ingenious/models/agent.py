@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import asyncio
+from datetime import datetime, timedelta
 from autogen_core import MessageContext
 from pydantic import BaseModel
 from ingenious.files.files_repository import FileStorage
@@ -30,9 +31,25 @@ class AgentChat(BaseModel):
     source_agent_name: str
     user_message: str
     system_prompt: str
+    identifier: Optional[str] = None # Identifies the data payload associated with the chat for live chat this could be the thread id
     chat_response: Optional[Response] = None
     completion_tokens: int = 0
     prompt_tokens: int = 0
+    start_time: Optional[float] = None
+    end_time: Optional[float] = None
+
+    def get_execution_time(self) -> float:
+        return self.end_time - self.start_time
+    
+    def get_execution_time_formatted(self) -> str:
+        execution_time = self.get_execution_time()
+        return f"{int(execution_time // 60)}:{int(execution_time % 60):02d}"
+    
+    def get_start_time_formatted(self) -> str:
+        return datetime.fromtimestamp(self.start_time).strftime("%H:%M:%S")
+        
+    def get_associated_agent_response_file_name(self, identifier: str, event_type: str) -> str:
+        return f"agent_response_{event_type}_{self.source_agent_name}_{self.target_agent_name}_{identifier.strip()}.md"
 
 
 class AgentChats(BaseModel):
@@ -96,8 +113,9 @@ class Agent(BaseModel):
     system_prompt: Optional[str] = None
     log_to_prompt_tuner: bool = True
     return_in_response: bool = False
+    agent_chats: list[AgentChat] = []
 
-    def get_agent_chat(self, content: str,  ctx: MessageContext = None, source=None) -> AgentChat:
+    def add_agent_chat(self, content: str, identifier: str, ctx: MessageContext = None, source=None) -> AgentChat:
         if ctx:
             source = ctx.topic_id.source
         
@@ -107,9 +125,19 @@ class Agent(BaseModel):
             source_agent_name=source,
             user_message=content,
             system_prompt=self.system_prompt,
-            chat_response=Response(chat_message=TextMessage(content=content, source=source))
+            identifier=identifier,
+            chat_response=Response(chat_message=TextMessage(content=content, source=source)),
+            start_time=datetime.now().timestamp(),
+            end_time=datetime.now().timestamp() + 36000
         )
+        self.agent_chats.append(agent_chat)
         return agent_chat
+
+    def get_agent_chat_by_source(self, source: str) -> AgentChat:
+        for agent_chat in self.agent_chats:
+            if agent_chat.source_agent_name == source:
+                return agent_chat
+        raise ValueError(f"AgentChat with source {source} not found")
 
     async def log(self, agent_chat: AgentChat, queue: asyncio.Queue[AgentChat]):
         if self.log_to_prompt_tuner or self.return_in_response:
@@ -142,6 +170,9 @@ class Agents(BaseModel):
     def get_agents(self):
         return self._agents
     
+    def get_agents_for_prompt_tuner(self):
+        return [agent for agent in self._agents if agent.log_to_prompt_tuner]
+
     def get_agent_by_name(self, agent_name: str) -> Agent:
         for agent in self._agents:
             if agent.agent_name == agent_name:
@@ -211,11 +242,13 @@ class LLMUsageTracker(logging.Handler):
                 source_name = event.kwargs["agent_id"].split("/")[1]
                 agent = self._agents.get_agent_by_name(agent_name)
                 response = "\n\n".join([r['message']['content'] for r in event.kwargs['response']['choices']])
-                chat = agent.get_agent_chat(content=response, source=source_name)
+                chat = agent.get_agent_chat_by_source(source=source_name)
+                chat.chat_response = Response(chat_message=TextMessage(content=response, source=source_name))
                 self._prompt_tokens += event.prompt_tokens
                 self._completion_tokens += event.completion_tokens
                 chat.prompt_tokens = event.prompt_tokens
                 chat.completion_tokens = event.completion_tokens
+                chat.end_time = datetime.now().timestamp()
                 self._queue.append(chat)
                 
         except Exception as e:

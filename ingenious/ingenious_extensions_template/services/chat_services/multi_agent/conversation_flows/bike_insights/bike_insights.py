@@ -94,7 +94,7 @@ class ConversationFlow(IConversationFlow):
 
         ## Class for topic reasearcher agents
         class ReceivingAgent(RoutedAgent):
-            def __init__(self, agent: Agent) -> None:
+            def __init__(self, agent: Agent, data_identifier: str) -> None:
                 super().__init__(agent.agent_name)
                 model_client = AzureOpenAIChatCompletionClient(**agent.model.__dict__)
                 assistant_agent = AssistantAgent(
@@ -105,17 +105,20 @@ class ConversationFlow(IConversationFlow):
                 )
                 self._delegate = assistant_agent
                 self._agent: Agent = agent
+                self._data_identifier = data_identifier
 
             @message_handler
             async def handle_my_message_type(
                 self, message: AgentMessage, ctx: MessageContext
             ) -> None:
-                agent_chat = self._agent.get_agent_chat(
-                    content=message.content, ctx=ctx
+                agent_chat = self._agent.add_agent_chat(
+                    content=message.content,
+                    identifier=self._data_identifier,
+                    ctx=ctx
                 )
                 agent_chat.chat_response = await self._delegate.on_messages(
-                    [TextMessage(content=message.content, source="user")],
-                    ctx.cancellation_token,
+                    messages=[TextMessage(content=message.content, source="user")],
+                    cancellation_token=ctx.cancellation_token
                 )
                 # Post the now complete incoming message into the queue if required
                 # This is important if you want to log the message to the prompt tuner
@@ -134,11 +137,13 @@ class ConversationFlow(IConversationFlow):
             _response_count: int = 0
             _agent: Agent
             _agent_message: AgentMessage
+            _data_identifier: str
 
-            def __init__(self, agent: Agent) -> None:
+            def __init__(self, agent: Agent, data_identifier: str) -> None:
                 super().__init__("UserProxyAgent")
                 self._agent = agent
                 self._agent_message = AgentMessage(content="")
+                self._data_identifier = data_identifier
 
             @message_handler
             async def handle_user_message(
@@ -146,8 +151,10 @@ class ConversationFlow(IConversationFlow):
             ) -> None:
                 self._response_count += 1
                 self._agent_message.content += message.content + "\n"
-                agent_chat = self._agent.get_agent_chat(
-                    content=message.content, ctx=ctx
+                agent_chat = self._agent.add_agent_chat(
+                    content=message.content,
+                    identifier=self._data_identifier,
+                    ctx=ctx
                 )
                 #await self._agent.log(agent_chat=agent_chat, queue=queue)
 
@@ -165,18 +172,20 @@ class ConversationFlow(IConversationFlow):
                 model_client: AzureOpenAIChatCompletionClient,
                 assistant_agent: AssistantAgent,
                 agent: Agent,
+                data_identifier: str,
             ) -> None:
                 super().__init__("SummaryAgent")
                 model_client = model_client
                 self._delegate = assistant_agent
                 self._agent: Agent = agent
+                self._data_identifier = data_identifier
 
             @message_handler
             async def handle_summary_message(
                 self, message: AgentMessage, ctx: MessageContext
             ) -> None:
-                agent_chat = self._agent.get_agent_chat(
-                    content=message.content, ctx=ctx
+                agent_chat = self._agent.add_agent_chat(
+                    content=message.content, identifier=self._data_identifier,  ctx=ctx
                 )
                 agent_chat.chat_response = await self._delegate.on_messages(
                     [TextMessage(content=message.content, source="summary_agent")],
@@ -193,7 +202,7 @@ class ConversationFlow(IConversationFlow):
             reg_agent = await ReceivingAgent.register(
                 runtime=runtime,
                 type=agent.agent_name,
-                factory=lambda: ReceivingAgent(agent=agent),
+                factory=lambda: ReceivingAgent(agent=agent, data_identifier=message["identifier"])
             )
             await runtime.add_subscription(
                 TypeSubscription(topic_type=agent_name, agent_type=reg_agent.type)
@@ -205,7 +214,10 @@ class ConversationFlow(IConversationFlow):
         await UserProxyAgent.register(
             runtime,
             "user_proxy",
-            lambda: UserProxyAgent(agents.get_agent_by_name("user_proxy")),
+            lambda: UserProxyAgent(
+                agents.get_agent_by_name("user_proxy"),
+                data_identifier=message["identifier"]
+            ),
         )
 
         async def register_summary_agent(agent_name: str):
@@ -222,7 +234,10 @@ class ConversationFlow(IConversationFlow):
                 runtime,
                 "summary_agent",
                 lambda: SummaryAgent(
-                    model_client=model_client, assistant_agent=ag_summary_agent, agent=agent
+                    model_client=model_client,
+                    assistant_agent=ag_summary_agent,
+                    agent=agent,
+                    data_identifier=message["identifier"]
                 ),
             )
 

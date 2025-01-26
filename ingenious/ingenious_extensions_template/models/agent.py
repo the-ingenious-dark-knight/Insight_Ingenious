@@ -44,7 +44,7 @@ class ProjectAgents(IProjectAgents):
                 model=None,
                 system_prompt=None,
                 log_to_prompt_tuner=True,
-                return_in_response=False
+                return_in_response=True
             )
         )
         local_agents.append(

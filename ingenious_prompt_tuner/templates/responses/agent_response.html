@@ -1,12 +1,16 @@
 <div class="markdown-content" markdown='1'>
-    <div class="row">
+    <div class="row btn-font-size-sm">
         <div class="col">
-            <span class="event_type badge text-bg-warning">Event Type: </span>
-            <span class="identifier badge text-bg-secondary">Identifier:</span>
+            <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                <div class="btn-group me-2" role="group">
+                    <button type="button" class="btn btn-outline-danger btn-sm disabled"><span style="font-size:x-small;">{{agent_name}}</span></button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm disabled"><span style="font-size:x-small;">Start Time: {{start_time}}</span></button>
+                    <button type="button" class="btn btn-outline-warning btn-sm disabled"><span style="font-size:x-small;">Execution Time: {{execution_time}}</span></button>
+                    <button type="button" class="btn btn-outline-info btn-sm disabled"><span style="font-size:x-small;">Prompt Tokens: {{ prompt_tokens }}</span></button>
+                    <button type="button" class="btn btn-outline-dark btn-sm disabled"><span style="font-size:x-small;">Completion Tokens: {{ completion_tokens }}</span></button>
+                </div>
+            </div>
         </div>
     </div>
-{{ agent_response|safe }}
+    {{ agent_response|safe }}
 </div>
-
-
-        

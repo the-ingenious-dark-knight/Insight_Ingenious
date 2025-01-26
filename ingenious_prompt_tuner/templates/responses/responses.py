@@ -1,3 +1,4 @@
+from typing import List
 from flask import (
     Blueprint,
     Response,
@@ -17,6 +18,7 @@ import yaml
 import json
 import uuid as guid
 from ingenious.models.agent import AgentChat, Agents
+from ingenious.models.test_data import Event
 from ingenious_prompt_tuner.event_processor import functional_tests
 import subprocess
 import markdown
@@ -139,7 +141,13 @@ def get_agent_response():
     )
 
     agent_response_md1 = render_template(
-        "responses/agent_response.html", agent_response=html_content
+        "responses/agent_response.html",
+        agent_response=html_content,
+        prompt_tokens=agent_chat.prompt_tokens,
+        completion_tokens=agent_chat.completion_tokens,
+        agent_name=agent_chat.target_agent_name,
+        execution_time=agent_chat.get_execution_time_formatted(),
+        start_time=agent_chat.get_start_time_formatted()
     )
     return agent_response_md1
 
@@ -164,13 +172,34 @@ def get_responses():
                 )
             )
         else:
-            return "<p>No responses folder found.</p>"
+            print("No responses folder found")
 
     except ValueError:
-        return "<p>No responses folder found.</p>"
+        print("No responses folder found")
+    
+    # Now loop through the data files and for each get any associated agent chats  
+    events_html = ""
+    
+    # get the agent which has the return_in_response set to True
+    return_agent = None
+    for agent in agents.get_agents():
+        if agent.return_in_response:
+            return_agent = agent
+            break
+    
+    events: List[Event] = []
+    for file in files:
+        event: Event = Event(**file)
+        events.append(event)
+        events_html += render_template(
+            "responses/event_template.html",
+            identifier=event.identifier,
+            event_type=event.event_type,
+            file_name=event.file_name,
+            agents=agents.get_agents_for_prompt_tuner(),
+        )
 
-    # render the responses2.html file
-    return render_template("responses/responses2.html", files=files, agents=agents.get_agents())
+    return render_template("responses/events_template.html", files=events, events_html=events_html)
 
 
 @bp.route("/get_agent_response_from_file", methods=["post"])
@@ -189,18 +218,30 @@ def get_agent_response_from_file():
     file_contents = asyncio.run(
         utils.fs.read_file(file_name=file_name, file_path=output_path)
     )
-    if file_contents is None:
-        return "No response found"
-    
-    agent_chat: AgentChat = AgentChat(**json.loads(file_contents))
-    html_content = markdown.markdown(
-        agent_chat.chat_response.chat_message.content,
-        extensions=["extra", "md_in_html", "toc", "fenced_code", "codehilite"],
-    )
 
-    agent_response_md1 = render_template(
-        "responses/agent_response.html", agent_response=html_content
-    )
+    file_content_placeholder = """
+            <div class="markdown-content" markdown='1'><p>No response found</p></div>
+    """
+    
+    try: 
+        agent_chat: AgentChat = AgentChat(**json.loads(file_contents))
+        html_content = markdown.markdown(
+            agent_chat.chat_response.chat_message.content,
+            extensions=["extra", "md_in_html", "toc", "fenced_code", "codehilite"],
+        )
+        agent_response_md1 = render_template(
+            "responses/agent_response.html",
+            agent_response=html_content,
+            prompt_tokens=agent_chat.prompt_tokens,
+            completion_tokens=agent_chat.completion_tokens,
+            agent_name=agent_chat.target_agent_name,
+            execution_time=agent_chat.get_execution_time_formatted(),
+            start_time=agent_chat.get_start_time_formatted()
+        )
+        
+    except:
+        agent_response_md1 = file_content_placeholder
+
     return agent_response_md1
 
 
