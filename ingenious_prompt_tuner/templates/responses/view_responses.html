@@ -4,6 +4,8 @@
 
 {% block head %}
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+ <!-- DataTables CSS -->
+ <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/2.2.1/css/dataTables.dataTables.min.css">
 <style>
 
 hr {
@@ -184,8 +186,16 @@ hr {
 
 {% block scripts %}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- DataTables JS -->
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/2.2.1/js/dataTables.min.js"></script>
 <script>
-
+    function init_datatables() {
+            setTimeout(function() {
+                if (!$.fn.DataTable.isDataTable('table')) {
+                    $('table').DataTable();
+                }
+            }, 10); // Adjust the timeout as needed
+    }
     function get_agent_response(identifier, event_type, agent_name) {
         fetch(`{{ url_for('responses.get_agent_response') }}?identifier=${identifier}&agent_name=${agent_name}&event_type=${event_type}`)
         .then(response => response.text())
@@ -253,7 +263,7 @@ hr {
         document.body.appendChild(modal);
         
         init_tooltips();
-
+        init_datatables();
         const bootstrapModal = new bootstrap.Modal(modal);
         bootstrapModal.show();
         modal.addEventListener('hidden.bs.modal', () => {

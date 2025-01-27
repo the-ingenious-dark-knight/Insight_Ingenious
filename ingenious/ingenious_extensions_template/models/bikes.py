@@ -43,6 +43,11 @@ class RootModel_BikeSale(BaseModel):
     customer_review: RootModel_CustomerReview
 
 
+class RootModel_BikeSale_Extended(RootModel_BikeSale):
+    store_name: str
+    location: str
+
+
 class RootModel_Store(BaseModel):
     name: str
     location: str
@@ -59,21 +64,15 @@ class RootModel(BaseModel):
         print(root_model)
 
     def display_bike_sales_as_table(self):
-        table_data = []
-        headers = ["Store Name", "Location", "Product Code", "Quantity Sold", "Sale Date", "Customer Rating", "Customer Comment"]
+        table_data: List[RootModel_BikeSale_Extended] = []
+        
         for store in self.stores:
             for sale in store.bike_sales:
                 store_name = store.name
                 location = store.location
-                table_data.append([
-                    store_name,
-                    location,
-                    sale.product_code,
-                    sale.quantity_sold,
-                    sale.sale_date,
-                    sale.customer_review.rating,
-                    sale.customer_review.comment,
-                ])
+                rec = RootModel_BikeSale_Extended(store_name=store_name, location=location, **sale.model_dump())
+                table_data.append(rec)
 
-        ret = List_To_Csv(table_data, headers, "bike_sales")
-        print(ret)
+        ret = Listable_Object_To_Csv(table_data, RootModel_BikeSale_Extended)
+        # Note always provide tabular data with a heading as this allows our datatables extension to render the data correctly
+        return "## Sales\n" + ret

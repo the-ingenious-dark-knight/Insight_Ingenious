@@ -189,8 +189,11 @@ def get_agent_inputs():
     else:
         content = agent_chat.system_prompt
 
+    # Convert any csv data to a table
+    content_csvs_converted = rp1.convert_csv_to_md_tables(content)
+
     html_content = markdown.markdown(
-        content,
+        content_csvs_converted,
         extensions=["extra", "md_in_html", "toc", "fenced_code", "codehilite"],
     )
 

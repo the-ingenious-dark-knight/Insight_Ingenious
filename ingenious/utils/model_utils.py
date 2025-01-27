@@ -82,7 +82,7 @@ def Listable_Object_To_Csv(obj, row_type):
             [getattr(row, header, None) for header in headers]
         )
     output += csv_output.getvalue() + "\n```"    
-    return output.getvalue()
+    return output
 
 
 def Object_To_Yaml(obj, strip_complex_fields=False):

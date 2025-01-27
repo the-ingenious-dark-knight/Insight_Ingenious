@@ -64,8 +64,12 @@ class ConversationFlow(IConversationFlow):
         project_agents = ProjectAgents()
         agents = project_agents.Get_Project_Agents(self._config)
 
-        # Process your data payload using your custom model class 
+        # Process your data payload using your custom data model class 
         bike_sales_data = RootModel.model_validate(message)
+
+        # Get the revision id and identifier from the message payload
+        revision_id = message["revision_id"]
+        identifier = message["identifier"]
 
         # Instantiate the logger and handler
         logger = logging.getLogger(EVENT_LOGGER_NAME)
@@ -74,8 +78,8 @@ class ConversationFlow(IConversationFlow):
         llm_logger = LLMUsageTracker(
             agents=agents,
             config=self._config,
-            revision_id=message["revision_id"],
-            identifier=message["identifier"],
+            revision_id=revision_id,
+            identifier=identifier,
             event_type="default"
         )
 
@@ -87,11 +91,11 @@ class ConversationFlow(IConversationFlow):
         self._logger.debug("Starting Flow")
 
         # Now add your system prompts to your agents from the prompt templates
-        # Modify this if you want to modfiy the pattern used to correlate the agent name to the prompt template
+        # Modify this if you want to modify the pattern used to correlate the agent name to the prompt template
         for agent in agents.get_agents():
             template_name = f"{agent.agent_name}_prompt.jinja"
             agent.system_prompt = await self.Get_Template(
-                file_name=template_name, revision_id=message["revision_id"]
+                file_name=template_name, revision_id=revision_id
             )
 
         # Create wrappers around the autogen chat agent classes to allow routing of messages to the correct agents
@@ -206,7 +210,7 @@ class ConversationFlow(IConversationFlow):
             reg_agent = await ReceivingAgent.register(
                 runtime=runtime,
                 type=agent.agent_name,
-                factory=lambda: ReceivingAgent(agent=agent, data_identifier=message["identifier"])
+                factory=lambda: ReceivingAgent(agent=agent, data_identifier=identifier)
             )
             await runtime.add_subscription(
                 TypeSubscription(topic_type=agent_name, agent_type=reg_agent.type)
@@ -220,7 +224,7 @@ class ConversationFlow(IConversationFlow):
             "user_proxy",
             lambda: UserProxyAgent(
                 agents.get_agent_by_name("user_proxy"),
-                data_identifier=message["identifier"]
+                data_identifier=identifier
             ),
         )
 
@@ -241,7 +245,7 @@ class ConversationFlow(IConversationFlow):
                     model_client=model_client,
                     assistant_agent=ag_summary_agent,
                     agent=agent,
-                    data_identifier=message["identifier"]
+                    data_identifier=identifier
                 ),
             )
 
@@ -253,15 +257,16 @@ class ConversationFlow(IConversationFlow):
         runtime.start()
 
         initial_message: AgentMessage = AgentMessage(content=json.dumps(message))
+        fiscal_analysis_agent_message: AgentMessage = AgentMessage(content=bike_sales_data.display_bike_sales_as_table())
         await asyncio.gather(
             runtime.publish_message(
                 initial_message,
                 topic_id=TopicId(type="customer_sentiment_agent", source="default"),
             ),
             runtime.publish_message(
-                initial_message,
+                fiscal_analysis_agent_message,
                 topic_id=TopicId(type="fiscal_analysis_agent", source="default"),
-            ),
+            )
         )
         
         await runtime.stop_when_idle()
