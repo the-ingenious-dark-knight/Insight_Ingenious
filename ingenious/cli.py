@@ -159,11 +159,9 @@ def run_test_batch(
         )
     )
 
-
-
 @app.command()
-def generate_template_folders():
-    """Generate 'docker', 'ingenious_extensions', and 'tmp' folders in the current working directory."""
+def initialize_new_project():
+    """Generate template folders for a new project using the Ingenious framework."""
     base_path = Path(__file__).parent
     templates_paths = {
         "docker": base_path / "docker_template",
@@ -196,9 +194,25 @@ def generate_template_folders():
                     dst_path = destination / item.name
 
                     if src_path.is_dir():
-                        shutil.copytree(src_path, dst_path)
+                        if "__pycache__" not in src_path.parts:
+                            shutil.copytree(src_path, dst_path, ignore=shutil.ignore_patterns('__pycache__'))
+                        # replace all instances of 'ingenious_extensions_template' with the project name:
+                        for root, dirs, files in os.walk(dst_path):
+                            for file in files:
+                                try:
+                                    file_path = os.path.join(root, file)
+                                    with open(file_path, "r") as f:
+                                        file_contents = f.read()
+                                    file_contents = file_contents.replace("ingenious_extensions_template", destination.name)
+                                    with open(file_path, "w") as f:
+                                        f.write(file_contents)
+                                except Exception as e:
+                                    console.print(f"[error]Error processing file '{file_path}': {e}[/error]")
                     else:
-                        shutil.copy2(src_path, dst_path)
+                        try:
+                            shutil.copy2(src_path, dst_path)
+                        except Exception as e:
+                            console.print(f"[error]Error copying files in  '{src_path}': {e}[/error]")
             elif folder_name == "tmp":
                 # Create an empty context.md file in the 'tmp' folder
                 (destination / "context.md").touch()
@@ -207,6 +221,12 @@ def generate_template_folders():
 
         except Exception as e:
             console.print(f"[error]Error processing folder '{folder_name}': {e}[/error]")
+
+    # create a gitignore file
+    gitignore_path = Path.cwd() / ".gitignore"
+    if not gitignore_path.exists():
+        with open(gitignore_path, "w") as f:
+            f.write("*.pyc\n__pycache__\n*.log\n")
 
     console.print("[info]Folder generation process completed.[/info]")
 

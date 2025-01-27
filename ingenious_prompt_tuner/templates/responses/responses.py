@@ -99,8 +99,11 @@ def rerun_event():
         identifier = request.args.get("identifier", type=str)
         event_type = request.args.get("event_type", type=str)
         file_name = request.args.get("file_name", type=str)
+        
+        # Events are locked in source code and copied to the output folder each time.
         events: Events = asyncio.run(utils.get_events())
         event = events.get_event_by_identifier(identifier)
+        
         ft = functional_tests(
             config=utils.get_config(),
             revision_prompt_folder=prompt_template_folder,

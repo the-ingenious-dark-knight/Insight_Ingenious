@@ -51,6 +51,7 @@ class functional_tests:
         self, event_type, identifier, file_name, agents: List[Agent], conversation_flow: str
     ):
         events = Events(self.fs)
+        # Note sample data will always come from code base and not local file storage. We may change this in the future
         file_path = get_path_from_namespace_with_fallback("sample_data")
         await Events.load_events_from_file(events, file_path)
         # Get payload file from the file system
