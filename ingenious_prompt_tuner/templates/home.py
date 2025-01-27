@@ -156,35 +156,10 @@ def save_revision():
     revisions.append(new_revision)
     revisions_str = yaml.safe_dump(revisions)
     asyncio.run(utils.fs.write_file(contents=revisions_str, file_name='revisions.yml', file_path=str(file_path_revisions)))
-
-    # Copy old prompts and function test outputs to new revision
-    if get_selected_revision_direct_call():
-        file_path_old_outputs = f"functional_test_outputs/{get_selected_revision_direct_call()}"
-        file_path_old_prompts = f"prompts/{get_selected_revision_direct_call()}"
-        
-        old_prompts = asyncio.run(utils.fs.list_files(file_path_old_prompts))
-        old_function_test_outputs = asyncio.run(utils.fs.list_files(file_path_old_outputs))
-
-        for prompt in old_prompts:
-            content = asyncio.run(utils.fs.read_file(file_name=Path(prompt).name, file_path=file_path_old_prompts))
-            asyncio.run(utils.fs.write_file(file_name=Path(prompt).name, file_path=file_path_new_prompts, contents=content))
-            
-        for function_test_output in old_function_test_outputs:
-            content = asyncio.run(utils.fs.read_file(file_name=Path(function_test_output).name, file_path=file_path_old_outputs))
-            asyncio.run(utils.fs.write_file(file_name=Path(function_test_output).name, file_path=file_path_new_outputs, contents=content))
-    else: 
-        
-        file_path_old_outputs = get_path_from_namespace_with_fallback("sample_data")
-        file_path_old_prompts = get_path_from_namespace_with_fallback("templates/prompts")
-        
-        for file in os.listdir(file_path_old_prompts):
-            with open(os.path.join(file_path_old_prompts, file), 'r') as f:
-                contents = f.read()
-                asyncio.run(utils.fs.write_file(file_name=file, file_path=file_path_new_prompts, contents=contents))
-
-        for file in os.listdir(file_path_old_outputs):
-            with open(os.path.join(file_path_old_outputs, file), 'r') as f:
-                contents = f.read()
-                asyncio.run(utils.fs.write_file(file_name=file, file_path=file_path_new_outputs, contents=contents))
+    
+    # Make sure that the prompts and sample data files are copied to the new revision folder
+    asyncio.run(utils.get_functional_tests_folder(new_revision["name"]))
+    asyncio.run(utils.get_prompt_template_folder(new_revision["name"]))
+    
 
     return redirect(url_for('index.home'))

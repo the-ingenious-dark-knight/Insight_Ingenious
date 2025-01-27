@@ -18,7 +18,7 @@ import yaml
 import json
 import uuid as guid
 from ingenious.models.agent import AgentChat, Agents
-from ingenious.models.test_data import Event
+from ingenious.models.test_data import Event, Events
 from ingenious_prompt_tuner.event_processor import functional_tests
 import subprocess
 import markdown
@@ -93,19 +93,27 @@ def get_payload():
 @requires_selected_revision
 def rerun_event():
     utils: utils_class = current_app.utils
-    ft = functional_tests(config=current_app.config)
     agents = current_app.config["agents"] 
+    prompt_template_folder = asyncio.run(utils.get_prompt_template_folder())
     try:
         identifier = request.args.get("identifier", type=str)
         event_type = request.args.get("event_type", type=str)
         file_name = request.args.get("file_name", type=str)
+        events: Events = asyncio.run(utils.get_events())
+        event = events.get_event_by_identifier(identifier)
+        ft = functional_tests(
+            config=utils.get_config(),
+            revision_prompt_folder=prompt_template_folder,
+            revision_id=get_selected_revision_direct_call(),
+            make_llm_calls=True
+        )
         asyncio.run(
             ft.run_event_from_pre_processed_file(
                 identifier=identifier,
-                event_type=event_type,
+                event_type=event.event_type,
                 file_name=file_name,
-                revision_id=get_selected_revision_direct_call(),
-                agents=agents
+                agents=agents,
+                conversation_flow=event.conversation_flow
             )
         )
 
@@ -124,6 +132,7 @@ def get_agent_response():
     identifier = request.args.get("identifier", type=str)
     event_type = request.args.get("event_type", type=str)
     agent_name = request.args.get("agent_name", type=str)
+    
     # Return mock html page
     file_name = f"agent_response_{event_type}_default_{agent_name}_{identifier.strip()}.md"
     output_path = (
@@ -145,9 +154,52 @@ def get_agent_response():
         agent_response=html_content,
         prompt_tokens=agent_chat.prompt_tokens,
         completion_tokens=agent_chat.completion_tokens,
+        identifier=identifier,
+        event_type=event_type,
         agent_name=agent_chat.target_agent_name,
         execution_time=agent_chat.get_execution_time_formatted(),
         start_time=agent_chat.get_start_time_formatted()
+    )
+    return agent_response_md1
+
+
+@bp.route("/get_agent_inputs", methods=["GET"])
+@requires_auth
+@requires_selected_revision
+def get_agent_inputs():
+    utils: utils_class = current_app.utils
+    identifier = request.args.get("identifier", type=str)
+    event_type = request.args.get("event_type", type=str)
+    agent_name = request.args.get("agent_name", type=str)
+    input_type = request.args.get("input_type", type=str)
+    
+    # Return mock html page
+    file_name = f"agent_response_{event_type}_default_{agent_name}_{identifier.strip()}.md"
+    output_path = (
+        current_app.config["test_output_path"]
+        + f"/{get_selected_revision_direct_call()}"
+    )
+    agent_response_md = asyncio.run(
+        utils.fs.read_file(file_name=file_name, file_path=output_path)
+    )
+    agent_chat: AgentChat = AgentChat(**json.loads(agent_response_md))
+    
+    if input_type == "user_input":
+        content = agent_chat.user_message
+    else:
+        content = agent_chat.system_prompt
+
+    html_content = markdown.markdown(
+        content,
+        extensions=["extra", "md_in_html", "toc", "fenced_code", "codehilite"],
+    )
+
+    agent_response_md1 = render_template(
+        "responses/agent_inputs.html",
+        agent_input=html_content,
+        input_type=input_type,
+        event_type=event_type,
+        agent_name=agent_chat.target_agent_name
     )
     return agent_response_md1
 
@@ -235,11 +287,15 @@ def get_agent_response_from_file():
             prompt_tokens=agent_chat.prompt_tokens,
             completion_tokens=agent_chat.completion_tokens,
             agent_name=agent_chat.target_agent_name,
+            identifier=identifier,
+            event_type=event_type,
             execution_time=agent_chat.get_execution_time_formatted(),
             start_time=agent_chat.get_start_time_formatted()
+
         )
-        
-    except:
+    # Add exception handling that will print the error message to the console
+    except Exception as e:
+        print(f"Error: {e}")
         agent_response_md1 = file_content_placeholder
 
     return agent_response_md1

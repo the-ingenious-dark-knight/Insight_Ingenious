@@ -242,12 +242,17 @@ class LLMUsageTracker(logging.Handler):
                 source_name = event.kwargs["agent_id"].split("/")[1]
                 agent = self._agents.get_agent_by_name(agent_name)
                 response = "\n\n".join([r['message']['content'] for r in event.kwargs['response']['choices']])
+                user_input = "\n\n".join([r['content'] for r in event.kwargs['messages'] if r['role'] == 'user'])
+                system_input = "\n\n".join([r['content'] for r in event.kwargs['messages'] if r['role'] == 'system'])    
+
                 chat = agent.get_agent_chat_by_source(source=source_name)
                 chat.chat_response = Response(chat_message=TextMessage(content=response, source=source_name))
                 self._prompt_tokens += event.prompt_tokens
                 self._completion_tokens += event.completion_tokens
                 chat.prompt_tokens = event.prompt_tokens
                 chat.completion_tokens = event.completion_tokens
+                chat.system_prompt = system_input
+                chat.user_message = user_input
                 chat.end_time = datetime.now().timestamp()
                 self._queue.append(chat)
                 

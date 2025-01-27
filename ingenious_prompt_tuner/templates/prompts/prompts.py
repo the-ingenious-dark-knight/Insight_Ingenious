@@ -17,19 +17,20 @@ bp = Blueprint('prompts', __name__, url_prefix='/prompts')
 @requires_selected_revision
 def edit(filename):
     utils: utils_class = current_app.utils
+    prompt_template_folder = asyncio.run(utils.get_prompt_template_folder())
     if request.method == 'POST':
         new_content = request.form.get('file_content', '')
         asyncio.run(utils.fs.write_file(
             contents=new_content,
             file_name=filename,
-            file_path=f'prompts/{get_selected_revision_direct_call()}'
+            file_path=prompt_template_folder
             )
         )
         return redirect(url_for('prompts.list'))
     else:
         content = asyncio.run(utils.fs.read_file(            
             file_name=filename,
-            file_path=f'prompts/{get_selected_revision_direct_call()}'
+            file_path=prompt_template_folder
             )
         )
 
@@ -41,10 +42,11 @@ def edit(filename):
 @requires_selected_revision
 def list():
     utils: utils_class = current_app.utils
+    prompt_template_folder = asyncio.run(utils.get_prompt_template_folder())
     try:
         files_raw = asyncio.run(
             utils.fs.list_files(
-                file_path=f"prompts/{get_selected_revision_direct_call()}"
+                file_path=prompt_template_folder
                 )
             )
         files = sorted([

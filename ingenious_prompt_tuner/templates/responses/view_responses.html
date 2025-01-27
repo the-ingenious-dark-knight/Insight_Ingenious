@@ -110,6 +110,7 @@ hr {
     background-color: #f1f1f1;
 }
 
+
 </style>
 
 {% endblock %}
@@ -210,6 +211,49 @@ hr {
             </div>
         `;
         document.body.appendChild(modal);
+        
+        init_tooltips();
+
+        const bootstrapModal = new bootstrap.Modal(modal);
+        bootstrapModal.show();
+        modal.addEventListener('hidden.bs.modal', () => {
+            document.body.removeChild(modal);
+        });
+        })
+        .catch(err => {
+        console.error('Error fetching agent response:', err);
+        alert('Error fetching agent response. Please try again later.');
+        });
+    }
+
+    function get_agent_inputs(identifier, event_type, agent_name, input_type) {
+        fetch(`{{ url_for('responses.get_agent_inputs') }}?identifier=${identifier}&agent_name=${agent_name}&event_type=${event_type}&input_type=${input_type}`)
+        .then(response => response.text())
+        .then(html => {
+        const modal = document.createElement('div');
+        modal.classList.add('modal', 'fade');
+        modal.id = 'agentPromptsModal';
+        modal.tabIndex = -1;
+        modal.innerHTML = `
+            <div class="modal-dialog modal-xl">
+            <div class="modal-content border-secondary" style="border-width: 10px;">
+            <div class="modal-header">
+            <h5 class="modal-title">Agent Input</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+            ${html}
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+            </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        init_tooltips();
+
         const bootstrapModal = new bootstrap.Modal(modal);
         bootstrapModal.show();
         modal.addEventListener('hidden.bs.modal', () => {
@@ -245,8 +289,7 @@ hr {
                     var ballIdentifier = $(this).find('.identifier').text().split(':')[1].trim();
                     getFileContent(ballIdentifier, eventType);
                 });
-                const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-                const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+                init_tooltips();    
             })
             .catch(err => {
                 responsesContainer.innerHTML = "<p class='text-danger'>Error loading responses. Please try again later.</p>";
@@ -282,6 +325,7 @@ hr {
             },
             success: function(response) {
                 $('#' + identifier + '_' + event_type + ' .markdown-content').replaceWith(response);
+                init_tooltips();
             },
             error: function(error) {
                 console.error('Error fetching file content:', error);

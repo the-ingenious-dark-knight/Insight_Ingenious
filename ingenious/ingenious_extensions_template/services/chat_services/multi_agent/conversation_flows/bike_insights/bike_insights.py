@@ -46,6 +46,7 @@ import logging
 
 # Custom class import from ingenious_extensions
 from ingenious.ingenious_extensions_template.models.agent import ProjectAgents
+from ingenious.ingenious_extensions_template.models.bikes import RootModel
 
 
 class ConversationFlow(IConversationFlow):
@@ -58,10 +59,13 @@ class ConversationFlow(IConversationFlow):
         event_type: str = None,
     ) -> tuple[str, str]:
         message = json.loads(message)
+        
         #  Get your agents and agent chats from your custom class in models folder
         project_agents = ProjectAgents()
         agents = project_agents.Get_Project_Agents(self._config)
 
+        # Process your data payload using your custom model class 
+        bike_sales_data = RootModel.model_validate(message)
 
         # Instantiate the logger and handler
         logger = logging.getLogger(EVENT_LOGGER_NAME)

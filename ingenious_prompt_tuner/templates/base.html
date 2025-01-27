@@ -151,6 +151,15 @@
             });
         });
 
+        function init_tooltips() {
+            const newTooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]:not([data-bs-initialized])');
+            newTooltipTriggerList.forEach(tooltipTriggerEl => {
+                new bootstrap.Tooltip(tooltipTriggerEl);
+                tooltipTriggerEl.setAttribute('data-bs-initialized', 'true');
+            });
+
+        }
+
         function setActiveNav(element) {
             var navLinks = document.querySelectorAll('.nav-link');
             navLinks.forEach(function(navLink) {
