@@ -14,11 +14,11 @@ import os
 import uvicorn
 import importlib
 import pkgutil
-import ingenious.config.config as ingen_config
+
 from ingenious.utils.log_levels import LogLevel
 from ingenious.utils.namespace_utils import import_class_with_fallback
 import ingenious.utils.stage_executor as stage_executor_module
-from ingenious_prompt_tuner import create_app as prompt_tuner
+
 
 
 app = typer.Typer(no_args_is_help=True, pretty_exceptions_show_locals=False)
@@ -26,7 +26,6 @@ app = typer.Typer(no_args_is_help=True, pretty_exceptions_show_locals=False)
 custom_theme = Theme({"info": "dim cyan", "warning": "dark_orange", "danger": "bold red", "error": "bold red", "debug": "khaki1"})
 
 console = Console(theme=custom_theme)
-
 
 def docs_options():
     return ["generate", "serve"]
@@ -81,7 +80,7 @@ def run_all(
     
     print(f"Profile path: {profile_dir}")
     os.environ["INGENIOUS_PROFILE_PATH"] = str(profile_dir).replace("\\", "/")
-
+    import ingenious.config.config as ingen_config
     config = ingen_config.get_config()
     
     # We need to clean this up and probrably separate overall system config from fast api, eg. set the config here in cli and then pass it to FastAgentAPI
@@ -235,6 +234,7 @@ def initialize_new_project():
 @app.command()
 def run_prompt_tuner():
     """Run the prompt tuner web application."""
+    from ingenious_prompt_tuner import create_app as prompt_tuner
     app = prompt_tuner()
     app.run(debug=True)
 

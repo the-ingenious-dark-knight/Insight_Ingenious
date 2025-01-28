@@ -127,9 +127,16 @@ def save_revision():
     
     # Make sure that the prompts and sample data files are copied to the new revision folder
     for file_path_old, file_path_new in [(file_path_old_outputs, file_path_new_outputs), (file_path_old_prompts, file_path_new_prompts)]:
-        for file in asyncio.run(utils.fs.list_files(file_path_old)):
-            content = asyncio.run(utils.fs.read_file(file_name=file, file_path=file_path_old))
-            asyncio.run(utils.fs.write_file(contents=content, file_name=file, file_path=file_path_new))
+        old_files = asyncio.run(utils.fs.list_files(file_path_old))
+        if old_files is None:
+            if file_path_old == file_path_old_outputs:
+                asyncio.run(utils.get_functional_tests_folder(revision_id=new_guid, force_copy_from_source=True))
+            if file_path_old == file_path_old_prompts:
+                asyncio.run(utils.get_prompt_template_folder(revision_id=new_guid, force_copy_from_source=True))
+        else: 
+            for file in old_files:
+                content = asyncio.run(utils.fs.read_file(file_name=file, file_path=file_path_old))
+                asyncio.run(utils.fs.write_file(contents=content, file_name=file, file_path=file_path_new))
 
     return redirect(url_for('index.home'))
 
