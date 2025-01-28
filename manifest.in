@@ -11,5 +11,6 @@ include ingenious/ingenious_extensions_template/**/*.md
 include ingenious/ingenious_extensions_template/**/*.jinja
 include ingenious/ingenious_extensions_template/**/*.html
 include ingenious/ingenious_extensions_template/**/*.py
+include ingenious/ingenious_extensions_template/*.yml
 
 

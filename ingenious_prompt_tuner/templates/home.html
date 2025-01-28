@@ -22,6 +22,18 @@
     <button id="createRevisionButton" onclick=javascript:window.open('{{ url_for('index.create_revision') }}') class="btn btn-outline-primary" disabled>
         <i class="bi bi-copy"></i>  Copy Selected Revision
     </button>
+    <button id="syncSampleData" 
+        onclick="SyncSampleData()" 
+        class="btn btn-outline-warning" 
+        disabled>
+        <i class="bi bi-arrow-repeat"></i>  Sync Sample Data 
+    </button>
+    <button id="syncPrompts" 
+        onclick="SyncPrompts()" 
+        class="btn btn-outline-warning" 
+        disabled>
+        <i class="bi bi-arrow-repeat"></i>  Sync Prompts 
+    </button>
     <button id="clearCookiesButton" onclick="clearCookies()" class="btn btn-outline-danger">
         <i class="bi bi-trash"></i>  Clear Selection
     </button>
@@ -69,11 +81,15 @@
 
         if (selectedRevision) {
             $('#createRevisionButton').removeAttr('disabled');
+            $('#syncSampleData').removeAttr('disabled');
+            $('#syncPrompts').removeAttr('disabled');
             document.getElementById('editPromptsNav').style.display = 'block';
             document.getElementById('runTestsNav').style.display = 'block';
         }
         else {
             $('#createRevisionButton').prop('disabled',true);
+            $('#syncSampleData').prop('disabled',true);
+            $('#syncPrompts').prop('disabled',true);
             document.getElementById('editPromptsNav').style.display = 'none';
             document.getElementById('runTestsNav').style.display = 'none';
         }
@@ -81,7 +97,35 @@
 
     }
 
-    
+    function SyncPrompts(){
+        var url = "{{ url_for('index.sync_prompts') }}";
+        
+        fetch(url, {
+            method: 'GET'
+        })
+        .then(response => {
+            if (response.ok) {
+                alert('Prompts synced successfully');
+            } else {
+                alert('Failed to sync prompts');
+            }
+        })
+    }
+
+    function SyncSampleData(){
+        var url = "{{ url_for('index.sync_sample_data') }}";
+        
+        fetch(url, {
+            method: 'GET'
+        })
+        .then(response => {
+            if (response.ok) {
+                alert('Sample data synced successfully');
+            } else {
+                alert('Failed to sync sample data');
+            }
+        })
+    }
 
     function OpenUrl(url){
             window.location.href(url);

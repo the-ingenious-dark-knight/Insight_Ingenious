@@ -54,13 +54,13 @@ class utils_class:
     def get_config(self):
         return self.config
     
-    async def get_prompt_template_folder(self, revision_id=None):
+    async def get_prompt_template_folder(self, revision_id=None, force_copy_from_source=False):
         if revision_id is None:
             revision_id = get_selected_revision_direct_call()
-        if self.prompt_template_folder is None:
+        if self.prompt_template_folder is None or force_copy_from_source:
             source_prompt_folder = get_path_from_namespace_with_fallback("templates/prompts")
             target_prompt_folder = f"templates/prompts/{revision_id}"
-            if await self.fs.list_files(target_prompt_folder) is None:
+            if (await self.fs.list_files(target_prompt_folder) is None) or force_copy_from_source:
                 print("No prompts found in the revision prompts folder")
                 print("Copying prompts from the template folder to the prompts folder")
                 for file in os.listdir(source_prompt_folder):
@@ -72,13 +72,13 @@ class utils_class:
         
         return self.prompt_template_folder
     
-    async def get_functional_tests_folder(self, revision_id=None):
+    async def get_functional_tests_folder(self, revision_id=None, force_copy_from_source=False):
         if revision_id is None:
             revision_id = get_selected_revision_direct_call()
-        if self.functional_tests_folder is None:
+        if self.functional_tests_folder is None or force_copy_from_source:
             source_folder = get_path_from_namespace_with_fallback("sample_data")
             target_folder = f"functional_test_outputs/{revision_id}"
-            if await self.fs.list_files(target_folder) is None:
+            if (await self.fs.list_files(target_folder) is None) or force_copy_from_source:
                 for file in os.listdir(source_folder):
                     # read the file and write it to the local_files
                     with open(f"{source_folder}/{file}", "r") as f:

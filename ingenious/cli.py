@@ -18,6 +18,7 @@ import ingenious.config.config as ingen_config
 from ingenious.utils.log_levels import LogLevel
 from ingenious.utils.namespace_utils import import_class_with_fallback
 import ingenious.utils.stage_executor as stage_executor_module
+from ingenious_prompt_tuner import create_app as prompt_tuner
 
 
 app = typer.Typer(no_args_is_help=True, pretty_exceptions_show_locals=False)
@@ -167,7 +168,6 @@ def initialize_new_project():
         "docker": base_path / "docker_template",
         "ingenious_extensions": base_path / "ingenious_extensions_template",
         "tmp": None,  # No template, just create the folder
-        "functional_test_outputs": None  # No template, just create the folder
     }
 
     for folder_name, template_path in templates_paths.items():
@@ -226,9 +226,17 @@ def initialize_new_project():
     gitignore_path = Path.cwd() / ".gitignore"
     if not gitignore_path.exists():
         with open(gitignore_path, "w") as f:
-            f.write("*.pyc\n__pycache__\n*.log\n")
+            git_ignore_content = ["*.pyc", "__pycache__", "*.log", "/files/", "/tmp/"]
+            f.write("\n".join(git_ignore_content))
 
     console.print("[info]Folder generation process completed.[/info]")
+
+
+@app.command()
+def run_prompt_tuner():
+    """Run the prompt tuner web application."""
+    app = prompt_tuner()
+    app.run(debug=True)
 
 
 if __name__ == "__cli__":

@@ -16,10 +16,6 @@ from ingenious_prompt_tuner import auth
 config = ig_deps.get_config()
 
 
-def hw():
-    return "Hello World"
-
-
 def create_app():
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
