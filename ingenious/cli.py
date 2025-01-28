@@ -18,6 +18,7 @@ import ingenious.config.config as ingen_config
 from ingenious.utils.log_levels import LogLevel
 from ingenious.utils.namespace_utils import import_class_with_fallback
 import ingenious.utils.stage_executor as stage_executor_module
+from ingenious_prompt_tuner import create_app as prompt_tuner
 
 
 app = typer.Typer(no_args_is_help=True, pretty_exceptions_show_locals=False)
@@ -159,17 +160,14 @@ def run_test_batch(
         )
     )
 
-
-
 @app.command()
-def generate_template_folders():
-    """Generate 'docker', 'ingenious_extensions', and 'tmp' folders in the current working directory."""
+def initialize_new_project():
+    """Generate template folders for a new project using the Ingenious framework."""
     base_path = Path(__file__).parent
     templates_paths = {
         "docker": base_path / "docker_template",
         "ingenious_extensions": base_path / "ingenious_extensions_template",
         "tmp": None,  # No template, just create the folder
-        "functional_test_outputs": None  # No template, just create the folder
     }
 
     for folder_name, template_path in templates_paths.items():
@@ -196,9 +194,25 @@ def generate_template_folders():
                     dst_path = destination / item.name
 
                     if src_path.is_dir():
-                        shutil.copytree(src_path, dst_path)
+                        if "__pycache__" not in src_path.parts:
+                            shutil.copytree(src_path, dst_path, ignore=shutil.ignore_patterns('__pycache__'))
+                        # replace all instances of 'ingenious_extensions_template' with the project name:
+                        for root, dirs, files in os.walk(dst_path):
+                            for file in files:
+                                try:
+                                    file_path = os.path.join(root, file)
+                                    with open(file_path, "r") as f:
+                                        file_contents = f.read()
+                                    file_contents = file_contents.replace("ingenious_extensions_template", destination.name)
+                                    with open(file_path, "w") as f:
+                                        f.write(file_contents)
+                                except Exception as e:
+                                    console.print(f"[error]Error processing file '{file_path}': {e}[/error]")
                     else:
-                        shutil.copy2(src_path, dst_path)
+                        try:
+                            shutil.copy2(src_path, dst_path)
+                        except Exception as e:
+                            console.print(f"[error]Error copying files in  '{src_path}': {e}[/error]")
             elif folder_name == "tmp":
                 # Create an empty context.md file in the 'tmp' folder
                 (destination / "context.md").touch()
@@ -208,8 +222,21 @@ def generate_template_folders():
         except Exception as e:
             console.print(f"[error]Error processing folder '{folder_name}': {e}[/error]")
 
+    # create a gitignore file
+    gitignore_path = Path.cwd() / ".gitignore"
+    if not gitignore_path.exists():
+        with open(gitignore_path, "w") as f:
+            git_ignore_content = ["*.pyc", "__pycache__", "*.log", "/files/", "/tmp/"]
+            f.write("\n".join(git_ignore_content))
+
     console.print("[info]Folder generation process completed.[/info]")
 
+
+@app.command()
+def run_prompt_tuner():
+    """Run the prompt tuner web application."""
+    app = prompt_tuner()
+    app.run(debug=True)
 
 
 if __name__ == "__cli__":
@@ -224,6 +251,7 @@ class CliFunctions:
             try:                
                 repository_class_import = import_class_with_fallback(module_name, class_name)
                 repository_class = repository_class_import(progress=progress, task_id=task_id)
+                
                 await repository_class.run(progress, task_id, **kwargs)
 
             except (ImportError, AttributeError) as e:

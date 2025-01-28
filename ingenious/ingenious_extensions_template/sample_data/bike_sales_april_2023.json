@@ -268,7 +268,8 @@
                         "comment": "Very disappointing, would not recommend."
                     }
                 }
-            ]
+            ],
+            "bike_stock":[]
         },
         {
             "name": "Bike World Melbourne",
@@ -714,7 +715,8 @@
                         "comment": "An average experience, room for improvement."
                     }
                 }
-            ]
+            ],
+            "bike_stock":[]
         },
         {
             "name": "Bike World Brisbane",
@@ -1006,7 +1008,8 @@
                         "comment": "Not what I expected, faced several issues."
                     }
                 }
-            ]
+            ],
+            "bike_stock":[]
         }
     ]
 }

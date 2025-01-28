@@ -24,3 +24,4 @@ class ChatResponse(BaseModel):
     topic: Optional[str] = None
     memory_summary: Optional[str]  = None
     event_type: Optional[str] = None
+

@@ -1,6 +1,7 @@
 from typing import List, Union
 from pydantic import BaseModel, Field
 import json
+from ingenious.utils.model_utils import List_To_Csv, Listable_Object_To_Csv, Object_To_Yaml
 
 
 class RootModel_Bike(BaseModel):
@@ -42,18 +43,36 @@ class RootModel_BikeSale(BaseModel):
     customer_review: RootModel_CustomerReview
 
 
+class RootModel_BikeSale_Extended(RootModel_BikeSale):
+    store_name: str
+    location: str
+
+
 class RootModel_Store(BaseModel):
     name: str
     location: str
     bike_sales: List[RootModel_BikeSale]
+    bike_stock: List[RootModel_BikeStock]
 
 
 class RootModel(BaseModel):
-    store: RootModel_Store
-    bike_stock: List[RootModel_BikeStock]
-    bike_sales: List[RootModel_BikeSale]
+    stores: List[RootModel_Store]
 
     def load_from_json(json_data: str):
         data = json.loads(json_data)
         root_model = RootModel(**data)
         print(root_model)
+
+    def display_bike_sales_as_table(self):
+        table_data: List[RootModel_BikeSale_Extended] = []
+        
+        for store in self.stores:
+            for sale in store.bike_sales:
+                store_name = store.name
+                location = store.location
+                rec = RootModel_BikeSale_Extended(store_name=store_name, location=location, **sale.model_dump())
+                table_data.append(rec)
+
+        ret = Listable_Object_To_Csv(table_data, RootModel_BikeSale_Extended)
+        # Note always provide tabular data with a heading as this allows our datatables extension to render the data correctly
+        return "## Sales\n" + ret

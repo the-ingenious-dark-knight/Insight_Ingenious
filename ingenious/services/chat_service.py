@@ -1,10 +1,14 @@
 from abc import ABC, abstractmethod
+from pathlib import Path
+from typing import List
 from ingenious.models.chat import ChatRequest, ChatResponse
 from ingenious.db.chat_history_repository import ChatHistoryRepository
 from ingenious.utils.conversation_builder import Sync_Prompt_Templates
+from ingenious.utils.namespace_utils import import_class_with_fallback
 from ingenious.config.config import Config
-import importlib
-
+from ingenious.models.functional_tests import Event
+from ingenious.models.agent import Agent
+from ingenious.files.files_repository import FileStorage
 
 class IChatService(ABC):
     service_class = None
@@ -28,19 +32,29 @@ class ChatService(IChatService):
         self.config = config
         self.revision = revision
 
-        try:            
-            # First look for the module in the extensions namespace
-            module_name = f"ingenious_extensions.services.chat_services.{chat_service_type.lower()}.service"
-            if importlib.util.find_spec(module_name) is None:
-                module = importlib.import_module( f"ingenious.services.chat_services.{chat_service_type.lower()}.service")
-            else:
-                module = importlib.import_module(f"{module_name}")
-            service_class = getattr(module, class_name)
+        try:
+    
+            module_name = f"services.chat_services.{chat_service_type.lower()}.service"
+            service_class = import_class_with_fallback(module_name, class_name)
             
-        except (ImportError, AttributeError) as e:
-            raise ValueError(f"Unsupported chat service type: {module_name}.{class_name}") from e
+        except ImportError as e:
+            raise ImportError(
+                f"Failed to import module for chat service type '{chat_service_type}'. "
+                f"Attempted modules: '{module_name}', "
+                f"'ingenious.services.chat_services.{chat_service_type.lower()}.service'. "
+                f"Error: {str(e)}") from e
+        except AttributeError as e:
+            raise AttributeError(
+                f"Module '{module_name}' does not have the expected class '{class_name}'. "
+                f"Ensure the class name matches the service type. Error: {str(e)}") from e
+        except Exception as e:
+            raise Exception(
+                f"An unexpected error occurred while initializing the chat service. "
+                f"Service type: '{chat_service_type}', Module: '{module_name}', "
+                f"Class: '{class_name}'. Error: {str(e)}") from e
 
         self.service_class = service_class(
+            config=config,
             chat_history_repository=chat_history_repository,
             conversation_flow=conversation_flow
         )
@@ -52,5 +66,5 @@ class ChatService(IChatService):
         if not chat_request.conversation_flow:
             raise ValueError(f"conversation_flow not set {chat_request}")
         return await self.service_class.get_chat_response(chat_request)
-    
+
     
