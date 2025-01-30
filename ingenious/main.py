@@ -3,7 +3,6 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, HTMLResponse, RedirectResponse
 from chainlit.utils import mount_chainlit
 from dotenv import load_dotenv
-from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
 import logging
 import ingenious.config.config as ingen_config
 import importlib.resources as pkg_resources
@@ -11,6 +10,8 @@ import importlib.resources as pkg_resources
 # Import your routers
 import ingenious.api.routes.chat as chat
 import ingenious.api.routes.message_feedback as message_feedback
+from ingenious.models.api_routes import IApiRoutes
+from ingenious.utils.namespace_utils import import_class_with_fallback, import_module_with_fallback
 
 config = ingen_config.get_config(os.getenv("INGENIOUS_PROJECT_PATH", ""))
 print("config.web_configuration.asynchronous", config.web_configuration.asynchronous)
@@ -38,10 +39,16 @@ class FastAgentAPI:
         # Include routers
         self.app.include_router(chat_test.router, prefix="/api/v1", tags=["ChatTest"])
         self.app.include_router(chat.router, prefix="/api/v1", tags=["Chat"])
-        self.app.include_router(message_feedback.router, prefix="/api/v1", tags=["Message Feedback"])
+        self.app.include_router(
+            message_feedback.router, prefix="/api/v1", tags=["Message Feedback"]
+        )
 
-        # Instrument HTTPX - required for OpenAI SDK
-        HTTPXClientInstrumentor().instrument()
+        # Add custom routes from ingenious extensions
+        custom_api_routes_module = import_module_with_fallback("api.routes.custom")
+        if custom_api_routes_module.__name__ != "ingenious.api.routes.custom":
+            custom_api_routes_class = import_class_with_fallback("api.routes.custom", "Api_Routes")
+            custom_api_routes_class_instance: IApiRoutes = custom_api_routes_class(config, self.app)
+            custom_api_routes_class_instance.add_custom_routes()
 
         # Add exception handler
         self.app.add_exception_handler(Exception, self.generic_exception_handler)
@@ -54,11 +61,9 @@ class FastAgentAPI:
         # Redirect `/` to `/docs`
         self.app.get("/", tags=["Root"])(self.redirect_to_docs)
 
-
     async def redirect_to_docs(self):
         """Redirect the root endpoint to /docs."""
         return RedirectResponse(url="/docs")
-
 
     async def generic_exception_handler(self, request: Request, exc: Exception):
         if os.environ.get("LOADENV") == "True":
@@ -68,8 +73,7 @@ class FastAgentAPI:
         logger.exception(exc)
 
         return JSONResponse(
-            status_code=500,
-            content={"detail": f"An error occurred: {str(exc)}"}
+            status_code=500, content={"detail": f"An error occurred: {str(exc)}"}
         )
 
     async def root(self):

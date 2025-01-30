@@ -35,7 +35,7 @@ def log_levels():
     return ["DEBUG", "INFO", "WARNING", "ERROR"]
 
 @app.command()
-def run_all(
+def run_rest_api_server(
     project_dir: Annotated[
         str,
         typer.Argument(
@@ -68,7 +68,7 @@ def run_all(
     ] = ""
 ):
     """
-    This command will run all elements of the project. 
+    This command will run a fastapi server and present your agent workflows via a rest endpoint. 
     """    
     if (project_dir is not None):
         os.environ["INGENIOUS_PROJECT_PATH"] = project_dir

@@ -10,7 +10,7 @@ _config: config.Config = config.get_config()
 
 
 def run_cli():
-    cli.run_all(
+    cli.run_rest_api_server(
         profile_dir=None,  # This is set by your environment variables
         project_dir=None,  # This is set by your environment variables
         host=_config.web_configuration.ip_address,

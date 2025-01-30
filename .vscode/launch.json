@@ -21,6 +21,13 @@
             "cwd": "${workspaceFolder}",
             "jinja": true,
             "autoStartBrowser": false
+        },
+        {
+            "name": "Python: Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "run_ingen_cli.py",
+            "console": "integratedTerminal"
         }
     ]
 }
