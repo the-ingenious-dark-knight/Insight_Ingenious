@@ -192,7 +192,9 @@ hr {
     function init_datatables() {
             setTimeout(function() {
                 if (!$.fn.DataTable.isDataTable('table')) {
-                    $('table').DataTable();
+                    $('table').DataTable({
+                        scrollX: true
+                });
                 }
             }, 10); // Adjust the timeout as needed
     }

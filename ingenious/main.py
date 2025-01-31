@@ -16,11 +16,8 @@ from ingenious.utils.namespace_utils import import_class_with_fallback, import_m
 config = ingen_config.get_config(os.getenv("INGENIOUS_PROJECT_PATH", ""))
 print("config.web_configuration.asynchronous", config.web_configuration.asynchronous)
 
-if config.web_configuration.asynchronous:
-    import ingenious.api.routes.chat_async as chat
-else:
-    import ingenious.api.routes.chat as chat
-
+import ingenious.api.routes.chat_async as chat
+import ingenious.api.routes.chat as chat
 import ingenious.api.routes.chat_async_test as chat_test
 
 # Configure logging

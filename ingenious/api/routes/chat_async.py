@@ -127,7 +127,7 @@ def send_response(response, thread_id, api_key=None):
 
 
 @router.post(
-    "/chat",
+    "/chat_async",
     responses={
         200: {"description": "Request Received"},
         400: {"model": HTTPError, "description": "Bad Request"},
@@ -137,7 +137,7 @@ def send_response(response, thread_id, api_key=None):
     },
     status_code=200,  # Default response status for acknowledgment
 )
-async def chat(
+async def chat_async(
     chat_request: ChatRequest,
     chat_service: Annotated[ChatService, Depends(get_chat_service)],
     credentials: Annotated[HTTPBasicCredentials, Depends(igen_deps.get_security_service)],

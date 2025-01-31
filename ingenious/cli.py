@@ -202,7 +202,7 @@ def initialize_new_project():
                                     file_path = os.path.join(root, file)
                                     with open(file_path, "r") as f:
                                         file_contents = f.read()
-                                    file_contents = file_contents.replace("ingenious_extensions_template", destination.name)
+                                    file_contents = file_contents.replace("ingenious.ingenious_extensions_template", destination.name)
                                     with open(file_path, "w") as f:
                                         f.write(file_contents)
                                 except Exception as e:
