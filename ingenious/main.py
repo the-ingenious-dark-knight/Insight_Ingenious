@@ -14,11 +14,9 @@ from ingenious.models.api_routes import IApiRoutes
 from ingenious.utils.namespace_utils import import_class_with_fallback, import_module_with_fallback
 
 config = ingen_config.get_config(os.getenv("INGENIOUS_PROJECT_PATH", ""))
-print("config.web_configuration.asynchronous", config.web_configuration.asynchronous)
 
-import ingenious.api.routes.chat_async as chat
 import ingenious.api.routes.chat as chat
-import ingenious.api.routes.chat_async_test as chat_test
+
 
 # Configure logging
 logging.basicConfig(level=logging.ERROR)
@@ -33,8 +31,7 @@ class FastAgentAPI:
         # Initialize FastAPI app
         self.app = FastAPI(title="FastAgent API", version="1.0.0")
 
-        # Include routers
-        self.app.include_router(chat_test.router, prefix="/api/v1", tags=["ChatTest"])
+        # Add in-built routes
         self.app.include_router(chat.router, prefix="/api/v1", tags=["Chat"])
         self.app.include_router(
             message_feedback.router, prefix="/api/v1", tags=["Message Feedback"]
