@@ -5,6 +5,7 @@ ingenious/__init__.py
 ingenious/cli.py
 ingenious/dependencies.py
 ingenious/main.py
+ingenious/run_tests.py
 ingenious.egg-info/PKG-INFO
 ingenious.egg-info/SOURCES.txt
 ingenious.egg-info/dependency_links.txt
@@ -15,8 +16,6 @@ ingenious.egg-info/top_level.txt
 ingenious/api/__init__.py
 ingenious/api/routes/__init__.py
 ingenious/api/routes/chat.py
-ingenious/api/routes/chat_async.py
-ingenious/api/routes/chat_async_test.py
 ingenious/api/routes/conversation.py
 ingenious/api/routes/message_feedback.py
 ingenious/api/routes/search.py
@@ -47,6 +46,8 @@ ingenious/files/local/__init__.py
 ingenious/ingenious_extensions_template/__init__.py
 ingenious/ingenious_extensions_template/config.yml
 ingenious/ingenious_extensions_template/readme.md
+ingenious/ingenious_extensions_template/api/readme.md
+ingenious/ingenious_extensions_template/api/routes/custom.py
 ingenious/ingenious_extensions_template/models/agent.py
 ingenious/ingenious_extensions_template/models/bikes.py
 ingenious/ingenious_extensions_template/models/readme.md
@@ -69,6 +70,8 @@ ingenious/ingenious_extensions_template/tests/run_tests.py
 ingenious/ingenious_extensions_template/tests/run_tests_flat.py
 ingenious/models/__init__.py
 ingenious/models/agent.py
+ingenious/models/api_routes.py
+ingenious/models/ca_raw_fixture_data.py
 ingenious/models/chat.py
 ingenious/models/config.py
 ingenious/models/config_ns.py

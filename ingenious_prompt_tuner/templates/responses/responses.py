@@ -268,7 +268,7 @@ def get_agent_response_from_file():
     identifier = request.form.get("identifier", type=str).replace("#", "")
     event_type = request.form.get("event_type", type=str)
 
-    file_name = f"agent_response_{event_type}_default_summary_agent_{identifier.strip()}.md"
+    file_name = f"agent_response_{event_type}_default_{current_app.config["response_agent_name"]}_{identifier.strip()}.md"
     output_path = (
         current_app.config["test_output_path"]
         + f"/{get_selected_revision_direct_call()}"
