@@ -32,4 +32,4 @@ COPY ./ingenious_extensions /ingen_app/ingenious_extensions
 COPY ./tmp /ingen_app/tmp
 
 # Set the command to run the app
-CMD ["python", "/ingen_app/ingenious_extensions/tests/run_fask_app.py"]
+CMD ["ingen_cli", "run-rest-api-server"]
