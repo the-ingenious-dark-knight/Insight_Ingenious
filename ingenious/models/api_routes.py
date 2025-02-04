@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 import logging
-from fastapi import APIRouter
+from fastapi import APIRouter, FastAPI
 from ingenious.models.config import Config
 from ingenious.models.http_error import HTTPError
 from ingenious.dependencies import get_security_service, get_chat_history_repository
