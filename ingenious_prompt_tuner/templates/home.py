@@ -39,10 +39,10 @@ def home():
 
     utils: utils_class = current_app.utils
     if asyncio.run(
-        utils.fs.check_if_file_exists(
-            file_name="revisions.yml",
-            file_path=str(current_app.config["revisions_folder"]),
-        )
+            utils.fs.check_if_file_exists(
+                file_name="revisions.yml",
+                file_path=str(current_app.config["revisions_folder"]),
+            )
     ):
         revisions_str = asyncio.run(
             utils.fs.read_file(
@@ -68,9 +68,9 @@ def create_revision():
         REVISIONS_FOLDER = current_app.config["revisions_folder"]
 
         if asyncio.run(
-            utils.fs.check_if_file_exists(
-                file_name="revisions", file_path=str(REVISIONS_FOLDER)
-            )
+                utils.fs.check_if_file_exists(
+                    file_name="revisions", file_path=str(REVISIONS_FOLDER)
+                )
         ):
             revisions_str = asyncio.run(
                 utils.fs.read_file(
@@ -105,10 +105,10 @@ def save_revision():
     old_guid = request.args.get('old_guid')
     new_guid = request.args.get('new_guid')
     revision_description = request.form['revision_description']
-    
+
     new_revision = {'name': new_guid, 'description': revision_description}
-    
-    file_path_old_outputs = f"functional_test_outputs/{old_guid}"   
+
+    file_path_old_outputs = f"functional_test_outputs/{old_guid}"
     file_path_revisions = "revisions"
     file_path_old_prompts = f"templates/prompts/{old_guid}"
 
@@ -123,17 +123,19 @@ def save_revision():
 
     revisions.append(new_revision)
     revisions_str = yaml.safe_dump(revisions)
-    asyncio.run(utils.fs.write_file(contents=revisions_str, file_name='revisions.yml', file_path=str(file_path_revisions)))
-    
+    asyncio.run(
+        utils.fs.write_file(contents=revisions_str, file_name='revisions.yml', file_path=str(file_path_revisions)))
+
     # Make sure that the prompts and sample data files are copied to the new revision folder
-    for file_path_old, file_path_new in [(file_path_old_outputs, file_path_new_outputs), (file_path_old_prompts, file_path_new_prompts)]:
+    for file_path_old, file_path_new in [(file_path_old_outputs, file_path_new_outputs),
+                                         (file_path_old_prompts, file_path_new_prompts)]:
         old_files = asyncio.run(utils.fs.list_files(file_path_old))
         if old_files is None:
             if file_path_old == file_path_old_outputs:
                 asyncio.run(utils.get_functional_tests_folder(revision_id=new_guid, force_copy_from_source=True))
             if file_path_old == file_path_old_prompts:
                 asyncio.run(utils.get_prompt_template_folder(revision_id=new_guid, force_copy_from_source=True))
-        else: 
+        else:
             for file in old_files:
                 content = asyncio.run(utils.fs.read_file(file_name=file, file_path=file_path_old))
                 asyncio.run(utils.fs.write_file(contents=content, file_name=file, file_path=file_path_new))
@@ -149,6 +151,7 @@ def sync_prompts():
     asyncio.run(utils.get_prompt_template_folder(revision_id, force_copy_from_source=True))
     # Return ok 
     return 'OK'
+
 
 @bp.route('/sync_sample_data')
 @requires_auth

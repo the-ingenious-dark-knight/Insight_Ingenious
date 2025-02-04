@@ -37,10 +37,6 @@ class azure_FileStorageRepository(IFileStorage):
             self.container_name = container_name
         if self.test:
             self.blob_service_client = BlobServiceClient(account_url=self.url, credential=self.token)
-            if container_name == "container-app-deps":
-                self.token = self.config.azure_search_services[0].key
-            else:
-                self.token = self.config.file_storage.token
         else:
             self.blob_service_client = BlobServiceClient(account_url=self.url, credential=ManagedIdentityCredential(client_id=self.client_id))
 
@@ -71,10 +67,6 @@ class azure_FileStorageRepository(IFileStorage):
             self.container_name = container_name
         if self.test:
             self.blob_service_client = BlobServiceClient(account_url=self.url, credential=self.token)
-            if container_name == "container-app-deps":
-                self.token = self.config.azure_search_services[0].key
-            else:
-                self.token = self.config.file_storage.token
         else:
             self.blob_service_client = BlobServiceClient(account_url=self.url,
                                                          credential=ManagedIdentityCredential(client_id=self.client_id))
@@ -106,10 +98,6 @@ class azure_FileStorageRepository(IFileStorage):
             self.container_name = container_name
         if self.test:
             self.blob_service_client = BlobServiceClient(account_url=self.url, credential=self.token)
-            if container_name == "container-app-deps":
-                self.token = self.config.azure_search_services[0].key
-            else:
-                self.token = self.config.file_storage.token
         else:
             self.blob_service_client = BlobServiceClient(account_url=self.url,
                                                          credential=ManagedIdentityCredential(client_id=self.client_id))
@@ -135,10 +123,6 @@ class azure_FileStorageRepository(IFileStorage):
             self.container_name = container_name
         if self.test:
             self.blob_service_client = BlobServiceClient(account_url=self.url, credential=self.token)
-            if container_name == "container-app-deps":
-                self.token = self.config.azure_search_services[0].key
-            else:
-                self.token = self.config.file_storage.token
         else:
             self.blob_service_client = BlobServiceClient(account_url=self.url,
                                                          credential=ManagedIdentityCredential(client_id=self.client_id))
@@ -171,10 +155,6 @@ class azure_FileStorageRepository(IFileStorage):
 
         if self.test:
             self.blob_service_client = BlobServiceClient(account_url=self.url, credential=self.token)
-            if container_name == "container-app-deps":
-                self.token = self.config.azure_search_services[0].key
-            else:
-                self.token = self.config.file_storage.token
         else:
             self.blob_service_client = BlobServiceClient(account_url=self.url,
                                                          credential=ManagedIdentityCredential(client_id=self.client_id))

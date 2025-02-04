@@ -52,7 +52,7 @@ class functional_tests:
     ):
         events = Events(self.fs)
         # Note sample data will always come from code base and not local file storage. We may change this in the future
-        file_path = get_path_from_namespace_with_fallback("sample_data")
+        file_path = "sample_data"
         await Events.load_events_from_file(events, file_path)
         # Get payload file from the file system
         file_contents = await self.fs.read_file(
