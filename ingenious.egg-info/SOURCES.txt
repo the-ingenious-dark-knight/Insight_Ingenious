@@ -5,7 +5,6 @@ ingenious/__init__.py
 ingenious/cli.py
 ingenious/dependencies.py
 ingenious/main.py
-ingenious/run_tests.py
 ingenious.egg-info/PKG-INFO
 ingenious.egg-info/SOURCES.txt
 ingenious.egg-info/dependency_links.txt
@@ -18,7 +17,6 @@ ingenious/api/routes/__init__.py
 ingenious/api/routes/chat.py
 ingenious/api/routes/conversation.py
 ingenious/api/routes/message_feedback.py
-ingenious/api/routes/search.py
 ingenious/chainlit/app.py
 ingenious/chainlit/datalayer.py
 ingenious/chainlit/index.html
@@ -31,14 +29,12 @@ ingenious/db/chat_history_repository.py
 ingenious/db/cosmos/__init__.py
 ingenious/db/duckdb/__init__.py
 ingenious/db/sqlite/__init__.py
-ingenious/docker_template/production_images/linux_no_chat_summariser.dockerfile
-ingenious/docker_template/production_images/linux_no_chat_summariser_uat_test.dockerfile
+ingenious/docker_template/linux_no_chat_summariser.dockerfile
 ingenious/errors/__init__.py
 ingenious/errors/content_filter_error.py
 ingenious/errors/token_limit_exceeded_error.py
 ingenious/external_services/__init__.py
 ingenious/external_services/openai_service.py
-ingenious/external_services/search_service.py
 ingenious/files/__init__.py
 ingenious/files/files_repository.py
 ingenious/files/azure/__init__.py
