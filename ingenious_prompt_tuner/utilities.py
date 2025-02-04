@@ -93,7 +93,7 @@ class utils_class:
         return self.functional_tests_folder
 
     async def get_events(self) -> Events:
-        await self.events.load_events_from_file(get_path_from_namespace_with_fallback("sample_data"))
+        await self.events.load_events_from_file("sample_data")
         return self.events
 
 
