@@ -141,8 +141,8 @@ def create_revision():
             asyncio.run(fs.write_file(file_name=prompt, file_path=f"prompts/{revision_name}", contents=content))
             
         for function_test_output in function_test_outputs:
-            content = asyncio.run(fs.read_file(file_name=prompt, file_path=f"functional_test_outputs/{get_selected_revision_direct_call()}"))
-            asyncio.run(fs.write_file(file_name=prompt, file_path=f"functional_test_outputs/{revision_name}", contents=content))
+            content = asyncio.run(fs.read_file(file_name=function_test_output, file_path=f"functional_test_outputs/{get_selected_revision_direct_call()}"))
+            asyncio.run(fs.write_file(file_name=function_test_output, file_path=f"functional_test_outputs/{revision_name}", contents=content))
 
         return redirect(url_for('index.home'))
     return render_template('create_revision.html')
