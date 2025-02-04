@@ -83,7 +83,7 @@ class utils_class:
             target_folder = f"functional_test_outputs/{revision_id}"
             if (await self.fs.list_files(target_folder) is None) or force_copy_from_source:
                 for file in os.listdir(source_folder):
-                    if ".json" in file or ".md" in file:
+                    if ".json" in file or ".md" in file or ".yml" in file:
                         # read the file and write it to the local_files
                         with open(f"{source_folder}/{file}", "r") as f:
                             content = f.read()
