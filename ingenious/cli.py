@@ -236,7 +236,7 @@ def run_prompt_tuner():
     """Run the prompt tuner web application."""
     from ingenious_prompt_tuner import create_app as prompt_tuner
     app = prompt_tuner()
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=80)
 
 
 if __name__ == "__cli__":
