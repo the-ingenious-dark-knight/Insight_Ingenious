@@ -47,7 +47,6 @@ class multi_agent_chat_service:
         # Initialize additional response fields - to be populated later
         thread_chat_history = [{"role": "user", "content": ""}]
         thread_memory = ''
-        await self.chat_history_repository.update_memory()
 
         # Check if thread exists
         if not chat_request.thread_id:

@@ -1,4 +1,3 @@
-
 from abc import ABC, abstractmethod
 import logging
 from fastapi import APIRouter, FastAPI
@@ -7,6 +6,7 @@ from ingenious.models.http_error import HTTPError
 from ingenious.dependencies import get_security_service, get_chat_history_repository
 from ingenious.models.chat import ChatResponse
 from fastapi.security import HTTPBasicCredentials
+from fastapi import FastAPI
 
 
 class IApiRoutes(ABC):
@@ -16,7 +16,7 @@ class IApiRoutes(ABC):
         self.app = app
         self.security_service = get_security_service(HTTPBasicCredentials)
         self.chat_history_repository = get_chat_history_repository()
-    
+
     @abstractmethod
     def add_custom_routes(self) -> APIRouter:
         """
