@@ -103,7 +103,7 @@ class multi_agent_chat_service:
                     thread_chat_history=thread_chat_history
                 )
             else:
-                response_task = conversation_flow_service_class_instance.x(                    
+                response_task = conversation_flow_service_class_instance.get_conversation_response(                    
                     message=chat_request.user_prompt,
                     memory_record_switch=chat_request.memory_record,
                     thread_memory=thread_memory,
