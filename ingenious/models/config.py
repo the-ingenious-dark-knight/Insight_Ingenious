@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import List, Dict, Optional
 from pydantic import BaseModel, Field, ValidationError
 from ingenious.models import profile as profile_models
@@ -101,9 +102,17 @@ class LocaldbConfig(config_ns_models.LocaldbConfig):
             sample_database_name=config.sample_database_name)
 
 
+class AuthenticationMethod(str, Enum):
+    MSI = "msi"
+    CLIENT_ID_AND_SECRET = "client_id_and_secret"
+    DEFAULT_CREDENTIAL = "default_credential"
+
+
 class FileStorage(config_ns_models.FileStorage):
-    url: str = Field("", description="File Storage URL")
-    token: str = Field("", description="File Storage token")
+    url: str = Field("", description="File Storage SAS URL")    
+    client_id: str = Field("", description="File Storage SAS Client ID")
+    token: str = Field("", description="File Storage SAS Token")
+    authentication_method: AuthenticationMethod = Field(AuthenticationMethod.DEFAULT_CREDENTIAL, description="File Storage SAS Authentication Method")
 
     def __init__(
             self,
@@ -117,6 +126,8 @@ class FileStorage(config_ns_models.FileStorage):
         )
         self.url = profile.url
         self.token = profile.token
+        self.client_id = profile.client_id
+        self.authentication_method = profile.authentication_method
 
 
 class Config(BaseModel):
