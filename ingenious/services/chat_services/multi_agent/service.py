@@ -54,16 +54,7 @@ class multi_agent_chat_service:
         else:
             # Get thread messages & add to messages list
             thread_messages = await self.chat_history_repository.get_thread_messages(chat_request.thread_id)
-            thread_memory_list = await self.chat_history_repository.get_thread_memory(chat_request.thread_id)
             thread_memory = 'no existing context.'
-
-            if chat_request.memory_record:
-                if thread_memory_list:
-                    for thread_memory in thread_memory_list:
-                        if thread_memory != '':
-                            thread_memory = thread_memory.content  # only one row is retrieved per thread
-            else:
-                await self.chat_history_repository.delete_user_memory(user_id=chat_request.user_id)
 
             msg = f'current_memory: {thread_memory}'
             logger.log(level=logging.INFO, msg=msg)
@@ -112,7 +103,7 @@ class multi_agent_chat_service:
                     thread_chat_history=thread_chat_history
                 )
             else:
-                response_task = conversation_flow_service_class_instance.get_conversation_response(                    
+                response_task = conversation_flow_service_class_instance.x(                    
                     message=chat_request.user_prompt,
                     memory_record_switch=chat_request.memory_record,
                     thread_memory=thread_memory,

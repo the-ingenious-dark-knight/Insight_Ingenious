@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field, ValidationError, RootModel
 from typing import List, Dict, Optional
+from enum import Enum
 
 
 class ModelConfig(BaseModel):
@@ -61,9 +62,17 @@ class LoggingConfig(BaseModel):
     pass
 
 
+class AuthenticationMethod(str, Enum):
+    MSI = "msi"
+    CLIENT_ID_AND_SECRET = "client_id_and_secret"
+    DEFAULT_CREDENTIAL = "default_credential"
+
+
 class FileStorage(BaseModel):
-    url: str = Field("", description="File Storage SAS URL")
+    url: str = Field("", description="File Storage SAS URL")    
+    client_id: str = Field("", description="File Storage SAS Client ID")
     token: str = Field("", description="File Storage SAS Token")
+    authentication_method: AuthenticationMethod = Field(AuthenticationMethod.DEFAULT_CREDENTIAL, description="File Storage SAS Authentication Method")
 
 
 class Profile(BaseModel):

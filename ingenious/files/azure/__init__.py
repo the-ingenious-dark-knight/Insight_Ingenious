@@ -1,8 +1,10 @@
 from azure.storage.blob import BlobServiceClient
-from azure.identity import ManagedIdentityCredential
+from azure.identity import ManagedIdentityCredential, DefaultAzureCredential, ClientSecretCredential
 import ingenious.dependencies as ig_deps
 from ingenious.files.files_repository import IFileStorage
 from pathlib import Path
+
+from ingenious.models.config import AuthenticationMethod as file_storage_AuthenticationMethod
 
 
 class azure_FileStorageRepository(IFileStorage):
@@ -10,16 +12,20 @@ class azure_FileStorageRepository(IFileStorage):
     def __init__(self):
         self.config = ig_deps.config
         self.url = self.config.file_storage.url
-        self.token  = self.config.file_storage.token
+        self.token = self.config.file_storage.token
         self.client_id = self.config.file_storage.token
         self.container_name = self.config.file_storage.container_name
-        self.test = True
+        self.authentication_method = self.config.file_storage.authentication_method
 
-        if self.test:
-            self.blob_service_client = BlobServiceClient(account_url=self.url, credential=self.token)
-        else:
+        if self.authentication_method == file_storage_AuthenticationMethod.CLIENT_ID_AND_SECRET:
+            cred = ClientSecretCredential(self.client_id, self.token)
+            self.blob_service_client = BlobServiceClient(account_url=self.url, credential=cred)
+        
+        if self.authentication_method == file_storage_AuthenticationMethod.MSI:
             self.blob_service_client = BlobServiceClient(account_url=self.url, credential=ManagedIdentityCredential(client_id=self.client_id))
-
+        
+        if self.authentication_method == file_storage_AuthenticationMethod.DEFAULT_CREDENTIAL:
+            self.blob_service_client = BlobServiceClient(account_url=self.url, credential=DefaultAzureCredential())
 
     async def write_file(self, contents: str, file_name: str, file_path: str, container_name: str = ''):
         """
