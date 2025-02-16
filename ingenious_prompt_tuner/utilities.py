@@ -45,7 +45,8 @@ def set_selected_revision_direct_call(revision_id):
 class utils_class:
     def __init__(self, config):
         self.config = config
-        self.fs: FileStorage = FileStorage(config)
+        self.fs: FileStorage = FileStorage(config, Category="revisions")
+        self.fs_data: FileStorage = FileStorage(config, Category="data")
         self.events: Events = Events(self.fs)
         self.prompt_template_folder: str = None
         self.functional_tests_folder: str = None
@@ -83,11 +84,28 @@ class utils_class:
             target_folder = f"functional_test_outputs/{revision_id}"
             if (await self.fs.list_files(target_folder) is None) or force_copy_from_source:
                 for file in os.listdir(source_folder):
-                    if ".json" in file or ".md" in file or ".yml" in file:
+                    if ".md" in file or ".yml" in file:
                         # read the file and write it to the local_files
                         with open(f"{source_folder}/{file}", "r") as f:
                             content = f.read()
                             await self.fs.write_file(content, file, target_folder)
+            self.functional_tests_folder = target_folder
+
+        return self.functional_tests_folder
+    
+    async def get_data_folder(self, revision_id=None, force_copy_from_source=False):
+        if revision_id is None:
+            revision_id = get_selected_revision_direct_call()
+        if self.functional_tests_folder is None or force_copy_from_source:
+            source_folder = get_path_from_namespace_with_fallback("sample_data")
+            target_folder = f"functional_test_outputs/{revision_id}"
+            if (await self.fs_data.list_files(target_folder) is None) or force_copy_from_source:
+                for file in os.listdir(source_folder):
+                    if ".json" in file:
+                        # read the file and write it to the local_files
+                        with open(f"{source_folder}/{file}", "r") as f:
+                            content = f.read()
+                            await self.fs_data.write_file(content, file, target_folder)
             self.functional_tests_folder = target_folder
 
         return self.functional_tests_folder

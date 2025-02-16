@@ -1,16 +1,17 @@
-import ingenious.dependencies as ig_deps
 from ingenious.files.files_repository import IFileStorage
 from pathlib import Path
 import aiofiles
+from ingenious.models.config import Config, FileStorageContainer
 
 
 class local_FileStorageRepository(IFileStorage):
 
-    def __init__(self):
-        self.config = ig_deps.config
-        self.base_path = Path(self.config.file_storage.path)
+    def __init__(self, config: Config, fs_config: FileStorageContainer):
+        self.config = config
+        self.fs_config = fs_config
+        self.base_path = Path(fs_config.path)
 
-    async def write_file(self, contents: str, file_name: str, file_path: str, container_name: str = ''):
+    async def write_file(self, contents: str, file_name: str, file_path: str):
         """
         Write data to a local file.
 
@@ -19,7 +20,7 @@ class local_FileStorageRepository(IFileStorage):
         :param file_path: Path to the file.
         """
         try:
-            path = Path(self.config.file_storage.path) / Path(file_path) / Path(file_name)
+            path = Path(self.fs_config.path) / Path(file_path) / Path(file_name)
             path.parent.mkdir(parents=True, exist_ok=True)
             async with aiofiles.open(path, "w") as f:
                 await f.write(contents)
@@ -27,7 +28,7 @@ class local_FileStorageRepository(IFileStorage):
         except Exception as e:
             print(f"Failed to write {path}: {e}")
 
-    async def read_file(self, file_name: str, file_path: str, container_name: str= ''):
+    async def read_file(self, file_name: str, file_path: str):
         """
         Read data from a local file.
 
@@ -36,7 +37,7 @@ class local_FileStorageRepository(IFileStorage):
         :return: Contents of the file.
         """
         try:
-            path = Path(self.config.file_storage.path) / Path(file_path) / Path(file_name)
+            path = Path(self.fs_config.path) / Path(file_path) / Path(file_name)
             async with aiofiles.open(path, "r") as f:
                 contents = await f.read()
                 # print(f"Successfully read {path}.")
@@ -45,7 +46,7 @@ class local_FileStorageRepository(IFileStorage):
             print(f"Failed to read {path}: {e}")
             return None
         
-    async def delete_file(self, file_name: str, file_path: str, container_name: str= ''):
+    async def delete_file(self, file_name: str, file_path: str):
         """
         Delete a local file.
 
@@ -53,20 +54,20 @@ class local_FileStorageRepository(IFileStorage):
         :param file_path: Path to the file.
         """
         try:
-            path = Path(self.config.file_storage.path) / Path(file_path) / Path(file_name)
+            path = Path(self.fs_config.path) / Path(file_path) / Path(file_name)
             Path(path).unlink()
             # print(f"Successfully deleted {path}.")
         except Exception as e:
             print(f"Failed to delete {path}: {e}")
     
-    async def list_files(self, file_path: str, container_name: str= ''):
+    async def list_files(self, file_path: str):
         """
         List files in a local directory.
 
         :param file_path: Path to the directory.
         """
         try:
-            path = Path(self.config.file_storage.path) / Path(file_path)
+            path = Path(self.fs_config.path) / Path(file_path)
             files = [f.name for f in path.iterdir() if f.is_file()]
             # print(f"Files in {path}: {files}")
             return files
@@ -74,7 +75,7 @@ class local_FileStorageRepository(IFileStorage):
             print(f"Failed to list files in {path}: {e}")
             return None
         
-    async def check_if_file_exists(self, file_path: str, file_name: str, container_name: str= '') -> bool:
+    async def check_if_file_exists(self, file_path: str, file_name: str) -> bool:
         """
         Check if a local file exists.
 
@@ -82,8 +83,8 @@ class local_FileStorageRepository(IFileStorage):
         :param file_name: Name of the file.
         :return: True if the file exists, False otherwise.
         """
+        path = Path(self.fs_config.path) / Path(file_path) / Path(file_name)
         try:
-            path = Path(self.config.file_storage.path) / Path(file_path) / Path(file_name)
             exists = path.exists()
             # print(f"File {file_name} exists in {path}: {exists}")
             return exists

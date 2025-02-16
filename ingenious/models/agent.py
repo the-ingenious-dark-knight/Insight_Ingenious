@@ -1,17 +1,20 @@
 from abc import ABC, abstractmethod
 import asyncio
 from datetime import datetime, timedelta
-from autogen_core import MessageContext
+from autogen_core import CancellationToken, FunctionCall, MessageContext
 from pydantic import BaseModel
 from ingenious.files.files_repository import FileStorage
 from ingenious.models.config import Config, ModelConfig
 import ingenious.config.config as ig_config
+from ingenious.models.llm_event_kwargs import LLMEventKwargs, ToolCall
 from typing import List, Optional
 import logging
+from autogen_core.tools import FunctionTool, Tool
+from autogen_core.models import FunctionExecutionResult
 from autogen_core.logging import LLMCallEvent
 from autogen_agentchat.base import Response
 from autogen_agentchat.messages import TextMessage, ChatMessage
-
+import json
 
 class AgentChat(BaseModel):
     """
@@ -143,6 +146,21 @@ class Agent(BaseModel):
         if self.log_to_prompt_tuner or self.return_in_response:
             await queue.put(agent_chat)
 
+    async def execute_tool_call(
+        self, call: FunctionCall, cancellation_token: CancellationToken, tools: List[Tool] = []
+    ) -> FunctionExecutionResult:
+        # Find the tool by name.
+        tool = next((tool for tool in tools if tool.name == call.name), None)
+        assert tool is not None
+
+        # Run the tool and capture the result.
+        try:
+            arguments = json.loads(call.arguments)
+            result = await tool.run_json(arguments, cancellation_token)
+            return FunctionExecutionResult(call_id=call.id, content=tool.return_value_as_string(result), is_error=False)
+        except Exception as e:
+            return FunctionExecutionResult(call_id=call.id, content=str(e), is_error=True)
+
 
 class Agents(BaseModel):
     """
@@ -235,15 +253,35 @@ class LLMUsageTracker(logging.Handler):
 
     def emit(self, record: logging.LogRecord) -> None:
         """Emit the log record."""
+
         try:
+            add_chat = True
             if isinstance(record.msg, LLMCallEvent):
                 event: LLMCallEvent = record.msg
-                agent_name = event.kwargs["agent_id"].split("/")[0]
-                source_name = event.kwargs["agent_id"].split("/")[1]
+                kwargs: LLMEventKwargs = LLMEventKwargs.model_validate(event.kwargs)
+                
+                agent_name = kwargs.agent_id.split("/")[0]
+                source_name = kwargs.agent_id.split("/")[1]
                 agent = self._agents.get_agent_by_name(agent_name)
-                response = "\n\n".join([r['message']['content'] for r in event.kwargs['response']['choices']])
-                user_input = "\n\n".join([r['content'] for r in event.kwargs['messages'] if r['role'] == 'user'])
-                system_input = "\n\n".join([r['content'] for r in event.kwargs['messages'] if r['role'] == 'system'])    
+                response = ""
+                for r in kwargs.response.choices:
+                    content = r.message.content
+                    if content:
+                        response += r.message.content + "\n\n"
+                    if r.message.tool_calls:
+                        for tool_call in r.message.tool_calls:
+                            add_chat = False
+
+                    system_input = "\n\n".join([r.content for r in kwargs.messages if r.role == 'system'])
+                    user_input = "\n\n".join([r.content for r in kwargs.messages if r.role == 'user'])
+                    
+                    # Get all messages with role 'tool'
+                    tool_messages = [m for m in kwargs.messages if m.role == 'tool']
+                    if tool_messages:
+                        user_input += "\n\n---\n\n"
+                        user_input += "# Tool Messages\n\n"
+                        for m in tool_messages:
+                            user_input += f"{m.content}\n\n"
 
                 chat = agent.get_agent_chat_by_source(source=source_name)
                 chat.chat_response = Response(chat_message=TextMessage(content=response, source=source_name))
@@ -254,10 +292,11 @@ class LLMUsageTracker(logging.Handler):
                 chat.system_prompt = system_input
                 chat.user_message = user_input
                 chat.end_time = datetime.now().timestamp()
-                self._queue.append(chat)
+                if add_chat:
+                    self._queue.append(chat)
                 
         except Exception as e:
-            print(e)
+            print(f'Failed to emit log record :{e}')
             self.handleError(record)
 
 
@@ -268,3 +307,4 @@ class IProjectAgents(ABC):
     @abstractmethod
     def Get_Project_Agents(self, config: Config) -> Agents:
         pass
+

@@ -3,9 +3,10 @@ from dataclasses import dataclass
 import json
 import os
 from pathlib import Path
+import random
 import threading
 import time
-from typing import List
+from typing import Annotated, List
 from autogen_core import (
     CancellationToken,
     AgentId,
@@ -27,13 +28,14 @@ from autogen_core import (
 from autogen_agentchat.agents import AssistantAgent
 from autogen_agentchat.teams import RoundRobinGroupChat
 from autogen_agentchat.ui import Console
+from autogen_core.tools import FunctionTool
 
 from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
 from autogen_agentchat.messages import TextMessage, ChatMessage
 from autogen_agentchat.base import Response
 from jinja2 import Environment, FileSystemLoader
 import jsonpickle
-from ingenious.ingenious_extensions_template.models.ag_agents import RelayAgent, RoutedAssistantAgent, RoutedResponseOutputAgent
+from ingenious.models.ag_agents import RelayAgent, RoutedAssistantAgent, RoutedResponseOutputAgent
 from ingenious.utils.namespace_utils import get_path_from_namespace_with_fallback
 from ingenious.services.chat_services.multi_agent.service import IConversationFlow
 from ingenious.models.chat import ChatRequest, ChatResponse
@@ -102,19 +104,26 @@ class ConversationFlow(IConversationFlow):
         # In this sample I'll first define my topic agents
         runtime = SingleThreadedAgentRuntime()
 
-        async def register_research_agent(agent_name: str):
+        async def get_bike_price(ticker: str, date: Annotated[str, "Date in YYYY/MM/DD"]) -> float:
+            # Returns a random stock price for demonstration purposes.
+            return random.uniform(10, 200)
+        
+        bike_price_tool = FunctionTool(get_bike_price, description="Get the bike price.")
+
+        async def register_research_agent(agent_name: str, tools: List[FunctionTool] = [], next_agent_topic: str = None):   
             agent = agents.get_agent_by_name(agent_name=agent_name)
             reg_agent = await RoutedAssistantAgent.register(
                 runtime=runtime,
                 type=agent.agent_name,
-                factory=lambda: RoutedAssistantAgent(agent=agent, data_identifier=identifier, next_agent_topic="user_proxy")
+                factory=lambda: RoutedAssistantAgent(agent=agent, data_identifier=identifier, next_agent_topic=next_agent_topic, tools=tools)
             )
             await runtime.add_subscription(
                 TypeSubscription(topic_type=agent_name, agent_type=reg_agent.type)
             )
 
-        await register_research_agent(agent_name="customer_sentiment_agent")
-        await register_research_agent(agent_name="fiscal_analysis_agent")
+        await register_research_agent(agent_name="customer_sentiment_agent", next_agent_topic="user_proxy")
+        await register_research_agent(agent_name="fiscal_analysis_agent", next_agent_topic="user_proxy")
+        await register_research_agent(agent_name="bike_lookup_agent", tools=[bike_price_tool], next_agent_topic=None)
 
         user_proxy = await RelayAgent.register(
             runtime,
@@ -130,21 +139,22 @@ class ConversationFlow(IConversationFlow):
                 TypeSubscription(topic_type="user_proxy", agent_type=user_proxy.type)
             )
 
-        async def register_output_agent(agent_name: str):
+        async def register_output_agent(agent_name: str, next_agent_topic: str = None):
             agent = agents.get_agent_by_name(agent_name=agent_name)
             summary = await RoutedResponseOutputAgent.register(
                 runtime,
                 agent.agent_name,
                 lambda: RoutedResponseOutputAgent(
                     agent=agent,
-                    data_identifier=identifier
+                    data_identifier=identifier,
+                    next_agent_topic=next_agent_topic,
                 ),
             )
             await runtime.add_subscription(
                 TypeSubscription(topic_type=agent_name, agent_type=summary.type)
             )
 
-        await register_output_agent(agent_name="summary")
+        await register_output_agent(agent_name="summary", next_agent_topic="bike_lookup_agent")
 
         results = []
         tasks = []

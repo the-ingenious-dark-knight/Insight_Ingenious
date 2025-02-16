@@ -30,7 +30,7 @@ from ingenious_prompt_tuner.utilities import (
     utils_class,
     get_selected_revision_direct_call,
 )
-
+import jsonpickle
 # Authentication Helpers
 
 bp = Blueprint("responses", __name__, url_prefix="/responses")
@@ -147,8 +147,17 @@ def get_agent_response():
     )
     agent_chat: AgentChat = AgentChat(**json.loads(agent_response_md))
     
+    message_content = agent_chat.chat_response.chat_message.content
+    if agent_chat.chat_response.inner_messages:
+        message_content += "\n\n### Inner Messages \n\n"
+        message_content += "```json\n" + agent_chat.model_dump_json(
+            include={'chat_response'},
+            #exclude={'chat_response': {'chat_message'}},
+            indent=4
+        ) + "\n\n```"
+
     html_content = markdown.markdown(
-        agent_chat.chat_response.chat_message.content,
+        message_content,
         extensions=["extra", "md_in_html", "toc", "fenced_code", "codehilite"],
     )
 
