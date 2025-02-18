@@ -36,7 +36,7 @@ class ProjectAgents(IProjectAgents):
         )
         local_agents.append(
             Agent(
-                agent_name="summary_agent",
+                agent_name="summary",
                 agent_model_name="gpt-4o",
                 agent_display_name="Summarizer",
                 agent_description="A sample agent.",
@@ -60,5 +60,21 @@ class ProjectAgents(IProjectAgents):
                 return_in_response=False
             )
         )
+        local_agents.append(
+            Agent(
+                agent_name="bike_lookup_agent",
+                agent_model_name="gpt-4o",
+                agent_display_name="bike_lookup_agent",
+                agent_description="A sample agent.",
+                agent_type="user_proxy",
+                model=None,
+                system_prompt=None,
+                log_to_prompt_tuner=True,
+                return_in_response=False
+            )
+        )
+
+
+        
 
         return Agents(agents=local_agents, config=config)

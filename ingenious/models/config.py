@@ -106,18 +106,16 @@ class AuthenticationMethod(str, Enum):
     MSI = "msi"
     CLIENT_ID_AND_SECRET = "client_id_and_secret"
     DEFAULT_CREDENTIAL = "default_credential"
+    TOKEN = "token"
 
 
-class FileStorage(config_ns_models.FileStorage):
+class FileStorageContainer(config_ns_models.FileStorageContainer):
     url: str = Field("", description="File Storage SAS URL")    
     client_id: str = Field("", description="File Storage SAS Client ID")
     token: str = Field("", description="File Storage SAS Token")
     authentication_method: AuthenticationMethod = Field(AuthenticationMethod.DEFAULT_CREDENTIAL, description="File Storage SAS Authentication Method")
 
-    def __init__(
-            self,
-            config: config_ns_models.FileStorage,
-            profile: profile_models.FileStorage):
+    def __init__(self, config: config_ns_models.FileStorageContainer, profile: profile_models.FileStorageContainer):
         super().__init__(
             enable=config.enable,
             storage_type=config.storage_type,
@@ -128,6 +126,17 @@ class FileStorage(config_ns_models.FileStorage):
         self.token = profile.token
         self.client_id = profile.client_id
         self.authentication_method = profile.authentication_method
+
+
+class FileStorage(config_ns_models.FileStorage):
+    revisions: FileStorageContainer = Field(default_factory=FileStorageContainer, description="File Storage configuration for revisions")
+    data: FileStorageContainer = Field(default_factory=FileStorageContainer, description="File Storage configuration for data")
+
+    def __init__(self, config: config_ns_models.FileStorage, profile: profile_models.FileStorage):
+        super().__init__(
+            revisions=FileStorageContainer(config.revisions, profile.revisions),
+            data=FileStorageContainer(config.data, profile.data)
+        )
 
 
 class Config(BaseModel):

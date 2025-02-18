@@ -54,9 +54,11 @@ ingenious/ingenious_extensions_template/services/chat_services/__init__.py
 ingenious/ingenious_extensions_template/services/chat_services/multi_agent/conversation_flows/bike_insights/bike_insights.py
 ingenious/ingenious_extensions_template/templates/readme.md
 ingenious/ingenious_extensions_template/templates/prompts/__init__.py
+ingenious/ingenious_extensions_template/templates/prompts/bike_lookup_agent_prompt.jinja
 ingenious/ingenious_extensions_template/templates/prompts/customer_sentiment_agent_prompt.jinja
 ingenious/ingenious_extensions_template/templates/prompts/fiscal_analysis_agent_prompt.jinja
 ingenious/ingenious_extensions_template/templates/prompts/summary_agent_prompt.jinja
+ingenious/ingenious_extensions_template/templates/prompts/summary_prompt.jinja
 ingenious/ingenious_extensions_template/tests/flask_app_index.html
 ingenious/ingenious_extensions_template/tests/readme.md
 ingenious/ingenious_extensions_template/tests/run_api_tests.py
@@ -65,6 +67,7 @@ ingenious/ingenious_extensions_template/tests/run_ingen_cli.py
 ingenious/ingenious_extensions_template/tests/run_tests.py
 ingenious/ingenious_extensions_template/tests/run_tests_flat.py
 ingenious/models/__init__.py
+ingenious/models/ag_agents.py
 ingenious/models/agent.py
 ingenious/models/api_routes.py
 ingenious/models/ca_raw_fixture_data.py
@@ -75,6 +78,7 @@ ingenious/models/database_client.py
 ingenious/models/file_storage_client.py
 ingenious/models/functional_tests.py
 ingenious/models/http_error.py
+ingenious/models/llm_event_kwargs.py
 ingenious/models/message.py
 ingenious/models/message_feedback.py
 ingenious/models/profile.py

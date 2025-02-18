@@ -66,13 +66,19 @@ class AuthenticationMethod(str, Enum):
     MSI = "msi"
     CLIENT_ID_AND_SECRET = "client_id_and_secret"
     DEFAULT_CREDENTIAL = "default_credential"
+    TOKEN = "token"
 
 
-class FileStorage(BaseModel):
+class FileStorageContainer(BaseModel):
     url: str = Field("", description="File Storage SAS URL")    
     client_id: str = Field("", description="File Storage SAS Client ID")
     token: str = Field("", description="File Storage SAS Token")
     authentication_method: AuthenticationMethod = Field(AuthenticationMethod.DEFAULT_CREDENTIAL, description="File Storage SAS Authentication Method")
+
+
+class FileStorage(BaseModel):
+    revisions: FileStorageContainer = Field(default_factory=FileStorageContainer, description="File Storage configuration for revisions")
+    data: FileStorageContainer = Field(default_factory=FileStorageContainer, description="File Storage configuration for data")
 
 
 class Profile(BaseModel):

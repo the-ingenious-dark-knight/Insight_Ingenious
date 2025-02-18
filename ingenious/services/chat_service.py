@@ -60,9 +60,6 @@ class ChatService(IChatService):
         )
 
     async def get_chat_response(self,  chat_request: ChatRequest) -> ChatResponse:
-        # Sync the prompt templates
-        await Sync_Prompt_Templates(self.config, revision=self.revision)
-
         if not chat_request.conversation_flow:
             raise ValueError(f"conversation_flow not set {chat_request}")
         return await self.service_class.get_chat_response(chat_request)

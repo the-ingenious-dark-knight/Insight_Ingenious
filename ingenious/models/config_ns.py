@@ -57,7 +57,7 @@ class LocaldbConfig(BaseModel):
     sample_database_name: str = Field("sample_sql_db", description="Sample database name")
 
 
-class FileStorage(BaseModel):
+class FileStorageContainer(BaseModel):
     enable: bool = Field(
         True,
         description="Enables or Disables File Storage"
@@ -74,6 +74,11 @@ class FileStorage(BaseModel):
         "./",
         description="Path to the file storage. Used for local storage and Azure storage."
     )
+
+
+class FileStorage(BaseModel):
+    revisions: FileStorageContainer = Field(default_factory=lambda: FileStorageContainer(enable=True, storage_type='local', container_name="", path="./"), description="File Storage configuration")
+    data: FileStorageContainer = Field(default_factory=lambda: FileStorageContainer(enable=True, storage_type='local', container_name="", path="./"), description="File Storage configuration")
 
 
 class Config(BaseModel):

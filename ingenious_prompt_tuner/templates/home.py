@@ -93,6 +93,7 @@ def create_revision():
 
         utils.get_functional_tests_folder(new_revision["name"])
         utils.get_prompt_template_folder(new_revision["name"])
+        utils.get_data_folder(new_revision["name"])
 
         return redirect(url_for("index.home"))
     return render_template("revisions/create_revision.html")
@@ -159,5 +160,6 @@ def sync_sample_data():
     utils: utils_class = current_app.utils
     revision_id = get_selected_revision_direct_call()
     asyncio.run(utils.get_functional_tests_folder(revision_id, force_copy_from_source=True))
+    asyncio.run(utils.get_data_folder(revision_id, force_copy_from_source=True))
     # Return ok 
     return 'OK'

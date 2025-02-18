@@ -30,7 +30,7 @@ from ingenious_prompt_tuner.utilities import (
     utils_class,
     get_selected_revision_direct_call,
 )
-
+import jsonpickle
 # Authentication Helpers
 
 bp = Blueprint("responses", __name__, url_prefix="/responses")
@@ -101,7 +101,7 @@ def rerun_event():
         file_name = request.args.get("file_name", type=str)
         
         # Events are locked in source code and copied to the output folder each time.
-        events: Events = asyncio.run(utils.get_events())
+        events: Events = asyncio.run(utils.get_events(revision_id=get_selected_revision_direct_call()))
         event = events.get_event_by_identifier(identifier)
         
         ft = functional_tests(
@@ -113,7 +113,7 @@ def rerun_event():
         asyncio.run(
             ft.run_event_from_pre_processed_file(
                 identifier=identifier,
-                event_type=event.event_type,
+                event_type=event_type,
                 file_name=file_name,
                 agents=agents,
                 conversation_flow=event.conversation_flow
@@ -145,24 +145,39 @@ def get_agent_response():
     agent_response_md = asyncio.run(
         utils.fs.read_file(file_name=file_name, file_path=output_path)
     )
-    agent_chat: AgentChat = AgentChat(**json.loads(agent_response_md))
     
-    html_content = markdown.markdown(
-        agent_chat.chat_response.chat_message.content,
-        extensions=["extra", "md_in_html", "toc", "fenced_code", "codehilite"],
-    )
+    if agent_response_md == "" or agent_response_md is None:
+        agent_response_md1 = """
+            <div class="markdown-content" markdown='1'><p>No response found - this agent may not be used for this event type</p></div>
+        """
+    else:
+        agent_chat: AgentChat = AgentChat(**json.loads(agent_response_md))
+        
+        message_content = agent_chat.chat_response.chat_message.content
+        if agent_chat.chat_response.inner_messages:
+            message_content += "\n\n### Inner Messages \n\n"
+            message_content += "```json\n" + agent_chat.model_dump_json(
+                include={'chat_response'},
+                #exclude={'chat_response': {'chat_message'}},
+                indent=4
+            ) + "\n\n```"
 
-    agent_response_md1 = render_template(
-        "responses/agent_response.html",
-        agent_response=html_content,
-        prompt_tokens=agent_chat.prompt_tokens,
-        completion_tokens=agent_chat.completion_tokens,
-        identifier=identifier,
-        event_type=event_type,
-        agent_name=agent_chat.target_agent_name,
-        execution_time=agent_chat.get_execution_time_formatted(),
-        start_time=agent_chat.get_start_time_formatted()
-    )
+        html_content = markdown.markdown(
+            message_content,
+            extensions=["extra", "md_in_html", "toc", "fenced_code", "codehilite"],
+        )
+
+        agent_response_md1 = render_template(
+            "responses/agent_response.html",
+            agent_response=html_content,
+            prompt_tokens=agent_chat.prompt_tokens,
+            completion_tokens=agent_chat.completion_tokens,
+            identifier=identifier,
+            event_type=event_type,
+            agent_name=agent_chat.target_agent_name,
+            execution_time=agent_chat.get_execution_time_formatted(),
+            start_time=agent_chat.get_start_time_formatted()
+        )
     return agent_response_md1
 
 
