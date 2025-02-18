@@ -16,6 +16,9 @@ class azure_FileStorageRepository(IFileStorage):
         self.container_name = fs_config.container_name
         self.authentication_method = fs_config.authentication_method
 
+        if self.authentication_method == file_storage_AuthenticationMethod.TOKEN:
+            self.blob_service_client = BlobServiceClient(account_url=self.url, credential=self.token)
+        
         if self.authentication_method == file_storage_AuthenticationMethod.CLIENT_ID_AND_SECRET:
             cred = ClientSecretCredential(self.client_id, self.token)
             self.blob_service_client = BlobServiceClient(account_url=self.url, credential=cred)

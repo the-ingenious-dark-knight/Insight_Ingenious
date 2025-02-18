@@ -106,6 +106,7 @@ class AuthenticationMethod(str, Enum):
     MSI = "msi"
     CLIENT_ID_AND_SECRET = "client_id_and_secret"
     DEFAULT_CREDENTIAL = "default_credential"
+    TOKEN = "token"
 
 
 class FileStorageContainer(config_ns_models.FileStorageContainer):
