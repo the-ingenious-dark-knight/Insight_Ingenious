@@ -215,8 +215,9 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <!-- End Modal -->
 
 <br/>
-<div class="alert alert-primary" role="alert">
+<div class="alert alert-primary alert-dismissible fade show" role="alert">
     <h4 class="alert-heading">Agent Responses</h4>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     <p> Use this page to view and regenerate agent responses.</p>
 </div>
 <div class="collapse" id="advSettingsSection">
@@ -275,6 +276,16 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
             }, 10); // Adjust the timeout as needed
     }
     function get_agent_response(identifier, event_type, agent_name) {
+        const buttonId = `${identifier}_${event_type}_${agent_name}`;
+        const button = document.getElementById(buttonId);
+        const spinner = button.querySelector('.spinner-border');
+        const icon = button.querySelector('.icon');
+
+        // Disable the button and show the spinner
+        button.disabled = true;
+        spinner.style.display = 'inline-block';
+        icon.style.display = 'none';
+
         fetch(`{{ url_for('responses.get_agent_response') }}?identifier=${identifier}&agent_name=${agent_name}&event_type=${event_type}`)
         .then(response => response.text())
         .then(html => {
@@ -283,35 +294,43 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
         modal.id = 'agentResponseModal';
         modal.tabIndex = -1;
         modal.innerHTML = `
-            <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-            <div class="modal-header">
-            <h5 class="modal-title">Agent Response</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-            ${html}
-            </div>
-            <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-            </div>
-            </div>
-        `;
-        document.body.appendChild(modal);
+                <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                <div class="modal-header">
+                <h5 class="modal-title">Agent Response</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                ${html}
+                </div>
+                <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+                </div>
+                </div>
+            `;
         
-        init_tooltips();
+            document.body.appendChild(modal);
+            
+            init_tooltips();
 
-        const bootstrapModal = new bootstrap.Modal(modal);
-        bootstrapModal.show();
-        modal.addEventListener('hidden.bs.modal', () => {
-            document.body.removeChild(modal);
-        });
+            const bootstrapModal = new bootstrap.Modal(modal);
+            bootstrapModal.show();
+            modal.addEventListener('hidden.bs.modal', () => {
+                document.body.removeChild(modal);
+            });
         })
         .catch(err => {
         console.error('Error fetching agent response:', err);
         alert('Error fetching agent response. Please try again later.');
-        });
+        })
+        .finally( r => {
+                // Re-enable the button and hide the spinner
+                button.disabled = false;
+                spinner.style.display = 'none';
+                icon.style.display = 'inline-block';
+            }
+        );
     }
 
     function get_agent_inputs(identifier, event_type, agent_name, input_type) {

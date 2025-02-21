@@ -1,4 +1,4 @@
-<div class="event card border-primary" id='{{ identifier }}_{{ event_type }}'>
+<div class="event card border-primary focus-ring" id='{{ identifier }}_{{ event_type }}'>
     <div class="data_file_heading card-header">
         <div class="row">
             <div class="col">
@@ -17,9 +17,10 @@
                     </div>
                     <div class="btn-group me-2" role="group">        
                         {% for agent in agents %}    
-                        <button class="btn btn-primary" 
+                        <button class="btn btn-primary" id="{{ identifier }}_{{ event_type }}_{{ agent.agent_name }}" 
                                 data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="View the response for the {{ agent.agent_name }}"
                                 onclick="get_agent_response('{{ identifier  }}', '{{ event_type }}', '{{ agent.agent_name }}')">
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
                             <i class="fa-solid fa-comment-dots icon"></i>{{ loop.index }}
                         </button>
                         {% endfor %}
