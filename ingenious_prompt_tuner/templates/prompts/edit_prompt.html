@@ -8,6 +8,15 @@
 {% endblock %}
 
 {% block content %}
+<div class="alert alert-primary alert-dismissible fade show" role="alert">
+    <h4 class="alert-heading">Prompts</h4>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <p>Use this page edit the agent prompts</p>
+    <p><em>Note: The prompt template folder is: {{ prompt_template_folder }}</em>
+    </p>
+    
+</div>
+
 <h3 class="header-space" >Editing: {{ filename }}</h3>
 <form method="POST">
     <div id="toolbar"></div>

@@ -53,8 +53,8 @@ def home():
         revisions = yaml.safe_load(revisions_str)
     else:
         return redirect(url_for("index.create_revision"))
-
-    return render_template("home.html", files=revisions)
+    base_folder = asyncio.run(utils.fs.get_base_path()) + '/' + str(current_app.config["revisions_folder"])
+    return render_template("home.html", files=revisions, base_folder=base_folder)
 
 
 @bp.route("/create_revision", methods=["GET", "POST"])

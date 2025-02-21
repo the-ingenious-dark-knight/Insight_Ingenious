@@ -33,8 +33,8 @@ def edit(filename):
             file_path=prompt_template_folder
             )
         )
-
-        return render_template('/prompts/edit_prompt.html', filename=filename, content=content)
+        base_path = asyncio.run(utils.fs.get_base_path()) / Path(prompt_template_folder)
+        return render_template('/prompts/edit_prompt.html', filename=filename, content=content, prompt_template_folder=base_path)
 
 
 @bp.route('/list')
@@ -54,4 +54,5 @@ def list():
         ])
     except FileNotFoundError:
         files = []
-    return render_template('prompts/view_prompts.html', files=files)
+    base_path = asyncio.run(utils.fs.get_base_path()) / Path(prompt_template_folder)
+    return render_template('prompts/view_prompts.html', files=files, prompt_template_folder=base_path)

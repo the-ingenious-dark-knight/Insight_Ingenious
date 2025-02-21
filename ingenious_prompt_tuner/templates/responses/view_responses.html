@@ -194,6 +194,11 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 {% endblock %}
 
 {% block content %}
+
+<div id="spinner" class="spinner-border" role="status">
+    <span class="visually-hidden">Loading...</span>
+</div> 
+
 <!-- Modal -->
 <div class="modal fade"  id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
@@ -266,6 +271,9 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <!-- DataTables JS -->
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/2.2.1/js/dataTables.min.js"></script>
 <script>
+    window.addEventListener('load', function() {
+        document.getElementById('spinner').style.display = 'none';
+    });
     function init_datatables() {
             setTimeout(function() {
                 if (!$.fn.DataTable.isDataTable('table')) {

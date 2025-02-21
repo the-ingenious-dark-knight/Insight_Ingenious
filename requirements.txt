@@ -1,3 +1,4 @@
+
 Jinja2==3.1.4
 annotated-types==0.7.0
 azure-core==1.30.2
@@ -23,6 +24,8 @@ matplotlib==3.9.2
 numpy==1.26.4
 openai==1.59.6
 pandas==2.2.3
+autogen-agentchat==0.4.2
+autogen-ext[openai]==0.4.2
 pydantic==2.10.6
 pyodbc==5.2.0
 pypdf==4.3.1
