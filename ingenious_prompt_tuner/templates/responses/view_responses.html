@@ -195,7 +195,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 {% block content %}
 
-<div id="spinner" class="spinner-border" role="status">
+<div id="spinner" class="spinner-border" role="status" style="display: block; margin: 0 auto;">
     <span class="visually-hidden">Loading...</span>
 </div> 
 
@@ -389,7 +389,12 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
     function refreshResponses() {
         const responsesContainer = document.getElementById('responsesContainer');
-
+        responsesContainer.innerHTML =`
+        <div class="d-flex align-items-center">
+            <strong role="status">Loading...</strong>
+            <div class="spinner-border ms-auto" aria-hidden="true"></div>
+        </div>
+        `;
         fetch('{{ url_for("responses.get_responses") }}')
             .then(response => {
                 if (!response.ok) {
@@ -431,6 +436,15 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     }
 
     function getFileContent(identifier, event_type) {
+        const contentElement = $('#' + identifier + '_' + event_type + ' .markdown-content');
+        contentElement.html(`
+        <div class="d-flex align-items-center">
+            <strong role="status">Loading...</strong>
+            <div class="spinner-border ms-auto" aria-hidden="true"></div>
+        </div>
+        `);
+
+
         $.ajax({
             url: '{{ url_for("responses.get_agent_response_from_file") }}',
             type: 'POST',

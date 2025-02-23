@@ -517,10 +517,15 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
     async def get_thread_messages(self, thread_id: str) -> list[Message]:
         cursor = self.connection.cursor()
         cursor.execute('''
-            SELECT user_id, thread_id, message_id, positive_feedback, timestamp, role, content, content_filter_results, tool_calls, tool_call_id, tool_call_function
-            FROM chat_history
-            WHERE thread_id = ?
-            ORDER BY timestamp
+            SELECT *
+            FROM (
+                SELECT user_id, thread_id, message_id, positive_feedback, timestamp, role, content, content_filter_results, tool_calls, tool_call_id, tool_call_function
+                FROM chat_history
+                WHERE thread_id = ?
+                ORDER BY timestamp DESC
+                LIMIT 5
+            ) AS last_five
+            ORDER BY timestamp ASC;
         ''', (thread_id,))
         rows = cursor.fetchall()
         return [Message(

@@ -148,7 +148,7 @@ class RelayAgent(RoutedAgent):
 
 
 class RoutedResponseOutputAgent(RoutedAgent, ABC):
-    def __init__(self, agent: Agent, data_identifier: str, next_agent_topic: str = None) -> None:
+    def __init__(self, agent: Agent, data_identifier: str, next_agent_topic: str = None, additional_data: str = '') -> None:
         super().__init__(agent.agent_name)
         self._next_agent_topic = next_agent_topic
         model_client = AzureOpenAIChatCompletionClient(**agent.model.__dict__)
@@ -161,6 +161,7 @@ class RoutedResponseOutputAgent(RoutedAgent, ABC):
         self._delegate = assistant_agent
         self._agent: Agent = agent
         self._data_identifier = data_identifier
+        self._additional_data = additional_data
 
     @message_handler
     async def handle_my_message_type(
@@ -169,7 +170,7 @@ class RoutedResponseOutputAgent(RoutedAgent, ABC):
         """
             Receives the message and sends it to the assistant agent to make a llm call. It then calls publish message to send the response to the next agent.
         """
-        content = message.content
+        content = message.content + '\n\n' + self._additional_data
         agent_chat = self._agent.add_agent_chat(
             content=content,
             identifier=self._data_identifier,
