@@ -4,9 +4,13 @@
 
 {% block content %}
 <br/>
-<div class="alert alert-primary" role="alert">
+<div class="alert alert-primary alert-dismissible fade show" role="alert">
     <h4 class="alert-heading">Prompts</h4>
-    <p> Use this page to view and edit the agent prompts.</p>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <p>Use this page to view and edit the agent prompts.</p>
+    <p><em>Note: The prompt template folder is: {{ prompt_template_folder }}</em>
+    </p>
+    
 </div>
 <div class="list-group">
     {% for file in files %}

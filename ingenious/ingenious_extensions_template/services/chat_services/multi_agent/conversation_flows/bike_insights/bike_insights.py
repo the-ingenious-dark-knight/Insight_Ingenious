@@ -47,7 +47,7 @@ from ingenious.models.agent import (
     AgentChats,
 )
 import logging
-
+from ingenious.models.message import Message as ChatHistoryMessage
 # Custom class import from ingenious_extensions
 from ingenious.ingenious_extensions_template.models.agent import ProjectAgents
 from ingenious.ingenious_extensions_template.models.bikes import RootModel
@@ -139,6 +139,15 @@ class ConversationFlow(IConversationFlow):
                 TypeSubscription(topic_type="user_proxy", agent_type=user_proxy.type)
             )
 
+        # Optionally inject the chat history into the conversation flow so that you can avoid duplicate responses
+        hist_itr = await self._chat_service.chat_history_repository.get_thread_messages(
+            thread_id=chat_request.thread_id)        
+        hist_join = ['']
+        for h in hist_itr:
+            if h.role == "output":
+                hist_join.append(h.content)                
+        hist_str = '# Chat History \n\n' + '``` json\n\n " ' + json.dumps(hist_join)
+        
         async def register_output_agent(agent_name: str, next_agent_topic: str = None):
             agent = agents.get_agent_by_name(agent_name=agent_name)
             summary = await RoutedResponseOutputAgent.register(
@@ -148,6 +157,7 @@ class ConversationFlow(IConversationFlow):
                     agent=agent,
                     data_identifier=identifier,
                     next_agent_topic=next_agent_topic,
+                    additional_data=hist_str
                 ),
             )
             await runtime.add_subscription(
@@ -182,11 +192,28 @@ class ConversationFlow(IConversationFlow):
         # Lastly return your chat response object
         chat_response = ChatResponse(
             thread_id=chat_request.thread_id,
-            message_id="",
+            message_id=identifier,
             agent_response=jsonpickle.encode(unpicklable=False, value=llm_logger._queue),
             token_count=llm_logger.prompt_tokens,
             max_token_count=0,
             memory_summary=""
         )
+
+        summary_response: AgentChat = next(l for l in llm_logger._queue if l.chat_name == "summary")
+        
+        message: ChatHistoryMessage = ChatHistoryMessage(
+            user_id=chat_request.user_id,
+            thread_id=chat_request.thread_id,
+            message_id=identifier,
+            role="output",
+            # Get the item from the queue where chat_name = "summary"
+            content=summary_response.chat_response.chat_message.content,
+            content_filter_results=None,
+            tool_calls=None,
+            tool_call_id=None,
+            tool_call_function=None
+        ) 
+
+        _ = await self._chat_service.chat_history_repository.add_message(message=message)
 
         return chat_response

@@ -51,35 +51,25 @@ class multi_agent_chat_service:
         # Check if thread exists
         if not chat_request.thread_id:
             chat_request.thread_id = str(uuid.uuid4())
-        else:
-            # Get thread messages & add to messages list
-            thread_messages = await self.chat_history_repository.get_thread_messages(chat_request.thread_id)
-            chat_request.thread_memory = 'no existing context.'
+            
+        # Get thread messages & add to messages list
+        thread_messages = await self.chat_history_repository.get_thread_messages(chat_request.thread_id)
+        chat_request.thread_memory = 'no existing context.'
 
-            msg = f'current_memory: {chat_request.thread_memory}'
-            logger.log(level=logging.INFO, msg=msg)
-            # print(msg)
+        msg = f'current_memory: {chat_request.thread_memory}'
+        logger.log(level=logging.INFO, msg=msg)
+        # print(msg)
 
-            for thread_message in thread_messages:
-                # Validate user_id
-                # if thread_message.user_id != chat_request.user_id:
-                #     raise ValueError("User ID does not match thread messages.")
+        for thread_message in thread_messages:
+            # Validate user_id
+            # if thread_message.user_id != chat_request.user_id:
+            #     raise ValueError("User ID does not match thread messages.")
 
-                # Validate content_filter_results not present
-                if thread_message.content_filter_results:
-                    raise ContentFilterError(content_filter_results=thread_message.content_filter_results)
+            # Validate content_filter_results not present
+            if thread_message.content_filter_results:
+                raise ContentFilterError(content_filter_results=thread_message.content_filter_results)
 
-                chat_request.thread_chat_history.append({"role": thread_message.role, "content": thread_message.content})
-
-        # Add latest user message
-        user_message = build_user_message(chat_request.user_prompt, chat_request.user_name)
-        _ = await self.chat_history_repository.add_message(
-            Message(
-                user_id=chat_request.user_id,
-                thread_id=chat_request.thread_id,
-                role=user_message["role"],
-                content=str(user_message["content"]))
-        )
+            chat_request.thread_chat_history.append({"role": thread_message.role, "content": thread_message.content})
 
         try:
             # call specific agent flow here and get final response
@@ -92,7 +82,7 @@ class multi_agent_chat_service:
 
             conversation_flow_service_class: IConversationFlow = import_class_with_fallback(module_name, class_name)
 
-            conversation_flow_service_class_instance = conversation_flow_service_class()
+            conversation_flow_service_class_instance = conversation_flow_service_class(parent_multi_agent_chat_service=self)
             
             response_task = conversation_flow_service_class_instance.get_conversation_response(
                 chat_request=chat_request
@@ -175,13 +165,15 @@ class IConversationFlow(ABC):
     _memory_path: str
     _memory_file_path: str
     _logger: logging.Logger
+    _chat_service: multi_agent_chat_service
 
-    def __init__(self):
+    def __init__(self, parent_multi_agent_chat_service: multi_agent_chat_service):
         super().__init__()
         self._config = ig_config.get_config()
         self._memory_path = self.GetConfig().chat_history.memory_path
         self._memory_file_path = f"{self._memory_path}/context.md"
         self._logger = logging.getLogger(__name__)
+        self._chat_service = parent_multi_agent_chat_service
         
     def GetConfig(self):
         return self._config

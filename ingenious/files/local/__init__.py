@@ -91,3 +91,11 @@ class local_FileStorageRepository(IFileStorage):
         except Exception as e:
             print(f"Failed to check if {file_name} exists in {path}: {e}")
             return False
+
+    async def get_base_path(self) -> str:
+        """
+        Get the base path of the local file storage.
+
+        :return: Base path of the local file storage.
+        """
+        return self.base_path

@@ -63,7 +63,7 @@ class utils_class:
         if self.prompt_template_folder is None or force_copy_from_source:
             source_prompt_folder = get_path_from_namespace_with_fallback("templates/prompts")
             target_prompt_folder = f"templates/prompts/{revision_id}"
-            if (await self.fs.list_files(target_prompt_folder) is None) or force_copy_from_source:
+            if (await self.fs.list_files(source_prompt_folder) is None) or force_copy_from_source:
                 print("No prompts found in the revision prompts folder")
                 print("Copying prompts from the template folder to the prompts folder")
                 for file in os.listdir(source_prompt_folder):
@@ -80,15 +80,30 @@ class utils_class:
         if revision_id is None:
             revision_id = get_selected_revision_direct_call()
         if self.functional_tests_folder is None or force_copy_from_source:
-            source_folder = get_path_from_namespace_with_fallback("sample_data")
+            source_folder_code = get_path_from_namespace_with_fallback("sample_data")            
+            source_files_code = os.listdir(source_folder_code)
             target_folder = f"functional_test_outputs/{revision_id}"
-            if (await self.fs.list_files(target_folder) is None) or force_copy_from_source:
-                for file in os.listdir(source_folder):
-                    if ".md" in file or ".yml" in file:
+
+            # filter files to exclude readme.md 
+            source_files_filtered = []
+            for file in source_files_code:
+                if "readme.md" not in file:
+                    source_files_filtered.append(file)
+
+            if (len(source_files_filtered) == 0) or force_copy_from_source:
+                print("No data found in the revision prompts folder")
+                print("Copying data from the sample_data folder in source")
+                for file in source_files_filtered:
+                    if ".md" in file or ".yml" or '.json' in file:
                         # read the file and write it to the local_files
-                        with open(f"{source_folder}/{file}", "r") as f:
+                        with open(f"{source_folder_code}/{file}", "r") as f:
                             content = f.read()
-                            await self.fs.write_file(content, file, target_folder)
+                            if file == "events.yml":
+                                # write the event file to the same location as the prompts
+                                await self.fs.write_file(content, file, target_folder)
+                            else:
+                                # write any data files to the data folder
+                                await self.fs_data.write_file(content, file, target_folder)
             self.functional_tests_folder = target_folder
 
         return self.functional_tests_folder

@@ -139,3 +139,11 @@ class azure_FileStorageRepository(IFileStorage):
         except Exception as e:
             print(f"Failed to check if blob {path} exists in container {self.container_name}: {e}")
             return False
+        
+    async def get_base_path(self) -> str:
+        """
+        Get the base path of the Azure Blob container.
+
+        :return: Base path of the Azure Blob container.
+        """
+        return self.url + '/' + self.fs_config.path

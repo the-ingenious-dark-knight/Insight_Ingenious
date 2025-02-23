@@ -33,6 +33,11 @@ class IFileStorage(ABC):
         """ checks if a file exists in the file storage """
         pass
 
+    @abstractmethod
+    async def get_base_path(self) -> str:
+        """ returns the base path of the file storage """
+        pass
+
 
 class FileStorage:
 
@@ -63,6 +68,9 @@ class FileStorage:
 
     async def write_file(self, contents: str, file_name: str, file_path: str):
         return await self.repository.write_file(contents=contents, file_name=file_name, file_path=file_path)
+
+    async def get_base_path(self):
+        return await self.repository.get_base_path()
 
     async def read_file(self, file_name: str, file_path: str):
         return await self.repository.read_file(file_name, file_path)

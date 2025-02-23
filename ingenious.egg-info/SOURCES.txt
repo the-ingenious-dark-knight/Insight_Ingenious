@@ -40,7 +40,6 @@ ingenious/files/files_repository.py
 ingenious/files/azure/__init__.py
 ingenious/files/local/__init__.py
 ingenious/ingenious_extensions_template/__init__.py
-ingenious/ingenious_extensions_template/config.yml
 ingenious/ingenious_extensions_template/readme.md
 ingenious/ingenious_extensions_template/api/readme.md
 ingenious/ingenious_extensions_template/api/routes/custom.py

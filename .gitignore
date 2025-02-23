@@ -20,3 +20,4 @@ __pycache__
 /guardrails/.guard_venv/
 /guardrails/.venv/
 config.yml
+/.tmp
