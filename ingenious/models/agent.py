@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import asyncio
 from datetime import datetime, timedelta
-from autogen_core import CancellationToken, FunctionCall, MessageContext
+from autogen_core import CancellationToken, FunctionCall, MessageContext, SingleThreadedAgentRuntime, TypeSubscription
 from pydantic import BaseModel
 from ingenious.files.files_repository import FileStorage
 from ingenious.models.config import Config, ModelConfig
@@ -14,6 +14,8 @@ from autogen_core.models import FunctionExecutionResult
 from autogen_core.logging import LLMCallEvent
 from autogen_agentchat.base import Response
 from autogen_agentchat.messages import TextMessage, ChatMessage
+
+
 import json
 
 class AgentChat(BaseModel):
@@ -112,6 +114,7 @@ class Agent(BaseModel):
     agent_display_name: str
     agent_description: str
     agent_type: str
+    input_topics: list[str] = []
     model: Optional[ModelConfig] = None
     system_prompt: Optional[str] = None
     log_to_prompt_tuner: bool = True
@@ -196,6 +199,25 @@ class Agents(BaseModel):
             if agent.agent_name == agent_name:
                 return agent
         raise ValueError(f"Agent with name {agent_name} not found")
+
+    async def register_agent(
+                self, 
+                ag_class,
+                runtime: SingleThreadedAgentRuntime,
+                agent_name: str,
+                data_identifier: str,
+                next_agent_topic: str,
+                tools: List[Tool] = [] 
+            ):
+        agent = self.get_agent_by_name(agent_name=agent_name)
+        reg_agent = await ag_class.register(
+            runtime=runtime,
+            type=agent.agent_name,
+            factory=lambda: ag_class(agent=agent, data_identifier=data_identifier, next_agent_topic=next_agent_topic, tools=tools)
+        )
+        await runtime.add_subscription(
+            TypeSubscription(topic_type=agent_name, agent_type=reg_agent.type)
+        )
 
 
 class AgentMessage(BaseModel):
