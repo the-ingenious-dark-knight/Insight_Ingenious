@@ -224,6 +224,9 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <h4 class="alert-heading">Agent Responses</h4>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     <p> Use this page to view and regenerate agent responses.</p>
+    <button class="btn btn-danger" onclick="refreshAllResponses()">
+        <i class="bi bi-arrow-clockwise icon"></i> Refresh All Responses
+    </button>
 </div>
 <div class="collapse" id="advSettingsSection">
     <div class="card-body">
@@ -271,6 +274,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <!-- DataTables JS -->
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/2.2.1/js/dataTables.min.js"></script>
 <script>
+    fetchInProgress = false;
     window.addEventListener('load', function() {
         document.getElementById('spinner').style.display = 'none';
     });
@@ -387,6 +391,31 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
             document.getElementById('responsesSection').style.display = 'block';
     }
 
+    function refreshAllResponses() {
+        fetch('{{ url_for("responses.get_events") }}')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.text();
+            })
+            .then(async response => {
+                for (const event of JSON.parse(response)) {
+                    const eventType = event.event_type;
+                    const ballIdentifier = event.identifier;
+                    await reRunEventAsync(ballIdentifier, eventType, event.file_name);
+                    // wait for fetchInProgress to be false 
+                    while(fetchInProgress) {
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    }
+                }
+            })
+            .catch(err => {
+                responsesContainer.innerHTML = "<p class='text-danger'>Error loading responses. Please try again later.</p>";
+                console.error('Error fetching responses:', err);
+            });
+    }
+
     function refreshResponses() {
         const responsesContainer = document.getElementById('responsesContainer');
         responsesContainer.innerHTML =`
@@ -463,6 +492,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     }
 
     function reRunEventAsync(identifier, event_type, file_name) {
+        fetchInProgress = true;
         const contentElement = $('#' + identifier + '_' + event_type + ' .markdown-content');
         contentElement.html(`
         <div class="d-flex align-items-center">
@@ -480,6 +510,9 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
             error: function(error) {
                 console.error('Error fetching file content:', error);
                 contentElement.html('<p class="text-danger">Error loading content. Please try again later.</p>');
+            },
+            complete: function() {
+                fetchInProgress = false;
             }
         });
     }

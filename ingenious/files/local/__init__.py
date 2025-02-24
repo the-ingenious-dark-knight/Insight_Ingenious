@@ -98,4 +98,4 @@ class local_FileStorageRepository(IFileStorage):
 
         :return: Base path of the local file storage.
         """
-        return self.base_path
+        return str(self.base_path)

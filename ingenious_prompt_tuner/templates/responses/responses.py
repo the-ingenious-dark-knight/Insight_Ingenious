@@ -225,6 +225,36 @@ def get_agent_inputs():
     return agent_response_md1
 
 
+
+@bp.route("/get_events", methods=["GET"])
+@requires_auth
+@requires_selected_revision
+def get_events():
+    utils: utils_class = current_app.utils
+    files = []
+    try:
+        output_path = (
+            current_app.config["test_output_path"]
+            + f"/{get_selected_revision_direct_call()}"
+        )
+        if asyncio.run(
+            utils.fs.check_if_file_exists(file_name="events.yml", file_path=output_path)
+        ):
+            files = yaml.safe_load(
+                asyncio.run(
+                    utils.fs.read_file(file_name="events.yml", file_path=output_path)
+                )
+            )
+        else:
+            print("No responses folder found")
+
+    except ValueError:
+        print("No responses folder found")
+
+    return json.dumps(files)
+
+
+
 @bp.route("/get_responses", methods=["GET"])
 @requires_auth
 @requires_selected_revision
