@@ -224,6 +224,11 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     <h4 class="alert-heading">Agent Responses</h4>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     <p> Use this page to view and regenerate agent responses.</p>
+    <ul>
+        <li><em>The prompt template folder is: {{ prompt_template_folder }}</em></li>
+        <li><em> The data folder is: {{ data_template_folder }}</em></li>
+    </ul>
+    <br/>
     <button class="btn btn-danger" onclick="refreshAllResponses()">
         <i class="bi bi-arrow-clockwise icon"></i> Refresh All Responses
     </button>

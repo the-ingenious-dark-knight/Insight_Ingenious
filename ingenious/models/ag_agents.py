@@ -194,4 +194,3 @@ class RoutedResponseOutputAgent(RoutedAgent, ABC):
             AgentMessage(content=agent_chat.chat_response.chat_message.content),
             topic_id=TopicId(type=self._next_agent_topic, source=self.id.key),
         )
-

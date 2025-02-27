@@ -41,7 +41,12 @@ bp = Blueprint("responses", __name__, url_prefix="/responses")
 @requires_auth
 @requires_selected_revision
 def list():
-    return render_template("responses/view_responses.html")
+    utils: utils_class = current_app.utils
+    prompt_template_folder = asyncio.run(utils.get_prompt_template_folder())    
+    base_path = asyncio.run(utils.fs.get_base_path()) / Path(prompt_template_folder)
+    data_folder = asyncio.run(utils.get_data_folder())
+    data_base_path = asyncio.run(utils.fs_data.get_base_path()) / Path(data_folder)
+    return render_template("responses/view_responses.html", data_template_folder=data_base_path, prompt_template_folder=base_path)
 
 
 @bp.route("/get_test_data_files", methods=["GET"])

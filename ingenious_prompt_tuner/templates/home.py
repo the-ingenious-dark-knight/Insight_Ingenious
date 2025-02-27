@@ -108,8 +108,9 @@ def save_revision():
                 asyncio.run(utils.get_prompt_template_folder(revision_id=new_guid, force_copy_from_source=True))
         else:
             for file in old_files:
-                content = asyncio.run(utils.fs.read_file(file_name=file, file_path=file_path_old))
-                asyncio.run(utils.fs.write_file(contents=content, file_name=file, file_path=file_path_new))
+                file_name = Path(file).name
+                content = asyncio.run(utils.fs.read_file(file_name=file_name, file_path=file_path_old))
+                asyncio.run(utils.fs.write_file(contents=content, file_name=file_name, file_path=file_path_new))
 
     return redirect(url_for('index.home'))
 
