@@ -56,6 +56,11 @@ def create_app():
     agents = agents_class.get_agents()
     app.config["agents"] = agents_class
     
+    if config.file_storage.data.add_sub_folders:
+        app.config["events_path"] = str(Path("functional_test_outputs"))
+    else:
+        app.config["events_path"] = str(Path("./"))
+    
     app.config["test_output_path"] = str(Path("functional_test_outputs"))   
 
     app.config["response_agent_name"] = None

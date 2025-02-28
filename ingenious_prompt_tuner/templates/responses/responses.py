@@ -244,26 +244,7 @@ def get_agent_inputs():
 @requires_selected_revision
 def get_events():
     utils: utils_class = current_app.utils
-    files = []
-    try:
-        output_path = (
-            current_app.config["test_output_path"]
-            + f"/{get_selected_revision_direct_call()}"
-        )
-        if asyncio.run(
-            utils.fs.check_if_file_exists(file_name="events.yml", file_path=output_path)
-        ):
-            files = yaml.safe_load(
-                asyncio.run(
-                    utils.fs.read_file(file_name="events.yml", file_path=output_path)
-                )
-            )
-        else:
-            print("No responses folder found")
-
-    except ValueError:
-        print("No responses folder found")
-
+    files = asyncio.run(utils.get_events(get_selected_revision_direct_call())).get_events()
     return json.dumps(files)
 
 
@@ -274,24 +255,7 @@ def get_events():
 def get_responses():
     utils: utils_class = current_app.utils
     agents: Agents = current_app.config["agents"]
-    try:
-        output_path = (
-            current_app.config["test_output_path"]
-            + f"/{get_selected_revision_direct_call()}"
-        )
-        if asyncio.run(
-            utils.fs.check_if_file_exists(file_name="events.yml", file_path=output_path)
-        ):
-            files = yaml.safe_load(
-                asyncio.run(
-                    utils.fs.read_file(file_name="events.yml", file_path=output_path)
-                )
-            )
-        else:
-            print("No responses folder found")
-
-    except ValueError:
-        print("No responses folder found")
+    files = asyncio.run(utils.get_events(get_selected_revision_direct_call()))
     
     # Now loop through the data files and for each get any associated agent chats  
     events_html = ""
@@ -304,8 +268,8 @@ def get_responses():
             break
     
     events: List[Event] = []
-    for file in files:
-        event: Event = Event(**file)
+    for file in files.get_events():
+        event: Event = file
         events.append(event)
         events_html += render_template(
             "responses/event_template.html",

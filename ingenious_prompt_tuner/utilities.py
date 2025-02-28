@@ -21,7 +21,7 @@ def requires_auth(f):
 def requires_selected_revision(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        selected_revision = request.cookies.get('selected_revision')
+        selected_revision = get_selected_revision_direct_call()
         if not selected_revision:
             return redirect(url_for('index.home'))
         return f(*args, **kwargs)
@@ -47,7 +47,7 @@ class utils_class:
         self.config = config
         self.fs: FileStorage = FileStorage(config, Category="revisions")
         self.fs_data: FileStorage = FileStorage(config, Category="data")
-        self.events: Events = Events(self.fs)
+        self.events: Events = Events(fs=self.fs)
         self.prompt_template_folder: str = None
         self.functional_tests_folder: str = None
         self.data_folder: str = None
@@ -64,17 +64,27 @@ class utils_class:
 
         source_prompt_folder = get_path_from_namespace_with_fallback("templates/prompts")        
         target_prompt_folder = f"templates/prompts/{revision_id}"
-        existing_prompts = []
+        no_existing_prompts = False
 
         if not self.prompt_template_folder == target_prompt_folder:
             self.prompt_template_folder = target_prompt_folder
             # Revision has changed so we need to recheck the prompt folder
             existing_prompts = await self.fs.list_files(target_prompt_folder)
+            if len(existing_prompts) == 0:
+                no_existing_prompts = True
+        
+        if force_copy_from_source:
+            print("Force copying prompts from the source")
+
+        if self.prompt_template_folder is None:
+            print("Prompt folder is not set")
+
+        if no_existing_prompts:
+            print("Prompt folder is Empty")
 
         # Copy the prompts from source    
-        if self.prompt_template_folder is None or force_copy_from_source or len(existing_prompts) == 0:
-            if (len(existing_prompts) == 0) or force_copy_from_source:
-                print("No prompts found in the revision prompts folder")
+        if self.prompt_template_folder is None or force_copy_from_source or no_existing_prompts:
+            if no_existing_prompts or force_copy_from_source:
                 print("Copying prompts from the template folder to the prompts folder")
                 for file in os.listdir(source_prompt_folder):
                     if ".jinja" in file:
@@ -91,16 +101,17 @@ class utils_class:
             revision_id = get_selected_revision_direct_call()
         
         target_folder = f"functional_test_outputs/{revision_id}"
-        existing_events = []
+        no_existing_events = []
         if not self.functional_tests_folder == target_folder:
             self.functional_tests_folder = target_folder
             # Revision has changed so we need to recheck the prompt folder
-            existing_events = await self.fs.list_files(target_folder)        
+            existing_events = await self.fs.list_files(target_folder)
+            if len(existing_events) == 0:
+                no_existing_events = True
 
-        if self.functional_tests_folder is None or force_copy_from_source or len(existing_events) == 0:
+        if self.functional_tests_folder is None or force_copy_from_source or no_existing_events:
             source_folder_code = get_path_from_namespace_with_fallback("sample_data")            
             source_files_code = os.listdir(source_folder_code)
-            
 
             # filter files to exclude readme.md 
             source_files_filtered = []
@@ -132,14 +143,16 @@ class utils_class:
 
         source_folder = get_path_from_namespace_with_fallback("sample_data")
         target_folder = f"functional_test_outputs/{revision_id}"
-        existing_data = []
+        no_existing_data = []
 
         if not self.data_folder == target_folder:
             self.data_folder = target_folder
             # Revision has changed so we need to recheck the prompt folder
             existing_data = await self.fs.list_files(target_folder)
+            if len(existing_data) == 0:
+                no_existing_data = True
         
-        if self.functional_tests_folder is None or force_copy_from_source or len(existing_data) == 0:
+        if self.data_folder is None or force_copy_from_source or no_existing_data == 0:
             source_folder = get_path_from_namespace_with_fallback("sample_data")
             target_folder = f"functional_test_outputs/{revision_id}"
             if (await self.fs_data.list_files(target_folder) is None) or force_copy_from_source:
@@ -149,9 +162,9 @@ class utils_class:
                         with open(f"{source_folder}/{file}", "r") as f:
                             content = f.read()
                             await self.fs_data.write_file(content, file, target_folder)
-            self.functional_tests_folder = target_folder
+            self.data_folder = target_folder
 
-        return self.functional_tests_folder
+        return self.data_folder
 
     async def get_events(self, revision_id) -> Events:
 

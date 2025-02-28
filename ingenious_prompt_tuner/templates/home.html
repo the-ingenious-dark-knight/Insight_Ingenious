@@ -80,9 +80,9 @@
         location.reload();
     }
 
-    function UpdateButtonState(){
+    async function UpdateButtonState(){
         // Automatically select the record if a revision is stored in cookies
-        var selectedRevision = getCookie('selected_revision');
+        const selectedRevision = await getSelectedRevision('selected_revision');
 
         if (selectedRevision) {
             $('#createRevisionButton').removeAttr('disabled');
@@ -152,16 +152,41 @@
             window.location.href(url);
         }
 
-    // Function to get cookie value by name
-    function getCookie(name) {
-        var value = "; " + document.cookie;
-        var parts = value.split("; " + name + "=");
-        if (parts.length == 2) return parts.pop().split(";").shift();
+    
+    
+    async function getSelectedRevision(name) {
+        return fetch("{{ url_for('index.get_selected_revision') }}", {
+            method: 'GET'
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json().then(data => {
+                    return data.revision;
+                });
+            } else {
+                alert('Failed to get selected cookie');
+                return null;
+            }
+        });
     }
 
-    var selectedRevision = getCookie('selected_revision');
+    async function setSelectedRevision(revision_id) {
+        return fetch(`{{ url_for('index.set_selected_revision') }}?revision_id=${revision_id}`, {
+            method: 'GET'
+        })
+        .then(response => {
+            if (response.ok) {
+                return null; 
+            } else {
+                alert('Failed to get selected cookie');
+                return null;
+            }
+        });
+    }
 
-    $(document).ready(function() {
+    
+
+    $(document).ready(async function() {
         table = $('#revisionsTable').DataTable({
             select: {
                 style: 'single'
@@ -175,32 +200,32 @@
                     .data()
                     .toArray();
 
-                    var revisionName = rowData[0][0];
-                    var revisionTitle = rowData[0][1];
-                    document.cookie = "selected_revision=" + revisionName + "; path=/";
+                var revisionName = rowData[0][0];
+                var revisionTitle = rowData[0][1];
+                setSelectedRevision(revisionName).then(() => {
                     notice = 'The currently selected revision is <mark>'+revisionName + " -- " + revisionTitle+'</mark>'
                     $('#selectedRevisionNotice').html(notice)
-                    UpdateButtonState()
-
-        
+                    UpdateButtonState().then(() => {
+                        // Additional actions if needed after button state update
+                    });
+                });
                 
         });
 
-
-
+        const selectedRevision = await getSelectedRevision('selected_revision');
         if (selectedRevision) {
             table.rows().every(function() {
                 var data = this.data();
                 if (data[0] === selectedRevision) {
                     this.select();
-                    UpdateButtonState();
+                    UpdateButtonState().then(() => {
+                        // Additional actions if needed after button state update
+                    });
                 }
             });
         }
-        else {
-            UpdateButtonState();
-        }       
-            
+
+
     });
 
     
