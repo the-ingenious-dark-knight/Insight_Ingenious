@@ -11,6 +11,7 @@ class Event(BaseModel):
     file_name: str
     conversation_flow: str
     response_content: str
+    identifier_group: str = "default"
 
 
 class Events(BaseModel):

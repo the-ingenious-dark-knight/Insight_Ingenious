@@ -80,6 +80,7 @@ class ConversationFlow(IConversationFlow):
         llm_logger = LLMUsageTracker(
             agents=agents,
             config=self._config,
+            chat_history_repository=self._chat_service.chat_history_repository,
             revision_id=revision_id,
             identifier=identifier,
             event_type="default"
@@ -187,7 +188,7 @@ class ConversationFlow(IConversationFlow):
         await runtime.stop_when_idle()
 
         # If you want to use the prompt tuner you need to write the responses to a file with the method provided in the logger
-        await llm_logger.write_llm_responses_to_file()
+        await llm_logger.write_llm_responses_to_file(file_prefixes=[str(chat_request.user_id)])
 
         # Lastly return your chat response object
         chat_response = ChatResponse(

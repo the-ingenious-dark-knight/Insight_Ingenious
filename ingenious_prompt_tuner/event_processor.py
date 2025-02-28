@@ -37,11 +37,14 @@ class functional_tests:
         pass
 
     async def run_event_from_pre_processed_file(
-        self, event_type, identifier, file_name, agents: List[Agent], conversation_flow: str
+        self, event_type, identifier, identifier_group, file_name, agents: List[Agent], conversation_flow: str
     ):
         events = Events(self.fs)
         # Note sample data is loaded from the revision folder
-        file_path = f"functional_test_outputs/{self.revision_id}"
+        if self.config.file_storage.data.add_sub_folders:
+            file_path = f"functional_test_outputs/{self.revision_id}"
+        else:
+            file_path = "./"
         await Events.load_events_from_file(events, file_path)
         # Get payload file from the file system
         file_contents = await self.fs_data.read_file(
@@ -67,6 +70,7 @@ class functional_tests:
         json_object["revision_id"] = self.revision_id
         if self.make_llm_calls:
             chat_request = ChatRequest(
+                user_id=identifier_group,
                 thread_id=identifier,
                 user_prompt=jsonpickle.dumps(json_object, unpicklable=False),
                 conversation_flow=conversation_flow,

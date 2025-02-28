@@ -292,7 +292,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                 }
             }, 10); // Adjust the timeout as needed
     }
-    function get_agent_response(identifier, event_type, agent_name) {
+    function get_agent_response(identifier, event_type, agent_name, identifier_group) {
         const buttonId = `${identifier}_${event_type}_${agent_name}`;
         const button = document.getElementById(buttonId);
         const spinner = button.querySelector('.spinner-border');
@@ -303,7 +303,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
         spinner.style.display = 'inline-block';
         icon.style.display = 'none';
 
-        fetch(`{{ url_for('responses.get_agent_response') }}?identifier=${identifier}&agent_name=${agent_name}&event_type=${event_type}`)
+        fetch(`{{ url_for('responses.get_agent_response') }}?identifier=${identifier}&agent_name=${agent_name}&event_type=${event_type}&identifier_group=${identifier_group}`)
         .then(response => response.text())
         .then(html => {
         const modal = document.createElement('div');
@@ -350,8 +350,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
         );
     }
 
-    function get_agent_inputs(identifier, event_type, agent_name, input_type) {
-        fetch(`{{ url_for('responses.get_agent_inputs') }}?identifier=${identifier}&agent_name=${agent_name}&event_type=${event_type}&input_type=${input_type}`)
+    function get_agent_inputs(identifier, event_type, agent_name, input_type, identifier_group) {
+        fetch(`{{ url_for('responses.get_agent_inputs') }}?identifier=${identifier}&agent_name=${agent_name}&event_type=${event_type}&input_type=${input_type}&identifier_group=${identifier_group}`)
         .then(response => response.text())
         .then(html => {
         const modal = document.createElement('div');
@@ -408,7 +408,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                 for (const event of JSON.parse(response)) {
                     const eventType = event.event_type;
                     const ballIdentifier = event.identifier;
-                    await reRunEventAsync(ballIdentifier, eventType, event.file_name);
+                    const identifier_group = event.identifier_group;
+                    await reRunEventAsync(ballIdentifier, eventType, event.file_name, identifier_group);
                     // wait for fetchInProgress to be false 
                     while(fetchInProgress) {
                         await new Promise(resolve => setTimeout(resolve, 1000));
@@ -441,7 +442,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                 $('.event').each(function() {
                     var eventType = $(this).find('.event_type').text().split(':')[1].trim();
                     var ballIdentifier = $(this).find('.identifier').text().split(':')[1].trim();
-                    getFileContent(ballIdentifier, eventType);
+                    var identifier_group = $(this).find('.identifier_group').text().split(':')[1].trim();
+                    getFileContent(ballIdentifier, eventType, identifier_group);
                 });
                 init_tooltips();    
             })
@@ -469,7 +471,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
     }
 
-    function getFileContent(identifier, event_type) {
+    function getFileContent(identifier, event_type, identifier_group) {
         const contentElement = $('#' + identifier + '_' + event_type + ' .markdown-content');
         contentElement.html(`
         <div class="d-flex align-items-center">
@@ -484,7 +486,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
             type: 'POST',
             data: { 
                 identifier: identifier,
-                event_type: event_type
+                event_type: event_type,
+                identifier_group: identifier_group
             },
             success: function(response) {
                 $('#' + identifier + '_' + event_type + ' .markdown-content').replaceWith(response);
@@ -496,7 +499,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
         });
     }
 
-    function reRunEventAsync(identifier, event_type, file_name) {
+    function reRunEventAsync(identifier, event_type, file_name, identifier_group) {
         fetchInProgress = true;
         const contentElement = $('#' + identifier + '_' + event_type + ' .markdown-content');
         contentElement.html(`
@@ -507,10 +510,10 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
         `);
 
         $.ajax({
-            url: `{{ url_for("responses.rerun_event") }}?&identifier=${identifier}&event_type=${event_type}&file_name=${file_name}`,
+            url: `{{ url_for("responses.rerun_event") }}?&identifier=${identifier}&event_type=${event_type}&file_name=${file_name}&identifier_group=${identifier_group}`,
             type: 'GET',
             success: function(response) {
-                getFileContent(identifier, event_type);
+                getFileContent(identifier, event_type, identifier_group);
             },
             error: function(error) {
                 console.error('Error fetching file content:', error);
@@ -529,7 +532,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
             // Get the event type and ball identifier from the p tags with the class event_type and identifier inside the event div
             var eventType = $(this).find('.event_type').text().split(':')[1].trim();
             var ballIdentifier = $(this).find('.identifier').text().split(':')[1].trim();
-            getFileContent(ballIdentifier, eventType);
+            var ballIdentifier = $(this).find('.identifier_group').text().split(':')[1].trim();
+            getFileContent(ballIdentifier, eventType, identifier_group);
         });
     });
 

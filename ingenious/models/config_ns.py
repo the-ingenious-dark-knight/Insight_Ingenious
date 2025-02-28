@@ -73,6 +73,10 @@ class FileStorageContainer(BaseModel):
     path: str = Field(
         "./",
         description="Path to the file storage. Used for local storage and Azure storage."
+    ),
+    add_sub_folders: Optional[bool] = Field(
+        default=True,
+        description="Add sub_folders to the path. Used for local storage and Azure storage."
     )
 
 

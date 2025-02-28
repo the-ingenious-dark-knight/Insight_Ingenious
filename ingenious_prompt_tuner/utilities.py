@@ -130,7 +130,7 @@ class utils_class:
         if revision_id is None:
             revision_id = get_selected_revision_direct_call()
 
-        source_folder = get_path_from_namespace_with_fallback("sample_data")        
+        source_folder = get_path_from_namespace_with_fallback("sample_data")
         target_folder = f"functional_test_outputs/{revision_id}"
         existing_data = []
 

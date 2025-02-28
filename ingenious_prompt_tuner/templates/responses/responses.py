@@ -104,6 +104,7 @@ def rerun_event():
         identifier = request.args.get("identifier", type=str)
         event_type = request.args.get("event_type", type=str)
         file_name = request.args.get("file_name", type=str)
+        identifier_group = request.args.get("identifier_group", type=str)
         
         # Events are locked in source code and copied to the output folder each time.
         events: Events = asyncio.run(utils.get_events(revision_id=get_selected_revision_direct_call()))
@@ -118,6 +119,7 @@ def rerun_event():
         asyncio.run(
             ft.run_event_from_pre_processed_file(
                 identifier=identifier,
+                identifier_group=identifier_group,
                 event_type=event_type,
                 file_name=file_name,
                 agents=agents,
@@ -140,9 +142,11 @@ def get_agent_response():
     identifier = request.args.get("identifier", type=str)
     event_type = request.args.get("event_type", type=str)
     agent_name = request.args.get("agent_name", type=str)
+    identifier_group = request.args.get("identifier_group", type=str)
     
-    # Return mock html page
-    file_name = f"agent_response_{event_type}_default_{agent_name}_{identifier.strip()}.md"
+    file_name_parts = [identifier_group, "agent_response", event_type, "default", agent_name, identifier.strip()]
+
+    file_name = f"{'_'.join(file_name_parts)}.md"
     output_path = (
         current_app.config["test_output_path"]
         + f"/{get_selected_revision_direct_call()}"
@@ -181,7 +185,8 @@ def get_agent_response():
             event_type=event_type,
             agent_name=agent_chat.target_agent_name,
             execution_time=agent_chat.get_execution_time_formatted(),
-            start_time=agent_chat.get_start_time_formatted()
+            start_time=agent_chat.get_start_time_formatted(),
+            identifier_group=identifier_group
         )
     return agent_response_md1
 
@@ -195,9 +200,12 @@ def get_agent_inputs():
     event_type = request.args.get("event_type", type=str)
     agent_name = request.args.get("agent_name", type=str)
     input_type = request.args.get("input_type", type=str)
+    identifier_group = request.args.get("identifier_group", type=str)
     
-    # Return mock html page
-    file_name = f"agent_response_{event_type}_default_{agent_name}_{identifier.strip()}.md"
+    file_name_parts = [identifier_group, "agent_response", event_type, "default", agent_name, identifier.strip()]
+
+    file_name = f"{'_'.join(file_name_parts)}.md"
+    
     output_path = (
         current_app.config["test_output_path"]
         + f"/{get_selected_revision_direct_call()}"
@@ -305,6 +313,7 @@ def get_responses():
             event_type=event.event_type,
             file_name=event.file_name,
             agents=agents.get_agents_for_prompt_tuner(),
+            identifier_group=event.identifier_group
         )
 
     return render_template("responses/events_template.html", files=events, events_html=events_html)
@@ -317,8 +326,11 @@ def get_agent_response_from_file():
     utils: utils_class = current_app.utils
     identifier = request.form.get("identifier", type=str).replace("#", "")
     event_type = request.form.get("event_type", type=str)
-
-    file_name = f"agent_response_{event_type}_default_{current_app.config["response_agent_name"]}_{identifier.strip()}.md"
+    identifier_group = request.form.get("identifier_group", type=str, default="default")
+    
+    file_name_parts = [identifier_group, "agent_response", event_type, "default", current_app.config["response_agent_name"], identifier.strip()]
+    print(file_name_parts)
+    file_name = f"{'_'.join(file_name_parts)}.md"
     output_path = (
         current_app.config["test_output_path"]
         + f"/{get_selected_revision_direct_call()}"
@@ -346,8 +358,8 @@ def get_agent_response_from_file():
             identifier=identifier,
             event_type=event_type,
             execution_time=agent_chat.get_execution_time_formatted(),
-            start_time=agent_chat.get_start_time_formatted()
-
+            start_time=agent_chat.get_start_time_formatted(),
+            identifier_group=identifier_group
         )
     # Add exception handling that will print the error message to the console
     except Exception as e:
