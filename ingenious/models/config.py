@@ -120,7 +120,8 @@ class FileStorageContainer(config_ns_models.FileStorageContainer):
             enable=config.enable,
             storage_type=config.storage_type,
             container_name=config.container_name,
-            path=config.path
+            path=config.path,
+            add_sub_folders=config.add_sub_folders
         )
         self.url = profile.url
         self.token = profile.token

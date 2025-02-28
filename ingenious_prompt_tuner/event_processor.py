@@ -41,9 +41,10 @@ class functional_tests:
     ):
         events = Events(self.fs)
         # Note sample data is loaded from the revision folder
+        print("sub folders:", self.config.file_storage.data.add_sub_folders)
         if self.config.file_storage.data.add_sub_folders:
             file_path = f"functional_test_outputs/{self.revision_id}"
-        else:
+        else:            
             file_path = "./"
         await Events.load_events_from_file(events, file_path)
         # Get payload file from the file system
