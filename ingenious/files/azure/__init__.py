@@ -25,6 +25,7 @@ class azure_FileStorageRepository(IFileStorage):
         
         if self.authentication_method == file_storage_AuthenticationMethod.MSI:
             self.blob_service_client = BlobServiceClient(account_url=self.url, credential=ManagedIdentityCredential(client_id=self.client_id))
+            print("======")
             print(self.client_id, self.url)
         
         if self.authentication_method == file_storage_AuthenticationMethod.DEFAULT_CREDENTIAL:
@@ -69,20 +70,12 @@ class azure_FileStorageRepository(IFileStorage):
         try:
             path = Path(self.fs_config.path) / Path(file_path) / Path(file_name)
             print(path)
-            try:
-                # Create a blob client
-                blob_client = self.blob_service_client.get_blob_client(container=self.container_name, blob=str(path))
+            # Create a blob client
+            blob_client = self.blob_service_client.get_blob_client(container=self.container_name, blob=str(path))
 
-                # encoding param is necessary for readall() to return str, otherwise it returns bytes
-                downloader = blob_client.download_blob(max_concurrency=1, encoding='UTF-8')
-                data = downloader.readall()
-            except:
-                # Create a blob client
-                blob_client = self.blob_service_client.get_blob_client(container=self.container_name, blob=str(Path(file_name)))
-
-                # encoding param is necessary for readall() to return str, otherwise it returns bytes
-                downloader = blob_client.download_blob(max_concurrency=1, encoding='UTF-8')
-                data = downloader.readall()
+            # encoding param is necessary for readall() to return str, otherwise it returns bytes
+            downloader = blob_client.download_blob(max_concurrency=1, encoding='UTF-8')
+            data = downloader.readall()
 
 
             #print(f"Successfully downloaded {path} from container {self.container_name}.")
