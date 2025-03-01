@@ -27,6 +27,7 @@ class azure_FileStorageRepository(IFileStorage):
             self.blob_service_client = BlobServiceClient(account_url=self.url, credential=ManagedIdentityCredential(client_id=self.client_id))
             print("======")
             print(self.client_id, self.url)
+            print("======")
         
         if self.authentication_method == file_storage_AuthenticationMethod.DEFAULT_CREDENTIAL:
             self.blob_service_client = BlobServiceClient(account_url=self.url, credential=DefaultAzureCredential())
