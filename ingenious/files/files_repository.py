@@ -1,5 +1,6 @@
 import importlib
 from abc import ABC, abstractmethod
+from pathlib import Path
 from ingenious.models.config import FileStorageContainer, Config
 
 
@@ -83,3 +84,12 @@ class FileStorage:
     
     async def check_if_file_exists(self, file_path: str, file_name: str):
         return await self.repository.check_if_file_exists(file_path, file_name)
+    
+    async def get_prompt_template_path(self, revision_id: str = None):
+        if revision_id:
+            template_path = str(Path("templates")/Path("prompts")/Path(revision_id))
+        else: 
+            template_path = str(Path("templates")/Path("prompts"))
+        return template_path
+    
+

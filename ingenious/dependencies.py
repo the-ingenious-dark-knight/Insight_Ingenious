@@ -80,7 +80,6 @@ def get_chat_service(
         config=config
     )
 
-
 def get_message_feedback_service(
     chat_history_repository: Annotated[ChatHistoryRepository, Depends(get_chat_history_repository)]
 ):
@@ -101,6 +100,14 @@ def sync_templates():
             file_path = os.path.join(working_dir, "ingenious", "templates", file_name)
             with open(file_path, "w") as f:
                 f.write(file_contents)
+
+
+def get_file_storage_data() -> FileStorage:
+    return FileStorage(config, Category="data")
+
+
+def get_file_storage_revisions() -> FileStorage:
+    return FileStorage(config, Category="data")
 
 
 def get_config():

@@ -138,6 +138,22 @@ def get_path_from_namespace_with_fallback(path: str):
             return dir
 
 
+def get_inbuilt_api_routes():
+    """
+    Retrieves a list of in-built API routes from the Ingenious package.
+    Returns:
+        list: A list of Path objects representing the in-built API routes.
+    """
+    working_dir = Path(os.getcwd()) / Path("ingenious") / Path("api") / Path("routes")
+    install_dir = Path(get_paths()["purelib"]) / Path("ingenious") / Path("api") / Path("routes")
+
+    dirs = [working_dir, install_dir]
+        
+    for dir in dirs:
+        if os.path.exists(str(dir)):
+            return dir
+
+
 def get_dir_roots():
     """
     Retrieves a list of directory paths that are considered as root directories for the project.

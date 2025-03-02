@@ -178,13 +178,9 @@ class IConversationFlow(ABC):
     def GetConfig(self):
         return self._config
     
-    async def Get_Template(self, revision_id: str = None, file_name: str = "user_prompt.md"):
-        if revision_id:
-            template_path = str(Path("templates")/Path("prompts")/Path(revision_id))
-        else: 
-            template_path = str(Path("templates")/Path("prompts"))
-
+    async def Get_Template(self, revision_id: str = None, file_name: str = "user_prompt.md"):       
         fs = FileStorage(self._config)
+        template_path = fs.get_prompt_template_path(revision_id)
         content = await fs.read_file(file_name=file_name, file_path=template_path)
         if content is None:
             print(f"Prompt file {file_name} not found in {template_path}")
