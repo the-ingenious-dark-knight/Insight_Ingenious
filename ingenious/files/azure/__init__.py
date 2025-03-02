@@ -12,7 +12,7 @@ class azure_FileStorageRepository(IFileStorage):
         self.fs_config = fs_config
         self.url = fs_config.url
         self.token = fs_config.token
-        self.client_id = fs_config.token
+        self.client_id = fs_config.client_id
         self.container_name = fs_config.container_name
         self.authentication_method = fs_config.authentication_method
 

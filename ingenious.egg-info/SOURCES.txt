@@ -16,7 +16,9 @@ ingenious/api/__init__.py
 ingenious/api/routes/__init__.py
 ingenious/api/routes/chat.py
 ingenious/api/routes/conversation.py
+ingenious/api/routes/diagnostic.py
 ingenious/api/routes/message_feedback.py
+ingenious/api/routes/prompts.py
 ingenious/chainlit/app.py
 ingenious/chainlit/datalayer.py
 ingenious/chainlit/index.html

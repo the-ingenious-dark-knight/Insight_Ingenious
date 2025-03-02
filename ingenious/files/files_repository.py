@@ -43,7 +43,8 @@ class IFileStorage(ABC):
 class FileStorage:
 
     def __init__(self, config: Config, Category: str = "revisions"):
-        self.config = config
+        self.config = config        
+        self.add_sub_folders = getattr(self.config.file_storage, Category).add_sub_folders
         module_name = \
             f"ingenious.files.{self.config.file_storage.revisions.storage_type.lower()}"
         
@@ -92,4 +93,26 @@ class FileStorage:
             template_path = str(Path("templates")/Path("prompts"))
         return template_path
     
+    async def get_data_path(self, revision_id: str = None):
+        if self.add_sub_folders:
+            if revision_id:
+                template_path = str(Path("functional_test_outputs")/Path(revision_id))
+            else:
+                template_path = str(Path("functional_test_outputs"))
+        else:
+            template_path = ""
+        return template_path
 
+    async def get_output_path(self, revision_id: str = None):
+        if revision_id:
+            template_path = str(Path("functional_test_outputs")/Path(revision_id))
+        else: 
+            template_path = str(Path("functional_test_outputs"))
+        return template_path
+    
+    async def get_events_path(self, revision_id: str = None):
+        if revision_id:
+            template_path = str(Path("functional_test_outputs")/Path(revision_id))
+        else: 
+            template_path = str(Path("functional_test_outputs"))
+        return template_path

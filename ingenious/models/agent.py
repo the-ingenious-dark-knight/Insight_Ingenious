@@ -262,8 +262,8 @@ class LLMUsageTracker(logging.Handler):
         for agent_chat in self._queue:
             agent = self._agents.get_agent_by_name(agent_chat.target_agent_name)
             if agent.log_to_prompt_tuner:
-                output_path = f"functional_test_outputs/{self._revision_id}"
                 fs = FileStorage(self._config)
+                output_path = await fs.get_output_path(self._revision_id)
                 content = agent_chat.model_dump_json()
                 temp_file_prefixes = file_prefixes.copy()
                 temp_file_prefixes.append("agent_response")
@@ -276,15 +276,16 @@ class LLMUsageTracker(logging.Handler):
                     f"{"_".join(temp_file_prefixes)}.md",
                     output_path
                 )
-
+    
+    # TODO: Implement this function
     async def write_llm_responses_to_repository(
             self, user_id: str, thread_id: str, message_id: str
     ):
         for agent_chat in self._queue:
             agent = self._agents.get_agent_by_name(agent_chat.target_agent_name)
-            if agent.log_to_prompt_tuner:
-                output_path = f"functional_test_outputs/{self._revision_id}"
+            if agent.log_to_prompt_tuner:                
                 fs = FileStorage(self._config)
+                output_path = await fs.get_output_path(self._revision_id)
                 content = agent_chat.model_dump_json()
                 await fs.write_file(
                     content,

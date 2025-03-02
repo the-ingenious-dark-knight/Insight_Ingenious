@@ -41,11 +41,25 @@ async def diagnostic(
         data_dir = Path(
                 await igen_deps.get_file_storage_data().get_base_path()
             ) / Path(
-                await igen_deps.get_file_storage_data().get_base_path()
+                await igen_deps.get_file_storage_data().get_data_path()
+            )
+        
+        output_dir = Path(
+                await igen_deps.get_file_storage_revisions().get_base_path()
+            ) / Path(
+                await igen_deps.get_file_storage_revisions().get_output_path()
+            )
+
+        events_dir = Path(
+                await igen_deps.get_file_storage_revisions().get_base_path()
+            ) / Path(
+                await igen_deps.get_file_storage_revisions().get_events_path()
             )
 
         diagnostic["Prompt Directory"] = prompt_dir
         diagnostic["Data Directory"] = data_dir
+        diagnostic["Output Directory"] = output_dir
+        diagnostic["Events Directory"] = events_dir
         
         return diagnostic
 

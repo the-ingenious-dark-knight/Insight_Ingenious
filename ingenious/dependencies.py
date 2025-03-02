@@ -107,7 +107,7 @@ def get_file_storage_data() -> FileStorage:
 
 
 def get_file_storage_revisions() -> FileStorage:
-    return FileStorage(config, Category="data")
+    return FileStorage(config, Category="revisions")
 
 
 def get_config():

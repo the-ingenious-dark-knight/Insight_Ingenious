@@ -63,7 +63,7 @@ class utils_class:
             revision_id = get_selected_revision_direct_call()
 
         source_prompt_folder = get_path_from_namespace_with_fallback("templates/prompts")        
-        target_prompt_folder = self.fs.get_prompt_template_path(revision_id)
+        target_prompt_folder = await self.fs.get_prompt_template_path(revision_id)
         no_existing_prompts = False
 
         if not self.prompt_template_folder == target_prompt_folder:
