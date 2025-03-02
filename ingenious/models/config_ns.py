@@ -73,11 +73,18 @@ class FileStorageContainer(BaseModel):
     path: str = Field(
         "./",
         description="Path to the file storage. Used for local storage and Azure storage."
+    ),
+    add_sub_folders: bool = Field(
+        default=True,
+        description="Add sub_folders to the path. Used for local storage and Azure storage."
     )
 
 
 class FileStorage(BaseModel):
-    revisions: FileStorageContainer = Field(default_factory=lambda: FileStorageContainer(enable=True, storage_type='local', container_name="", path="./"), description="File Storage configuration")
+    revisions: FileStorageContainer = Field(
+        default_factory=lambda: FileStorageContainer(
+            enable=True, storage_type='local', container_name="", path="./"), description="File Storage configuration"
+        )
     data: FileStorageContainer = Field(default_factory=lambda: FileStorageContainer(enable=True, storage_type='local', container_name="", path="./"), description="File Storage configuration")
 
 

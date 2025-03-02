@@ -35,6 +35,18 @@
             "request": "launch",
             "program": "run_ingen_cli.py",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Api",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "typer",
+            "cwd":"${workspaceFolder}",
+            "args": [                
+                "ingenious.cli",
+                "run",
+                "run-rest-api-server"
+            ],
         }
     ]
 }

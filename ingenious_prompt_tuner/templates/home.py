@@ -8,6 +8,7 @@ from flask import (
     session,
     url_for,
     current_app,
+    jsonify
 )
 import asyncio
 import yaml
@@ -19,6 +20,7 @@ from ingenious_prompt_tuner.utilities import (
     requires_auth,
     utils_class,
     get_selected_revision_direct_call,
+    set_selected_revision_direct_call
 )
 
 # Authentication Helpers
@@ -55,6 +57,21 @@ def home():
         return redirect(url_for("index.create_revision"))
     base_folder = asyncio.run(utils.fs.get_base_path()) + '/' + str(current_app.config["revisions_folder"])
     return render_template("home.html", files=revisions, base_folder=base_folder)
+
+
+@bp.route("/set_selected_revision", methods=["GET", "POST"])
+@requires_auth
+def set_selected_revision():
+    revision_id = request.args.get("revision_id")
+    response = set_selected_revision_direct_call(revision_id)
+    return response
+
+
+@bp.route("/get_selected_revision", methods=["GET", "POST"])
+@requires_auth
+def get_selected_revision():
+    selected_revision = get_selected_revision_direct_call()
+    return jsonify({"revision": selected_revision})
 
 
 @bp.route("/create_revision", methods=["GET", "POST"])
@@ -108,8 +125,9 @@ def save_revision():
                 asyncio.run(utils.get_prompt_template_folder(revision_id=new_guid, force_copy_from_source=True))
         else:
             for file in old_files:
-                content = asyncio.run(utils.fs.read_file(file_name=file, file_path=file_path_old))
-                asyncio.run(utils.fs.write_file(contents=content, file_name=file, file_path=file_path_new))
+                file_name = Path(file).name
+                content = asyncio.run(utils.fs.read_file(file_name=file_name, file_path=file_path_old))
+                asyncio.run(utils.fs.write_file(contents=content, file_name=file_name, file_path=file_path_new))
 
     return redirect(url_for('index.home'))
 

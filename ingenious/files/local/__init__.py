@@ -66,14 +66,15 @@ class local_FileStorageRepository(IFileStorage):
 
         :param file_path: Path to the directory.
         """
+        files = []
         try:
-            path = Path(self.fs_config.path) / Path(file_path)
-            files = [f.name for f in path.iterdir() if f.is_file()]
+            path = Path(self.fs_config.path) / Path(file_path)            
+            files = [f.name for f in path.iterdir() if f.is_file()]            
             # print(f"Files in {path}: {files}")
             return files
         except Exception as e:
             print(f"Failed to list files in {path}: {e}")
-            return None
+            return []
         
     async def check_if_file_exists(self, file_path: str, file_name: str) -> bool:
         """
@@ -99,3 +100,5 @@ class local_FileStorageRepository(IFileStorage):
         :return: Base path of the local file storage.
         """
         return str(self.base_path)
+
+    

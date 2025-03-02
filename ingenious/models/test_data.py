@@ -11,6 +11,7 @@ class Event(BaseModel):
     file_name: str
     conversation_flow: str
     response_content: str
+    identifier_group: str = "default"
 
 
 class Events(BaseModel):
@@ -43,29 +44,23 @@ class Events(BaseModel):
     
     async def load_events_from_file(self, file_path: str):
         try:
+            self._events = []
             if await self._fs.check_if_file_exists(file_name="events.yml", file_path=file_path):
                 events_raw = yaml.safe_load(
                     await self._fs.read_file(file_name="events.yml", file_path=file_path)
                 )
                 # use pydantic to validate the data
-                for events_raw in events_raw:
+                for event_raw in events_raw:
                     try:
-                        Events.add_event(self, Event.model_validate(events_raw))
-                    
-                    except Event.ValidationError as e:
-                        for error in e.errors():
-                            print(
-                                f"Validation error in \
-                                field '{error['loc']}': {error['msg']}"
-                            )
-                            raise e
-
+                        event = Event(**event_raw)
+                        self.add_event(event)
+                                        
                     except Exception as e:
                         print(f"Unexpected error during validation: {e}")
                         raise e
                 
             else:
-                print(f"No event.yml found at {file_path}")
+                print(f"No events.yml found at {file_path}")
 
         except ValueError as e:
-            print(f"No event.yml found at {file_path} and error is {e}")
+            print(f"No events.yml found at {file_path} and error is {e}")

@@ -1,5 +1,6 @@
 import importlib
 from abc import ABC, abstractmethod
+from pathlib import Path
 from ingenious.models.config import FileStorageContainer, Config
 
 
@@ -42,7 +43,8 @@ class IFileStorage(ABC):
 class FileStorage:
 
     def __init__(self, config: Config, Category: str = "revisions"):
-        self.config = config
+        self.config = config        
+        self.add_sub_folders = getattr(self.config.file_storage, Category).add_sub_folders
         module_name = \
             f"ingenious.files.{self.config.file_storage.revisions.storage_type.lower()}"
         
@@ -83,3 +85,34 @@ class FileStorage:
     
     async def check_if_file_exists(self, file_path: str, file_name: str):
         return await self.repository.check_if_file_exists(file_path, file_name)
+    
+    async def get_prompt_template_path(self, revision_id: str = None):
+        if revision_id:
+            template_path = str(Path("templates")/Path("prompts")/Path(revision_id))
+        else: 
+            template_path = str(Path("templates")/Path("prompts"))
+        return template_path
+    
+    async def get_data_path(self, revision_id: str = None):
+        if self.add_sub_folders:
+            if revision_id:
+                template_path = str(Path("functional_test_outputs")/Path(revision_id))
+            else:
+                template_path = str(Path("functional_test_outputs"))
+        else:
+            template_path = ""
+        return template_path
+
+    async def get_output_path(self, revision_id: str = None):
+        if revision_id:
+            template_path = str(Path("functional_test_outputs")/Path(revision_id))
+        else: 
+            template_path = str(Path("functional_test_outputs"))
+        return template_path
+    
+    async def get_events_path(self, revision_id: str = None):
+        if revision_id:
+            template_path = str(Path("functional_test_outputs")/Path(revision_id))
+        else: 
+            template_path = str(Path("functional_test_outputs"))
+        return template_path

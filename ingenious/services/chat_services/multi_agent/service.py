@@ -178,13 +178,9 @@ class IConversationFlow(ABC):
     def GetConfig(self):
         return self._config
     
-    async def Get_Template(self, revision_id: str = None, file_name: str = "user_prompt.md"):
-        if revision_id:
-            template_path = str(Path("templates")/Path("prompts")/Path(revision_id))
-        else: 
-            template_path = str(Path("templates")/Path("prompts"))
-
+    async def Get_Template(self, revision_id: str = None, file_name: str = "user_prompt.md"):       
         fs = FileStorage(self._config)
+        template_path = await fs.get_prompt_template_path(revision_id)
         content = await fs.read_file(file_name=file_name, file_path=template_path)
         if content is None:
             print(f"Prompt file {file_name} not found in {template_path}")
@@ -219,25 +215,7 @@ class IConversationFlow(ABC):
 
         # Write the truncated content back to the file
         with open(file_path, "w") as memory_file:
-            memory_file.write(truncated_content)
-
-    async def write_llm_responses_to_file(
-            self,
-            response_array: List[dict],
-            event_type: str,
-            identifier: str,
-            revison_id: str
-    ):
-        output_path = f"functional_test_outputs/{revison_id}"
-        fs = FileStorage(self._config)
-        for res in response_array:
-            make_llm_calls = True
-            if make_llm_calls:
-                this_response = res["chat_response"]
-            else:
-                this_response = "Insight not yet generated"
-
-            await fs.write_file(this_response, f"agent_response_{event_type}_{res['chat_title']}_{identifier}.md", output_path)
+            memory_file.write(truncated_content)    
 
     @abstractmethod
     async def get_conversation_response(self, chat_request: IChatRequest) -> IChatResponse:

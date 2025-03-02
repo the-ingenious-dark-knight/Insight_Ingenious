@@ -8,14 +8,17 @@ import ingenious.config.config as ingen_config
 import importlib.resources as pkg_resources
 
 # Import your routers
-import ingenious.api.routes.chat as chat
-import ingenious.api.routes.message_feedback as message_feedback
 from ingenious.models.api_routes import IApiRoutes
-from ingenious.utils.namespace_utils import import_class_with_fallback, import_module_with_fallback
+from ingenious.utils.namespace_utils import import_class_with_fallback, import_module_with_fallback, get_inbuilt_api_routes
+from ingenious.api.routes import \
+    chat as chat_route, \
+    message_feedback as message_feedback_route, \
+    diagnostic as diagnostic_route, \
+    prompts as prompts_route
 
 config = ingen_config.get_config(os.getenv("INGENIOUS_PROJECT_PATH", ""))
 
-import ingenious.api.routes.chat as chat
+
 
 
 # Configure logging
@@ -32,9 +35,11 @@ class FastAgentAPI:
         self.app = FastAPI(title="FastAgent API", version="1.0.0")
 
         # Add in-built routes
-        self.app.include_router(chat.router, prefix="/api/v1", tags=["Chat"])
+        self.app.include_router(chat_route.router, prefix="/api/v1", tags=["Chat"])
+        self.app.include_router(diagnostic_route.router, prefix="/api/v1", tags=["Diagnostic"])
+        self.app.include_router(prompts_route.router, prefix="/api/v1", tags=["Prompts"])
         self.app.include_router(
-            message_feedback.router, prefix="/api/v1", tags=["Message Feedback"]
+            message_feedback_route.router, prefix="/api/v1", tags=["Message Feedback"]
         )
 
         # Add custom routes from ingenious extensions

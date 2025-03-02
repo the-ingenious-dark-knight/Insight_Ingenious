@@ -7,6 +7,7 @@ from ingenious.files.files_repository import FileStorage
 from ingenious.models.config import Config, ModelConfig
 import ingenious.config.config as ig_config
 from ingenious.models.llm_event_kwargs import LLMEventKwargs, ToolCall
+from ingenious.models.message import Message as ChatHistoryMessage
 from typing import List, Optional
 import logging
 from autogen_core.tools import FunctionTool, Tool
@@ -17,6 +18,7 @@ from autogen_agentchat.messages import TextMessage, ChatMessage
 
 
 import json
+from ingenious.db.chat_history_repository import ChatHistoryRepository
 
 class AgentChat(BaseModel):
     """
@@ -225,7 +227,7 @@ class AgentMessage(BaseModel):
 
 
 class LLMUsageTracker(logging.Handler):
-    def __init__(self, agents: Agents, config: ig_config.Config, revision_id: str, identifier: str, event_type: str) -> None:
+    def __init__(self, agents: Agents, config: ig_config.Config, chat_history_repository: ChatHistoryRepository, revision_id: str, identifier: str, event_type: str) -> None:
         """Logging handler that tracks the number of tokens used in the prompt and completion."""
         super().__init__()
         self._prompt_tokens = 0
@@ -233,6 +235,7 @@ class LLMUsageTracker(logging.Handler):
         self._completion_tokens = 0
         self._queue: List[AgentChat] = []
         self._config = config
+        self._chat_history_database:  ChatHistoryRepository = chat_history_repository
         self._revision_id: str = revision_id
         self._identifier: str = identifier
         self._event_type: str = event_type
@@ -254,19 +257,56 @@ class LLMUsageTracker(logging.Handler):
         self._completion_tokens = 0
 
     async def write_llm_responses_to_file(
-            self
+            self, file_prefixes: List[str] = []
     ):
         for agent_chat in self._queue:
             agent = self._agents.get_agent_by_name(agent_chat.target_agent_name)
             if agent.log_to_prompt_tuner:
-                output_path = f"functional_test_outputs/{self._revision_id}"
                 fs = FileStorage(self._config)
+                output_path = await fs.get_output_path(self._revision_id)
+                content = agent_chat.model_dump_json()
+                temp_file_prefixes = file_prefixes.copy()
+                temp_file_prefixes.append("agent_response")
+                temp_file_prefixes.append(self._event_type)
+                temp_file_prefixes.append(agent_chat.source_agent_name)
+                temp_file_prefixes.append(agent_chat.target_agent_name)
+                temp_file_prefixes.append(self._identifier)
+                await fs.write_file(
+                    content,
+                    f"{"_".join(temp_file_prefixes)}.md",
+                    output_path
+                )
+    
+    # TODO: Implement this function
+    async def write_llm_responses_to_repository(
+            self, user_id: str, thread_id: str, message_id: str
+    ):
+        for agent_chat in self._queue:
+            agent = self._agents.get_agent_by_name(agent_chat.target_agent_name)
+            if agent.log_to_prompt_tuner:                
+                fs = FileStorage(self._config)
+                output_path = await fs.get_output_path(self._revision_id)
                 content = agent_chat.model_dump_json()
                 await fs.write_file(
                     content,
                     f"agent_response_{self._event_type}_{agent_chat.source_agent_name}_{agent_chat.target_agent_name}_{self._identifier}.md",
                     output_path
                 )
+
+                message: ChatHistoryMessage = ChatHistoryMessage(
+                    user_id=user_id,
+                    thread_id=thread_id,
+                    message_id=message_id,
+                    role="agent_chat",
+                    # Get the item from the queue where chat_name = "summary"
+                    content=agent_chat.model_dump_json(),
+                    content_filter_results=None,
+                    tool_calls=None,
+                    tool_call_id=None,
+                    tool_call_function=None
+                )
+
+                write_message = await self._chat_history_database.add_message(message=message)
 
     async def post_chats_to_queue(self, target_queue: asyncio.Queue[AgentChat]):
         for agent_chat in self._queue:
