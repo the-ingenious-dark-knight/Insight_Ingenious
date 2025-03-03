@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from typing_extensions import Annotated
 from ingenious.dependencies import get_chat_service
@@ -16,19 +16,25 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.get(
+@router.api_route(
     "/diagnostic",
+    methods=["GET", "OPTIONS"],
     responses={
+        200: {"model": dict, "description": "Diagnostic information"},
         400: {"model": HTTPError, "description": "Bad Request"},
         406: {"model": HTTPError, "description": "Not Acceptable"},
         413: {"model": HTTPError, "description": "Payload Too Large"},
     },
 )
-async def diagnostic(    
+async def diagnostic(
+    request: Request,
     credentials: Annotated[
         HTTPBasicCredentials, Depends(igen_deps.get_security_service)
     ]
 ):
+    if request.method == "OPTIONS":
+        return {"Allow": "GET, OPTIONS"}
+
     try:
         diagnostic = {}
         

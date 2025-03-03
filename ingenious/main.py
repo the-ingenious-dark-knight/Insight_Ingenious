@@ -1,6 +1,7 @@
 import os
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, HTMLResponse, RedirectResponse
+from fastapi.middleware.cors import CORSMiddleware
 from chainlit.utils import mount_chainlit
 from dotenv import load_dotenv
 import logging
@@ -33,6 +34,22 @@ class FastAgentAPI:
 
         # Initialize FastAPI app
         self.app = FastAPI(title="FastAgent API", version="1.0.0")
+
+        # TODO: Add CORS option to config.
+        origins = [
+            "http://localhost",
+            "http://localhost:5173",
+            "http://localhost:4173",
+        ]
+
+        self.app.add_middleware(
+            CORSMiddleware,
+            allow_origins=origins,
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+
 
         # Add in-built routes
         self.app.include_router(chat_route.router, prefix="/api/v1", tags=["Chat"])

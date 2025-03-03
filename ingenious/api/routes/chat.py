@@ -23,7 +23,6 @@ parent_dir = os.path.abspath(
 )
 sys.path.append(parent_dir)
 
-
 @router.post(
     "/chat",
     responses={
