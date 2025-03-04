@@ -245,7 +245,7 @@ def get_agent_inputs():
 def get_events():
     utils: utils_class = current_app.utils
     files = asyncio.run(utils.get_events(get_selected_revision_direct_call())).get_events()
-    return json.dumps(files)
+    return jsonpickle.encode(files, unpicklable=False)
 
 
 
