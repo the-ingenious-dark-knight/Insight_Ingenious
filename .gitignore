@@ -21,3 +21,4 @@ __pycache__
 /guardrails/.venv/
 config.yml
 /.tmp
+/ingenious_prompt_tuner_sv/node_modules

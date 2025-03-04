@@ -1,6 +1,8 @@
 import os
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, HTMLResponse, RedirectResponse
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.wsgi import WSGIMiddleware
 from chainlit.utils import mount_chainlit
 from dotenv import load_dotenv
 import logging
@@ -33,6 +35,24 @@ class FastAgentAPI:
 
         # Initialize FastAPI app
         self.app = FastAPI(title="FastAgent API", version="1.0.0")
+        import ingenious_prompt_tuner as prompt_tuner
+        self.flask_app = prompt_tuner.create_app()
+
+        # TODO: Add CORS option to config.
+        origins = [
+            "http://localhost",
+            "http://localhost:5173",
+            "http://localhost:4173",
+        ]
+
+        self.app.add_middleware(
+            CORSMiddleware,
+            allow_origins=origins,
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+
 
         # Add in-built routes
         self.app.include_router(chat_route.router, prefix="/api/v1", tags=["Chat"])
@@ -56,6 +76,9 @@ class FastAgentAPI:
         if config.chainlit_configuration.enable:
             chainlit_path = pkg_resources.files("ingenious.chainlit") / "app.py"
             mount_chainlit(app=self.app, target=str(chainlit_path), path="/chainlit")
+
+        # Mount Flask App 
+        self.app.mount("/prompt-tuner", WSGIMiddleware(self.flask_app))
 
         # Redirect `/` to `/docs`
         self.app.get("/", tags=["Root"])(self.redirect_to_docs)
