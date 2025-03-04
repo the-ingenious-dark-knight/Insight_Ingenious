@@ -173,6 +173,7 @@ class ConversationFlow(IConversationFlow):
         runtime.start()
 
         initial_message: AgentMessage = AgentMessage(content=json.dumps(message))
+        initial_message.content = "```json\n" + initial_message.content + "\n```"
         fiscal_analysis_agent_message: AgentMessage = AgentMessage(content=bike_sales_data.display_bike_sales_as_table())
         await asyncio.gather(
             runtime.publish_message(

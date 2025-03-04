@@ -229,7 +229,30 @@ def initialize_new_project():
             git_ignore_content = ["*.pyc", "__pycache__", "*.log", "/files/", "/tmp/"]
             f.write("\n".join(git_ignore_content))
 
+    # create a config file
+    template_config_path = templates_paths["ingenious_extensions"] / "config.template.yml"
+    if template_config_path.exists():
+        config_path = Path.cwd() / "config.yml"
+        shutil.copy2(template_config_path, config_path)
+        console.print(f"[info]Config file created successfully at {config_path}.[/info]")
+    else:
+        console.print(f"[warning]Config file template not found at {template_config_path}. Skipping...[/warning]")
+
+    # create profile file
+    template_profile_path = templates_paths["ingenious_extensions"] / "profiles.template.yml"
+    if template_profile_path.exists():
+        # Get user home directory
+        home_dir = os.path.expanduser("~")
+        profile_path = Path(home_dir) / Path(".ingenious") / Path("profiles.yml")
+        shutil.copy2(template_profile_path, profile_path)
+        console.print(f"[info]Profile file created successfully created at {profile_path}[/info]")
+    else:
+        console.print(f"[warning]Profile file template not found at {template_profile_path}. Skipping...[/warning]")
+
     console.print("[info]Folder generation process completed.[/info]")
+    console.print("[warning]Before executing set the environment variables INGENIOUS_PROJECT_PATH and INGENIOUS_PROFILE_PATH [/warning]")
+    console.print("[warning]Before executing update config.yml and profiles.yml [/warning]")
+    console.print("[info]To execute use ingen_cli[/info]")
 
 
 @app.command()
