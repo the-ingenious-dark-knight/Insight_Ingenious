@@ -22,7 +22,7 @@ class local_FileStorageRepository(IFileStorage):
         try:
             path = Path(self.fs_config.path) / Path(file_path) / Path(file_name)
             path.parent.mkdir(parents=True, exist_ok=True)
-            async with aiofiles.open(path, "w") as f:
+            async with aiofiles.open(path, "w", encoding='utf-8') as f:
                 await f.write(contents)
             # print(f"Successfully wrote {path}.")
         except Exception as e:
@@ -38,7 +38,7 @@ class local_FileStorageRepository(IFileStorage):
         """
         try:
             path = Path(self.fs_config.path) / Path(file_path) / Path(file_name)
-            async with aiofiles.open(path, "r") as f:
+            async with aiofiles.open(path, "r", encoding='utf-8') as f:
                 contents = await f.read()
                 # print(f"Successfully read {path}.")
                 return contents
