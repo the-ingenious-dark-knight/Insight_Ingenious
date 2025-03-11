@@ -14,7 +14,7 @@ class IApiRoutes(ABC):
         self.config = config
         self.logger = logging.getLogger(__name__)
         self.app = app
-        self.security_service = get_security_service(HTTPBasicCredentials)
+        # self.security_service = get_security_service(HTTPBasicCredentials)
         self.chat_history_repository = get_chat_history_repository()
 
     @abstractmethod
