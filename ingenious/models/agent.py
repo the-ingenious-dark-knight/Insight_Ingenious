@@ -16,9 +16,9 @@ from autogen_core.logging import LLMCallEvent
 from autogen_agentchat.base import Response
 from autogen_agentchat.messages import TextMessage, ChatMessage
 
-
 import json
 from ingenious.db.chat_history_repository import ChatHistoryRepository
+
 
 class AgentChat(BaseModel):
     """
@@ -122,6 +122,7 @@ class Agent(BaseModel):
     log_to_prompt_tuner: bool = True
     return_in_response: bool = False
     agent_chats: list[AgentChat] = []
+    _errors: list[Exception] = []
 
     def add_agent_chat(self, content: str, identifier: str, ctx: MessageContext = None, source=None) -> AgentChat:
         if ctx:
@@ -151,6 +152,9 @@ class Agent(BaseModel):
         if self.log_to_prompt_tuner or self.return_in_response:
             await queue.put(agent_chat)
 
+    async def log_error(self, error: Exception):
+        self._errors.append(error)
+        
     async def execute_tool_call(
         self, call: FunctionCall, cancellation_token: CancellationToken, tools: List[Tool] = []
     ) -> FunctionExecutionResult:
@@ -179,17 +183,17 @@ class Agents(BaseModel):
 
     _agents: List[Agent]
 
-    def __init__(self, agents: List[Agent], config: Config):
+    def __init__(self, agents: List[Agent], config: Config) -> None:
         super().__init__()
-        self._agents = agents       
+        self._agents = agents
         for agent in self._agents:
             for model in config.models:
                 if model.model == agent.agent_model_name:
                     agent.model = model
                     break
         if not agent.model:
-            raise ValueError(f"Model {agent.model_name} not found in config.yml")
-        
+            raise ValueError(f"Model {agent.agent_model_name} not found in config.yml")
+
     def get_agents(self):
         return self._agents
     
@@ -224,6 +228,18 @@ class Agents(BaseModel):
 
 class AgentMessage(BaseModel):
     content: str
+
+
+class IProjectAgents(ABC):
+    _config: Config
+
+    def __init__(self, config: Config,  Chat_History_Repository) -> None:
+        self._config = config
+        self._chat_history_repository = Chat_History_Repository
+
+    @abstractmethod
+    def Get_Project_Agents(self) -> Agents:
+        pass
 
 
 class LLMUsageTracker(logging.Handler):
@@ -312,6 +328,18 @@ class LLMUsageTracker(logging.Handler):
         for agent_chat in self._queue:
             agent = self._agents.get_agent_by_name(agent_chat.target_agent_name)
             await agent.log(agent_chat, target_queue) 
+    
+    def log_error(self, error: str):
+        agent = ""
+        response = ""
+        chat = agent.get_agent_chat_by_source(source="")
+        chat.chat_response = Response(chat_message=TextMessage(content=response, source=""))
+        chat.prompt_tokens = 0
+        chat.completion_tokens = 0
+        chat.system_prompt = None
+        chat.user_message = None
+        chat.end_time = datetime.now().timestamp()
+        self._queue.append(chat)
 
     def emit(self, record: logging.LogRecord) -> None:
         """Emit the log record."""
@@ -360,13 +388,3 @@ class LLMUsageTracker(logging.Handler):
         except Exception as e:
             print(f'Failed to emit log record :{e}')
             self.handleError(record)
-
-
-class IProjectAgents(ABC):
-    def __init__(self):
-        pass
-
-    @abstractmethod
-    def Get_Project_Agents(self, config: Config) -> Agents:
-        pass
-

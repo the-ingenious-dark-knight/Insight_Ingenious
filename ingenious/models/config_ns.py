@@ -12,6 +12,8 @@ class ChatHistoryConfig(BaseModel):
 
 class ModelConfig(BaseModel):
     model: str = Field(..., description="Name of the model")
+    max_tokens: int = Field(1000, description="Maximum number of tokens")
+    max_retries: int = Field(1, description="Maximum number of retries")
     api_type: str = Field(..., description="Type of the API (e.g., rest, grpc)")
     api_version: str = Field(..., description="Version of the API")
 

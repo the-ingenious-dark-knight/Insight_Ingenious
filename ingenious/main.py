@@ -64,10 +64,11 @@ class FastAgentAPI:
 
         # Add custom routes from ingenious extensions
         custom_api_routes_module = import_module_with_fallback("api.routes.custom")
-        if custom_api_routes_module.__name__ != "ingenious.api.routes.custom":
-            custom_api_routes_class = import_class_with_fallback("api.routes.custom", "Api_Routes")
-            custom_api_routes_class_instance: IApiRoutes = custom_api_routes_class(config, self.app)
-            custom_api_routes_class_instance.add_custom_routes()
+        if custom_api_routes_module:
+            if custom_api_routes_module.__name__ != "ingenious.api.routes.custom":
+                custom_api_routes_class = import_class_with_fallback("api.routes.custom", "Api_Routes")
+                custom_api_routes_class_instance: IApiRoutes = custom_api_routes_class(config, self.app)
+                custom_api_routes_class_instance.add_custom_routes()
 
         # Add exception handler
         self.app.add_exception_handler(Exception, self.generic_exception_handler)

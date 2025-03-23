@@ -50,8 +50,8 @@ def create_app():
     # Get the list of agents -- note this should preference the Agents class in the project level extensions dir
     # Note the Agents module and ProjectAgents class must be defined in the project level extensions dir
     agents_class: IProjectAgents = import_class_with_fallback('models.agent', "ProjectAgents")
-    agents_instance = agents_class()
-    agents_class: Agents = agents_instance.Get_Project_Agents(config)
+    agents_instance = agents_class(config, ig_deps.get_chat_history_repository())
+    agents_class: Agents = agents_instance.Get_Project_Agents()
 
     agents = agents_class.get_agents()
     app.config["agents"] = agents_class

@@ -56,15 +56,19 @@ from ingenious.ingenious_extensions_template.models.bikes import RootModel
 class ConversationFlow(IConversationFlow):
     async def get_conversation_response(
         self,
-        chat_request: ChatRequest, # This needs to be an object that implements the IChatRequest model so you can extend this by creating a new model in the models folder
+        chat_request: ChatRequest  # This needs to be an object that implements the IChatRequest model so you can extend this by creating a new model in the models folder
     ) -> ChatResponse:
-        
+
+        ## Random text of 20,000 words for testing
+        import friendlywords as fw
+        random_text = fw.generate(20000)
         message = json.loads(chat_request.user_prompt)
+    
         event_type = chat_request.event_type
         
         #  Get your agents and agent chats from your custom class in models folder
-        project_agents = ProjectAgents()
-        agents = project_agents.Get_Project_Agents(self._config)
+        project_agents = ProjectAgents(self._config, self._chat_service.chat_history_repository)
+        agents = project_agents.Get_Project_Agents()
 
         # Process your data payload using your custom data model class 
         bike_sales_data = RootModel.model_validate(message)
@@ -72,6 +76,7 @@ class ConversationFlow(IConversationFlow):
         # Get the revision id and identifier from the message payload
         revision_id = message["revision_id"]
         identifier = message["identifier"]
+        # message["bloat"] = random_text
 
         # Instantiate the logger and handler
         logger = logging.getLogger(EVENT_LOGGER_NAME)
@@ -170,23 +175,30 @@ class ConversationFlow(IConversationFlow):
         results = []
         tasks = []
 
-        runtime.start()
 
-        initial_message: AgentMessage = AgentMessage(content=json.dumps(message))
-        initial_message.content = "```json\n" + initial_message.content + "\n```"
-        fiscal_analysis_agent_message: AgentMessage = AgentMessage(content=bike_sales_data.display_bike_sales_as_table())
-        await asyncio.gather(
-            runtime.publish_message(
-                initial_message,
-                topic_id=TopicId(type="customer_sentiment_agent", source="default"),
-            ),
-            runtime.publish_message(
-                fiscal_analysis_agent_message,
-                topic_id=TopicId(type="fiscal_analysis_agent", source="default"),
+        # Add try except block to catch any exceptions
+        try:
+            runtime.start()
+            initial_message: AgentMessage = AgentMessage(content=json.dumps(message))
+            initial_message.content = "```json\n" + initial_message.content + "\n```"
+            fiscal_analysis_agent_message: AgentMessage = AgentMessage(content=bike_sales_data.display_bike_sales_as_table())
+            await asyncio.gather(
+                runtime.publish_message(
+                    initial_message,
+                    topic_id=TopicId(type="customer_sentiment_agent", source="default"),
+                ),
+                runtime.publish_message(
+                    fiscal_analysis_agent_message,
+                    topic_id=TopicId(type="fiscal_analysis_agent", source="default"),
+                )
             )
-        )
+            
+            await runtime.stop_when_idle()
+        # Catch and print exception type and message
+        except Exception as e:
+            print(type(e), e)
+
         
-        await runtime.stop_when_idle()
 
         # If you want to use the prompt tuner you need to write the responses to a file with the method provided in the logger
         await llm_logger.write_llm_responses_to_file(file_prefixes=[str(chat_request.user_id)])
