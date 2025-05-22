@@ -17,12 +17,18 @@ This quickstart guide will help you get up and running with Insight Ingenious in
    uv pip install -e .
    ```
 
-3. **Initialize a new project**:
+3. **(Recommended for development) Install pre-commit hooks**:
+   ```bash
+   uv pip install pre-commit
+   pre-commit install
+   ```
+
+4. **Initialize a new project**:
    ```bash
    ingen_cli initialize-new-project
    ```
 
-4. **Verify installation**:
+5. **Verify installation**:
    ```bash
    ingen_cli run-test-batch
    ```
@@ -108,6 +114,16 @@ Insight Ingenious supports different chat service types:
 - **Basic**: Simple single-agent chat
 - **MultiAgent**: Conversations between multiple agents
 - **Router**: Routing messages to different agents
+
+## Using pre-commit
+
+To ensure code quality and consistent formatting, pre-commit hooks are used in this project. After installing pre-commit, you can manually run all hooks on your codebase:
+
+```bash
+pre-commit run --all-files
+```
+
+This will check and auto-fix issues such as trailing whitespace, end-of-file fixes, and code formatting (e.g., with Black for Python).
 
 ## Next Steps
 

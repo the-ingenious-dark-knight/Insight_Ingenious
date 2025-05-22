@@ -34,3 +34,16 @@ If you need assistance with Insight Ingenious, you can:
 ## Contributing
 
 Contributions to Insight Ingenious are welcome! Please refer to the project's GitHub repository for contribution guidelines.
+
+### Development Standards
+
+- This project uses [pre-commit](https://pre-commit.com/) to enforce code quality and formatting standards.
+- After cloning the repository, run:
+  ```bash
+  pre-commit install
+  ```
+- To manually check all files, run:
+  ```bash
+  pre-commit run --all-files
+  ```
+- Please ensure all pre-commit hooks pass before submitting a pull request.
