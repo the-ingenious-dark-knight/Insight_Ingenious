@@ -30,6 +30,7 @@ If you need assistance with Insight Ingenious, you can:
 1. Check the relevant documentation section
 2. Look for examples in the `ingenious_extensions_template` directory
 3. Refer to the code comments in the relevant modules
+4. Create an issue and label it `question`
 
 ## Contributing
 
