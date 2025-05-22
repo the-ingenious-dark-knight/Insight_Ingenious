@@ -9,6 +9,7 @@ Before installing Insight Ingenious, ensure you have the following prerequisites
 - Python 3.13 or higher
 - [uv](https://docs.astral.sh/uv/) package manager (recommended)
 - Git (for cloning the repository)
+- [pre-commit](https://pre-commit.com/) (for development, code linting, and formatting)
 
 ## Installation Methods
 
@@ -60,7 +61,13 @@ Before installing Insight Ingenious, ensure you have the following prerequisites
    pip install -e .
    ```
 
-4. **Initialize a new project**:
+4. **(Recommended for development) Install pre-commit hooks**:
+   ```bash
+   pip install pre-commit
+   pre-commit install
+   ```
+
+5. **Initialize a new project**:
    ```bash
    ingen_cli initialize-new-project
    ```
@@ -123,10 +130,17 @@ Insight Ingenious provides Docker images for easy deployment:
    uv pip install -e .
    ```
 
-2. **Configuration not found**:
+2. **pre-commit not installed or not running**:
+   If you see linting or formatting issues in pull requests or commits, make sure you have installed pre-commit and run:
+   ```bash
+   pre-commit install
+   pre-commit run --all-files
+   ```
+
+3. **Configuration not found**:
    Ensure the `config.yml` file is in your current directory or set the `INGENIOUS_PROJECT_PATH` environment variable.
 
-3. **Profile not found**:
+4. **Profile not found**:
    Ensure the profiles.yml file exists at `~/.ingenious/profiles.yml` or set the `INGENIOUS_PROFILE_PATH` environment variable.
 
 ### Getting Help
