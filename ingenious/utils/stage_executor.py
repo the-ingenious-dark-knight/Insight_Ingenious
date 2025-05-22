@@ -23,16 +23,16 @@ class ProgressConsoleWrapper:
             # Check if style is in args or kwargs
             style = kwargs.get("style", None)
             if style is None:
-                # get the string representation of the level                        
+                # get the string representation of the level
                 style = LogLevel.to_string(level).lower()
             # Add the style to the kwargs
             kwargs["style"] = style
             self.progress.console.print(message, *args, **kwargs)
-    
+
     @property
     def completed_items(self) -> int:
         return self._completed_items
-    
+
     @completed_items.setter
     def completed_items(self, value: int):
         self._completed_items = value
@@ -40,7 +40,7 @@ class ProgressConsoleWrapper:
     @property
     def failed_items(self) -> int:
         return self._completed_items
-    
+
     @failed_items.setter
     def failed_items(self, value: int):
         self._failed_items = value
@@ -67,7 +67,7 @@ class stage_executor:
             :param action_callables: A list of callables to execute.These callables should implement the ActionCallable interface.
             :param stage_name: The name of the stage.
             :param kwargs: Additional keyword arguments to pass to the action callables.
-        """  
+        """
         with Progress(
                 SpinnerColumn(spinner_name="dots", style="progress.spinner", finished_text="📦"),
                 TextColumn("[progress.description]{task.description}"), transient=False,
@@ -77,7 +77,7 @@ class stage_executor:
             stage_status = "Initiated  "
 
             # progress.console.print(Panel(f"Stage: {stage_name}"))
-            ptid = progress.add_task(description=f"[{stage_status}] Stage: {stage_name}")            
+            ptid = progress.add_task(description=f"[{stage_status}] Stage: {stage_name}")
             # Wrap the Progress object
             wrapped_progress = ProgressConsoleWrapper(progress, self.log_level)
 
@@ -97,4 +97,3 @@ class stage_executor:
             milliseconds = int((runtime % 1) * 1000)
             runtime_str = time.strftime("%H:%M:%S", time.gmtime(runtime)) + f".{milliseconds:03d}"
             progress.update(task_id=ptid, description=f"[{stage_status}] Stage: {stage_name}[info] | Runtime: {runtime_str}[/info]", total=1, completed=1)
-

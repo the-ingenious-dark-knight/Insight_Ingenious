@@ -1,4 +1,4 @@
-## Folder Description & Purpose 
+## Folder Description & Purpose
 
 This folder contains the files you will need to create a project using the Ingenious Accelerator.
 

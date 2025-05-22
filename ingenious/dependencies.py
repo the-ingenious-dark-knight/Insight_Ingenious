@@ -38,7 +38,7 @@ def get_chat_history_repository():
         raise ValueError(f"Unknown database type: {db_type_val}")
 
     chr = ChatHistoryRepository(db_type=db_type, config=config)
-    
+
     return chr
 
 
@@ -65,8 +65,8 @@ def get_security_service(
         return credentials.username
     else:
         # Raise warning if authentication is disabled
-        logger.warning("Authentication is disabled. This is not recommended for production use.")        
-    
+        logger.warning("Authentication is disabled. This is not recommended for production use.")
+
 
 def get_chat_service(
     chat_history_repository: Annotated[ChatHistoryRepository, Depends(get_chat_history_repository)],
@@ -112,5 +112,3 @@ def get_file_storage_revisions() -> FileStorage:
 
 def get_config():
     return config
-
-

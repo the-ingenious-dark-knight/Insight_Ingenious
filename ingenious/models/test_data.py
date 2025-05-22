@@ -41,7 +41,7 @@ class Events(BaseModel):
             if event.identifier == identifier:
                 events.append(event)
         return events
-    
+
     async def load_events_from_file(self, file_path: str):
         try:
             self._events = []
@@ -54,11 +54,11 @@ class Events(BaseModel):
                     try:
                         event = Event(**event_raw)
                         self.add_event(event)
-                                        
+
                     except Exception as e:
                         print(f"Unexpected error during validation: {e}")
                         raise e
-                
+
             else:
                 print(f"No events.yml found at {file_path}")
 

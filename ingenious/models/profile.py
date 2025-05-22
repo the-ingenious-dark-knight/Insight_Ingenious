@@ -48,7 +48,7 @@ class WebAuthConfig(BaseModel):
 
 
 
-class WebConfig(BaseModel):    
+class WebConfig(BaseModel):
     authentication: WebAuthConfig = Field(default_factory=WebAuthConfig)
 
 
@@ -70,7 +70,7 @@ class AuthenticationMethod(str, Enum):
 
 
 class FileStorageContainer(BaseModel):
-    url: str = Field("", description="File Storage SAS URL")    
+    url: str = Field("", description="File Storage SAS URL")
     client_id: str = Field("", description="File Storage SAS Client ID")
     token: str = Field("", description="File Storage SAS Token")
     authentication_method: AuthenticationMethod = Field(AuthenticationMethod.DEFAULT_CREDENTIAL, description="File Storage SAS Authentication Method")

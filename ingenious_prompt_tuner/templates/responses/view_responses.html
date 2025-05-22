@@ -28,11 +28,11 @@ hr {
     padding-bottom: 0.5rem;
 }
 
-.markdown-content h1::before, 
-.markdown-content h2::before, 
-.markdown-content h3::before, 
-.markdown-content h4::before, 
-.markdown-content h5::before, 
+.markdown-content h1::before,
+.markdown-content h2::before,
+.markdown-content h3::before,
+.markdown-content h4::before,
+.markdown-content h5::before,
 .markdown-content h6::before {
     font-family: "Font Awesome 5 Free";
     font-weight: 900;
@@ -74,7 +74,7 @@ hr {
     color: #495057;
 }
 
-.markdown-content ul, 
+.markdown-content ul,
 .markdown-content ol {
     margin-bottom: 1rem;
     padding-left: 2rem;
@@ -197,7 +197,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 <div id="spinner" class="spinner-border" role="status" style="display: block; margin: 0 auto;">
     <span class="visually-hidden">Loading...</span>
-</div> 
+</div>
 
 <!-- Modal -->
 <div class="modal fade"  id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -326,9 +326,9 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                 </div>
                 </div>
             `;
-        
+
             document.body.appendChild(modal);
-            
+
             init_tooltips();
 
             const bootstrapModal = new bootstrap.Modal(modal);
@@ -375,7 +375,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
             </div>
         `;
         document.body.appendChild(modal);
-        
+
         init_tooltips();
         init_datatables();
         const bootstrapModal = new bootstrap.Modal(modal);
@@ -410,7 +410,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                     const ballIdentifier = event.identifier;
                     const identifier_group = event.identifier_group;
                     await reRunEventAsync(ballIdentifier, eventType, event.file_name, identifier_group);
-                    // wait for fetchInProgress to be false 
+                    // wait for fetchInProgress to be false
                     while(fetchInProgress) {
                         await new Promise(resolve => setTimeout(resolve, 1000));
                     }
@@ -445,7 +445,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
                     var identifier_group = $(this).find('.identifier_group').text().split(':')[1].trim();
                     getFileContent(ballIdentifier, eventType, identifier_group);
                 });
-                init_tooltips();    
+                init_tooltips();
             })
             .catch(err => {
                 responsesContainer.innerHTML = "<p class='text-danger'>Error loading responses. Please try again later.</p>";
@@ -484,7 +484,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
         $.ajax({
             url: '{{ url_for("responses.get_agent_response_from_file") }}',
             type: 'POST',
-            data: { 
+            data: {
                 identifier: identifier,
                 event_type: event_type,
                 identifier_group: identifier_group

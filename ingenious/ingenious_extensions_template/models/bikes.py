@@ -65,7 +65,7 @@ class RootModel(BaseModel):
 
     def display_bike_sales_as_table(self):
         table_data: List[RootModel_BikeSale_Extended] = []
-        
+
         for store in self.stores:
             for sale in store.bike_sales:
                 store_name = store.name

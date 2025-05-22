@@ -28,7 +28,7 @@ def edit(filename):
         )
         return redirect(url_for('prompts.list'))
     else:
-        content = asyncio.run(utils.fs.read_file(            
+        content = asyncio.run(utils.fs.read_file(
             file_name=filename,
             file_path=prompt_template_folder
             )
@@ -56,5 +56,3 @@ def list():
         files = []
     base_path = asyncio.run(utils.fs.get_base_path()) / Path(prompt_template_folder)
     return render_template('prompts/view_prompts.html', files=files, prompt_template_folder=base_path)
-
-

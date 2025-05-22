@@ -1,4 +1,4 @@
-# Folder Description & Purpose 
+# Folder Description & Purpose
 
-This folder contains text based templates such as your project specific prompts or 
+This folder contains text based templates such as your project specific prompts or
 html page templates.

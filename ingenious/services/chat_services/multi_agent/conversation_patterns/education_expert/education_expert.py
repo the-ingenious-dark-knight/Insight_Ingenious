@@ -1,7 +1,7 @@
 import autogen.retrieve_utils
 import autogen.runtime_logging
 import autogen
-import json 
+import json
 import ingenious.services.chat_services.multi_agent.agents.agents as agents
 
 
@@ -11,23 +11,23 @@ class ConversationPattern:
         def __init__(
                 self
         ):
-            pass    
+            pass
 
     def __init__(self, default_llm_config: dict):
         self.default_llm_config = default_llm_config
 
     async def get_conversation_response(self, input_message: str, thread_chat_history: list = []) -> str:
         """
-        This function is the main entry point for the conversation pattern. It takes a message as input and returns a 
-        response. Make sure that you have added the necessary topic agents and agent topic chats before 
+        This function is the main entry point for the conversation pattern. It takes a message as input and returns a
+        response. Make sure that you have added the necessary topic agents and agent topic chats before
         calling this function.
-        """        
+        """
         chat_history_json = json.dumps(thread_chat_history)
         _educator= agents.GetAgent("education_expert")
         #_educator= agents.GetAgent("education_expert")
         educator_tasks = [_educator["Tasks"][0]["Tasks"]]
-                
-        
+
+
 
         curriculum_expert = autogen.AssistantAgent(
             name="curriculum_expert",
@@ -66,7 +66,7 @@ class ConversationPattern:
                 "summary_method": "last_msg",
             }
         ])
-    
+
 
         # Send a response back to the user
         return "chat_results.summary()"

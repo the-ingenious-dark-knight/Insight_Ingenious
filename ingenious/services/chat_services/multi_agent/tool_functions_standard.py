@@ -128,8 +128,8 @@ class SQL_ToolFunctions:
             database_name = _config.azure_sql_services.database_name
             table_name = _config.azure_sql_services.table_name
             cursor.execute(f"""
-                SELECT COLUMN_NAME 
-                FROM INFORMATION_SCHEMA.COLUMNS 
+                SELECT COLUMN_NAME
+                FROM INFORMATION_SCHEMA.COLUMNS
                 WHERE TABLE_NAME = '{table_name}'
             """)
             column_names = [row[0] for row in cursor.fetchall()]

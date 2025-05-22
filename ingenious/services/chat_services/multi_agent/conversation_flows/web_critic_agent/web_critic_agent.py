@@ -30,7 +30,7 @@ class ConversationFlow:
             I **ONLY** suggest complete removal or replacement for non-factual information to `researcher`.
             Rules:
             - If there is no feedback, just pass to `researcher` to compose the final response.
-            - Do not talk things other than the suggestion from web search. 
+            - Do not talk things other than the suggestion from web search.
             """),
             description = ("""I am **ONLY** allowed to speak **immediately** after `researcher`."""),
             llm_config=llm_config,

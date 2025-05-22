@@ -31,15 +31,15 @@ class ConversationFlow(IConversationFlow):
         self,
         chat_request: ChatRequest, # This needs to be an object that implements the IChatRequest model so you can extend this by creating a new model in the models folder
     ) -> ChatResponse:
-        
+
         message = json.loads(chat_request.user_prompt)
         event_type = chat_request.event_type
-        
+
         #  Get your agents and agent chats from your custom class in models folder
         project_agents = ProjectAgents()
         agents = project_agents.Get_Project_Agents(self._config)
 
-        # Process your data payload using your custom data model class 
+        # Process your data payload using your custom data model class
         bike_sales_data = RootModel.model_validate(message)
 
         # Get the revision id and identifier from the message payload
@@ -81,10 +81,10 @@ class ConversationFlow(IConversationFlow):
         async def get_bike_price(ticker: str, date: Annotated[str, "Date in YYYY/MM/DD"]) -> float:
             # Returns a random stock price for demonstration purposes.
             return random.uniform(10, 200)
-        
+
         bike_price_tool = FunctionTool(get_bike_price, description="Get the bike price.")
 
-        async def register_research_agent(agent_name: str, tools: List[FunctionTool] = [], next_agent_topic: str = None):   
+        async def register_research_agent(agent_name: str, tools: List[FunctionTool] = [], next_agent_topic: str = None):
             agent = agents.get_agent_by_name(agent_name=agent_name)
             reg_agent = await RoutedAssistantAgent.register(
                 runtime=runtime,
@@ -115,13 +115,13 @@ class ConversationFlow(IConversationFlow):
 
         # Optionally inject the chat history into the conversation flow so that you can avoid duplicate responses
         hist_itr = await self._chat_service.chat_history_repository.get_thread_messages(
-            thread_id=chat_request.thread_id)        
+            thread_id=chat_request.thread_id)
         hist_join = ['']
         for h in hist_itr:
             if h.role == "output":
-                hist_join.append(h.content)                
+                hist_join.append(h.content)
         hist_str = '# Chat History \n\n' + '``` json\n\n " ' + json.dumps(hist_join)
-        
+
         async def register_output_agent(agent_name: str, next_agent_topic: str = None):
             agent = agents.get_agent_by_name(agent_name=agent_name)
             summary = await RoutedResponseOutputAgent.register(
@@ -158,7 +158,7 @@ class ConversationFlow(IConversationFlow):
                 topic_id=TopicId(type="fiscal_analysis_agent", source="default"),
             )
         )
-        
+
         await runtime.stop_when_idle()
 
         # If you want to use the prompt tuner you need to write the responses to a file with the method provided in the logger
@@ -175,7 +175,7 @@ class ConversationFlow(IConversationFlow):
         )
 
         summary_response: AgentChat = next(l for l in llm_logger._queue if l.chat_name == "summary")
-        
+
         message: ChatHistoryMessage = ChatHistoryMessage(
             user_id=chat_request.user_id,
             thread_id=chat_request.thread_id,
@@ -187,7 +187,7 @@ class ConversationFlow(IConversationFlow):
             tool_calls=None,
             tool_call_id=None,
             tool_call_function=None
-        ) 
+        )
 
         _ = await self._chat_service.chat_history_repository.add_message(message=message)
 

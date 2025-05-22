@@ -21,16 +21,16 @@ class ChatService(IChatService):
             config: Config,
             revision: str = "dfe19b62-07f1-4cb5-ae9a-561a253e4b04"
             ):
-        
+
         class_name = f"{chat_service_type.lower()}_chat_service"
         self.config = config
         self.revision = revision
 
         try:
-    
+
             module_name = f"services.chat_services.{chat_service_type.lower()}.service"
             service_class = import_class_with_fallback(module_name, class_name)
-            
+
         except ImportError as e:
             raise ImportError(
                 f"Failed to import module for chat service type '{chat_service_type}'. "
@@ -57,5 +57,3 @@ class ChatService(IChatService):
         if not chat_request.conversation_flow:
             raise ValueError(f"conversation_flow not set {chat_request}")
         return await self.service_class.get_chat_response(chat_request)
-
-    

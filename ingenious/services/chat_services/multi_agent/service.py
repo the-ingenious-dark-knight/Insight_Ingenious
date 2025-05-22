@@ -23,10 +23,10 @@ class multi_agent_chat_service:
     chat_history_repository: ChatHistoryRepository
     conversation_flow: str
     openai_service: Optional[ChatCompletionMessageParam]
-    
+
     def __init__(
             self,
-            config: ig_config.Config, 
+            config: ig_config.Config,
             chat_history_repository: ChatHistoryRepository,
             conversation_flow: str):
         self.config = config
@@ -48,7 +48,7 @@ class multi_agent_chat_service:
         # Check if thread exists
         if not chat_request.thread_id:
             chat_request.thread_id = str(uuid.uuid4())
-            
+
         # Get thread messages & add to messages list
         thread_messages = await self.chat_history_repository.get_thread_messages(chat_request.thread_id)
         chat_request.thread_memory = 'no existing context.'
@@ -80,11 +80,11 @@ class multi_agent_chat_service:
             conversation_flow_service_class: IConversationFlow = import_class_with_fallback(module_name, class_name)
 
             conversation_flow_service_class_instance = conversation_flow_service_class(parent_multi_agent_chat_service=self)
-            
+
             response_task = conversation_flow_service_class_instance.get_conversation_response(
                 chat_request=chat_request
             )
-    
+
             agent_response = await response_task
 
         except Exception as e:
@@ -98,22 +98,22 @@ class IConversationPattern(ABC):
     _config: ig_config.Config
     _memory_path: str
     _memory_file_path: str
-    
+
     def __init__(self):
         super().__init__()
         self._config = ig_config.get_config()
         self._memory_path = self.GetConfig().chat_history.memory_path
         self._memory_file_path = f"{self._memory_path}/context.md"
-    
+
     def GetConfig(self):
         return self._config
-    
+
     def Get_Models(self):
         return self._config.models.__dict__
 
     def Get_Memory_Path(self):
         return self._memory_path
-    
+
     def Get_Memory_File(self):
         return self._memory_file_path
 
@@ -171,11 +171,11 @@ class IConversationFlow(ABC):
         self._memory_file_path = f"{self._memory_path}/context.md"
         self._logger = logging.getLogger(__name__)
         self._chat_service = parent_multi_agent_chat_service
-        
+
     def GetConfig(self):
         return self._config
-    
-    async def Get_Template(self, revision_id: str = None, file_name: str = "user_prompt.md"):       
+
+    async def Get_Template(self, revision_id: str = None, file_name: str = "user_prompt.md"):
         fs = FileStorage(self._config)
         template_path = await fs.get_prompt_template_path(revision_id)
         content = await fs.read_file(file_name=file_name, file_path=template_path)
@@ -185,13 +185,13 @@ class IConversationFlow(ABC):
         env = Environment()
         template = env.from_string(content)
         return template.render()
-    
+
     def Get_Models(self):
         return self._config.models
 
     def Get_Memory_Path(self):
         return self._memory_path
-    
+
     def Get_Memory_File(self):
         return self._memory_file_path
 
@@ -212,7 +212,7 @@ class IConversationFlow(ABC):
 
         # Write the truncated content back to the file
         with open(file_path, "w") as memory_file:
-            memory_file.write(truncated_content)    
+            memory_file.write(truncated_content)
 
     @abstractmethod
     async def get_conversation_response(self, chat_request: IChatRequest) -> IChatResponse:

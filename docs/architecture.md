@@ -39,7 +39,7 @@ Insight Ingenious is a framework for building, managing, and deploying multi-age
 ### 1. Client Interfaces
 
 - **FastAPI REST Interface**: The primary way to interact with the system
-- **CLI Interface**: Command-line tools for administration and testing 
+- **CLI Interface**: Command-line tools for administration and testing
 - **ChainLit UI**: Web-based user interface for interactions
 - **Prompt Tuner**: Web interface for managing and tuning prompts
 

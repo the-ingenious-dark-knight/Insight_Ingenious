@@ -110,7 +110,7 @@ class AuthenticationMethod(str, Enum):
 
 
 class FileStorageContainer(config_ns_models.FileStorageContainer):
-    url: str = Field("", description="File Storage SAS URL")    
+    url: str = Field("", description="File Storage SAS URL")
     client_id: str = Field("", description="File Storage SAS Client ID")
     token: str = Field("", description="File Storage SAS Token")
     authentication_method: AuthenticationMethod = Field(AuthenticationMethod.DEFAULT_CREDENTIAL, description="File Storage SAS Authentication Method")
@@ -185,5 +185,3 @@ class Config(BaseModel):
             for profile_as_config in profile.azure_search_services:
                 if as_config.service == profile_as_config.service:
                     self.azure_search_services.append(config_models.AzureSearchConfig(as_config, profile_as_config))
-
-

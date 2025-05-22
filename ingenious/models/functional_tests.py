@@ -7,4 +7,3 @@ class Event(BaseModel):
     event_type: str
     response_content: str
     identifier: str
-

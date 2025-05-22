@@ -81,7 +81,7 @@ def save_revision():
     utils: utils_class = current_app.utils
     old_guid = request.args.get('old_guid')
     new_guid = request.args.get('new_guid')
-    
+
     revision_description = request.form['revision_description']
     new_revision = {'name': new_guid, 'description': revision_description}
     file_path_revisions = "revisions"
@@ -96,16 +96,16 @@ def save_revision():
     revisions_str = yaml.safe_dump(revisions)
     asyncio.run(
         utils.fs.write_file(contents=revisions_str, file_name='revisions.yml', file_path=str(file_path_revisions)))
-    
+
     # If old_guid is None, then this is a new revision
     if old_guid is None:
         print(f"Creating new revision {new_guid} using source files")
         asyncio.run(utils.get_prompt_template_folder(revision_id=new_guid, force_copy_from_source=True))
         asyncio.run(utils.get_functional_tests_folder(revision_id=new_guid, force_copy_from_source=True))
         return redirect(url_for('index.home'))
-        
+
     # Make sure that the prompts and sample data files are copied to the new revision folder
-    file_path_old_outputs = f"functional_test_outputs/{old_guid}"    
+    file_path_old_outputs = f"functional_test_outputs/{old_guid}"
     file_path_old_prompts = f"templates/prompts/{old_guid}"
     file_path_new_outputs = f"functional_test_outputs/{new_guid}"
     file_path_new_prompts = f"templates/prompts/{new_guid}"
@@ -133,7 +133,7 @@ def sync_prompts():
     utils: utils_class = current_app.utils
     revision_id = get_selected_revision_direct_call()
     asyncio.run(utils.get_prompt_template_folder(revision_id, force_copy_from_source=True))
-    # Return ok 
+    # Return ok
     return 'OK'
 
 
@@ -144,5 +144,5 @@ def sync_sample_data():
     revision_id = get_selected_revision_direct_call()
     asyncio.run(utils.get_functional_tests_folder(revision_id, force_copy_from_source=True))
     asyncio.run(utils.get_data_folder(revision_id, force_copy_from_source=True))
-    # Return ok 
+    # Return ok
     return 'OK'

@@ -18,11 +18,11 @@ class azure_FileStorageRepository(IFileStorage):
 
         if self.authentication_method == file_storage_AuthenticationMethod.TOKEN:
             self.blob_service_client = BlobServiceClient(account_url=self.url, credential=self.token)
-        
+
         if self.authentication_method == file_storage_AuthenticationMethod.CLIENT_ID_AND_SECRET:
             cred = ClientSecretCredential(self.client_id, self.token)
             self.blob_service_client = BlobServiceClient(account_url=self.url, credential=cred)
-        
+
         if self.authentication_method == file_storage_AuthenticationMethod.MSI:
             self.blob_service_client = BlobServiceClient(account_url=self.url, credential=ManagedIdentityCredential(client_id=self.client_id))
             print("======")
@@ -66,7 +66,7 @@ class azure_FileStorageRepository(IFileStorage):
         :param file_name: Name of the blob (file) to read.
         :param file_path: Path of the blob (file) to read.
         """
-        
+
         try:
             path = Path(self.fs_config.path) / Path(file_path) / Path(file_name)
             print(path)
@@ -91,7 +91,7 @@ class azure_FileStorageRepository(IFileStorage):
         :param file_name: Name of the blob (file) to delete.
         :param file_path: Path of the blob (file) to delete.
         """
-        
+
         try:
             path = Path(self.fs_config.path) / Path(file_path) / Path(file_name)
             # Create a blob client
@@ -131,7 +131,7 @@ class azure_FileStorageRepository(IFileStorage):
         :param connection_string: Connection string to Azure Storage account.
         :return: True if the blob exists, False otherwise.
         """
-        
+
         try:
             path = Path(self.fs_config.path) / Path(file_path) / Path(file_name)
             # Create a blob client
@@ -142,7 +142,7 @@ class azure_FileStorageRepository(IFileStorage):
         except Exception as e:
             print(f"Failed to check if blob {path} exists in container {self.container_name}: {e}")
             return False
-        
+
     async def get_base_path(self) -> str:
         """
         Get the base path of the Azure Blob container.

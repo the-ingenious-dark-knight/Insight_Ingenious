@@ -157,7 +157,7 @@ class cosmos_ChatHistoryRepository(IChatHistoryRepository):
     async def get_memory(self, message_id: str, thread_id: str) -> Message | None:
         try:
             query = """
-                SELECT * FROM c WHERE c.thread_id = @thread_id 
+                SELECT * FROM c WHERE c.thread_id = @thread_id
                 AND c.message_id = @message_id AND c.is_memory = true
                 ORDER BY c.timestamp DESC
                 OFFSET 0 LIMIT 1
@@ -178,8 +178,8 @@ class cosmos_ChatHistoryRepository(IChatHistoryRepository):
     async def update_memory(self) -> None:
         # Query to find the latest record for each thread
         query = """
-            SELECT c.user_id, c.thread_id, c.message_id, c.positive_feedback, c.timestamp, 
-                   c.role, c.content, c.content_filter_results, c.tool_calls, 
+            SELECT c.user_id, c.thread_id, c.message_id, c.positive_feedback, c.timestamp,
+                   c.role, c.content, c.content_filter_results, c.tool_calls,
                    c.tool_call_id, c.tool_call_function
             FROM c
             WHERE c.is_memory = true
@@ -211,7 +211,7 @@ class cosmos_ChatHistoryRepository(IChatHistoryRepository):
 
     async def get_thread_memory(self, thread_id: str) -> list[Message]:
         query = """
-            SELECT * FROM c WHERE c.thread_id = @thread_id 
+            SELECT * FROM c WHERE c.thread_id = @thread_id
             AND c.is_memory = true ORDER BY c.timestamp DESC
         """
         parameters = [{"name": "@thread_id", "value": thread_id}]

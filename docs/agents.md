@@ -80,11 +80,11 @@ class CustomAgent(Agent):
     """
     A custom agent implementation.
     """
-    
+
     def __init__(self, name: str, config: Dict[str, Any]):
         super().__init__(name, config)
         # Custom initialization
-        
+
     async def process_message(self, message: Message) -> str:
         """
         Custom message processing logic.
@@ -156,7 +156,7 @@ The system prompt is a crucial part of agent configuration. It defines the agent
 Example system prompt:
 
 ```
-You are a customer service agent for Acme Corporation. 
+You are a customer service agent for Acme Corporation.
 Your role is to help customers with product inquiries, order status, and technical support.
 
 DO:
@@ -223,7 +223,7 @@ class ResearchAgent(Agent):
     def __init__(self, name, config):
         super().__init__(name, config)
         self.register_tool("search_database", self.search_database)
-        
+
     async def search_database(self, query, filters=None):
         # Implementation of database search
         return {"results": [...]}
@@ -273,6 +273,6 @@ For debugging agents, you can:
    ```
    POST /api/v1/diagnostic/trace-conversation
    ```
-   
+
 4. **Review Agent Logs**:
    Agent activities are logged to the console and log files based on your logging configuration.

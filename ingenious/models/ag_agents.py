@@ -52,7 +52,7 @@ class RoutedAssistantAgent(RoutedAgent, ABC):
         #     messages=[TextMessage(content=message.content, source=ctx.topic_id.source)],
         #     cancellation_token=ctx.cancellation_token
         # )
-        
+
         # if self._next_agent_topic:
         #     await self.publish_my_message(agent_chat)
 
@@ -60,7 +60,7 @@ class RoutedAssistantAgent(RoutedAgent, ABC):
         # Create a session of messages.
         session: List[LLMMessage] = self._system_messages + [UserMessage(content=message.content, source="user")]
         execute_tool_calls = True
-        
+
         # Run the chat completion with the tools.
         create_result = await self._model_client.create(
             messages=session,
@@ -70,7 +70,7 @@ class RoutedAssistantAgent(RoutedAgent, ABC):
 
         # If there are no tool calls, return the result.
         if isinstance(create_result.content, str):
-            agent_chat.chat_response = Response(chat_message=TextMessage(content=create_result.content, source="user")) 
+            agent_chat.chat_response = Response(chat_message=TextMessage(content=create_result.content, source="user"))
             execute_tool_calls = False
 
         if execute_tool_calls:
@@ -93,8 +93,8 @@ class RoutedAssistantAgent(RoutedAgent, ABC):
             assert isinstance(create_result.content, str)
 
             # Return the result as a message.
-            agent_chat.chat_response = Response(chat_message=TextMessage(content=create_result.content, source="user")) 
-            
+            agent_chat.chat_response = Response(chat_message=TextMessage(content=create_result.content, source="user"))
+
         if self._next_agent_topic:
             await self.publish_my_message(agent_chat)
 

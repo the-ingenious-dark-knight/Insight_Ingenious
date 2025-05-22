@@ -19,15 +19,15 @@ class duckdb_ChatHistoryRepository(IChatHistoryRepository):
                 CREATE TABLE IF NOT EXISTS chat_history (
                     user_id TEXT,
                     thread_id TEXT,
-                    message_id TEXT, 
-                    positive_feedback BOOLEAN, 
+                    message_id TEXT,
+                    positive_feedback BOOLEAN,
                     timestamp TEXT,
                     role TEXT,
                     content TEXT,
                     content_filter_results TEXT,
                     tool_calls TEXT,
-                    tool_call_id TEXT, 
-                    tool_call_function TEXT                
+                    tool_call_id TEXT,
+                    tool_call_function TEXT
                 )
             ''')
 
@@ -38,29 +38,29 @@ class duckdb_ChatHistoryRepository(IChatHistoryRepository):
         with self.connection:
             self.connection.execute('''
                 INSERT INTO chat_history (
-                                    user_id, 
-                                    thread_id, 
-                                    message_id, 
-                                    positive_feedback, 
-                                    timestamp, 
-                                    role, 
-                                    content, 
-                                    content_filter_results, 
-                                    tool_calls, 
-                                    tool_call_id, 
+                                    user_id,
+                                    thread_id,
+                                    message_id,
+                                    positive_feedback,
+                                    timestamp,
+                                    role,
+                                    content,
+                                    content_filter_results,
+                                    tool_calls,
+                                    tool_call_id,
                                     tool_call_function)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
-                    message.user_id, 
-                    message.thread_id, 
-                    message.message_id, 
-                    message.positive_feedback, 
-                    message.timestamp, 
-                    message.role, 
-                    message.content, 
-                    message.content_filter_results, 
-                    message.tool_calls, 
-                    message.tool_call_id, 
+                    message.user_id,
+                    message.thread_id,
+                    message.message_id,
+                    message.positive_feedback,
+                    message.timestamp,
+                    message.role,
+                    message.content,
+                    message.content_filter_results,
+                    message.tool_calls,
+                    message.tool_call_id,
                     message.tool_call_function
                 )
                                     )

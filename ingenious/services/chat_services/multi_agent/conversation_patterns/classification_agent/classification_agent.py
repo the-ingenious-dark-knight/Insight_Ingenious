@@ -103,7 +103,7 @@ class ConversationPattern:
 
         res = await self.user_proxy.a_initiate_chat(
             manager,
-            message= ("Extract insights from the payload, ensuring that only one type of topic agent is selected. \n" 
+            message= ("Extract insights from the payload, ensuring that only one type of topic agent is selected. \n"
                      "The output must be in JSON format, containing only the JSON string within {} and no additional text outside."
                      "Payload: "+ input_message),
             summary_method="last_msg"
