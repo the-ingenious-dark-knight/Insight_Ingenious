@@ -2,10 +2,8 @@
 
 import os
 import sys
-from functools import wraps
-from pathlib import Path
 
-from flask import Flask, current_app
+from flask import Flask
 
 # Add parent directory to sys.path if not already there
 current_dir = os.path.abspath(os.getcwd())

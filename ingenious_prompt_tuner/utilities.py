@@ -24,19 +24,6 @@ def requires_auth(f):
     return decorated
 
 
-# Decorator for requiring authentication
-def requires_auth(f):
-    """Decorator to require authentication for a route."""
-
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        if "logged_in" not in session:
-            return redirect(url_for("auth.login"))
-        return f(*args, **kwargs)
-
-    return decorated
-
-
 # Decorator for requiring a selected revision
 def requires_selected_revision(f):
     """Decorator to require a selected revision for a route."""
@@ -56,6 +43,18 @@ def get_selected_revision() -> Optional[str]:
     """Get the currently selected revision from cookies."""
     selected_revision = request.cookies.get("selected_revision")
     return selected_revision if selected_revision else None
+
+
+def get_selected_revision_direct_call() -> Optional[str]:
+    """Get the currently selected revision without relying on Flask request.
+
+    This is for use in non-request contexts.
+    """
+    from flask import current_app
+
+    if hasattr(current_app, "selected_revision") and current_app.selected_revision:
+        return current_app.selected_revision
+    return None
 
 
 def set_selected_revision(revision_id: str) -> Response:

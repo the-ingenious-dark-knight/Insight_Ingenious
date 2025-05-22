@@ -121,27 +121,6 @@ def get_file_from_namespace_with_fallback(module_name, file_name):
     return None
 
 
-def get_path_from_namespace_with_fallback(path: str):
-    """
-    Get a path from the first namespace where it exists.
-
-    Args:
-        path: The relative path within a namespace
-
-    Returns:
-        The absolute path as a Path object, or None if not found
-    """
-    importer = ModuleImporter()
-    namespace_paths = importer.get_namespace_paths()
-
-    for namespace, base_path in namespace_paths.items():
-        full_path = base_path / Path(path)
-        if full_path.exists():
-            return full_path
-
-    return None
-
-
 def get_inbuilt_api_routes():
     """
     Get the path to the in-built API routes.

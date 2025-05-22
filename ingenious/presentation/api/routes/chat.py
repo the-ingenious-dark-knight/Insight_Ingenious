@@ -1,4 +1,6 @@
 import logging
+import os
+import sys
 
 from fastapi import APIRouter, HTTPException
 
@@ -12,9 +14,6 @@ from ingenious.domain.model.http_error import HTTPError
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
-
-import os
-import sys
 
 parent_dir = os.path.abspath(
     os.path.join(os.path.dirname(__file__), "../../../../../../..")

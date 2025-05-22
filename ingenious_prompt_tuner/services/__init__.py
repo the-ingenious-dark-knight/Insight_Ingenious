@@ -1,14 +1,11 @@
 """Service for managing file operations and prompt templates."""
 
-import asyncio
 import os
-from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import List
 
 from ingenious.files.files_repository import FileStorage
 from ingenious.models.test_data import Events
 from ingenious.utils.namespace_utils import get_path_from_namespace_with_fallback
-from ingenious_prompt_tuner.config import APP_CONFIG
 
 
 class FileService:

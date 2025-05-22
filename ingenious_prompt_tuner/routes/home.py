@@ -5,6 +5,7 @@ import uuid as guid
 
 import yaml
 from flask import (
+    Blueprint,
     current_app,
     jsonify,
     make_response,
@@ -18,6 +19,8 @@ from ingenious_prompt_tuner.utilities import (
     get_selected_revision,
     requires_auth,
 )
+
+bp = Blueprint("index", __name__)
 
 
 @bp.route("/")

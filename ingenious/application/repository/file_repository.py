@@ -2,6 +2,7 @@ import importlib
 from pathlib import Path
 
 from ingenious.domain.interfaces.repository.file_repository import IFileRepository
+from ingenious.domain.interfaces.repository.file_storage import IFileStorage
 from ingenious.domain.model.config import Config
 
 

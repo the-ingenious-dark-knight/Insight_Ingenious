@@ -5,9 +5,10 @@ from uuid import UUID
 
 # Type definitions
 MessageStepType = Literal["user_message", "assistant_message", "system_message"]
-StepType = Union[
-    "TrueStepType", MessageStepType
-]  # TrueStepType is defined in the interface
+TrueStepType = Literal[
+    "assistant_streaming", "code", "tool", "thread", "assistant_step", "user_step"
+]
+StepType = Union[TrueStepType, MessageStepType]
 
 # Constants
 mime_types = {
