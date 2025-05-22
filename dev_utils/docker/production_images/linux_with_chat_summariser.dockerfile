@@ -28,8 +28,8 @@ COPY dist/ingenious-1.0.0-py3-none-any.whl /ingen_app/ingenious-1.0.0-py3-none-a
 RUN mkdir -p /ingen_app/ingenious/sample_dataset
 RUN mkdir -p /ingen_app/ingenious/tmp
 RUN mkdir -p /ingen_app/tmp
-RUN mkdir -p /ingen_app/public
-COPY public /ingen_app/public
+#RUN mkdir -p /ingen_app/public
+#COPY public /ingen_app/public
 COPY ingenious/sample_dataset/cleaned_students_performance.csv /ingen_app/ingenious/sample_dataset/cleaned_students_performance.csv
 
 # Install dependencies

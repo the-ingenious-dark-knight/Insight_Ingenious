@@ -45,9 +45,9 @@ jobs:
          mkdir -p ./docker/ingenious/sample_dataset
          cp ingenious/sample_dataset/cleaned_students_performance.csv ./docker/ingenious/sample_dataset/cleaned_students_performance.csv
 
-      - run: |
-          mkdir -p ./docker/public
-          cp -r public/* ./docker/public
+      # - run: |
+      #     mkdir -p ./docker/public
+      #     cp -r public/* ./docker/public
 
       - run: |
           pip install -r requirements.txt
@@ -66,6 +66,6 @@ jobs:
          azcliversion: latest
          inlineScript:             
             az containerapp update -n ingen-app -g DefaultResourceGroup-EAU --image acrsydingdevkfpqjli23em5m.azurecr.io/ingen_prd:latest --set-env-vars APPSETTING_INGENIOUS_CONFIG=secretref:config APPSETTING_INGENIOUS_PROFILE=secretref:profile
-            
-      
-     
+
+
+
