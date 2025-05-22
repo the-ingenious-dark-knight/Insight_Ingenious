@@ -1,4 +1,3 @@
-import asyncio
 import logging
 from fastapi import APIRouter, FastAPI
 from ingenious.config import config

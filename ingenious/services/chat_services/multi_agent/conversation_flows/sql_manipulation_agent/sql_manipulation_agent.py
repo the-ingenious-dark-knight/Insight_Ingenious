@@ -6,8 +6,7 @@ import ingenious.config.config as config
 from ingenious.models.chat import ChatResponse
 from ingenious.services.chat_services.multi_agent.conversation_patterns.sql_manipulation_agent.sql_manipulation_agent import \
     ConversationPattern
-from ingenious.services.chat_services.multi_agent.tool_factory import SQL_ToolFunctions, PandasExecutor
-import pandas as pd
+from ingenious.services.chat_services.multi_agent.tool_factory import SQL_ToolFunctions
 
 class ConversationFlow:
     @staticmethod

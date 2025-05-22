@@ -6,7 +6,6 @@ import uuid
 import sqlite3
 from ingenious.models.message import Message
 from ingenious.db.chat_history_repository import IChatHistoryRepository
-from ingenious.db.chat_history_repository import IChatHistoryRepository
 import ingenious.config.config as Config
 from types import SimpleNamespace
 

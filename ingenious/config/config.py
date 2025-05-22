@@ -112,7 +112,7 @@ def get_config(config_path=None) -> config_models.Config:
                 config_str = get_kv_secret("config")
                 config = Config.from_yaml_str(config_str)
                 return config
-            except Exception as e:
+            except Exception:
                 raise ValueError(f"Config file at {config_path} is not a file. Tried falling back to key vault but KEY_VAULT_NAME environment variable not set")
 
     else:

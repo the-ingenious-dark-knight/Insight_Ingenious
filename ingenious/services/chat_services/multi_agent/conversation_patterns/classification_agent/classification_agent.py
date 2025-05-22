@@ -3,7 +3,6 @@ import logging
 import autogen
 import autogen.retrieve_utils
 import autogen.runtime_logging
-from autogen.agentchat.contrib.retrieve_user_proxy_agent import RetrieveUserProxyAgent
 
 logger = logging.getLogger(__name__)
 

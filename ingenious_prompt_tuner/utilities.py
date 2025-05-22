@@ -1,7 +1,5 @@
-import asyncio
-import json
 import os
-from flask import Flask, render_template, request, redirect, url_for, session, send_file, Response, stream_with_context
+from flask import request, redirect, url_for, session, Response
 from functools import wraps
 from ingenious.files.files_repository import FileStorage
 from ingenious.models.test_data import Events

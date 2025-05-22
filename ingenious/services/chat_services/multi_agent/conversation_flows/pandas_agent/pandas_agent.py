@@ -3,13 +3,9 @@ import ingenious.config.config as config
 from ingenious.models.chat import ChatResponse
 from ingenious.services.chat_services.multi_agent.conversation_patterns.pandas_agent.pandas_agent import \
     ConversationPattern
-from ingenious.services.chat_services.multi_agent.tool_factory import SQL_ToolFunctions, PandasExecutor
 from autogen.agentchat.contrib.multimodal_conversable_agent import MultimodalConversableAgent  # for GPT-4V
 import autogen
-import matplotlib.pyplot as plt
-from PIL import Image
 import os
-import chainlit
 
 working_dir = "tmp/code/"
 class FigureCreator(autogen.ConversableAgent):

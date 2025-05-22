@@ -1,4 +1,3 @@
-import pandas as pd
 from pydantic import BaseModel
 from typing import Optional, List, Any
 from enum import Enum
@@ -1310,7 +1309,7 @@ class RootModel(BaseModel):
         return batsmen
 
     def Get_Current_Batsman_As_Yaml(self):
-        output = f"## Current Batsman\n" 
+        output = "## Current Batsman\n" 
         
         batsman = self.Get_Current_Batsman()
         if batsman:

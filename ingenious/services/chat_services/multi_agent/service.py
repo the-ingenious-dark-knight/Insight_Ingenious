@@ -10,12 +10,9 @@ from ingenious.dependencies import get_openai_service
 from ingenious.errors.content_filter_error import ContentFilterError
 from ingenious.files.files_repository import FileStorage
 from ingenious.models.chat import IChatRequest, IChatResponse
-from ingenious.models.message import Message
-from ingenious.utils.conversation_builder import (build_user_message)
-from ingenious.utils.namespace_utils import import_class_with_fallback, get_path_from_namespace_with_fallback
+from ingenious.utils.namespace_utils import import_class_with_fallback
 import os
-from jinja2 import Environment, FileSystemLoader
-from pathlib import Path
+from jinja2 import Environment
 
 
 logger = logging.getLogger(__name__)

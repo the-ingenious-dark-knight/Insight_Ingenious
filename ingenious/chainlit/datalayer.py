@@ -1,4 +1,3 @@
-import json
 from typing import Dict, List, Optional
 import chainlit as cl
 import chainlit.data as cl_data

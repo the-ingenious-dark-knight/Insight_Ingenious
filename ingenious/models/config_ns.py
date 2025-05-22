@@ -1,5 +1,5 @@
-from typing import List, Dict, Optional
-from pydantic import BaseModel, Field, ValidationError
+from typing import List
+from pydantic import BaseModel, Field
 
 
 class ChatHistoryConfig(BaseModel):
