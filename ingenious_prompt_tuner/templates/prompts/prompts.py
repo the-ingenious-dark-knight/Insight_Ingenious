@@ -1,9 +1,9 @@
 from flask import (
-    Blueprint, flash, g, redirect, render_template, request, session, url_for, current_app
+    Blueprint, redirect, render_template, request, url_for, current_app
 )
 import asyncio
 from pathlib import Path
-from ingenious_prompt_tuner.utilities import requires_auth, utils_class, requires_selected_revision, get_selected_revision_direct_call
+from ingenious_prompt_tuner.utilities import requires_auth, utils_class, requires_selected_revision
 
 # Authentication Helpers
 

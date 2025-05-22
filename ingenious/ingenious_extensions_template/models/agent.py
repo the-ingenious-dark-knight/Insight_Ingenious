@@ -1,6 +1,4 @@
-from typing import List
-from ingenious.models.agent import Agent, AgentChat, AgentChats, Agents, IProjectAgents
-from pydantic import BaseModel
+from ingenious.models.agent import Agent, Agents, IProjectAgents
 from ingenious.models.config import Config
 
 

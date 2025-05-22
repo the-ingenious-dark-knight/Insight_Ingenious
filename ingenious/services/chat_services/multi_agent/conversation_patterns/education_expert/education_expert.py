@@ -2,11 +2,7 @@ import autogen.retrieve_utils
 import autogen.runtime_logging
 import autogen
 import json 
-import ingenious.config.config as config
-import ingenious.dependencies as deps
 import ingenious.services.chat_services.multi_agent.agents.agents as agents
-from ingenious.services.chat_services.multi_agent.tool_factory import AgentFactory
-from ingenious.models.chat import Action, ChatRequest, ChatResponse, KnowledgeBaseLink, Product
 
 
 class ConversationPattern:

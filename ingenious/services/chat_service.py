@@ -1,14 +1,8 @@
 from abc import ABC, abstractmethod
-from pathlib import Path
-from typing import List
 from ingenious.models.chat import ChatRequest, ChatResponse
 from ingenious.db.chat_history_repository import ChatHistoryRepository
-from ingenious.utils.conversation_builder import Sync_Prompt_Templates
 from ingenious.utils.namespace_utils import import_class_with_fallback
 from ingenious.config.config import Config
-from ingenious.models.functional_tests import Event
-from ingenious.models.agent import Agent
-from ingenious.files.files_repository import FileStorage
 
 class IChatService(ABC):
     service_class = None

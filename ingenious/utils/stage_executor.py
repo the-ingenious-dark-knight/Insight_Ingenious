@@ -1,7 +1,6 @@
 from ingenious.utils.log_levels import LogLevel
 import time
 from rich.progress import Progress, SpinnerColumn, TextColumn
-from rich.panel import Panel
 from abc import ABC, abstractmethod
 from typing import List
 

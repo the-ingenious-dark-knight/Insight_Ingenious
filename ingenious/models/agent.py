@@ -1,20 +1,20 @@
 from abc import ABC, abstractmethod
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime
 from autogen_core import CancellationToken, FunctionCall, MessageContext, SingleThreadedAgentRuntime, TypeSubscription
 from pydantic import BaseModel
 from ingenious.files.files_repository import FileStorage
 from ingenious.models.config import Config, ModelConfig
 import ingenious.config.config as ig_config
-from ingenious.models.llm_event_kwargs import LLMEventKwargs, ToolCall
+from ingenious.models.llm_event_kwargs import LLMEventKwargs
 from ingenious.models.message import Message as ChatHistoryMessage
 from typing import List, Optional
 import logging
-from autogen_core.tools import FunctionTool, Tool
+from autogen_core.tools import Tool
 from autogen_core.models import FunctionExecutionResult
 from autogen_core.logging import LLMCallEvent
 from autogen_agentchat.base import Response
-from autogen_agentchat.messages import TextMessage, ChatMessage
+from autogen_agentchat.messages import TextMessage
 
 
 import json

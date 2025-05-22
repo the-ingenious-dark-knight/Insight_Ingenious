@@ -11,7 +11,7 @@ import importlib.resources as pkg_resources
 
 # Import your routers
 from ingenious.models.api_routes import IApiRoutes
-from ingenious.utils.namespace_utils import import_class_with_fallback, import_module_with_fallback, get_inbuilt_api_routes
+from ingenious.utils.namespace_utils import import_class_with_fallback, import_module_with_fallback
 from ingenious.api.routes import \
     chat as chat_route, \
     message_feedback as message_feedback_route, \

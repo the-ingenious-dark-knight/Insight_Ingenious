@@ -1,7 +1,6 @@
-import secrets
 import logging
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.security import HTTPBasicCredentials
 from typing_extensions import Annotated
 from ingenious.dependencies import get_chat_service
 from ingenious.errors.content_filter_error import ContentFilterError

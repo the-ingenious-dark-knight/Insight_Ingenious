@@ -1,14 +1,11 @@
 import shutil
-import sys
 from sysconfig import get_paths
-import time
 from typing import Optional
 import typer
 import asyncio
 from typing_extensions import Annotated
 from rich.console import Console
 from rich.theme import Theme
-from rich import panel
 from rich import print
 from pathlib import Path
 import os
@@ -94,7 +91,7 @@ def run_rest_api_server(
     if CliFunctions.PureLibIncludeDirExists():
         src = Path(os.getcwd()) / Path('ingenious/')
         if os.path.exists(src):
-            CliFunctions.copy_ingenious_folder(src, Path(get_paths()['purelib']) / Path(f'ingenious/'))
+            CliFunctions.copy_ingenious_folder(src, Path(get_paths()['purelib']) / Path('ingenious/'))
     
     print(f"Current working directory: {os.getcwd()}")    
     
@@ -270,7 +267,7 @@ if __name__ == "__cli__":
 class CliFunctions:
     class RunTestBatch(stage_executor_module.IActionCallable):
         async def __call__(self, progress, task_id, **kwargs):
-            module_name = f"tests.run_tests"
+            module_name = "tests.run_tests"
             class_name = "RunBatches"
             try:                
                 repository_class_import = import_class_with_fallback(module_name, class_name)
@@ -283,12 +280,12 @@ class CliFunctions:
     
     @staticmethod
     def PureLibIncludeDirExists():
-        ChkPath = Path(get_paths()['purelib']) / Path(f'ingenious/')
+        ChkPath = Path(get_paths()['purelib']) / Path('ingenious/')
         return os.path.exists(ChkPath)
             
     @staticmethod
     def GetIncludeDir():
-        ChkPath = Path(get_paths()['purelib']) / Path(f'ingenious/')
+        ChkPath = Path(get_paths()['purelib']) / Path('ingenious/')
         # print(ChkPath)
         # Does Check for the path
         if os.path.exists(ChkPath):

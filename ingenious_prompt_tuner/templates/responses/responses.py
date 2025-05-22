@@ -2,21 +2,14 @@ from typing import List
 from flask import (
     Blueprint,
     Response,
-    flash,
-    g,
-    redirect,
     render_template,
     request,
-    session,
     stream_with_context,
-    url_for,
     current_app,
     jsonify,
 )
 import asyncio
-import yaml
 import json
-import uuid as guid
 from ingenious.models.agent import AgentChat, Agents
 from ingenious.models.test_data import Event, Events
 from ingenious_prompt_tuner.event_processor import functional_tests

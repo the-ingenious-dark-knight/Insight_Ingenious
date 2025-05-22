@@ -2,7 +2,6 @@ import os
 import uuid
 from datetime import datetime
 from pathlib import Path
-import json
 
 import autogen
 import autogen.runtime_logging
@@ -67,7 +66,7 @@ class ConversationFlow:
 
             description = f"I **ONLY** respond when addressed by `planner`, focusing solely on insights about {topic}."
             if topic == 'undefined':
-                description = f"I **ONLY** respond when addressed by `planner` when the payload is undefined."
+                description = "I **ONLY** respond when addressed by `planner` when the payload is undefined."
 
             topic_agent = autogen.AssistantAgent(
                 name=topic,
