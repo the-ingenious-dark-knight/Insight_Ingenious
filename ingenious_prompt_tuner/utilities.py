@@ -1,6 +1,8 @@
 import os
-from flask import request, redirect, url_for, session, Response
 from functools import wraps
+
+from flask import Response, redirect, request, session, url_for
+
 from ingenious.files.files_repository import FileStorage
 from ingenious.models.test_data import Events
 from ingenious.utils.namespace_utils import get_path_from_namespace_with_fallback
@@ -9,8 +11,8 @@ from ingenious.utils.namespace_utils import get_path_from_namespace_with_fallbac
 def requires_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        if 'logged_in' not in session:
-            return redirect(url_for('auth.login'))
+        if "logged_in" not in session:
+            return redirect(url_for("auth.login"))
         return f(*args, **kwargs)
 
     return decorated
@@ -21,14 +23,14 @@ def requires_selected_revision(f):
     def decorated_function(*args, **kwargs):
         selected_revision = get_selected_revision_direct_call()
         if not selected_revision:
-            return redirect(url_for('index.home'))
+            return redirect(url_for("index.home"))
         return f(*args, **kwargs)
 
     return decorated_function
 
 
 def get_selected_revision_direct_call():
-    selected_revision = request.cookies.get('selected_revision')
+    selected_revision = request.cookies.get("selected_revision")
     if selected_revision:
         return selected_revision
     return None
@@ -36,7 +38,7 @@ def get_selected_revision_direct_call():
 
 def set_selected_revision_direct_call(revision_id):
     response = Response()
-    response.set_cookie('selected_revision', revision_id)
+    response.set_cookie("selected_revision", revision_id)
     return response
 
 
@@ -56,11 +58,15 @@ class utils_class:
     def get_config(self):
         return self.config
 
-    async def get_prompt_template_folder(self, revision_id=None, force_copy_from_source=False):
+    async def get_prompt_template_folder(
+        self, revision_id=None, force_copy_from_source=False
+    ):
         if revision_id is None:
             revision_id = get_selected_revision_direct_call()
 
-        source_prompt_folder = get_path_from_namespace_with_fallback("templates/prompts")
+        source_prompt_folder = get_path_from_namespace_with_fallback(
+            "templates/prompts"
+        )
         target_prompt_folder = await self.fs.get_prompt_template_path(revision_id)
         no_existing_prompts = False
 
@@ -81,7 +87,11 @@ class utils_class:
             print("Prompt folder is Empty")
 
         # Copy the prompts from source
-        if self.prompt_template_folder is None or force_copy_from_source or no_existing_prompts:
+        if (
+            self.prompt_template_folder is None
+            or force_copy_from_source
+            or no_existing_prompts
+        ):
             if no_existing_prompts or force_copy_from_source:
                 print("Copying prompts from the template folder to the prompts folder")
                 for file in os.listdir(source_prompt_folder):
@@ -89,12 +99,16 @@ class utils_class:
                         # read the file and write it to the local_files
                         with open(f"{source_prompt_folder}/{file}", "r") as f:
                             content = f.read()
-                            await self.fs.write_file(content, file, target_prompt_folder)
+                            await self.fs.write_file(
+                                content, file, target_prompt_folder
+                            )
             self.prompt_template_folder = target_prompt_folder
 
         return self.prompt_template_folder
 
-    async def get_functional_tests_folder(self, revision_id=None, force_copy_from_source=False):
+    async def get_functional_tests_folder(
+        self, revision_id=None, force_copy_from_source=False
+    ):
         if revision_id is None:
             revision_id = get_selected_revision_direct_call()
 
@@ -107,7 +121,11 @@ class utils_class:
             if len(existing_events) == 0:
                 no_existing_events = True
 
-        if self.functional_tests_folder is None or force_copy_from_source or no_existing_events:
+        if (
+            self.functional_tests_folder is None
+            or force_copy_from_source
+            or no_existing_events
+        ):
             source_folder_code = get_path_from_namespace_with_fallback("sample_data")
             source_files_code = os.listdir(source_folder_code)
 
@@ -121,7 +139,7 @@ class utils_class:
                 print("No data found in the revision prompts folder")
                 print("Copying data from the sample_data folder in source")
                 for file in source_files_filtered:
-                    if ".md" in file or ".yml" or '.json' in file:
+                    if ".md" in file or ".yml" or ".json" in file:
                         # read the file and write it to the local_files
                         with open(f"{source_folder_code}/{file}", "r") as f:
                             content = f.read()
@@ -130,7 +148,9 @@ class utils_class:
                                 await self.fs.write_file(content, file, target_folder)
                             else:
                                 # write any data files to the data folder
-                                await self.fs_data.write_file(content, file, target_folder)
+                                await self.fs_data.write_file(
+                                    content, file, target_folder
+                                )
             self.functional_tests_folder = target_folder
 
         return self.functional_tests_folder
@@ -153,7 +173,9 @@ class utils_class:
         if self.data_folder is None or force_copy_from_source or no_existing_data == 0:
             source_folder = get_path_from_namespace_with_fallback("sample_data")
             target_folder = f"functional_test_outputs/{revision_id}"
-            if (await self.fs_data.list_files(target_folder) is None) or force_copy_from_source:
+            if (
+                await self.fs_data.list_files(target_folder) is None
+            ) or force_copy_from_source:
                 for file in os.listdir(source_folder):
                     if ".json" in file:
                         # read the file and write it to the local_files
@@ -165,6 +187,7 @@ class utils_class:
         return self.data_folder
 
     async def get_events(self, revision_id) -> Events:
-
-        await self.events.load_events_from_file(f"functional_test_outputs/{revision_id}")
+        await self.events.load_events_from_file(
+            f"functional_test_outputs/{revision_id}"
+        )
         return self.events

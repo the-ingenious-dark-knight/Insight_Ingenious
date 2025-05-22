@@ -4,51 +4,77 @@ This document outlines the architectural design of Insight Ingenious, explaining
 
 ## System Overview
 
-Insight Ingenious is a framework for building, managing, and deploying multi-agent AI conversations. The system is structured as a modular, extensible application with several key components:
+Insight Ingenious is a framework for building, managing, and deploying multi-agent AI conversations. The system follows clean architecture principles with clear separation of concerns:
 
 ```
-                  ┌───────────────┐
-                  │    Client     │
-                  │  Interfaces   │
-                  └───────┬───────┘
-                          │
-                          ▼
-┌─────────────────────────────────────────────┐
-│               FastAgentAPI                  │
-│  ┌────────────┐  ┌────────────┐  ┌────────┐ │
-│  │   Routes   │  │  Services  │  │ Config │ │
-│  └─────┬──────┘  └─────┬──────┘  └────────┘ │
-│        │               │                    │
-│        └───────────────┼────────────────────┘
-│                        │
-│  ┌─────────────────────┴──────────────────┐ │
-│  │              Agents                    │ │
-│  └─────────────────────┬──────────────────┘ │
-│                        │                    │
-│  ┌─────────────────────┴──────────────────┐ │
-│  │         Data Storage Layer             │ │
-│  │  ┌────────────┐  ┌────────────────┐    │ │
-│  │  │ Databases  │  │ File Storage   │    │ │
-│  │  └────────────┘  └────────────────┘    │ │
-│  └────────────────────────────────────────┘ │
-└─────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                     Presentation Layer                          │
+│  ┌────────────┐    ┌────────────────┐    ┌────────────────┐    │
+│  │ REST API   │    │   ChainLit UI  │    │      CLI       │    │
+│  └─────┬──────┘    └────────┬───────┘    └────────┬───────┘    │
+└────────┼─────────────────────┼────────────────────┼─────────────┘
+          │                     │                    │
+          │                     │                    │
+          ▼                     ▼                    ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                     Application Layer                           │
+│  ┌────────────┐    ┌────────────────┐    ┌────────────────┐    │
+│  │  Services  │    │  Repositories  │    │    Factory     │    │
+│  └─────┬──────┘    └────────┬───────┘    └────────────────┘    │
+└────────┼─────────────────────┼────────────────────────────────────┘
+          │                     │
+          │                     │
+          ▼                     ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                     Domain Layer                                │
+│  ┌────────────┐    ┌────────────────┐    ┌────────────────┐    │
+│  │   Models   │    │   Interfaces   │    │  Domain Logic  │    │
+│  └────────────┘    └────────────────┘    └────────────────┘    │
+└─────────────────────────────────────────────────────────────────┘
+          │                     │
+          │                     │
+          ▼                     ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    Infrastructure Layer                         │
+│  ┌────────────┐    ┌────────────────┐    ┌────────────────┐    │
+│  │  Database  │    │ External APIs  │    │ File Storage   │    │
+│  └────────────┘    └────────────────┘    └────────────────┘    │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-## Key Components
+## Architecture Layers
 
-### 1. Client Interfaces
+### 1. Presentation Layer
 
-- **FastAPI REST Interface**: The primary way to interact with the system
-- **CLI Interface**: Command-line tools for administration and testing
-- **ChainLit UI**: Web-based user interface for interactions
-- **Prompt Tuner**: Web interface for managing and tuning prompts
+The presentation layer is responsible for handling user interactions and displaying information:
 
-### 2. Core Components
+- **API**: REST API endpoints built with FastAPI
+- **ChainLit**: Web-based user interface for chat interactions
+- **CLI**: Command-line interface for administration and testing
 
-- **FastAgentAPI**: The main application class that initializes the system and routes
-- **Configuration System**: Manages application settings and profiles
-- **Services**: Business logic implementation
-  - **ChatService**: Handles chat interactions and agent orchestration
+### 2. Application Layer
+
+The application layer orchestrates the flow of data and coordinates business operations:
+
+- **Services**: Implement business logic and orchestrate domain objects
+- **Repositories**: Implementations of domain interfaces for data access
+- **Factory**: Creates and manages dependencies using dependency injection
+
+### 3. Domain Layer
+
+The domain layer contains the business rules, entities, and interfaces:
+
+- **Models**: Business entities and value objects
+- **Interfaces**: Abstract definitions for repositories and services
+- **Domain Logic**: Core business rules that remain constant regardless of external systems
+
+### 4. Infrastructure Layer
+
+The infrastructure layer provides implementations for external systems:
+
+- **Database**: Database access implementations (Cosmos, DuckDB, SQLite)
+- **External APIs**: Integration with external services (OpenAI, etc.)
+- **Storage**: File storage and retrieval mechanisms
   - **MessageFeedbackService**: Manages user feedback on messages
   - **External Services**: Integrations with external systems like OpenAI
 

@@ -2,17 +2,17 @@ import json
 from typing import List
 
 import jsonpickle
+
+import ingenious.dependencies as ingen_deps
+from ingenious.files.files_repository import FileStorage
+from ingenious.models.agent import Agent
 from ingenious.models.chat import ChatRequest
 from ingenious.models.config import Config
-from ingenious.files.files_repository import FileStorage
 from ingenious.services.chat_service import ChatService
 from ingenious_prompt_tuner.utilities import utils_class
-import ingenious.dependencies as ingen_deps
-from ingenious.models.agent import Agent
 
 
 class functional_tests:
-
     def __init__(
         self,
         config: Config,
@@ -33,9 +33,14 @@ class functional_tests:
         pass
 
     async def run_event_from_pre_processed_file(
-        self, event_type, identifier, identifier_group, file_name, agents: List[Agent], conversation_flow: str
+        self,
+        event_type,
+        identifier,
+        identifier_group,
+        file_name,
+        agents: List[Agent],
+        conversation_flow: str,
     ):
-
         # Note sample data is loaded from the revision folder
         print("sub folders:", self.config.file_storage.data.add_sub_folders)
         if self.config.file_storage.data.add_sub_folders:
@@ -54,7 +59,7 @@ class functional_tests:
             chat_service_type="multi_agent",
             chat_history_repository=ingen_deps.get_chat_history_repository(),
             conversation_flow=conversation_flow,
-            config=self.config
+            config=self.config,
         )
 
         # Make sure that the prompt template folder exists
@@ -71,9 +76,9 @@ class functional_tests:
                 thread_id=identifier,
                 user_prompt=jsonpickle.dumps(json_object, unpicklable=False),
                 conversation_flow=conversation_flow,
-                event_type=event_type
+                event_type=event_type,
             )
 
-            response = await self.chat_service.get_chat_response(chat_request)
+            await self.chat_service.get_chat_response(chat_request)
 
             # print(response)
