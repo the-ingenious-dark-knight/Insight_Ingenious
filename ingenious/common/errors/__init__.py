@@ -18,6 +18,9 @@ from ingenious.common.errors.common import (
     ValidationError,
 )
 
+# Import commonly used specialized errors directly
+from ingenious.common.errors.content_filter_error import ContentFilterError
+
 # Import and re-export error handler functions
 from ingenious.common.errors.handlers import (
     get_error_handler,
@@ -27,9 +30,6 @@ from ingenious.common.errors.handlers import (
 
 # Import specialized error modules
 from ingenious.common.errors.importer import import_error_modules
-
-# Import commonly used specialized errors directly
-from ingenious.common.errors.content_filter_error import ContentFilterError
 from ingenious.common.errors.token_limit_exceeded_error import TokenLimitExceededError
 
 # Get all error classes from specialized modules and add them to this module's globals

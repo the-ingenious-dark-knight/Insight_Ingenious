@@ -7,7 +7,6 @@ and making their classes available at the package level.
 
 import importlib
 import logging
-import sys
 from typing import Dict, Type
 
 from ingenious.common.errors.base import IngeniousError
@@ -49,10 +48,11 @@ def import_error_modules() -> Dict[str, Type]:
             for name in module_items:
                 if not name.startswith("_"):
                     attr = getattr(module, name)
-                    if (isinstance(attr, type) and
-                        issubclass(attr, IngeniousError) and
-                        attr is not IngeniousError):
-
+                    if (
+                        isinstance(attr, type)
+                        and issubclass(attr, IngeniousError)
+                        and attr is not IngeniousError
+                    ):
                         # Add to the collected error classes
                         error_classes[name] = attr
 

@@ -4,7 +4,7 @@ Common error types for the Ingenious framework.
 This module defines common error types that are used throughout the application.
 """
 
-from typing import Dict, Optional, Any
+from typing import Dict, Optional
 
 from ingenious.common.errors.base import IngeniousError
 
