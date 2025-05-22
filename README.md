@@ -30,3 +30,7 @@ A framework for building, managing, and deploying multi-agent AI conversations.
    ```
 
 See [docs/](docs/) for full documentation.
+
+## Contributing
+
+Contributions to Insight Ingenious are welcome! Please refer to the [CONTRIBUTING.md](./CONTRIBUTING.md) file for detailed contribution guidelines including code standards, pull request process, and development setup.
