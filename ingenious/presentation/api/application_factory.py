@@ -12,7 +12,9 @@ from fastapi.responses import JSONResponse, RedirectResponse
 
 import ingenious.common.config.config as ingen_config
 from ingenious.common.di.container import get_container
+from ingenious.common.errors import IngeniousError, handle_exception
 from ingenious.presentation.api.managers.base_manager import IManager
+from ingenious.presentation.api.middleware import add_middleware
 
 
 class ApplicationFactory:
@@ -62,6 +64,13 @@ class ApplicationFactory:
                 manager = container.resolve(manager_class)
                 manager.configure()
 
+        # Add middleware for logging and exception handling
+        logging_config = {
+            "log_request_headers": getattr(config, "debug_mode", False),
+            "log_response_headers": getattr(config, "debug_mode", False),
+        }
+        add_middleware(app, logging_config=logging_config)
+
         return app
 
     @staticmethod
@@ -90,8 +99,17 @@ class ApplicationFactory:
         import logging
 
         logger = logging.getLogger(__name__)
+
+        # If it's our custom error type, use its logging and formatting
+        if isinstance(exc, IngeniousError):
+            exc.log()
+            return JSONResponse(status_code=exc.status_code, content=exc.to_dict())
+
+        # Otherwise, log it and return a generic error response
         logger.exception(exc)
 
-        return JSONResponse(
-            status_code=500, content={"detail": f"An error occurred: {str(exc)}"}
-        )
+        # Use the error handling system to format the response
+        error_dict = handle_exception(exc)
+        status_code = error_dict.get("status_code", 500)
+
+        return JSONResponse(status_code=status_code, content=error_dict)

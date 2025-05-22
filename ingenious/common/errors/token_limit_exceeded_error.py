@@ -1,4 +1,7 @@
-class TokenLimitExceededError(Exception):
+from ingenious.common.errors import IngeniousError
+
+
+class TokenLimitExceededError(IngeniousError):
     """Exception raised when the user has exceeded the OpenAI token limit."""
 
     DEFAULT_MESSAGE = (
@@ -13,9 +16,19 @@ class TokenLimitExceededError(Exception):
         prompt_tokens: int = 0,
         completion_tokens: int = 0,
     ):
-        self.message = message
+        details = {
+            "max_context_length": max_context_length,
+            "requested_tokens": requested_tokens,
+            "prompt_tokens": prompt_tokens,
+            "completion_tokens": completion_tokens,
+        }
+        super().__init__(
+            message=message,
+            status_code=413,  # Payload Too Large
+            error_code="TOKEN_LIMIT_EXCEEDED",
+            details=details,
+        )
         self.max_context_length = max_context_length
         self.requested_tokens = requested_tokens
         self.prompt_tokens = prompt_tokens
         self.completion_tokens = completion_tokens
-        super().__init__(self.message)
