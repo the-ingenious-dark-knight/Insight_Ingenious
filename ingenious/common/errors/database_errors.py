@@ -7,7 +7,15 @@ ensuring consistent error handling for database-related issues.
 
 from typing import Optional
 
-from ingenious.common.errors import IngeniousError
+from ingenious.common.errors.base import IngeniousError
+
+__all__ = [
+    "DatabaseError",
+    "ConnectionError",
+    "QueryError",
+    "DataIntegrityError",
+    "TransactionError",
+]
 
 
 class DatabaseError(IngeniousError):

@@ -7,7 +7,9 @@ ensuring consistent error handling for rate limit violations.
 
 from typing import Optional
 
-from ingenious.common.errors import IngeniousError
+from ingenious.common.errors.base import IngeniousError
+
+__all__ = ["RateLimitError", "QuotaExceededError"]
 
 
 class RateLimitError(IngeniousError):

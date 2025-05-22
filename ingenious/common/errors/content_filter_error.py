@@ -1,4 +1,6 @@
-from ingenious.common.errors import IngeniousError
+from ingenious.common.errors.base import IngeniousError
+
+__all__ = ["ContentFilterError"]
 
 
 class ContentFilterError(IngeniousError):

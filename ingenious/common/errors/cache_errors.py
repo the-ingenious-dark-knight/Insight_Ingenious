@@ -7,7 +7,9 @@ ensuring consistent error handling for cache-related issues.
 
 from typing import Optional
 
-from ingenious.common.errors import IngeniousError
+from ingenious.common.errors.base import IngeniousError
+
+__all__ = ["CacheError", "CacheConnectionError", "CacheKeyError"]
 
 
 class CacheError(IngeniousError):

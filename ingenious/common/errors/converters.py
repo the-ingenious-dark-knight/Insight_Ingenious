@@ -17,9 +17,9 @@ import sqlite3
 from typing import Callable, Dict, Type
 
 # Import error classes
-from ingenious.common.errors import (
+from ingenious.common.errors.base import IngeniousError
+from ingenious.common.errors.common import (
     ConfigurationError,
-    IngeniousError,
     ServiceError,
     ValidationError,
 )

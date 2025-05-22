@@ -9,7 +9,7 @@ from typing import Any, Callable, Dict, Optional, Type, TypeVar
 
 import pytest
 
-from ingenious.common.errors import IngeniousError
+from ingenious.common.errors.base import IngeniousError
 
 T = TypeVar("T", bound=Exception)
 
