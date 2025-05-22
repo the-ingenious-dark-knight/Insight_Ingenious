@@ -12,6 +12,7 @@ Thank you for your interest in contributing to Insight Ingenious! This document 
 - [Branching Strategy](#branching-strategy)
 - [Pull Request Process](#pull-request-process)
 - [Testing](#testing)
+- [Code Quality](#code-quality)
 - [Documentation](#documentation)
 - [Extension Development](#extension-development)
 
@@ -147,6 +148,35 @@ ingen_cli run-test-batch
 ```
 
 When adding new features, include appropriate tests.
+
+## Code Quality
+
+### Finding Dead Code with Vulture
+
+We use [Vulture](https://github.com/jendrikseipp/vulture) to identify unused code in our codebase. This helps maintain a cleaner, more maintainable project.
+
+1. Install Vulture:
+   ```bash
+   uv pip install vulture
+   ```
+
+2. Run Vulture on the project:
+   ```bash
+   vulture ingenious/ --min-confidence 80
+   ```
+
+3. To exclude specific files or directories:
+   ```bash
+   vulture ingenious/ --exclude "*/tests/*,*/migrations/*" --min-confidence 80
+   ```
+
+4. Create whitelists for false positives:
+   ```bash
+   vulture ingenious/ --make-whitelist > whitelist.py
+   vulture ingenious/ whitelist.py
+   ```
+
+For detailed usage and configuration options, refer to the [Code Quality Documentation](./docs/code_quality.md).
 
 ## Documentation
 
