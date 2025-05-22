@@ -77,7 +77,7 @@ class FastAgentAPI:
             chainlit_path = pkg_resources.files("ingenious.chainlit") / "app.py"
             mount_chainlit(app=self.app, target=str(chainlit_path), path="/chainlit")
 
-        # Mount Flask App 
+        # Mount Flask App
         self.app.mount("/prompt-tuner", WSGIMiddleware(self.flask_app))
 
         # Redirect `/` to `/docs`

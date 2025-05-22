@@ -24,7 +24,7 @@ class ConversationFlow:
         memory_record_switch = chatrequest.memory_record
         event_type = chatrequest.event_type
         thread_chat_history = chatrequest.thread_chat_history
-        
+
         _config = config.get_config()
         llm_config = _config.models[0].__dict__
         memory_path = _config.chat_history.memory_path

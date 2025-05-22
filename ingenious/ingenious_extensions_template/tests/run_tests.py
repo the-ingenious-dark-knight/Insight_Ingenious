@@ -106,5 +106,3 @@ class RunBatches:
         html_output_path = output_path.replace(".md", ".html")
         with open(html_output_path, 'w') as f:
             f.write(html_content2)
-
-    

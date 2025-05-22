@@ -60,7 +60,7 @@ class utils_class:
         if revision_id is None:
             revision_id = get_selected_revision_direct_call()
 
-        source_prompt_folder = get_path_from_namespace_with_fallback("templates/prompts")        
+        source_prompt_folder = get_path_from_namespace_with_fallback("templates/prompts")
         target_prompt_folder = await self.fs.get_prompt_template_path(revision_id)
         no_existing_prompts = False
 
@@ -70,7 +70,7 @@ class utils_class:
             existing_prompts = await self.fs.list_files(target_prompt_folder)
             if len(existing_prompts) == 0:
                 no_existing_prompts = True
-        
+
         if force_copy_from_source:
             print("Force copying prompts from the source")
 
@@ -80,7 +80,7 @@ class utils_class:
         if no_existing_prompts:
             print("Prompt folder is Empty")
 
-        # Copy the prompts from source    
+        # Copy the prompts from source
         if self.prompt_template_folder is None or force_copy_from_source or no_existing_prompts:
             if no_existing_prompts or force_copy_from_source:
                 print("Copying prompts from the template folder to the prompts folder")
@@ -97,7 +97,7 @@ class utils_class:
     async def get_functional_tests_folder(self, revision_id=None, force_copy_from_source=False):
         if revision_id is None:
             revision_id = get_selected_revision_direct_call()
-        
+
         target_folder = f"functional_test_outputs/{revision_id}"
         no_existing_events = []
         if not self.functional_tests_folder == target_folder:
@@ -108,10 +108,10 @@ class utils_class:
                 no_existing_events = True
 
         if self.functional_tests_folder is None or force_copy_from_source or no_existing_events:
-            source_folder_code = get_path_from_namespace_with_fallback("sample_data")            
+            source_folder_code = get_path_from_namespace_with_fallback("sample_data")
             source_files_code = os.listdir(source_folder_code)
 
-            # filter files to exclude readme.md 
+            # filter files to exclude readme.md
             source_files_filtered = []
             for file in source_files_code:
                 if "readme.md" not in file:
@@ -134,7 +134,7 @@ class utils_class:
             self.functional_tests_folder = target_folder
 
         return self.functional_tests_folder
-    
+
     async def get_data_folder(self, revision_id=None, force_copy_from_source=False):
         if revision_id is None:
             revision_id = get_selected_revision_direct_call()
@@ -149,7 +149,7 @@ class utils_class:
             existing_data = await self.fs.list_files(target_folder)
             if len(existing_data) == 0:
                 no_existing_data = True
-        
+
         if self.data_folder is None or force_copy_from_source or no_existing_data == 0:
             source_folder = get_path_from_namespace_with_fallback("sample_data")
             target_folder = f"functional_test_outputs/{revision_id}"
@@ -168,5 +168,3 @@ class utils_class:
 
         await self.events.load_events_from_file(f"functional_test_outputs/{revision_id}")
         return self.events
-
-

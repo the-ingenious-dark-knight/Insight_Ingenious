@@ -46,7 +46,7 @@ def create_app():
 
     # Set utils so that downstream blueprints have access to the config
     app.utils = uti.utils_class(config)
-    
+
     # Get the list of agents -- note this should preference the Agents class in the project level extensions dir
     # Note the Agents module and ProjectAgents class must be defined in the project level extensions dir
     agents_class: IProjectAgents = import_class_with_fallback('models.agent', "ProjectAgents")
@@ -55,23 +55,23 @@ def create_app():
 
     agents = agents_class.get_agents()
     app.config["agents"] = agents_class
-    
+
     if config.file_storage.data.add_sub_folders:
         app.config["events_path"] = str(Path("functional_test_outputs"))
     else:
         app.config["events_path"] = str(Path("./"))
-    
-    app.config["test_output_path"] = str(Path("functional_test_outputs"))   
+
+    app.config["test_output_path"] = str(Path("functional_test_outputs"))
 
     app.config["response_agent_name"] = None
     for agent in agents:
         agent: Agent = agent  # type hinting
         if agent.return_in_response:
             app.config["response_agent_name"] = agent.agent_name
-    
+
     if app.config["response_agent_name"] is None:
         raise ValueError("Response agent not found in agents list. You must set one agent to return in response.")
-        
+
     # ensure the instance folder exists
     try:
         # os.makedirs(app.instance_path)

@@ -8,7 +8,7 @@ import asyncio
 from pathlib import Path
 import yaml
 import uuid as guid
-import json 
+import json
 import markdown
 
 # Set up parent directory and import dependencies
@@ -103,7 +103,7 @@ def logout():
 def home():
     class Revision:
         def __init__(self, description):
-            self.name = guid.uuid4() 
+            self.name = guid.uuid4()
             self.description
 
     if asyncio.run(fs.check_if_file_exists(file_name='revisions.yml', file_path=str(REVISIONS_FOLDER))):
@@ -111,7 +111,7 @@ def home():
         revisions = yaml.safe_load(revisions_str)
     else:
         revisions = []
-    
+
     return render_template('home.html', files=revisions)
 
 
@@ -138,7 +138,7 @@ def create_revision():
         for prompt in prompts:
             content = asyncio.run(fs.read_file(file_name=prompt, file_path=f"prompts/{get_selected_revision_direct_call()}"))
             asyncio.run(fs.write_file(file_name=prompt, file_path=f"prompts/{revision_name}", contents=content))
-            
+
         for function_test_output in function_test_outputs:
             content = asyncio.run(fs.read_file(file_name=function_test_output, file_path=f"functional_test_outputs/{get_selected_revision_direct_call()}"))
             asyncio.run(fs.write_file(file_name=function_test_output, file_path=f"functional_test_outputs/{revision_name}", contents=content))
@@ -169,7 +169,7 @@ def save_revision():
     for prompt in prompts:
         content = asyncio.run(fs.read_file(file_name=prompt, file_path=f"prompts/{get_selected_revision_direct_call()}"))
         asyncio.run(fs.write_file(file_name=prompt, file_path=f"prompts/{revision_name}", contents=content))
-        
+
     for function_test_output in function_test_outputs:
         content = asyncio.run(fs.read_file(file_name=function_test_output, file_path=f"functional_test_outputs/{get_selected_revision_direct_call()}"))
         asyncio.run(fs.write_file(file_name=function_test_output, file_path=f"functional_test_outputs/{revision_name}", contents=content))
@@ -220,7 +220,7 @@ def get_test_data_files():
         files.sort(key=lambda x: json.loads(asyncio.run(fs.read_file(file_name=x, file_path=output_path)))['ball_identifier'])
     else:
         files = []
-    
+
     if files_all:
         files = [
             f for f in files_all
@@ -309,7 +309,7 @@ def get_responses():
 def get_agent_response_from_file():
     ball_identifier = request.form.get('ball_identifier', type=str).replace("#", "")
     event_type = request.form.get('event_type', type=str)
-    
+
     file_name = f"agent_response_{event_type}_summary_{ball_identifier.strip()}.md"
     output_path = str(Path(asyncio.run(run_tests.get_output_path(session_id=get_selected_revision_direct_call()))).parent)
     file_contents = asyncio.run(fs.read_file(file_name=file_name, file_path=output_path))

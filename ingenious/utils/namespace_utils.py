@@ -68,7 +68,7 @@ def import_module_with_fallback(module_name):
         sys.path.append(str(working_dir))
 
     modules = [f"{n}.{module_name}" for n in get_namespaces()]
-    
+
     for i in range(len(modules)):
         m = modules[i]
         print(f"Trying to import module {m}")
@@ -148,7 +148,7 @@ def get_inbuilt_api_routes():
     install_dir = Path(get_paths()["purelib"]) / Path("ingenious") / Path("api") / Path("routes")
 
     dirs = [working_dir, install_dir]
-        
+
     for dir in dirs:
         if os.path.exists(str(dir)):
             return dir

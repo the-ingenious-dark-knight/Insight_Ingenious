@@ -49,7 +49,7 @@ def Dict_To_Csv(obj: dict, row_header_columns, name):
         writer.writerow(
             [row[key] for key in row_header_columns]
         )
-    output += csv_output.getvalue() + "\n```"    
+    output += csv_output.getvalue() + "\n```"
     return output
 
 
@@ -67,7 +67,7 @@ def List_To_Csv(obj: List, row_header_columns, name):
         writer.writerow(
             [row[key] for key in row_header_columns]
         )
-    output += csv_output.getvalue() + "\n```"    
+    output += csv_output.getvalue() + "\n```"
     return output
 
 
@@ -81,7 +81,7 @@ def Listable_Object_To_Csv(obj, row_type):
         writer.writerow(
             [getattr(row, header, None) for header in headers]
         )
-    output += csv_output.getvalue() + "\n```"    
+    output += csv_output.getvalue() + "\n```"
     return output
 
 

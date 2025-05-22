@@ -52,7 +52,7 @@ class Api_Routes(IApiRoutes):
         @self.router.get("/custom-endpoint")
         async def custom_endpoint():
             return {"message": "This is a custom endpoint"}
-            
+
         # Include your router
         self.app.include_router(self.router, prefix="/api/v1", tags=["Custom"])
 ```
@@ -139,7 +139,7 @@ Use your template in code:
 from ingenious.utils.template_utils import render_template
 
 prompt = render_template(
-    "custom_prompt.j2", 
+    "custom_prompt.j2",
     {"agent_type": "research assistant", "task": "academic research", "query": user_query}
 )
 ```
@@ -171,7 +171,7 @@ from ingenious.db import BaseRepository
 class CustomRepository(BaseRepository):
     def __init__(self, db_client):
         super().__init__(db_client)
-        
+
     async def custom_query(self, query_params):
         # Implementation
         pass
@@ -270,7 +270,7 @@ class Api_Routes(IApiRoutes):
         @self.router.get("/weather")
         async def get_weather(city: str):
             return {"city": city, "condition": "sunny", "temperature": 25}
-            
+
         self.app.include_router(self.router, prefix="/api/v1", tags=["Weather"])
 ```
 

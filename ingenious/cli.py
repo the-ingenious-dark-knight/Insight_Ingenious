@@ -66,21 +66,21 @@ def run_rest_api_server(
     ] = ""
 ):
     """
-    This command will run a fastapi server and present your agent workflows via a rest endpoint. 
-    """    
+    This command will run a fastapi server and present your agent workflows via a rest endpoint.
+    """
     if (project_dir is not None):
         os.environ["INGENIOUS_PROJECT_PATH"] = project_dir
-    
+
     if profile_dir is None:
         # get home directory
         home_dir = os.path.expanduser("~")
         profile_dir = Path(home_dir) / Path(".ingenious") / Path("profiles.yml")
-    
+
     print(f"Profile path: {profile_dir}")
     os.environ["INGENIOUS_PROFILE_PATH"] = str(profile_dir).replace("\\", "/")
     import ingenious.config.config as ingen_config
     config = ingen_config.get_config()
-    
+
     # We need to clean this up and probrably separate overall system config from fast api, eg. set the config here in cli and then pass it to FastAgentAPI
     # As soon as we import FastAgentAPI, config will be loaded hence to ensure that the environment variables above are loaded first we need to import FastAgentAPI after setting the environment variables
     from ingenious.main import FastAgentAPI
@@ -92,9 +92,9 @@ def run_rest_api_server(
         src = Path(os.getcwd()) / Path('ingenious/')
         if os.path.exists(src):
             CliFunctions.copy_ingenious_folder(src, Path(get_paths()['purelib']) / Path('ingenious/'))
-    
-    print(f"Current working directory: {os.getcwd()}")    
-    
+
+    print(f"Current working directory: {os.getcwd()}")
+
     def print_namespace_modules(namespace):
         package = importlib.import_module(namespace)
         if hasattr(package, '__path__'):
@@ -110,8 +110,8 @@ def run_rest_api_server(
 
     # Access the FastAPI app instance
     app = fast_agent_api.app
-    
-    # change directory to project dir    
+
+    # change directory to project dir
     uvicorn.run(app, host=config.web_configuration.ip_address, port=config.web_configuration.port)
     #import subprocess
     #subprocess.run(["fastapi", "dev", "./ingenious/main.py"])
@@ -135,10 +135,10 @@ def run_test_batch(
     """
         This command will run all the tests in the project
         """
-    _log_level: LogLevel = LogLevel.from_string(log_level)    
-    
+    _log_level: LogLevel = LogLevel.from_string(log_level)
+
     se: stage_executor_module.stage_executor = stage_executor_module.stage_executor(log_level=_log_level, console=console)
-    
+
     # Parse the run_args string into a dictionary
     kwargs = {}
     if run_args:
@@ -269,20 +269,20 @@ class CliFunctions:
         async def __call__(self, progress, task_id, **kwargs):
             module_name = "tests.run_tests"
             class_name = "RunBatches"
-            try:                
+            try:
                 repository_class_import = import_class_with_fallback(module_name, class_name)
                 repository_class = repository_class_import(progress=progress, task_id=task_id)
-                
+
                 await repository_class.run(progress, task_id, **kwargs)
 
             except (ImportError, AttributeError) as e:
                 raise ValueError(f"Batch Run Failed: {module_name}") from e
-    
+
     @staticmethod
     def PureLibIncludeDirExists():
         ChkPath = Path(get_paths()['purelib']) / Path('ingenious/')
         return os.path.exists(ChkPath)
-            
+
     @staticmethod
     def GetIncludeDir():
         ChkPath = Path(get_paths()['purelib']) / Path('ingenious/')
@@ -290,11 +290,11 @@ class CliFunctions:
         # Does Check for the path
         if os.path.exists(ChkPath):
             return ChkPath
-        else:        
+        else:
             path = Path(os.getcwd()) / Path('ingenious/')
             # print(str(path))
             return (path)
-    
+
     @staticmethod
     def copy_ingenious_folder(src, dst):
         if not os.path.exists(dst):

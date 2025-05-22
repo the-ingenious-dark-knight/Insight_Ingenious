@@ -30,7 +30,7 @@ def num_tokens_from_messages(messages: list[ChatCompletionMessageParam], model: 
     except KeyError:
         logger.warning("Warning: model not found. Using cl100k_base encoding.")
         encoding = tiktoken.get_encoding("cl100k_base")
-    
+
     ## TODO: Move this to a configuration file
     if model in {
         "gpt-3.5-turbo-0613",

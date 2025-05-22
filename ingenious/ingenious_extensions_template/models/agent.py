@@ -3,7 +3,7 @@ from ingenious.models.config import Config
 
 
 class ProjectAgents(IProjectAgents):
-    def Get_Project_Agents(self, config: Config) -> Agents:        
+    def Get_Project_Agents(self, config: Config) -> Agents:
         local_agents = []
         local_agents.append(
             Agent(
@@ -73,6 +73,6 @@ class ProjectAgents(IProjectAgents):
         )
 
 
-        
+
 
         return Agents(agents=local_agents, config=config)

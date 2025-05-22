@@ -8,7 +8,7 @@
 ## Tasks
 
 ### Design Process
-    
+
     * Clarify the lesson purpose and identify the learning goal/intention for the lesson:
         * What do you want the students to learn?
         * Why does this learning matter?
@@ -43,4 +43,3 @@
                 * Teaching Approach
                 * Resources/Materials
         * Assessments
-    

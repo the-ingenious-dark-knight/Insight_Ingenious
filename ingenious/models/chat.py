@@ -33,4 +33,3 @@ class ChatRequest(IChatRequest):
 
 class ChatResponse(IChatResponse):
     pass
-

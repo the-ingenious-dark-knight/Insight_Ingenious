@@ -54,7 +54,7 @@ agents:
       temperature: 0.7         # Temperature for generation
       max_tokens: 2000         # Maximum tokens to generate
     system_prompt: "You are a helpful assistant."
-  
+
   - name: "code_expert"        # Another agent
     model_config:
       model: "gpt-4o"
@@ -83,15 +83,15 @@ profiles:
     openai:
       api_key: "your_openai_api_key"
       organization: "your_organization_id"
-    
+
     azure_openai:
       api_key: "your_azure_openai_key"
       api_base: "your_azure_openai_endpoint"
       api_version: "2023-12-01-preview"
-    
+
     azure_storage:
       connection_string: "your_azure_storage_connection_string"
-    
+
     azure_cosmos:
       endpoint: "your_cosmos_endpoint"
       key: "your_cosmos_key"

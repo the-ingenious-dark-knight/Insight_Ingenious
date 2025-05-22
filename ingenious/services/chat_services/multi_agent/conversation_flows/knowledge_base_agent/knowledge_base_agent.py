@@ -33,14 +33,14 @@ class ConversationFlow:
                             " - I can use the below arguments for the `search_tool`: "
                             " - if the query is about health, please use argument: search_query str, index_name: 'index-document-set-1'; "
                             " - if the query is about safety, please use argument: search_query str, index_name: 'index-document-set-2' "
-                            
-                
+
+
                             "Rules for compose the query: "
                             f"- if the context is in predefined topics: {', '.join(agent_pattern.topics)}, "
                             f"  I will compose query using the relevant index. "
                             f"- if the question is not in predefined topics: {', '.join(agent_pattern.topics)} or lacks specific context,  "
                             f"  I will use keywords derived from the user question and search in all indexes: 'index-document-set-1', 'index-document-set-2'."
-                            
+
 
                             "Other Rules: "
                             " - My response MUST be based on the information found in the search results, without introducing any additional or external details. "

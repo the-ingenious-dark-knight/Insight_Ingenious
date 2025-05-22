@@ -18,7 +18,7 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        
+
         if check_auth(username, password):
             session['logged_in'] = True
             return redirect(url_for('index.home'))
@@ -34,5 +34,3 @@ def requires_auth(f):
             return redirect(url_for('auth.login'))
         return f(*args, **kwargs)
     return decorated
-
-

@@ -380,7 +380,7 @@ class RootModel_Innings_Bowlers_Extended(BaseModel):
         self.BowlingAverage = self.RunsConceded / self.WicketsTaken if self.WicketsTaken > 0 else 0
         self.EconomyRate = self.Economy
         self.StrikeRate = self.TotalBallsBowled / self.WicketsTaken if self.WicketsTaken > 0 else 0
-        
+
 
 
 class RootModel_Innings_Batsmen_Extended(BaseModel):
@@ -906,7 +906,7 @@ class RootModel(BaseModel):
     def Set_Current_Ball(self, ball):
         self._CurrentBall = ball
         print("")
-    
+
     def Get_Current_Ball(self, as_yml=False):
         """
             Method used to track current ball while processing new balls in the feed
@@ -918,7 +918,7 @@ class RootModel(BaseModel):
             ret = self._CurrentBall
 
         return ret
-        
+
     def Get_All_Balls_by_Player(self, as_csv=True):
         try:
             balls = self.Get_All_Balls()
@@ -950,7 +950,7 @@ class RootModel(BaseModel):
 
         # Aggregate by BowlerPlayerId
         try:
-            
+
             stats_by_bowler = aggregate_by_key(balls, "BowlerPlayerId")
             for stat in stats_by_bowler:
                 stat["BowlerName"] = players.get(stat.get("BowlerPlayerId", ""), {}).get("Name", "Unknown")
@@ -1309,8 +1309,8 @@ class RootModel(BaseModel):
         return batsmen
 
     def Get_Current_Batsman_As_Yaml(self):
-        output = "## Current Batsman\n" 
-        
+        output = "## Current Batsman\n"
+
         batsman = self.Get_Current_Batsman()
         if batsman:
             output += model_utils.Object_To_Yaml(
@@ -1453,7 +1453,7 @@ class RootModel(BaseModel):
         summaries_shot = list()
         summaries_connection = list()
         summaries_shot_placement = list()
-        
+
         csv_string = ""
         for player in self.Players:
             player_id = player.Id
@@ -1510,13 +1510,13 @@ class RootModel(BaseModel):
                         sum(1 for ball in player_balls if ball.BowlerPlayerId == player_id
                             and measure_func(getattr(ball, measure_name)) == measure and ball.IsWicket) or 0
                 return summary
-        
+
             summaries_length.append(summarize_measures(player_balls, player_id, player_name, "LengthType", self.Get_Ball_Length_Category, self.Get_Length_Types))
             summaries_line.append(summarize_measures(player_balls, player_id, player_name, "LineType", self.Get_Ball_Line_Category, self.Get_Line_Types))
             summaries_connection.append(summarize_measures(player_balls, player_id, player_name, "BattingConnection", self.Get_Ball_Shot_Connection_Type_Category, self.Get_Shot_Connection_Types))
             summaries_shot.append(summarize_measures(player_balls, player_id, player_name, "BattingShotType", self.Get_Ball_Shot_Type_Category, self.Get_Shot_Types))
             summaries_shot_placement.append(summarize_measures(player_balls, player_id, player_name, "ShotAngle", self.Get_Field_Area, self.Get_Field_Areas))
-            
+
         if as_csv:
             csv_string += "## Player Ball Data - Current Innings High Level Summaries\n"
             csv_string += model_utils.List_To_Csv(
@@ -1557,7 +1557,7 @@ class RootModel(BaseModel):
             for over in inning.Overs:
                 for ball in over.Balls:
                     length_types.add(ball.LengthType)
-        
+
         length_categories = set()
         for type in length_types:
             length_categories.add(self.Get_Ball_Length_Category(type))
@@ -1573,7 +1573,7 @@ class RootModel(BaseModel):
         for type in line_types:
             line_categories.add(self.Get_Ball_Line_Category(type))
         return line_categories
-    
+
     def Get_Shot_Types(self):
         shot_types = set()
         for inning in self.Innings:
@@ -1584,7 +1584,7 @@ class RootModel(BaseModel):
         for type in shot_types:
             shot_categories.add(self.Get_Ball_Shot_Type_Category(type))
         return shot_categories
-    
+
     def Get_Shot_Connection_Types(self):
         connection_types = set()
         for inning in self.Innings:
@@ -1595,7 +1595,7 @@ class RootModel(BaseModel):
         for type in connection_types:
             connection_categories.add(self.Get_Ball_Shot_Connection_Type_Category(type))
         return connection_categories
-    
+
     def Get_Field_Areas(self):
         """
         Returns a list of all cricket field areas.
@@ -1656,8 +1656,8 @@ class RootModel(BaseModel):
                 ret = "Short"
             case _:
                 ret = "Unknown"
-        
-        if ret == "Unknown" and ball != "" and ball is not None and ball != "none" and ball != "null": 
+
+        if ret == "Unknown" and ball != "" and ball is not None and ball != "none" and ball != "null":
             self._progress.progress.print(f"[bold red]❓ Missing shot length category: {ball}[/bold red]")
 
         return ret
@@ -1676,10 +1676,10 @@ class RootModel(BaseModel):
                 ret = "Down Leg"
             case _:
                 ret = "Unknown"
-        
+
         if ret == "Unknown" and line != "" and line is not None and line != "none" and line != "null":
             self._progress.progress.print(f"[bold red]❓ Missing shot line category: {line}[/bold red]")
-        
+
         return ret
 
     def Get_Ball_Shot_Type_Category(self, shot):
@@ -1713,9 +1713,9 @@ class RootModel(BaseModel):
 
         if ret == "Unknown":
             self._progress.progress.print(f"[bold red]❓ Missing shot category: {shot}[/bold red]")
-        
+
         return ret
-    
+
     def Get_Ball_Shot_Connection_Type_Category(self, contact):
         contact = str(contact).replace(" ", "")
         ret = "Unknown"
@@ -1740,10 +1740,10 @@ class RootModel(BaseModel):
                 ret = "Gloved"
             case _:
                 ret = "Unknown"
-        
+
         if ret == "Unknown":
             self._progress.progress.print(f"[bold red]❓ Missing shot contact category: {contact}[/bold red]")
-        
+
         return ret
 
     def Get_Detail_As_Json(self):

@@ -47,14 +47,14 @@ class AgentChat(BaseModel):
 
     def get_execution_time(self) -> float:
         return self.end_time - self.start_time
-    
+
     def get_execution_time_formatted(self) -> str:
         execution_time = self.get_execution_time()
         return f"{int(execution_time // 60)}:{int(execution_time % 60):02d}"
-    
+
     def get_start_time_formatted(self) -> str:
         return datetime.fromtimestamp(self.start_time).strftime("%H:%M:%S")
-        
+
     def get_associated_agent_response_file_name(self, identifier: str, event_type: str) -> str:
         return f"agent_response_{event_type}_{self.source_agent_name}_{self.target_agent_name}_{identifier.strip()}.md"
 
@@ -85,7 +85,7 @@ class AgentChats(BaseModel):
             if agent_chat.agent_name == agent_name:
                 return agent_chat
         raise ValueError(f"AgentChat with name {agent_name} not found")
-    
+
     def get_agent_chats_by_name(self, agent_name: str) -> List[AgentChat]:
         agent_chats = []
         for agent_chat in self._agent_chats:
@@ -126,7 +126,7 @@ class Agent(BaseModel):
     def add_agent_chat(self, content: str, identifier: str, ctx: MessageContext = None, source=None) -> AgentChat:
         if ctx:
             source = ctx.topic_id.source
-        
+
         agent_chat: AgentChat = AgentChat(
             chat_name=self.agent_name + "",
             target_agent_name=self.agent_name,
@@ -181,7 +181,7 @@ class Agents(BaseModel):
 
     def __init__(self, agents: List[Agent], config: Config):
         super().__init__()
-        self._agents = agents       
+        self._agents = agents
         for agent in self._agents:
             for model in config.models:
                 if model.model == agent.agent_model_name:
@@ -189,10 +189,10 @@ class Agents(BaseModel):
                     break
         if not agent.model:
             raise ValueError(f"Model {agent.model_name} not found in config.yml")
-        
+
     def get_agents(self):
         return self._agents
-    
+
     def get_agents_for_prompt_tuner(self):
         return [agent for agent in self._agents if agent.log_to_prompt_tuner]
 
@@ -203,13 +203,13 @@ class Agents(BaseModel):
         raise ValueError(f"Agent with name {agent_name} not found")
 
     async def register_agent(
-                self, 
+                self,
                 ag_class,
                 runtime: SingleThreadedAgentRuntime,
                 agent_name: str,
                 data_identifier: str,
                 next_agent_topic: str,
-                tools: List[Tool] = [] 
+                tools: List[Tool] = []
             ):
         agent = self.get_agent_by_name(agent_name=agent_name)
         reg_agent = await ag_class.register(
@@ -276,14 +276,14 @@ class LLMUsageTracker(logging.Handler):
                     f"{"_".join(temp_file_prefixes)}.md",
                     output_path
                 )
-    
+
     # TODO: Implement this function
     async def write_llm_responses_to_repository(
             self, user_id: str, thread_id: str, message_id: str
     ):
         for agent_chat in self._queue:
             agent = self._agents.get_agent_by_name(agent_chat.target_agent_name)
-            if agent.log_to_prompt_tuner:                
+            if agent.log_to_prompt_tuner:
                 fs = FileStorage(self._config)
                 output_path = await fs.get_output_path(self._revision_id)
                 content = agent_chat.model_dump_json()
@@ -311,7 +311,7 @@ class LLMUsageTracker(logging.Handler):
     async def post_chats_to_queue(self, target_queue: asyncio.Queue[AgentChat]):
         for agent_chat in self._queue:
             agent = self._agents.get_agent_by_name(agent_chat.target_agent_name)
-            await agent.log(agent_chat, target_queue) 
+            await agent.log(agent_chat, target_queue)
 
     def emit(self, record: logging.LogRecord) -> None:
         """Emit the log record."""
@@ -321,7 +321,7 @@ class LLMUsageTracker(logging.Handler):
             if isinstance(record.msg, LLMCallEvent):
                 event: LLMCallEvent = record.msg
                 kwargs: LLMEventKwargs = LLMEventKwargs.model_validate(event.kwargs)
-                
+
                 agent_name = kwargs.agent_id.split("/")[0]
                 source_name = kwargs.agent_id.split("/")[1]
                 agent = self._agents.get_agent_by_name(agent_name)
@@ -336,7 +336,7 @@ class LLMUsageTracker(logging.Handler):
 
                     system_input = "\n\n".join([r.content for r in kwargs.messages if r.role == 'system'])
                     user_input = "\n\n".join([r.content for r in kwargs.messages if r.role == 'user'])
-                    
+
                     # Get all messages with role 'tool'
                     tool_messages = [m for m in kwargs.messages if m.role == 'tool']
                     if tool_messages:
@@ -356,7 +356,7 @@ class LLMUsageTracker(logging.Handler):
                 chat.end_time = datetime.now().timestamp()
                 if add_chat:
                     self._queue.append(chat)
-                
+
         except Exception as e:
             print(f'Failed to emit log record :{e}')
             self.handleError(record)
@@ -369,4 +369,3 @@ class IProjectAgents(ABC):
     @abstractmethod
     def Get_Project_Agents(self, config: Config) -> Agents:
         pass
-

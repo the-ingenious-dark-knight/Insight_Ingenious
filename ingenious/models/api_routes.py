@@ -20,4 +20,3 @@ class IApiRoutes(ABC):
         Adds custom routes to the FastAPI app instance. Always returns the router instance.
         """
         pass
-

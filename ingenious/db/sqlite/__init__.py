@@ -52,15 +52,15 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
                 CREATE TABLE IF NOT EXISTS chat_history (
                     user_id TEXT,
                     thread_id TEXT,
-                    message_id TEXT, 
-                    positive_feedback BOOLEAN, 
+                    message_id TEXT,
+                    positive_feedback BOOLEAN,
                     timestamp TEXT,
                     role TEXT,
                     content TEXT,
                     content_filter_results TEXT,
                     tool_calls TEXT,
-                    tool_call_id TEXT, 
-                    tool_call_function TEXT                
+                    tool_call_id TEXT,
+                    tool_call_function TEXT
                 );
             ''')
 
@@ -68,15 +68,15 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
                             CREATE TABLE IF NOT EXISTS chat_history_summary (
                                 user_id TEXT,
                                 thread_id TEXT,
-                                message_id TEXT, 
-                                positive_feedback BOOLEAN, 
+                                message_id TEXT,
+                                positive_feedback BOOLEAN,
                                 timestamp TEXT,
                                 role TEXT,
                                 content TEXT,
                                 content_filter_results TEXT,
                                 tool_calls TEXT,
-                                tool_call_id TEXT, 
-                                tool_call_function TEXT                
+                                tool_call_id TEXT,
+                                tool_call_function TEXT
                             );
                         ''')
 
@@ -89,7 +89,7 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
                 );
             ''')
 
-            self.connection.execute('''                                     
+            self.connection.execute('''
                 CREATE TABLE IF NOT EXISTS threads (
                     "id" UUID PRIMARY KEY,
                     "createdAt" TEXT,
@@ -176,16 +176,16 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
         with self.connection:
             self.connection.execute('''
                 INSERT INTO chat_history_summary (
-                                    user_id, 
-                                    thread_id, 
-                                    message_id, 
-                                    positive_feedback, 
-                                    timestamp, 
-                                    role, 
-                                    content, 
-                                    content_filter_results, 
-                                    tool_calls, 
-                                    tool_call_id, 
+                                    user_id,
+                                    thread_id,
+                                    message_id,
+                                    positive_feedback,
+                                    timestamp,
+                                    role,
+                                    content,
+                                    content_filter_results,
+                                    tool_calls,
+                                    tool_call_id,
                                     tool_call_function)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
@@ -212,16 +212,16 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
         with self.connection:
             self.connection.execute('''
                 INSERT INTO chat_history (
-                                    user_id, 
-                                    thread_id, 
-                                    message_id, 
-                                    positive_feedback, 
-                                    timestamp, 
-                                    role, 
-                                    content, 
-                                    content_filter_results, 
-                                    tool_calls, 
-                                    tool_call_id, 
+                                    user_id,
+                                    thread_id,
+                                    message_id,
+                                    positive_feedback,
+                                    timestamp,
+                                    role,
+                                    content,
+                                    content_filter_results,
+                                    tool_calls,
+                                    tool_call_id,
                                     tool_call_function)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
@@ -270,7 +270,7 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
     async def get_user(self, identifier) -> IChatHistoryRepository.User | None:
         cursor = self.connection.cursor()
         cursor.execute('''
-            SELECT 
+            SELECT
                 id,
                 identifier,
                 metadata,
@@ -672,10 +672,10 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
         # Create a temporary table for the latest records
         cursor.execute('''
             CREATE TEMP TABLE latest_chat_history AS
-            SELECT user_id, thread_id, message_id, positive_feedback, timestamp, role, content, 
+            SELECT user_id, thread_id, message_id, positive_feedback, timestamp, role, content,
                    content_filter_results, tool_calls, tool_call_id, tool_call_function
             FROM (
-                SELECT user_id, thread_id, message_id, positive_feedback, timestamp, role, content, 
+                SELECT user_id, thread_id, message_id, positive_feedback, timestamp, role, content,
                        content_filter_results, tool_calls, tool_call_id, tool_call_function,
                        ROW_NUMBER() OVER (PARTITION BY thread_id ORDER BY timestamp DESC) AS row_num
                 FROM chat_history_summary
@@ -688,9 +688,9 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
 
         # Insert the latest records back into the original table
         cursor.execute('''
-            INSERT INTO chat_history_summary (user_id, thread_id, message_id, positive_feedback, timestamp, role, content, 
+            INSERT INTO chat_history_summary (user_id, thread_id, message_id, positive_feedback, timestamp, role, content,
                                               content_filter_results, tool_calls, tool_call_id, tool_call_function)
-            SELECT user_id, thread_id, message_id, positive_feedback, timestamp, role, content, 
+            SELECT user_id, thread_id, message_id, positive_feedback, timestamp, role, content,
                    content_filter_results, tool_calls, tool_call_id, tool_call_function
             FROM latest_chat_history
         ''')
@@ -703,7 +703,7 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
     async def get_memory(self, message_id: str, thread_id: str) -> Message | None:
         cursor = self.connection.cursor()
         cursor.execute('''
-            SELECT user_id, thread_id, message_id, positive_feedback, timestamp, role, content, 
+            SELECT user_id, thread_id, message_id, positive_feedback, timestamp, role, content,
                    content_filter_results, tool_calls, tool_call_id, tool_call_function
             FROM chat_history_summary
             WHERE thread_id = ?
@@ -730,7 +730,7 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
     async def get_thread_memory(self, thread_id: str) -> list[Message]:
         cursor = self.connection.cursor()
         cursor.execute('''
-            SELECT user_id, thread_id, message_id, positive_feedback, timestamp, role, content, 
+            SELECT user_id, thread_id, message_id, positive_feedback, timestamp, role, content,
                    content_filter_results, tool_calls, tool_call_id, tool_call_function
             FROM chat_history_summary
             WHERE thread_id = ?

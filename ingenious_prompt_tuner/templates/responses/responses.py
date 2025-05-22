@@ -35,7 +35,7 @@ bp = Blueprint("responses", __name__, url_prefix="/responses")
 @requires_selected_revision
 def list():
     utils: utils_class = current_app.utils
-    prompt_template_folder = asyncio.run(utils.get_prompt_template_folder())    
+    prompt_template_folder = asyncio.run(utils.get_prompt_template_folder())
     base_path = asyncio.run(utils.fs.get_base_path()) / Path(prompt_template_folder)
     data_folder = asyncio.run(utils.get_data_folder())
     data_base_path = asyncio.run(utils.fs_data.get_base_path()) / Path(data_folder)
@@ -91,18 +91,18 @@ def get_payload():
 @requires_selected_revision
 def rerun_event():
     utils: utils_class = current_app.utils
-    agents = current_app.config["agents"] 
+    agents = current_app.config["agents"]
     prompt_template_folder = asyncio.run(utils.get_prompt_template_folder())
     try:
         identifier = request.args.get("identifier", type=str)
         event_type = request.args.get("event_type", type=str)
         file_name = request.args.get("file_name", type=str)
         identifier_group = request.args.get("identifier_group", type=str)
-        
+
         # Events are locked in source code and copied to the output folder each time.
         events: Events = asyncio.run(utils.get_events(revision_id=get_selected_revision_direct_call()))
         event = events.get_event_by_identifier(identifier)
-        
+
         ft = functional_tests(
             config=utils.get_config(),
             revision_prompt_folder=prompt_template_folder,
@@ -136,7 +136,7 @@ def get_agent_response():
     event_type = request.args.get("event_type", type=str)
     agent_name = request.args.get("agent_name", type=str)
     identifier_group = request.args.get("identifier_group", type=str)
-    
+
     file_name_parts = [identifier_group, "agent_response", event_type, "default", agent_name, identifier.strip()]
 
     file_name = f"{'_'.join(file_name_parts)}.md"
@@ -147,14 +147,14 @@ def get_agent_response():
     agent_response_md = asyncio.run(
         utils.fs.read_file(file_name=file_name, file_path=output_path)
     )
-    
+
     if agent_response_md == "" or agent_response_md is None:
         agent_response_md1 = """
             <div class="markdown-content" markdown='1'><p>No response found - this agent may not be used for this event type</p></div>
         """
     else:
         agent_chat: AgentChat = AgentChat(**json.loads(agent_response_md))
-        
+
         message_content = agent_chat.chat_response.chat_message.content
         if agent_chat.chat_response.inner_messages:
             message_content += "\n\n### Inner Messages \n\n"
@@ -194,11 +194,11 @@ def get_agent_inputs():
     agent_name = request.args.get("agent_name", type=str)
     input_type = request.args.get("input_type", type=str)
     identifier_group = request.args.get("identifier_group", type=str)
-    
+
     file_name_parts = [identifier_group, "agent_response", event_type, "default", agent_name, identifier.strip()]
 
     file_name = f"{'_'.join(file_name_parts)}.md"
-    
+
     output_path = (
         current_app.config["test_output_path"]
         + f"/{get_selected_revision_direct_call()}"
@@ -207,7 +207,7 @@ def get_agent_inputs():
         utils.fs.read_file(file_name=file_name, file_path=output_path)
     )
     agent_chat: AgentChat = AgentChat(**json.loads(agent_response_md))
-    
+
     if input_type == "user_input":
         content = agent_chat.user_message
     else:
@@ -249,17 +249,17 @@ def get_responses():
     utils: utils_class = current_app.utils
     agents: Agents = current_app.config["agents"]
     files = asyncio.run(utils.get_events(get_selected_revision_direct_call()))
-    
-    # Now loop through the data files and for each get any associated agent chats  
+
+    # Now loop through the data files and for each get any associated agent chats
     events_html = ""
-    
+
     # get the agent which has the return_in_response set to True
     return_agent = None
     for agent in agents.get_agents():
         if agent.return_in_response:
             return_agent = agent
             break
-    
+
     events: List[Event] = []
     for file in files.get_events():
         event: Event = file
@@ -284,7 +284,7 @@ def get_agent_response_from_file():
     identifier = request.form.get("identifier", type=str).replace("#", "")
     event_type = request.form.get("event_type", type=str)
     identifier_group = request.form.get("identifier_group", type=str, default="default")
-    
+
     file_name_parts = [identifier_group, "agent_response", event_type, "default", current_app.config["response_agent_name"], identifier.strip()]
     print(file_name_parts)
     file_name = f"{'_'.join(file_name_parts)}.md"
@@ -299,8 +299,8 @@ def get_agent_response_from_file():
     file_content_placeholder = """
             <div class="markdown-content" markdown='1'><p>No response found</p></div>
     """
-    
-    try: 
+
+    try:
         agent_chat: AgentChat = AgentChat(**json.loads(file_contents))
         html_content = markdown.markdown(
             agent_chat.chat_response.chat_message.content,

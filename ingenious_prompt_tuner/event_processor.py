@@ -35,14 +35,14 @@ class functional_tests:
     async def run_event_from_pre_processed_file(
         self, event_type, identifier, identifier_group, file_name, agents: List[Agent], conversation_flow: str
     ):
-        
+
         # Note sample data is loaded from the revision folder
         print("sub folders:", self.config.file_storage.data.add_sub_folders)
         if self.config.file_storage.data.add_sub_folders:
             file_path = f"functional_test_outputs/{self.revision_id}"
         else:
             file_path = "./"
-        
+
         # Get payload file from the file system
         file_contents = await self.fs_data.read_file(
             file_name=file_name, file_path=file_path

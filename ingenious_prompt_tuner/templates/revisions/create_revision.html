@@ -23,8 +23,8 @@
                 if (getCookie('selected_revision') !== null)
                 {
                     var old_guid = getCookie('selected_revision');
-                } 
-                
+                }
+
                 const formData = new FormData(form);
                 const url = "{{ url_for('index.save_revision') }}?new_guid=" + new_guid + "&old_guid=" + old_guid;
 
