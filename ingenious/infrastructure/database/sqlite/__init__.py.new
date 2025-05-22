@@ -1,6 +1,0 @@
-"""
-SQLite client module.
-"""
-from ingenious.infrastructure.database.sqlite.client import SQLiteClient
-
-__all__ = ['SQLiteClient']

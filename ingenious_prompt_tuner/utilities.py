@@ -1,5 +1,8 @@
+"""Utility functions and helpers for the Prompt Tuner app."""
+
 import os
 from functools import wraps
+from typing import Optional
 
 from flask import Response, redirect, request, session, url_for
 
@@ -8,7 +11,10 @@ from ingenious.models.test_data import Events
 from ingenious.utils.namespace_utils import get_path_from_namespace_with_fallback
 
 
+# Decorator for requiring authentication
 def requires_auth(f):
+    """Decorator to require authentication for a route."""
+
     @wraps(f)
     def decorated(*args, **kwargs):
         if "logged_in" not in session:
@@ -18,10 +24,26 @@ def requires_auth(f):
     return decorated
 
 
+# Decorator for requiring authentication
+def requires_auth(f):
+    """Decorator to require authentication for a route."""
+
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if "logged_in" not in session:
+            return redirect(url_for("auth.login"))
+        return f(*args, **kwargs)
+
+    return decorated
+
+
+# Decorator for requiring a selected revision
 def requires_selected_revision(f):
+    """Decorator to require a selected revision for a route."""
+
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        selected_revision = get_selected_revision_direct_call()
+        selected_revision = get_selected_revision()
         if not selected_revision:
             return redirect(url_for("index.home"))
         return f(*args, **kwargs)
@@ -29,20 +51,21 @@ def requires_selected_revision(f):
     return decorated_function
 
 
-def get_selected_revision_direct_call():
+# Revision cookie management
+def get_selected_revision() -> Optional[str]:
+    """Get the currently selected revision from cookies."""
     selected_revision = request.cookies.get("selected_revision")
-    if selected_revision:
-        return selected_revision
-    return None
+    return selected_revision if selected_revision else None
 
 
-def set_selected_revision_direct_call(revision_id):
+def set_selected_revision(revision_id: str) -> Response:
+    """Set the selected revision in cookies and return response object."""
     response = Response()
     response.set_cookie("selected_revision", revision_id)
     return response
 
 
-class utils_class:
+class UtilityService:
     def __init__(self, config):
         self.config = config
         self.fs: FileStorage = FileStorage(config, Category="revisions")
