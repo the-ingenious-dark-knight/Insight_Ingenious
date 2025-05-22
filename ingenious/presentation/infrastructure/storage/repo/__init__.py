@@ -2,8 +2,8 @@
 Repository implementations.
 """
 
-from ingenious.infrastructure.storage.repo.factory import RepositoryFactory
-from ingenious.infrastructure.storage.repo.file_repository import (
+from ingenious.presentation.infrastructure.storage.repo.factory import RepositoryFactory
+from ingenious.presentation.infrastructure.storage.repo.file_repository import (
     BlobStorageFileRepository,
 )
 

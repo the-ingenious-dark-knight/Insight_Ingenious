@@ -12,7 +12,7 @@ from ingenious.domain.interfaces.repository.chat_history_repository import (
     IChatHistoryRepository,
 )
 from ingenious.domain.interfaces.repository.database import DatabaseInterface
-from ingenious.domain.model.message import Message
+from ingenious.domain.model.chat.message import Message
 
 logger = logging.getLogger(__name__)
 

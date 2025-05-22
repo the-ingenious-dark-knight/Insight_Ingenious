@@ -9,9 +9,13 @@ from azure.storage.blob import BlobServiceClient
 from ingenious.domain.interfaces.service.blob_storage import BlobStorageInterface
 from ingenious.domain.interfaces.service.path_helper import PathHelperInterface
 from ingenious.domain.model.config import FileStorageContainer
-from ingenious.infrastructure.storage.azure.blob_operations import AzureBlobOperations
-from ingenious.infrastructure.storage.azure.path_helper import AzurePathHelper
-from ingenious.infrastructure.storage.local.file_storage import (
+from ingenious.presentation.infrastructure.storage.azure.path_helper import (
+    AzurePathHelper,
+)
+from ingenious.presentation.infrastructure.storage.azure.blob_operations import (
+    AzureBlobOperations,
+)
+from ingenious.presentation.infrastructure.storage.local.file_storage import (
     LocalFileStorage,
     LocalPathHelper,
 )

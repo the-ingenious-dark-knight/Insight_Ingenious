@@ -2,6 +2,6 @@
 SQLite client module.
 """
 
-from ingenious.infrastructure.database.sqlite.client import SQLiteClient
+from ingenious.presentation.infrastructure.database.sqlite.client import SQLiteClient
 
 __all__ = ["SQLiteClient"]

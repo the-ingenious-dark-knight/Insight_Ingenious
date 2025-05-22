@@ -3,8 +3,8 @@ Factory for creating database clients.
 """
 
 from ingenious.domain.interfaces.repository.database import DatabaseInterface
-from ingenious.infrastructure.database.duckdb.client import DuckDBClient
-from ingenious.infrastructure.database.sqlite.client import SQLiteClient
+from ingenious.presentation.infrastructure.database.duckdb.client import DuckDBClient
+from ingenious.presentation.infrastructure.database.sqlite.client import SQLiteClient
 
 
 class DatabaseFactory:

@@ -5,9 +5,9 @@ import ingenious.common.config.config as Config
 from ingenious.domain.interfaces.repository.chat_history_repository import (
     IChatHistoryRepository,
 )
-from ingenious.domain.model.chat_history_models import StepDict, ThreadDict, User
-from ingenious.domain.model.database_client import DatabaseClientType
-from ingenious.domain.model.message import Message
+from ingenious.domain.model.chat.chat_history_models import StepDict, ThreadDict, User
+from ingenious.domain.model.chat.message import Message
+from ingenious.domain.model.database.database_client import DatabaseClientType
 
 
 class ChatHistoryRepository(IChatHistoryRepository):

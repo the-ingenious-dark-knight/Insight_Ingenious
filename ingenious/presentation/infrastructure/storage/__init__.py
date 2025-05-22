@@ -4,7 +4,7 @@ Storage implementation modules.
 
 from pkgutil import extend_path
 
-from ingenious.infrastructure.storage.factory import BlobStorageFactory
+from ingenious.presentation.infrastructure.storage.factory import BlobStorageFactory
 
 __path__ = extend_path(__path__, __name__)
 __all__ = ["BlobStorageFactory"]

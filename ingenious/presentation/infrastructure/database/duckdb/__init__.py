@@ -2,6 +2,6 @@
 DuckDB client module.
 """
 
-from ingenious.infrastructure.database.duckdb.client import DuckDBClient
+from ingenious.presentation.infrastructure.database.duckdb.client import DuckDBClient
 
 __all__ = ["DuckDBClient"]

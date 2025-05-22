@@ -4,8 +4,8 @@ External service implementations.
 
 from pkgutil import extend_path
 
-from ingenious.infrastructure.external.factory import AIServiceFactory
-from ingenious.infrastructure.external.openai_service import OpenAIService
+from ingenious.presentation.infrastructure.external.factory import AIServiceFactory
+from ingenious.presentation.infrastructure.external.openai_service import OpenAIService
 
 __path__ = extend_path(__path__, __name__)
 __all__ = ["AIServiceFactory", "OpenAIService"]

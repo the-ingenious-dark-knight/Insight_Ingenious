@@ -4,8 +4,10 @@ Database implementation modules.
 
 from pkgutil import extend_path
 
-from ingenious.infrastructure.database.base_client import BaseDatabaseClient
-from ingenious.infrastructure.database.factory import DatabaseFactory
+from ingenious.presentation.infrastructure.database.base_client import (
+    BaseDatabaseClient,
+)
+from ingenious.presentation.infrastructure.database.factory import DatabaseFactory
 
 __path__ = extend_path(__path__, __name__)
 __all__ = [
