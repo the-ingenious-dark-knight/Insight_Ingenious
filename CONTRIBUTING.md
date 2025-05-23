@@ -15,6 +15,8 @@ Thank you for your interest in contributing to Insight Ingenious! This document 
 - [Code Quality](#code-quality)
 - [Documentation](#documentation)
 - [Extension Development](#extension-development)
+- [License](#license)
+- [Getting Help](#getting-help)
 
 ## Code of Conduct
 
@@ -147,7 +149,7 @@ Run all tests to ensure your changes don't break existing functionality:
 ingen_cli run-test-batch
 ```
 
-When adding new features, include appropriate tests.
+When adding new features, include appropriate tests. See [Testing Documentation](./docs/testing.md) for more details.
 
 ## Code Quality
 
@@ -157,7 +159,7 @@ We use [Vulture](https://github.com/jendrikseipp/vulture) to identify unused cod
 
 1. Install Vulture:
    ```bash
-   uv pip install vulture
+   uv add vulture --dev
    ```
 
 2. Run Vulture on the project:
