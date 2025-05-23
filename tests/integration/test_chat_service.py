@@ -133,7 +133,7 @@ class TestChatService:
         previous_messages = [
             Message(
                 id="msg1",
-                role=MessageRole.SYSTEM,
+                role=MessageRole.SYSTEM.value,
                 content="You are a helpful assistant.",
                 thread_id="thread_123",
                 created_at="2023-01-01T00:00:00Z",
@@ -141,7 +141,7 @@ class TestChatService:
             ),
             Message(
                 id="msg2",
-                role=MessageRole.USER,
+                role=MessageRole.USER.value,
                 content="What is the capital of France?",
                 thread_id="thread_123",
                 created_at="2023-01-01T00:01:00Z",
@@ -149,7 +149,7 @@ class TestChatService:
             ),
             Message(
                 id="msg3",
-                role=MessageRole.ASSISTANT,
+                role=MessageRole.ASSISTANT.value,
                 content="The capital of France is Paris.",
                 thread_id="thread_123",
                 created_at="2023-01-01T00:02:00Z",

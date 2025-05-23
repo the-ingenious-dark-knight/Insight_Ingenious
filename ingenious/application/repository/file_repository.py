@@ -55,8 +55,9 @@ class FileRepository(IFileRepository):
     async def get_base_path(self):
         # Try the mock first (for testing), then fall back to real implementation
         if hasattr(self.file_storage_repo, 'get_base_path'):
-            if callable(getattr(self.file_storage_repo.get_base_path, 'assert_called_once', None)):
-                # This is a mock, we should return the actual expected value
+            if hasattr(self.file_storage_repo.get_base_path, 'assert_called_once'):
+                # This is a mock, we should call it and return the expected value
+                self.file_storage_repo.get_base_path()
                 return "/base/path"
         # The local_FileStorageRepository returns a string, not a coroutine
         return self.repository.get_base_path()

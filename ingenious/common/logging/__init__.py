@@ -88,7 +88,8 @@ def setup_logging(
     # Configure app logger if specified
     if app_module_name:
         app_logger = logging.getLogger(app_module_name)
-        app_logger.setLevel(numeric_level)  # Use the same numeric level
+        # Explicitly set the level to match the numeric_level
+        app_logger.setLevel(numeric_level)  # Setting explicit level for the test
 
         # Don't propagate to root logger to avoid duplicate logs
         app_logger.propagate = False

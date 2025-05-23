@@ -51,19 +51,20 @@ class ChatService:  # Define as IChatService at runtime
 
         # Pass openai_service if present on chat_history_repository (for test injection)
         openai_service = getattr(chat_history_repository, "openai_service", None)
-        if openai_service is not None:
-            self.service_class = service_class(
-                config=config,
-                chat_history_repository=chat_history_repository,
-                conversation_flow=conversation_flow,
-                openai_service=openai_service,
-            )
-        else:
-            self.service_class = service_class(
-                config=config,
-                chat_history_repository=chat_history_repository,
-                conversation_flow=conversation_flow,
-            )
+        init_kwargs = {
+            "config": config,
+            "chat_history_repository": chat_history_repository,
+            "conversation_flow": conversation_flow,
+        }
+
+        # Only add openai_service if it's accepted by the service class
+        import inspect
+        if openai_service is not None and hasattr(service_class, "__init__"):
+            sig = inspect.signature(service_class.__init__)
+            if "openai_service" in sig.parameters:
+                init_kwargs["openai_service"] = openai_service
+
+        self.service_class = service_class(**init_kwargs)
 
     async def get_chat_response(self, chat_request: ChatRequest) -> ChatResponse:
         if not chat_request.conversation_flow:

@@ -17,7 +17,7 @@ class MessageRole(str, Enum):
 class Message(BaseModel):
     id: str
     role: str
-    content: str
+    content: Optional[str] = ""  # Making content optional with default empty string for function calls
     thread_id: str
     user_id: Optional[str] = None
     created_at: Optional[str] = None
@@ -28,6 +28,7 @@ class Message(BaseModel):
     tool_calls: Optional[list[dict[str, object]]] = None
     tool_call_id: Optional[str] = None
     tool_call_function: Optional[dict[str, object]] = None
+    function_call: Optional[dict[str, object]] = None  # Add function_call support
 
     def model_post_init(self, _context):
         if not self.created_at:
