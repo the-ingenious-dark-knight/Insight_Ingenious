@@ -33,9 +33,9 @@ def set_context(context: dict = None, value: Any = None):
         raise ValueError("Key must be provided when setting a value.")
 
 
-def get_context(key: str, default: Any = None) -> Any:
+def get_context(key: str = None, default: Any = None) -> Any:
     """
-    Get a value from the current thread's context.
+    Get a value from the current thread's context, or the whole context if no key is provided.
 
     Args:
         key: The context key
@@ -45,6 +45,8 @@ def get_context(key: str, default: Any = None) -> Any:
         The context value or default
     """
     context = get_context_data()
+    if key is None:
+        return context
     return context.get(key, default)
 
 

@@ -100,6 +100,11 @@ class DIContainer:
             implementation = self._registry[interface]
             return implementation()
 
+        if hasattr(self, '_factories') and interface in self._factories:
+            instance = self._factories[interface]()
+            self._instances[interface] = instance
+            return cast(T, instance)
+
         raise ServiceError(f"Service {interface.__name__} is not registered")
 
     def resolve(self, interface: Type[T]) -> T:

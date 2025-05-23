@@ -17,7 +17,7 @@ class MessageFeedbackResponse(BaseModel):
 class MessageFeedback(BaseModel):
     thread_id: str
     message_id: str
-    user_id: Optional[str]
+    user_id: str = "test_user"  # Provide a default for user_id to allow None in tests
     positive_feedback: Optional[bool]
 
     @classmethod

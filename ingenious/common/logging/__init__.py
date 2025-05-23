@@ -196,7 +196,7 @@ def log_execution_time(logger=None, level=logging.DEBUG):
             execution_time = end_time - start_time
             logger.log(
                 level,
-                f"Function '{func.__name__}' executed in {execution_time:.3f} seconds",
+                f"Function '{func.__name__}' execution time: {execution_time:.3f} seconds",
             )
             return result
 

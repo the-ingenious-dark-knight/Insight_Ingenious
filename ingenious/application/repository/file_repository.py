@@ -44,7 +44,7 @@ class FileRepository(IFileRepository):
 
     async def write_file(self, contents: str, file_name: str, file_path: str):
         # The local_FileStorageRepository expects (file_path, content), so adapt the call
-        return await self.repository.write_file(file_path=file_path + "/" + file_name, content=contents)
+        return self.repository.write_file(file_path=file_path + "/" + file_name, content=contents)
 
     async def get_base_path(self):
         # The local_FileStorageRepository returns a string, not a coroutine
@@ -52,11 +52,11 @@ class FileRepository(IFileRepository):
 
     async def read_file(self, file_name: str, file_path: str):
         # The local_FileStorageRepository expects (file_path)
-        return await self.repository.read_file(file_path=file_path + "/" + file_name)
+        return self.repository.read_file(file_path=file_path + "/" + file_name)
 
     async def delete_file(self, file_name: str, file_path: str):
         # The local_FileStorageRepository expects (file_path)
-        return await self.repository.delete_file(file_path=file_path + "/" + file_name)
+        return self.repository.delete_file(file_path=file_path + "/" + file_name)
 
     async def list_files(self, file_path: str):
         # The local_FileStorageRepository returns a list, not a coroutine

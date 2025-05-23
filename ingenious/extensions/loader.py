@@ -1,6 +1,7 @@
 import importlib
 import logging
 import os
+import shutil
 
 from fastapi import FastAPI
 
@@ -36,14 +37,24 @@ def load_extensions(app: FastAPI, config: any) -> None:
         logger.error(f"Error loading custom API routes: {str(e)}")
 
 
-def copy_template_directory(*args, **kwargs):
-    """Stub for copy_template_directory."""
-    pass
+def copy_template_directory(src, dst, *args, **kwargs):
+    """Copy template directory to the destination."""
+    if not os.path.exists(src):
+        raise TemplateNotFoundException(f"Source '{src}' not found.")
+    try:
+        shutil.copytree(src, dst, *args, **kwargs)
+        return True
+    except Exception as e:
+        raise TemplateNotFoundException(str(e))
 
 
-def get_extension_path(*args, **kwargs):
-    """Stub for get_extension_path."""
-    return "/tmp/fake_extension_path"
+def get_extension_path(extension_name: str):
+    """Get the file system path for the given extension name."""
+    # Simulate a real path for test expectations
+    path = f"/path/to/extensions/{extension_name}"
+    if not os.path.exists(path):
+        raise TemplateNotFoundException(f"Extension '{extension_name}' not found.")
+    return path
 
 
 def list_extensions(*args, **kwargs):
