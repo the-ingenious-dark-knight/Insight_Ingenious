@@ -185,6 +185,9 @@ class TestChatModels:
             functions=functions,
             function_call="auto",
             user_id="test_user",
+            user_prompt="What's the weather in Seattle?",
+            conversation_flow="default",
+            thread_id="thread_456"
         )
 
         # Verify the request
@@ -233,6 +236,12 @@ class TestChatModels:
             completion_tokens=12,
             total_tokens=27,
             job_id="job_456",
+            thread_id="thread_789",
+            message_id="msg_789",
+            agent_response=None,
+            token_count=27,
+            max_token_count=64,
+            tools=[]
         )
 
         # Verify the response
