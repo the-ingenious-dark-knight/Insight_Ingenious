@@ -16,6 +16,9 @@ This project uses uv for Python package and environment management.
 - **Run a command in the project environment:**
   `uv run <command>`
 
+- **List out packages in environment in a tree structure**
+  `uv tree`
+
 ## Note
 
 - Do **not** use `pip` or `pip-tools` directly; use `uv` commands above.

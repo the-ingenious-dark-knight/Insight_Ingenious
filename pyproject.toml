@@ -52,6 +52,9 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools]
 packages = ["ingenious"]
 
+[project.scripts]
+ingen_cli = "ingenious.cli:app"
+
 [tool.ruff.lint]
 extend-select = ["I"]
 ignore = ["E402"]
