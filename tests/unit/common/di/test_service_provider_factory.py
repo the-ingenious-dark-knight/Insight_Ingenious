@@ -15,7 +15,21 @@ class TestServiceProviderFactory:
 
     def setup_method(self):
         """Reset the factory before each test."""
-        self.factory = ServiceProviderFactory()
+        class IService:
+            pass
+
+        def resolver(param):
+            mock_provider = Mock()
+            mock_provider.name = "test_provider"
+            return mock_provider
+
+        mock_config = Mock()
+
+        self.factory = ServiceProviderFactory(
+            interface_type=IService,
+            implementation_resolver=resolver,
+            config=mock_config
+        )
 
     def test_register_provider(self):
         """Test registering a service provider."""

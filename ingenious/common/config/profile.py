@@ -70,7 +70,7 @@ class Profiles:
         else:
             print(f"Profile not found at {profiles_path}")
             print("Trying to load profile from key vault")
-            profiles_yml = get_kv_secret(secretName="profile")
+            profiles_yml = Profiles.get_kv_secret(secretName="profile")
             profiles = Profiles.from_yaml_str(profiles_yml)
 
         return profiles
@@ -79,18 +79,23 @@ class Profiles:
         for profile in self.profiles:
             if profile.name == name:
                 return profile
-        return None
+        from ingenious.common.errors.common import ConfigurationError
+        raise ConfigurationError(f"Profile '{name}' not found")
+
+    # Alias for compatibility with tests
+    def get_profile(self, name):
+        return self.get_profile_by_name(name)
 
 
-@staticmethod
-def get_kv_secret(secretName):
-    try:
-        keyVaultName = os.environ["KEY_VAULT_NAME"]
-    except KeyError:
-        raise ValueError("KEY_VAULT_NAME environment variable not set")
+    @staticmethod
+    def get_kv_secret(secretName):
+        try:
+            keyVaultName = os.environ["KEY_VAULT_NAME"]
+        except KeyError:
+            raise ValueError("KEY_VAULT_NAME environment variable not set")
 
-    KVUri = f"https://{keyVaultName}.vault.azure.net"
-    credential = DefaultAzureCredential()
-    client = SecretClient(vault_url=KVUri, credential=credential)
-    secret = client.get_secret(secretName)
-    return secret.value
+        KVUri = f"https://{keyVaultName}.vault.azure.net"
+        credential = DefaultAzureCredential()
+        client = SecretClient(vault_url=KVUri, credential=credential)
+        secret = client.get_secret(secretName)
+        return secret.value

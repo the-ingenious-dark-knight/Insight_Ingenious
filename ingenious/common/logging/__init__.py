@@ -38,9 +38,15 @@ def setup_logging(
         log_format: The format string to use for log messages
     """
     # Get log levels from environment or parameters
-    root_log_level = os.environ.get("ROOTLOGLEVEL", "WARNING")
     if log_level is None:
         log_level = os.environ.get("LOGLEVEL", "WARNING")
+    elif isinstance(log_level, str):
+        log_level = log_level.upper()
+
+    # Convert string level to integer
+    numeric_level = getattr(logging, log_level.upper(), None)
+    if not isinstance(numeric_level, int):
+        raise ValueError(f'Invalid log level: {log_level}')
 
     # Create handlers list
     handlers = []
@@ -69,16 +75,15 @@ def setup_logging(
         handlers.append(file_handler)
 
     # Configure root logger
-    if root_log_level:
-        root_logger = logging.getLogger()
-        root_logger.setLevel(root_log_level)
+    root_logger = logging.getLogger()
+    root_logger.setLevel(numeric_level)
 
-        # Clear existing handlers to avoid duplication
-        if root_logger.handlers:
-            root_logger.handlers.clear()
+    # Clear existing handlers to avoid duplication
+    if root_logger.handlers:
+        root_logger.handlers.clear()
 
-        for handler in handlers:
-            root_logger.addHandler(handler)
+    for handler in handlers:
+        root_logger.addHandler(handler)
 
     # Configure app logger if specified
     if app_module_name:

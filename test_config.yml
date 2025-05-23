@@ -1,3 +1,8 @@
+azure_search_services: []
+azure_sql_services:
+  database_connection_string: ''
+chainlit_configuration:
+  enable: false
 chat_history:
   connection_string: ':memory:'
   database_type: sqlite
@@ -11,13 +16,21 @@ file_storage:
     path: ./revisions
   path: ./storage
   storage_type: local
+local_sql_db:
+  connection_string: ''
+logging:
+  log_level: INFO
+  root_log_level: INFO
 models:
 - api_key: test-api-key
+  api_type: azure
   api_version: '2023-05-15'
   base_url: https://example.com/openai
   model: gpt-3.5-turbo
   name: test-model
 profile: test
+tool_service:
+  enable: false
 web_configuration:
   authentication:
     enable: false

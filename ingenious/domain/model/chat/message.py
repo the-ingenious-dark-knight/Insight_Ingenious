@@ -1,6 +1,7 @@
 from datetime import datetime
 from enum import Enum
 from typing import Optional
+from uuid import uuid4
 
 from pydantic import BaseModel
 
@@ -14,14 +15,24 @@ class MessageRole(str, Enum):
 
 
 class Message(BaseModel):
-    user_id: Optional[str]
-    thread_id: str
-    message_id: Optional[str] = None
-    positive_feedback: Optional[bool] = None
-    timestamp: Optional[datetime] = None
+    id: str
     role: str
-    content: Optional[str] = None
+    content: str
+    thread_id: str
+    user_id: Optional[str] = None
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
+    metadata: Optional[dict[str, object]] = None
+    feedback: Optional[dict[str, object]] = None
     content_filter_results: Optional[dict[str, object]] = None
     tool_calls: Optional[list[dict[str, object]]] = None
     tool_call_id: Optional[str] = None
     tool_call_function: Optional[dict[str, object]] = None
+
+    def model_post_init(self, _context):
+        if not self.created_at:
+            self.created_at = datetime.now().isoformat()
+        if not self.updated_at:
+            self.updated_at = datetime.now().isoformat()
+        if not self.id:
+            self.id = str(uuid4())

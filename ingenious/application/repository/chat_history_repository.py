@@ -1,6 +1,7 @@
 import importlib
 from typing import Any, Dict, List, Optional
 
+from ingenious.common.utils.namespace_utils import import_class_with_fallback
 from ingenious.domain.interfaces.repository.chat_history_repository import (
     IChatHistoryRepository,
 )
@@ -17,9 +18,8 @@ class ChatHistoryRepository(IChatHistoryRepository):
         class_name = f"{db_type.value.lower()}_ChatHistoryRepository"
 
         try:
-            module = importlib.import_module(module_name)
-            repository_class = getattr(module, class_name)
-        except (ImportError, AttributeError) as e:
+            repository_class = import_class_with_fallback(module_name, class_name)
+        except ValueError as e:
             raise ValueError(
                 f"Unsupported database client type: {module_name}.{class_name}"
             ) from e

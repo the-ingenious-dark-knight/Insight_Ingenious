@@ -19,8 +19,10 @@ from ingenious.domain.model.config import Config
 def mock_config():
     """Create a mock config for testing."""
     mock_config = MagicMock(spec=Config)
-    mock_config.chat_history.database_type = "sqlite"
-    mock_config.chat_history.database_path = ":memory:"
+    mock_chat_history = MagicMock()
+    mock_chat_history.database_type = "sqlite"
+    mock_chat_history.database_path = ":memory:"
+    type(mock_config).chat_history = mock_chat_history
     return mock_config
 
 

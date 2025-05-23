@@ -5,7 +5,7 @@ Tests for the config module in ingenious.common.config.
 
 import pytest
 import yaml
-
+from ingenious.common.config.config import get_config
 from ingenious.common.errors import ConfigurationError
 
 

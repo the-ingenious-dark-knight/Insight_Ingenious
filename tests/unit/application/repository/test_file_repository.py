@@ -16,17 +16,24 @@ def mock_config():
     """Create a mock config for testing."""
     mock_config = MagicMock(spec=Config)
     file_storage = MagicMock(spec=FileStorage)
-    file_storage.revisions = MagicMock(spec=FileStorageContainer)
-    file_storage.revisions.url = "https://example.com/revisions"
-    file_storage.revisions.path = ".files"
-    file_storage.revisions.client_id = "test_client_id"
-    file_storage.revisions.token = "test_token"
-    file_storage.data = MagicMock(spec=FileStorageContainer)
-    file_storage.data.url = "https://example.com/data"
-    file_storage.data.path = ".files"
-    file_storage.data.client_id = "test_client_id"
-    file_storage.data.token = "test_token"
-    file_storage.storage_type = "local"
+    mock_revisions = MagicMock(spec=FileStorageContainer)
+    mock_revisions.url = "https://example.com/revisions"
+    mock_revisions.path = ".files"
+    mock_revisions.client_id = "test_client_id"
+    mock_revisions.token = "test_token"
+    mock_revisions.add_sub_folders = True
+    mock_revisions.storage_type = "local"
+
+    mock_data = MagicMock(spec=FileStorageContainer)
+    mock_data.url = "https://example.com/data"
+    mock_data.path = ".files"
+    mock_data.client_id = "test_client_id"
+    mock_data.token = "test_token"
+    mock_data.add_sub_folders = True
+    mock_data.storage_type = "local"
+
+    file_storage.revisions = mock_revisions
+    file_storage.data = mock_data
     mock_config.file_storage = file_storage
     return mock_config
 

@@ -7,6 +7,7 @@ It follows the Factory and Service Locator patterns.
 
 from typing import Dict, Generic, Type, TypeVar
 
+from ingenious.common.errors.common import ServiceError
 from ingenious.domain.model.config import Config
 
 T = TypeVar("T")
@@ -37,19 +38,64 @@ class ServiceProviderFactory(Generic[T, S]):
         self.config = config
         self._instances: Dict[str, T] = {}
 
-    def get(self, param: S = None) -> T:
+    def register_provider(self, provider: T) -> None:
         """
-        Get a service provider instance.
+        Register a service provider.
 
         Args:
-            param: Optional parameter to differentiate service providers
+            provider: The provider instance to register
+        """
+        self._instances[provider.name] = provider
+
+    def get_provider(self, name: str) -> T:
+        """
+        Get a registered provider.
+
+        Args:
+            name: The name of the provider
 
         Returns:
-            A service provider instance
+            The provider instance
+
+        Raises:
+            ServiceError: If no provider is found with the given name
         """
-        key = str(param) if param is not None else ""
+        if name not in self._instances:
+            raise ServiceError(f"No provider found with name '{name}'")
+        return self._instances[name]
 
-        if key not in self._instances:
-            self._instances[key] = self.implementation_resolver(param)
+    def create_provider(self, provider_class: Type[T], *args, **kwargs) -> T:
+        """
+        Create a provider from a class.
 
-        return self._instances[key]
+        Args:
+            provider_class: The class to create the provider from
+            *args: Positional arguments for provider instantiation
+            **kwargs: Keyword arguments for provider instantiation
+
+        Returns:
+            The created provider instance
+        """
+        provider = provider_class(*args, **kwargs)
+        self.register_provider(provider)
+        return provider
+
+    def get_or_create_provider(self, name: str, provider_class: Type[T], *args, **kwargs) -> T:
+        """
+        Get a registered provider or create it if it doesn't exist.
+
+        Args:
+            name: The name of the provider
+            provider_class: The class to create the provider from if needed
+            *args: Positional arguments for provider instantiation
+            **kwargs: Keyword arguments for provider instantiation
+
+        Returns:
+            The provider instance
+        """
+        try:
+            return self.get_provider(name)
+        except ServiceError:
+            provider = self.create_provider(provider_class, *args, **kwargs)
+            self.register_provider(provider)
+            return provider

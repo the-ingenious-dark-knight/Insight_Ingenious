@@ -7,6 +7,8 @@ Service Locator pattern while enabling proper dependency management.
 
 from typing import Any, Dict, Type, TypeVar, cast
 
+from ingenious.common.errors.common import ServiceError
+
 T = TypeVar("T")
 
 
@@ -19,56 +21,75 @@ class DIContainer:
     """
 
     def __init__(self):
-        self._bindings: Dict[Type, Type] = {}
+        self._registry: Dict[Type, Type] = {}
+        self._singletons: Dict[Type, Any] = {}
         self._instances: Dict[Type, Any] = {}
-        self._factories: Dict[Type, callable] = {}
 
-    def bind(self, interface: Type[T], implementation: Type[T]) -> None:
+    def register(self, interface: Type[T], implementation: Type[T]) -> None:
         """
-        Bind an interface to its implementation.
+        Register a service implementation.
 
         Args:
-            interface: The interface type to bind
-            implementation: The implementation type to bind to the interface
+            interface: The interface type to register
+            implementation: The implementation type to register
         """
-        self._bindings[interface] = implementation
+        self._registry[interface] = implementation
 
-    def bind_instance(self, interface: Type[T], instance: T) -> None:
+    def register_singleton(self, interface: Type[T], implementation: Type[T]) -> None:
         """
-        Bind an interface to an existing instance.
+        Register a singleton service implementation.
 
         Args:
-            interface: The interface type to bind
-            instance: The instance to bind to the interface
+            interface: The interface type to register
+            implementation: The implementation type to register
+        """
+        instance = implementation()
+        self._singletons[interface] = instance
+
+    def register_instance(self, interface: Type[T], instance: T) -> None:
+        """
+        Register an existing instance.
+
+        Args:
+            interface: The interface type to register
+            instance: The instance to register
         """
         self._instances[interface] = instance
 
-    def bind_factory(self, interface: Type[T], factory: callable) -> None:
+    def bind_instance(self, interface: Type[T], instance: T) -> None:
         """
-        Bind an interface to a factory function.
+        Bind an instance to an interface.
 
         Args:
-            interface: The interface type to bind
-            factory: A callable that creates an instance of the interface
+            interface: The interface type to bind to
+            instance: The instance to bind
         """
-        self._factories[interface] = factory
+        self.register_instance(interface, instance)
 
-    def resolve(self, interface: Type[T]) -> T:
+    def get(self, interface: Type[T]) -> T:
         """
-        Resolve an interface to its implementation instance.
+        Get a service from the container.
 
         Args:
-            interface: The interface type to resolve
+            interface: The interface type to get
 
         Returns:
-            An instance of the implementation bound to the interface
+            An instance of the requested service
 
         Raises:
-            KeyError: If the interface is not bound
+            ServiceError: If the service is not registered
         """
-        # If we already have an instance, return it
         if interface in self._instances:
             return cast(T, self._instances[interface])
+
+        if interface in self._singletons:
+            return cast(T, self._singletons[interface])
+
+        if interface in self._registry:
+            implementation = self._registry[interface]
+            return implementation()
+
+        raise ServiceError(f"Service {interface.__name__} is not registered")
 
         # If we have a factory, use it to create an instance
         if interface in self._factories:

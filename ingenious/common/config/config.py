@@ -8,10 +8,14 @@ from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
 
 from ingenious.common.config.profile import Profiles
+from ingenious.common.errors.common import ConfigurationError
 from ingenious.domain.model.config import config_ns as config_ns_models
 from ingenious.domain.model.config import profile as profile_models
 
 logger = logging.getLogger(__name__)
+
+# Configuration singleton instance
+_config_instance = None
 
 
 class Config:
@@ -28,17 +32,19 @@ class Config:
     @staticmethod
     def from_yaml_str(config_yml):
         yaml_data = yaml.safe_load(config_yml)
+        if not yaml_data:
+            raise ConfigurationError("Invalid or empty YAML configuration")
+
         json_data = json.dumps(yaml_data)
         config_ns: config_ns_models.Config
         try:
             config_ns = config_ns_models.Config.model_validate_json(json_data)
         except Exception as e:
-            logger.debug(f"Unexpected error during validation: {e}")
-            raise e
+            logger.debug(f"Configuration validation error: {e}")
+            raise ConfigurationError(f"Invalid configuration format: {str(e)}")
 
         profile_data: profile_models.Profiles = Profiles(
-            os.getenv("INGENIOUS_PROFILE_PATH", "")
-        )
+            os.getenv("INGENIOUS_PROFILE_PATH", ""))
 
         # Create a dummy profile for tests if needed
         if config_ns.profile == "test":
@@ -62,13 +68,13 @@ class Config:
                     )
                 ),
                 file_storage=profile_models.FileStorage(
-                    revisions=profile_models.FileStorageConfig(
+                    revisions=profile_models.FileStorageContainer(
                         url="",
                         client_id="",
                         token="",
                         authentication_method="default_credential"
                     ),
-                    data=profile_models.FileStorageConfig(
+                    data=profile_models.FileStorageContainer(
                         url="",
                         client_id="",
                         token="",
@@ -215,3 +221,21 @@ class Config:
                 username: admin
                 password: password
             """)
+
+
+def get_config(config_path=None, project_path=None, profiles_path=None):
+    """
+    Get the configuration singleton instance.
+
+    Args:
+        config_path: Path to the config file
+        project_path: Path to the project
+        profiles_path: Path to the profiles file
+
+    Returns:
+        The configuration object
+    """
+    global _config_instance
+    if _config_instance is None:
+        _config_instance = Config.get_config(config_path)
+    return _config_instance
