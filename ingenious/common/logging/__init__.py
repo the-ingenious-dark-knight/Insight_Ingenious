@@ -46,7 +46,7 @@ def setup_logging(
     # Convert string level to integer
     numeric_level = getattr(logging, log_level.upper(), None)
     if not isinstance(numeric_level, int):
-        raise ValueError(f'Invalid log level: {log_level}')
+        raise ValueError(f"Invalid log level: {log_level}")
 
     # Create handlers list
     handlers = []

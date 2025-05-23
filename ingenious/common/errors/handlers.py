@@ -20,9 +20,7 @@ logger = logging.getLogger(__name__)
 _error_handlers: Dict[Type[Exception], Callable] = {}
 
 
-def register_error_handler(
-    exception_class: Type[Exception]
-) -> Callable:
+def register_error_handler(exception_class: Type[Exception]) -> Callable:
     """
     Register an error handler for a specific exception type.
 
@@ -34,9 +32,11 @@ def register_error_handler(
     Returns:
         A decorator function that registers the handler
     """
+
     def decorator(handler_func: Callable[[Exception], Any]):
         _error_handlers[exception_class] = handler_func
         return handler_func
+
     return decorator
 
 
@@ -90,7 +90,11 @@ def handle_exception(exc: Exception) -> Any:
         exc.log()
         error_dict = exc.to_dict()
         # Add expected status field for compatibility
-        return {"status": "error", "message": error_dict["message"], "details": error_dict}
+        return {
+            "status": "error",
+            "message": error_dict["message"],
+            "details": error_dict,
+        }
 
     # Log unhandled exceptions
     logger.error(f"Unhandled exception: {exc}", exc_info=True)

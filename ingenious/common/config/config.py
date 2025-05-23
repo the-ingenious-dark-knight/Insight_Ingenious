@@ -44,7 +44,8 @@ class Config:
             raise ConfigurationError(f"Invalid configuration format: {str(e)}")
 
         profile_data: profile_models.Profiles = Profiles(
-            os.getenv("INGENIOUS_PROFILE_PATH", ""))
+            os.getenv("INGENIOUS_PROFILE_PATH", "")
+        )
 
         # Create a dummy profile for tests if needed
         if config_ns.profile == "test":
@@ -62,9 +63,7 @@ class Config:
                 ),
                 web_configuration=profile_models.WebConfig(
                     authentication=profile_models.WebAuthConfig(
-                        enable=False,
-                        username="test",
-                        password="test"
+                        enable=False, username="test", password="test"
                     )
                 ),
                 file_storage=profile_models.FileStorage(
@@ -72,34 +71,24 @@ class Config:
                         url="",
                         client_id="",
                         token="",
-                        authentication_method="default_credential"
+                        authentication_method="default_credential",
                     ),
                     data=profile_models.FileStorageContainer(
                         url="",
                         client_id="",
                         token="",
-                        authentication_method="default_credential"
-                    )
+                        authentication_method="default_credential",
+                    ),
                 ),
                 azure_search_services=[],
                 azure_sql_services=profile_models.AzureSqlConfig(
                     database_connection_string=""
                 ),
-                receiver_configuration=profile_models.ReceiverConfig(
-                    enable=False
-                ),
-                chainlit_configuration=profile_models.ChainlitConfig(
-                    enable=False
-                ),
-                logging=profile_models.LoggingConfig(
-                    level="INFO"
-                ),
-                tool_service=profile_models.ToolServiceConfig(
-                    enable=False
-                ),
-                chat_service=profile_models.ChatServiceConfig(
-                    type="basic"
-                )
+                receiver_configuration=profile_models.ReceiverConfig(enable=False),
+                chainlit_configuration=profile_models.ChainlitConfig(enable=False),
+                logging=profile_models.LoggingConfig(level="INFO"),
+                tool_service=profile_models.ToolServiceConfig(enable=False),
+                chat_service=profile_models.ChatServiceConfig(type="basic"),
             )
             return test_profile
 

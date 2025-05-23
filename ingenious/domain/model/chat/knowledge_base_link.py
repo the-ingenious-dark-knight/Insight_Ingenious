@@ -7,6 +7,7 @@ class KnowledgeBaseLink(BaseModel):
     """
     Represents a link to a knowledge base item.
     """
+
     id: str
     title: str
     url: Optional[str] = None

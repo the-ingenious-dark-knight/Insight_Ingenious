@@ -1,6 +1,6 @@
 """Utility functions for error handling."""
 
-from typing import Any, Dict
+from typing import Any
 
 
 def format_error_message(message: str, **kwargs: Any) -> str:

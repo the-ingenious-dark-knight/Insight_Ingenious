@@ -2,8 +2,6 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel
 
-from .message import Message
-
 
 class ChatRequest(BaseModel):
     messages: List[Dict[str, str]]

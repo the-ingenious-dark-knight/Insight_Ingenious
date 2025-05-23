@@ -15,7 +15,7 @@ class ChatService:  # Define as IChatService at runtime
     def __init__(
         self,
         chat_service_type: str,
-        chat_history_repository: 'IChatHistoryRepository',
+        chat_history_repository: "IChatHistoryRepository",
         conversation_flow: str,
         config: Config,
         revision: str = "dfe19b62-07f1-4cb5-ae9a-561a253e4b04",

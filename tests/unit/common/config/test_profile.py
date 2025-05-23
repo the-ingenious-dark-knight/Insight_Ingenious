@@ -83,9 +83,7 @@ class TestProfiles:
             {
                 # Missing required 'models' field
                 "name": "test",
-                "chat_history": {
-                    "database_connection_string": ""
-                }
+                "chat_history": {"database_connection_string": ""},
             }
         ]
 

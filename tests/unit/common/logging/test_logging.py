@@ -60,6 +60,7 @@ class TestLogging:
         @log_execution_time(logger=logger)
         def slow_function():
             import time
+
             time.sleep(0.1)
             return "done"
 
@@ -94,7 +95,7 @@ class TestStructuredLogging:
             lineno=100,
             msg="Test message",
             args=(),
-            exc_info=None
+            exc_info=None,
         )
 
         # Format the record

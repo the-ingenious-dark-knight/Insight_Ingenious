@@ -1,6 +1,5 @@
 import importlib
 import logging
-import os
 
 from fastapi import FastAPI
 
@@ -12,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 class TemplateNotFoundException(Exception):
     """Exception raised when a template is not found."""
+
     pass
 
 

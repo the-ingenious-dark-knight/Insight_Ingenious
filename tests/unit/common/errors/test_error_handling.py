@@ -2,7 +2,6 @@
 Tests for the error converters and handlers in ingenious.common.errors.
 """
 
-
 from ingenious.common.errors.base import IngeniousError
 from ingenious.common.errors.common import NotFoundError
 from ingenious.common.errors.converters import (
@@ -27,6 +26,7 @@ class TestErrorConverters:
 
     def test_register_converter(self):
         """Test registering a custom converter."""
+
         class CustomError(Exception):
             pass
 
@@ -35,7 +35,7 @@ class TestErrorConverters:
             return NotFoundError(
                 message=f"Converted: {str(exc)}",
                 resource_id="test_resource",
-                resource_type="test_type"
+                resource_type="test_type",
             )
 
         # Test converting the error
@@ -47,6 +47,7 @@ class TestErrorConverters:
 
     def test_convert_exception_no_converter(self):
         """Test converting an exception without a registered converter."""
+
         class UnregisteredError(Exception):
             pass
 
@@ -62,7 +63,7 @@ class TestErrorConverters:
         error = NotFoundError(
             message="Already an IngeniousError",
             resource_id="test_resource",
-            resource_type="test_type"
+            resource_type="test_type",
         )
         converted = convert_exception(error)
 
@@ -90,7 +91,7 @@ class TestErrorHandlers:
         error = NotFoundError(
             message="Resource not found",
             resource_id="test_resource",
-            resource_type="test_type"
+            resource_type="test_type",
         )
         result = handle_exception(error)
 
@@ -101,6 +102,7 @@ class TestErrorHandlers:
 
     def test_handle_exception_no_handler(self):
         """Test handling an exception without a registered handler."""
+
         class UnhandledError(IngeniousError):
             pass
 
@@ -115,20 +117,22 @@ class TestErrorHandlers:
 
     def test_get_error_handler(self):
         """Test getting a registered error handler."""
+
         @register_error_handler(NotFoundError)
         def handle_not_found(error):
             return {"custom": "handler"}
 
         handler = get_error_handler(NotFoundError)
         assert handler is not None
-        assert handler(NotFoundError(
-            message="test",
-            resource_id="test_resource",
-            resource_type="test_type"
-        )) == {"custom": "handler"}
+        assert handler(
+            NotFoundError(
+                message="test", resource_id="test_resource", resource_type="test_type"
+            )
+        ) == {"custom": "handler"}
 
     def test_get_error_handler_inheritance(self):
         """Test handler inheritance for subclasses."""
+
         @register_error_handler(IngeniousError)
         def handle_ingenious(error):
             return {"handled_by": "ingenious"}
@@ -137,8 +141,8 @@ class TestErrorHandlers:
         # the IngeniousError handler if no specific handler is registered
         handler = get_error_handler(NotFoundError)
         assert handler is not None
-        assert handler(NotFoundError(
-            message="test",
-            resource_id="test_resource",
-            resource_type="test_type"
-        )) == {"handled_by": "ingenious"}
+        assert handler(
+            NotFoundError(
+                message="test", resource_id="test_resource", resource_type="test_type"
+            )
+        ) == {"handled_by": "ingenious"}

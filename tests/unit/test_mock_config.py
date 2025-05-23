@@ -1,5 +1,6 @@
 def test_simple_mock():
     """A test with a simple mock of Config."""
+
     # Create a mock class
     class MockConfig:
         @staticmethod

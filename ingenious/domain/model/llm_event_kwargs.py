@@ -11,7 +11,9 @@ class LLMEventKwargs(BaseModel):
     completion_tokens: int = Field(0, description="Number of completion tokens")
     total_tokens: int = Field(0, description="Total number of tokens")
     cost: float = Field(0.0, description="Cost of the request")
-    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
+    metadata: Dict[str, Any] = Field(
+        default_factory=dict, description="Additional metadata"
+    )
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert the model to a dictionary."""

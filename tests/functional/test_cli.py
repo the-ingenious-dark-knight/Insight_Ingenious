@@ -69,7 +69,9 @@ class TestCLI:
     @pytest.mark.skip(reason="Requires actual project setup and OpenAI credentials")
     def test_run_test_batch(self, runner):
         """Test running a test batch."""
-        with patch("ingenious.common.utils.cli_command_executor.TestBatchExecutor.run_test_batch") as mock_run:
+        with patch(
+            "ingenious.common.utils.cli_command_executor.TestBatchExecutor.run_test_batch"
+        ) as mock_run:
             # Run the command
             result = runner.invoke(app, ["run-test-batch", "--log-level", "INFO"])
 
@@ -80,7 +82,9 @@ class TestCLI:
             mock_run.assert_called_once()
             assert mock_run.call_args[1]["log_level"] == "INFO"
 
-    @pytest.mark.skip(reason="Requires actual project setup and would start a web server")
+    @pytest.mark.skip(
+        reason="Requires actual project setup and would start a web server"
+    )
     def test_run_prompt_tuner(self, runner):
         """Test running the prompt tuner."""
         with patch("ingenious.cli.importlib.import_module") as mock_import:

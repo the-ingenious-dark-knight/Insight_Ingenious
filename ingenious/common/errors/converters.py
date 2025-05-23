@@ -280,9 +280,11 @@ def register_converter(exception_type: Type[Exception]):
     Args:
         exception_type: The exception type to register the converter for.
     """
+
     def decorator(converter_func: Callable[[Exception], IngeniousError]):
         _CONVERTERS[exception_type] = converter_func
         return converter_func
+
     return decorator
 
 

@@ -15,6 +15,7 @@ class TestServiceProviderFactory:
 
     def setup_method(self):
         """Reset the factory before each test."""
+
         class IService:
             pass
 
@@ -28,7 +29,7 @@ class TestServiceProviderFactory:
         self.factory = ServiceProviderFactory(
             interface_type=IService,
             implementation_resolver=resolver,
-            config=mock_config
+            config=mock_config,
         )
 
     def test_register_provider(self):
@@ -66,6 +67,7 @@ class TestServiceProviderFactory:
 
     def test_create_provider(self):
         """Test creating a provider from a class."""
+
         # Define a mock provider class
         class MockProvider:
             def __init__(self, param1, param2=None):
@@ -78,9 +80,7 @@ class TestServiceProviderFactory:
 
         # Create the provider
         provider = self.factory.create_provider(
-            MockProvider,
-            "test_param1",
-            param2="test_param2"
+            MockProvider, "test_param1", param2="test_param2"
         )
 
         # Verify the provider
@@ -94,6 +94,7 @@ class TestServiceProviderFactory:
 
     def test_get_or_create_provider(self):
         """Test getting or creating a provider."""
+
         # Define a mock provider class
         class MockProvider:
             def __init__(self, param1, param2=None):
@@ -106,10 +107,7 @@ class TestServiceProviderFactory:
 
         # First call should create the provider
         provider1 = self.factory.get_or_create_provider(
-            "test_provider",
-            MockProvider,
-            "test_param1",
-            param2="test_param2"
+            "test_provider", MockProvider, "test_param1", param2="test_param2"
         )
 
         # Verify the provider
@@ -122,7 +120,7 @@ class TestServiceProviderFactory:
             "test_provider",
             MockProvider,
             "different_param1",  # This should be ignored
-            param2="different_param2"  # This should be ignored
+            param2="different_param2",  # This should be ignored
         )
 
         # Verify it's the same provider

@@ -80,7 +80,9 @@ class ServiceProviderFactory(Generic[T, S]):
         self.register_provider(provider)
         return provider
 
-    def get_or_create_provider(self, name: str, provider_class: Type[T], *args, **kwargs) -> T:
+    def get_or_create_provider(
+        self, name: str, provider_class: Type[T], *args, **kwargs
+    ) -> T:
         """
         Get a registered provider or create it if it doesn't exist.
 

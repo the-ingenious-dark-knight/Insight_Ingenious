@@ -19,6 +19,7 @@ class TestDIContainer:
 
     def test_register_service(self):
         """Test registering a service in the container."""
+
         # Define a simple service interface and implementation
         class IService:
             def get_value(self):
@@ -36,6 +37,7 @@ class TestDIContainer:
 
     def test_get_service(self):
         """Test retrieving a service from the container."""
+
         # Define a simple service interface and implementation
         class IService:
             def get_value(self):
@@ -57,6 +59,7 @@ class TestDIContainer:
 
     def test_get_service_with_dependencies(self):
         """Test retrieving a service with dependencies."""
+
         # Define services with dependencies
         class ILogger:
             def log(self, message):
@@ -92,6 +95,7 @@ class TestDIContainer:
 
     def test_get_service_not_registered(self):
         """Test error when getting an unregistered service."""
+
         class IService:
             pass
 
@@ -101,6 +105,7 @@ class TestDIContainer:
 
     def test_register_singleton(self):
         """Test registering a service as a singleton."""
+
         # Define a simple service
         class ICounter:
             def increment(self):
@@ -128,6 +133,7 @@ class TestDIContainer:
 
     def test_register_instance(self):
         """Test registering a specific instance."""
+
         # Define a simple service
         class IService:
             def get_value(self):

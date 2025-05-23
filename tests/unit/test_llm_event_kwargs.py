@@ -9,7 +9,7 @@ def test_llm_event_kwargs():
         completion_tokens=20,
         total_tokens=30,
         cost=0.01,
-        metadata={"test": "value"}
+        metadata={"test": "value"},
     )
 
     assert kwargs.model == "gpt-3.5-turbo"

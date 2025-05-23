@@ -44,8 +44,7 @@ class TestNamespaceUtils:
         """Test importing a class with fallback."""
         # Import an existing class
         cls = import_class_with_fallback(
-            "ingenious.common.utils.project_setup_manager",
-            "ProjectSetupManager"
+            "ingenious.common.utils.project_setup_manager", "ProjectSetupManager"
         )
         assert cls is not None
         assert cls.__name__ == "ProjectSetupManager"
@@ -58,7 +57,9 @@ class TestNamespaceUtils:
             mock_import.side_effect = [ImportError, mock_module]
 
             # Call the function
-            result = import_class_with_fallback("nonexistent.module", "NonexistentClass")
+            result = import_class_with_fallback(
+                "nonexistent.module", "NonexistentClass"
+            )
 
             # Verify the fallback was attempted
             assert mock_import.call_count == 2
@@ -73,7 +74,9 @@ class TestNamespaceUtils:
             test_dir.mkdir()
 
             # Mock the get_dir_roots function to include our temp path
-            with patch("ingenious.common.utils.namespace_utils.get_dir_roots") as mock_get_roots:
+            with patch(
+                "ingenious.common.utils.namespace_utils.get_dir_roots"
+            ) as mock_get_roots:
                 mock_get_roots.return_value = [temp_path]
 
                 # Test with existing path
@@ -94,18 +97,24 @@ class TestNamespaceUtils:
                 f.write("Test content")
 
             # Mock the import_module_with_fallback function
-            with patch("ingenious.common.utils.namespace_utils.import_module_with_fallback") as mock_import:
+            with patch(
+                "ingenious.common.utils.namespace_utils.import_module_with_fallback"
+            ) as mock_import:
                 mock_module = Mock()
                 mock_module.__file__ = str(temp_path / "__init__.py")
                 mock_import.return_value = mock_module
 
                 # Test with existing file
-                result = get_file_from_namespace_with_fallback("test_module", "test_file.txt")
+                result = get_file_from_namespace_with_fallback(
+                    "test_module", "test_file.txt"
+                )
                 assert result == str(test_file)
 
                 # Test with non-existent file
                 with pytest.raises(FileNotFoundError):
-                    get_file_from_namespace_with_fallback("test_module", "nonexistent_file.txt")
+                    get_file_from_namespace_with_fallback(
+                        "test_module", "nonexistent_file.txt"
+                    )
 
 
 class TestProjectSetupManager:
@@ -158,9 +167,7 @@ class TestProjectSetupManager:
 
             # Copy the directory with ignore pattern
             result = self.manager.copy_directory(
-                source_dir,
-                dest_dir,
-                ignore_patterns=["*.tmp"]
+                source_dir, dest_dir, ignore_patterns=["*.tmp"]
             )
 
             # Verify the result
@@ -182,10 +189,7 @@ class TestProjectSetupManager:
                 f.write("Hello {{name}}! Your age is {{age}}.")
 
             # Process the file
-            replacements = {
-                "{{name}}": "John",
-                "{{age}}": "30"
-            }
+            replacements = {"{{name}}": "John", "{{age}}": "30"}
             result = self.manager.process_file_content(test_file, replacements)
 
             # Verify the result

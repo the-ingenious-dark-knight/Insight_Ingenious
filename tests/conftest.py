@@ -17,75 +17,73 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # Create a temporary config file for testing
 with open("test_config.yml", "w") as f:
-    yaml.dump({
-        "profile": "test",
-        "models": [
-            {
-                "name": "test-model",
-                "model": "gpt-3.5-turbo",
-                "base_url": "https://example.com/openai",
-                "api_key": "test-api-key",
-                "api_version": "2023-05-15",
-                "api_type": "azure"  # This was missing
-            }
-        ],
-        "file_storage": {
-            "storage_type": "local",
-            "path": "./storage",
-            "containers": [
-                {"name": "data", "path": "./data"},
-                {"name": "revisions", "path": "./revisions"}
-            ]
+    yaml.dump(
+        {
+            "profile": "test",
+            "models": [
+                {
+                    "name": "test-model",
+                    "model": "gpt-3.5-turbo",
+                    "base_url": "https://example.com/openai",
+                    "api_key": "test-api-key",
+                    "api_version": "2023-05-15",
+                    "api_type": "azure",  # This was missing
+                }
+            ],
+            "file_storage": {
+                "storage_type": "local",
+                "path": "./storage",
+                "containers": [
+                    {"name": "data", "path": "./data"},
+                    {"name": "revisions", "path": "./revisions"},
+                ],
+            },
+            "chat_history": {
+                "database_type": "sqlite",
+                "connection_string": ":memory:",
+            },
+            "chat_service": {"type": "basic"},
+            "web_configuration": {
+                "authentication": {
+                    "enable": False,
+                    "username": "admin",
+                    "password": "password",
+                }
+            },
+            # Missing required fields
+            "logging": {"root_log_level": "INFO", "log_level": "INFO"},
+            "tool_service": {"enable": False},
+            "chainlit_configuration": {"enable": False},
+            "azure_search_services": [],
+            "local_sql_db": {"connection_string": ""},
+            "azure_sql_services": {"database_connection_string": ""},
         },
-        "chat_history": {
-            "database_type": "sqlite",
-            "connection_string": ":memory:"
-        },
-        "chat_service": {
-            "type": "basic"
-        },
-        "web_configuration": {
-            "authentication": {
-                "enable": False,
-                "username": "admin",
-                "password": "password"
-            }
-        },
-        # Missing required fields
-        "logging": {
-            "root_log_level": "INFO",
-            "log_level": "INFO"
-        },
-        "tool_service": {
-            "enable": False
-        },
-        "chainlit_configuration": {
-            "enable": False
-        },
-        "azure_search_services": [],
-        "local_sql_db": {
-            "connection_string": ""
-        },
-        "azure_sql_services": {
-            "database_connection_string": ""
-        }
-    }, f)
+        f,
+    )
+
 
 # Patch the get_config method to use our test file
 @pytest.fixture(autouse=True)
 def mock_config():
     """Automatically mock the config module for all tests."""
     # Import here to avoid circular import issues
-    from ingenious.common.config.config import Config, get_config
+    from ingenious.common.config.config import Config
 
     orig_get_config = Config.get_config
 
     def get_test_config(*args, **kwargs):
         return orig_get_config("test_config.yml")
 
-    with patch('ingenious.common.config.config.Config.get_config', side_effect=get_test_config):
-        with patch('ingenious.common.config.config.get_config', side_effect=get_test_config):
-            with patch('ingenious.common.config.profile.Profiles.get_kv_secret', return_value="[]"):
+    with patch(
+        "ingenious.common.config.config.Config.get_config", side_effect=get_test_config
+    ):
+        with patch(
+            "ingenious.common.config.config.get_config", side_effect=get_test_config
+        ):
+            with patch(
+                "ingenious.common.config.profile.Profiles.get_kv_secret",
+                return_value="[]",
+            ):
                 yield
 
 
@@ -104,62 +102,51 @@ def sample_profile_dict():
     Returns:
         dict: Sample profile dictionary
     """
-    return [{
-        "name": "test",
-        "models": [
-            {
-                "model": "gpt-4o",
-                "api_key": "test_api_key",
-                "base_url": "https://test.openai.azure.com/openai/deployments/test"
-            }
-        ],
-        "chat_history": {
-            "database_connection_string": ""
-        },
-        "azure_search_services": [
-            {
-                "service": "test_service",
-                "key": "test_key"
-            }
-        ],
-        "azure_sql_services": {
-            "database_connection_string": ""
-        },
-        "receiver_configuration": {
-            "enable": False,
-            "api_url": "",
-            "api_key": ""
-        },
-        "chainlit_configuration": {
-            "enable": False,
-            "authentication": {
+    return [
+        {
+            "name": "test",
+            "models": [
+                {
+                    "model": "gpt-4o",
+                    "api_key": "test_api_key",
+                    "base_url": "https://test.openai.azure.com/openai/deployments/test",
+                }
+            ],
+            "chat_history": {"database_connection_string": ""},
+            "azure_search_services": [{"service": "test_service", "key": "test_key"}],
+            "azure_sql_services": {"database_connection_string": ""},
+            "receiver_configuration": {"enable": False, "api_url": "", "api_key": ""},
+            "chainlit_configuration": {
                 "enable": False,
-                "github_secret": "",
-                "github_client_id": ""
-            }
-        },
-        "web_configuration": {
-            "authentication": {
-                "enable": False,
-                "username": "test_user",
-                "password": "test_password"
-            }
-        },
-        "file_storage": {
-            "revisions": {
-                "url": "",
-                "client_id": "",
-                "token": "",
-                "authentication_method": "default_credential"
+                "authentication": {
+                    "enable": False,
+                    "github_secret": "",
+                    "github_client_id": "",
+                },
             },
-            "data": {
-                "url": "",
-                "client_id": "",
-                "token": "",
-                "authentication_method": "default_credential"
-            }
+            "web_configuration": {
+                "authentication": {
+                    "enable": False,
+                    "username": "test_user",
+                    "password": "test_password",
+                }
+            },
+            "file_storage": {
+                "revisions": {
+                    "url": "",
+                    "client_id": "",
+                    "token": "",
+                    "authentication_method": "default_credential",
+                },
+                "data": {
+                    "url": "",
+                    "client_id": "",
+                    "token": "",
+                    "authentication_method": "default_credential",
+                },
+            },
         }
-    }]
+    ]
 
 
 @pytest.fixture
@@ -178,7 +165,7 @@ def sample_config_dict():
                 "model": "gpt-3.5-turbo",
                 "base_url": "https://example.com/openai",
                 "api_key": "test-api-key",
-                "api_version": "2023-05-15"
+                "api_version": "2023-05-15",
             }
         ],
         "file_storage": {
@@ -186,23 +173,18 @@ def sample_config_dict():
             "path": "./storage",
             "containers": [
                 {"name": "data", "path": "./data"},
-                {"name": "revisions", "path": "./revisions"}
-            ]
+                {"name": "revisions", "path": "./revisions"},
+            ],
         },
-        "chat_history": {
-            "database_type": "sqlite",
-            "connection_string": ":memory:"
-        },
-        "chat_service": {
-            "type": "basic"
-        },
+        "chat_history": {"database_type": "sqlite", "connection_string": ":memory:"},
+        "chat_service": {"type": "basic"},
         "web_configuration": {
             "authentication": {
                 "enable": False,
                 "username": "admin",
-                "password": "password"
+                "password": "password",
             }
-        }
+        },
     }
 
 
@@ -258,5 +240,6 @@ def mock_env_vars(monkeypatch, sample_config_file, sample_profile_file):
 
     # Reset any existing config singleton
     from ingenious.common.config import config
+
     if hasattr(config, "_config_instance"):
         config._config_instance = None

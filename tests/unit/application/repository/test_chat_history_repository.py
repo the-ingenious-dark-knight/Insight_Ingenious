@@ -47,7 +47,9 @@ class TestChatHistoryRepository:
 
     async def test_initialization(self, mock_config):
         """Test initializing a ChatHistoryRepository."""
-        with patch("ingenious.application.repository.chat_history_repository.import_class_with_fallback") as mock_import:
+        with patch(
+            "ingenious.application.repository.chat_history_repository.import_class_with_fallback"
+        ) as mock_import:
             mock_db_repo = AsyncMock()
             mock_import.return_value = lambda config: mock_db_repo
 
@@ -66,7 +68,9 @@ class TestChatHistoryRepository:
         mock_db_repo = AsyncMock()
         mock_db_repo.add_message.return_value = "message_id"
 
-        with patch("ingenious.application.repository.chat_history_repository.import_class_with_fallback") as mock_import:
+        with patch(
+            "ingenious.application.repository.chat_history_repository.import_class_with_fallback"
+        ) as mock_import:
             mock_import.return_value = lambda config: mock_db_repo
             repo = ChatHistoryRepository(mock_config)
 
@@ -83,21 +87,21 @@ class TestChatHistoryRepository:
         mock_db_repo = AsyncMock()
         mock_db_repo.get_message.return_value = sample_message
 
-        with patch("ingenious.application.repository.chat_history_repository.import_class_with_fallback") as mock_import:
+        with patch(
+            "ingenious.application.repository.chat_history_repository.import_class_with_fallback"
+        ) as mock_import:
             mock_import.return_value = lambda config: mock_db_repo
             repo = ChatHistoryRepository(mock_config)
 
             # Get a message
             result = await repo.get_message(
-                message_id=sample_message.id,
-                thread_id=sample_message.thread_id
+                message_id=sample_message.id, thread_id=sample_message.thread_id
             )
 
             # Check the result
             assert result == sample_message
             mock_db_repo.get_message.assert_called_once_with(
-                message_id=sample_message.id,
-                thread_id=sample_message.thread_id
+                message_id=sample_message.id, thread_id=sample_message.thread_id
             )
 
     async def test_get_thread_messages(self, mock_config, sample_message):
@@ -106,7 +110,9 @@ class TestChatHistoryRepository:
         mock_db_repo = AsyncMock()
         mock_db_repo.get_thread_messages.return_value = [sample_message]
 
-        with patch("ingenious.application.repository.chat_history_repository.import_class_with_fallback") as mock_import:
+        with patch(
+            "ingenious.application.repository.chat_history_repository.import_class_with_fallback"
+        ) as mock_import:
             mock_import.return_value = lambda config: mock_db_repo
             repo = ChatHistoryRepository(mock_config)
 
@@ -124,7 +130,9 @@ class TestChatHistoryRepository:
         # Create the repository with a mock database implementation
         mock_db_repo = AsyncMock()
 
-        with patch("ingenious.application.repository.chat_history_repository.import_class_with_fallback") as mock_import:
+        with patch(
+            "ingenious.application.repository.chat_history_repository.import_class_with_fallback"
+        ) as mock_import:
             mock_import.return_value = lambda config: mock_db_repo
             repo = ChatHistoryRepository(mock_config)
 
@@ -132,14 +140,14 @@ class TestChatHistoryRepository:
             await repo.update_message_feedback(
                 message_id="test_message_id",
                 thread_id="test_thread_id",
-                positive_feedback=True
+                positive_feedback=True,
             )
 
             # Check the method was called
             mock_db_repo.update_message_feedback.assert_called_once_with(
                 message_id="test_message_id",
                 thread_id="test_thread_id",
-                positive_feedback=True
+                positive_feedback=True,
             )
 
     async def test_update_message_content_filter_results(self, mock_config):
@@ -147,7 +155,9 @@ class TestChatHistoryRepository:
         # Create the repository with a mock database implementation
         mock_db_repo = AsyncMock()
 
-        with patch("ingenious.application.repository.chat_history_repository.import_class_with_fallback") as mock_import:
+        with patch(
+            "ingenious.application.repository.chat_history_repository.import_class_with_fallback"
+        ) as mock_import:
             mock_import.return_value = lambda config: mock_db_repo
             repo = ChatHistoryRepository(mock_config)
 
@@ -156,21 +166,21 @@ class TestChatHistoryRepository:
                 "filtered": False,
                 "categories": {
                     "hate": {"filtered": False, "score": 0.01},
-                    "violence": {"filtered": False, "score": 0.02}
-                }
+                    "violence": {"filtered": False, "score": 0.02},
+                },
             }
 
             await repo.update_message_content_filter_results(
                 message_id="test_message_id",
                 thread_id="test_thread_id",
-                content_filter_results=content_filter_results
+                content_filter_results=content_filter_results,
             )
 
             # Check the method was called
             mock_db_repo.update_message_content_filter_results.assert_called_once_with(
                 message_id="test_message_id",
                 thread_id="test_thread_id",
-                content_filter_results=content_filter_results
+                content_filter_results=content_filter_results,
             )
 
     async def test_delete_thread(self, mock_config):
@@ -178,7 +188,9 @@ class TestChatHistoryRepository:
         # Create the repository with a mock database implementation
         mock_db_repo = AsyncMock()
 
-        with patch("ingenious.application.repository.chat_history_repository.import_class_with_fallback") as mock_import:
+        with patch(
+            "ingenious.application.repository.chat_history_repository.import_class_with_fallback"
+        ) as mock_import:
             mock_import.return_value = lambda config: mock_db_repo
             repo = ChatHistoryRepository(mock_config)
 
@@ -195,7 +207,9 @@ class TestChatHistoryRepository:
         # Create the repository with a mock database implementation
         mock_db_repo = AsyncMock()
 
-        with patch("ingenious.application.repository.chat_history_repository.import_class_with_fallback") as mock_import:
+        with patch(
+            "ingenious.application.repository.chat_history_repository.import_class_with_fallback"
+        ) as mock_import:
             mock_import.return_value = lambda config: mock_db_repo
             repo = ChatHistoryRepository(mock_config)
 
@@ -204,7 +218,7 @@ class TestChatHistoryRepository:
                 thread_id="test_thread_id",
                 name="Updated Thread Name",
                 user_id="user123",
-                metadata={"key": "value"}
+                metadata={"key": "value"},
             )
 
             # Check the method was called
@@ -212,5 +226,5 @@ class TestChatHistoryRepository:
                 thread_id="test_thread_id",
                 name="Updated Thread Name",
                 user_id="user123",
-                metadata={"key": "value"}
+                metadata={"key": "value"},
             )

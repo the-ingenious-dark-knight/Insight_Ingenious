@@ -7,6 +7,7 @@ class Product(BaseModel):
     """
     Represents a product that can be recommended in a chat.
     """
+
     id: str
     name: str
     description: Optional[str] = None

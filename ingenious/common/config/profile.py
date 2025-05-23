@@ -80,12 +80,12 @@ class Profiles:
             if profile.name == name:
                 return profile
         from ingenious.common.errors.common import ConfigurationError
+
         raise ConfigurationError(f"Profile '{name}' not found")
 
     # Alias for compatibility with tests
     def get_profile(self, name):
         return self.get_profile_by_name(name)
-
 
     @staticmethod
     def get_kv_secret(secretName):

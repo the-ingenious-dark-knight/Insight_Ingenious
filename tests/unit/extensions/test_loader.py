@@ -21,7 +21,12 @@ class TestExtensionLoader:
         """Test listing available extensions."""
         with patch("ingenious.extensions.loader.os.listdir") as mock_listdir:
             # Mock the directory listing
-            mock_listdir.return_value = ["template", "custom_extension", "__pycache__", "loader.py"]
+            mock_listdir.return_value = [
+                "template",
+                "custom_extension",
+                "__pycache__",
+                "loader.py",
+            ]
 
             # Get the extensions
             extensions = list_extensions()
@@ -69,7 +74,9 @@ class TestExtensionLoader:
                 mock_exists.return_value = True
 
                 # Mock the directory operations
-                with patch("ingenious.extensions.loader.shutil.copytree") as mock_copytree:
+                with patch(
+                    "ingenious.extensions.loader.shutil.copytree"
+                ) as mock_copytree:
                     # Run the function
                     result = copy_template_directory("template", "/destination/path")
 
@@ -79,7 +86,7 @@ class TestExtensionLoader:
                     mock_copytree.assert_called_once_with(
                         "/path/to/extensions/template",
                         "/destination/path",
-                        dirs_exist_ok=True
+                        dirs_exist_ok=True,
                     )
 
     def test_copy_template_directory_error(self):
@@ -93,7 +100,9 @@ class TestExtensionLoader:
                 mock_exists.return_value = True
 
                 # Mock the directory operations to raise an error
-                with patch("ingenious.extensions.loader.shutil.copytree") as mock_copytree:
+                with patch(
+                    "ingenious.extensions.loader.shutil.copytree"
+                ) as mock_copytree:
                     mock_copytree.side_effect = Exception("Copy error")
 
                     # Run the function

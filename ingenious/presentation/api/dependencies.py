@@ -31,9 +31,7 @@ security = HTTPBasic()
 
 # Try to load the config file, but use a default config for tests if it fails
 try:
-    config = Config.Config.get_config(
-        os.getenv("INGENIOUS_PROJECT_PATH", "")
-    )
+    config = Config.Config.get_config(os.getenv("INGENIOUS_PROJECT_PATH", ""))
 except Exception as e:
     logger.warning(f"Config loading failed: {e}. Using a minimal test config.")
     # For tests, we'll use the default test config provided by the Config class

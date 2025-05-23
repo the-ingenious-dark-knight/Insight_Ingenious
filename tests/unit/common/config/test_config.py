@@ -2,9 +2,9 @@
 Tests for the config module in ingenious.common.config.
 """
 
-
 import pytest
 import yaml
+
 from ingenious.common.config.config import get_config
 from ingenious.common.errors import ConfigurationError
 
@@ -25,7 +25,7 @@ class TestConfig:
         config = get_config(
             project_path=str(sample_config_file.parent),
             config_path=str(sample_config_file),
-            profiles_path=str(sample_profile_file)
+            profiles_path=str(sample_profile_file),
         )
 
         assert config is not None
@@ -63,16 +63,8 @@ class TestConfig:
         """Test error when a required field is missing."""
         incomplete_config = {
             # Missing required 'profile' field
-            "models": [
-                {
-                    "model": "gpt-4o",
-                    "api_type": "azure"
-                }
-            ],
-            "logging": {
-                "root_log_level": "debug",
-                "log_level": "debug"
-            }
+            "models": [{"model": "gpt-4o", "api_type": "azure"}],
+            "logging": {"root_log_level": "debug", "log_level": "debug"},
         }
 
         config_path = temp_dir / "incomplete_config.yml"
@@ -89,13 +81,15 @@ class TestConfig:
         """Test error when profile name doesn't match any in profiles file."""
         config_dict = {
             "profile": "nonexistent_profile",
-            "models": [{"model": "gpt-4o", "api_type": "azure"}]
+            "models": [{"model": "gpt-4o", "api_type": "azure"}],
         }
 
-        profiles_dict = [{
-            "name": "test",
-            "models": [{"model": "gpt-4o", "api_key": "key", "base_url": "url"}]
-        }]
+        profiles_dict = [
+            {
+                "name": "test",
+                "models": [{"model": "gpt-4o", "api_key": "key", "base_url": "url"}],
+            }
+        ]
 
         config_path = temp_dir / "config.yml"
         profile_path = temp_dir / "profiles.yml"

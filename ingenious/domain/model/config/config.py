@@ -128,9 +128,7 @@ class ReceiverConfig(profile_models.ReceiverConfig):
 class WebConfig(config_ns.WebConfig):
     authentication: profile_models.WebAuthConfig = {}
 
-    def __init__(
-        self, config: config_ns.WebConfig, profile: profile_models.WebConfig
-    ):
+    def __init__(self, config: config_ns.WebConfig, profile: profile_models.WebConfig):
         super().__init__(
             ip_address=config.ip_address,
             port=config.port,
@@ -220,9 +218,7 @@ class Config(BaseModel):
     azure_sql_services: AzureSqlConfig
     file_storage: FileStorage
 
-    def __init__(
-        self, config: config_ns.Config, profile: profile_models.Profile
-    ):
+    def __init__(self, config: config_ns.Config, profile: profile_models.Profile):
         super().__init__(
             chat_history=ChatHistoryConfig(config.chat_history, profile.chat_history),
             models=[],

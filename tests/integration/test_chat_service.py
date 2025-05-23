@@ -55,7 +55,9 @@ def mock_config():
 class TestChatService:
     """Integration tests for ChatService."""
 
-    async def test_process_chat_request(self, mock_openai_service, mock_chat_history_repo, mock_config):
+    async def test_process_chat_request(
+        self, mock_openai_service, mock_chat_history_repo, mock_config
+    ):
         """Test processing a chat request."""
         # Create the chat service
         chat_service = ChatService(
@@ -87,9 +89,13 @@ class TestChatService:
         mock_openai_service.generate_chat_completion.assert_called_once()
 
         # Verify messages were saved to chat history
-        assert mock_chat_history_repo.add_message.call_count == 2  # User message and assistant response
+        assert (
+            mock_chat_history_repo.add_message.call_count == 2
+        )  # User message and assistant response
 
-    async def test_process_chat_request_with_history(self, mock_openai_service, mock_chat_history_repo, mock_config):
+    async def test_process_chat_request_with_history(
+        self, mock_openai_service, mock_chat_history_repo, mock_config
+    ):
         """Test processing a chat request with existing history."""
         # Set up previous messages in the chat history
         previous_messages = [
@@ -129,7 +135,9 @@ class TestChatService:
 
         # Create a test request with the same thread ID
         request = ChatRequest(
-            messages=[{"role": "user", "content": "And what is the capital of Germany?"}],
+            messages=[
+                {"role": "user", "content": "And what is the capital of Germany?"}
+            ],
             model="gpt-4o",
             user_id="test_user",
             thread_id="thread_123",
@@ -151,7 +159,9 @@ class TestChatService:
         assert sent_messages[3]["role"] == "user"
         assert sent_messages[3]["content"] == "And what is the capital of Germany?"
 
-    async def test_process_chat_request_with_function_call(self, mock_openai_service, mock_chat_history_repo, mock_config):
+    async def test_process_chat_request_with_function_call(
+        self, mock_openai_service, mock_chat_history_repo, mock_config
+    ):
         """Test processing a chat request that uses a function call."""
         # Set up the OpenAI service to return a function call
         function_call_response = ChatResponse(
@@ -166,7 +176,9 @@ class TestChatService:
             total_tokens=35,
             job_id=str(uuid.uuid4()),
         )
-        mock_openai_service.generate_chat_completion.return_value = function_call_response
+        mock_openai_service.generate_chat_completion.return_value = (
+            function_call_response
+        )
 
         # Create the chat service
         chat_service = ChatService(
@@ -209,7 +221,11 @@ class TestChatService:
         assert response.content is None
         assert response.function_call is not None
         assert response.function_call["name"] == "get_weather"
-        assert json.loads(response.function_call["arguments"]) == {"location": "Seattle"}
+        assert json.loads(response.function_call["arguments"]) == {
+            "location": "Seattle"
+        }
 
         # Verify the function call was saved to chat history
-        assert mock_chat_history_repo.add_message.call_count == 2  # User message and function call
+        assert (
+            mock_chat_history_repo.add_message.call_count == 2
+        )  # User message and function call

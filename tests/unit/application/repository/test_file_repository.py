@@ -81,9 +81,7 @@ class TestFileRepository:
         # Test writing a file
         await repo.write_file("Test content", "test.txt", "test/path")
         mock_impl.write_file.assert_called_once_with(
-            contents="Test content",
-            file_name="test.txt",
-            file_path="test/path"
+            contents="Test content", file_name="test.txt", file_path="test/path"
         )
 
     async def test_read_file(self, mock_config):
@@ -99,8 +97,7 @@ class TestFileRepository:
         content = await repo.read_file("test.txt", "test/path")
         assert content == "File content"
         mock_impl.read_file.assert_called_once_with(
-            file_name="test.txt",
-            file_path="test/path"
+            file_name="test.txt", file_path="test/path"
         )
 
     async def test_delete_file(self, mock_config):
@@ -114,8 +111,7 @@ class TestFileRepository:
         # Test deleting a file
         await repo.delete_file("test.txt", "test/path")
         mock_impl.delete_file.assert_called_once_with(
-            file_name="test.txt",
-            file_path="test/path"
+            file_name="test.txt", file_path="test/path"
         )
 
     async def test_list_files(self, mock_config):
@@ -130,9 +126,7 @@ class TestFileRepository:
         # Test listing files
         files = await repo.list_files("test/path")
         assert files == ["file1.txt", "file2.txt"]
-        mock_impl.list_files.assert_called_once_with(
-            file_path="test/path"
-        )
+        mock_impl.list_files.assert_called_once_with(file_path="test/path")
 
     async def test_check_if_file_exists(self, mock_config):
         """Test checking if a file exists."""
@@ -147,8 +141,7 @@ class TestFileRepository:
         exists = await repo.check_if_file_exists("test/path", "test.txt")
         assert exists is True
         mock_impl.check_if_file_exists.assert_called_once_with(
-            file_path="test/path",
-            file_name="test.txt"
+            file_path="test/path", file_name="test.txt"
         )
 
     async def test_get_prompt_template_path(self, mock_config):
