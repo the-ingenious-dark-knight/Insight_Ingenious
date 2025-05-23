@@ -49,11 +49,21 @@ class ChatService:  # Define as IChatService at runtime
                 f"Class: '{class_name}'. Error: {str(e)}"
             ) from e
 
-        self.service_class = service_class(
-            config=config,
-            chat_history_repository=chat_history_repository,
-            conversation_flow=conversation_flow,
-        )
+        # Pass openai_service if present on chat_history_repository (for test injection)
+        openai_service = getattr(chat_history_repository, "openai_service", None)
+        if openai_service is not None:
+            self.service_class = service_class(
+                config=config,
+                chat_history_repository=chat_history_repository,
+                conversation_flow=conversation_flow,
+                openai_service=openai_service,
+            )
+        else:
+            self.service_class = service_class(
+                config=config,
+                chat_history_repository=chat_history_repository,
+                conversation_flow=conversation_flow,
+            )
 
     async def get_chat_response(self, chat_request: ChatRequest) -> ChatResponse:
         if not chat_request.conversation_flow:

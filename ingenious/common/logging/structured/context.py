@@ -19,18 +19,31 @@ def get_context_data() -> Dict[str, Any]:
     return _context_data.data
 
 
-def set_context(context: dict = None, value: Any = None):
+def set_context(context_data: dict = None, **kwargs):
     """
     Set the entire context dictionary or a single key-value pair.
 
     Args:
-        context: The context dictionary or key-value pair
-        value: The context value (optional, used only if setting a single key-value pair)
+        context_data: The context dictionary to replace or update the current context
+        **kwargs: Key-value pairs to add to the context
     """
-    if context is not None:
-        _context_data.data = context
-    elif value is not None:
-        raise ValueError("Key must be provided when setting a value.")
+    current_context = get_context_data()
+
+    if context_data is not None:
+        if isinstance(context_data, dict):
+            # Update existing context with the new values
+            current_context.update(context_data)
+        else:
+            # If a key-value pair is provided (old behavior)
+            key = context_data
+            if len(kwargs) == 0 or 'value' not in kwargs:
+                raise ValueError("Value must be provided when setting a single key")
+            current_context[key] = kwargs.get('value')
+
+    # Add any additional kwargs to the context
+    for key, value in kwargs.items():
+        if key != 'value':  # Skip the 'value' if it was used for a single key
+            current_context[key] = value
 
 
 def get_context(key: str = None, default: Any = None) -> Any:

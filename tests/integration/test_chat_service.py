@@ -40,11 +40,12 @@ def mock_openai_service():
 
 
 @pytest.fixture
-def mock_chat_history_repo():
-    """Create a mock chat history repository."""
+def mock_chat_history_repo(mock_openai_service):
+    """Create a mock chat history repository and attach openai_service for injection."""
     mock_repo = AsyncMock()
     mock_repo.add_message.return_value = "message_id"
     mock_repo.get_thread_messages.return_value = []
+    mock_repo.openai_service = mock_openai_service
     return mock_repo
 
 

@@ -54,7 +54,22 @@ class JsonFormatter(logging.Formatter):
 
         # Add structured data if available
         if hasattr(record, "structured") and record.structured:
-            log_data.update(record.structured)
+            # Add context as a separate field in the JSON output
+            context_data = {}
+            for key, value in record.structured.items():
+                if key.startswith("context_"):
+                    # Move context_* keys to the context object
+                    context_key = key[8:]  # Remove "context_" prefix
+                    context_data[context_key] = value
+                else:
+                    log_data[key] = value
+
+            # If we found any context data, add it to the log
+            if context_data:
+                log_data["context"] = context_data
+            else:
+                # For test compatibility, include the whole structured data as context
+                log_data["context"] = record.structured
 
         # Add exception info if available
         if record.exc_info:

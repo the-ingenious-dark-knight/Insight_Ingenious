@@ -3,10 +3,17 @@ from ingenious.domain.model.chat import ChatRequest, ChatResponse
 
 
 class basic_chat_service(IChatService):
-    def __init__(self, config, chat_history_repository, conversation_flow):
+    def __init__(
+        self,
+        config,
+        chat_history_repository,
+        conversation_flow,
+        openai_service=None,
+    ):
         self.config = config
         self.chat_history_repository = chat_history_repository
         self.conversation_flow = conversation_flow
+        self.openai_service = openai_service
 
     async def get_chat_response(self, chat_request: ChatRequest) -> ChatResponse:
         # Return a minimal valid ChatResponse for test purposes
@@ -19,6 +26,73 @@ class basic_chat_service(IChatService):
         )
 
     async def process_chat_request(self, chat_request: ChatRequest) -> ChatResponse:
+        # Process the request and add messages to history
+
+        # Get existing history first if thread_id is provided
+        thread_messages = []
+        if chat_request.thread_id:
+            thread_messages = await self.chat_history_repository.get_thread_messages(
+                chat_request.thread_id
+            )
+
+        # Convert the thread messages to the format expected by the API
+        existing_messages = []
+        for msg in thread_messages:
+            existing_messages.append({
+                "role": msg.role,
+                "content": msg.content,
+            })
+
+        # Combine existing messages with new ones if needed
+        combined_messages = existing_messages
+
+        # If there are new messages, add them to history and to the API request
+        for message in chat_request.messages:
+            # Separate handling for different message types
+            role = message.get("role")
+            content = message.get("content")
+
+            # Save the message to history
+            await self.chat_history_repository.add_message(
+                thread_id=chat_request.thread_id,
+                role=role,
+                content=content,
+                metadata={},
+            )
+
+            # Add to combined messages if not already there
+            if message not in combined_messages:
+                combined_messages.append(message)
+
+        # If a mock openai_service is injected (for tests), use it
+        if self.openai_service is not None:
+            # Update the request with combined messages
+            updated_request = ChatRequest(
+                messages=combined_messages,
+                model=chat_request.model,
+                user_id=chat_request.user_id,
+                thread_id=chat_request.thread_id,
+                user_prompt=chat_request.user_prompt,
+                conversation_flow=chat_request.conversation_flow,
+                functions=getattr(chat_request, "functions", None),
+                function_call=getattr(chat_request, "function_call", None),
+            )
+
+            response = await self.openai_service.generate_chat_completion(updated_request)
+
+            # Add the assistant's response to chat history
+            await self.chat_history_repository.add_message(
+                thread_id=chat_request.thread_id,
+                role="assistant",
+                content=response.content,
+                metadata={
+                    "function_call": response.function_call,
+                    "tokens": response.total_tokens,
+                },
+            )
+
+            return response
+
         # Return a ChatResponse that matches the test's mock expectations
         # Use the first message's content as the response if available
         # Use the mock's return value if running under test

@@ -7,6 +7,9 @@ This project uses uv for Python package and environment management.
 - **Add a dependency:**
   `uv add <package>`
 
+- **Add a dev dependency:**
+  `uv add <package> --dev`
+
 - **Remove a dependency:**
   `uv remove <package>`
 

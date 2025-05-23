@@ -87,18 +87,18 @@ def setup_logging(
 
     # Configure app logger if specified
     if app_module_name:
-        logger = logging.getLogger(app_module_name)
-        logger.setLevel(log_level)
+        app_logger = logging.getLogger(app_module_name)
+        app_logger.setLevel(numeric_level)  # Use the same numeric level
 
         # Don't propagate to root logger to avoid duplicate logs
-        logger.propagate = False
+        app_logger.propagate = False
 
         # Clear existing handlers to avoid duplication
-        if logger.handlers:
-            logger.handlers.clear()
+        if app_logger.handlers:
+            app_logger.handlers.clear()
 
         for handler in handlers:
-            logger.addHandler(handler)
+            app_logger.addHandler(handler)
 
     # Configure uvicorn loggers
     for logger_name in ["uvicorn.access", "uvicorn.error"]:
