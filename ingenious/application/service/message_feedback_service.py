@@ -1,14 +1,19 @@
-from ingenious.application.repository.chat_history_repository import (
-    ChatHistoryRepository,
-)
-from ingenious.domain.model.message_feedback import (
+from typing import TYPE_CHECKING
+
+from ingenious.domain.model.chat.message_feedback import (
     MessageFeedbackRequest,
     MessageFeedbackResponse,
 )
 
+# Use TYPE_CHECKING to avoid circular imports
+if TYPE_CHECKING:
+    from ingenious.application.repository.chat_history_repository import (
+        ChatHistoryRepository,
+    )
+
 
 class MessageFeedbackService:
-    def __init__(self, chat_history_repository: ChatHistoryRepository):
+    def __init__(self, chat_history_repository: "ChatHistoryRepository"):
         self.chat_history_repository = chat_history_repository
 
     async def update_message_feedback(

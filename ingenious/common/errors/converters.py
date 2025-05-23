@@ -199,6 +199,48 @@ def convert_requests_exception(exc: Exception) -> ServiceError:
     )
 
 
+# Store converters registry
+_CONVERTERS: Dict[Type[Exception], Callable[[Exception], IngeniousError]] = {}
+
+
+def register_converter(
+    exception_type: Type[Exception], converter: Callable[[Exception], IngeniousError]
+) -> None:
+    """
+    Register a converter function for a specific exception type.
+
+    Args:
+        exception_type: The exception type to register the converter for.
+        converter: A function that converts the exception to an IngeniousError.
+    """
+    _CONVERTERS[exception_type] = converter
+
+
+def reset_converters() -> None:
+    """Reset all registered converters."""
+    _CONVERTERS.clear()
+
+
+def convert_exception(exception: Exception) -> IngeniousError:
+    """
+    Convert an exception to an IngeniousError using the registered converters.
+
+    Args:
+        exception: The exception to convert.
+
+    Returns:
+        IngeniousError: The converted error.
+    """
+    for exc_type, converter in _CONVERTERS.items():
+        if isinstance(exception, exc_type):
+            return converter(exception)
+
+    # Default conversion fallback
+    return IngeniousError(
+        f"Unhandled error: {type(exception).__name__} - {str(exception)}"
+    )
+
+
 # Registry for exception converters
 _exception_converters: Dict[Type[Exception], Callable[[Exception], IngeniousError]] = {
     ValueError: convert_standard_exception,
@@ -228,6 +270,22 @@ def register_exception_converter(
     _exception_converters[exception_class] = converter
 
 
+# Function to register a converter as a decorator
+def register_converter(exception_type: Type[Exception]):
+    """
+    Register a converter function for a specific exception type.
+
+    This function can be used as a decorator.
+
+    Args:
+        exception_type: The exception type to register the converter for.
+    """
+    def decorator(converter_func: Callable[[Exception], IngeniousError]):
+        _CONVERTERS[exception_type] = converter_func
+        return converter_func
+    return decorator
+
+
 # Function to convert exceptions
 def convert_exception(exc: Exception) -> IngeniousError:
     """
@@ -246,6 +304,11 @@ def convert_exception(exc: Exception) -> IngeniousError:
     if isinstance(exc, IngeniousError):
         return exc
 
+    # First check decorators registry
+    for exc_type, converter in _CONVERTERS.items():
+        if isinstance(exc, exc_type):
+            return converter(exc)
+
     # Try to find an exact match
     if type(exc) in _exception_converters:
         return _exception_converters[type(exc)](exc)
@@ -256,7 +319,10 @@ def convert_exception(exc: Exception) -> IngeniousError:
             return converter(exc)
 
     # Default conversion
-    return convert_standard_exception(exc)
+    return IngeniousError(
+        message=f"{type(exc).__name__}: {str(exc)}",
+        details={"exception_type": exc.__class__.__name__},
+    )
 
 
 # Try to register requests exceptions if the library is available

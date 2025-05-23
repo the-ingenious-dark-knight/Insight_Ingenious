@@ -1,0 +1,39 @@
+# Basic configuration for testing
+api:
+  port: 8000
+  host: "0.0.0.0"
+  middleware:
+    cors:
+      allow_origins: ["http://localhost:3000"]
+      allow_methods: ["*"]
+      allow_headers: ["*"]
+      allow_credentials: true
+
+models:
+  - name: "test-model"
+    model: "gpt-3.5-turbo"
+    base_url: "https://example.com/openai"
+    api_key: "test-api-key"
+    api_version: "2023-05-15"
+
+file_storage:
+  storage_type: "local"
+  path: "./storage"
+  containers:
+    - name: "data"
+      path: "./data"
+    - name: "revisions"
+      path: "./revisions"
+
+chat_history:
+  database_type: "sqlite"
+  connection_string: ":memory:"
+
+chat_service:
+  type: "basic"
+
+web_configuration:
+  authentication:
+    enable: false
+    username: "admin"
+    password: "password"

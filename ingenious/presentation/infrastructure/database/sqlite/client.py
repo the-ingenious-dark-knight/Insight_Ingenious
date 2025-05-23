@@ -9,7 +9,9 @@ from typing import Any, Dict, List, Optional, Union
 
 import aiosqlite
 
-from ingenious.infrastructure.database.base_client import BaseDatabaseClient
+from ingenious.presentation.infrastructure.database.base_client import (
+    BaseDatabaseClient,
+)
 
 logger = logging.getLogger(__name__)
 

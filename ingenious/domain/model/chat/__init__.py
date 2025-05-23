@@ -1,4 +1,5 @@
 # Expose chat models
+from ingenious.domain.model.chat.action import Action
 from ingenious.domain.model.chat.chat import (
     ChatRequest,
     ChatResponse,
@@ -12,20 +13,25 @@ from ingenious.domain.model.chat.chat_history_models import (
     TrueStepType,
     User,
 )
+from ingenious.domain.model.chat.knowledge_base_link import KnowledgeBaseLink
 from ingenious.domain.model.chat.message import Message, MessageRole
 from ingenious.domain.model.chat.message_feedback import MessageFeedback
+from ingenious.domain.model.chat.product import Product
 
 __all__ = [
+    "Action",
     "ChatRequest",
     "ChatResponse",
     "IChatRequest",
     "IChatResponse",
-    "ThreadDict",
-    "User",
-    "StepType",
-    "TrueStepType",
-    "MessageStepType",
+    "KnowledgeBaseLink",
     "Message",
-    "MessageRole",
     "MessageFeedback",
+    "MessageRole",
+    "MessageStepType",
+    "Product",
+    "StepType",
+    "ThreadDict",
+    "TrueStepType",
+    "User",
 ]

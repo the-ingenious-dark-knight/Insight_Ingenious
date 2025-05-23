@@ -1,7 +1,6 @@
 import importlib
 from typing import Any, Dict, List, Optional
 
-import ingenious.common.config.config as Config
 from ingenious.domain.interfaces.repository.chat_history_repository import (
     IChatHistoryRepository,
 )
@@ -13,7 +12,7 @@ from ingenious.domain.model.database.database_client import DatabaseClientType
 class ChatHistoryRepository(IChatHistoryRepository):
     """Implementation of the chat history repository interface"""
 
-    def __init__(self, db_type: DatabaseClientType, config: Config.Config):
+    def __init__(self, db_type: DatabaseClientType, config: Any):
         module_name = f"ingenious.infrastructure.database.{db_type.value.lower()}"
         class_name = f"{db_type.value.lower()}_ChatHistoryRepository"
 

@@ -1,3 +1,4 @@
+# Expose config_ns models first to avoid circular imports
 # Expose config models
 from ingenious.domain.model.config.config import (
     AuthenticationMethod,
@@ -16,6 +17,7 @@ from ingenious.domain.model.config.config import (
     ToolServiceConfig,
     WebConfig,
 )
+from ingenious.domain.model.config.config_ns import *
 
 __all__ = [
     "ChatHistoryConfig",

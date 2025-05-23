@@ -1,0 +1,25 @@
+chat_history:
+  connection_string: ':memory:'
+  database_type: sqlite
+chat_service:
+  type: basic
+file_storage:
+  containers:
+  - name: data
+    path: ./data
+  - name: revisions
+    path: ./revisions
+  path: ./storage
+  storage_type: local
+models:
+- api_key: test-api-key
+  api_version: '2023-05-15'
+  base_url: https://example.com/openai
+  model: gpt-3.5-turbo
+  name: test-model
+profile: test
+web_configuration:
+  authentication:
+    enable: false
+    password: password
+    username: admin

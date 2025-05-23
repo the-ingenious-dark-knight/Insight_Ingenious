@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Literal, Optional
 
-from ingenious.domain.model.chat_history_models import ThreadDict, User
-from ingenious.domain.model.message import Message
+from ingenious.domain.model.chat.chat_history_models import ThreadDict, User
+from ingenious.domain.model.chat.message import Message
 
 
 class IChatHistoryRepository(ABC):

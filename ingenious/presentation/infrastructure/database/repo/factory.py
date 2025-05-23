@@ -6,7 +6,7 @@ from ingenious.domain.interfaces.repository.chat_history_repository import (
     IChatHistoryRepository,
 )
 from ingenious.domain.interfaces.repository.database import DatabaseInterface
-from ingenious.infrastructure.database.repo.chat_history_repository import (
+from ingenious.presentation.infrastructure.database.repo.chat_history_repository import (
     DatabaseChatHistoryRepository,
 )
 

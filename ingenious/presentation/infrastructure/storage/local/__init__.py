@@ -2,8 +2,8 @@ from pathlib import Path
 
 import aiofiles
 
+from ingenious.domain.interfaces.repository.file_storage import IFileStorage
 from ingenious.domain.model.config import Config, FileStorageContainer
-from ingenious.infrastructure.storage.files_repository import IFileStorage
 
 
 class local_FileStorageRepository(IFileStorage):

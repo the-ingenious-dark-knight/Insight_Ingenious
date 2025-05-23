@@ -23,7 +23,7 @@ from ingenious.domain.interfaces.service.message_feedback_service import (
     IMessageFeedbackService,
 )
 from ingenious.domain.model.config import Config
-from ingenious.domain.model.database_client import DatabaseClientType
+from ingenious.domain.model.database.database_client import DatabaseClientType
 from ingenious.presentation.api.managers.app_configuration_manager import (
     AppConfigurationManager,
 )

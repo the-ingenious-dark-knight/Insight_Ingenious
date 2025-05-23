@@ -21,16 +21,28 @@ _error_handlers: Dict[Type[Exception], Callable] = {}
 
 
 def register_error_handler(
-    exception_class: Type[Exception], handler: Callable[[Exception], T]
-) -> None:
+    exception_class: Type[Exception]
+) -> Callable:
     """
     Register an error handler for a specific exception type.
 
+    Can be used as a decorator.
+
     Args:
         exception_class: The exception class to handle
-        handler: The handler function
+
+    Returns:
+        A decorator function that registers the handler
     """
-    _error_handlers[exception_class] = handler
+    def decorator(handler_func: Callable[[Exception], Any]):
+        _error_handlers[exception_class] = handler_func
+        return handler_func
+    return decorator
+
+
+def reset_error_handlers() -> None:
+    """Reset all registered error handlers."""
+    _error_handlers.clear()
 
 
 def get_error_handler(exception_class: Type[Exception]) -> Optional[Callable]:
@@ -76,7 +88,9 @@ def handle_exception(exc: Exception) -> Any:
     # Default behavior for unhandled exceptions
     if isinstance(exc, IngeniousError):
         exc.log()
-        return exc.to_dict()
+        error_dict = exc.to_dict()
+        # Add expected status field for compatibility
+        return {"status": "error", "message": error_dict["message"], "details": error_dict}
 
     # Log unhandled exceptions
     logger.error(f"Unhandled exception: {exc}", exc_info=True)
@@ -87,4 +101,5 @@ def handle_exception(exc: Exception) -> Any:
         details={"exception_type": exc.__class__.__name__},
     )
 
-    return generic_error.to_dict()
+    error_dict = generic_error.to_dict()
+    return {"status": "error", "message": error_dict["message"], "details": error_dict}

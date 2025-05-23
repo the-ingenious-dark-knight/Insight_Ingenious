@@ -6,7 +6,7 @@ import yaml
 from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
 
-from ingenious.domain.model import profile as profile_models
+from ingenious.domain.model.config import profile as profile_models
 
 
 class Profiles:

@@ -1,17 +1,21 @@
+from typing import TYPE_CHECKING
+
 from ingenious.common.utils.namespace_utils import import_class_with_fallback
-from ingenious.domain.interfaces.repository.chat_history_repository import (
-    IChatHistoryRepository,
-)
-from ingenious.domain.interfaces.service.chat_service import IChatService
+
+# Use TYPE_CHECKING to avoid circular imports
+if TYPE_CHECKING:
+    from ingenious.domain.interfaces.repository.chat_history_repository import (
+        IChatHistoryRepository,
+    )
 from ingenious.domain.model.chat import ChatRequest, ChatResponse
 from ingenious.domain.model.config import Config
 
 
-class ChatService(IChatService):
+class ChatService:  # Define as IChatService at runtime
     def __init__(
         self,
         chat_service_type: str,
-        chat_history_repository: IChatHistoryRepository,
+        chat_history_repository: 'IChatHistoryRepository',
         conversation_flow: str,
         config: Config,
         revision: str = "dfe19b62-07f1-4cb5-ae9a-561a253e4b04",

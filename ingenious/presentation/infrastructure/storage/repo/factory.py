@@ -4,7 +4,7 @@ Factory for creating repository implementations.
 
 from ingenious.domain.interfaces.repository.file_repository import IFileRepository
 from ingenious.domain.interfaces.service.blob_storage import BlobStorageInterface
-from ingenious.infrastructure.storage.repo.file_repository import (
+from ingenious.presentation.infrastructure.storage.repo.file_repository import (
     BlobStorageFileRepository,
 )
 

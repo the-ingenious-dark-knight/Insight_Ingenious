@@ -6,7 +6,9 @@ from azure.storage.blob import BlobClient, BlobServiceClient, ContainerClient
 from ingenious.domain.interfaces.service.blob_storage import BlobStorageInterface
 from ingenious.domain.interfaces.service.path_helper import PathHelperInterface
 from ingenious.domain.model.config import FileStorageContainer
-from ingenious.infrastructure.storage.azure.path_helper import AzurePathHelper
+from ingenious.presentation.infrastructure.storage.azure.path_helper import (
+    AzurePathHelper,
+)
 
 logger = logging.getLogger(__name__)
 

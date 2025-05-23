@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "aiosqlite>=0.21.0",
     "annotated-types==0.7.0",
     "autogen-agentchat==0.4.2",
     "autogen-ext[openai]==0.4.2",
@@ -40,9 +41,29 @@ dependencies = [
     "typer>=0.15.4",
 ]
 
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["ingenious"]
+
 [tool.ruff.lint]
 extend-select = ["I"]
 ignore = ["E402"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+asyncio_mode = "auto"
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests",
+    "functional: Functional tests",
+    "slow: Slow running tests",
+]
 
 [dependency-groups]
 dev = [

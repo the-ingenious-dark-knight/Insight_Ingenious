@@ -3,7 +3,7 @@ Factory for creating AI service implementations.
 """
 
 from ingenious.domain.interfaces.service.ai_service import AIServiceInterface
-from ingenious.infrastructure.external.openai_service import OpenAIService
+from ingenious.presentation.infrastructure.external.openai_service import OpenAIService
 
 
 class AIServiceFactory:

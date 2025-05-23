@@ -4,13 +4,12 @@ import logging
 from fastapi import FastAPI
 
 from ingenious.common.utils.namespace_utils import import_class_with_fallback
-from ingenious.domain.model.api_routes import IApiRoutes
-from ingenious.domain.model.config import Config
+from ingenious.domain.model.api.api_routes import IApiRoutes
 
 logger = logging.getLogger(__name__)
 
 
-def load_extensions(app: FastAPI, config: Config) -> None:
+def load_extensions(app: FastAPI, config: any) -> None:
     """Load custom extensions for the application"""
     try:
         # Try to load custom API routes

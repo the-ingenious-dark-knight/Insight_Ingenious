@@ -3,19 +3,20 @@ from typing import List
 
 from pydantic import BaseModel, Field
 
+# Import directly to avoid circular imports
 from ingenious.domain.model import config as config_models
-from ingenious.domain.model import config_ns as config_ns_models
-from ingenious.domain.model import profile as profile_models
+from ingenious.domain.model.config import config_ns
+from ingenious.domain.model.config import profile as profile_models
 
 
-class ChatHistoryConfig(config_ns_models.ChatHistoryConfig):
+class ChatHistoryConfig(config_ns.ChatHistoryConfig):
     database_connection_string: str = Field(
         "", description="Connection string for the database. Only used for cosmosdb"
     )
 
     def __init__(
         self,
-        config: config_ns_models.ChatHistoryConfig,
+        config: config_ns.ChatHistoryConfig,
         profile: profile_models.ChatHistoryConfig,
     ):
         super().__init__(
@@ -27,12 +28,12 @@ class ChatHistoryConfig(config_ns_models.ChatHistoryConfig):
         )
 
 
-class ModelConfig(config_ns_models.ModelConfig):
+class ModelConfig(config_ns.ModelConfig):
     api_key: str
     base_url: str
 
     def __init__(
-        self, config: config_ns_models.ModelConfig, profile: profile_models.ModelConfig
+        self, config: config_ns.ModelConfig, profile: profile_models.ModelConfig
     ):
         super().__init__(
             model=config.model,
@@ -43,41 +44,41 @@ class ModelConfig(config_ns_models.ModelConfig):
         )
 
 
-class ChainlitConfig(config_ns_models.ChainlitConfig):
+class ChainlitConfig(config_ns.ChainlitConfig):
     authentication: profile_models.ChainlitAuthConfig = Field(
         default_factory=profile_models.ChainlitAuthConfig
     )
 
     def __init__(
         self,
-        config: config_ns_models.ChainlitConfig,
+        config: config_ns.ChainlitConfig,
         profile: profile_models.ChainlitConfig,
     ):
         super().__init__(enable=config.enable, authentication=profile.authentication)
 
 
-class ChatServiceConfig(config_ns_models.ChatServiceConfig):
+class ChatServiceConfig(config_ns.ChatServiceConfig):
     def __init__(
         self,
-        config: config_ns_models.ChatServiceConfig,
+        config: config_ns.ChatServiceConfig,
         profile: profile_models.ChatServiceConfig,
     ):
         super().__init__(type=config.type)
 
 
-class ToolServiceConfig(config_ns_models.ToolServiceConfig):
+class ToolServiceConfig(config_ns.ToolServiceConfig):
     def __init__(
         self,
-        config: config_ns_models.ToolServiceConfig,
+        config: config_ns.ToolServiceConfig,
         profile: profile_models.ToolServiceConfig,
     ):
         super().__init__(enable=config.enable)
 
 
-class LoggingConfig(config_ns_models.LoggingConfig):
+class LoggingConfig(config_ns.LoggingConfig):
     def __init__(
         self,
-        config: config_ns_models.LoggingConfig,
+        config: config_ns.LoggingConfig,
         profile: profile_models.LoggingConfig,
     ):
         super().__init__(
@@ -85,12 +86,12 @@ class LoggingConfig(config_ns_models.LoggingConfig):
         )
 
 
-class AzureSearchConfig(config_ns_models.AzureSearchConfig):
+class AzureSearchConfig(config_ns.AzureSearchConfig):
     key: str = ""
 
     def __init__(
         self,
-        config: config_ns_models.AzureSearchConfig,
+        config: config_ns.AzureSearchConfig,
         profile: profile_models.AzureSearchConfig,
     ):
         super().__init__(
@@ -98,14 +99,14 @@ class AzureSearchConfig(config_ns_models.AzureSearchConfig):
         )
 
 
-class AzureSqlConfig(config_ns_models.AzureSqlConfig):
+class AzureSqlConfig(config_ns.AzureSqlConfig):
     database_connection_string: str = Field(
         "", description="azure SQL Connection string"
     )
 
     def __init__(
         self,
-        config: config_ns_models.AzureSqlConfig,
+        config: config_ns.AzureSqlConfig,
         profile: profile_models.AzureSqlConfig,
     ):
         super().__init__(
@@ -124,11 +125,11 @@ class ReceiverConfig(profile_models.ReceiverConfig):
         )
 
 
-class WebConfig(config_ns_models.WebConfig):
+class WebConfig(config_ns.WebConfig):
     authentication: profile_models.WebAuthConfig = {}
 
     def __init__(
-        self, config: config_ns_models.WebConfig, profile: profile_models.WebConfig
+        self, config: config_ns.WebConfig, profile: profile_models.WebConfig
     ):
         super().__init__(
             ip_address=config.ip_address,
@@ -139,8 +140,8 @@ class WebConfig(config_ns_models.WebConfig):
         )
 
 
-class LocaldbConfig(config_ns_models.LocaldbConfig):
-    def __init__(self, config: config_ns_models.LocaldbConfig):
+class LocaldbConfig(config_ns.LocaldbConfig):
+    def __init__(self, config: config_ns.LocaldbConfig):
         super().__init__(
             database_path=config.database_path,
             sample_csv_path=config.sample_csv_path,
@@ -155,7 +156,7 @@ class AuthenticationMethod(str, Enum):
     TOKEN = "token"
 
 
-class FileStorageContainer(config_ns_models.FileStorageContainer):
+class FileStorageContainer(config_ns.FileStorageContainer):
     url: str = Field("", description="File Storage SAS URL")
     client_id: str = Field("", description="File Storage SAS Client ID")
     token: str = Field("", description="File Storage SAS Token")
@@ -166,7 +167,7 @@ class FileStorageContainer(config_ns_models.FileStorageContainer):
 
     def __init__(
         self,
-        config: config_ns_models.FileStorageContainer,
+        config: config_ns.FileStorageContainer,
         profile: profile_models.FileStorageContainer,
     ):
         super().__init__(
@@ -182,7 +183,7 @@ class FileStorageContainer(config_ns_models.FileStorageContainer):
         self.authentication_method = profile.authentication_method
 
 
-class FileStorage(config_ns_models.FileStorage):
+class FileStorage(config_ns.FileStorage):
     revisions: FileStorageContainer = Field(
         default_factory=FileStorageContainer,
         description="File Storage configuration for revisions",
@@ -193,7 +194,7 @@ class FileStorage(config_ns_models.FileStorage):
     )
 
     def __init__(
-        self, config: config_ns_models.FileStorage, profile: profile_models.FileStorage
+        self, config: config_ns.FileStorage, profile: profile_models.FileStorage
     ):
         super().__init__(
             revisions=FileStorageContainer(config.revisions, profile.revisions),
@@ -220,7 +221,7 @@ class Config(BaseModel):
     file_storage: FileStorage
 
     def __init__(
-        self, config: config_ns_models.Config, profile: profile_models.Profile
+        self, config: config_ns.Config, profile: profile_models.Profile
     ):
         super().__init__(
             chat_history=ChatHistoryConfig(config.chat_history, profile.chat_history),
