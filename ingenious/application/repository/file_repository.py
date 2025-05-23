@@ -4,7 +4,6 @@ from pathlib import Path
 
 try:
     from ingenious.domain.interfaces.repository.file_repository import IFileRepository
-    from ingenious.domain.interfaces.repository.file_storage import IFileStorage
 except ImportError:
     # For testing, use the simplified interfaces
 

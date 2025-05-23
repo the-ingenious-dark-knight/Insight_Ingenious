@@ -126,8 +126,6 @@ def import_class_with_fallback(module_name, class_name):
 
                         source_dir = args[0]
                         dest_dir = args[1]
-                        ignore_patterns = kwargs.get("ignore_patterns", [])
-
                         Path(dest_dir).mkdir(parents=True, exist_ok=True)
 
                         for item in Path(source_dir).glob("**/*"):
@@ -171,6 +169,8 @@ def import_class_with_fallback(module_name, class_name):
         ) as e:
             try:
                 # Direct attempt as fallback
+                import importlib  # Ensure importlib is imported before use
+
                 module = importlib.import_module(module_name)
                 if hasattr(module, class_name):
                     return getattr(module, class_name)

@@ -17,7 +17,7 @@ from ingenious.domain.model.config.config import (
     ToolServiceConfig,
     WebConfig,
 )
-from ingenious.domain.model.config.config_ns import *
+from ingenious.domain.model.config.config_ns import *  # noqa: F403
 
 __all__ = [
     "ChatHistoryConfig",

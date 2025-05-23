@@ -34,7 +34,7 @@ class TestNamespaceUtils:
             mock_import.side_effect = [ImportError, Mock()]
 
             # Call the function
-            result = import_module_with_fallback("nonexistent.module")
+            import_module_with_fallback("nonexistent.module")
 
             # Verify the fallback was attempted
             assert mock_import.call_count == 2
@@ -57,9 +57,7 @@ class TestNamespaceUtils:
             mock_import.side_effect = [ImportError, mock_module]
 
             # Call the function
-            result = import_class_with_fallback(
-                "nonexistent.module", "NonexistentClass"
-            )
+            import_class_with_fallback("nonexistent.module", "NonexistentClass")
 
             # Verify the fallback was attempted
             assert mock_import.call_count == 2
