@@ -198,3 +198,25 @@ def log_execution_time(logger=None, level=logging.DEBUG):
         return wrapper
 
     return decorator
+
+
+# Import structured logging components
+from ingenious.common.logging.structured import (
+    JsonFormatter,
+    StructuredLogger,
+    get_structured_logger,
+    setup_json_logging,
+    with_correlation_id,
+)
+
+__all__ = [
+    "setup_logging",
+    "LoggingContext",
+    "get_logger",
+    "log_execution_time",
+    "StructuredLogger",
+    "JsonFormatter",
+    "get_structured_logger",
+    "with_correlation_id",
+    "setup_json_logging",
+]
