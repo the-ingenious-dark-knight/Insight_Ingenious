@@ -28,11 +28,11 @@ with open("test_config.yml", "w") as f:
             "models": [
                 {
                     "name": "test-model",
-                    "model": "gpt-3.5-turbo",
+                    "model": "gpt-4o",
                     "base_url": "https://example.com/openai",
                     "api_key": "test-api-key",
                     "api_version": "2023-05-15",
-                    "api_type": "azure",  # This was missing
+                    "api_type": "azure",
                 }
             ],
             "file_storage": {
@@ -59,9 +59,11 @@ with open("test_config.yml", "w") as f:
             },
             "chat_service": {"type": "basic"},
             "web_configuration": {
+                "ip_address": "0.0.0.0",
+                "port": 8000,
                 "authentication": {
                     "enable": False,
-                    "username": "admin",
+                    "username": "test_user",
                     "password": "password",
                 }
             },
@@ -140,6 +142,8 @@ def sample_profile_dict():
                 },
             },
             "web_configuration": {
+                "ip_address": "0.0.0.0",
+                "port": 8000,
                 "authentication": {
                     "enable": False,
                     "username": "test_user",
@@ -177,7 +181,7 @@ def sample_config_dict():
         "models": [
             {
                 "name": "test-model",
-                "model": "gpt-3.5-turbo",
+                "model": "gpt-4o",
                 "base_url": "https://example.com/openai",
                 "api_key": "test-api-key",
                 "api_version": "2023-05-15",
@@ -194,9 +198,11 @@ def sample_config_dict():
         "chat_history": {"database_type": "sqlite", "connection_string": ":memory:"},
         "chat_service": {"type": "basic"},
         "web_configuration": {
+            "ip_address": "0.0.0.0",
+            "port": 8000,
             "authentication": {
                 "enable": False,
-                "username": "admin",
+                "username": "test_user",
                 "password": "password",
             }
         },

@@ -49,6 +49,7 @@ class WebAuthConfig(BaseModel):
 
 
 class WebConfig(BaseModel):
+    port: int = 8000
     authentication: WebAuthConfig = Field(default_factory=WebAuthConfig)
 
 

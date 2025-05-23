@@ -56,7 +56,7 @@ def register_bindings(config: Config) -> None:
 
     container.bind_factory(
         IFileRepository,
-        lambda category="revisions": FileRepository(config=config, category=category),
+        lambda Category="revisions": FileRepository(config=config, Category=Category),
     )
 
     container.bind_factory(

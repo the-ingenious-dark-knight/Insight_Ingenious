@@ -34,7 +34,7 @@ models:
   api_type: azure
   api_version: '2023-05-15'
   base_url: https://example.com/openai
-  model: gpt-3.5-turbo
+  model: gpt-4o
   name: test-model
 profile: test
 tool_service:
@@ -43,4 +43,6 @@ web_configuration:
   authentication:
     enable: false
     password: password
-    username: admin
+    username: test_user
+  ip_address: 0.0.0.0
+  port: 8000

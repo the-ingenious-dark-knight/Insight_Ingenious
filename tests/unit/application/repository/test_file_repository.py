@@ -22,7 +22,7 @@ def mock_config():
     mock_revisions.client_id = "test_client_id"
     mock_revisions.token = "test_token"
     mock_revisions.add_sub_folders = True
-    mock_revisions.storage_type = "local"
+    mock_revisions.storage_type = "local"  # Add storage_type for compatibility
 
     mock_data = MagicMock(spec=FileStorageContainer)
     mock_data.url = "https://example.com/data"
@@ -30,10 +30,11 @@ def mock_config():
     mock_data.client_id = "test_client_id"
     mock_data.token = "test_token"
     mock_data.add_sub_folders = True
-    mock_data.storage_type = "local"
+    mock_data.storage_type = "local"  # Add storage_type for compatibility
 
     file_storage.revisions = mock_revisions
     file_storage.data = mock_data
+    file_storage.storage_type = "local"  # Add storage_type to file_storage itself for DI
     mock_config.file_storage = file_storage
     return mock_config
 

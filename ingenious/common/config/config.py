@@ -11,6 +11,7 @@ from ingenious.common.config.profile import Profiles
 from ingenious.common.errors.common import ConfigurationError
 from ingenious.domain.model.config import config_ns as config_ns_models
 from ingenious.domain.model.config import profile as profile_models
+from ingenious.domain.model import config as config_models
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +54,7 @@ class Config:
                 name="test",
                 models=[
                     profile_models.ModelConfig(
-                        model="gpt-3.5-turbo",
+                        model="gpt-4o",
                         base_url="https://test.com",
                         api_key="test_key",
                     )
@@ -62,9 +63,11 @@ class Config:
                     database_connection_string=":memory:"
                 ),
                 web_configuration=profile_models.WebConfig(
+                    ip_address="0.0.0.0",
+                    port=8000,
                     authentication=profile_models.WebAuthConfig(
-                        enable=False, username="test", password="test"
-                    )
+                        enable=False, username="test_user", password="test_password"
+                    ),
                 ),
                 file_storage=profile_models.FileStorage(
                     revisions=profile_models.FileStorageContainer(
@@ -86,9 +89,9 @@ class Config:
                 ),
                 receiver_configuration=profile_models.ReceiverConfig(enable=False),
                 chainlit_configuration=profile_models.ChainlitConfig(enable=False),
-                logging=profile_models.LoggingConfig(level="INFO"),
-                tool_service=profile_models.ToolServiceConfig(enable=False),
-                chat_service=profile_models.ChatServiceConfig(type="basic"),
+                logging=profile_models.LoggingConfig(),
+                tool_service=profile_models.ToolServiceConfig(),
+                chat_service=profile_models.ChatServiceConfig(),
             )
             return test_profile
 
@@ -140,7 +143,10 @@ class Config:
         if path.exists():
             if path.is_file():
                 logger.debug("Config loaded from file")
-                config = Config.from_yaml(str(path))
+                try:
+                    config = Config.from_yaml(str(path))
+                except Exception as e:
+                    raise ConfigurationError(f"Invalid configuration file: {e}")
                 return config
             else:
                 logger.debug(
@@ -152,64 +158,10 @@ class Config:
                     return config
                 except Exception as e:
                     logger.error(f"Failed to load config from key vault: {e}")
-                    # Return a minimal test config for tests
-                    return Config.from_yaml_str("""
-                    profile: test
-                    models:
-                      - name: test-model
-                        model: gpt-3.5-turbo
-                        base_url: https://example.com/openai
-                        api_key: test-api-key
-                        api_version: 2023-05-15
-                    file_storage:
-                      storage_type: local
-                      path: ./storage
-                      containers:
-                        - name: data
-                          path: ./data
-                        - name: revisions
-                          path: ./revisions
-                    chat_history:
-                      database_type: sqlite
-                      connection_string: :memory:
-                    chat_service:
-                      type: basic
-                    web_configuration:
-                      authentication:
-                        enable: false
-                        username: admin
-                        password: password
-                    """)
+                    raise ConfigurationError(f"Failed to load config from key vault: {e}")
         else:
             logger.debug(f"No config file found at {config_path}")
-            # For tests, return a minimal config instead of exiting
-            return Config.from_yaml_str("""
-            profile: test
-            models:
-              - name: test-model
-                model: gpt-3.5-turbo
-                base_url: https://example.com/openai
-                api_key: test-api-key
-                api_version: 2023-05-15
-            file_storage:
-              storage_type: local
-              path: ./storage
-              containers:
-                - name: data
-                  path: ./data
-                - name: revisions
-                  path: ./revisions
-            chat_history:
-              database_type: sqlite
-              connection_string: :memory:
-            chat_service:
-              type: basic
-            web_configuration:
-              authentication:
-                enable: false
-                username: admin
-                password: password
-            """)
+            raise ConfigurationError(f"No config file found at {config_path}")
 
 
 def get_config(config_path=None, project_path=None, profiles_path=None):

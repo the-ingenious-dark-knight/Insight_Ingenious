@@ -3,6 +3,7 @@ Tests for the dependency injection module in ingenious.common.di.
 """
 
 import pytest
+from unittest.mock import MagicMock
 
 from ingenious.common.di.bindings import register_bindings
 from ingenious.common.di.container import DIContainer, get_container
@@ -194,3 +195,27 @@ class TestBindings:
         # File repository should be registered and injectable
         file_repository = container.get(IFileRepository)
         assert file_repository is not None
+
+
+@pytest.fixture
+def mock_config():
+    """Mock configuration object."""
+    mock_config = MagicMock()
+    mock_config.chat_service = MagicMock()
+    mock_config.chat_service.type = "basic"
+    # Add web_configuration with port attribute for config tests
+    mock_web_config = MagicMock()
+    mock_web_config.port = 8000
+    mock_web_config.authentication = MagicMock()
+    mock_web_config.authentication.username = "test_user"
+    mock_web_config.authentication.password = "test_password"
+    mock_config.web_configuration = mock_web_config
+    # Add file_storage with storage_type for DI tests
+    mock_file_storage = MagicMock()
+    mock_file_storage.storage_type = "local"
+    mock_file_storage.revisions = MagicMock()
+    mock_file_storage.revisions.storage_type = "local"
+    mock_file_storage.data = MagicMock()
+    mock_file_storage.data.storage_type = "local"
+    mock_config.file_storage = mock_file_storage
+    return mock_config

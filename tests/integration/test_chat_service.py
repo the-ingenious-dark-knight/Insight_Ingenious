@@ -54,6 +54,13 @@ def mock_config():
     mock_config = MagicMock(spec=Config)
     mock_config.chat_service = MagicMock()
     mock_config.chat_service.type = "basic"
+    # Add web_configuration with port attribute for config tests
+    mock_web_config = MagicMock()
+    mock_web_config.port = 8000
+    mock_web_config.authentication = MagicMock()
+    mock_web_config.authentication.username = "test_user"
+    mock_web_config.authentication.password = "test_password"
+    mock_config.web_configuration = mock_web_config
     return mock_config
 
 
