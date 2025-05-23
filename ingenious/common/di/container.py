@@ -100,7 +100,7 @@ class DIContainer:
             implementation = self._registry[interface]
             return implementation()
 
-        if hasattr(self, '_factories') and interface in self._factories:
+        if hasattr(self, "_factories") and interface in self._factories:
             instance = self._factories[interface]()
             self._instances[interface] = instance
             return cast(T, instance)

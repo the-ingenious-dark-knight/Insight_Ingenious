@@ -5,14 +5,9 @@ This module contains fixtures and configuration settings for pytest.
 """
 
 import sys
-import os
-import uuid
-import json
-import logging
-import datetime
 import tempfile
 from pathlib import Path
-from unittest.mock import patch, AsyncMock, MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 import yaml
@@ -45,13 +40,13 @@ with open("test_config.yml", "w") as f:
                 "revisions": {
                     "storage_type": "local",
                     "path": "./revisions",
-                    "add_sub_folders": True
+                    "add_sub_folders": True,
                 },
                 "data": {
                     "storage_type": "local",
                     "path": "./data",
-                    "add_sub_folders": True
-                }
+                    "add_sub_folders": True,
+                },
             },
             "chat_history": {
                 "database_type": "sqlite",
@@ -65,7 +60,7 @@ with open("test_config.yml", "w") as f:
                     "enable": False,
                     "username": "test_user",
                     "password": "password",
-                }
+                },
             },
             # Missing required fields
             "logging": {"root_log_level": "INFO", "log_level": "INFO"},
@@ -148,7 +143,7 @@ def sample_profile_dict():
                     "enable": False,
                     "username": "test_user",
                     "password": "test_password",
-                }
+                },
             },
             "file_storage": {
                 "revisions": {
@@ -204,7 +199,7 @@ def sample_config_dict():
                 "enable": False,
                 "username": "test_user",
                 "password": "password",
-            }
+            },
         },
     }
 
@@ -265,6 +260,7 @@ def mock_env_vars(monkeypatch, sample_config_file, sample_profile_file):
     if hasattr(config, "_config_instance"):
         config._config_instance = None
 
+
 # Add a fixture for mocking the FileRepository tests
 @pytest.fixture
 def mock_file_storage_config():
@@ -286,18 +282,23 @@ def mock_file_storage_config():
 
     return config
 
+
 # Create infrastructure mock
 @pytest.fixture
 def mock_infrastructure():
     """Mock the infrastructure module for file storage tests."""
     local_mod = MagicMock()
+
     class MockStorage:
         def __init__(self, *args, **kwargs):
             pass
 
     local_mod.local_FileStorageRepository = MockStorage
 
-    with patch.dict('sys.modules', {
-        'ingenious.infrastructure.storage.local': local_mod,
-    }):
+    with patch.dict(
+        "sys.modules",
+        {
+            "ingenious.infrastructure.storage.local": local_mod,
+        },
+    ):
         yield

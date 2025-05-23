@@ -121,9 +121,9 @@ class Profile(BaseModel):
     @property
     def profile(self):
         # Return the profile name if available, else None
-        if hasattr(self, 'name'):
+        if hasattr(self, "name"):
             return self.name
-        return getattr(self, 'profile_name', None)
+        return getattr(self, "profile_name", None)
 
 
 class Profiles(RootModel[List[Profile]]):

@@ -2,8 +2,9 @@
 Tests for the dependency injection module in ingenious.common.di.
 """
 
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
 
 from ingenious.common.di.bindings import register_bindings
 from ingenious.common.di.container import DIContainer, get_container

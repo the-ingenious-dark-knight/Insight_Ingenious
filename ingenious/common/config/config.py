@@ -11,7 +11,6 @@ from ingenious.common.config.profile import Profiles
 from ingenious.common.errors.common import ConfigurationError
 from ingenious.domain.model.config import config_ns as config_ns_models
 from ingenious.domain.model.config import profile as profile_models
-from ingenious.domain.model import config as config_models
 
 logger = logging.getLogger(__name__)
 
@@ -158,7 +157,9 @@ class Config:
                     return config
                 except Exception as e:
                     logger.error(f"Failed to load config from key vault: {e}")
-                    raise ConfigurationError(f"Failed to load config from key vault: {e}")
+                    raise ConfigurationError(
+                        f"Failed to load config from key vault: {e}"
+                    )
         else:
             logger.debug(f"No config file found at {config_path}")
             raise ConfigurationError(f"No config file found at {config_path}")

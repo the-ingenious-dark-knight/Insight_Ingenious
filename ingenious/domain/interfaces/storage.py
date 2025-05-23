@@ -2,11 +2,14 @@
 Interface for file storage repositories.
 This is a minimal mock implementation for testing.
 """
+
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import List
+
 
 class IFileStorage(ABC):
     """Interface for file storage repositories."""
+
     @abstractmethod
     def get_base_path(self) -> str:
         """Get the base path for the repository."""

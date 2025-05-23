@@ -62,7 +62,7 @@ class TestChatModels:
             thread_id=thread_id,
             created_at=datetime.datetime.now().isoformat(),
             updated_at=datetime.datetime.now().isoformat(),
-            user_id="test_user"
+            user_id="test_user",
         )
 
         # Verify the message
@@ -145,7 +145,7 @@ class TestChatModels:
             user_id="test_user",
             thread_id="thread_123",
             user_prompt="Hello!",
-            conversation_flow="default"
+            conversation_flow="default",
         )
 
         # Verify the request
@@ -187,7 +187,7 @@ class TestChatModels:
             user_id="test_user",
             user_prompt="What's the weather in Seattle?",
             conversation_flow="default",
-            thread_id="thread_456"
+            thread_id="thread_456",
         )
 
         # Verify the request
@@ -241,7 +241,7 @@ class TestChatModels:
             agent_response=None,
             token_count=27,
             max_token_count=64,
-            tools=[]
+            tools=[],
         )
 
         # Verify the response

@@ -90,7 +90,7 @@ class TestChatService:
             user_id="test_user",
             thread_id=str(uuid.uuid4()),
             user_prompt="Hello, how are you?",
-            conversation_flow="default"
+            conversation_flow="default",
         )
 
         # Patch the mock_openai_service to return a valid ChatResponse
@@ -174,7 +174,7 @@ class TestChatService:
             user_id="test_user",
             thread_id="thread_123",
             user_prompt="And what is the capital of Germany?",
-            conversation_flow="default"
+            conversation_flow="default",
         )
 
         # Patch the mock_openai_service to return a valid ChatResponse
@@ -231,7 +231,9 @@ class TestChatService:
             token_count=35,
             max_token_count=64,
         )
-        mock_openai_service.generate_chat_completion.return_value = function_call_response
+        mock_openai_service.generate_chat_completion.return_value = (
+            function_call_response
+        )
 
         # Create the chat service
         chat_service = ChatService(
@@ -267,7 +269,7 @@ class TestChatService:
             functions=functions,
             function_call="auto",
             user_prompt="What's the weather in Seattle?",
-            conversation_flow="default"
+            conversation_flow="default",
         )
 
         # Process the request

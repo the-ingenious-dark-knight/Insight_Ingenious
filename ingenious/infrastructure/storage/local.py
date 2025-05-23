@@ -2,8 +2,10 @@
 Local file storage repository implementation.
 This is a mock implementation for testing.
 """
+
 from ingenious.domain.interfaces.storage import IFileStorage
 from ingenious.domain.model.config import Config, FileStorageContainer
+
 
 class local_FileStorageRepository(IFileStorage):
     """Local file storage repository implementation."""

@@ -34,7 +34,9 @@ def mock_config():
 
     file_storage.revisions = mock_revisions
     file_storage.data = mock_data
-    file_storage.storage_type = "local"  # Add storage_type to file_storage itself for DI
+    file_storage.storage_type = (
+        "local"  # Add storage_type to file_storage itself for DI
+    )
     mock_config.file_storage = file_storage
     return mock_config
 

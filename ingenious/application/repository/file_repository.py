@@ -6,10 +6,10 @@ try:
     from ingenious.domain.interfaces.repository.file_storage import IFileStorage
 except ImportError:
     # For testing, use the simplified interfaces
-    from ingenious.domain.interfaces.storage import IFileStorage
 
     class IFileRepository:
         pass
+
 
 from ingenious.domain.model.config import Config
 
@@ -19,11 +19,11 @@ class FileRepository(IFileRepository):
         self.config = config
         self.category = Category
         self.fs_config = getattr(self.config.file_storage, Category)
-        self.add_sub_folders = getattr(
-            self.fs_config, "add_sub_folders", True
-        )
+        self.add_sub_folders = getattr(self.fs_config, "add_sub_folders", True)
 
-        module_name = f"ingenious.infrastructure.storage.{self.fs_config.storage_type.lower()}"
+        module_name = (
+            f"ingenious.infrastructure.storage.{self.fs_config.storage_type.lower()}"
+        )
 
         # Dynamically import the module based on the storage type
         class_name = f"{self.fs_config.storage_type}_FileStorageRepository"
@@ -44,7 +44,9 @@ class FileRepository(IFileRepository):
 
     async def write_file(self, contents: str, file_name: str, file_path: str):
         # The local_FileStorageRepository expects (file_path, content), so adapt the call
-        return self.repository.write_file(file_path=file_path + "/" + file_name, content=contents)
+        return self.repository.write_file(
+            file_path=file_path + "/" + file_name, content=contents
+        )
 
     async def get_base_path(self):
         # The local_FileStorageRepository returns a string, not a coroutine
@@ -64,7 +66,9 @@ class FileRepository(IFileRepository):
 
     async def check_if_file_exists(self, file_path: str, file_name: str):
         # The local_FileStorageRepository expects (file_path)
-        return self.repository.check_if_file_exists(file_path=file_path + "/" + file_name)
+        return self.repository.check_if_file_exists(
+            file_path=file_path + "/" + file_name
+        )
 
     async def get_prompt_template_path(self, revision_id: str = None):
         if revision_id:
