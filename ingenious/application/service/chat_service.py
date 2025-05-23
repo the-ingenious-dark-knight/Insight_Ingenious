@@ -59,3 +59,9 @@ class ChatService:  # Define as IChatService at runtime
         if not chat_request.conversation_flow:
             raise ValueError(f"conversation_flow not set {chat_request}")
         return await self.service_class.get_chat_response(chat_request)
+
+    async def process_chat_request(self, chat_request: ChatRequest) -> ChatResponse:
+        # Forward to the underlying service_class if it exists, else fallback to get_chat_response
+        if hasattr(self.service_class, "process_chat_request"):
+            return await self.service_class.process_chat_request(chat_request)
+        return await self.get_chat_response(chat_request)

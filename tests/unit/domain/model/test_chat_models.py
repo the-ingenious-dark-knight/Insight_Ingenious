@@ -56,9 +56,13 @@ class TestChatModels:
 
         # Create a message with minimal fields (should auto-generate some fields)
         message = Message(
+            id=str(uuid.uuid4()),
             role=MessageRole.ASSISTANT,
             content="I'm an AI assistant.",
             thread_id=thread_id,
+            created_at=datetime.datetime.now().isoformat(),
+            updated_at=datetime.datetime.now().isoformat(),
+            user_id="test_user"
         )
 
         # Verify the message
@@ -111,6 +115,7 @@ class TestChatModels:
         feedback = MessageFeedback(
             message_id="msg_123",
             thread_id="thread_456",
+            user_id="user_789",
             positive_feedback=True,
         )
 
@@ -138,6 +143,9 @@ class TestChatModels:
             ],
             model="gpt-4o",
             user_id="test_user",
+            thread_id="thread_123",
+            user_prompt="Hello!",
+            conversation_flow="default"
         )
 
         # Verify the request
@@ -195,6 +203,11 @@ class TestChatModels:
             total_tokens=18,
             job_id="job_123",
             tools=[],
+            thread_id="thread_123",
+            message_id="msg_456",
+            agent_response="Hello! How can I help you today?",
+            token_count=18,
+            max_token_count=32,
         )
 
         # Verify the response

@@ -101,3 +101,13 @@ class ServiceProviderFactory(Generic[T, S]):
             provider = self.create_provider(provider_class, *args, **kwargs)
             self.register_provider(provider)
             return provider
+
+    @property
+    def providers(self):
+        """
+        Get the registered providers.
+
+        Returns:
+            A dictionary of registered providers indexed by name
+        """
+        return self._instances

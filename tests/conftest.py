@@ -5,9 +5,14 @@ This module contains fixtures and configuration settings for pytest.
 """
 
 import sys
+import os
+import uuid
+import json
+import logging
+import datetime
 import tempfile
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 import yaml
@@ -37,6 +42,16 @@ with open("test_config.yml", "w") as f:
                     {"name": "data", "path": "./data"},
                     {"name": "revisions", "path": "./revisions"},
                 ],
+                "revisions": {
+                    "storage_type": "local",
+                    "path": "./revisions",
+                    "add_sub_folders": True
+                },
+                "data": {
+                    "storage_type": "local",
+                    "path": "./data",
+                    "add_sub_folders": True
+                }
             },
             "chat_history": {
                 "database_type": "sqlite",
@@ -243,3 +258,40 @@ def mock_env_vars(monkeypatch, sample_config_file, sample_profile_file):
 
     if hasattr(config, "_config_instance"):
         config._config_instance = None
+
+# Add a fixture for mocking the FileRepository tests
+@pytest.fixture
+def mock_file_storage_config():
+    """Create a mock file storage config for testing."""
+    config = MagicMock()
+
+    revisions = MagicMock()
+    revisions.storage_type = "local"
+    revisions.path = "./revisions"
+    revisions.add_sub_folders = True
+
+    data = MagicMock()
+    data.storage_type = "local"
+    data.path = "./data"
+    data.add_sub_folders = True
+
+    config.file_storage.revisions = revisions
+    config.file_storage.data = data
+
+    return config
+
+# Create infrastructure mock
+@pytest.fixture
+def mock_infrastructure():
+    """Mock the infrastructure module for file storage tests."""
+    local_mod = MagicMock()
+    class MockStorage:
+        def __init__(self, *args, **kwargs):
+            pass
+
+    local_mod.local_FileStorageRepository = MockStorage
+
+    with patch.dict('sys.modules', {
+        'ingenious.infrastructure.storage.local': local_mod,
+    }):
+        yield

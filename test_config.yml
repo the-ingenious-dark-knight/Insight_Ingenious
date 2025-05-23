@@ -14,7 +14,15 @@ file_storage:
     path: ./data
   - name: revisions
     path: ./revisions
+  data:
+    add_sub_folders: true
+    path: ./data
+    storage_type: local
   path: ./storage
+  revisions:
+    add_sub_folders: true
+    path: ./revisions
+    storage_type: local
   storage_type: local
 local_sql_db:
   connection_string: ''

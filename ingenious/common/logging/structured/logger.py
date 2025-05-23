@@ -46,6 +46,13 @@ class StructuredLogger:
         if level != logging.NOTSET:
             self.logger.setLevel(level)
 
+    @property
+    def name(self):
+        return self.logger.name
+
+    def setLevel(self, level):
+        self.logger.setLevel(level)
+
     def add_mask_field(self, field_name: str) -> None:
         """Add a field to be masked in logs."""
         self.mask_fields.add(field_name)
@@ -200,3 +207,7 @@ class StructuredLogger:
     def exception(self, message: str, extra: Optional[Dict[str, Any]] = None) -> None:
         """Log an exception message."""
         self._log(logging.ERROR, message, extra, exc_info=True)
+
+    def addHandler(self, handler):
+        """Add a handler to the logger."""
+        self.logger.addHandler(handler)

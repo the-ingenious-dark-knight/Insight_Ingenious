@@ -24,6 +24,7 @@ class DIContainer:
         self._registry: Dict[Type, Type] = {}
         self._singletons: Dict[Type, Any] = {}
         self._instances: Dict[Type, Any] = {}
+        self._factories: Dict[Type, Any] = {}
 
     def register(self, interface: Type[T], implementation: Type[T]) -> None:
         """
@@ -66,6 +67,16 @@ class DIContainer:
         """
         self.register_instance(interface, instance)
 
+    def bind_factory(self, interface: Type[T], factory: Any) -> None:
+        """
+        Bind a factory function to an interface.
+
+        Args:
+            interface: The interface type to bind the factory to
+            factory: The factory function to bind
+        """
+        self._factories[interface] = factory
+
     def get(self, interface: Type[T]) -> T:
         """
         Get a service from the container.
@@ -91,27 +102,21 @@ class DIContainer:
 
         raise ServiceError(f"Service {interface.__name__} is not registered")
 
-        # If we have a factory, use it to create an instance
+    def resolve(self, interface: Type[T]) -> T:
+        """
+        Resolve a service, using the factory if available.
+
+        Args:
+            interface: The interface type to resolve
+
+        Returns:
+            An instance of the requested service
+        """
         if interface in self._factories:
-            instance = self._factories[interface]()
-            self._instances[interface] = instance
-            return cast(T, instance)
+            factory = self._factories[interface]
+            return factory()
 
-        # If we have a binding, instantiate it
-        if interface in self._bindings:
-            implementation = self._bindings[interface]
-            instance = implementation()
-            self._instances[interface] = instance
-            return cast(T, instance)
-
-        # If we don't have a binding, but the interface is a concrete class,
-        # we can instantiate it directly
-        if isinstance(interface, type):
-            instance = interface()
-            self._instances[interface] = instance
-            return cast(T, instance)
-
-        raise KeyError(f"No binding found for {interface}")
+        return self.get(interface)
 
 
 # Singleton instance

@@ -47,7 +47,7 @@ class JsonFormatter(logging.Formatter):
 
         # Add optional attributes
         if self.include_logger_name:
-            log_data["logger"] = record.name
+            log_data["name"] = record.name
 
         if self.include_level_name:
             log_data["level"] = record.levelname

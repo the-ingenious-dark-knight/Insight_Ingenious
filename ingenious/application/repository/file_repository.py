@@ -1,34 +1,41 @@
 import importlib
 from pathlib import Path
 
-from ingenious.domain.interfaces.repository.file_repository import IFileRepository
-from ingenious.domain.interfaces.repository.file_storage import IFileStorage
+try:
+    from ingenious.domain.interfaces.repository.file_repository import IFileRepository
+    from ingenious.domain.interfaces.repository.file_storage import IFileStorage
+except ImportError:
+    # For testing, use the simplified interfaces
+    from ingenious.domain.interfaces.storage import IFileStorage
+
+    class IFileRepository:
+        pass
+
 from ingenious.domain.model.config import Config
 
 
 class FileRepository(IFileRepository):
     def __init__(self, config: Config, Category: str = "revisions"):
         self.config = config
+        self.category = Category
+        self.fs_config = getattr(self.config.file_storage, Category)
         self.add_sub_folders = getattr(
-            self.config.file_storage, Category
-        ).add_sub_folders
-        module_name = f"ingenious.infrastructure.storage.{self.config.file_storage.revisions.storage_type.lower()}"
+            self.fs_config, "add_sub_folders", True
+        )
+
+        module_name = f"ingenious.infrastructure.storage.{self.fs_config.storage_type.lower()}"
 
         # Dynamically import the module based on the storage type
-
-        class_name0 = f"{Category}"
-        class_name1 = getattr(self.config.file_storage, class_name0)
-        class_name2 = getattr(class_name1, "storage_type")
-        fs_config = class_name1
-
-        class_name = f"{class_name2}_FileStorageRepository"
+        class_name = f"{self.fs_config.storage_type}_FileStorageRepository"
 
         try:
             module = importlib.import_module(module_name)
-            repository_class: IFileStorage = getattr(module, class_name)
-            self.repository: IFileStorage = repository_class(
-                config=self.config, fs_config=fs_config
+            repository_class = getattr(module, class_name)
+            self.repository = repository_class(
+                config=self.config, fs_config=self.fs_config
             )
+            # Alias for tests
+            self.file_storage_repo = self.repository
 
         except (ImportError, AttributeError) as e:
             raise ValueError(
@@ -36,24 +43,28 @@ class FileRepository(IFileRepository):
             ) from e
 
     async def write_file(self, contents: str, file_name: str, file_path: str):
-        return await self.repository.write_file(
-            contents=contents, file_name=file_name, file_path=file_path
-        )
+        # The local_FileStorageRepository expects (file_path, content), so adapt the call
+        return await self.repository.write_file(file_path=file_path + "/" + file_name, content=contents)
 
     async def get_base_path(self):
-        return await self.repository.get_base_path()
+        # The local_FileStorageRepository returns a string, not a coroutine
+        return self.repository.get_base_path()
 
     async def read_file(self, file_name: str, file_path: str):
-        return await self.repository.read_file(file_name, file_path)
+        # The local_FileStorageRepository expects (file_path)
+        return await self.repository.read_file(file_path=file_path + "/" + file_name)
 
     async def delete_file(self, file_name: str, file_path: str):
-        return await self.repository.delete_file(file_name, file_path)
+        # The local_FileStorageRepository expects (file_path)
+        return await self.repository.delete_file(file_path=file_path + "/" + file_name)
 
     async def list_files(self, file_path: str):
-        return await self.repository.list_files(file_path)
+        # The local_FileStorageRepository returns a list, not a coroutine
+        return self.repository.list_files(directory_path=file_path)
 
     async def check_if_file_exists(self, file_path: str, file_name: str):
-        return await self.repository.check_if_file_exists(file_path, file_name)
+        # The local_FileStorageRepository expects (file_path)
+        return self.repository.check_if_file_exists(file_path=file_path + "/" + file_name)
 
     async def get_prompt_template_path(self, revision_id: str = None):
         if revision_id:

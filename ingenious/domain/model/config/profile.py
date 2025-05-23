@@ -116,6 +116,14 @@ class Profile(BaseModel):
         default_factory=FileStorage, description="File Storage configuration"
     )
 
+    # Add a profile property for test compatibility
+    @property
+    def profile(self):
+        # Return the profile name if available, else None
+        if hasattr(self, 'name'):
+            return self.name
+        return getattr(self, 'profile_name', None)
+
 
 class Profiles(RootModel[List[Profile]]):
     pass

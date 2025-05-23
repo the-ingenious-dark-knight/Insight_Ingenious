@@ -22,6 +22,7 @@ from ingenious.domain.model.config import Config
 def mock_openai_service():
     """Create a mock OpenAI service."""
     mock_service = AsyncMock()
+    # Provide all required fields for ChatResponse
     mock_service.generate_chat_completion.return_value = ChatResponse(
         content="This is a test response",
         model="gpt-4o",
@@ -29,6 +30,11 @@ def mock_openai_service():
         completion_tokens=5,
         total_tokens=15,
         job_id=str(uuid.uuid4()),
+        thread_id=str(uuid.uuid4()),
+        message_id=str(uuid.uuid4()),
+        agent_response="This is a test response",
+        token_count=15,
+        max_token_count=32,
     )
     return mock_service
 
@@ -61,8 +67,9 @@ class TestChatService:
         """Test processing a chat request."""
         # Create the chat service
         chat_service = ChatService(
-            openai_service=mock_openai_service,
+            chat_service_type="basic",
             chat_history_repository=mock_chat_history_repo,
+            conversation_flow="default",
             config=mock_config,
         )
 
@@ -75,6 +82,23 @@ class TestChatService:
             model="gpt-4o",
             user_id="test_user",
             thread_id=str(uuid.uuid4()),
+            user_prompt="Hello, how are you?",
+            conversation_flow="default"
+        )
+
+        # Patch the mock_openai_service to return a valid ChatResponse
+        mock_openai_service.generate_chat_completion.return_value = ChatResponse(
+            content="This is a test response",
+            model="gpt-4o",
+            prompt_tokens=10,
+            completion_tokens=5,
+            total_tokens=15,
+            job_id=str(uuid.uuid4()),
+            thread_id=request.thread_id,
+            message_id=str(uuid.uuid4()),
+            agent_response="This is a test response",
+            token_count=15,
+            max_token_count=32,
         )
 
         # Process the request
@@ -128,8 +152,9 @@ class TestChatService:
 
         # Create the chat service
         chat_service = ChatService(
-            openai_service=mock_openai_service,
+            chat_service_type="basic",
             chat_history_repository=mock_chat_history_repo,
+            conversation_flow="default",
             config=mock_config,
         )
 
@@ -141,6 +166,24 @@ class TestChatService:
             model="gpt-4o",
             user_id="test_user",
             thread_id="thread_123",
+            user_prompt="And what is the capital of Germany?",
+            conversation_flow="default"
+        )
+
+        # Patch the mock_openai_service to return a valid ChatResponse
+        thread_id = str(uuid.uuid4())
+        mock_openai_service.generate_chat_completion.return_value = ChatResponse(
+            content="This is a test response",
+            model="gpt-4o",
+            prompt_tokens=10,
+            completion_tokens=5,
+            total_tokens=15,
+            job_id=str(uuid.uuid4()),
+            thread_id=thread_id,
+            message_id=str(uuid.uuid4()),
+            agent_response="This is a test response",
+            token_count=15,
+            max_token_count=32,
         )
 
         # Process the request
@@ -175,15 +218,19 @@ class TestChatService:
             completion_tokens=15,
             total_tokens=35,
             job_id=str(uuid.uuid4()),
+            thread_id=str(uuid.uuid4()),
+            message_id=str(uuid.uuid4()),
+            agent_response=None,
+            token_count=35,
+            max_token_count=64,
         )
-        mock_openai_service.generate_chat_completion.return_value = (
-            function_call_response
-        )
+        mock_openai_service.generate_chat_completion.return_value = function_call_response
 
         # Create the chat service
         chat_service = ChatService(
-            openai_service=mock_openai_service,
+            chat_service_type="basic",
             chat_history_repository=mock_chat_history_repo,
+            conversation_flow="default",
             config=mock_config,
         )
 
@@ -212,6 +259,8 @@ class TestChatService:
             thread_id=str(uuid.uuid4()),
             functions=functions,
             function_call="auto",
+            user_prompt="What's the weather in Seattle?",
+            conversation_flow="default"
         )
 
         # Process the request

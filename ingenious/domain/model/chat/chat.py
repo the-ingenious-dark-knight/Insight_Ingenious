@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List, Any, Dict
 
 from pydantic import BaseModel
 
@@ -29,8 +29,18 @@ class IChatResponse(BaseModel):
 
 
 class ChatRequest(IChatRequest):
-    pass
+    messages: Optional[List[Dict[str, Any]]] = None
+    model: Optional[str] = None
+    functions: Optional[List[Dict[str, Any]]] = None
+    function_call: Optional[Any] = None
 
 
 class ChatResponse(IChatResponse):
-    pass
+    content: Optional[Any] = None
+    model: Optional[str] = None
+    prompt_tokens: Optional[int] = None
+    completion_tokens: Optional[int] = None
+    total_tokens: Optional[int] = None
+    job_id: Optional[str] = None
+    tools: Optional[List[Any]] = None
+    function_call: Optional[Any] = None

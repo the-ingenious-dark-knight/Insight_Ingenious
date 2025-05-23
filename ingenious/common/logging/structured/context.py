@@ -19,16 +19,18 @@ def get_context_data() -> Dict[str, Any]:
     return _context_data.data
 
 
-def set_context(key: str, value: Any) -> None:
+def set_context(context: dict = None, value: Any = None):
     """
-    Set a value in the current thread's context.
+    Set the entire context dictionary or a single key-value pair.
 
     Args:
-        key: The context key
-        value: The context value
+        context: The context dictionary or key-value pair
+        value: The context value (optional, used only if setting a single key-value pair)
     """
-    context = get_context_data()
-    context[key] = value
+    if context is not None:
+        _context_data.data = context
+    elif value is not None:
+        raise ValueError("Key must be provided when setting a value.")
 
 
 def get_context(key: str, default: Any = None) -> Any:

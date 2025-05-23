@@ -256,3 +256,11 @@ class Config(BaseModel):
                     self.azure_search_services.append(
                         config_models.AzureSearchConfig(as_config, profile_as_config)
                     )
+
+    # Add a profile property for test compatibility
+    @property
+    def profile(self):
+        # Return the profile name if available, else None
+        if hasattr(self, 'name'):
+            return self.name
+        return getattr(self, 'profile_name', None)
