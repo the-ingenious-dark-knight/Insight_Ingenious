@@ -1,8 +1,9 @@
 """
 Additional chat models.
 """
+
 from enum import Enum
-from typing import Any, Dict, List, Optional, Protocol, Union
+from typing import Any, Dict, List, Optional, Protocol
 
 from pydantic import BaseModel
 
@@ -46,9 +47,7 @@ class IChatLogger(Protocol):
 class IChatProvider(Protocol):
     """Chat provider interface."""
 
-    async def generate_chat_completion(
-        self, messages: List[Any], **kwargs
-    ) -> Any:
+    async def generate_chat_completion(self, messages: List[Any], **kwargs) -> Any:
         """Generate chat completion."""
         ...
 

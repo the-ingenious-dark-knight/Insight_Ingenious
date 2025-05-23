@@ -80,19 +80,15 @@ class LocaldbConfig(BaseModel):
 
 
 class FileStorageContainer(BaseModel):
-    enable: bool = (Field(True, description="Enables or Disables File Storage"),)
-    storage_type: str = (Field("local", description="Type of the File Storage"),)
-    container_name: str = (
-        Field(
-            default="",
-            description="Name of the container. Used for Azure storage. Not used for local storage.",
-        ),
+    enable: bool = Field(True, description="Enables or Disables File Storage")
+    storage_type: str = Field("local", description="Type of the File Storage")
+    container_name: str = Field(
+        default="",
+        description="Name of the container. Used for Azure storage. Not used for local storage.",
     )
-    path: str = (
-        Field(
-            "./",
-            description="Path to the file storage. Used for local storage and Azure storage.",
-        ),
+    path: str = Field(
+        "./",
+        description="Path to the file storage. Used for local storage and Azure storage.",
     )
     add_sub_folders: bool = Field(
         default=True,

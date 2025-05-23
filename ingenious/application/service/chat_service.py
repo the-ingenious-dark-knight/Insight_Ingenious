@@ -59,6 +59,7 @@ class ChatService:  # Define as IChatService at runtime
 
         # Only add openai_service if it's accepted by the service class
         import inspect
+
         if openai_service is not None and hasattr(service_class, "__init__"):
             sig = inspect.signature(service_class.__init__)
             if "openai_service" in sig.parameters:

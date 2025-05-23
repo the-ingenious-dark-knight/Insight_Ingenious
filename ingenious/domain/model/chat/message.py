@@ -17,7 +17,9 @@ class MessageRole(str, Enum):
 class Message(BaseModel):
     id: str
     role: str
-    content: Optional[str] = ""  # Making content optional with default empty string for function calls
+    content: Optional[str] = (
+        ""  # Making content optional with default empty string for function calls
+    )
     thread_id: str
     user_id: Optional[str] = None
     created_at: Optional[str] = None

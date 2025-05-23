@@ -36,13 +36,13 @@ def set_context(context_data: dict = None, **kwargs):
         else:
             # If a key-value pair is provided (old behavior)
             key = context_data
-            if len(kwargs) == 0 or 'value' not in kwargs:
+            if len(kwargs) == 0 or "value" not in kwargs:
                 raise ValueError("Value must be provided when setting a single key")
-            current_context[key] = kwargs.get('value')
+            current_context[key] = kwargs.get("value")
 
     # Add any additional kwargs to the context
     for key, value in kwargs.items():
-        if key != 'value':  # Skip the 'value' if it was used for a single key
+        if key != "value":  # Skip the 'value' if it was used for a single key
             current_context[key] = value
 
 

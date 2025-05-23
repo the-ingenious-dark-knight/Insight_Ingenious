@@ -100,11 +100,14 @@ class DIContainer:
             implementation = self._registry[interface]
             # Get the constructor parameters
             import inspect
+
             constructor_params = inspect.signature(implementation.__init__).parameters
             if len(constructor_params) > 1:  # More than just 'self'
                 # We need to inject dependencies
                 kwargs = {}
-                for param_name, param in list(constructor_params.items())[1:]:  # Skip 'self'
+                for param_name, param in list(constructor_params.items())[
+                    1:
+                ]:  # Skip 'self'
                     if param.annotation != inspect.Parameter.empty:
                         try:
                             # Try to get the dependency from the container

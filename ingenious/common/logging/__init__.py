@@ -169,7 +169,12 @@ def get_logger(name: str) -> logging.Logger:
     Returns:
         The logger instance
     """
-    return logging.getLogger(name)
+    logger = logging.getLogger(name)
+    # Explicitly inherit the level from root logger if not set
+    if not logger.level or logger.level == 0:
+        root_level = logging.getLogger().level
+        logger.setLevel(root_level)
+    return logger
 
 
 # Performance timing decorator

@@ -1,9 +1,6 @@
-import asyncio
-import json
 import logging
 import time
 import uuid
-from typing import Dict, List, Optional, Union
 
 # Import chat models
 from ingenious.domain.model.chat.chat import (
@@ -11,14 +8,6 @@ from ingenious.domain.model.chat.chat import (
     ChatResponse,
 )
 from ingenious.domain.model.chat.message import Message, MessageRole
-from ingenious.domain.model.chat.models import (
-    ChatFunction,
-    ChatFunctionCall,
-    ChatMessage,
-    IChatLogger,
-    IChatProvider,
-    LLMType,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -51,9 +40,7 @@ class BasicChatService:
         """Set up the chat service."""
         pass
 
-    async def process_chat_request(
-        self, chat_request: ChatRequest
-    ) -> ChatResponse:
+    async def process_chat_request(self, chat_request: ChatRequest) -> ChatResponse:
         """Process a chat request.
 
         Args:
@@ -103,7 +90,9 @@ class BasicChatService:
         completion_messages = []
 
         # Add system message if no previous messages or if there's no system message
-        if not previous_messages or not any(msg.role == MessageRole.SYSTEM.value for msg in previous_messages):
+        if not previous_messages or not any(
+            msg.role == MessageRole.SYSTEM.value for msg in previous_messages
+        ):
             await self.chat_history_repository.add_message(system_message)
             completion_messages.append(
                 {"role": system_message.role, "content": system_message.content}
@@ -111,9 +100,7 @@ class BasicChatService:
 
         # Add previous messages
         for msg in previous_messages:
-            completion_messages.append(
-                {"role": msg.role, "content": msg.content}
-            )
+            completion_messages.append({"role": msg.role, "content": msg.content})
 
         # Add the new message and save it to history
         await self.chat_history_repository.add_message(new_message)
@@ -157,7 +144,9 @@ class BasicChatService:
         previous_messages = []
         if thread_id and chat_request.thread_id:
             try:
-                previous_messages = await self.chat_history_repository.get_thread_messages(thread_id)
+                previous_messages = (
+                    await self.chat_history_repository.get_thread_messages(thread_id)
+                )
             except Exception as e:
                 logger.warning(f"Failed to retrieve message history: {e}")
 
@@ -184,9 +173,11 @@ class BasicChatService:
                 # Don't add duplicate messages to history
                 duplicate = False
                 for prev_msg in previous_messages:
-                    if (prev_msg.role == message.role and
-                        prev_msg.content == message.content and
-                        prev_msg.thread_id == message.thread_id):
+                    if (
+                        prev_msg.role == message.role
+                        and prev_msg.content == message.content
+                        and prev_msg.thread_id == message.thread_id
+                    ):
                         duplicate = True
                         break
 
@@ -203,10 +194,7 @@ class BasicChatService:
         # If we have existing messages from history and no explicit messages in request
         elif previous_messages:
             for msg in previous_messages:
-                completion_messages.append({
-                    "role": msg.role,
-                    "content": msg.content
-                })
+                completion_messages.append({"role": msg.role, "content": msg.content})
 
         # Check if there's an openai_service attached to the repository (for testing)
         openai_service = getattr(self.chat_history_repository, "openai_service", None)
@@ -217,10 +205,7 @@ class BasicChatService:
                 # Create a new request with all history messages plus the new message
                 history_messages = []
                 for msg in previous_messages:
-                    history_messages.append({
-                        "role": msg.role,
-                        "content": msg.content
-                    })
+                    history_messages.append({"role": msg.role, "content": msg.content})
 
                 # Add the new message
                 if chat_request.messages:
