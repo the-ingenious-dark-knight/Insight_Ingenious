@@ -1,10 +1,8 @@
-from enum import Enum
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
 # Import directly to avoid circular imports
-from ingenious.domain.model import config as config_models
 from ingenious.domain.model.config import config_ns
 from ingenious.domain.model.config import profile as profile_models
 
@@ -29,8 +27,11 @@ class ChatHistoryConfig(config_ns.ChatHistoryConfig):
 
 
 class ModelConfig(config_ns.ModelConfig):
-    api_key: str
-    base_url: str
+    api_key: str = ""
+    base_url: str = ""
+
+    class Config:
+        arbitrary_types_allowed = True
 
     def __init__(
         self, config: config_ns.ModelConfig, profile: profile_models.ModelConfig
@@ -39,9 +40,9 @@ class ModelConfig(config_ns.ModelConfig):
             model=config.model,
             api_type=config.api_type,
             api_version=config.api_version,
-            base_url=profile.base_url,
-            api_key=profile.api_key,
         )
+        self.base_url = profile.base_url
+        self.api_key = profile.api_key
 
 
 class ChainlitConfig(config_ns.ChainlitConfig):
@@ -54,7 +55,8 @@ class ChainlitConfig(config_ns.ChainlitConfig):
         config: config_ns.ChainlitConfig,
         profile: profile_models.ChainlitConfig,
     ):
-        super().__init__(enable=config.enable, authentication=profile.authentication)
+        super().__init__(enable=config.enable)
+        self.authentication = profile.authentication
 
 
 class ChatServiceConfig(config_ns.ChatServiceConfig):
@@ -94,9 +96,10 @@ class AzureSearchConfig(config_ns.AzureSearchConfig):
         config: config_ns.AzureSearchConfig,
         profile: profile_models.AzureSearchConfig,
     ):
-        super().__init__(
-            service=config.service, endpoint=config.endpoint, key=profile.key
-        )
+        # Initialize the parent class with appropriate fields
+        super().__init__(service=config.service, endpoint=config.endpoint)
+        # Set key from profile
+        self.key = profile.key
 
 
 class AzureSqlConfig(config_ns.AzureSqlConfig):
@@ -126,7 +129,9 @@ class ReceiverConfig(profile_models.ReceiverConfig):
 
 
 class WebConfig(config_ns.WebConfig):
-    authentication: profile_models.WebAuthConfig = {}
+    authentication: profile_models.WebAuthConfig = Field(
+        default_factory=profile_models.WebAuthConfig
+    )
 
     def __init__(self, config: config_ns.WebConfig, profile: profile_models.WebConfig):
         super().__init__(
@@ -134,9 +139,10 @@ class WebConfig(config_ns.WebConfig):
             port=getattr(config, "port", 8000),
             type=getattr(config, "type", "fastapi"),
             asynchronous=getattr(config, "asynchronous", False),
-            authentication=getattr(
-                profile, "authentication", profile_models.WebAuthConfig()
-            ),
+        )
+        # Explicitly set authentication from profile
+        self.authentication = getattr(
+            profile, "authentication", profile_models.WebAuthConfig()
         )
         # Ensure port is always set for compatibility with tests
         self.port = getattr(config, "port", 8000)
@@ -151,11 +157,8 @@ class LocaldbConfig(config_ns.LocaldbConfig):
         )
 
 
-class AuthenticationMethod(str, Enum):
-    MSI = "msi"
-    CLIENT_ID_AND_SECRET = "client_id_and_secret"
-    DEFAULT_CREDENTIAL = "default_credential"
-    TOKEN = "token"
+# Use the same enum type from profile_models to ensure compatibility
+AuthenticationMethod = profile_models.AuthenticationMethod
 
 
 class FileStorageContainer(config_ns.FileStorageContainer):
@@ -187,21 +190,49 @@ class FileStorageContainer(config_ns.FileStorageContainer):
 
 class FileStorage(config_ns.FileStorage):
     revisions: FileStorageContainer = Field(
-        default_factory=FileStorageContainer,
+        default_factory=lambda: FileStorageContainer(
+            config=config_ns.FileStorageContainer(
+                enable=True,
+                storage_type="local",
+                container_name="",
+                path="./",
+                add_sub_folders=True,
+            ),
+            profile=profile_models.FileStorageContainer(
+                url="",
+                client_id="",
+                token="",
+                authentication_method=AuthenticationMethod.DEFAULT_CREDENTIAL,
+            ),
+        ),
         description="File Storage configuration for revisions",
     )
     data: FileStorageContainer = Field(
-        default_factory=FileStorageContainer,
+        default_factory=lambda: FileStorageContainer(
+            config=config_ns.FileStorageContainer(
+                enable=True,
+                storage_type="local",
+                container_name="",
+                path="./",
+                add_sub_folders=True,
+            ),
+            profile=profile_models.FileStorageContainer(
+                url="",
+                client_id="",
+                token="",
+                authentication_method=AuthenticationMethod.DEFAULT_CREDENTIAL,
+            ),
+        ),
         description="File Storage configuration for data",
     )
 
     def __init__(
         self, config: config_ns.FileStorage, profile: profile_models.FileStorage
     ):
-        super().__init__(
-            revisions=FileStorageContainer(config.revisions, profile.revisions),
-            data=FileStorageContainer(config.data, profile.data),
-        )
+        super().__init__()  # Initialize the parent without arguments
+        # Then set the properties explicitly
+        self.revisions = FileStorageContainer(config.revisions, profile.revisions)
+        self.data = FileStorageContainer(config.data, profile.data)
 
 
 class Config(BaseModel):
@@ -210,29 +241,34 @@ class Config(BaseModel):
     """
 
     chat_history: ChatHistoryConfig
-    models: List[ModelConfig]
+    models: List[ModelConfig] = []
     logging: LoggingConfig
     tool_service: ToolServiceConfig
     chat_service: ChatServiceConfig
     chainlit_configuration: ChainlitConfig
-    azure_search_services: List[AzureSearchConfig]
+    azure_search_services: List[AzureSearchConfig] = []
     web_configuration: WebConfig
     receiver_configuration: ReceiverConfig
     local_sql_db: LocaldbConfig
     azure_sql_services: AzureSqlConfig
     file_storage: FileStorage
+    profile_name: Optional[str] = None  # Store the profile name
 
     def __init__(self, config: config_ns.Config, profile: profile_models.Profile):
+        # Store the profile name for compatibility
+        profile_name = getattr(profile, "name", None)
+
+        # Initialize with empty lists for collections
         super().__init__(
             chat_history=ChatHistoryConfig(config.chat_history, profile.chat_history),
-            models=[],
+            models=[],  # Initialize as empty, will be filled below
             logging=LoggingConfig(config.logging, profile.logging),
             tool_service=ToolServiceConfig(config.tool_service, profile.tool_service),
             chat_service=ChatServiceConfig(config.chat_service, profile.chat_service),
             chainlit_configuration=ChainlitConfig(
                 config.chainlit_configuration, profile.chainlit_configuration
             ),
-            azure_search_services=[],
+            azure_search_services=[],  # Initialize as empty, will be filled below
             web_configuration=WebConfig(
                 config.web_configuration, profile.web_configuration
             ),
@@ -242,29 +278,27 @@ class Config(BaseModel):
                 config.azure_sql_services, profile.azure_sql_services
             ),
             file_storage=FileStorage(config.file_storage, profile.file_storage),
+            profile_name=profile_name,
         )
 
-        models: List[config_models.ModelConfig] = []
+        # Fill the models list with type-compatible objects
         for config_model in config.models:
             for profile_model in profile.models:
                 if config_model.model == profile_model.model:
-                    models.append(
-                        config_models.ModelConfig(config_model, profile_model)
-                    )
-        self.models = models
+                    self.models.append(ModelConfig(config_model, profile_model))
 
-        self.azure_search_services = []
+        # Fill the azure search services list with type-compatible objects
         for as_config in config.azure_search_services:
             for profile_as_config in profile.azure_search_services:
                 if as_config.service == profile_as_config.service:
                     self.azure_search_services.append(
-                        config_models.AzureSearchConfig(as_config, profile_as_config)
+                        AzureSearchConfig(as_config, profile_as_config)
                     )
 
     # Add a profile property for test compatibility
     @property
-    def profile(self):
+    def profile(self) -> Optional[str]:
         # Return the profile name if available, else None
-        if hasattr(self, "name"):
-            return self.name
-        return getattr(self, "profile_name", None)
+        if hasattr(self, "profile_name") and self.profile_name is not None:
+            return self.profile_name
+        return None

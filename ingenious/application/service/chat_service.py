@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 
 from ingenious.common.utils.namespace_utils import import_class_with_fallback
 
@@ -9,6 +9,15 @@ if TYPE_CHECKING:
     )
 from ingenious.domain.model.chat import ChatRequest, ChatResponse
 from ingenious.domain.model.config import Config
+
+
+@runtime_checkable
+class ChatServiceProtocol(Protocol):
+    """Protocol defining the interface for chat service implementations."""
+
+    async def process_chat_request(self, chat_request: ChatRequest) -> ChatResponse: ...
+
+    async def get_chat_response(self, chat_request: ChatRequest) -> ChatResponse: ...
 
 
 class ChatService:  # Define as IChatService at runtime
@@ -28,7 +37,7 @@ class ChatService:  # Define as IChatService at runtime
             module_name = (
                 f"application.service.chat.{chat_service_type.lower()}.service"
             )
-            service_class = import_class_with_fallback(module_name, class_name)
+            service_class_type = import_class_with_fallback(module_name, class_name)
 
         except ImportError as e:
             raise ImportError(
@@ -60,20 +69,30 @@ class ChatService:  # Define as IChatService at runtime
         # Only add openai_service if it's accepted by the service class
         import inspect
 
-        if openai_service is not None and hasattr(service_class, "__init__"):
-            sig = inspect.signature(service_class.__init__)
+        if openai_service is not None and hasattr(service_class_type, "__init__"):
+            sig = inspect.signature(service_class_type.__init__)
             if "openai_service" in sig.parameters:
                 init_kwargs["openai_service"] = openai_service
 
-        self.service_class = service_class(**init_kwargs)
+        self.service_class: Any = service_class_type(**init_kwargs)
 
     async def get_chat_response(self, chat_request: ChatRequest) -> ChatResponse:
         if not chat_request.conversation_flow:
             raise ValueError(f"conversation_flow not set {chat_request}")
-        return await self.service_class.get_chat_response(chat_request)
+        if hasattr(self.service_class, "get_chat_response"):
+            return await self.service_class.get_chat_response(chat_request)
+        else:
+            raise AttributeError(
+                f"Service class {type(self.service_class).__name__} does not implement get_chat_response method"
+            )
 
     async def process_chat_request(self, chat_request: ChatRequest) -> ChatResponse:
         # Forward to the underlying service_class if it exists, else fallback to get_chat_response
         if hasattr(self.service_class, "process_chat_request"):
             return await self.service_class.process_chat_request(chat_request)
-        return await self.get_chat_response(chat_request)
+        elif hasattr(self.service_class, "get_chat_response"):
+            return await self.get_chat_response(chat_request)
+        else:
+            raise AttributeError(
+                f"Service class {type(self.service_class).__name__} does not implement process_chat_request or get_chat_response methods"
+            )

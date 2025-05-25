@@ -21,17 +21,29 @@ class FileStorage:
         """Read a file from storage."""
         # Implement a basic file read functionality
         try:
-            with open(f"{file_path}/{file_name}", "r") as f:
+            full_path = f"{file_path}/{file_name}"
+            with open(full_path, "r") as f:
                 return f.read()
         except Exception as e:
             print(f"Error reading file: {e}")
             return None
 
-    async def get_prompt_template_path(self, revision_id):
+    def get_prompt_template_path(self, revision_id):
         """Get the path to prompt templates."""
         return f"templates/prompts/{revision_id}"
 
-    async def list_files(self, folder_path):
+    def get_functional_tests_path(self, revision_id):
+        """Get the path to functional tests."""
+        return f"functional_test_outputs/{revision_id}"
+
+    def check_if_file_exists(self, file_name, file_path):
+        """Check if a file exists."""
+        import os
+
+        full_path = f"{file_path}/{file_name}"
+        return os.path.exists(full_path)
+
+    def list_files(self, folder_path):
         """List files in a folder."""
         import os
 
@@ -42,7 +54,7 @@ class FileStorage:
         except Exception:
             return []
 
-    async def write_file(self, content, file_name, file_path):
+    def write_file(self, content, file_name, file_path):
         """Write a file to storage."""
         import os
 
@@ -140,13 +152,13 @@ class UtilityService:
         source_prompt_folder = get_path_from_namespace_with_fallback(
             "templates/prompts"
         )
-        target_prompt_folder = await self.fs.get_prompt_template_path(revision_id)
+        target_prompt_folder = self.fs.get_prompt_template_path(revision_id)
         no_existing_prompts = False
 
         if not self.prompt_template_folder == target_prompt_folder:
             self.prompt_template_folder = target_prompt_folder
             # Revision has changed so we need to recheck the prompt folder
-            existing_prompts = await self.fs.list_files(target_prompt_folder)
+            existing_prompts = self.fs.list_files(target_prompt_folder)
             if len(existing_prompts) == 0:
                 no_existing_prompts = True
 
@@ -172,9 +184,7 @@ class UtilityService:
                         # read the file and write it to the local_files
                         with open(f"{source_prompt_folder}/{file}", "r") as f:
                             content = f.read()
-                            await self.fs.write_file(
-                                content, file, target_prompt_folder
-                            )
+                            self.fs.write_file(content, file, target_prompt_folder)
             self.prompt_template_folder = target_prompt_folder
 
         return self.prompt_template_folder
@@ -186,11 +196,11 @@ class UtilityService:
             revision_id = get_selected_revision_direct_call()
 
         target_folder = f"functional_test_outputs/{revision_id}"
-        no_existing_events = []
+        no_existing_events = False
         if not self.functional_tests_folder == target_folder:
             self.functional_tests_folder = target_folder
             # Revision has changed so we need to recheck the prompt folder
-            existing_events = await self.fs.list_files(target_folder)
+            existing_events = self.fs.list_files(target_folder)
             if len(existing_events) == 0:
                 no_existing_events = True
 
@@ -212,18 +222,16 @@ class UtilityService:
                 print("No data found in the revision prompts folder")
                 print("Copying data from the sample_data folder in source")
                 for file in source_files_filtered:
-                    if ".md" in file or ".yml" or ".json" in file:
+                    if ".md" in file or ".yml" in file or ".json" in file:
                         # read the file and write it to the local_files
                         with open(f"{source_folder_code}/{file}", "r") as f:
                             content = f.read()
                             if file == "events.yml":
                                 # write the event file to the same location as the prompts
-                                await self.fs.write_file(content, file, target_folder)
+                                self.fs.write_file(content, file, target_folder)
                             else:
                                 # write any data files to the data folder
-                                await self.fs_data.write_file(
-                                    content, file, target_folder
-                                )
+                                self.fs_data.write_file(content, file, target_folder)
             self.functional_tests_folder = target_folder
 
         return self.functional_tests_folder
@@ -234,27 +242,27 @@ class UtilityService:
 
         source_folder = get_path_from_namespace_with_fallback("sample_data")
         target_folder = f"functional_test_outputs/{revision_id}"
-        no_existing_data = []
+        no_existing_data = False
 
         if not self.data_folder == target_folder:
             self.data_folder = target_folder
             # Revision has changed so we need to recheck the prompt folder
-            existing_data = await self.fs.list_files(target_folder)
+            existing_data = self.fs.list_files(target_folder)
             if len(existing_data) == 0:
                 no_existing_data = True
 
-        if self.data_folder is None or force_copy_from_source or no_existing_data == 0:
+        if self.data_folder is None or force_copy_from_source or no_existing_data:
             source_folder = get_path_from_namespace_with_fallback("sample_data")
             target_folder = f"functional_test_outputs/{revision_id}"
-            if (
-                await self.fs_data.list_files(target_folder) is None
-            ) or force_copy_from_source:
+            data_files = self.fs_data.list_files(target_folder)
+
+            if data_files is None or len(data_files) == 0 or force_copy_from_source:
                 for file in os.listdir(source_folder):
                     if ".json" in file:
                         # read the file and write it to the local_files
                         with open(f"{source_folder}/{file}", "r") as f:
                             content = f.read()
-                            await self.fs_data.write_file(content, file, target_folder)
+                            self.fs_data.write_file(content, file, target_folder)
             self.data_folder = target_folder
 
         return self.data_folder

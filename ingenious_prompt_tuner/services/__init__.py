@@ -1,11 +1,34 @@
 """Service for managing file operations and prompt templates."""
 
 import os
-from typing import List
+from typing import List, Optional
 
-from ingenious.files.files_repository import FileStorage
-from ingenious.models.test_data import Events
-from ingenious.utils.namespace_utils import get_path_from_namespace_with_fallback
+import yaml
+
+# We'll define our own Events class below instead of importing a placeholder
+# from ingenious.domain.model.common.test_data import Events
+from ingenious.common.utils.namespace_utils import get_path_from_namespace_with_fallback
+
+# Fixed imports to use the correct paths
+from ingenious_prompt_tuner.utilities import FileStorage
+
+
+# Create a custom Events class that has the needed functionality
+class Events:
+    """A simple class to handle events data."""
+
+    def __init__(self, fs: Optional[FileStorage] = None):
+        """Initialize with optional file storage."""
+        self.fs = fs
+        self.events = []
+
+    def load_events_from_file(self, file_path: str, file_name: str = "events.yml"):
+        """Load events from a YAML file."""
+        if self.fs:
+            content = self.fs.read_file(file_name=file_name, file_path=file_path)
+            if content:
+                self.events = yaml.safe_load(content) or []
+        return self.events
 
 
 class FileService:
@@ -21,44 +44,43 @@ class FileService:
         self.functional_tests_folder = None
         self.data_folder = None
 
-    async def read_file(self, file_name: str, file_path: str) -> str:
+    def read_file(self, file_name: str, file_path: str) -> str:
         """Read a file's contents."""
-        return await self.fs.read_file(file_name=file_name, file_path=file_path)
+        content = self.fs.read_file(file_name=file_name, file_path=file_path)
+        return content or ""  # Return empty string if None
 
-    async def write_file(self, file_name: str, file_path: str, content: str) -> bool:
+    def write_file(self, file_name: str, file_path: str, content: str) -> bool:
         """Write content to a file."""
-        return await self.fs.write_file(
-            file_name=file_name, file_path=file_path, content=content
+        return self.fs.write_file(
+            content=content, file_name=file_name, file_path=file_path
         )
 
-    async def check_if_file_exists(self, file_name: str, file_path: str) -> bool:
+    def check_if_file_exists(self, file_name: str, file_path: str) -> bool:
         """Check if a file exists."""
-        return await self.fs.check_if_file_exists(
-            file_name=file_name, file_path=file_path
-        )
+        return self.fs.check_if_file_exists(file_name=file_name, file_path=file_path)
 
-    async def list_files(self, file_path: str) -> List[str]:
+    def list_files(self, file_path: str) -> List[str]:
         """List files in a directory."""
-        return await self.fs.list_files(file_path)
+        return self.fs.list_files(file_path)
 
-    async def get_prompt_template_path(self, revision_id: str) -> str:
+    def get_prompt_template_path(self, revision_id: str) -> str:
         """Get the prompt template path for a revision."""
-        return await self.fs.get_prompt_template_path(revision_id)
+        return self.fs.get_prompt_template_path(revision_id)
 
-    async def get_functional_tests_path(self, revision_id: str) -> str:
+    def get_functional_tests_path(self, revision_id: str) -> str:
         """Get the functional tests path for a revision."""
-        path = await self.fs.get_functional_tests_path(revision_id)
+        path = self.fs.get_functional_tests_path(revision_id)
         self.functional_tests_folder = path
         return path
 
-    async def ensure_prompt_templates(
+    def ensure_prompt_templates(
         self, revision_id: str, force_copy: bool = False
     ) -> str:
         """Ensure prompt templates exist for a revision, copying if needed."""
         source_prompt_folder = get_path_from_namespace_with_fallback(
             "templates/prompts"
         )
-        target_prompt_folder = await self.fs.get_prompt_template_path(revision_id)
+        target_prompt_folder = self.fs.get_prompt_template_path(revision_id)
 
         # Check if folders changed or need initialization
         folder_changed = self.prompt_template_folder != target_prompt_folder
@@ -66,7 +88,7 @@ class FileService:
             self.prompt_template_folder = target_prompt_folder
 
         # Check if prompts exist
-        existing_prompts = await self.fs.list_files(target_prompt_folder)
+        existing_prompts = self.fs.list_files(target_prompt_folder)
         no_existing_prompts = len(existing_prompts) == 0
 
         # Copy prompts if needed
@@ -76,11 +98,11 @@ class FileService:
                 if ".jinja" in file:
                     with open(f"{source_prompt_folder}/{file}", "r") as f:
                         content = f.read()
-                        await self.fs.write_file(file, target_prompt_folder, content)
+                        self.fs.write_file(content, file, target_prompt_folder)
 
         return target_prompt_folder
 
-    async def ensure_test_data(self, revision_id: str, force_copy: bool = False) -> str:
+    def ensure_test_data(self, revision_id: str, force_copy: bool = False) -> str:
         """Ensure test data exists for a revision, copying if needed."""
         target_folder = f"functional_test_outputs/{revision_id}"
 
@@ -90,7 +112,7 @@ class FileService:
             self.functional_tests_folder = target_folder
 
         # Check if data exists
-        existing_files = await self.fs.list_files(target_folder)
+        existing_files = self.fs.list_files(target_folder)
         no_existing_files = len(existing_files) == 0
 
         # Copy data if needed
@@ -107,16 +129,14 @@ class FileService:
 
                         if file == "events.yml":
                             # Event file goes to test folder
-                            await self.fs.write_file(file, target_folder, content)
+                            self.fs.write_file(content, file, target_folder)
                         else:
                             # Data files go to data folder
-                            await self.fs_data.write_file(file, target_folder, content)
+                            self.fs_data.write_file(content, file, target_folder)
 
         return target_folder
 
-    async def get_events(self, revision_id: str) -> Events:
+    def get_events(self, revision_id: str) -> Events:
         """Get events for a revision."""
-        await self.events.load_events_from_file(
-            f"functional_test_outputs/{revision_id}"
-        )
+        self.events.load_events_from_file(f"functional_test_outputs/{revision_id}")
         return self.events

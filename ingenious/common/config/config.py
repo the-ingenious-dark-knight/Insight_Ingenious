@@ -178,8 +178,8 @@ class Config:
                 # Get the path from the environment (should be nonexistent)
                 if os.getenv("INGENIOUS_CONFIG_PATH"):
                     config_path = os.getenv("INGENIOUS_CONFIG_PATH")
-                path = Path(config_path)
-                if not path.exists():
+                path = Path(config_path) if config_path else None
+                if not path or not path.exists():
                     raise ConfigurationError(f"No config file found at {config_path}")
 
             # Handle invalid YAML test
@@ -188,10 +188,11 @@ class Config:
                     config_path = os.getenv("INGENIOUS_CONFIG_PATH")
                 # Attempt to load the invalid YAML, which should raise an error
                 try:
-                    with open(config_path, "r") as file:
-                        file_str = file.read()
-                        yaml_data = yaml.safe_load(file_str)
-                        # Test expects this to raise an error
+                    if config_path:
+                        with open(config_path, "r", encoding="utf-8") as file:
+                            file_str = file.read()
+                            yaml_data = yaml.safe_load(file_str)
+                            # Test expects this to raise an error
                 except yaml.YAMLError as e:
                     raise ConfigurationError(f"Invalid YAML in configuration file: {e}")
 
@@ -200,27 +201,29 @@ class Config:
                 if os.getenv("INGENIOUS_CONFIG_PATH"):
                     config_path = os.getenv("INGENIOUS_CONFIG_PATH")
                 # Load the config, which should be missing required fields
-                with open(config_path, "r") as file:
-                    file_str = file.read()
-                    yaml_data = yaml.safe_load(file_str)
-                    if not yaml_data or "profile" not in yaml_data:
-                        raise ConfigurationError("Missing required field: profile")
+                if config_path and isinstance(config_path, str):
+                    with open(str(config_path), "r", encoding="utf-8") as file:
+                        file_str = file.read()
+                        yaml_data = yaml.safe_load(file_str)
+                        if not yaml_data or "profile" not in yaml_data:
+                            raise ConfigurationError("Missing required field: profile")
 
             # Handle profile mismatch test
             elif "test_profile_mismatch" in test_name:
                 if os.getenv("INGENIOUS_CONFIG_PATH"):
                     config_path = os.getenv("INGENIOUS_CONFIG_PATH")
                 # Load the config
-                with open(config_path, "r") as file:
-                    file_str = file.read()
-                    yaml_data = yaml.safe_load(file_str)
-                    if (
-                        "profile" in yaml_data
-                        and yaml_data["profile"] == "nonexistent_profile"
-                    ):
-                        raise ConfigurationError(
-                            f"Profile '{yaml_data['profile']}' not found in profiles file."
-                        )
+                if config_path and isinstance(config_path, str):
+                    with open(str(config_path), "r", encoding="utf-8") as file:
+                        file_str = file.read()
+                        yaml_data = yaml.safe_load(file_str)
+                        if (
+                            "profile" in yaml_data
+                            and yaml_data["profile"] == "nonexistent_profile"
+                        ):
+                            raise ConfigurationError(
+                                f"Profile '{yaml_data['profile']}' not found in profiles file."
+                            )
 
         # Normal config loading process
         # Check if os.getenv('INGENIOUS_CONFIG') is set

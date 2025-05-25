@@ -39,11 +39,11 @@ def log_levels():
 @app.command()
 def run_rest_api_server(
     project_dir: Annotated[
-        str,
+        Optional[str],
         typer.Argument(help="The path to the config file. "),
     ] = None,
     profile_dir: Annotated[
-        str,
+        Optional[str],
         typer.Argument(
             help="The path to the profile file. If left blank it will use '$HOME/.ingenious/profiles.yml'"
         ),
@@ -73,7 +73,8 @@ def run_rest_api_server(
     if profile_dir is None:
         # get home directory
         home_dir = os.path.expanduser("~")
-        profile_dir = Path(home_dir) / Path(".ingenious") / Path("profiles.yml")
+        profile_path = Path(home_dir) / Path(".ingenious") / Path("profiles.yml")
+        profile_dir = str(profile_path)
 
     console.print(f"Profile path: {profile_dir}", style="info")
     os.environ["INGENIOUS_PROFILE_PATH"] = str(profile_dir).replace("\\", "/")
@@ -119,8 +120,8 @@ def run_rest_api_server(
     # Run the server
     uvicorn.run(
         app,
-        host=config.web_configuration.ip_address,
-        port=config.web_configuration.port,
+        host=host,
+        port=port,
     )
 
 
@@ -148,6 +149,11 @@ def run_test_batch(
     executor = TestBatchExecutor(console=console)
 
     # Run the tests
+    if log_level is None:
+        log_level = "WARNING"
+    if run_args is None:
+        run_args = ""
+
     asyncio.run(executor.run_test_batch(log_level=log_level, run_args=run_args))
 
 
