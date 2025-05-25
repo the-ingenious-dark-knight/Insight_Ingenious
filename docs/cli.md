@@ -4,7 +4,7 @@ This document provides a comprehensive reference for the Insight Ingenious Comma
 
 ## Overview
 
-The Insight Ingenious CLI (`ingen_cli`) is a powerful tool that allows you to:
+The Insight Ingenious CLI (`ingen`) is a powerful tool that allows you to:
 
 - Initialize new projects
 - Run the REST API server
@@ -15,13 +15,13 @@ The Insight Ingenious CLI (`ingen_cli`) is a powerful tool that allows you to:
 ## Basic Usage
 
 ```bash
-ingen_cli [COMMAND] [OPTIONS]
+ingen [COMMAND] [OPTIONS]
 ```
 
 Use the `--help` option to get information about available commands:
 
 ```bash
-ingen_cli --help
+ingen --help
 ```
 
 ## Commands
@@ -31,7 +31,7 @@ ingen_cli --help
 Starts the REST API server.
 
 ```bash
-ingen_cli run-rest-api-server [OPTIONS]
+ingen run-rest-api-server [OPTIONS]
 ```
 
 **Options:**
@@ -42,7 +42,7 @@ ingen_cli run-rest-api-server [OPTIONS]
 
 **Example:**
 ```bash
-ingen_cli run-rest-api-server --host 0.0.0.0 --port 8000
+ingen run-rest-api-server --host 0.0.0.0 --port 8000
 ```
 
 ### `run-test-batch`
@@ -50,7 +50,7 @@ ingen_cli run-rest-api-server --host 0.0.0.0 --port 8000
 Runs the test batch for the project.
 
 ```bash
-ingen_cli run-test-batch [OPTIONS]
+ingen run-test-batch [OPTIONS]
 ```
 
 **Options:**
@@ -61,7 +61,7 @@ ingen_cli run-test-batch [OPTIONS]
 
 **Example:**
 ```bash
-ingen_cli run-test-batch --log-level INFO --run-args='--test_name=TestName --test_type=TestType'
+ingen run-test-batch --log-level INFO --run-args='--test_name=TestName --test_type=TestType'
 ```
 
 ### `initialize-new-project`
@@ -69,7 +69,7 @@ ingen_cli run-test-batch --log-level INFO --run-args='--test_name=TestName --tes
 Generates template folders for a new project using the Ingenious framework.
 
 ```bash
-ingen_cli initialize-new-project
+ingen initialize-new-project
 ```
 
 This command creates the following:
@@ -83,7 +83,7 @@ This command creates the following:
 Runs the prompt tuner web application.
 
 ```bash
-ingen_cli run-prompt-tuner
+ingen run-prompt-tuner
 ```
 
 This starts a Flask application for tuning prompts, accessible at `http://0.0.0.0:80` by default.
@@ -114,28 +114,28 @@ uv venv
 uv pip install -e .
 
 # Initialize a new project
-ingen_cli initialize-new-project
+ingen initialize-new-project
 
 # Edit configuration files
 # - config.yml in the current directory
 # - ~/.ingenious/profiles.yml
 
 # Run tests to verify setup
-ingen_cli run-test-batch
+ingen run-test-batch
 ```
 
 ### Starting the API Server
 
 ```bash
 # Start the API server
-ingen_cli run-rest-api-server --host 127.0.0.1 --port 8000
+ingen run-rest-api-server --host 127.0.0.1 --port 8000
 ```
 
 ### Tuning Prompts
 
 ```bash
 # Start the prompt tuner
-ingen_cli run-prompt-tuner
+ingen run-prompt-tuner
 ```
 
 Then access the prompt tuner at `http://0.0.0.0:80` in your browser.
@@ -147,7 +147,7 @@ Then access the prompt tuner at `http://0.0.0.0:80` in your browser.
 For verbose output, use the `--log-level` option:
 
 ```bash
-ingen_cli run-test-batch --log-level DEBUG
+ingen run-test-batch --log-level DEBUG
 ```
 
 ### Continuous Integration
@@ -157,7 +157,7 @@ In CI environments, you can use the CLI non-interactively:
 ```bash
 export INGENIOUS_PROJECT_PATH=/path/to/config.yml
 export INGENIOUS_PROFILE_PATH=/path/to/profiles.yml
-ingen_cli run-test-batch --log-level INFO
+ingen run-test-batch --log-level INFO
 ```
 
 ## Error Handling

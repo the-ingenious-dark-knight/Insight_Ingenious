@@ -46,7 +46,7 @@ web_configuration:
 
 # Database configuration
 database:
-  type: "sqlite"  # Database type: sqlite, duckdb, cosmos
+  type: "sqlite"  # Database type: sqlite, cosmos
   connection_string: "conversations.db"  # Connection string or file path
   auto_create: true  # Automatically create the database
 
@@ -151,7 +151,7 @@ Configure different database backends:
 
 ```yaml
 database:
-  type: "sqlite"  # Or "duckdb", "cosmos"
+  type: "sqlite"  # Or "cosmos"
   connection_string: "conversations.db"
   auto_create: true
   pool_size: 5

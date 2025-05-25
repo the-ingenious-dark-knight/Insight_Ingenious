@@ -57,7 +57,7 @@ Before contributing, ensure you have:
    ```
 5. Initialize the project:
    ```bash
-   ingen_cli initialize-new-project
+   ingen initialize-new-project
    ```
 
 ## Development Environment
@@ -146,7 +146,7 @@ Always create new branches from `develop`.
 Run all tests to ensure your changes don't break existing functionality:
 
 ```bash
-ingen_cli run-test-batch
+ingen run-test-batch
 ```
 
 When adding new features, include appropriate tests. See [Testing Documentation](./docs/testing.md) for more details.

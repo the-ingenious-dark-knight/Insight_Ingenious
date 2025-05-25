@@ -25,12 +25,12 @@ This quickstart guide will help you get up and running with Insight Ingenious in
 
 4. **Initialize a new project**:
    ```bash
-   ingen_cli initialize-new-project
+   ingen initialize-new-project
    ```
 
 5. **Verify installation**:
    ```bash
-   ingen_cli run-test-batch
+   ingen run-test-batch
    ```
 
    This command will run the test suite to verify that everything is working correctly.
@@ -51,7 +51,7 @@ profiles:
 ### 2. Start the API Server
 
 ```bash
-ingen_cli run-rest-api-server --host 127.0.0.1 --port 8000
+ingen run-rest-api-server --host 127.0.0.1 --port 8000
 ```
 
 ### 3. Send a Test Request

@@ -9,7 +9,7 @@ A powerful framework for building, managing, and deploying multi-agent AI conver
 
 - **Multi-Agent Orchestration**: Create and manage conversations between multiple AI agents
 - **Extensible Architecture**: Easily extend with custom agents, templates, and APIs
-- **Database Integration**: Store conversations in SQLite, DuckDB, or Azure Cosmos DB
+- **Database Integration**: Store conversations in SQLite or Azure Cosmos DB
 - **Modern Package Management**: Built with [uv](https://docs.astral.sh/uv/) for fast dependency management
 - **Web Interfaces**: Access via REST API, ChainLit UI, or Prompt Tuner
 - **Comprehensive Documentation**: Detailed guides and references
@@ -31,7 +31,7 @@ A powerful framework for building, managing, and deploying multi-agent AI conver
 
 3. **Initialize a new project**:
    ```bash
-   ingen_cli initialize-new-project
+   ingen initialize-new-project
    ```
 
 4. **Configure API keys** in `~/.ingenious/profiles.yml`:
@@ -44,7 +44,7 @@ A powerful framework for building, managing, and deploying multi-agent AI conver
 
 5. **Start the API server**:
    ```bash
-   ingen_cli run-rest-api-server --host 127.0.0.1 --port 8000
+   ingen run-rest-api-server --host 127.0.0.1 --port 8000
    ```
 
 6. **Access the interfaces**:

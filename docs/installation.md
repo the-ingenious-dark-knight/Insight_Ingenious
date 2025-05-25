@@ -6,7 +6,7 @@ This guide provides detailed instructions for installing and setting up Insight 
 
 Before installing Insight Ingenious, ensure you have the following prerequisites:
 
-- Python 3.13 or higher
+- Python 3.13 or higher (as specified in pyproject.toml)
 - [uv](https://docs.astral.sh/uv/) package manager (recommended)
 - Git (for cloning the repository)
 - [pre-commit](https://pre-commit.com/) (for development, code linting, and formatting)
@@ -34,12 +34,12 @@ Before installing Insight Ingenious, ensure you have the following prerequisites
 
 4. **Initialize a new project**:
    ```bash
-   ingen_cli initialize-new-project
+   ingen initialize-new-project
    ```
 
 5. **Verify installation**:
    ```bash
-   ingen_cli run-test-batch
+   ingen run-test-batch
    ```
 
    This command will run the test suite to verify that everything is working correctly.
@@ -71,7 +71,7 @@ Before installing Insight Ingenious, ensure you have the following prerequisites
 
 5. **Initialize a new project**:
    ```bash
-   ingen_cli initialize-new-project
+   ingen initialize-new-project
    ```
 
 ## Docker Installation
@@ -146,7 +146,7 @@ For developers who want to contribute to the project:
 
 4. **Initialize a new project**:
    ```bash
-   ingen_cli initialize-new-project
+   ingen initialize-new-project
    ```
 
 ## Troubleshooting

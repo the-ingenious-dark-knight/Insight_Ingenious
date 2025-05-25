@@ -64,7 +64,6 @@ Insight Ingenious is a framework for building, managing, and deploying multi-age
 - **File Storage**: Manages file attachments and document storage
 - **Database Backends**: Multiple database support
   - SQLite
-  - DuckDB
   - Azure Cosmos DB
 
 ## Design Principles
