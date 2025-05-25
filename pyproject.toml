@@ -53,7 +53,7 @@ build-backend = "setuptools.build_meta"
 packages = ["ingenious"]
 
 [project.scripts]
-ingen_cli = "ingenious.cli:app"
+ingen = "ingenious.cli:app"
 
 [tool.ruff.lint]
 extend-select = ["I"]

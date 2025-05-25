@@ -119,8 +119,18 @@ class ProjectSetupExecutor(CliCommandExecutor):
         templates_paths = {
             "docker": base_path / "docker_template",
             "ingenious_extensions": base_path / "ingenious_extensions_template",
+            "templates": base_path / "ingenious_extensions_template" / "templates",
+            "extensions": base_path / "ingenious_extensions_template" / "extensions",
             "tmp": None,  # No template, just create the folder
         }
+
+        self._log(f"Base path: {base_path}", "info")
+        for path_name, path in templates_paths.items():
+            if path:
+                self._log(
+                    f"Template path '{path_name}': {path} (exists: {path.exists()})",
+                    "info",
+                )
 
         # Process each template folder
         for folder_name, template_path in templates_paths.items():
@@ -220,7 +230,7 @@ class ProjectSetupExecutor(CliCommandExecutor):
             "warning",
         )
         self._log("Before executing update config.yml and profiles.yml", "warning")
-        self._log("To execute use ingen_cli", "info")
+        self._log("To execute use ingen", "info")
 
     def copy_ingenious_folder(self, src: Path, dst: Path):
         """

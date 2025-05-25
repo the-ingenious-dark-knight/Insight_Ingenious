@@ -2,6 +2,8 @@ from typing import List
 
 from pydantic import BaseModel, Field
 
+from .profile import WebAuthConfig  # Import WebAuthConfig from profile
+
 
 class ChatHistoryConfig(BaseModel):
     database_type: str = Field(
@@ -69,6 +71,10 @@ class WebConfig(BaseModel):
     asynchronous: bool = Field(
         False, description="Enables or Disables the Asynchronous Response"
     )
+    authentication: WebAuthConfig = Field(
+        default_factory=WebAuthConfig,
+        description="Authentication config for the web server",
+    )
 
 
 class LocaldbConfig(BaseModel):
@@ -99,15 +105,23 @@ class FileStorageContainer(BaseModel):
 class FileStorage(BaseModel):
     revisions: FileStorageContainer = Field(
         default_factory=lambda: FileStorageContainer(
-            enable=True, storage_type="local", container_name="", path="./"
+            enable=True,
+            storage_type="local",
+            container_name="",
+            path="./",
+            add_sub_folders=True,
         ),
-        description="File Storage configuration",
+        description="File Storage configuration for revisions",
     )
     data: FileStorageContainer = Field(
         default_factory=lambda: FileStorageContainer(
-            enable=True, storage_type="local", container_name="", path="./"
+            enable=True,
+            storage_type="local",
+            container_name="",
+            path="./",
+            add_sub_folders=True,
         ),
-        description="File Storage configuration",
+        description="File Storage configuration for data",
     )
 
 
@@ -129,7 +143,20 @@ class Config(BaseModel):
     azure_sql_services: AzureSqlConfig
     file_storage: FileStorage = Field(
         default_factory=lambda: FileStorage(
-            enable=True, storage_type="local", container_name="", path="./"
+            revisions=FileStorageContainer(
+                enable=True,
+                storage_type="local",
+                container_name="",
+                path="./",
+                add_sub_folders=True,
+            ),
+            data=FileStorageContainer(
+                enable=True,
+                storage_type="local",
+                container_name="",
+                path="./",
+                add_sub_folders=True,
+            ),
         ),
         description="File Storage configuration",
     )

@@ -5,6 +5,7 @@ from pathlib import Path
 import yaml
 from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
+from pydantic import ValidationError
 
 from ingenious.domain.model.config import profile as profile_models
 
@@ -18,8 +19,36 @@ class Profiles:
         yaml_data = yaml.safe_load(profile_yml)
         json_data = json.dumps(yaml_data)
         try:
-            profiles = profile_models.Profiles.model_validate_json(json_data).root
-        except profile_models.ValidationError as e:
+            # Check if the data is already in the expected format (a list) or needs wrapping
+            if isinstance(yaml_data, list):
+                profiles = profile_models.Profiles.model_validate_json(json_data).root
+            else:
+                # Handle the case where profiles might be under a key
+                if yaml_data and "profiles" in yaml_data:
+                    profiles_data = yaml_data["profiles"]
+                    if isinstance(profiles_data, dict) and "default" in profiles_data:
+                        # Convert to list format expected by the model
+                        profiles_list = []
+                        for name, profile_data in profiles_data.items():
+                            if isinstance(profile_data, dict):
+                                profile_data["name"] = name
+                                profiles_list.append(profile_data)
+                        json_data = json.dumps(profiles_list)
+                        profiles = profile_models.Profiles.model_validate_json(
+                            json_data
+                        ).root
+                    else:
+                        # Try to use the profiles key directly
+                        json_data = json.dumps(profiles_data)
+                        profiles = profile_models.Profiles.model_validate_json(
+                            json_data
+                        ).root
+                else:
+                    # Data might be a single profile or invalid
+                    raise ValueError(
+                        "Invalid profiles format: expected a list of profiles or a profiles dictionary"
+                    )
+        except ValidationError as e:
             for error in e.errors():
                 print(
                     f"Validation error in \
@@ -76,9 +105,10 @@ class Profiles:
         return profiles
 
     def get_profile_by_name(self, name):
-        for profile in self.profiles:
-            if profile.name == name:
-                return profile
+        if self.profiles:
+            for profile in self.profiles:
+                if profile.name == name:
+                    return profile
         from ingenious.common.errors.common import ConfigurationError
 
         raise ConfigurationError(f"Profile '{name}' not found")
