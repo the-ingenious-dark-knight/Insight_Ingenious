@@ -6,7 +6,7 @@ This guide provides detailed instructions for installing and setting up Insight 
 
 Before installing Insight Ingenious, ensure you have the following prerequisites:
 
-- Python 3.13 or higher
+- Python 3.13 or higher (as specified in pyproject.toml)
 - [uv](https://docs.astral.sh/uv/) package manager (recommended)
 - Git (for cloning the repository)
 - [pre-commit](https://pre-commit.com/) (for development, code linting, and formatting)
@@ -34,13 +34,15 @@ Before installing Insight Ingenious, ensure you have the following prerequisites
 
 4. **Initialize a new project**:
    ```bash
-   ingen_cli initialize-new-project
+   ingen initialize-new-project
    ```
 
 5. **Verify installation**:
    ```bash
-   ingen_cli run-test-batch
+   ingen run-test-batch
    ```
+
+   This command will run the test suite to verify that everything is working correctly.
 
 ### Method 2: Using pip
 
@@ -69,7 +71,21 @@ Before installing Insight Ingenious, ensure you have the following prerequisites
 
 5. **Initialize a new project**:
    ```bash
-   ingen_cli initialize-new-project
+   ingen initialize-new-project
+   ```
+
+## Docker Installation
+
+For containerized deployment, you can use Docker:
+
+1. **Build the Docker image**:
+   ```bash
+   docker build -t insight-ingenious -f utils/docker/production_images/Dockerfile .
+   ```
+
+2. **Run the container**:
+   ```bash
+   docker run -p 8000:8000 -v ./config.yml:/app/config.yml -v ~/.ingenious:/root/.ingenious insight-ingenious
    ```
 
 ## Configuration
@@ -106,18 +122,31 @@ You can also configure Insight Ingenious using environment variables:
 - `INGENIOUS_WORKING_DIR`: Working directory for the application
 - `KEY_VAULT_NAME`: (Optional) Azure Key Vault name for secret management
 
-## Docker Installation
+## Development Installation
 
-Insight Ingenious provides Docker images for easy deployment:
+For developers who want to contribute to the project:
 
-1. **Build the Docker image**:
+1. **Clone the repository**:
    ```bash
-   docker build -f dev_utils/docker/development_images/linux_development_image_python.dockerfile -t ingenious:dev .
+   git clone https://github.com/Insight-Services-APAC/Insight_Ingenious.git
+   cd Insight_Ingenious
    ```
 
-2. **Run the container**:
+2. **Install with development dependencies**:
    ```bash
-   docker run -p 8000:80 -v $(pwd):/app ingenious:dev
+   uv venv
+   uv pip install -e .
+   uv pip install -e ".[dev]"  # Install development dependencies
+   ```
+
+3. **Set up pre-commit hooks**:
+   ```bash
+   pre-commit install
+   ```
+
+4. **Initialize a new project**:
+   ```bash
+   ingen initialize-new-project
    ```
 
 ## Troubleshooting
@@ -125,24 +154,25 @@ Insight Ingenious provides Docker images for easy deployment:
 ### Common Issues
 
 1. **Missing dependencies**:
-   If you encounter errors about missing dependencies, ensure you've installed all required packages:
+   If you encounter errors about missing dependencies, try running:
    ```bash
    uv pip install -e .
    ```
 
-2. **pre-commit not installed or not running**:
-   If you see linting or formatting issues in pull requests or commits, make sure you have installed pre-commit and run:
+2. **Configuration issues**:
+   Ensure that your configuration files are correctly set up and that the environment variables point to the right locations.
+
+3. **Python version issues**:
+   Verify that you're using Python 3.13 or higher:
    ```bash
-   pre-commit install
-   pre-commit run --all-files
+   python --version
    ```
-
-3. **Configuration not found**:
-   Ensure the `config.yml` file is in your current directory or set the `INGENIOUS_PROJECT_PATH` environment variable.
-
-4. **Profile not found**:
-   Ensure the profiles.yml file exists at `~/.ingenious/profiles.yml` or set the `INGENIOUS_PROFILE_PATH` environment variable.
 
 ### Getting Help
 
-If you continue to experience issues, please check the project's GitHub repository for additional support resources.
+If you encounter issues during installation:
+
+1. Check the documentation in the `docs/` directory
+2. Look for examples in the `ingenious_extensions_template` directory
+3. Refer to the code comments in the relevant modules
+4. Create an issue on GitHub and label it `question`

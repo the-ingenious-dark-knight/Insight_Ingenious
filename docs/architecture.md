@@ -7,40 +7,50 @@ This document outlines the architectural design of Insight Ingenious, explaining
 Insight Ingenious is a framework for building, managing, and deploying multi-agent AI conversations. The system is structured as a modular, extensible application with several key components:
 
 ```
-                  ┌───────────────┐
-                  │    Client     │
-                  │  Interfaces   │
-                  └───────┬───────┘
-                          │
-                          ▼
-┌─────────────────────────────────────────────┐
-│               FastAgentAPI                  │
-│  ┌────────────┐  ┌────────────┐  ┌────────┐ │
-│  │   Routes   │  │  Services  │  │ Config │ │
-│  └─────┬──────┘  └─────┬──────┘  └────────┘ │
-│        │               │                    │
-│        └───────────────┼────────────────────┘
-│                        │
-│  ┌─────────────────────┴──────────────────┐ │
-│  │              Agents                    │ │
-│  └─────────────────────┬──────────────────┘ │
-│                        │                    │
-│  ┌─────────────────────┴──────────────────┐ │
-│  │         Data Storage Layer             │ │
-│  │  ┌────────────┐  ┌────────────────┐    │ │
-│  │  │ Databases  │  │ File Storage   │    │ │
-│  │  └────────────┘  └────────────────┘    │ │
-│  └────────────────────────────────────────┘ │
-└─────────────────────────────────────────────┘
+           ┌───────────────┐
+           │   Client      │
+           │ Interfaces    │
+           └──────┬────────┘
+                  │
+                  ▼
+        ┌─────────────────────┐
+        │   FastAgentAPI      │
+        │ ┌───────────────┐   │
+        │ │   Routes      │   │
+        │ └──────┬────────┘   │
+        │        │            │
+        │ ┌──────▼────────┐   │
+        │ │   Services    │   │
+        │ └──────┬────────┘   │
+        │        │            │
+        │ ┌──────▼────────┐   │
+        │ │  Config       │   │
+        │ └───────────────┘   │
+        └─────────┬───────────┘
+                  │
+                  ▼
+        ┌─────────────────────┐
+        │      Agents         │
+        └─────────┬───────────┘
+                  │
+                  ▼
+        ┌─────────────────────┐
+        │  Data Storage Layer │
+        │ ┌───────────────┐   │
+        │ │  Databases    │   │
+        │ ├───────────────┤   │
+        │ │ File Storage  │   │
+        │ └───────────────┘   │
+        └─────────────────────┘
 ```
 
 ## Key Components
 
 ### 1. Client Interfaces
 
-- **FastAPI REST Interface**: The primary way to interact with the system
-- **CLI Interface**: Command-line tools for administration and testing
-- **ChainLit UI**: Web-based user interface for interactions
+- **FastAPI REST Interface**: The primary way to interact with the system programmatically
+- **CLI Interface**: Command-line tools for administration, testing, and initialization
+- **ChainLit UI**: Web-based user interface for interactive conversations
 - **Prompt Tuner**: Web interface for managing and tuning prompts
 
 ### 2. Core Components
@@ -64,7 +74,6 @@ Insight Ingenious is a framework for building, managing, and deploying multi-age
 - **File Storage**: Manages file attachments and document storage
 - **Database Backends**: Multiple database support
   - SQLite
-  - DuckDB
   - Azure Cosmos DB
 
 ## Design Principles
@@ -114,3 +123,38 @@ The system supports multiple deployment options:
 1. **Local Development**: Run locally for development and testing.
 2. **Docker Containers**: Containerized deployment for production.
 3. **Cloud Deployment**: Deploy to cloud platforms like Azure.
+
+## Directory Structure
+
+The Insight Ingenious codebase follows a structured organization:
+
+```
+ingenious/
+├── __init__.py
+├── cli.py                      # Command-line interface
+├── main.py                     # FastAPI application
+├── application/                # Application logic
+│   ├── factory.py
+│   ├── repository/             # Repository implementations
+│   └── service/                # Service implementations
+├── common/                     # Common utilities
+│   ├── config/                 # Configuration handling
+│   ├── di/                     # Dependency injection
+│   ├── errors/                 # Error handling
+│   ├── logging/                # Logging utilities
+│   └── utils/                  # General utilities
+├── domain/                     # Domain models and interfaces
+│   ├── interfaces/
+│   └── model/
+├── extensions/                 # Extension loader and templates
+│   ├── loader.py
+│   └── template/
+├── infrastructure/             # Infrastructure services
+│   └── storage/                # Storage implementations
+└── presentation/               # Presentation layer
+    ├── api/                    # API routes
+    ├── chainlit/               # ChainLit UI
+    └── templates/              # Jinja2 templates
+```
+
+This architecture provides a clean separation of concerns and makes the system easy to understand, extend, and maintain.

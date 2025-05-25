@@ -4,204 +4,270 @@ This document provides a detailed reference for the Insight Ingenious REST API.
 
 ## Base URL
 
-All API endpoints are relative to your base URL:
+The base URL for all API endpoints is:
+
 ```
 http://<host>:<port>/api/v1
 ```
 
-By default, this would be:
+By default, the API server runs on `127.0.0.1:8000`, making the base URL:
+
 ```
 http://127.0.0.1:8000/api/v1
 ```
 
 ## Authentication
 
-Authentication methods depend on your configuration. By default, the API does not require authentication in development mode. For production deployments, configure API keys or OAuth authentication.
+The API supports HTTP Basic Authentication. You can configure authentication credentials in the `config.yml` file:
+
+```yaml
+web_configuration:
+  authentication:
+    enabled: true
+    username: "your_username"
+    password: "your_password"
+```
+
+To authenticate, include the `Authorization` header with a Base64-encoded "username:password" string:
+
+```
+Authorization: Basic <base64-encoded-credentials>
+```
 
 ## Common Headers
 
-| Header | Description | Required |
-|--------|-------------|----------|
-| `Content-Type` | Should be set to `application/json` for all requests with a body | Yes |
-| `Authorization` | Authentication token (if configured) | Depends on configuration |
+All API requests should include the following headers:
+
+- `Content-Type: application/json` (for POST and PUT requests)
+- `Accept: application/json`
+- `Authorization: Basic <credentials>` (if authentication is enabled)
 
 ## Endpoints
 
-### Chat
+### Chat Endpoint
 
-#### Start or Continue a Chat
+#### POST /chat
 
-```
-POST /chat
-```
+Create a new chat message or continue an existing conversation.
 
-Request body:
+**Request Body:**
+
 ```json
 {
-  "conversation_id": "string",
-  "message": "string",
-  "conversation_flow": "string",
-  "thread_id": "string (optional)",
-  "metadata": { (optional)
-    "key": "value"
-  }
-}
-```
-
-Response:
-```json
-{
-  "conversation_id": "string",
-  "message_id": "string",
-  "thread_id": "string",
-  "response": "string",
-  "created_at": "datetime",
+  "conversation_id": "unique-conversation-id",
+  "message": "User message here",
+  "conversation_flow": "default",
   "metadata": {
-    "key": "value"
+    "key1": "value1",
+    "key2": "value2"
   }
 }
 ```
 
-#### Get Chat History
+**Response:**
 
-```
-GET /chat/{conversation_id}
-```
-
-Response:
 ```json
 {
-  "conversation_id": "string",
+  "conversation_id": "unique-conversation-id",
+  "message_id": "message-id",
+  "response": "AI response here",
+  "created_at": "2023-05-01T12:34:56.789Z",
+  "metadata": {
+    "model": "gpt-4o",
+    "prompt_tokens": 123,
+    "completion_tokens": 456,
+    "total_tokens": 579
+  }
+}
+```
+
+#### GET /chat/{conversation_id}
+
+Get the history of a conversation.
+
+**Response:**
+
+```json
+{
+  "conversation_id": "unique-conversation-id",
   "messages": [
     {
-      "message_id": "string",
-      "role": "string",
-      "content": "string",
-      "created_at": "datetime"
+      "message_id": "message-id-1",
+      "role": "user",
+      "content": "User message here",
+      "created_at": "2023-05-01T12:34:56.789Z"
+    },
+    {
+      "message_id": "message-id-2",
+      "role": "assistant",
+      "content": "AI response here",
+      "created_at": "2023-05-01T12:35:00.123Z"
     }
   ]
 }
 ```
 
-### Message Feedback
+### Message Feedback Endpoint
 
-#### Submit Message Feedback
+#### POST /message_feedback
 
-```
-POST /message-feedback
-```
+Submit feedback for a message.
 
-Request body:
+**Request Body:**
+
 ```json
 {
-  "message_id": "string",
-  "rating": "number",
-  "feedback_text": "string (optional)"
+  "conversation_id": "unique-conversation-id",
+  "message_id": "message-id",
+  "feedback_type": "thumbs_up",
+  "comment": "Optional user comment"
 }
 ```
 
-Response:
+**Response:**
+
 ```json
 {
-  "message_id": "string",
-  "feedback_id": "string",
-  "status": "success"
+  "status": "success",
+  "message": "Feedback recorded"
 }
 ```
 
-### Prompts
+### Diagnostic Endpoint
 
-#### List Available Prompts
+#### GET /diagnostic/health
 
+Check the health of the API.
+
+**Response:**
+
+```json
+{
+  "status": "healthy",
+  "version": "0.1.0",
+  "components": {
+    "database": "ok",
+    "openai": "ok"
+  }
+}
 ```
-GET /prompts
-```
 
-Response:
+### Prompts Endpoint
+
+#### GET /prompts
+
+Get a list of available prompts.
+
+**Response:**
+
 ```json
 {
   "prompts": [
     {
-      "id": "string",
-      "name": "string",
-      "description": "string",
-      "created_at": "datetime",
-      "updated_at": "datetime"
+      "id": "prompt-id-1",
+      "name": "Customer Service",
+      "description": "Prompt for customer service agent"
+    },
+    {
+      "id": "prompt-id-2",
+      "name": "Technical Support",
+      "description": "Prompt for technical support agent"
     }
   ]
 }
 ```
 
-#### Get Prompt Detail
+#### GET /prompts/{prompt_id}
 
-```
-GET /prompts/{prompt_id}
-```
+Get a specific prompt.
 
-Response:
+**Response:**
+
 ```json
 {
-  "id": "string",
-  "name": "string",
-  "description": "string",
-  "content": "string",
-  "variables": [
-    {
-      "name": "string",
-      "description": "string",
-      "required": "boolean"
-    }
-  ],
-  "created_at": "datetime",
-  "updated_at": "datetime"
-}
-```
-
-### Diagnostic
-
-#### Health Check
-
-```
-GET /health
-```
-
-Response:
-```json
-{
-  "status": "healthy",
-  "version": "string",
-  "services": {
-    "database": "healthy",
-    "file_storage": "healthy"
+  "id": "prompt-id-1",
+  "name": "Customer Service",
+  "description": "Prompt for customer service agent",
+  "content": "You are a helpful customer service agent...",
+  "metadata": {
+    "author": "John Doe",
+    "created_at": "2023-05-01T12:34:56.789Z",
+    "last_updated": "2023-05-02T12:34:56.789Z"
   }
 }
 ```
 
 ## Error Handling
 
-The API uses standard HTTP status codes to indicate success or failure:
+The API returns standard HTTP status codes to indicate the success or failure of a request:
 
 - `200 OK`: The request was successful
-- `400 Bad Request`: The request was malformed
-- `401 Unauthorized`: Authentication is required
-- `403 Forbidden`: The authenticated user does not have permission
-- `404 Not Found`: The requested resource was not found
+- `400 Bad Request`: Invalid request parameters
+- `401 Unauthorized`: Authentication failed
+- `404 Not Found`: Resource not found
 - `429 Too Many Requests`: Rate limit exceeded
-- `500 Internal Server Error`: An unexpected server error occurred
+- `500 Internal Server Error`: Server error
 
-Error response structure:
+Error responses include a JSON object with details:
+
 ```json
 {
-  "detail": "Error message",
-  "code": "ERROR_CODE",
-  "timestamp": "datetime"
+  "error": {
+    "code": "error_code",
+    "message": "Error message",
+    "details": {
+      "field": "Error details"
+    }
+  }
 }
 ```
 
 ## Rate Limiting
 
-The API implements rate limiting to prevent abuse. Rate limits may vary based on your deployment configuration.
+The API implements rate limiting to prevent abuse. Rate limits are configurable in the `config.yml` file:
+
+```yaml
+web_configuration:
+  rate_limit:
+    enabled: true
+    requests_per_minute: 60
+```
+
+When a rate limit is exceeded, the API returns a `429 Too Many Requests` status code.
 
 ## Extensions
 
-Custom API routes can be added through extensions. Refer to the Extensions documentation for details on how to add custom endpoints.
+You can extend the API with custom endpoints by creating a custom API routes class in your extension:
+
+```python
+# ingenious_extensions/api/routes/custom.py
+from fastapi import APIRouter, Depends
+from ingenious.models.api_routes import IApiRoutes
+from ingenious.config.config import Config
+
+class Api_Routes(IApiRoutes):
+    def __init__(self, config: Config, app: "FastAPI"):
+        self.router = APIRouter()
+        self.config = config
+        self.app = app
+
+    def add_custom_routes(self):
+        @self.router.get("/custom-endpoint")
+        async def custom_endpoint():
+            return {"message": "This is a custom endpoint"}
+
+        # Include your router
+        self.app.include_router(self.router, prefix="/api/v1", tags=["Custom"])
+```
+
+Enable custom routes in your configuration:
+
+```yaml
+extensions:
+  enabled: true
+  custom_routes: true
+```
+
+## API Versioning
+
+The API uses a version prefix in the URL (`/api/v1/`) for versioning. Future versions of the API may be released under different prefixes (e.g., `/api/v2/`).

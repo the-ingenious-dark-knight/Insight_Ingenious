@@ -25,17 +25,17 @@ This quickstart guide will help you get up and running with Insight Ingenious in
 
 4. **Initialize a new project**:
    ```bash
-   ingen_cli initialize-new-project
+   ingen initialize-new-project
    ```
 
 5. **Verify installation**:
    ```bash
-   ingen_cli run-test-batch
+   ingen run-test-batch
    ```
 
-## Your First Conversation
+   This command will run the test suite to verify that everything is working correctly.
 
-Let's create a simple conversation with an AI agent:
+## Your First Conversation
 
 ### 1. Configure Your API Keys
 
@@ -51,7 +51,7 @@ profiles:
 ### 2. Start the API Server
 
 ```bash
-ingen_cli run-rest-api-server --host 127.0.0.1 --port 8000
+ingen run-rest-api-server --host 127.0.0.1 --port 8000
 ```
 
 ### 3. Send a Test Request
@@ -114,6 +114,19 @@ Insight Ingenious supports different chat service types:
 - **Basic**: Simple single-agent chat
 - **MultiAgent**: Conversations between multiple agents
 - **Router**: Routing messages to different agents
+
+## Creating Extensions
+
+To create your own extension:
+
+1. **Copy the template**:
+   ```bash
+   cp -r ingenious/ingenious_extensions_template ingenious_extensions
+   ```
+
+2. **Customize the code** to fit your needs.
+
+3. **Update the configuration** to use your extension.
 
 ## Using pre-commit
 

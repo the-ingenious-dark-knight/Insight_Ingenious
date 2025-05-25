@@ -11,6 +11,10 @@ Welcome to the Insight Ingenious documentation. This guide provides comprehensiv
 - [Configuration](./configuration.md) - Configuration options and settings
 - [Agents](./agents.md) - Working with AI agents
 - [Extensions](./extensions.md) - Extending the framework
+- [Error Handling](./error_handling.md) - Error handling system
+- [Testing](./testing.md) - Testing framework and best practices
+- [Code Quality](./code_quality.md) - Code quality tools and standards
+- [CLI](./cli.md) - Command line interface reference
 
 ## About Insight Ingenious
 
@@ -23,6 +27,16 @@ Insight Ingenious is a powerful framework designed to build, manage, and deploy 
 
 The framework is built on modern Python technologies including FastAPI, Pydantic, and integrations with AI platforms.
 
+## Key Features
+
+- **Flexible Agent System**: Define and customize AI agents with different roles and capabilities
+- **Multi-modal Conversations**: Support for text, images, and other content types
+- **Extensible Architecture**: Easy to extend with custom components
+- **Database Integration**: Store conversation history in SQLite, DuckDB, or Azure Cosmos DB
+- **Package Management with uv**: Modern Python package and environment management
+- **Web Interface**: Built-in web interface using ChainLit
+- **Prompt Tuner**: Dedicated interface for tuning prompts
+
 ## Getting Help
 
 If you need assistance with Insight Ingenious, you can:
@@ -34,7 +48,7 @@ If you need assistance with Insight Ingenious, you can:
 
 ## Contributing
 
-Contributions to Insight Ingenious are welcome! Please refer to the project's GitHub repository for contribution guidelines.
+Contributions to Insight Ingenious are welcome! Please refer to the [CONTRIBUTING.md](../CONTRIBUTING.md) file for detailed contribution guidelines.
 
 ### Development Standards
 

@@ -59,28 +59,38 @@ class Api_Routes(IApiRoutes):
 
 ### 2. Custom Agents
 
-Create custom agent types:
+Create custom agent implementations:
 
 ```python
 # ingenious_extensions/models/custom_agent.py
 from ingenious.models.agent import Agent
-from typing import Dict, Any
-from ingenious.models.message import Message
+from ingenious.models.chat import ChatRequest, ChatResponse
+from datetime import datetime
 
 class CustomAgent(Agent):
-    async def process_message(self, message: Message) -> str:
+    def __init__(self, name: str, config):
+        super().__init__(name, config)
+        # Custom initialization
+
+    async def process_message(self, request: ChatRequest) -> ChatResponse:
         # Custom processing logic
-        return f"Custom response to: {message.content}"
+        return ChatResponse(
+            conversation_id=request.conversation_id,
+            message_id="custom-message-id",
+            response="Custom agent response",
+            created_at=datetime.now().isoformat()
+        )
 ```
 
-Register your custom agent in the configuration:
+Register your agent in your configuration:
 
 ```yaml
 agents:
-  - name: "my_custom_agent"
-    type: "custom"  # The system will look for a CustomAgent class
+  - name: "custom_agent"
+    type: "custom_agent"
     model_config:
       model: "gpt-4o"
+      temperature: 0.7
     system_prompt: "You are a custom agent."
 ```
 
@@ -116,8 +126,10 @@ Enable your custom chat service in the configuration:
 ```yaml
 conversation_flows:
   - name: "custom_flow"
-    type: "custom"  # Points to your custom_chat_service
-    # Additional configuration...
+    description: "Custom conversation flow"
+    chat_service: "custom"
+    agents:
+      - "custom_agent"
 ```
 
 ### 4. Custom Templates
@@ -233,69 +245,111 @@ pip install path/to/ingenious-extension-name-0.1.0.whl
 
 ## Example: Creating a Simple Extension
 
-Here's a complete example of creating a simple extension:
+Here's a simple example of creating a custom extension that adds a calculator agent:
 
-1. **Copy the template**:
+1. **Create the extension structure**:
+
 ```bash
-cp -r ingenious_extensions_template ingenious_extensions
+cp -r ingenious/ingenious_extensions_template ingenious_extensions
 ```
 
-2. **Create a custom agent**:
+2. **Create a custom calculator agent**:
+
 ```python
-# ingenious_extensions/models/weather_agent.py
+# ingenious_extensions/models/calculator_agent.py
 from ingenious.models.agent import Agent
-from typing import Dict, Any
-from ingenious.models.message import Message
+from ingenious.models.chat import ChatRequest, ChatResponse
+from datetime import datetime
+import re
 
-class WeatherAgent(Agent):
-    async def process_message(self, message: Message) -> str:
-        # In a real implementation, this would call a weather API
-        return f"The weather is sunny today! (Response to: {message.content})"
+class CalculatorAgent(Agent):
+    def __init__(self, name: str, config):
+        super().__init__(name, config)
+
+    async def process_message(self, request: ChatRequest) -> ChatResponse:
+        # Extract mathematical expression using regex
+        match = re.search(r'calculate\s+([\d\+\-\*\/\(\)\s]+)', request.message, re.IGNORECASE)
+
+        if match:
+            expression = match.group(1).strip()
+            try:
+                result = eval(expression)
+                response = f"The result of {expression} is {result}"
+            except Exception as e:
+                response = f"Error calculating {expression}: {str(e)}"
+        else:
+            response = "Please provide a mathematical expression to calculate, e.g., 'calculate 2 + 2'"
+
+        return ChatResponse(
+            conversation_id=request.conversation_id,
+            message_id=f"calc-{datetime.now().timestamp()}",
+            response=response,
+            created_at=datetime.now().isoformat()
+        )
 ```
 
-3. **Create a custom API route**:
+3. **Register the agent factory**:
+
 ```python
-# ingenious_extensions/api/routes/custom.py
-from fastapi import APIRouter
-from ingenious.models.api_routes import IApiRoutes
-from ingenious.config.config import Config
+# ingenious_extensions/models/factory.py
+from ingenious.models.agent import AgentFactory
+from ingenious_extensions.models.calculator_agent import CalculatorAgent
 
-class Api_Routes(IApiRoutes):
-    def __init__(self, config: Config, app):
-        self.router = APIRouter()
-        self.config = config
-        self.app = app
-
-    def add_custom_routes(self):
-        @self.router.get("/weather")
-        async def get_weather(city: str):
-            return {"city": city, "condition": "sunny", "temperature": 25}
-
-        self.app.include_router(self.router, prefix="/api/v1", tags=["Weather"])
+class CustomAgentFactory(AgentFactory):
+    def create_agent(self, agent_type: str, name: str, config, **kwargs):
+        if agent_type == "calculator":
+            return CalculatorAgent(name, config)
+        # Fall back to default agent creation
+        return super().create_agent(agent_type, name, config, **kwargs)
 ```
 
-4. **Update configuration**:
+4. **Update the configuration**:
+
 ```yaml
 # config.yml
 agents:
-  - name: "weather_agent"
-    type: "weather"
-    model_config:
-      model: "gpt-4o"
-    system_prompt: "You are a weather information agent."
+  - name: "calculator"
+    type: "calculator"
+    system_prompt: "You are a calculator agent that can perform mathematical calculations."
 
 conversation_flows:
-  - name: "weather_info"
-    type: "basic"
-    primary_agent: "weather_agent"
+  - name: "calculator_flow"
+    description: "Calculator conversation flow"
+    chat_service: "basic"
+    agents:
+      - "calculator"
 ```
 
-5. **Test your extension**:
+5. **Use the calculator agent**:
+
 ```bash
-ingen_cli run-rest-api-server
+curl -X POST "http://127.0.0.1:8000/api/v1/chat" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "conversation_id": "calc-test",
+    "message": "calculate 2 + 2 * 3",
+    "conversation_flow": "calculator_flow"
+  }'
 ```
 
-Then make a request to your new endpoint:
-```bash
-curl "http://127.0.0.1:8000/api/v1/weather?city=London"
+The agent will respond with: "The result of 2 + 2 * 3 is 8"
+
+## Debugging Extensions
+
+When debugging extensions, you can enable debug logging:
+
+```yaml
+log_level: "DEBUG"
 ```
+
+You can also use the built-in test tools to test your extensions:
+
+```bash
+ingen_cli run-test-batch
+```
+
+## Conclusion
+
+Extending Insight Ingenious allows you to customize the framework to your specific needs. By leveraging the extension points and following best practices, you can create powerful custom implementations while maintaining compatibility with the core framework.
+
+For more examples, refer to the documentation in the `ingenious_extensions_template` directory.

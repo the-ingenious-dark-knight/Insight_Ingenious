@@ -144,9 +144,13 @@ node_modules/
 
 # Local files
 *.local
+.files/
 
 # Test output
 test-output/
 
 #ruff
 .ruff_cache/
+
+#chainlit
+.chainlit/

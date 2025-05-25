@@ -1,0 +1,6 @@
+"""
+Local file storage implementations.
+"""
+from ingenious.infrastructure.storage.local.file_storage import LocalFileStorage, LocalPathHelper
+
+__all__ = ['LocalFileStorage', 'LocalPathHelper']
