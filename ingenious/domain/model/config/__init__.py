@@ -1,7 +1,8 @@
 # Expose config_ns models first to avoid circular imports
+from ingenious.domain.model.config.config_ns import AuthenticationMethod
+
 # Expose config models
 from ingenious.domain.model.config.config import (
-    AuthenticationMethod,
     AzureSearchConfig,
     AzureSqlConfig,
     ChainlitConfig,
@@ -9,8 +10,7 @@ from ingenious.domain.model.config.config import (
     ChatServiceConfig,
     Config,
     FileStorage,
-    FileStorageContainer,
-    LocaldbConfig,
+    FileStorageConfig as FileStorageContainer,
     LoggingConfig,
     ModelConfig,
     ReceiverConfig,

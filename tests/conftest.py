@@ -180,6 +180,7 @@ def sample_config_dict():
                 "base_url": "https://example.com/openai",
                 "api_key": "test-api-key",
                 "api_version": "2023-05-15",
+                "api_type": "azure",
             }
         ],
         "file_storage": {
@@ -189,6 +190,16 @@ def sample_config_dict():
                 {"name": "data", "path": "./data"},
                 {"name": "revisions", "path": "./revisions"},
             ],
+            "revisions": {
+                "storage_type": "local",
+                "path": "./revisions",
+                "add_sub_folders": True,
+            },
+            "data": {
+                "storage_type": "local",
+                "path": "./data",
+                "add_sub_folders": True,
+            },
         },
         "chat_history": {"database_type": "sqlite", "connection_string": ":memory:"},
         "chat_service": {"type": "basic"},
@@ -201,6 +212,13 @@ def sample_config_dict():
                 "password": "password",
             },
         },
+        # Add all required fields
+        "logging": {"root_log_level": "INFO", "log_level": "INFO"},
+        "tool_service": {"enable": False},
+        "chainlit_configuration": {"enable": False},
+        "azure_search_services": [],
+        "azure_sql_services": {"database_connection_string": ""},
+        "local_sql_db": {"database_path": "/tmp/sample_sql_db", "sample_csv_path": "", "sample_database_name": "sample_sql_db"}
     }
 
 

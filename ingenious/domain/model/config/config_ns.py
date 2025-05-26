@@ -4,6 +4,12 @@ from typing import List
 from pydantic import BaseModel, Field
 
 
+class AuthenticationMethod(str, Enum):
+    DEFAULT_CREDENTIAL = "default_credential"
+    CLIENT_SECRET = "client_secret"
+    MANAGED_IDENTITY = "managed_identity"
+
+
 class WebAuthConfig(BaseModel):
     type: str = Field("", description="Authentication type")
     enable: bool = Field(True, description="Enable authentication")
@@ -37,18 +43,18 @@ class ModelConfig(BaseModel):
     base_url: str = Field("", description="Base URL for the model API")
 
 
+class ChainlitAuthConfig(BaseModel):
+    enable: bool = Field(False, description="Enable Chainlit authentication")
+    github_secret: str = Field("", description="GitHub secret for Chainlit authentication")
+    github_client_id: str = Field("", description="GitHub client ID for Chainlit authentication")
+
+
 class ChainlitConfig(BaseModel):
     enable: bool = Field(
         False,
         description="Enables or Disables the Python based Chainlit chat interface",
     )
     authentication: ChainlitAuthConfig = Field(default_factory=lambda: ChainlitAuthConfig())
-
-
-class ChainlitAuthConfig(BaseModel):
-    enable: bool = Field(False, description="Enable Chainlit authentication")
-    github_secret: str = Field("", description="GitHub secret for Chainlit authentication")
-    github_client_id: str = Field("", description="GitHub client ID for Chainlit authentication")
 
 
 class ChatServiceConfig(BaseModel):
