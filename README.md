@@ -34,12 +34,12 @@ A powerful framework for building, managing, and deploying multi-agent AI conver
    ingen init
    ```
 
-4. **Configure API keys** in `~/.ingenious/profiles.yml`:
+4. **Configure API keys** in `config.yml`:
    ```yaml
-   profiles:
+   profile: default
+   models:
      - name: default
-       openai:
-         api_key: your_openai_api_key
+       api_key: your_openai_api_key
    ```
 
 5. **Start the API server**:

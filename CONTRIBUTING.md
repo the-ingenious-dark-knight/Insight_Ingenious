@@ -80,14 +80,9 @@ uv run pre-commit run --all-files
 
 ### Configuration
 
-Create configuration files:
+Create configuration file:
 
 1. Project configuration (`config.yml`) - Created during initialization
-2. Profiles configuration:
-   ```bash
-   mkdir -p ~/.ingenious
-   touch ~/.ingenious/profiles.yml
-   ```
 
 ## Code Style and Standards
 

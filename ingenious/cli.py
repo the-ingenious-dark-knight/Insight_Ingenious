@@ -53,12 +53,6 @@ def run(
         Optional[str],
         typer.Argument(help="The path to the config file."),
     ] = None,
-    profile_dir: Annotated[
-        Optional[str],
-        typer.Argument(
-            help="The path to the profile file. If left blank it will use '$HOME/.ingenious/profiles.yml'"
-        ),
-    ] = None,
     host: Annotated[
         str,
         typer.Argument(
@@ -80,15 +74,6 @@ def run(
     # Set environment variables
     if project_dir is not None:
         os.environ["INGENIOUS_PROJECT_PATH"] = project_dir
-
-    if profile_dir is None:
-        # get home directory
-        home_dir = os.path.expanduser("~")
-        profile_path = Path(home_dir) / Path(".ingenious") / Path("profiles.yml")
-        profile_dir = str(profile_path)
-
-    console.print(f"Profile path: {profile_dir}", style="info")
-    os.environ["INGENIOUS_PROFILE_PATH"] = str(profile_dir).replace("\\", "/")
 
     # Import configuration
     import ingenious.common.config.config as ingen_config

@@ -1,8 +1,14 @@
+from enum import Enum
 from typing import List
 
 from pydantic import BaseModel, Field
 
-from .profile import WebAuthConfig  # Import WebAuthConfig from profile
+
+class WebAuthConfig(BaseModel):
+    type: str = Field("", description="Authentication type")
+    enable: bool = Field(True, description="Enable authentication")
+    username: str = Field("", description="Username for authentication")
+    password: str = Field("", description="Password for authentication")
 
 
 class ChatHistoryConfig(BaseModel):
@@ -27,6 +33,8 @@ class ModelConfig(BaseModel):
     model: str = Field(..., description="Name of the model")
     api_type: str = Field(..., description="Type of the API (e.g., rest, grpc)")
     api_version: str = Field(..., description="Version of the API")
+    api_key: str = Field("", description="API key for the model")
+    base_url: str = Field("", description="Base URL for the model API")
 
 
 class ChainlitConfig(BaseModel):
@@ -34,6 +42,13 @@ class ChainlitConfig(BaseModel):
         False,
         description="Enables or Disables the Python based Chainlit chat interface",
     )
+    authentication: ChainlitAuthConfig = Field(default_factory=lambda: ChainlitAuthConfig())
+
+
+class ChainlitAuthConfig(BaseModel):
+    enable: bool = Field(False, description="Enable Chainlit authentication")
+    github_secret: str = Field("", description="GitHub secret for Chainlit authentication")
+    github_client_id: str = Field("", description="GitHub client ID for Chainlit authentication")
 
 
 class ChatServiceConfig(BaseModel):
@@ -54,6 +69,7 @@ class LoggingConfig(BaseModel):
 class AzureSearchConfig(BaseModel):
     service: str = Field(..., description="Name of the service")
     endpoint: str = Field(..., description="Endpoint of the service")
+    key: str = Field("", description="API key for Azure Search")
 
 
 class AzureSqlConfig(BaseModel):
@@ -77,12 +93,10 @@ class WebConfig(BaseModel):
     )
 
 
-class LocaldbConfig(BaseModel):
-    database_path: str = Field("/tmp/sample_sql_db", description="Database path")
-    sample_csv_path: str = Field("", description="Sample csv path")
-    sample_database_name: str = Field(
-        "sample_sql_db", description="Sample database name"
-    )
+class ReceiverConfig(BaseModel):
+    enable: bool = Field(True, description="Enables or Disables the Receiver")
+    api_url: str = Field("", description="API URL for the Receiver")
+    api_key: str = Field("", description="API key for the Receiver")
 
 
 class FileStorageContainer(BaseModel):
@@ -99,6 +113,13 @@ class FileStorageContainer(BaseModel):
     add_sub_folders: bool = Field(
         default=True,
         description="Add sub_folders to the path. Used for local storage and Azure storage.",
+    )
+    url: str = Field("", description="File Storage SAS URL")
+    client_id: str = Field("", description="File Storage SAS Client ID")
+    token: str = Field("", description="File Storage SAS Token")
+    authentication_method: AuthenticationMethod = Field(
+        AuthenticationMethod.DEFAULT_CREDENTIAL,
+        description="File Storage SAS Authentication Method",
     )
 
 
@@ -125,22 +146,40 @@ class FileStorage(BaseModel):
     )
 
 
+class LocaldbConfig(BaseModel):
+    database_path: str = Field("/tmp/sample_sql_db", description="Database path")
+    sample_csv_path: str = Field("", description="Sample csv path")
+    sample_database_name: str = Field(
+        "sample_sql_db", description="Sample database name"
+    )
+
+
+class AuthenticationMethod(str, Enum):
+    MSI = "msi"
+    CLIENT_ID_AND_SECRET = "client_id_and_secret"
+    DEFAULT_CREDENTIAL = "default_credential"
+    TOKEN = "token"
+
+
 class Config(BaseModel):
     """
-    This is the configuration class for the config.yml file. It contains only non-secret information.
+    This is the configuration class for the config.yml file.
     """
 
-    chat_history: ChatHistoryConfig
-    profile: str
+    profile: str = Field("default", description="Profile name for configuration")
     models: List[ModelConfig]
     logging: LoggingConfig
     tool_service: ToolServiceConfig
     chat_service: ChatServiceConfig
+    chat_history: ChatHistoryConfig
     chainlit_configuration: ChainlitConfig
     azure_search_services: List[AzureSearchConfig]
-    web_configuration: WebConfig
-    local_sql_db: LocaldbConfig
     azure_sql_services: AzureSqlConfig
+    web_configuration: WebConfig
+    local_sql_db: LocaldbConfig = Field(
+        default_factory=lambda: LocaldbConfig(),
+        description="Local SQL database configuration",
+    )
     file_storage: FileStorage = Field(
         default_factory=lambda: FileStorage(
             revisions=FileStorageContainer(
@@ -159,4 +198,8 @@ class Config(BaseModel):
             ),
         ),
         description="File Storage configuration",
+    )
+    receiver_configuration: ReceiverConfig = Field(
+        default_factory=lambda: ReceiverConfig(),
+        description="Receiver configuration",
     )

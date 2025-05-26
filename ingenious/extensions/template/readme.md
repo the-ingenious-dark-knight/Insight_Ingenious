@@ -12,5 +12,5 @@ This folder contains the files you will need to create a project using the Ingen
 
 ## To get started
 - Review and update config.yml to match your project requirements.
-- Create a profile.yml and store in your user home directory. This file will contain sensitive information such as API keys.
-- Add environment variables to point to your profile.yml file and config.yml file.
+- Add environment variables to set up API keys and other sensitive information in the config.yml file.
+- Add environment variables to point to your config.yml file.

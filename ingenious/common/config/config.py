@@ -7,10 +7,8 @@ import yaml
 from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
 
-from ingenious.common.config.profile import Profiles
 from ingenious.common.errors.common import ConfigurationError
 from ingenious.domain.model.config import config_ns as config_ns_models
-from ingenious.domain.model.config import profile as profile_models
 
 logger = logging.getLogger(__name__)
 
@@ -48,57 +46,14 @@ class Config:
             if not hasattr(config_ns, "profile") or not config_ns.profile:
                 raise ConfigurationError("Missing required field: profile")
 
-            profile_data: profile_models.Profiles = Profiles(
-                os.getenv("INGENIOUS_PROFILE_PATH", "")
-            ).profiles
+            return config_ns
 
-            # Create a dummy profile for tests if needed
-            if config_ns.profile == "test":
-                test_profile = profile_models.Profile(
-                    name="test",
-                    models=[
-                        profile_models.ModelConfig(
-                            model="gpt-4o",
-                            base_url="https://test.com",
-                            api_key="test_key",
-                        )
-                    ],
-                    chat_history=profile_models.ChatHistoryConfig(
-                        database_connection_string=":memory:"
-                    ),
-                    web_configuration=profile_models.WebConfig(
-                        port=8000,
-                        authentication=profile_models.WebAuthConfig(
-                            enable=False, username="test_user", password="test_password"
-                        ),
-                    ),
-                    file_storage=profile_models.FileStorage(
-                        revisions=profile_models.FileStorageContainer(
-                            url="",
-                            client_id="",
-                            token="",
-                            authentication_method=profile_models.AuthenticationMethod.DEFAULT_CREDENTIAL,
-                        ),
-                        data=profile_models.FileStorageContainer(
-                            url="",
-                            client_id="",
-                            token="",
-                            authentication_method=profile_models.AuthenticationMethod.DEFAULT_CREDENTIAL,
-                        ),
-                    ),
-                    azure_search_services=[],
-                    azure_sql_services=profile_models.AzureSqlConfig(
-                        database_connection_string=""
-                    ),
-                    receiver_configuration=profile_models.ReceiverConfig(enable=False),
-                    chainlit_configuration=profile_models.ChainlitConfig(),
-                    logging=profile_models.LoggingConfig(),
-                    tool_service=profile_models.ToolServiceConfig(),
-                    chat_service=profile_models.ChatServiceConfig(),
-                )
-                # Important: Set the config web authentication to match the test profile
-                config_ns.web_configuration.authentication.username = "test_user"
-                config_ns.web_configuration.authentication.password = "test_password"
+        except yaml.YAMLError as e:
+            raise ConfigurationError(f"Invalid YAML syntax: {str(e)}")
+        except ConfigurationError as e:
+            raise e
+        except Exception as e:
+            raise ConfigurationError(f"Unexpected error loading configuration: {str(e)}")
 
                 # Special case for test_load_config_from_path
                 if "test_load_config_from_path" in os.environ.get(
