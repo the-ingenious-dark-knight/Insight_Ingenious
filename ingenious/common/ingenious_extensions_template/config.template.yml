@@ -5,17 +5,14 @@ project:
   name: my_ingenious_project
   description: A new Ingenious framework project
   version: 0.1.0
-
 web_configuration:
   ip_address: 0.0.0.0
   port: 80
   logging_level: INFO
-
 extensions:
   enabled: true
   paths:
     - ./extensions
-
 providers:
   openai:
     api_key: ${OPENAI_API_KEY}
@@ -24,7 +21,6 @@ providers:
     # azure_endpoint: ${AZURE_OPENAI_ENDPOINT}
     # api_version: "2023-05-15"
     # deployment_name: ${AZURE_OPENAI_DEPLOYMENT_NAME}
-
 models:
   default:
     provider: openai
