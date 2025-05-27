@@ -1,11 +1,13 @@
 import logging
 from pathlib import Path
+
 from openai.types.chat import (
+    ChatCompletionAssistantMessageParam,
     ChatCompletionMessageParam,
     ChatCompletionSystemMessageParam,
     ChatCompletionUserMessageParam,
-    ChatCompletionAssistantMessageParam,
 )
+
 from ingenious.config.config import Config
 from ingenious.files.files_repository import FileStorage
 
@@ -13,22 +15,23 @@ logger = logging.getLogger(__name__)
 
 
 def build_system_prompt(
-        system_prompt: str,
-        user_name: str | None = None
+    system_prompt: str, user_name: str | None = None
 ) -> ChatCompletionSystemMessageParam:
     system_prompt_message: ChatCompletionSystemMessageParam = {
         "role": "system",
-        "content": system_prompt
+        "content": system_prompt,
     }
     if user_name:
         system_prompt_message["name"] = user_name
     return system_prompt_message
 
 
-def build_user_message(user_prompt: str, user_name: str | None) -> ChatCompletionUserMessageParam:
+def build_user_message(
+    user_prompt: str, user_name: str | None
+) -> ChatCompletionUserMessageParam:
     user_message: ChatCompletionUserMessageParam = {
         "role": "user",
-        "content": user_prompt
+        "content": user_prompt,
     }
     if user_name:
         user_message["name"] = user_name
@@ -36,10 +39,9 @@ def build_user_message(user_prompt: str, user_name: str | None) -> ChatCompletio
 
 
 def build_assistant_message(
-        content: str | None, tool_calls: list[dict[str, object]] | None = None) -> ChatCompletionAssistantMessageParam:
-    assistant_message: ChatCompletionAssistantMessageParam = {
-        "role": "assistant"
-    }
+    content: str | None, tool_calls: list[dict[str, object]] | None = None
+) -> ChatCompletionAssistantMessageParam:
+    assistant_message: ChatCompletionAssistantMessageParam = {"role": "assistant"}
 
     if content is not None:
         assistant_message["content"] = content
@@ -51,9 +53,8 @@ def build_assistant_message(
 
 
 def build_message(
-        role: str,
-        content: str | None,
-        user_name: str | None = None) -> ChatCompletionMessageParam:
+    role: str, content: str | None, user_name: str | None = None
+) -> ChatCompletionMessageParam:
     if role == "system":
         return build_system_prompt(system_prompt=str(content))
     elif role == "user":
@@ -67,13 +68,16 @@ def build_message(
 async def Sync_Prompt_Templates(_config: Config, revision: str):
     fs = FileStorage(_config, Category="revisions")
     # Check the storage type and handle Jinja files accordingly
-    azure_template_dir = "prompts/"+revision
-    if _config.file_storage.revisions.storage_type != 'local':
+    azure_template_dir = "prompts/" + revision
+    if _config.file_storage.revisions.storage_type != "local":
         # Define the file path in Azure storage
-        jinja_files = sorted([
-            f for f in await fs.list_files(file_path=azure_template_dir)
-            if f.endswith(".jinja")
-        ])
+        jinja_files = sorted(
+            [
+                f
+                for f in await fs.list_files(file_path=azure_template_dir)
+                if f.endswith(".jinja")
+            ]
+        )
 
         # Local directory to save the Jinja files
         local_template_dir = Path("ingenious_extensions/templates/prompts")
@@ -82,7 +86,9 @@ async def Sync_Prompt_Templates(_config: Config, revision: str):
         for file in jinja_files:
             file_name = file.split("/")[-1]  # Extract the actual file name
             logger.debug(f"Downloading template: {file_name}")
-            temp_file_content = await fs.read_file(file_name=file_name, file_path=azure_template_dir)
+            temp_file_content = await fs.read_file(
+                file_name=file_name, file_path=azure_template_dir
+            )
             local_file_path = local_template_dir / file_name
             with open(local_file_path, "w", encoding="utf-8") as f:
                 f.write(temp_file_content)

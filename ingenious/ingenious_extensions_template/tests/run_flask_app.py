@@ -1,13 +1,23 @@
+import asyncio
+import io
 import os
 import subprocess
-from flask import Flask, render_template_string, request, redirect, url_for, jsonify, session, send_file
-from functools import wraps
 import sys
-import io
-import asyncio
+from functools import wraps
+
+from flask import (
+    Flask,
+    jsonify,
+    redirect,
+    render_template_string,
+    request,
+    send_file,
+    session,
+    url_for,
+)
 
 # Set up parent directory and import dependencies
-parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../'))
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../"))
 sys.path.append(parent_dir)
 
 import ingenious.dependencies as ig_deps
@@ -16,10 +26,10 @@ from ingenious.files.files_repository import FileStorage
 app = Flask(__name__)
 app.secret_key = ig_deps.config.web_configuration.authentication.password
 
-TEMPLATE_FOLDER = os.path.join(parent_dir, 'templates', 'prompts')
+TEMPLATE_FOLDER = os.path.join(parent_dir, "templates", "prompts")
 
-output_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
-functional_test_dir = os.path.join(output_dir, 'functional_test_outputs')
+output_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
+functional_test_dir = os.path.join(output_dir, "functional_test_outputs")
 os.makedirs(functional_test_dir, exist_ok=True)
 
 USERNAME = ig_deps.config.web_configuration.authentication.username
@@ -42,21 +52,22 @@ def authenticate():
 def requires_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        if 'logged_in' not in session:
-            return redirect(url_for('login'))
+        if "logged_in" not in session:
+            return redirect(url_for("login"))
         return f(*args, **kwargs)
+
     return decorated
 
 
 # Routes
-@app.route('/login', methods=['GET', 'POST'])
+@app.route("/login", methods=["GET", "POST"])
 def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
         if check_auth(username, password):
-            session['logged_in'] = True
-            return redirect(url_for('home'))
+            session["logged_in"] = True
+            return redirect(url_for("home"))
         else:
             return "Invalid credentials", 401
     return render_template_string("""
@@ -70,79 +81,86 @@ def login():
     """)
 
 
-@app.route('/logout')
+@app.route("/logout")
 def logout():
-    session.pop('logged_in', None)
-    return redirect(url_for('login'))
+    session.pop("logged_in", None)
+    return redirect(url_for("login"))
 
 
-@app.route('/')
+@app.route("/")
 @requires_auth
 def home():
     html = ""
-    with open(os.path.join(os.path.dirname(__file__), './flask_app_index.html'), 'r') as f:
+    with open(
+        os.path.join(os.path.dirname(__file__), "./flask_app_index.html"), "r"
+    ) as f:
         html = f.read()
 
     try:
-        files = sorted([f for f in os.listdir(TEMPLATE_FOLDER) if f.endswith(('.md', '.jinja'))])
+        files = sorted(
+            [f for f in os.listdir(TEMPLATE_FOLDER) if f.endswith((".md", ".jinja"))]
+        )
     except FileNotFoundError:
         files = []
 
     return render_template_string(html, files=files)
 
 
-@app.route('/get_responses', methods=['GET'])
+@app.route("/get_responses", methods=["GET"])
 @requires_auth
 def get_responses():
     try:
         latest_folder = max(
-            [os.path.join(functional_test_dir, d) for d in os.listdir(functional_test_dir)],
-            key=os.path.getmtime
+            [
+                os.path.join(functional_test_dir, d)
+                for d in os.listdir(functional_test_dir)
+            ],
+            key=os.path.getmtime,
         )
     except ValueError:
         return "<p>No responses folder found.</p>"
 
-    RESPONSES_FILE = os.path.join(latest_folder, 'responses.html')
+    RESPONSES_FILE = os.path.join(latest_folder, "responses.html")
 
     if os.path.exists(RESPONSES_FILE):
-        with open(RESPONSES_FILE, 'r', encoding='utf-8') as rf:
+        with open(RESPONSES_FILE, "r", encoding="utf-8") as rf:
             return rf.read()
     return "<p>No responses found or file does not exist.</p>"
 
 
-@app.route('/download_responses', methods=['GET'])
+@app.route("/download_responses", methods=["GET"])
 @requires_auth
 def download_responses():
     try:
         latest_folder = max(
-            [os.path.join(functional_test_dir, d) for d in os.listdir(functional_test_dir)],
-            key=os.path.getmtime
+            [
+                os.path.join(functional_test_dir, d)
+                for d in os.listdir(functional_test_dir)
+            ],
+            key=os.path.getmtime,
         )
-        RESPONSES_FILE = os.path.join(latest_folder, 'responses.html')
+        RESPONSES_FILE = os.path.join(latest_folder, "responses.html")
 
         if os.path.exists(RESPONSES_FILE):
-            with open(RESPONSES_FILE, 'r', encoding='utf-8') as rf:
+            with open(RESPONSES_FILE, "r", encoding="utf-8") as rf:
                 file_contents = rf.read()
             return send_file(
-                io.BytesIO(file_contents.encode('utf-8')),
+                io.BytesIO(file_contents.encode("utf-8")),
                 as_attachment=True,
-                download_name='responses.html',
-                mimetype='text/html'
+                download_name="responses.html",
+                mimetype="text/html",
             )
     except ValueError:
         pass
     return jsonify({"status": "error", "output": "Responses file not found"}), 404
 
 
-@app.route('/run_simple_tests', methods=['POST'])
+@app.route("/run_simple_tests", methods=["POST"])
 @requires_auth
 def run_simple_tests():
     try:
         result = subprocess.run(
-            ["ingen_cli", "run-test-batch"],
-            capture_output=True,
-            text=True,
-            check=False
+            ["ingen_cli", "run-test-batch"], capture_output=True, text=True, check=False
         )
         status = "success" if result.returncode == 0 else "error"
         return jsonify({"status": status, "output": result.stdout or result.stderr})
@@ -150,28 +168,33 @@ def run_simple_tests():
         return jsonify({"status": "error", "output": str(e)})
 
 
-@app.route('/edit/<filename>', methods=['GET', 'POST'])
+@app.route("/edit/<filename>", methods=["GET", "POST"])
 @requires_auth
 def edit_file(filename):
     file_path = os.path.join(TEMPLATE_FOLDER, filename)
 
-    if request.method == 'POST':
-        new_content = request.form.get('file_content', '')
-        if ig_deps.config.file_storage.storage_type == 'azure':
-            asyncio.run(fs.write_file(contents=new_content, file_name=filename, file_path='prompts'))
+    if request.method == "POST":
+        new_content = request.form.get("file_content", "")
+        if ig_deps.config.file_storage.storage_type == "azure":
+            asyncio.run(
+                fs.write_file(
+                    contents=new_content, file_name=filename, file_path="prompts"
+                )
+            )
         else:
-            with open(file_path, 'w', encoding='utf-8') as f:
+            with open(file_path, "w", encoding="utf-8") as f:
                 f.write(new_content)
-        return redirect(url_for('home'))
+        return redirect(url_for("home"))
     else:
-        if ig_deps.config.file_storage.storage_type == 'azure':
-            content = asyncio.run(fs.read_file(file_name=filename, file_path='prompts'))
+        if ig_deps.config.file_storage.storage_type == "azure":
+            content = asyncio.run(fs.read_file(file_name=filename, file_path="prompts"))
         else:
             if not os.path.exists(file_path):
                 return f"File '{filename}' does not exist.", 404
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, "r", encoding="utf-8") as f:
                 content = f.read()
-        return render_template_string("""
+        return render_template_string(
+            """
             <!DOCTYPE html>
             <html>
             <head>
@@ -190,8 +213,11 @@ def edit_file(filename):
                 </div>
             </body>
             </html>
-        """, filename=filename, content=content)
+        """,
+            filename=filename,
+            content=content,
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True, host=HOST, port=PORT)

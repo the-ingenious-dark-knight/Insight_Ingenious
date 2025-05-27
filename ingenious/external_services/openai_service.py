@@ -1,29 +1,25 @@
 import logging
 import re
-from ingenious.errors.content_filter_error import ContentFilterError
-from ingenious.errors.token_limit_exceeded_error import TokenLimitExceededError
-from openai import AzureOpenAI, NOT_GIVEN, BadRequestError
+
+from openai import NOT_GIVEN, AzureOpenAI, BadRequestError
 from openai.types.chat import (
+    ChatCompletionMessage,
     ChatCompletionMessageParam,
     ChatCompletionToolParam,
-    ChatCompletionMessage
 )
+
+from ingenious.errors.content_filter_error import ContentFilterError
+from ingenious.errors.token_limit_exceeded_error import TokenLimitExceededError
 
 logger = logging.getLogger(__name__)
 
 
 class OpenAIService:
     def __init__(
-        self,
-        azure_endpoint: str,
-        api_key: str,
-        api_version: str,
-        open_ai_model: str
+        self, azure_endpoint: str, api_key: str, api_version: str, open_ai_model: str
     ):
         self.client = AzureOpenAI(
-            azure_endpoint=azure_endpoint,
-            api_key=api_key,
-            api_version=api_version
+            azure_endpoint=azure_endpoint, api_key=api_key, api_version=api_version
         )
         self.model = open_ai_model
 
@@ -32,7 +28,7 @@ class OpenAIService:
         messages: list[ChatCompletionMessageParam],
         tools: list[ChatCompletionToolParam] | None = None,
         tool_choice: str | dict | None = None,
-        json_mode=False
+        json_mode=False,
     ) -> ChatCompletionMessage:
         logger.debug(f"Generating OpenAI response for messages: {messages}")
         try:
@@ -76,14 +72,14 @@ class OpenAIService:
                         max_context_length,
                         requested_tokens,
                         prompt_tokens,
-                        completion_tokens
+                        completion_tokens,
                     ) = token_error_match.groups()
                     raise TokenLimitExceededError(
                         message=message,
                         max_context_length=int(max_context_length),
                         requested_tokens=int(requested_tokens),
                         prompt_tokens=int(prompt_tokens),
-                        completion_tokens=int(completion_tokens)
+                        completion_tokens=int(completion_tokens),
                     )
 
             raise Exception(message)

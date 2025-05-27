@@ -4,29 +4,38 @@ import autogen.runtime_logging
 
 import ingenious.config.config as config
 from ingenious.models.chat import ChatResponse
-from ingenious.services.chat_services.multi_agent.conversation_patterns.sql_manipulation_agent.sql_manipulation_agent import \
-    ConversationPattern
+from ingenious.services.chat_services.multi_agent.conversation_patterns.sql_manipulation_agent.sql_manipulation_agent import (
+    ConversationPattern,
+)
 from ingenious.services.chat_services.multi_agent.tool_factory import SQL_ToolFunctions
+
 
 class ConversationFlow:
     @staticmethod
-    async def get_conversation_response(message: str, topics: list = [], thread_memory: str = '',
-                                        memory_record_switch=True,
-                                        thread_chat_history: list[str, str] = []) -> ChatResponse:
+    async def get_conversation_response(
+        message: str,
+        topics: list = [],
+        thread_memory: str = "",
+        memory_record_switch=True,
+        thread_chat_history: list[str, str] = [],
+    ) -> ChatResponse:
         _config = config.get_config()
         llm_config = _config.models[0].__dict__
         memory_path = _config.chat_history.memory_path
 
         # Initialize the knowledge base agent pattern, you only need to add defined topics here
-        agent_pattern = ConversationPattern(default_llm_config=llm_config,
-                                            topics=topics,
-                                            memory_record_switch=memory_record_switch,
-                                            memory_path=memory_path,
-                                            thread_memory=thread_memory)
+        agent_pattern = ConversationPattern(
+            default_llm_config=llm_config,
+            topics=topics,
+            memory_record_switch=memory_record_switch,
+            memory_path=memory_path,
+            thread_memory=thread_memory,
+        )
 
-        if _config.azure_sql_services.database_name == 'skip':
-
-            table_name, column_names = SQL_ToolFunctions.get_db_attr(_config) #enable this for local sql
+        if _config.azure_sql_services.database_name == "skip":
+            table_name, column_names = SQL_ToolFunctions.get_db_attr(
+                _config
+            )  # enable this for local sql
             sql_writer = autogen.AssistantAgent(
                 "sql_writer",
                 llm_config=llm_config,
@@ -40,8 +49,11 @@ class ConversationFlow:
                         - Format your output based on the number of rows:
                           - **Single Row**: Use the format `{{column_name: value, column_name: value}}`.
                           - **Multiple Rows**: Use a list format with each row as a dictionary, e.g., `[{{column_name: value}}, {{column_name: value}}]`.
-                        """),
-                description=("""I am **ONLY** allowed to speak **immediately** after `researcher`."""),
+                        """
+                ),
+                description=(
+                    """I am **ONLY** allowed to speak **immediately** after `researcher`."""
+                ),
                 is_termination_msg=agent_pattern.termination_msg,
             )
 
@@ -51,11 +63,13 @@ class ConversationFlow:
                 caller=agent_pattern.sql_writer,
                 executor=agent_pattern.planner,
                 name="sql_writer",
-                description="Use this tool to perform sql query."
+                description="Use this tool to perform sql query.",
             )
 
         else:
-            database_name, table_name, column_names = SQL_ToolFunctions.get_azure_db_attr(_config) #enable this for azure sql
+            database_name, table_name, column_names = (
+                SQL_ToolFunctions.get_azure_db_attr(_config)
+            )  # enable this for azure sql
             sql_writer = autogen.AssistantAgent(
                 "sql_writer",
                 llm_config=llm_config,
@@ -68,8 +82,11 @@ class ConversationFlow:
                         - Format your output based on the number of rows:
                           - **Single Row**: Use the format `{{column_name: value, column_name: value}}`.
                           - **Multiple Rows**: Use a list format with each row as a dictionary, e.g., `[{{column_name: value}}, {{column_name: value}}]`.
-                        """),
-                description=("""I am **ONLY** allowed to speak **immediately** after `researcher`."""),
+                        """
+                ),
+                description=(
+                    """I am **ONLY** allowed to speak **immediately** after `researcher`."""
+                ),
                 is_termination_msg=agent_pattern.termination_msg,
             )
 
@@ -79,10 +96,8 @@ class ConversationFlow:
                 caller=agent_pattern.sql_writer,
                 executor=agent_pattern.planner,
                 name="sql_writer",
-                description="Use this tool to perform sql query."
+                description="Use this tool to perform sql query.",
             )
-
-
 
         # Get the conversation response using the pattern
         res, memory_summary = await agent_pattern.get_conversation_response(message)

@@ -1,9 +1,11 @@
-from abc import ABC, abstractmethod
 import logging
+from abc import ABC, abstractmethod
+
 from fastapi import APIRouter, FastAPI
-from ingenious.models.config import Config
-from ingenious.dependencies import get_security_service, get_chat_history_repository
 from fastapi.security import HTTPBasicCredentials
+
+from ingenious.dependencies import get_chat_history_repository, get_security_service
+from ingenious.models.config import Config
 
 
 class IApiRoutes(ABC):
@@ -20,4 +22,3 @@ class IApiRoutes(ABC):
         Adds custom routes to the FastAPI app instance. Always returns the router instance.
         """
         pass
-

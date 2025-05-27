@@ -1,3 +1,4 @@
+import json
 import tempfile
 from concurrent.futures import ThreadPoolExecutor, TimeoutError
 from typing import Dict
@@ -7,9 +8,10 @@ import pandas as pd
 import pyodbc
 from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
-import json
+
 import ingenious.config.config as ingen_config
 from ingenious.utils.load_sample_data import sqlite_sample_db
+
 _config = ingen_config.get_config()
 
 
@@ -22,19 +24,22 @@ class ToolFunctions:
             index_name=index_name,
             credential=credential,
         )
-        results = client.search(search_text=search_query, top=5,
-                                query_type="semantic",  # semantic, full or simple
-                                query_answer="extractive",
-                                query_caption="extractive",
-                                vector_queries=None)  # vector_queries can input the query as a vector
+        results = client.search(
+            search_text=search_query,
+            top=5,
+            query_type="semantic",  # semantic, full or simple
+            query_answer="extractive",
+            query_caption="extractive",
+            vector_queries=None,
+        )  # vector_queries can input the query as a vector
         text_results = ""
         title = ""
         for result in results:
-            captions = result['@search.captions']
+            captions = result["@search.captions"]
             for caption in captions:
                 text_results = text_results + "; " + caption.text
-                if 'title' in result:
-                    title = result['title']
+                if "title" in result:
+                    title = result["title"]
                 else:
                     title = ""
         return text_results
@@ -44,6 +49,7 @@ class ToolFunctions:
         memory_path = _config.chat_history.memory_path
         with open(f"{memory_path}/context.md", "w") as memory_file:
             memory_file.write(context)
+
 
 class PandasExecutor:
     @staticmethod
@@ -58,14 +64,14 @@ class PandasExecutor:
         plot_bar_chart({"GROUP_A": 518, "GROUP_B": 100})
         """
         # Convert the dictionary to a DataFrame for easier plotting
-        df = pd.DataFrame(list(data.items()), columns=['Category', 'Value'])
+        df = pd.DataFrame(list(data.items()), columns=["Category", "Value"])
 
         # Plotting
         plt.figure(figsize=(8, 6))
-        plt.bar(df['Category'], df['Value'])
-        plt.xlabel('Category')
-        plt.ylabel('Value')
-        plt.title('Bar Chart')
+        plt.bar(df["Category"], df["Value"])
+        plt.xlabel("Category")
+        plt.ylabel("Value")
+        plt.title("Bar Chart")
         plt.show()
 
         # Save the plot to a temporary file
@@ -75,7 +81,7 @@ class PandasExecutor:
         return temp_file.name
 
 
-#SQL Tools TODO: need a better way to wrap these functions
+# SQL Tools TODO: need a better way to wrap these functions
 def get_conn(_config):
     connection_string = _config.azure_sql_services.database_connection_string
     # credential = identity.DefaultAzureCredential(exclude_interactive_browser_credential=False)
@@ -86,14 +92,16 @@ def get_conn(_config):
     cursor = conn.cursor()
     return conn, cursor
 
-if _config.azure_sql_services.database_name == 'skip':
-    test_db = sqlite_sample_db() #this is for local sql initialisation
+
+if _config.azure_sql_services.database_name == "skip":
+    test_db = sqlite_sample_db()  # this is for local sql initialisation
 else:
     conn, cursor = get_conn(_config)
 
-class SQL_ToolFunctions:
 
-    if _config.azure_sql_services.database_name == 'skip':
+class SQL_ToolFunctions:
+    if _config.azure_sql_services.database_name == "skip":
+
         @staticmethod
         def get_db_attr(_config):
             table_name = _config.local_sql_db.sample_database_name
@@ -102,10 +110,10 @@ class SQL_ToolFunctions:
             return table_name, column_names
 
         @staticmethod
-        def execute_sql_local(sql: str,
-                              timeout: int = 10  # Timeout in seconds
-                              ) -> str:
-
+        def execute_sql_local(
+            sql: str,
+            timeout: int = 10,  # Timeout in seconds
+        ) -> str:
             def run_query(sql: str):
                 return test_db.execute_sql(sql)
 
@@ -123,13 +131,14 @@ class SQL_ToolFunctions:
                     return str(e)
 
     else:
+
         @staticmethod
         def get_azure_db_attr(_config):
             database_name = _config.azure_sql_services.database_name
             table_name = _config.azure_sql_services.table_name
             cursor.execute(f"""
-                SELECT COLUMN_NAME 
-                FROM INFORMATION_SCHEMA.COLUMNS 
+                SELECT COLUMN_NAME
+                FROM INFORMATION_SCHEMA.COLUMNS
                 WHERE TABLE_NAME = '{table_name}'
             """)
             column_names = [row[0] for row in cursor.fetchall()]
@@ -138,15 +147,20 @@ class SQL_ToolFunctions:
             return database_name, table_name, column_names
 
         @staticmethod
-        def execute_sql_azure(sql: str,
-                              timeout: int = 15  # Timeout in seconds
-                              ) -> str:
-
+        def execute_sql_azure(
+            sql: str,
+            timeout: int = 15,  # Timeout in seconds
+        ) -> str:
             def run_query(sql_query):
                 try:
                     cursor.execute(sql_query)
-                    r = [dict((cursor.description[i][0], value) \
-                              for i, value in enumerate(row)) for row in cursor.fetchall()]
+                    r = [
+                        dict(
+                            (cursor.description[i][0], value)
+                            for i, value in enumerate(row)
+                        )
+                        for row in cursor.fetchall()
+                    ]
                     # cursor.close()
                     # conn.close()
                     return json.dumps(r)

@@ -1,6 +1,8 @@
-from typing import List, Union
-from pydantic import BaseModel, Field
 import json
+from typing import List, Union
+
+from pydantic import BaseModel, Field
+
 from ingenious.utils.model_utils import Listable_Object_To_Csv
 
 
@@ -12,11 +14,15 @@ class RootModel_Bike(BaseModel):
 
 
 class RootModel_MountainBike(RootModel_Bike):
-    suspension: str = Field(..., description="Type of suspension (e.g., full, hardtail)")
+    suspension: str = Field(
+        ..., description="Type of suspension (e.g., full, hardtail)"
+    )
 
 
 class RootModel_RoadBike(RootModel_Bike):
-    frame_material: str = Field(..., description="Material of the frame (e.g., carbon, aluminum)")
+    frame_material: str = Field(
+        ..., description="Material of the frame (e.g., carbon, aluminum)"
+    )
 
 
 class RootModel_CustomerReview(BaseModel):
@@ -65,12 +71,14 @@ class RootModel(BaseModel):
 
     def display_bike_sales_as_table(self):
         table_data: List[RootModel_BikeSale_Extended] = []
-        
+
         for store in self.stores:
             for sale in store.bike_sales:
                 store_name = store.name
                 location = store.location
-                rec = RootModel_BikeSale_Extended(store_name=store_name, location=location, **sale.model_dump())
+                rec = RootModel_BikeSale_Extended(
+                    store_name=store_name, location=location, **sale.model_dump()
+                )
                 table_data.append(rec)
 
         ret = Listable_Object_To_Csv(table_data, RootModel_BikeSale_Extended)

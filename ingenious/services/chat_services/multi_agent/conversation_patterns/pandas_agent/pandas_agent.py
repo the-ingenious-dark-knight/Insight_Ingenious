@@ -1,19 +1,25 @@
+import logging
+
 import autogen
 import autogen.retrieve_utils
 import autogen.runtime_logging
 
-import logging
 logger = logging.getLogger(__name__)
 
-import shutil
 import os
+import shutil
+
 
 class ConversationPattern:
-
-    def __init__(self, default_llm_config: dict, topics: list, memory_record_switch: bool, memory_path: str,
-                 thread_memory: str):
-
-        tmp_folder_path = 'tmp/code'
+    def __init__(
+        self,
+        default_llm_config: dict,
+        topics: list,
+        memory_record_switch: bool,
+        memory_path: str,
+        thread_memory: str,
+    ):
+        tmp_folder_path = "tmp/code"
         if os.path.exists(tmp_folder_path):
             # Delete everything under the tmp folder
             for item in os.listdir(tmp_folder_path):
@@ -32,14 +38,15 @@ class ConversationPattern:
         self.memory_path = memory_path
         self.thread_memory = thread_memory
 
-
         if not self.thread_memory:
             with open(f"{self.memory_path}/context.md", "w") as memory_file:
                 memory_file.write("New conversation. Continue based on user question.")
 
         if self.memory_record_switch and self.thread_memory:
-            logger.log(level=logging.DEBUG,
-                       msg="Memory recording enabled. Requires `ChatHistorySummariser` for optional dependency.")
+            logger.log(
+                level=logging.DEBUG,
+                msg="Memory recording enabled. Requires `ChatHistorySummariser` for optional dependency.",
+            )
             with open(f"{self.memory_path}/context.md", "w") as memory_file:
                 memory_file.write(self.thread_memory)
 
@@ -48,17 +55,17 @@ class ConversationPattern:
 
         self.termination_msg = lambda x: "TERMINATE" in x.get("content", "").upper()
 
-
         # Initialize customised agents for the group chat.
         self.sql_writer = None
         self.creator = None
 
         # Initialize core agents.
         self.user_proxy = autogen.UserProxyAgent(
-            name="user_proxy", human_input_mode="NEVER", max_consecutive_auto_reply=0,
-            code_execution_config={"use_docker": False}
+            name="user_proxy",
+            human_input_mode="NEVER",
+            max_consecutive_auto_reply=0,
+            code_execution_config={"use_docker": False},
         )
-
 
         # self.planner = autogen.AssistantAgent(
         #     name="planner",
@@ -77,7 +84,6 @@ class ConversationPattern:
         #     is_termination_msg=self.termination_msg,
         # )
 
-
         # self.researcher = autogen.ConversableAgent(
         #     name="researcher",
         #     system_message=(
@@ -94,7 +100,6 @@ class ConversationPattern:
         #     code_execution_config=False,
         #     is_termination_msg=self.termination_msg,
         # )
-
 
     async def get_conversation_response(self, input_message: str) -> [str, str]:
         """
@@ -128,7 +133,6 @@ class ConversationPattern:
         #                                    is_termination_msg=self.termination_msg,
         #                                    code_execution_config=False)
 
-
         # if self.memory_record_switch:
         #     self.user_proxy.retrieve_docs(input_message, 2, '')
         #     self.user_proxy.n_results = 2
@@ -149,9 +153,7 @@ class ConversationPattern:
         #     )
 
         res = await self.user_proxy.a_initiate_chat(
-            self.creator,
-            message=input_message,
-            summary_method="last_msg"
+            self.creator, message=input_message, summary_method="last_msg"
         )
 
         with open(f"{self.memory_path}/context.md", "w") as memory_file:

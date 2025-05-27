@@ -1,10 +1,12 @@
 import logging
 from pathlib import Path
+
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.security import HTTPBasicCredentials
 from typing_extensions import Annotated
-from ingenious.models.http_error import HTTPError
+
 import ingenious.dependencies as igen_deps
+from ingenious.models.http_error import HTTPError
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -24,43 +26,37 @@ async def diagnostic(
     request: Request,
     credentials: Annotated[
         HTTPBasicCredentials, Depends(igen_deps.get_security_service)
-    ]
+    ],
 ):
     if request.method == "OPTIONS":
         return {"Allow": "GET, OPTIONS"}
 
     try:
         diagnostic = {}
-        
+
         prompt_dir = Path(
-                await igen_deps.get_file_storage_revisions().get_base_path()
-            ) / Path(
-                await igen_deps.get_file_storage_revisions().get_prompt_template_path()
-            )
-        
-        data_dir = Path(
-                await igen_deps.get_file_storage_data().get_base_path()
-            ) / Path(
-                await igen_deps.get_file_storage_data().get_data_path()
-            )
-        
+            await igen_deps.get_file_storage_revisions().get_base_path()
+        ) / Path(
+            await igen_deps.get_file_storage_revisions().get_prompt_template_path()
+        )
+
+        data_dir = Path(await igen_deps.get_file_storage_data().get_base_path()) / Path(
+            await igen_deps.get_file_storage_data().get_data_path()
+        )
+
         output_dir = Path(
-                await igen_deps.get_file_storage_revisions().get_base_path()
-            ) / Path(
-                await igen_deps.get_file_storage_revisions().get_output_path()
-            )
+            await igen_deps.get_file_storage_revisions().get_base_path()
+        ) / Path(await igen_deps.get_file_storage_revisions().get_output_path())
 
         events_dir = Path(
-                await igen_deps.get_file_storage_revisions().get_base_path()
-            ) / Path(
-                await igen_deps.get_file_storage_revisions().get_events_path()
-            )
+            await igen_deps.get_file_storage_revisions().get_base_path()
+        ) / Path(await igen_deps.get_file_storage_revisions().get_events_path())
 
         diagnostic["Prompt Directory"] = prompt_dir
         diagnostic["Data Directory"] = data_dir
         diagnostic["Output Directory"] = output_dir
         diagnostic["Events Directory"] = events_dir
-        
+
         return diagnostic
 
     except Exception as e:

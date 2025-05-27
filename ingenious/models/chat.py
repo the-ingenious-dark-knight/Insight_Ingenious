@@ -1,4 +1,5 @@
 from typing import Optional
+
 from pydantic import BaseModel
 
 
@@ -33,4 +34,3 @@ class ChatRequest(IChatRequest):
 
 class ChatResponse(IChatResponse):
     pass
-

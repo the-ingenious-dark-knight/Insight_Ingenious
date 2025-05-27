@@ -3,7 +3,7 @@ from ingenious.models.config import Config
 
 
 class ProjectAgents(IProjectAgents):
-    def Get_Project_Agents(self, config: Config) -> Agents:        
+    def Get_Project_Agents(self, config: Config) -> Agents:
         local_agents = []
         local_agents.append(
             Agent(
@@ -15,8 +15,7 @@ class ProjectAgents(IProjectAgents):
                 model=None,
                 system_prompt=None,
                 log_to_prompt_tuner=True,
-                return_in_response=False
-
+                return_in_response=False,
             )
         )
         local_agents.append(
@@ -29,7 +28,7 @@ class ProjectAgents(IProjectAgents):
                 model=None,
                 system_prompt=None,
                 log_to_prompt_tuner=True,
-                return_in_response=False
+                return_in_response=False,
             )
         )
         local_agents.append(
@@ -42,7 +41,7 @@ class ProjectAgents(IProjectAgents):
                 model=None,
                 system_prompt=None,
                 log_to_prompt_tuner=True,
-                return_in_response=True
+                return_in_response=True,
             )
         )
         local_agents.append(
@@ -55,7 +54,7 @@ class ProjectAgents(IProjectAgents):
                 model=None,
                 system_prompt=None,
                 log_to_prompt_tuner=False,
-                return_in_response=False
+                return_in_response=False,
             )
         )
         local_agents.append(
@@ -68,11 +67,8 @@ class ProjectAgents(IProjectAgents):
                 model=None,
                 system_prompt=None,
                 log_to_prompt_tuner=True,
-                return_in_response=False
+                return_in_response=False,
             )
         )
-
-
-        
 
         return Agents(agents=local_agents, config=config)

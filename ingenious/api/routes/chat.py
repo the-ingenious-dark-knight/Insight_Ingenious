@@ -1,26 +1,29 @@
 import logging
+
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import HTTPBasicCredentials
 from typing_extensions import Annotated
+
+import ingenious.dependencies as igen_deps
+import ingenious.utils.namespace_utils as ns_utils
 from ingenious.dependencies import get_chat_service
 from ingenious.errors.content_filter_error import ContentFilterError
 from ingenious.errors.token_limit_exceeded_error import TokenLimitExceededError
 from ingenious.models.chat import ChatRequest, ChatResponse
 from ingenious.models.http_error import HTTPError
 from ingenious.services.chat_service import ChatService
-import ingenious.dependencies as igen_deps
-import ingenious.utils.namespace_utils as ns_utils
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
-import sys
 import os
+import sys
 
 parent_dir = os.path.abspath(
     os.path.join(os.path.dirname(__file__), "../../../../../../..")
 )
 sys.path.append(parent_dir)
+
 
 @router.post(
     "/chat",

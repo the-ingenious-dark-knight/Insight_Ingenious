@@ -1,6 +1,11 @@
+from datetime import datetime, timezone
 from typing import Dict, List, Optional
+
 import chainlit as cl
 import chainlit.data as cl_data
+from chainlit.data import queue_until_user_message
+from chainlit.element import Element, ElementDict
+from chainlit.step import StepDict
 from chainlit.types import (
     Feedback,
     PageInfo,
@@ -9,10 +14,7 @@ from chainlit.types import (
     ThreadDict,
     ThreadFilter,
 )
-from chainlit.data import queue_until_user_message
-from chainlit.element import Element, ElementDict
-from chainlit.step import StepDict
-from datetime import datetime, timezone
+
 import ingenious.dependencies as deps
 
 now = datetime.now(timezone.utc)
@@ -23,26 +25,32 @@ deleted_thread_ids = []  # type: List[str]
 user = None
 
 
-class DataLayer(cl_data.BaseDataLayer):    
+class DataLayer(cl_data.BaseDataLayer):
     async def set_user(self, user):
         self.user = user
-    
+
     async def get_user(self, identifier: str) -> Optional[cl.PersistedUser]:
         print("Searching for user with identifier: ", identifier)
         user = await deps.get_chat_history_repository().get_user(identifier)
         if user:
             print("Found Existing user with identifier: ", identifier)
-            self.user = cl.PersistedUser(id=user.id, createdAt=user.createdAt, identifier=user.identifier)
+            self.user = cl.PersistedUser(
+                id=user.id, createdAt=user.createdAt, identifier=user.identifier
+            )
             return self.user
         else:
             return None
 
-    async def create_user(self, user: cl.User):        
+    async def create_user(self, user: cl.User):
         print("Creating user with identifier: ", user.identifier)
-        _user = await deps.get_chat_history_repository().add_user(identifier=user.identifier)
-        self.user = cl.PersistedUser(id=user.identifier, createdAt=now_str, identifier=user.identifier)
+        _user = await deps.get_chat_history_repository().add_user(
+            identifier=user.identifier
+        )
+        self.user = cl.PersistedUser(
+            id=user.identifier, createdAt=now_str, identifier=user.identifier
+        )
         return self.user
-    
+
     async def update_thread(
         self,
         thread_id: str,
@@ -52,7 +60,9 @@ class DataLayer(cl_data.BaseDataLayer):
         tags: Optional[List[str]] = None,
     ):
         print("Updating thread: ", thread_id)
-        await deps.get_chat_history_repository().update_thread(thread_id, name, user_id, metadata, tags)
+        await deps.get_chat_history_repository().update_thread(
+            thread_id, name, user_id, metadata, tags
+        )
 
     @cl_data.queue_until_user_message()
     async def create_step(self, step_dict: StepDict):
@@ -64,52 +74,24 @@ class DataLayer(cl_data.BaseDataLayer):
         print("User ID: ", self.user.identifier)
         print("Thread ID: ", thread_id)
         threads = await deps.get_chat_history_repository().get_threads_for_user(
-            identifier=self.user.identifier, 
-            thread_id=thread_id
+            identifier=self.user.identifier, thread_id=thread_id
         )
         # Get first user in the thread
         if threads:
-            return threads[0]['userIdentifier']
+            return threads[0]["userIdentifier"]
         else:
             return ""
 
     async def get_threads_for_user(self, user_id: str):
         threads = []
-        tfu = await deps.get_chat_history_repository().get_threads_for_user(identifier=user_id, thread_id=None)
-        if tfu:
-            for t in tfu:
-                thread = {
-                    "id": t['id'],
-                    "name": t['name'],
-                    "createdAt": t['createdAt'],
-                    "userId": t['userId'],
-                    "userIdentifier": t['userIdentifier'],
-                    "tags": t['tags'],
-                    "metadata": t['metadata'],
-                    "elements": t['elements'],
-                    "steps": t['steps'],
-                }
-                threads.append(thread)
-        return threads
-    
-    async def list_threads(
-        self, pagination: Pagination, filters: ThreadFilter
-    ) -> PaginatedResponse[ThreadDict]:       
-        thread_history = await self.get_threads_for_user(self.user.identifier)
-        return PaginatedResponse(            
-                data=[t for t in thread_history if t["id"] not in deleted_thread_ids],
-                pageInfo=PageInfo(hasNextPage=False, startCursor=None, endCursor=None),
+        tfu = await deps.get_chat_history_repository().get_threads_for_user(
+            identifier=user_id, thread_id=None
         )
-
-    async def get_thread(self, thread_id: str) -> Optional[ThreadDict]: 
-        print("Getting thread: ", thread_id)
-        tfu = await deps.get_chat_history_repository().get_threads_for_user(identifier=self.user.identifier, thread_id=thread_id)
-        thread = None       
         if tfu:
             for t in tfu:
                 thread = {
-                    "id": t['id'],
-                    "name": t['name'],
+                    "id": t["id"],
+                    "name": t["name"],
                     "createdAt": t["createdAt"],
                     "userId": t["userId"],
                     "userIdentifier": t["userIdentifier"],
@@ -117,7 +99,38 @@ class DataLayer(cl_data.BaseDataLayer):
                     "metadata": t["metadata"],
                     "elements": t["elements"],
                     "steps": t["steps"],
-                }                   
+                }
+                threads.append(thread)
+        return threads
+
+    async def list_threads(
+        self, pagination: Pagination, filters: ThreadFilter
+    ) -> PaginatedResponse[ThreadDict]:
+        thread_history = await self.get_threads_for_user(self.user.identifier)
+        return PaginatedResponse(
+            data=[t for t in thread_history if t["id"] not in deleted_thread_ids],
+            pageInfo=PageInfo(hasNextPage=False, startCursor=None, endCursor=None),
+        )
+
+    async def get_thread(self, thread_id: str) -> Optional[ThreadDict]:
+        print("Getting thread: ", thread_id)
+        tfu = await deps.get_chat_history_repository().get_threads_for_user(
+            identifier=self.user.identifier, thread_id=thread_id
+        )
+        thread = None
+        if tfu:
+            for t in tfu:
+                thread = {
+                    "id": t["id"],
+                    "name": t["name"],
+                    "createdAt": t["createdAt"],
+                    "userId": t["userId"],
+                    "userIdentifier": t["userIdentifier"],
+                    "tags": t["tags"],
+                    "metadata": t["metadata"],
+                    "elements": t["elements"],
+                    "steps": t["steps"],
+                }
         if not thread:
             print("Thread not found")
             return None

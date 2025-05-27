@@ -8,9 +8,14 @@ logger = logging.getLogger(__name__)
 
 
 class ConversationPattern:
-
-    def __init__(self, default_llm_config: dict, topics: list, memory_record_switch: bool, memory_path: str,
-                 thread_memory: str):
+    def __init__(
+        self,
+        default_llm_config: dict,
+        topics: list,
+        memory_record_switch: bool,
+        memory_path: str,
+        thread_memory: str,
+    ):
         self.default_llm_config = default_llm_config
         self.topics = topics
         self.memory_record_switch = memory_record_switch
@@ -18,8 +23,7 @@ class ConversationPattern:
         self.thread_memory = thread_memory
         self.topic_agents: list[autogen.AssistantAgent] = []
         self.termination_msg = lambda x: "TERMINATE" in x.get("content", "").upper()
-        self.context = ''
-
+        self.context = ""
 
         self.user_proxy = autogen.UserProxyAgent(
             name="user_proxy",
@@ -28,7 +32,7 @@ class ConversationPattern:
             max_consecutive_auto_reply=2,
             system_message="I enhance the user question with context",
             code_execution_config=False,
-            silent=False
+            silent=False,
         )
 
         # self.researcher = autogen.ConversableAgent(
@@ -64,7 +68,6 @@ class ConversationPattern:
             is_termination_msg=self.termination_msg,
         )
 
-
     def add_topic_agent(self, agent: autogen.AssistantAgent):
         self.topic_agents.append(agent)
 
@@ -77,11 +80,10 @@ class ConversationPattern:
 
         graph_dict = {}
         graph_dict[self.user_proxy] = [self.planner]
-        #graph_dict[self.planner] = [self.researcher]
+        # graph_dict[self.planner] = [self.researcher]
         graph_dict[self.planner] = self.topic_agents
         for topic_agent in self.topic_agents:
             graph_dict[topic_agent] = [self.planner]
-
 
         groupchat = autogen.GroupChat(
             agents=[self.user_proxy, self.planner] + self.topic_agents,
@@ -95,18 +97,21 @@ class ConversationPattern:
             speaker_transitions_type="allowed",
         )
 
-        manager = autogen.GroupChatManager(groupchat=groupchat,
-                                           llm_config=self.default_llm_config,
-                                           is_termination_msg=self.termination_msg,
-                                           code_execution_config=False)
-
+        manager = autogen.GroupChatManager(
+            groupchat=groupchat,
+            llm_config=self.default_llm_config,
+            is_termination_msg=self.termination_msg,
+            code_execution_config=False,
+        )
 
         res = await self.user_proxy.a_initiate_chat(
             manager,
-            message= ("Extract insights from the payload, ensuring that only one type of topic agent is selected. \n" 
-                     "The output must be in JSON format, containing only the JSON string within {} and no additional text outside."
-                     "Payload: "+ input_message),
-            summary_method="last_msg"
+            message=(
+                "Extract insights from the payload, ensuring that only one type of topic agent is selected. \n"
+                "The output must be in JSON format, containing only the JSON string within {} and no additional text outside."
+                "Payload: " + input_message
+            ),
+            summary_method="last_msg",
         )
 
         return res.summary, self.context

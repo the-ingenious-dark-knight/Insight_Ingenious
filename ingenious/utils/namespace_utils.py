@@ -1,7 +1,7 @@
 import importlib
+import os
 import pkgutil
 import sys
-import os
 from pathlib import Path
 from sysconfig import get_paths
 
@@ -68,7 +68,7 @@ def import_module_with_fallback(module_name):
         sys.path.append(str(working_dir))
 
     modules = [f"{n}.{module_name}" for n in get_namespaces()]
-    
+
     for i in range(len(modules)):
         m = modules[i]
         print(f"Trying to import module {m}")
@@ -100,11 +100,17 @@ def import_class_with_fallback(module_name, class_name):
     except ModuleNotFoundError as e:
         raise ValueError(f"Module {module_name} not found in any namespace: {e}") from e
     except AttributeError as e:
-        raise ValueError(f"Class {class_name} not found in module {module_name}: {e}") from e
+        raise ValueError(
+            f"Class {class_name} not found in module {module_name}: {e}"
+        ) from e
     except ImportError as e:
-        raise ValueError(f"ImportError occurred while importing module {module_name}: {e}") from e
+        raise ValueError(
+            f"ImportError occurred while importing module {module_name}: {e}"
+        ) from e
     except Exception as e:
-        raise ValueError(f"An unexpected error occurred while importing {module_name}.{class_name}: {e}") from e
+        raise ValueError(
+            f"An unexpected error occurred while importing {module_name}.{class_name}: {e}"
+        ) from e
 
 
 def get_file_from_namespace_with_fallback(module_name, file_name):
@@ -145,10 +151,12 @@ def get_inbuilt_api_routes():
         list: A list of Path objects representing the in-built API routes.
     """
     working_dir = Path(os.getcwd()) / Path("ingenious") / Path("api") / Path("routes")
-    install_dir = Path(get_paths()["purelib"]) / Path("ingenious") / Path("api") / Path("routes")
+    install_dir = (
+        Path(get_paths()["purelib"]) / Path("ingenious") / Path("api") / Path("routes")
+    )
 
     dirs = [working_dir, install_dir]
-        
+
     for dir in dirs:
         if os.path.exists(str(dir)):
             return dir

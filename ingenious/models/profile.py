@@ -1,6 +1,7 @@
-from pydantic import BaseModel, Field, RootModel
-from typing import List
 from enum import Enum
+from typing import List
+
+from pydantic import BaseModel, Field, RootModel
 
 
 class ModelConfig(BaseModel):
@@ -47,8 +48,7 @@ class WebAuthConfig(BaseModel):
     password: str = ""
 
 
-
-class WebConfig(BaseModel):    
+class WebConfig(BaseModel):
     authentication: WebAuthConfig = Field(default_factory=WebAuthConfig)
 
 
@@ -70,34 +70,51 @@ class AuthenticationMethod(str, Enum):
 
 
 class FileStorageContainer(BaseModel):
-    url: str = Field("", description="File Storage SAS URL")    
+    url: str = Field("", description="File Storage SAS URL")
     client_id: str = Field("", description="File Storage SAS Client ID")
     token: str = Field("", description="File Storage SAS Token")
-    authentication_method: AuthenticationMethod = Field(AuthenticationMethod.DEFAULT_CREDENTIAL, description="File Storage SAS Authentication Method")
+    authentication_method: AuthenticationMethod = Field(
+        AuthenticationMethod.DEFAULT_CREDENTIAL,
+        description="File Storage SAS Authentication Method",
+    )
 
 
 class FileStorage(BaseModel):
-    revisions: FileStorageContainer = Field(default_factory=FileStorageContainer, description="File Storage configuration for revisions")
-    data: FileStorageContainer = Field(default_factory=FileStorageContainer, description="File Storage configuration for data")
+    revisions: FileStorageContainer = Field(
+        default_factory=FileStorageContainer,
+        description="File Storage configuration for revisions",
+    )
+    data: FileStorageContainer = Field(
+        default_factory=FileStorageContainer,
+        description="File Storage configuration for data",
+    )
 
 
 class Profile(BaseModel):
     """
-        This is the class for the profiles.yml file. It contains only secret information.
+    This is the class for the profiles.yml file. It contains only secret information.
     """
 
     name: str
     models: List[ModelConfig]
     chat_history: ChatHistoryConfig
-    chat_service: ChatServiceConfig = Field(default_factory=ChatServiceConfig, description="Chat service configuration")
+    chat_service: ChatServiceConfig = Field(
+        default_factory=ChatServiceConfig, description="Chat service configuration"
+    )
     azure_search_services: List[AzureSearchConfig]
     azure_sql_services: AzureSqlConfig
     web_configuration: WebConfig
     receiver_configuration: ReceiverConfig
     chainlit_configuration: ChainlitConfig
-    tool_service: ToolServiceConfig = Field(default_factory=ToolServiceConfig, description="Tool service configuration")
-    logging: LoggingConfig = Field(default_factory=LoggingConfig, description="Logging configuration")
-    file_storage: FileStorage = Field(default_factory=FileStorage, description="File Storage configuration")
+    tool_service: ToolServiceConfig = Field(
+        default_factory=ToolServiceConfig, description="Tool service configuration"
+    )
+    logging: LoggingConfig = Field(
+        default_factory=LoggingConfig, description="Logging configuration"
+    )
+    file_storage: FileStorage = Field(
+        default_factory=FileStorage, description="File Storage configuration"
+    )
 
 
 class Profiles(RootModel[List[Profile]]):

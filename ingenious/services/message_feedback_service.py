@@ -1,5 +1,8 @@
 from ingenious.db.chat_history_repository import ChatHistoryRepository
-from ingenious.models.message_feedback import MessageFeedbackRequest, MessageFeedbackResponse
+from ingenious.models.message_feedback import (
+    MessageFeedbackRequest,
+    MessageFeedbackResponse,
+)
 
 
 class MessageFeedbackService:
@@ -7,13 +10,16 @@ class MessageFeedbackService:
         self.chat_history_repository = chat_history_repository
 
     async def update_message_feedback(
-            self, message_id: str, message_feedback_request: MessageFeedbackRequest) -> MessageFeedbackResponse:
+        self, message_id: str, message_feedback_request: MessageFeedbackRequest
+    ) -> MessageFeedbackResponse:
         # Validate message ID
-        if (message_id != message_feedback_request.message_id):
+        if message_id != message_feedback_request.message_id:
             raise ValueError("Message ID does not match message feedback request.")
 
         # Get message from DB
-        message = await self.chat_history_repository.get_message(message_id, message_feedback_request.thread_id)
+        message = await self.chat_history_repository.get_message(
+            message_id, message_feedback_request.thread_id
+        )
         if not message:
             raise ValueError(f"Message {message_id} not found.")
 
@@ -25,7 +31,9 @@ class MessageFeedbackService:
         await self.chat_history_repository.update_message_feedback(
             message_id,
             message_feedback_request.thread_id,
-            message_feedback_request.positive_feedback
+            message_feedback_request.positive_feedback,
         )
 
-        return MessageFeedbackResponse(message=f"Feedback submitted for message {message_id}.")
+        return MessageFeedbackResponse(
+            message=f"Feedback submitted for message {message_id}."
+        )
