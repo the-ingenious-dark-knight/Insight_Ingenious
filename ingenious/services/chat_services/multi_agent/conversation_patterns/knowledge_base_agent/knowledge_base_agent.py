@@ -5,15 +5,18 @@ import autogen.retrieve_utils
 import autogen.runtime_logging
 from autogen.agentchat.contrib.retrieve_user_proxy_agent import RetrieveUserProxyAgent
 
-
 logger = logging.getLogger(__name__)
 
 
-
 class ConversationPattern:
-
-    def __init__(self, default_llm_config: dict, topics: list, memory_record_switch: bool, memory_path: str,
-                 thread_memory: str):
+    def __init__(
+        self,
+        default_llm_config: dict,
+        topics: list,
+        memory_record_switch: bool,
+        memory_path: str,
+        thread_memory: str,
+    ):
         self.default_llm_config = default_llm_config
         self.topics = topics
         self.memory_record_switch = memory_record_switch
@@ -21,14 +24,15 @@ class ConversationPattern:
         self.thread_memory = thread_memory
         self.search_agent = None
 
-
         if not self.thread_memory:
             with open(f"{self.memory_path}/context.md", "w") as memory_file:
                 memory_file.write("New conversation. Continue based on user question.")
 
         if self.memory_record_switch and self.thread_memory:
-            logger.log(level=logging.DEBUG,
-                       msg="Memory recording enabled. Requires `ChatHistorySummariser` for optional dependency.")
+            logger.log(
+                level=logging.DEBUG,
+                msg="Memory recording enabled. Requires `ChatHistorySummariser` for optional dependency.",
+            )
             with open(f"{self.memory_path}/context.md", "w") as memory_file:
                 memory_file.write(self.thread_memory)
 
@@ -52,7 +56,7 @@ class ConversationPattern:
                     "get_or_create": True,
                 },
                 code_execution_config=False,
-                silent=False
+                silent=False,
             )
         else:
             self.user_proxy = autogen.UserProxyAgent(
@@ -62,7 +66,7 @@ class ConversationPattern:
                 max_consecutive_auto_reply=2,
                 system_message="I enhance the user question with context",
                 code_execution_config=False,
-                silent=False
+                silent=False,
             )
 
         self.researcher = autogen.ConversableAgent(
@@ -72,7 +76,6 @@ class ConversationPattern:
                 "- Compose a concise final response.\n"
                 "Note:"
                 "- Never ask follow up question."
-
             ),
             description="I **ONLY** speak after `planner` or `search_agent`.",
             llm_config=self.default_llm_config,
@@ -95,8 +98,6 @@ class ConversationPattern:
             is_termination_msg=self.termination_msg,
         )
 
-
-
     async def get_conversation_response(self, input_message: str) -> [str, str]:
         """
         This function is the main entry point for the conversation pattern. It takes a message as input and returns a
@@ -109,9 +110,8 @@ class ConversationPattern:
         graph_dict[self.researcher] = [self.search_agent]
         graph_dict[self.search_agent] = [self.planner]
 
-
         groupchat = autogen.GroupChat(
-            agents=[self.user_proxy, self.researcher, self.search_agent , self.planner],
+            agents=[self.user_proxy, self.researcher, self.search_agent, self.planner],
             messages=[],
             max_round=10,
             speaker_selection_method="auto",
@@ -123,33 +123,30 @@ class ConversationPattern:
             # select_speaker_prompt_template
         )
 
-        manager = autogen.GroupChatManager(groupchat=groupchat,
-                                           llm_config=self.default_llm_config,
-                                           is_termination_msg=self.termination_msg,
-                                           code_execution_config=False)
-
-
+        manager = autogen.GroupChatManager(
+            groupchat=groupchat,
+            llm_config=self.default_llm_config,
+            is_termination_msg=self.termination_msg,
+            code_execution_config=False,
+        )
 
         if self.memory_record_switch:
-            self.user_proxy.retrieve_docs(input_message, 2, '')
+            self.user_proxy.retrieve_docs(input_message, 2, "")
             self.user_proxy.n_results = 2
             doc_contents = self.user_proxy._get_context(self.user_proxy._results)
             res = await self.user_proxy.a_initiate_chat(
                 manager,
                 message="Use group chat to solve user question."
-                        "When the question has no context, just focus on the keyword of the user question."
-                        "End the conversation with `planner`."
-                        "\n "
-                        "Context: " + doc_contents +
-                        "\nUser question: " + input_message,
+                "When the question has no context, just focus on the keyword of the user question."
+                "End the conversation with `planner`."
+                "\n "
+                "Context: " + doc_contents + "\nUser question: " + input_message,
                 problem=input_message,
-                summary_method="last_msg"
+                summary_method="last_msg",
             )
         else:
             res = await self.user_proxy.a_initiate_chat(
-                manager,
-                message=input_message,
-                summary_method="last_msg"
+                manager, message=input_message, summary_method="last_msg"
             )
 
         with open(f"{self.memory_path}/context.md", "w") as memory_file:

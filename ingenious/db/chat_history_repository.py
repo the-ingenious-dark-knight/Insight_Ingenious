@@ -18,7 +18,9 @@ from ingenious.models.message import Message
 
 
 class IChatHistoryRepository(ABC):
-    TrueStepType = Literal["run", "tool", "llm", "embedding", "retrieval", "rerank", "undefined"]
+    TrueStepType = Literal[
+        "run", "tool", "llm", "embedding", "retrieval", "rerank", "undefined"
+    ]
 
     MessageStepType = Literal["user_message", "assistant_message", "system_message"]
 
@@ -31,7 +33,15 @@ class IChatHistoryRepository(ABC):
     }
 
     ElementType = Literal[
-        "image", "text", "pdf", "tasklist", "audio", "video", "file", "plotly", "component"
+        "image",
+        "text",
+        "pdf",
+        "tasklist",
+        "audio",
+        "video",
+        "file",
+        "plotly",
+        "component",
     ]
     ElementDisplay = Literal["inline", "side", "page"]
     ElementSize = Literal["small", "medium", "large"]
@@ -40,13 +50,13 @@ class IChatHistoryRepository(ABC):
     class ElementDict(TypedDict):
         id: str
         threadId: Optional[str]
-        type: 'IChatHistoryRepository.ElementType'
+        type: "IChatHistoryRepository.ElementType"
         chainlitKey: Optional[str]
         url: Optional[str]
         objectKey: Optional[str]
         name: str
-        display: 'IChatHistoryRepository.ElementDisplay'
-        size: Optional['IChatHistoryRepository.ElementSize']
+        display: "IChatHistoryRepository.ElementDisplay"
+        size: Optional["IChatHistoryRepository.ElementSize"]
         language: Optional[str]
         page: Optional[int]
         autoPlay: Optional[bool]
@@ -142,7 +152,7 @@ class IChatHistoryRepository(ABC):
     @dataclass
     class StepDict(TypedDict, total=False):
         name: str
-        type: 'IChatHistoryRepository.StepType'
+        type: "IChatHistoryRepository.StepType"
         id: str
         threadId: str
         parentId: Optional[str]
@@ -161,7 +171,7 @@ class IChatHistoryRepository(ABC):
         showInput: Optional[Union[bool, str]]
         language: Optional[str]
         indent: Optional[int]
-        feedback: Optional['IChatHistoryRepository.FeedbackDict']
+        feedback: Optional["IChatHistoryRepository.FeedbackDict"]
 
     @dataclass
     class ThreadDict(TypedDict):
@@ -172,8 +182,8 @@ class IChatHistoryRepository(ABC):
         userIdentifier: Optional[str]
         tags: Optional[List[str]]
         metadata: Optional[Dict]
-        steps: List['IChatHistoryRepository.StepDict']
-        elements: Optional[List['IChatHistoryRepository.ElementDict']]
+        steps: List["IChatHistoryRepository.StepDict"]
+        elements: Optional[List["IChatHistoryRepository.ElementDict"]]
 
     def get_now(self):
         return datetime.now(timezone.utc)
@@ -183,33 +193,33 @@ class IChatHistoryRepository(ABC):
 
     @abstractmethod
     async def update_thread(
-            self,
-            thread_id: str,
-            name: Optional[str] = None,
-            user_id: Optional[str] = None,
-            metadata: Optional[Dict] = None,
-            tags: Optional[List[str]] = None
+        self,
+        thread_id: str,
+        name: Optional[str] = None,
+        user_id: Optional[str] = None,
+        metadata: Optional[Dict] = None,
+        tags: Optional[List[str]] = None,
     ) -> str:
         pass
 
     @abstractmethod
     async def add_message(self, message: Message) -> str:
-        """ adds a message to the chat history """
+        """adds a message to the chat history"""
         pass
 
     @abstractmethod
     async def add_user(self, identifier: str) -> User:
-        """ adds a user to the chat history database """
+        """adds a user to the chat history database"""
         pass
 
     @abstractmethod
     async def get_user(self, identifier: str) -> User | None:
-        """ gets a user from the chat history database """
+        """gets a user from the chat history database"""
         pass
 
     @abstractmethod
     async def get_message(self, message_id: str, thread_id: str) -> Message | None:
-        """ gets a message from the chat history """
+        """gets a message from the chat history"""
         pass
 
     @abstractmethod
@@ -217,17 +227,21 @@ class IChatHistoryRepository(ABC):
         pass
 
     @abstractmethod
-    async def get_threads_for_user(self, identifier: str, thread_id: Optional[str]) -> Optional[
-        List['IChatHistoryRepository.ThreadDict']]:
+    async def get_threads_for_user(
+        self, identifier: str, thread_id: Optional[str]
+    ) -> Optional[List["IChatHistoryRepository.ThreadDict"]]:
         pass
 
     @abstractmethod
-    async def update_message_feedback(self, message_id: str, thread_id: str, positive_feedback: bool | None) -> None:
+    async def update_message_feedback(
+        self, message_id: str, thread_id: str, positive_feedback: bool | None
+    ) -> None:
         pass
 
     @abstractmethod
     async def update_message_content_filter_results(
-            self, message_id: str, thread_id: str, content_filter_results: dict[str, object]) -> None:
+        self, message_id: str, thread_id: str, content_filter_results: dict[str, object]
+    ) -> None:
         pass
 
     @abstractmethod
@@ -236,7 +250,6 @@ class IChatHistoryRepository(ABC):
 
 
 class ChatHistoryRepository:
-
     def __init__(self, db_type: DatabaseClientType, config: Config.Config):
         module_name = f"ingenious.db.{db_type.value.lower()}"
         class_name = f"{db_type.value.lower()}_ChatHistoryRepository"
@@ -245,17 +258,19 @@ class ChatHistoryRepository:
             module = importlib.import_module(module_name)
             repository_class = getattr(module, class_name)
         except (ImportError, AttributeError) as e:
-            raise ValueError(f"Unsupported database client type: {module_name}.{class_name}") from e
+            raise ValueError(
+                f"Unsupported database client type: {module_name}.{class_name}"
+            ) from e
 
         self.repository = repository_class(config=config)
 
     async def update_thread(
-            self,
-            thread_id: str,
-            name: Optional[str] = None,
-            user_id: Optional[str] = None,
-            metadata: Optional[Dict] = None,
-            tags: Optional[List[str]] = None
+        self,
+        thread_id: str,
+        name: Optional[str] = None,
+        user_id: Optional[str] = None,
+        metadata: Optional[Dict] = None,
+        tags: Optional[List[str]] = None,
     ) -> str:
         return await self.repository.update_thread(
             thread_id=thread_id,
@@ -288,30 +303,48 @@ class ChatHistoryRepository:
     async def update_memory(self) -> Message | None:
         return await self.repository.update_memory()
 
-    async def get_thread_messages(self, thread_id: str) -> Optional[list[IChatHistoryRepository.ThreadDict]]:
+    async def get_thread_messages(
+        self, thread_id: str
+    ) -> Optional[list[IChatHistoryRepository.ThreadDict]]:
         return await self.repository.get_thread_messages(thread_id)
 
-    async def get_thread_memory(self, thread_id: str) -> Optional[list[IChatHistoryRepository.ThreadDict]]:
+    async def get_thread_memory(
+        self, thread_id: str
+    ) -> Optional[list[IChatHistoryRepository.ThreadDict]]:
         return await self.repository.get_thread_memory(thread_id)
 
-    async def get_threads_for_user(self, identifier: str, thread_id: Optional[str]) -> Optional[
-        List[IChatHistoryRepository.ThreadDict]]:
+    async def get_threads_for_user(
+        self, identifier: str, thread_id: Optional[str]
+    ) -> Optional[List[IChatHistoryRepository.ThreadDict]]:
         return await self.repository.get_threads_for_user(identifier, thread_id)
 
-    async def update_message_feedback(self, message_id: str, thread_id: str, positive_feedback: bool | None) -> None:
-        return await self.repository.update_message_feedback(message_id, thread_id, positive_feedback)
+    async def update_message_feedback(
+        self, message_id: str, thread_id: str, positive_feedback: bool | None
+    ) -> None:
+        return await self.repository.update_message_feedback(
+            message_id, thread_id, positive_feedback
+        )
 
-    async def update_memory_feedback(self, message_id: str, thread_id: str, positive_feedback: bool | None) -> None:
-        return await self.repository.update_memory_feedback(message_id, thread_id, positive_feedback)
+    async def update_memory_feedback(
+        self, message_id: str, thread_id: str, positive_feedback: bool | None
+    ) -> None:
+        return await self.repository.update_memory_feedback(
+            message_id, thread_id, positive_feedback
+        )
 
     async def update_message_content_filter_results(
-            self, message_id: str, thread_id: str, content_filter_results: dict[str, object]) -> None:
-        return await self.repository.update_message_content_filter_results(message_id, thread_id,
-                                                                           content_filter_results)
+        self, message_id: str, thread_id: str, content_filter_results: dict[str, object]
+    ) -> None:
+        return await self.repository.update_message_content_filter_results(
+            message_id, thread_id, content_filter_results
+        )
 
     async def update_memory_content_filter_results(
-            self, message_id: str, thread_id: str, content_filter_results: dict[str, object]) -> None:
-        return await self.repository.update_memory_content_filter_results(message_id, thread_id, content_filter_results)
+        self, message_id: str, thread_id: str, content_filter_results: dict[str, object]
+    ) -> None:
+        return await self.repository.update_memory_content_filter_results(
+            message_id, thread_id, content_filter_results
+        )
 
     async def delete_thread(self, thread_id: str) -> None:
         return await self.repository.delete_thread(thread_id)

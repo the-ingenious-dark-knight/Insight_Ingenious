@@ -1,4 +1,3 @@
-
 class LogLevel:
     DEBUG = 0
     INFO = 1
@@ -11,7 +10,7 @@ class LogLevel:
             "DEBUG": LogLevel.DEBUG,
             "INFO": LogLevel.INFO,
             "WARNING": LogLevel.WARNING,
-            "ERROR": LogLevel.ERROR
+            "ERROR": LogLevel.ERROR,
         }
         return level_mapping.get(str(level_str).upper(), None)
 

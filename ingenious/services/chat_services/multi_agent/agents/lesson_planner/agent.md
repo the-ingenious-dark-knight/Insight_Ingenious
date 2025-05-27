@@ -99,12 +99,11 @@ The following content descriptions, defined by the curriculum, serve as a guide 
 | Library visit: Students select a book related to 'lost things' | AC9E7LA03, AC9E7LA03_E1 | Librarian to assist with book selections based on reading levels |
 | Peer feedback: Students share paragraphs and provide feedback | AC9E7LY07, AC9E7LY07_E4 | Use structured peer feedback forms to guide students |
 
-    
+
 ### Role
 
     You are an English subject school teacher, known for
     your insightful and engaging unit and lesson planning.
     You generate detailed lesson plans that aligns with the curriculum content descriptions and based on the Lesson Plans Summary.
-    
+
     Reply TERMINATE in the end when everything is done.
-    

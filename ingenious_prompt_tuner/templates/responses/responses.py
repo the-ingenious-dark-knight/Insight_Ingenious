@@ -1,29 +1,32 @@
+import asyncio
+import json
+import subprocess
+from pathlib import Path
 from typing import List
+
+import jsonpickle
+import markdown
 from flask import (
     Blueprint,
     Response,
+    current_app,
+    jsonify,
     render_template,
     request,
     stream_with_context,
-    current_app,
-    jsonify,
 )
-import asyncio
-import json
+
+import ingenious_prompt_tuner.payload as rp1
 from ingenious.models.agent import AgentChat, Agents
 from ingenious.models.test_data import Event, Events
 from ingenious_prompt_tuner.event_processor import functional_tests
-import subprocess
-import markdown
-from pathlib import Path
-import ingenious_prompt_tuner.payload as rp1
 from ingenious_prompt_tuner.utilities import (
+    get_selected_revision_direct_call,
     requires_auth,
     requires_selected_revision,
     utils_class,
-    get_selected_revision_direct_call,
 )
-import jsonpickle
+
 # Authentication Helpers
 
 bp = Blueprint("responses", __name__, url_prefix="/responses")
@@ -35,11 +38,15 @@ bp = Blueprint("responses", __name__, url_prefix="/responses")
 @requires_selected_revision
 def list():
     utils: utils_class = current_app.utils
-    prompt_template_folder = asyncio.run(utils.get_prompt_template_folder())    
+    prompt_template_folder = asyncio.run(utils.get_prompt_template_folder())
     base_path = asyncio.run(utils.fs.get_base_path()) / Path(prompt_template_folder)
     data_folder = asyncio.run(utils.get_data_folder())
     data_base_path = asyncio.run(utils.fs_data.get_base_path()) / Path(data_folder)
-    return render_template("responses/view_responses.html", data_template_folder=data_base_path, prompt_template_folder=base_path)
+    return render_template(
+        "responses/view_responses.html",
+        data_template_folder=data_base_path,
+        prompt_template_folder=base_path,
+    )
 
 
 @bp.route("/get_test_data_files", methods=["GET"])
@@ -81,9 +88,7 @@ def get_payload():
         current_app.config["test_output_path"]
         + f"/{get_selected_revision_direct_call()}"
     )
-    return asyncio.run(
-        rp1.render_payload(identifier, utils.fs, output_dir, event_type)
-    )
+    return asyncio.run(rp1.render_payload(identifier, utils.fs, output_dir, event_type))
 
 
 @bp.route("/rerun_event", methods=["GET"])
@@ -91,23 +96,25 @@ def get_payload():
 @requires_selected_revision
 def rerun_event():
     utils: utils_class = current_app.utils
-    agents = current_app.config["agents"] 
+    agents = current_app.config["agents"]
     prompt_template_folder = asyncio.run(utils.get_prompt_template_folder())
     try:
         identifier = request.args.get("identifier", type=str)
         event_type = request.args.get("event_type", type=str)
         file_name = request.args.get("file_name", type=str)
         identifier_group = request.args.get("identifier_group", type=str)
-        
+
         # Events are locked in source code and copied to the output folder each time.
-        events: Events = asyncio.run(utils.get_events(revision_id=get_selected_revision_direct_call()))
+        events: Events = asyncio.run(
+            utils.get_events(revision_id=get_selected_revision_direct_call())
+        )
         event = events.get_event_by_identifier(identifier)
-        
+
         ft = functional_tests(
             config=utils.get_config(),
             revision_prompt_folder=prompt_template_folder,
             revision_id=get_selected_revision_direct_call(),
-            make_llm_calls=True
+            make_llm_calls=True,
         )
         asyncio.run(
             ft.run_event_from_pre_processed_file(
@@ -116,7 +123,7 @@ def rerun_event():
                 event_type=event_type,
                 file_name=file_name,
                 agents=agents,
-                conversation_flow=event.conversation_flow
+                conversation_flow=event.conversation_flow,
             )
         )
 
@@ -136,8 +143,15 @@ def get_agent_response():
     event_type = request.args.get("event_type", type=str)
     agent_name = request.args.get("agent_name", type=str)
     identifier_group = request.args.get("identifier_group", type=str)
-    
-    file_name_parts = [identifier_group, "agent_response", event_type, "default", agent_name, identifier.strip()]
+
+    file_name_parts = [
+        identifier_group,
+        "agent_response",
+        event_type,
+        "default",
+        agent_name,
+        identifier.strip(),
+    ]
 
     file_name = f"{'_'.join(file_name_parts)}.md"
     output_path = (
@@ -147,22 +161,26 @@ def get_agent_response():
     agent_response_md = asyncio.run(
         utils.fs.read_file(file_name=file_name, file_path=output_path)
     )
-    
+
     if agent_response_md == "" or agent_response_md is None:
         agent_response_md1 = """
             <div class="markdown-content" markdown='1'><p>No response found - this agent may not be used for this event type</p></div>
         """
     else:
         agent_chat: AgentChat = AgentChat(**json.loads(agent_response_md))
-        
+
         message_content = agent_chat.chat_response.chat_message.content
         if agent_chat.chat_response.inner_messages:
             message_content += "\n\n### Inner Messages \n\n"
-            message_content += "```json\n" + agent_chat.model_dump_json(
-                include={'chat_response'},
-                #exclude={'chat_response': {'chat_message'}},
-                indent=4
-            ) + "\n\n```"
+            message_content += (
+                "```json\n"
+                + agent_chat.model_dump_json(
+                    include={"chat_response"},
+                    # exclude={'chat_response': {'chat_message'}},
+                    indent=4,
+                )
+                + "\n\n```"
+            )
 
         html_content = markdown.markdown(
             message_content,
@@ -179,7 +197,7 @@ def get_agent_response():
             agent_name=agent_chat.target_agent_name,
             execution_time=agent_chat.get_execution_time_formatted(),
             start_time=agent_chat.get_start_time_formatted(),
-            identifier_group=identifier_group
+            identifier_group=identifier_group,
         )
     return agent_response_md1
 
@@ -194,11 +212,18 @@ def get_agent_inputs():
     agent_name = request.args.get("agent_name", type=str)
     input_type = request.args.get("input_type", type=str)
     identifier_group = request.args.get("identifier_group", type=str)
-    
-    file_name_parts = [identifier_group, "agent_response", event_type, "default", agent_name, identifier.strip()]
+
+    file_name_parts = [
+        identifier_group,
+        "agent_response",
+        event_type,
+        "default",
+        agent_name,
+        identifier.strip(),
+    ]
 
     file_name = f"{'_'.join(file_name_parts)}.md"
-    
+
     output_path = (
         current_app.config["test_output_path"]
         + f"/{get_selected_revision_direct_call()}"
@@ -207,7 +232,7 @@ def get_agent_inputs():
         utils.fs.read_file(file_name=file_name, file_path=output_path)
     )
     agent_chat: AgentChat = AgentChat(**json.loads(agent_response_md))
-    
+
     if input_type == "user_input":
         content = agent_chat.user_message
     else:
@@ -226,10 +251,9 @@ def get_agent_inputs():
         agent_input=html_content,
         input_type=input_type,
         event_type=event_type,
-        agent_name=agent_chat.target_agent_name
+        agent_name=agent_chat.target_agent_name,
     )
     return agent_response_md1
-
 
 
 @bp.route("/get_events", methods=["GET"])
@@ -237,9 +261,10 @@ def get_agent_inputs():
 @requires_selected_revision
 def get_events():
     utils: utils_class = current_app.utils
-    files = asyncio.run(utils.get_events(get_selected_revision_direct_call())).get_events()
+    files = asyncio.run(
+        utils.get_events(get_selected_revision_direct_call())
+    ).get_events()
     return jsonpickle.encode(files, unpicklable=False)
-
 
 
 @bp.route("/get_responses", methods=["GET"])
@@ -249,17 +274,17 @@ def get_responses():
     utils: utils_class = current_app.utils
     agents: Agents = current_app.config["agents"]
     files = asyncio.run(utils.get_events(get_selected_revision_direct_call()))
-    
-    # Now loop through the data files and for each get any associated agent chats  
+
+    # Now loop through the data files and for each get any associated agent chats
     events_html = ""
-    
+
     # get the agent which has the return_in_response set to True
     return_agent = None
     for agent in agents.get_agents():
         if agent.return_in_response:
             return_agent = agent
             break
-    
+
     events: List[Event] = []
     for file in files.get_events():
         event: Event = file
@@ -270,10 +295,12 @@ def get_responses():
             event_type=event.event_type,
             file_name=event.file_name,
             agents=agents.get_agents_for_prompt_tuner(),
-            identifier_group=event.identifier_group
+            identifier_group=event.identifier_group,
         )
 
-    return render_template("responses/events_template.html", files=events, events_html=events_html)
+    return render_template(
+        "responses/events_template.html", files=events, events_html=events_html
+    )
 
 
 @bp.route("/get_agent_response_from_file", methods=["post"])
@@ -284,8 +311,15 @@ def get_agent_response_from_file():
     identifier = request.form.get("identifier", type=str).replace("#", "")
     event_type = request.form.get("event_type", type=str)
     identifier_group = request.form.get("identifier_group", type=str, default="default")
-    
-    file_name_parts = [identifier_group, "agent_response", event_type, "default", current_app.config["response_agent_name"], identifier.strip()]
+
+    file_name_parts = [
+        identifier_group,
+        "agent_response",
+        event_type,
+        "default",
+        current_app.config["response_agent_name"],
+        identifier.strip(),
+    ]
     print(file_name_parts)
     file_name = f"{'_'.join(file_name_parts)}.md"
     output_path = (
@@ -299,8 +333,8 @@ def get_agent_response_from_file():
     file_content_placeholder = """
             <div class="markdown-content" markdown='1'><p>No response found</p></div>
     """
-    
-    try: 
+
+    try:
         agent_chat: AgentChat = AgentChat(**json.loads(file_contents))
         html_content = markdown.markdown(
             agent_chat.chat_response.chat_message.content,
@@ -316,7 +350,7 @@ def get_agent_response_from_file():
             event_type=event_type,
             execution_time=agent_chat.get_execution_time_formatted(),
             start_time=agent_chat.get_start_time_formatted(),
-            identifier_group=identifier_group
+            identifier_group=identifier_group,
         )
     # Add exception handling that will print the error message to the console
     except Exception as e:

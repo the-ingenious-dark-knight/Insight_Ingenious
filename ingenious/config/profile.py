@@ -1,24 +1,24 @@
 import json
-import yaml
 import os
 from pathlib import Path
-from ingenious.models import profile as profile_models
-from azure.keyvault.secrets import SecretClient
+
+import yaml
 from azure.identity import DefaultAzureCredential
+from azure.keyvault.secrets import SecretClient
+
+from ingenious.models import profile as profile_models
 
 
-class Profiles():
+class Profiles:
     def __init__(self, profiles_path=None):
-        self.profiles: profile_models.Profiles = \
-            Profiles._get_profiles(profiles_path)
+        self.profiles: profile_models.Profiles = Profiles._get_profiles(profiles_path)
 
     @staticmethod
     def from_yaml_str(profile_yml):
         yaml_data = yaml.safe_load(profile_yml)
         json_data = json.dumps(yaml_data)
         try:
-            profiles = \
-                profile_models.Profiles.model_validate_json(json_data).root
+            profiles = profile_models.Profiles.model_validate_json(json_data).root
         except profile_models.ValidationError as e:
             for error in e.errors():
                 print(
@@ -33,7 +33,7 @@ class Profiles():
 
     @staticmethod
     def from_yaml(file_path):
-        with open(file_path, 'r') as file:
+        with open(file_path, "r") as file:
             file_str = file.read()
             profiles = Profiles.from_yaml_str(file_str)
             return profiles
@@ -41,9 +41,9 @@ class Profiles():
     @staticmethod
     def _get_profiles(profiles_path=None):
         # Check if os.getenv('INGENIOUS_PROFILE') is set
-        if os.getenv('APPSETTING_INGENIOUS_PROFILE', '') != '':
-            #print("Profile JSON loaded from environment variable")
-            profile_string = os.getenv('APPSETTING_INGENIOUS_PROFILE', "{}")
+        if os.getenv("APPSETTING_INGENIOUS_PROFILE", "") != "":
+            # print("Profile JSON loaded from environment variable")
+            profile_string = os.getenv("APPSETTING_INGENIOUS_PROFILE", "{}")
             profile_object = json.loads(profile_string)
             # Convert the json string to a yaml string
             profile_yml = yaml.dump(profile_object)
@@ -51,21 +51,16 @@ class Profiles():
             return profile
 
         # Load the configuration from the YAML file
-        if profiles_path is None or profiles_path == '':
-            if os.getenv('INGENIOUS_PROFILE_PATH', '') != '':
+        if profiles_path is None or profiles_path == "":
+            if os.getenv("INGENIOUS_PROFILE_PATH", "") != "":
                 print("Profile Path loaded from environment variable")
-                profiles_path_object = Path(os.getenv('INGENIOUS_PROFILE_PATH'))
+                profiles_path_object = Path(os.getenv("INGENIOUS_PROFILE_PATH"))
             else:
                 print("Profile loaded from default path")
-                home_directory = os.path.expanduser('~')
-                profiles_path_object = \
-                    Path(
-                        home_directory
-                        ) / Path(
-                            '.ingenious'
-                            ) / Path(
-                                'profiles.yml'
-                                )
+                home_directory = os.path.expanduser("~")
+                profiles_path_object = (
+                    Path(home_directory) / Path(".ingenious") / Path("profiles.yml")
+                )
         else:
             profiles_path_object = Path(profiles_path)
 
@@ -93,7 +88,7 @@ def get_kv_secret(secretName):
         keyVaultName = os.environ["KEY_VAULT_NAME"]
     except KeyError:
         raise ValueError("KEY_VAULT_NAME environment variable not set")
-    
+
     KVUri = f"https://{keyVaultName}.vault.azure.net"
     credential = DefaultAzureCredential()
     client = SecretClient(vault_url=KVUri, credential=credential)

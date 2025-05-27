@@ -1,18 +1,20 @@
-from pydantic import BaseModel
-from typing import Optional, List, Any
-from enum import Enum
-import yaml
 import json
-import ingenious.dependencies as ig_dependencies
-import ingenious.utils.model_utils as model_utils
-from rich import progress
-from ingenious.files.files_repository import FileStorage
-from ingenious.utils.stage_executor import ProgressConsoleWrapper
-from collections import defaultdict
 import os
 import sys
+from collections import defaultdict
+from enum import Enum
+from typing import Any, List, Optional
 
-parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
+import yaml
+from pydantic import BaseModel
+from rich import progress
+
+import ingenious.dependencies as ig_dependencies
+import ingenious.utils.model_utils as model_utils
+from ingenious.files.files_repository import FileStorage
+from ingenious.utils.stage_executor import ProgressConsoleWrapper
+
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
 print("parent_dir", parent_dir)
 sys.path.append(parent_dir)
 
@@ -194,12 +196,12 @@ class RootModel_Players_Careerstats_Bowlers(BaseModel):
 
     def __init__(self, careerstats: RootModel_Players_Careerstats, RootModelInstance):
         super().__init__(**careerstats.__dict__)
-        player = RootModelInstance.Get_Player_By_Id(
-            player_id=careerstats.PlayerId
-        )
+        player = RootModelInstance.Get_Player_By_Id(player_id=careerstats.PlayerId)
         self.PlayerName = player.DisplayName
         self.TeamName = player.TeamName
-        self.BowlingStrikeRate = self.TotalBallsBowled / self.WicketsTaken if self.WicketsTaken > 0 else 0
+        self.BowlingStrikeRate = (
+            self.TotalBallsBowled / self.WicketsTaken if self.WicketsTaken > 0 else 0
+        )
 
 
 class RootModel_Players_Careerstats_Batsmen(BaseModel):
@@ -220,9 +222,7 @@ class RootModel_Players_Careerstats_Batsmen(BaseModel):
 
     def __init__(self, careerstats: RootModel_Players_Careerstats, RootModelInstance):
         super().__init__(**careerstats.__dict__)
-        player = RootModelInstance.Get_Player_By_Id(
-            player_id=careerstats.PlayerId
-        )
+        player = RootModelInstance.Get_Player_By_Id(player_id=careerstats.PlayerId)
         self.PlayerName = player.DisplayName
         self.TeamName = player.TeamName
 
@@ -306,9 +306,7 @@ class RootModel_Players_Curated(BaseModel):
 
     def __init__(self, player: RootModel_Players, RootModelInstance):
         super().__init__(**player.__dict__)
-        self.TeamName = RootModelInstance.Get_Team_By_Id(
-            team_id=player.TeamId
-        ).Name
+        self.TeamName = RootModelInstance.Get_Team_By_Id(team_id=player.TeamId).Name
 
 
 class RootModel_Innings_Batsmen(BaseModel):
@@ -331,6 +329,7 @@ class RootModel_Innings_Batsmen(BaseModel):
     StrikeRate: Optional[Any] = None
     Videos: Optional[Any] = None
 
+
 class RootModel_Innings_Bowlers(BaseModel):
     PlayerId: Optional[Any] = None
     OversBowled: Optional[Any] = None
@@ -347,6 +346,7 @@ class RootModel_Innings_Bowlers(BaseModel):
     IsNonStrike: Optional[Any] = None
     Economy: Optional[Any] = None
     Videos: Optional[Any] = None
+
 
 class RootModel_Innings_Bowlers_Extended(BaseModel):
     TeamName: Optional[str] = None
@@ -377,10 +377,13 @@ class RootModel_Innings_Bowlers_Extended(BaseModel):
         )
         self.PlayerName = player.DisplayName
         self.TeamName = player.TeamName
-        self.BowlingAverage = self.RunsConceded / self.WicketsTaken if self.WicketsTaken > 0 else 0
+        self.BowlingAverage = (
+            self.RunsConceded / self.WicketsTaken if self.WicketsTaken > 0 else 0
+        )
         self.EconomyRate = self.Economy
-        self.StrikeRate = self.TotalBallsBowled / self.WicketsTaken if self.WicketsTaken > 0 else 0
-        
+        self.StrikeRate = (
+            self.TotalBallsBowled / self.WicketsTaken if self.WicketsTaken > 0 else 0
+        )
 
 
 class RootModel_Innings_Batsmen_Extended(BaseModel):
@@ -648,7 +651,9 @@ class RootModel_Innings(BaseModel):
         overs: List[RootModel_Innings_Overs_Extended] = list()
         for over in self.Overs:
             if over is not None:
-                over_extended = RootModel_Innings_Overs_Extended.model_validate(over.__dict__)
+                over_extended = RootModel_Innings_Overs_Extended.model_validate(
+                    over.__dict__
+                )
                 over_extended.InningsNumber = self.InningNumber
                 over_extended.BattingTeam = self.BattingTeamId
                 overs.append(over_extended)
@@ -801,25 +806,34 @@ class RootModel(BaseModel):
     _progress: progress = None
 
     def Get_Fixture_As_Yml(self):
-        Fixture_Name = f'Fixture {self.Fixture.Id}:{self.Fixture.Name}'
+        Fixture_Name = f"Fixture {self.Fixture.Id}:{self.Fixture.Name}"
         output = f"## {Fixture_Name}\n"
         output += "```yaml\n"
         output_dic = dict()
         # Add the non-complex fields to the dictionary
-        output_dic.update({
-            field.FieldName: getattr(self.Fixture, field.FieldName)
-            for field in model_utils.Get_Model_Properties(RootModel_Fixture)
-            if model_utils.Is_Non_Complex_Field_Check_By_Type(field.FieldType)
-        })
+        output_dic.update(
+            {
+                field.FieldName: getattr(self.Fixture, field.FieldName)
+                for field in model_utils.Get_Model_Properties(RootModel_Fixture)
+                if model_utils.Is_Non_Complex_Field_Check_By_Type(field.FieldType)
+            }
+        )
         output_dic_filtered = {
             (
-                'HomeTeamName' if k == 'HomeTeamId' else
-                'AwayTeamName' if k == 'AwayTeamId' else k
-            ):  (
-                    self.Fixture.HomeTeam.Name if k == 'HomeTeamId' else
-                    self.Fixture.AwayTeam.Name if k == 'AwayTeamId' else v
-                )
-            for k, v in output_dic.items() if v not in (None, '', 'None', [])
+                "HomeTeamName"
+                if k == "HomeTeamId"
+                else "AwayTeamName"
+                if k == "AwayTeamId"
+                else k
+            ): (
+                self.Fixture.HomeTeam.Name
+                if k == "HomeTeamId"
+                else self.Fixture.AwayTeam.Name
+                if k == "AwayTeamId"
+                else v
+            )
+            for k, v in output_dic.items()
+            if v not in (None, "", "None", [])
         }
         output_dic_filtered["Fixture Name"] = self.FixtureTitle.FixtureName
         output_dic_filtered["Fixture Score"] = self.FixtureTitle.Score
@@ -891,10 +905,13 @@ class RootModel(BaseModel):
             csv_string += model_utils.List_To_Csv(
                 obj=over_balls,
                 row_header_columns=[
-                    prop.FieldName for prop
-                    in model_utils.Get_Model_Properties(RootModel_Innings_Overs_Balls)
+                    prop.FieldName
+                    for prop in model_utils.Get_Model_Properties(
+                        RootModel_Innings_Overs_Balls
+                    )
                     if model_utils.Is_Non_Complex_Field_Check_By_Type(prop.FieldType)
-                ], name="Over Balls"
+                ],
+                name="Over Balls",
             )
             return csv_string
         return sorted(over.Balls, key=lambda x: x.BallNumber)
@@ -906,10 +923,10 @@ class RootModel(BaseModel):
     def Set_Current_Ball(self, ball):
         self._CurrentBall = ball
         print("")
-    
+
     def Get_Current_Ball(self, as_yml=False):
         """
-            Method used to track current ball while processing new balls in the feed
+        Method used to track current ball while processing new balls in the feed
         """
         if as_yml:
             ret = "## Latest Ball\n"
@@ -918,7 +935,7 @@ class RootModel(BaseModel):
             ret = self._CurrentBall
 
         return ret
-        
+
     def Get_All_Balls_by_Player(self, as_csv=True):
         try:
             balls = self.Get_All_Balls()
@@ -935,7 +952,13 @@ class RootModel(BaseModel):
         # Helper function to aggregate stats by a given key
         def aggregate_by_key(balls, key):
             grouped_stats = defaultdict(
-                lambda: {"TotalBalls": 0, "TotalRunsConceded": 0, "TotalRunsScored": 0, "Wickets": 0})
+                lambda: {
+                    "TotalBalls": 0,
+                    "TotalRunsConceded": 0,
+                    "TotalRunsScored": 0,
+                    "Wickets": 0,
+                }
+            )
             for ball in balls:
                 try:
                     ball = dict(ball)
@@ -950,21 +973,26 @@ class RootModel(BaseModel):
 
         # Aggregate by BowlerPlayerId
         try:
-            
             stats_by_bowler = aggregate_by_key(balls, "BowlerPlayerId")
             for stat in stats_by_bowler:
-                stat["BowlerName"] = players.get(stat.get("BowlerPlayerId", ""), {}).get("Name", "Unknown")
+                stat["BowlerName"] = players.get(
+                    stat.get("BowlerPlayerId", ""), {}
+                ).get("Name", "Unknown")
         except:
             stats_by_bowler = []
 
         # Aggregate by BattingPlayerId
         try:
             stats_by_batter = defaultdict(
-                lambda: {"TotalBalls": 0, "TotalRunsScored": 0, "Wickets": 0})
+                lambda: {"TotalBalls": 0, "TotalRunsScored": 0, "Wickets": 0}
+            )
             for ball in balls:
                 try:
                     ball = dict(ball)
-                    key = (ball.get("BattingPlayerId", "Unknown"), ball.get("BowlerPlayerId", "Unknown"))
+                    key = (
+                        ball.get("BattingPlayerId", "Unknown"),
+                        ball.get("BowlerPlayerId", "Unknown"),
+                    )
                     group = stats_by_batter[key]
                     group["TotalBalls"] += 1
                     group["TotalRunsConceded"] += ball.get("RunsConceded", 0)
@@ -974,9 +1002,13 @@ class RootModel(BaseModel):
                     pass
 
             stats_by_batter = [
-                {"BattingPlayerId": k[0], "BowlerPlayerId": k[1],
-                "BatterName": players.get(k[0], {}).get("Name", "Unknown"),
-                "BowlerName": players.get(k[1], {}).get("Name", "Unknown"), **v}
+                {
+                    "BattingPlayerId": k[0],
+                    "BowlerPlayerId": k[1],
+                    "BatterName": players.get(k[0], {}).get("Name", "Unknown"),
+                    "BowlerName": players.get(k[1], {}).get("Name", "Unknown"),
+                    **v,
+                }
                 for k, v in stats_by_batter.items()
             ]
         except:
@@ -985,11 +1017,20 @@ class RootModel(BaseModel):
         # Aggregate by both BattingPlayerId and BowlerPlayerId
         try:
             stats_by_batter_bowler = defaultdict(
-                lambda: {"TotalBalls": 0, "TotalRunsConceded": 0, "TotalRunsScored": 0, "Wickets": 0})
+                lambda: {
+                    "TotalBalls": 0,
+                    "TotalRunsConceded": 0,
+                    "TotalRunsScored": 0,
+                    "Wickets": 0,
+                }
+            )
             for ball in balls:
                 try:
                     ball = dict(ball)
-                    key = (ball.get("BattingPlayerId", "Unknown"), ball.get("BowlerPlayerId", "Unknown"))
+                    key = (
+                        ball.get("BattingPlayerId", "Unknown"),
+                        ball.get("BowlerPlayerId", "Unknown"),
+                    )
                     group = stats_by_batter_bowler[key]
                     group["TotalBalls"] += 1
                     group["TotalRunsConceded"] += ball.get("RunsConceded", 0)
@@ -998,10 +1039,16 @@ class RootModel(BaseModel):
                 except:
                     pass
 
-            stats_by_batter_bowler = [{"BattingPlayerId": k[0], "BowlerPlayerId": k[1],
-                                       "BatterName": players.get(k[0], {}).get("Name", "Unknown"),
-                                       "BowlerName": players.get(k[1], {}).get("Name", "Unknown"), **v}
-                                      for k, v in stats_by_batter_bowler.items()]
+            stats_by_batter_bowler = [
+                {
+                    "BattingPlayerId": k[0],
+                    "BowlerPlayerId": k[1],
+                    "BatterName": players.get(k[0], {}).get("Name", "Unknown"),
+                    "BowlerName": players.get(k[1], {}).get("Name", "Unknown"),
+                    **v,
+                }
+                for k, v in stats_by_batter_bowler.items()
+            ]
         except:
             stats_by_batter_bowler = []
 
@@ -1011,23 +1058,43 @@ class RootModel(BaseModel):
                 csv_string = "## Ball stats grouped by Bowler:\n"
                 csv_string += model_utils.List_To_Csv(
                     obj=stats_by_bowler,
-                    row_header_columns=['BowlerPlayerId', 'BowlerName', 'TotalBalls', 'TotalRunsConceded',
-                                        'TotalRunsScored', 'Wickets'],
-                    name="Player_Ball"
+                    row_header_columns=[
+                        "BowlerPlayerId",
+                        "BowlerName",
+                        "TotalBalls",
+                        "TotalRunsConceded",
+                        "TotalRunsScored",
+                        "Wickets",
+                    ],
+                    name="Player_Ball",
                 )
                 csv_string += "\n\n# Ball stats grouped by Batting:\n"
                 csv_string += model_utils.List_To_Csv(
                     obj=stats_by_batter,
-                    row_header_columns=['BattingPlayerId', 'BatterName', 'TotalBalls', 'TotalRunsConceded',
-                                        'TotalRunsScored', 'Wickets'],
-                    name="Player_Ball"
+                    row_header_columns=[
+                        "BattingPlayerId",
+                        "BatterName",
+                        "TotalBalls",
+                        "TotalRunsConceded",
+                        "TotalRunsScored",
+                        "Wickets",
+                    ],
+                    name="Player_Ball",
                 )
                 csv_string += "\n\n# Ball stats grouped by Batting and Bowler:\n"
                 csv_string += model_utils.List_To_Csv(
                     obj=stats_by_batter_bowler,
-                    row_header_columns=['BattingPlayerId', 'BatterName', 'BowlerPlayerId', 'BowlerName', 'TotalBalls',
-                                        'TotalRunsConceded', 'TotalRunsScored', 'Wickets'],
-                    name="Player_Ball"
+                    row_header_columns=[
+                        "BattingPlayerId",
+                        "BatterName",
+                        "BowlerPlayerId",
+                        "BowlerName",
+                        "TotalBalls",
+                        "TotalRunsConceded",
+                        "TotalRunsScored",
+                        "Wickets",
+                    ],
+                    name="Player_Ball",
                 )
                 return csv_string
             except:
@@ -1036,7 +1103,7 @@ class RootModel(BaseModel):
             return {
                 "stats_by_bowler": stats_by_bowler,
                 "stats_by_batter": stats_by_batter,
-                "stats_by_batter_bowler": stats_by_batter_bowler
+                "stats_by_batter_bowler": stats_by_batter_bowler,
             }
 
     def Get_All_Balls(self) -> List[RootModel_Innings_Overs_Balls_Flat]:
@@ -1055,7 +1122,9 @@ class RootModel(BaseModel):
                                         setattr(ball_flat, key, value)
                                 # Concatenate the comments into a single string
                                 if ball.Comments is not None:
-                                    comments = [comment.Message for comment in ball.Comments]
+                                    comments = [
+                                        comment.Message for comment in ball.Comments
+                                    ]
                                     ball_flat.Comments = " ".join(comments)
                                 # Now add the additional fields
                                 ball_flat.InningsNumber = inning.InningNumber
@@ -1066,7 +1135,10 @@ class RootModel(BaseModel):
         return balls
 
     async def Get_New_Balls(
-            self, config: ig_dependencies.Config, progress: ProgressConsoleWrapper, task_id: str
+        self,
+        config: ig_dependencies.Config,
+        progress: ProgressConsoleWrapper,
+        task_id: str,
     ) -> List[RootModel_Innings_Overs_Balls_Flat]:
         if self._NewBallsMarked:
             progress.progress.print("New Balls already marked.")
@@ -1074,12 +1146,15 @@ class RootModel(BaseModel):
 
         # Define the parquet file path
         self._ball_history_path = "./ball_history/"
-        self._ball_history_file_name = f"ball_history_for_fixture_id_{self.Fixture.Id}.json"
+        self._ball_history_file_name = (
+            f"ball_history_for_fixture_id_{self.Fixture.Id}.json"
+        )
 
         # Check if the parquet file already exists
         fs = FileStorage(ig_dependencies.get_config())
-        file_check: bool = await fs.check_if_file_exists(file_path=self._ball_history_path,
-                                                         file_name=self._ball_history_file_name)
+        file_check: bool = await fs.check_if_file_exists(
+            file_path=self._ball_history_path, file_name=self._ball_history_file_name
+        )
 
         if not file_check:
             init_val = RootModel_Innings_Overs_Balls_Flat()
@@ -1087,14 +1162,17 @@ class RootModel(BaseModel):
             init_val.BallNumber = 0
             init_val.InningsNumber = 0
             contents = json.dumps(init_val.__dict__, indent=4)
-            await fs.write_file(file_path=self._ball_history_path, file_name=self._ball_history_file_name,
-                                contents=contents)
-        else:
-            contents = await fs.read_file(file_path=self._ball_history_path, file_name=self._ball_history_file_name)
-            init_val = RootModel_Innings_Overs_Balls_Flat \
-                .model_validate_json(
-                contents
+            await fs.write_file(
+                file_path=self._ball_history_path,
+                file_name=self._ball_history_file_name,
+                contents=contents,
             )
+        else:
+            contents = await fs.read_file(
+                file_path=self._ball_history_path,
+                file_name=self._ball_history_file_name,
+            )
+            init_val = RootModel_Innings_Overs_Balls_Flat.model_validate_json(contents)
 
         Last_Seen_Over = init_val.OverNumber
         Last_Seen_Ball = init_val.BallNumber
@@ -1108,28 +1186,36 @@ class RootModel(BaseModel):
         # Find all Balls in new data where innings number is greater than the
         # last ball in the parquet file
         ball_data_filtered = [
-            ball for ball in ball_data if ball.InningsNumber >
-                                          Last_Seen_Innings
+            ball for ball in ball_data if ball.InningsNumber > Last_Seen_Innings
         ]
 
         # Find all balls in new data where over number is greater than the
         # last ball in the parquet file
-        ball_data_filtered.extend([
-            ball for ball in ball_data if ball.InningsNumber ==
-                                          Last_Seen_Innings and ball.OverNumber > Last_Seen_Over
-        ])
+        ball_data_filtered.extend(
+            [
+                ball
+                for ball in ball_data
+                if ball.InningsNumber == Last_Seen_Innings
+                and ball.OverNumber > Last_Seen_Over
+            ]
+        )
 
         # If over number is equal to the last ball in the parquet file,
         # find all balls where ball number is greater
-        ball_data_filtered.extend([
-            ball for ball in ball_data
-            if ball.InningsNumber == Last_Seen_Innings
-               and ball.OverNumber == Last_Seen_Over
-               and ball.BallNumber > Last_Seen_Ball
-        ])
+        ball_data_filtered.extend(
+            [
+                ball
+                for ball in ball_data
+                if ball.InningsNumber == Last_Seen_Innings
+                and ball.OverNumber == Last_Seen_Over
+                and ball.BallNumber > Last_Seen_Ball
+            ]
+        )
 
         # Capture Number of Balls in parquet file after removing duplicates
-        progress.progress.print(f"Found {len(ball_data_filtered)} new balls in the data.")
+        progress.progress.print(
+            f"Found {len(ball_data_filtered)} new balls in the data."
+        )
 
         if len(ball_data_filtered) > 0:
             Last_Seen_Over = ball_data_filtered[0].OverNumber
@@ -1140,9 +1226,7 @@ class RootModel(BaseModel):
             await fs.write_file(
                 file_path=self._ball_history_path,
                 file_name=self._ball_history_file_name,
-                contents=json.dumps(
-                    ball_data_filtered[0].__dict__, indent=4
-                )
+                contents=json.dumps(ball_data_filtered[0].__dict__, indent=4),
             )
 
         # Update the new balls marked flag
@@ -1152,7 +1236,9 @@ class RootModel(BaseModel):
 
     async def Delete_New_Ball_Watermark(self, config: ig_dependencies.Config):
         fs = FileStorage(config)
-        await fs.delete_file(file_path=self._ball_history_path, file_name=self._ball_history_file_name)
+        await fs.delete_file(
+            file_path=self._ball_history_path, file_name=self._ball_history_file_name
+        )
         self._NewBallsMarked = False
         self._NewBallsInThisFeed = None
 
@@ -1179,10 +1265,13 @@ class RootModel(BaseModel):
             csv_string += model_utils.List_To_Csv(
                 obj=teams,
                 row_header_columns=[
-                    prop.FieldName for prop
-                    in model_utils.Get_Model_Properties(RootModel_Fixture_Hometeam)
+                    prop.FieldName
+                    for prop in model_utils.Get_Model_Properties(
+                        RootModel_Fixture_Hometeam
+                    )
                     if model_utils.Is_Non_Complex_Field_Check_By_Type(prop.FieldType)
-                ], name="Teams"
+                ],
+                name="Teams",
             )
             return csv_string
         return teams
@@ -1202,46 +1291,54 @@ class RootModel(BaseModel):
             csv_string += model_utils.List_To_Csv(
                 obj=innings,
                 row_header_columns=[
-                    prop.FieldName for prop in model_utils.Get_Model_Properties(RootModel_Innings)
-                    if model_utils.Is_Non_Complex_Field_Check_By_Type(prop.FieldType)],
-                name="Innings")
+                    prop.FieldName
+                    for prop in model_utils.Get_Model_Properties(RootModel_Innings)
+                    if model_utils.Is_Non_Complex_Field_Check_By_Type(prop.FieldType)
+                ],
+                name="Innings",
+            )
             return csv_string
         return innings
 
     def Get_Players(self, as_csv: bool = False):
         players = list()
         for player in self.Players:
-            player_curated = RootModel_Players_Curated(
-                player,
-                self
-            )
+            player_curated = RootModel_Players_Curated(player, self)
             players.append(player_curated)
         if as_csv:
             csv_string = "## Players\n"
             csv_string += model_utils.List_To_Csv(
                 obj=players,
                 row_header_columns=[
-                    prop.FieldName for prop in model_utils.Get_Model_Properties(RootModel_Players_Curated)
-                    if model_utils.Is_Non_Complex_Field_Check_By_Type(field_type=prop.FieldType)],
-                name="Players")
+                    prop.FieldName
+                    for prop in model_utils.Get_Model_Properties(
+                        RootModel_Players_Curated
+                    )
+                    if model_utils.Is_Non_Complex_Field_Check_By_Type(
+                        field_type=prop.FieldType
+                    )
+                ],
+                name="Players",
+            )
             return csv_string
         return players
 
     def Get_Bowlers(self, as_csv: bool = False):
         """
-            Method to get all the bowlers in the fixture, including their curated stats.
+        Method to get all the bowlers in the fixture, including their curated stats.
         """
         bowlers = list()
         bowlers_curated_stats = list()
         for innings in [self.Get_Latest_Inning()]:
             for bowler in innings.Bowlers:
-                bowler_curated = RootModel_Innings_Bowlers_Extended(
-                    bowler,
-                    self
+                bowler_curated = RootModel_Innings_Bowlers_Extended(bowler, self)
+                player_career_stats = self.Get_Player_Career_Stats_By_Id(
+                    bowler.PlayerId
                 )
-                player_career_stats = self.Get_Player_Career_Stats_By_Id(bowler.PlayerId)
                 if player_career_stats:
-                    bowler_curated_stats = RootModel_Players_Careerstats_Bowlers(player_career_stats, self)
+                    bowler_curated_stats = RootModel_Players_Careerstats_Bowlers(
+                        player_career_stats, self
+                    )
                     bowlers.append(bowler_curated)
                     bowlers_curated_stats.append(bowler_curated_stats)
 
@@ -1250,21 +1347,30 @@ class RootModel(BaseModel):
             csv_string += model_utils.List_To_Csv(
                 obj=bowlers,
                 row_header_columns=[
-                    prop.FieldName for prop in model_utils.Get_Model_Properties(RootModel_Innings_Bowlers_Extended)
-                    if model_utils.Is_Non_Complex_Field_Check_By_Type(field_type=prop.FieldType)
+                    prop.FieldName
+                    for prop in model_utils.Get_Model_Properties(
+                        RootModel_Innings_Bowlers_Extended
+                    )
+                    if model_utils.Is_Non_Complex_Field_Check_By_Type(
+                        field_type=prop.FieldType
+                    )
                 ],
-                name="Bowlers"
+                name="Bowlers",
             )
             csv_string += "\n\n"
             csv_string += "## Bowlers - Career Performance\n"
             csv_string += model_utils.List_To_Csv(
                 obj=bowlers_curated_stats,
                 row_header_columns=[
-                    prop.FieldName for prop
-                    in model_utils.Get_Model_Properties(RootModel_Players_Careerstats_Bowlers)
-                    if model_utils.Is_Non_Complex_Field_Check_By_Type(field_type=prop.FieldType)
+                    prop.FieldName
+                    for prop in model_utils.Get_Model_Properties(
+                        RootModel_Players_Careerstats_Bowlers
+                    )
+                    if model_utils.Is_Non_Complex_Field_Check_By_Type(
+                        field_type=prop.FieldType
+                    )
                 ],
-                name="Bowlers"
+                name="Bowlers",
             )
             return csv_string
 
@@ -1272,20 +1378,21 @@ class RootModel(BaseModel):
 
     def Get_Batsmen(self, as_csv: bool = False):
         """
-            Method to get all the batsmen in the fixture
+        Method to get all the batsmen in the fixture
         """
         batsmen = list()
         batsmen_curated_stats = list()
         for innings in [self.Get_Latest_Inning()]:
             for batsman in innings.Batsmen:
-                batsman_curated = RootModel_Innings_Batsmen_Extended(
-                    batsman,
-                    self
-                )
+                batsman_curated = RootModel_Innings_Batsmen_Extended(batsman, self)
 
-                player_career_stats = self.Get_Player_Career_Stats_By_Id(batsman.PlayerId)
+                player_career_stats = self.Get_Player_Career_Stats_By_Id(
+                    batsman.PlayerId
+                )
                 if player_career_stats:
-                    batsman_curated_stats = RootModel_Players_Careerstats_Batsmen(player_career_stats, self)
+                    batsman_curated_stats = RootModel_Players_Careerstats_Batsmen(
+                        player_career_stats, self
+                    )
                     batsmen.append(batsman_curated)
                     batsmen_curated_stats.append(batsman_curated_stats)
         if as_csv:
@@ -1293,29 +1400,40 @@ class RootModel(BaseModel):
             csv_string += model_utils.List_To_Csv(
                 obj=batsmen,
                 row_header_columns=[
-                    prop.FieldName for prop in model_utils.Get_Model_Properties(RootModel_Innings_Batsmen_Extended)
-                    if model_utils.Is_Non_Complex_Field_Check_By_Type(field_type=prop.FieldType)],
-                name="Batsmen")
+                    prop.FieldName
+                    for prop in model_utils.Get_Model_Properties(
+                        RootModel_Innings_Batsmen_Extended
+                    )
+                    if model_utils.Is_Non_Complex_Field_Check_By_Type(
+                        field_type=prop.FieldType
+                    )
+                ],
+                name="Batsmen",
+            )
             csv_string += "\n\n"
             csv_string += "## Batsmen - Career Performance\n"
             csv_string += model_utils.List_To_Csv(
                 obj=batsmen_curated_stats,
                 row_header_columns=[
-                    prop.FieldName for prop
-                    in model_utils.Get_Model_Properties(RootModel_Players_Careerstats_Batsmen)
-                    if model_utils.Is_Non_Complex_Field_Check_By_Type(field_type=prop.FieldType)],
-                name="Batsmen")
+                    prop.FieldName
+                    for prop in model_utils.Get_Model_Properties(
+                        RootModel_Players_Careerstats_Batsmen
+                    )
+                    if model_utils.Is_Non_Complex_Field_Check_By_Type(
+                        field_type=prop.FieldType
+                    )
+                ],
+                name="Batsmen",
+            )
             return csv_string
         return batsmen
 
     def Get_Current_Batsman_As_Yaml(self):
-        output = "## Current Batsman\n" 
-        
+        output = "## Current Batsman\n"
+
         batsman = self.Get_Current_Batsman()
         if batsman:
-            output += model_utils.Object_To_Yaml(
-                batsman
-            )
+            output += model_utils.Object_To_Yaml(batsman)
             return output
         output += "There is No current batsman\n\n"
         return output
@@ -1324,10 +1442,7 @@ class RootModel(BaseModel):
         inning = self.Get_Latest_Inning()
         for batsman in inning.Batsmen:
             if batsman.IsOnStrike:
-                batsman_curated = RootModel_Innings_Batsmen_Extended(
-                    batsman,
-                    self
-                )
+                batsman_curated = RootModel_Innings_Batsmen_Extended(batsman, self)
                 return batsman_curated
         return None
 
@@ -1343,7 +1458,8 @@ class RootModel(BaseModel):
         for player in self.Players:
             if player.CareerStats is not None:
                 filtered_stats = [
-                    stat for stat in player.CareerStats
+                    stat
+                    for stat in player.CareerStats
                     if stat.GameTypeId == self.Fixture.GameTypeId
                 ]
                 if len(filtered_stats) > 0:
@@ -1352,10 +1468,15 @@ class RootModel(BaseModel):
             csv_string = "## Player Career Stats\n"
             csv_string += model_utils.List_To_Csv(
                 obj=players_cs,
-                row_header_columns=[prop.FieldName for prop
-                                    in model_utils.Get_Model_Properties(RootModel_Players_Careerstats)
-                                    if model_utils.Is_Non_Complex_Field_Check_By_Type(prop.FieldType)],
-                name="Players")
+                row_header_columns=[
+                    prop.FieldName
+                    for prop in model_utils.Get_Model_Properties(
+                        RootModel_Players_Careerstats
+                    )
+                    if model_utils.Is_Non_Complex_Field_Check_By_Type(prop.FieldType)
+                ],
+                name="Players",
+            )
             return csv_string
         return players_cs
 
@@ -1365,7 +1486,8 @@ class RootModel(BaseModel):
                 player.CareerStats
                 if player.CareerStats is not None:
                     filtered_stats = [
-                        stat for stat in player.CareerStats
+                        stat
+                        for stat in player.CareerStats
                         if stat.GameTypeId == self.Fixture.GameTypeId
                     ]
                     if len(filtered_stats) > 0:
@@ -1391,7 +1513,9 @@ class RootModel(BaseModel):
                 overs.extend(overs_for_innings)
 
         if as_csv:
-            csv_string = model_utils.Listable_Object_To_Csv(obj=overs, row_type=RootModel_Innings_Overs_Extended)
+            csv_string = model_utils.Listable_Object_To_Csv(
+                obj=overs, row_type=RootModel_Innings_Overs_Extended
+            )
             return csv_string
         return overs
 
@@ -1405,8 +1529,11 @@ class RootModel(BaseModel):
         teams = self.Get_Teams()
         team_names = [team.Name for team in teams]
         team_innings_tracker = {team.Id: 0 for team in teams}
-        headings = ["OverNumber"] + [f"{team_name} Innings {innings_number} {measure.value}" for team_name in team_names
-                                     for innings_number in (1, 2)]
+        headings = ["OverNumber"] + [
+            f"{team_name} Innings {innings_number} {measure.value}"
+            for team_name in team_names
+            for innings_number in (1, 2)
+        ]
 
         for over in overs:
             team_id = over.BattingTeam
@@ -1423,8 +1550,10 @@ class RootModel(BaseModel):
             if over.OverNumber not in summary:
                 summary[over.OverNumber] = {
                     "OverNumber": over.OverNumber,
-                    team_names[0] + " Innings 1 " + measure.value: 0, team_names[0] + " Innings 2 " + measure.value: 0,
-                    team_names[1] + " Innings 1 " + measure.value: 0, team_names[1] + " Innings 2 " + measure.value: 0
+                    team_names[0] + " Innings 1 " + measure.value: 0,
+                    team_names[0] + " Innings 2 " + measure.value: 0,
+                    team_names[1] + " Innings 1 " + measure.value: 0,
+                    team_names[1] + " Innings 2 " + measure.value: 0,
                 }
 
             innings_number = team_innings_tracker[team_id]
@@ -1439,7 +1568,9 @@ class RootModel(BaseModel):
 
         if as_csv:
             csv_string = "## Overs Summary\n"
-            csv_string += model_utils.Dict_To_Csv(obj=sorted_summary, row_header_columns=headings, name="Overs Summary")
+            csv_string += model_utils.Dict_To_Csv(
+                obj=sorted_summary, row_header_columns=headings, name="Overs Summary"
+            )
 
             return csv_string
 
@@ -1453,7 +1584,7 @@ class RootModel(BaseModel):
         summaries_shot = list()
         summaries_connection = list()
         summaries_shot_placement = list()
-        
+
         csv_string = ""
         for player in self.Players:
             player_id = player.Id
@@ -1472,81 +1603,189 @@ class RootModel(BaseModel):
             summary_overall = {
                 "PlayerId": player_id,
                 "PlayerName": player_name,
-                "BallsFaced": sum(1 for ball in player_balls if ball.BattingPlayerId == player_id) or 0,
-                "RunsScored": sum(ball.RunsScored for ball in player_balls if ball.BattingPlayerId == player_id) or 0,
-                "BallsBowled": sum(1 for ball in player_balls if ball.BowlerPlayerId == player_id) or 0,
+                "BallsFaced": sum(
+                    1 for ball in player_balls if ball.BattingPlayerId == player_id
+                )
+                or 0,
+                "RunsScored": sum(
+                    ball.RunsScored
+                    for ball in player_balls
+                    if ball.BattingPlayerId == player_id
+                )
+                or 0,
+                "BallsBowled": sum(
+                    1 for ball in player_balls if ball.BowlerPlayerId == player_id
+                )
+                or 0,
                 "RunsConceded": sum(
-                    ball.RunsConceded for ball in player_balls if ball.BowlerPlayerId == player_id) or 0,
+                    ball.RunsConceded
+                    for ball in player_balls
+                    if ball.BowlerPlayerId == player_id
+                )
+                or 0,
                 "WicketsTaken": sum(
-                    1 for ball in player_balls if ball.BowlerPlayerId == player_id and ball.IsWicket) or 0
+                    1
+                    for ball in player_balls
+                    if ball.BowlerPlayerId == player_id and ball.IsWicket
+                )
+                or 0,
             }
             summaries_overall.append(summary_overall)
 
-            summary_length = {
-                "PlayerId": player_id,
-                "PlayerName": player_name
-            }
+            summary_length = {"PlayerId": player_id, "PlayerName": player_name}
 
-            def summarize_measures(player_balls, player_id, player_name, measure_name, measure_func, measure_type_func):
-                summary = {
-                    "PlayerId": player_id,
-                    "PlayerName": player_name
-                }
+            def summarize_measures(
+                player_balls,
+                player_id,
+                player_name,
+                measure_name,
+                measure_func,
+                measure_type_func,
+            ):
+                summary = {"PlayerId": player_id, "PlayerName": player_name}
                 measure_types = measure_type_func()
                 for measure in measure_types:
-                    summary[f"{measure}_BallsFaced"] = \
-                        sum(1 for ball in player_balls
-                            if ball.BattingPlayerId == player_id and measure_func(getattr(ball, measure_name)) == measure) or 0
-                    summary[f"{measure}_RunsScored"] = \
-                        sum(ball.RunsScored for ball in player_balls
-                            if ball.BattingPlayerId == player_id and measure_func(getattr(ball, measure_name)) == measure) or 0
-                    summary[f"{measure}_BallsBowled"] = \
-                        sum(1 for ball in player_balls if ball.BowlerPlayerId == player_id
-                            and measure_func(getattr(ball, measure_name)) == measure) or 0
-                    summary[f"{measure}_RunsConceded"] = \
-                        sum(ball.RunsConceded for ball in player_balls if ball.BowlerPlayerId == player_id
-                            and measure_func(getattr(ball, measure_name)) == measure) or 0
-                    summary[f"{measure}_WicketsTaken"] = \
-                        sum(1 for ball in player_balls if ball.BowlerPlayerId == player_id
-                            and measure_func(getattr(ball, measure_name)) == measure and ball.IsWicket) or 0
+                    summary[f"{measure}_BallsFaced"] = (
+                        sum(
+                            1
+                            for ball in player_balls
+                            if ball.BattingPlayerId == player_id
+                            and measure_func(getattr(ball, measure_name)) == measure
+                        )
+                        or 0
+                    )
+                    summary[f"{measure}_RunsScored"] = (
+                        sum(
+                            ball.RunsScored
+                            for ball in player_balls
+                            if ball.BattingPlayerId == player_id
+                            and measure_func(getattr(ball, measure_name)) == measure
+                        )
+                        or 0
+                    )
+                    summary[f"{measure}_BallsBowled"] = (
+                        sum(
+                            1
+                            for ball in player_balls
+                            if ball.BowlerPlayerId == player_id
+                            and measure_func(getattr(ball, measure_name)) == measure
+                        )
+                        or 0
+                    )
+                    summary[f"{measure}_RunsConceded"] = (
+                        sum(
+                            ball.RunsConceded
+                            for ball in player_balls
+                            if ball.BowlerPlayerId == player_id
+                            and measure_func(getattr(ball, measure_name)) == measure
+                        )
+                        or 0
+                    )
+                    summary[f"{measure}_WicketsTaken"] = (
+                        sum(
+                            1
+                            for ball in player_balls
+                            if ball.BowlerPlayerId == player_id
+                            and measure_func(getattr(ball, measure_name)) == measure
+                            and ball.IsWicket
+                        )
+                        or 0
+                    )
                 return summary
-        
-            summaries_length.append(summarize_measures(player_balls, player_id, player_name, "LengthType", self.Get_Ball_Length_Category, self.Get_Length_Types))
-            summaries_line.append(summarize_measures(player_balls, player_id, player_name, "LineType", self.Get_Ball_Line_Category, self.Get_Line_Types))
-            summaries_connection.append(summarize_measures(player_balls, player_id, player_name, "BattingConnection", self.Get_Ball_Shot_Connection_Type_Category, self.Get_Shot_Connection_Types))
-            summaries_shot.append(summarize_measures(player_balls, player_id, player_name, "BattingShotType", self.Get_Ball_Shot_Type_Category, self.Get_Shot_Types))
-            summaries_shot_placement.append(summarize_measures(player_balls, player_id, player_name, "ShotAngle", self.Get_Field_Area, self.Get_Field_Areas))
-            
+
+            summaries_length.append(
+                summarize_measures(
+                    player_balls,
+                    player_id,
+                    player_name,
+                    "LengthType",
+                    self.Get_Ball_Length_Category,
+                    self.Get_Length_Types,
+                )
+            )
+            summaries_line.append(
+                summarize_measures(
+                    player_balls,
+                    player_id,
+                    player_name,
+                    "LineType",
+                    self.Get_Ball_Line_Category,
+                    self.Get_Line_Types,
+                )
+            )
+            summaries_connection.append(
+                summarize_measures(
+                    player_balls,
+                    player_id,
+                    player_name,
+                    "BattingConnection",
+                    self.Get_Ball_Shot_Connection_Type_Category,
+                    self.Get_Shot_Connection_Types,
+                )
+            )
+            summaries_shot.append(
+                summarize_measures(
+                    player_balls,
+                    player_id,
+                    player_name,
+                    "BattingShotType",
+                    self.Get_Ball_Shot_Type_Category,
+                    self.Get_Shot_Types,
+                )
+            )
+            summaries_shot_placement.append(
+                summarize_measures(
+                    player_balls,
+                    player_id,
+                    player_name,
+                    "ShotAngle",
+                    self.Get_Field_Area,
+                    self.Get_Field_Areas,
+                )
+            )
+
         if as_csv:
             csv_string += "## Player Ball Data - Current Innings High Level Summaries\n"
             csv_string += model_utils.List_To_Csv(
-                obj=summaries_overall, row_header_columns=summaries_overall[-1].keys(),
-                name="Player Ball Data Summary")
+                obj=summaries_overall,
+                row_header_columns=summaries_overall[-1].keys(),
+                name="Player Ball Data Summary",
+            )
             csv_string += "\n\n"
             csv_string += "## Player Ball Data - Current Innings Line Summaries\n"
             csv_string += model_utils.List_To_Csv(
-                obj=summaries_line, row_header_columns=summaries_line[-1].keys(),
-                name="Player Ball Data Summary")
+                obj=summaries_line,
+                row_header_columns=summaries_line[-1].keys(),
+                name="Player Ball Data Summary",
+            )
             csv_string += "\n\n"
             csv_string += "## Player Ball Data - Current Length Summaries\n"
             csv_string += model_utils.List_To_Csv(
-                obj=summaries_length, row_header_columns=summaries_length[-1].keys(),
-                name="Player Ball Data Summary")
+                obj=summaries_length,
+                row_header_columns=summaries_length[-1].keys(),
+                name="Player Ball Data Summary",
+            )
             csv_string += "\n\n"
             csv_string += "## Player Ball Data - Current Shot Type Summaries\n"
             csv_string += model_utils.List_To_Csv(
-                obj=summaries_shot, row_header_columns=summaries_shot[-1].keys(),
-                name="Player Ball Data Summary")
+                obj=summaries_shot,
+                row_header_columns=summaries_shot[-1].keys(),
+                name="Player Ball Data Summary",
+            )
             csv_string += "\n\n"
             csv_string += "## Player Ball Data - Current Shot Connection Summaries\n"
             csv_string += model_utils.List_To_Csv(
-                obj=summaries_connection, row_header_columns=summaries_connection[-1].keys(),
-                name="Player Ball Data Summary")
+                obj=summaries_connection,
+                row_header_columns=summaries_connection[-1].keys(),
+                name="Player Ball Data Summary",
+            )
             csv_string += "\n\n"
             csv_string += "## Player Ball Data - Current Shot Placement Summaries\n"
             csv_string += model_utils.List_To_Csv(
-                obj=summaries_shot_placement, row_header_columns=summaries_shot_placement[-1].keys(),
-                name="Player Ball Data Summary")
+                obj=summaries_shot_placement,
+                row_header_columns=summaries_shot_placement[-1].keys(),
+                name="Player Ball Data Summary",
+            )
             csv_string += "\n\n"
 
         return csv_string
@@ -1557,7 +1796,7 @@ class RootModel(BaseModel):
             for over in inning.Overs:
                 for ball in over.Balls:
                     length_types.add(ball.LengthType)
-        
+
         length_categories = set()
         for type in length_types:
             length_categories.add(self.Get_Ball_Length_Category(type))
@@ -1573,7 +1812,7 @@ class RootModel(BaseModel):
         for type in line_types:
             line_categories.add(self.Get_Ball_Line_Category(type))
         return line_categories
-    
+
     def Get_Shot_Types(self):
         shot_types = set()
         for inning in self.Innings:
@@ -1584,7 +1823,7 @@ class RootModel(BaseModel):
         for type in shot_types:
             shot_categories.add(self.Get_Ball_Shot_Type_Category(type))
         return shot_categories
-    
+
     def Get_Shot_Connection_Types(self):
         connection_types = set()
         for inning in self.Innings:
@@ -1595,7 +1834,7 @@ class RootModel(BaseModel):
         for type in connection_types:
             connection_categories.add(self.Get_Ball_Shot_Connection_Type_Category(type))
         return connection_categories
-    
+
     def Get_Field_Areas(self):
         """
         Returns a list of all cricket field areas.
@@ -1656,9 +1895,17 @@ class RootModel(BaseModel):
                 ret = "Short"
             case _:
                 ret = "Unknown"
-        
-        if ret == "Unknown" and ball != "" and ball is not None and ball != "none" and ball != "null": 
-            self._progress.progress.print(f"[bold red]❓ Missing shot length category: {ball}[/bold red]")
+
+        if (
+            ret == "Unknown"
+            and ball != ""
+            and ball is not None
+            and ball != "none"
+            and ball != "null"
+        ):
+            self._progress.progress.print(
+                f"[bold red]❓ Missing shot length category: {ball}[/bold red]"
+            )
 
         return ret
 
@@ -1667,7 +1914,7 @@ class RootModel(BaseModel):
         ret = "Unknown"
         match line:
             case "wide" | "widedownleg":
-                ret =  "Wide"
+                ret = "Wide"
             case "outsideoff" | "offstump":
                 ret = "Outside"
             case "middlestump" | "legstump":
@@ -1676,10 +1923,18 @@ class RootModel(BaseModel):
                 ret = "Down Leg"
             case _:
                 ret = "Unknown"
-        
-        if ret == "Unknown" and line != "" and line is not None and line != "none" and line != "null":
-            self._progress.progress.print(f"[bold red]❓ Missing shot line category: {line}[/bold red]")
-        
+
+        if (
+            ret == "Unknown"
+            and line != ""
+            and line is not None
+            and line != "none"
+            and line != "null"
+        ):
+            self._progress.progress.print(
+                f"[bold red]❓ Missing shot line category: {line}[/bold red]"
+            )
+
         return ret
 
     def Get_Ball_Shot_Type_Category(self, shot):
@@ -1712,19 +1967,36 @@ class RootModel(BaseModel):
                 ret = "Unknown Shot Type"
 
         if ret == "Unknown":
-            self._progress.progress.print(f"[bold red]❓ Missing shot category: {shot}[/bold red]")
-        
+            self._progress.progress.print(
+                f"[bold red]❓ Missing shot category: {shot}[/bold red]"
+            )
+
         return ret
-    
+
     def Get_Ball_Shot_Connection_Type_Category(self, contact):
         contact = str(contact).replace(" ", "")
         ret = "Unknown"
         match contact.lower():
             case "middled" | "welltimed" | "hithard":
                 ret = "Middled"
-            case "missed" | "playandmiss" | "missedlegside" | "playandmiss(legside)" | "playandmisslegside":
+            case (
+                "missed"
+                | "playandmiss"
+                | "missedlegside"
+                | "playandmiss(legside)"
+                | "playandmisslegside"
+            ):
                 ret = "Missed"
-            case "thickedge" | "outsideedge" | "insideedge" | "topedge" | "bottomedge" | "batpad" | "leadingedge" | "edged":
+            case (
+                "thickedge"
+                | "outsideedge"
+                | "insideedge"
+                | "topedge"
+                | "bottomedge"
+                | "batpad"
+                | "leadingedge"
+                | "edged"
+            ):
                 ret = "Edged"
             case "padded" | "hitpad":
                 ret = "Hit pad"
@@ -1740,10 +2012,12 @@ class RootModel(BaseModel):
                 ret = "Gloved"
             case _:
                 ret = "Unknown"
-        
+
         if ret == "Unknown":
-            self._progress.progress.print(f"[bold red]❓ Missing shot contact category: {contact}[/bold red]")
-        
+            self._progress.progress.print(
+                f"[bold red]❓ Missing shot contact category: {contact}[/bold red]"
+            )
+
         return ret
 
     def Get_Detail_As_Json(self):
@@ -1755,15 +2029,15 @@ class RootModel(BaseModel):
             "venue": self.Fixture.Venue.Name,
             "home_team": {
                 "id": self.Get_Home_Team().Id,
-                "name": self.Get_Home_Team().Name
+                "name": self.Get_Home_Team().Name,
             },
             "away_team": {
                 "id": self.Get_Away_Team().Id,
-                "name": self.Get_Away_Team().Name
+                "name": self.Get_Away_Team().Name,
             },
             "batsmen": [self.Get_Current_Batsman()],
             "bowlers": [self.Get_Current_Bowler()],
-            "match_status": self.Fixture.GameStatus
+            "match_status": self.Fixture.GameStatus,
         }
 
         return ret_val

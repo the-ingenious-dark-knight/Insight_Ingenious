@@ -1,5 +1,5 @@
-
 from pydantic import BaseModel
+
 from ingenious.models.chat import Action, KnowledgeBaseLink, Product
 
 

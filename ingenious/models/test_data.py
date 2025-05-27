@@ -1,6 +1,7 @@
 from typing import List
-from pydantic import BaseModel
+
 import yaml
+from pydantic import BaseModel
 
 from ingenious.files.files_repository import FileStorage
 
@@ -41,24 +42,28 @@ class Events(BaseModel):
             if event.identifier == identifier:
                 events.append(event)
         return events
-    
+
     async def load_events_from_file(self, file_path: str):
         try:
             self._events = []
-            if await self._fs.check_if_file_exists(file_name="events.yml", file_path=file_path):
+            if await self._fs.check_if_file_exists(
+                file_name="events.yml", file_path=file_path
+            ):
                 events_raw = yaml.safe_load(
-                    await self._fs.read_file(file_name="events.yml", file_path=file_path)
+                    await self._fs.read_file(
+                        file_name="events.yml", file_path=file_path
+                    )
                 )
                 # use pydantic to validate the data
                 for event_raw in events_raw:
                     try:
                         event = Event(**event_raw)
                         self.add_event(event)
-                                        
+
                     except Exception as e:
                         print(f"Unexpected error during validation: {e}")
                         raise e
-                
+
             else:
                 print(f"No events.yml found at {file_path}")
 

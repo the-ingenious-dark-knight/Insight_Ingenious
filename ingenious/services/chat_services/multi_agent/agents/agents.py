@@ -2,54 +2,65 @@ import os
 import re
 
 
-
 def decrement_heading_levels(content):
     # Decrement the level of any headings within the content
-    return re.sub(r'^(#{3,})', lambda m: '#' * (len(m.group(1)) - 1), content, flags=re.MULTILINE)
+    return re.sub(
+        r"^(#{3,})", lambda m: "#" * (len(m.group(1)) - 1), content, flags=re.MULTILINE
+    )
 
 
 def parse_markdown_to_object(markdown_content):
-    lines = markdown_content.split('\n')
+    lines = markdown_content.split("\n")
     obj = {}
     current_section = None
     current_content = []
 
     for line in lines:
-        if line.startswith('# '):
+        if line.startswith("# "):
             obj_name = line[2:].strip()
             obj["Title"] = obj_name
-        elif line.startswith('## '):
+        elif line.startswith("## "):
             if current_section:
-                content = '\n'.join(current_content).strip()
+                content = "\n".join(current_content).strip()
                 obj[current_section] = decrement_heading_levels(content)
             current_section = line[3:].strip()
             current_content = []
         else:
             current_content.append(line)
-    
+
     if current_section:
-        content = '\n'.join(current_content).strip()
+        content = "\n".join(current_content).strip()
         obj[current_section] = decrement_heading_levels(content)
 
     return obj
 
 
-def GetAgent(agent_name): 
+def GetAgent(agent_name):
     markdown_content = ""
-    #Get the content from the markdown file
-    with open(f"./ingenious/services/chat_services/multi_agent/agents/{agent_name}/agent.md", "r", encoding='utf-8') as file:
+    # Get the content from the markdown file
+    with open(
+        f"./ingenious/services/chat_services/multi_agent/agents/{agent_name}/agent.md",
+        "r",
+        encoding="utf-8",
+    ) as file:
         markdown_content = file.read()
 
     agent_settings = parse_markdown_to_object(markdown_content)
-    
+
     # Pretty print the agent settings
-    #print(json.dumps(agent_settings, indent=4))
+    # print(json.dumps(agent_settings, indent=4))
 
     agent_tasks = []
-    
-    tasks = os.listdir(f"./ingenious/services/chat_services/multi_agent/agents/{agent_name}/tasks")
+
+    tasks = os.listdir(
+        f"./ingenious/services/chat_services/multi_agent/agents/{agent_name}/tasks"
+    )
     for task in tasks:
-        with open(f"./ingenious/services/chat_services/multi_agent/agents/{agent_name}/tasks/{task}", "r",  encoding='utf-8') as file:
+        with open(
+            f"./ingenious/services/chat_services/multi_agent/agents/{agent_name}/tasks/{task}",
+            "r",
+            encoding="utf-8",
+        ) as file:
             markdown_content = file.read()
             agent_tasks.append(parse_markdown_to_object(markdown_content))
 

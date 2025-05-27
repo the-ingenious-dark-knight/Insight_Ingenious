@@ -1,6 +1,7 @@
 import logging
-from openai.types.chat import ChatCompletionMessageParam
+
 import tiktoken
+from openai.types.chat import ChatCompletionMessageParam
 
 logger = logging.getLogger(__name__)
 
@@ -23,14 +24,16 @@ def get_max_tokens(model: str = "gpt-3.5-turbo-0125") -> int:
     return max_tokens.get(model, 4096)
 
 
-def num_tokens_from_messages(messages: list[ChatCompletionMessageParam], model: str = "gpt-3.5-turbo-0613") -> int:
+def num_tokens_from_messages(
+    messages: list[ChatCompletionMessageParam], model: str = "gpt-3.5-turbo-0613"
+) -> int:
     # Return the number of tokens used by a list of messages
     try:
         encoding = tiktoken.encoding_for_model(model)
     except KeyError:
         logger.warning("Warning: model not found. Using cl100k_base encoding.")
         encoding = tiktoken.get_encoding("cl100k_base")
-    
+
     ## TODO: Move this to a configuration file
     if model in {
         "gpt-3.5-turbo-0613",
@@ -46,14 +49,19 @@ def num_tokens_from_messages(messages: list[ChatCompletionMessageParam], model: 
         tokens_per_message = 4
         tokens_per_name = -1
     elif "gpt-3.5-turbo" in model:
-        logger.warning("Warning: gpt-3.5-turbo may update over time. Returning num tokens assuming gpt-3.5-turbo-0613.")
+        logger.warning(
+            "Warning: gpt-3.5-turbo may update over time. Returning num tokens assuming gpt-3.5-turbo-0613."
+        )
         return num_tokens_from_messages(messages, model="gpt-3.5-turbo-0613")
     elif "gpt-4" in model:
-        logger.warning("Warning: gpt-4 may update over time. Returning num tokens assuming gpt-4-0613.")
+        logger.warning(
+            "Warning: gpt-4 may update over time. Returning num tokens assuming gpt-4-0613."
+        )
         return num_tokens_from_messages(messages, model="gpt-4-0613")
     else:
         raise NotImplementedError(f"""num_tokens_from_messages() is not implemented for model {
-            model}. See https://github.com/openai/openai-python/blob/main/chatml.md for information
+            model
+        }. See https://github.com/openai/openai-python/blob/main/chatml.md for information
             on how messages are converted to tokens.""")
     num_tokens = 0
     for message in messages:

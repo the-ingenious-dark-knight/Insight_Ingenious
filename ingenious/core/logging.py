@@ -2,6 +2,7 @@ import logging
 import logging.handlers
 import os
 import sys
+
 import colorlog
 
 
@@ -11,8 +12,11 @@ def setup_logging(app_module_name: str | None) -> None:
 
     # Create a stream handler
     stream_handler = logging.StreamHandler(sys.stdout)
-    stream_handler.setFormatter(colorlog.ColoredFormatter(
-        '%(asctime)s - %(log_color)s[%(levelname)s]%(reset)s - %(name)s - %(message)s'))
+    stream_handler.setFormatter(
+        colorlog.ColoredFormatter(
+            "%(asctime)s - %(log_color)s[%(levelname)s]%(reset)s - %(name)s - %(message)s"
+        )
+    )
 
     # Handlers
     handlers = [stream_handler]

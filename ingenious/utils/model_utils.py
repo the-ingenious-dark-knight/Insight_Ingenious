@@ -1,10 +1,11 @@
-from pydantic import BaseModel
-from typing import List
-import io
 import csv
+import io
+from enum import Enum
+from typing import List
+
 import markpickle
 import yaml
-from enum import Enum
+from pydantic import BaseModel
 
 
 class Output_Format(Enum):
@@ -20,7 +21,7 @@ def Is_Non_Complex_Field_Check_By_Value(value):
 
 
 # Checks if a field is a non-complex field using the type.. note this is not a foolproof method and is based on the assumption that the field is a complex type with RootModel in the name
-def Is_Non_Complex_Field_Check_By_Type(field_type, root_model_name='RootModel'):
+def Is_Non_Complex_Field_Check_By_Type(field_type, root_model_name="RootModel"):
     if root_model_name in str(field_type):
         return False
     else:
@@ -46,10 +47,8 @@ def Dict_To_Csv(obj: dict, row_header_columns, name):
     writer = csv.writer(csv_output)
     writer.writerow(row_header_columns)
     for row in obj.values():
-        writer.writerow(
-            [row[key] for key in row_header_columns]
-        )
-    output += csv_output.getvalue() + "\n```"    
+        writer.writerow([row[key] for key in row_header_columns])
+    output += csv_output.getvalue() + "\n```"
     return output
 
 
@@ -64,10 +63,8 @@ def List_To_Csv(obj: List, row_header_columns, name):
                 row = row.__dict__
             except:
                 print(f"Could not convert {row} to dictionary")
-        writer.writerow(
-            [row[key] for key in row_header_columns]
-        )
-    output += csv_output.getvalue() + "\n```"    
+        writer.writerow([row[key] for key in row_header_columns])
+    output += csv_output.getvalue() + "\n```"
     return output
 
 
@@ -75,13 +72,15 @@ def Listable_Object_To_Csv(obj, row_type):
     output = "``` csv\n"
     csv_output = io.StringIO()
     writer = csv.writer(csv_output)
-    headers = [prop.FieldName for prop in Get_Model_Properties(row_type) if Is_Non_Complex_Field_Check_By_Type(prop.FieldType)]
+    headers = [
+        prop.FieldName
+        for prop in Get_Model_Properties(row_type)
+        if Is_Non_Complex_Field_Check_By_Type(prop.FieldType)
+    ]
     writer.writerow(headers)
     for row in obj:
-        writer.writerow(
-            [getattr(row, header, None) for header in headers]
-        )
-    output += csv_output.getvalue() + "\n```"    
+        writer.writerow([getattr(row, header, None) for header in headers])
+    output += csv_output.getvalue() + "\n```"
     return output
 
 
@@ -89,7 +88,11 @@ def Object_To_Yaml(obj, strip_complex_fields=False):
     obj_dict = obj.__dict__
     output = "``` yaml\n"
     if strip_complex_fields:
-        obj_dict = {k: v for k, v in obj.__dict__.items() if Is_Non_Complex_Field_Check_By_Value(v)}
+        obj_dict = {
+            k: v
+            for k, v in obj.__dict__.items()
+            if Is_Non_Complex_Field_Check_By_Value(v)
+        }
     yaml_output = yaml.dump(obj_dict, default_flow_style=False)
     return output + yaml_output + "\n```"
 

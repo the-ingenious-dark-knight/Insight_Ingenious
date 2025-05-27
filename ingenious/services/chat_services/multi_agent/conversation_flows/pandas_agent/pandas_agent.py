@@ -1,15 +1,21 @@
+import os
+
+import autogen
+from autogen.agentchat.contrib.multimodal_conversable_agent import (
+    MultimodalConversableAgent,  # for GPT-4V
+)
 
 import ingenious.config.config as config
 from ingenious.models.chat import ChatResponse
-from ingenious.services.chat_services.multi_agent.conversation_patterns.pandas_agent.pandas_agent import \
-    ConversationPattern
-from autogen.agentchat.contrib.multimodal_conversable_agent import MultimodalConversableAgent  # for GPT-4V
-import autogen
-import os
+from ingenious.services.chat_services.multi_agent.conversation_patterns.pandas_agent.pandas_agent import (
+    ConversationPattern,
+)
 
 working_dir = "tmp/code/"
+
+
 class FigureCreator(autogen.ConversableAgent):
-    def __init__(self, n_iters=2, user_name='', **kwargs):
+    def __init__(self, n_iters=2, user_name="", **kwargs):
         """
         Initializes a FigureCreator instance.
 
@@ -20,9 +26,11 @@ class FigureCreator(autogen.ConversableAgent):
             - **kwargs: keyword arguments for the parent AssistantAgent.
         """
         super().__init__(**kwargs)
-        self.register_reply([autogen.Agent, None], reply_func=FigureCreator._reply_user, position=0)
+        self.register_reply(
+            [autogen.Agent, None], reply_func=FigureCreator._reply_user, position=0
+        )
         self._n_iters = n_iters
-        self.file_name = 'demo_result.jpg'
+        self.file_name = "demo_result.jpg"
         self.termination_msg = lambda x: "TERMINATE" in x.get("content", "").upper()
 
     def _reply_user(self, messages=None, sender=None, config=None):
@@ -41,8 +49,14 @@ class FigureCreator(autogen.ConversableAgent):
             human_input_mode="NEVER",
             max_consecutive_auto_reply=4,
             system_message=f"Help me run the code, and tell other agents it is in the <img {self.file_name}> file location.",
-            is_termination_msg=lambda x: x.get("content", "").rstrip().endswith("TERMINATE"),
-            code_execution_config={"last_n_messages": 3, "work_dir": working_dir, "use_docker": False},
+            is_termination_msg=lambda x: x.get("content", "")
+            .rstrip()
+            .endswith("TERMINATE"),
+            code_execution_config={
+                "last_n_messages": 3,
+                "work_dir": working_dir,
+                "use_docker": False,
+            },
             llm_config=self.llm_config,
         )
 
@@ -66,16 +80,16 @@ class FigureCreator(autogen.ConversableAgent):
         coder.update_system_message(
             coder.system_message
             + f"ALWAYS save the figure in `{self.file_name}` file. "
-              f"Tell other agents it is in the <img {self.file_name}> file location."
-              f"Set plt.show(block=False) plt.pause(0.1)."
+            f"Tell other agents it is in the <img {self.file_name}> file location."
+            f"Set plt.show(block=False) plt.pause(0.1)."
         )
 
         # Data flow begins
         commander.initiate_chat(coder, message=user_question)
-        #img = Image.open(os.path.join(working_dir, self.file_name))
-        #plt.imshow(img)
-        #plt.axis("off")  # Hide the axes
-        #plt.show()
+        # img = Image.open(os.path.join(working_dir, self.file_name))
+        # plt.imshow(img)
+        # plt.axis("off")  # Hide the axes
+        # plt.show()
 
         for i in range(self._n_iters):
             commander.send(
@@ -93,10 +107,10 @@ class FigureCreator(autogen.ConversableAgent):
                 recipient=coder,
                 request_reply=True,
             )
-            #img = Image.open(os.path.join(working_dir, f"{self.file_name}"))
-            #plt.imshow(img)
-            #plt.axis("off")  # Hide the axes
-            #plt.show()
+            # img = Image.open(os.path.join(working_dir, f"{self.file_name}"))
+            # plt.imshow(img)
+            # plt.axis("off")  # Hide the axes
+            # plt.show()
 
         return True, os.path.join(working_dir, f"{self.file_name}")
 
@@ -107,12 +121,12 @@ class ConversationFlow:
 
     @staticmethod
     async def get_conversation_response(
-            message: str,
-            topics: list = [],
-            thread_memory: str = '',
-            memory_record_switch=True,
-            thread_chat_history: str = '',
-            user_name: str = 'demo_result',
+        message: str,
+        topics: list = [],
+        thread_memory: str = "",
+        memory_record_switch=True,
+        thread_chat_history: str = "",
+        user_name: str = "demo_result",
     ) -> ChatResponse:
         # Retrieve the application configuration
         _config = config.get_config()
@@ -126,10 +140,12 @@ class ConversationFlow:
             topics=topics,
             memory_record_switch=memory_record_switch,
             memory_path=memory_path,
-            thread_memory=thread_memory
+            thread_memory=thread_memory,
         )
 
-        agent_pattern.creator = FigureCreator(name="Figure Creator~", llm_config=llm_config, user_name = user_name)
+        agent_pattern.creator = FigureCreator(
+            name="Figure Creator~", llm_config=llm_config, user_name=user_name
+        )
 
         res, memory_summary = await agent_pattern.get_conversation_response(message)
 
