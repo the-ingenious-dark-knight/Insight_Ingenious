@@ -94,7 +94,7 @@ def get_config(config_path=None) -> config_models.Config:
 
     path = Path(config_path)
 
-    if path.exists:
+    if path.exists():
         if Path(config_path).is_file():
             logger.debug("Config loaded from file")
             config = Config.from_yaml(config_path)
