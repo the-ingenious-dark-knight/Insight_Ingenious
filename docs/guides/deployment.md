@@ -52,25 +52,44 @@ chmod +x start.sh
 
 ### Docker Deployment
 
-1. Create a `Dockerfile`:
+1. The project includes a `Dockerfile` and `.dockerignore` file optimized for uv:
 
 ```dockerfile
-FROM python:3.11-slim
+FROM python:3.12-slim-bookworm
 
+# Set working directory
 WORKDIR /app
 
 # Install uv
 RUN pip install --no-cache-dir uv
 
-# Copy requirements and install dependencies
+# Add uv to PATH
+ENV PATH="/root/.local/bin:$PATH"
+
+# Use uv in copy mode for Docker
+ENV UV_LINK_MODE=copy
+
+# Set Python to use system Python by default
+ENV UV_SYSTEM_PYTHON=1
+
+# Copy configuration files for dependency installation
 COPY pyproject.toml uv.lock ./
-RUN uv pip install --system -e .
+
+# Install dependencies using uv
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --locked --no-install-project
 
 # Copy application code
 COPY . .
 
-# Run the application
-CMD ["uv", "run", "gunicorn", "main:app", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000"]
+# Make start script executable
+RUN chmod +x start.sh
+
+# Expose the application port
+EXPOSE 8000
+
+# Run the application with uv
+CMD ["./start.sh"]
 ```
 
 2. Build the Docker image:
@@ -85,31 +104,34 @@ docker build -t insight-ingenious .
 docker run -p 8000:8000 --env-file .env insight-ingenious
 ```
 
-### Docker Compose
+The Docker setup uses a number of optimizations:
+- Uses a build cache to speed up dependency installation
+- Installs dependencies in a separate layer from the application code
+- Uses uv's `sync` command with `--locked` to ensure deterministic installs
+- Sets `UV_LINK_MODE=copy` to avoid hard link warnings in Docker
 
-For more complex deployments, create a `docker-compose.yml` file:
+## Developing in Docker
 
-```yaml
-version: '3'
+When developing with Docker, you can mount your local codebase into the container while preserving the container's Python environment:
 
-services:
-  api:
-    build: .
-    ports:
-      - "8000:8000"
-    env_file:
-      - .env
-    restart: unless-stopped
-  
-  nginx:
-    image: nginx:latest
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
-    depends_on:
-      - api
+```bash
+docker run --rm -it \
+  -p 8000:8000 \
+  --volume $(pwd):/app \
+  --volume /app/.venv \
+  --env-file .env \
+  insight-ingenious
 ```
+
+This setup:
+- Mounts your current directory to the `/app` directory in the container
+- Uses an anonymous volume for the `.venv` directory to preserve the container environment
+- Maps port 8000 to your host
+- Loads environment variables from your local `.env` file
+
+The `--rm` flag ensures the container and anonymous volume are cleaned up when the container exits.
+
+This approach lets you edit code locally while running it in a containerized environment that matches production.
 
 ## Cloud Deployment
 
