@@ -122,7 +122,6 @@ $RECYCLE.BIN/
 
 # Environments
 .env
-.env.*
 .venv/
 venv/
 ENV/

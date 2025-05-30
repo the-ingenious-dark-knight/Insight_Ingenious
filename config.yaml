@@ -1,0 +1,46 @@
+# AutoGen FastAPI Template Configuration
+# Simple YAML configuration for the application
+
+app:
+  name: "AutoGen FastAPI Template"
+  version: "1.0.0"
+  debug: false
+
+server:
+  host: "0.0.0.0"
+  port: 8000
+
+auth:
+  enabled: true
+  # Username and password are loaded from environment variables:
+  # AUTH_USERNAME and AUTH_PASSWORD
+
+models:
+  default_llm:
+    model: "gpt-4.1-mini"
+    temperature: 0.7
+    max_tokens: 1000
+    # API key, base_url, and api_version are loaded from environment variables
+
+agents:
+  # List of agent types to create by default
+  enabled:
+    - "chat"
+    - "research"
+    - "sql"
+  
+  # Optional configurations for specific agent types
+  configs:
+    chat:
+      system_message: "You are a helpful AI assistant. Provide clear, concise, and accurate responses."
+    
+    research:
+      system_message: "You are a research assistant. Help users find and analyze information from reliable sources."
+    
+    sql:
+      database_path: "sample.db"  # Will create a sample SQLite database
+      system_message: "You are a SQL expert. Help users write queries and analyze data safely."
+
+logging:
+  level: "INFO"
+  format: "json"  # or "simple" for human-readable logs
