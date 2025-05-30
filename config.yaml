@@ -1,8 +1,8 @@
-# AutoGen FastAPI Template Configuration
+# ingenious-slim Configuration
 # Simple YAML configuration for the application
 
 app:
-  name: "AutoGen FastAPI Template"
+  name: "ingenious-slim"
   version: "1.0.0"
   debug: false
 

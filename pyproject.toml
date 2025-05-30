@@ -1,7 +1,7 @@
 [project]
-name = "autogen-fastapi-template"
+name = "ingenious-slim"
 version = "1.0.0"
-description = "A minimal abstraction over AutoGen and FastAPI for building agent APIs"
+description = "A slim fork of Insight Ingenious for building agent APIs with AutoGen and FastAPI"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [

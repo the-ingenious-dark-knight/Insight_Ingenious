@@ -1,10 +1,10 @@
-# Insight Ingenious Documentation
+# ingenious-slim Documentation
 
-Welcome to the Insight Ingenious documentation. This guide will help you understand how to use, configure, and extend the AutoGen FastAPI template for building agent-based applications.
+Welcome to the ingenious-slim documentation. This guide will help you understand how to use, configure, and extend this slim fork of Insight Ingenious for building agent-based applications.
 
-## About Insight Ingenious
+## About ingenious-slim
 
-Insight Ingenious is a minimal, developer-friendly template for building AutoGen-based agent APIs with FastAPI. It provides a solid foundation for creating multi-agent applications with clean architecture and simple configuration.
+ingenious-slim is a lightweight fork of Insight Ingenious, providing a minimal, developer-friendly template for building AutoGen-based agent APIs with FastAPI. It provides a solid foundation for creating multi-agent applications with clean architecture and simple configuration.
 
 ## Key Features
 

@@ -1,6 +1,6 @@
 # Guides
 
-This section contains how-to guides for common tasks when working with the Insight Ingenious project.
+This section contains how-to guides for common tasks when working with the ingenious-slim project.
 
 ## Contents
 

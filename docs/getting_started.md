@@ -1,6 +1,6 @@
 # Getting Started
 
-This guide will help you set up and run the Insight Ingenious project.
+This guide will help you set up and run the ingenious-slim project.
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This guide will help you set up and run the Insight Ingenious project.
 
 ```bash
 git clone <repository-url>
-cd Insight_Ingenious
+cd ingenious-slim
 ```
 
 2. Copy the environment template:

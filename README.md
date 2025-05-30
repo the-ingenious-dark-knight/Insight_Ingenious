@@ -1,6 +1,6 @@
-# AutoGen FastAPI Template
+# ingenious-slim
 
-A minimal, developer-friendly template for building AutoGen-based agent APIs with FastAPI. This template provides a solid foundation for creating multi-agent applications with clean architecture and simple configuration.
+A slim fork of the Insight Ingenious project for building AutoGen-based agent APIs with FastAPI. This lightweight template provides a solid foundation for creating multi-agent applications with clean architecture and simple configuration.
 
 ## ✨ Features
 
@@ -12,13 +12,18 @@ A minimal, developer-friendly template for building AutoGen-based agent APIs wit
 - **Developer-Friendly**: Easy to understand, extend, and maintain
 - **Template-First**: Git-clonable foundation, not a library
 
+## Important Notes
+
+- This project **exclusively uses** `uv` for Python package management and environment operations.
+- This project **only supports** Azure OpenAI integrations, not standard OpenAI.
+
 ## 🚀 Quick Start
 
 ### 1. Clone and Setup
 
 ```bash
 git clone <repository-url>
-cd autogen-fastapi-template
+cd ingenious-slim
 
 # Copy environment template
 cp .env.example .env
@@ -45,7 +50,7 @@ auth:
 
 models:
   default_llm:
-    model: "gpt-4"
+    model: "gpt-4.1-mini"
     temperature: 0.7
 
 agents:
@@ -77,6 +82,23 @@ curl -u admin:your_password http://localhost:8000/api/v1/health
 ```
 
 ## 📚 Documentation
+
+Comprehensive documentation is available in the [docs](./docs/) directory:
+
+- [Getting Started](./docs/getting_started.md)
+- [Guides](./docs/guides/index.md)
+- [API Reference](./docs/api/index.md)
+- [Architecture](./docs/architecture/index.md)
+- [Examples](./docs/examples/index.md)
+- [Complete Table of Contents](./docs/toc.md)
+
+### Key Documentation Topics
+
+- [Package Management with uv](./docs/guides/package_management.md)
+- [Azure OpenAI Integration](./docs/guides/azure_openai.md)
+- [Custom Agents](./docs/guides/custom_agents.md)
+- [Authentication](./docs/guides/authentication.md)
+- [Deployment](./docs/guides/deployment.md)
 
 ### Configuration
 
