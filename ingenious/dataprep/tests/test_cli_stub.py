@@ -17,23 +17,28 @@ import importlib
 from typer.testing import CliRunner
 
 
-# --------------------------------------------------------------------------
+# =========================================================================== #
 # 1. Tiny stub that looks like the real Crawler but never touches the wire
-# --------------------------------------------------------------------------
+# =========================================================================== #
+
+
 class _StubCrawler:
-    """Drop-in replacement: accepts any **cfg, returns deterministic payload."""
+    """Return deterministic payload without touching the wire."""
 
     def __init__(self, **_):  # cfg ignored
-        ...
+        pass
 
     def scrape(self, url: str):
         return {"url": url, "content": "cli stub"}
 
 
-# --------------------------------------------------------------------------
+# =========================================================================== #
 # 2. The actual test
-# --------------------------------------------------------------------------
-def test_cli_crawl_stub(monkeypatch):
+# =========================================================================== #
+
+
+def test_cli_crawl_stub(monkeypatch) -> None:
+    """Invoke `ingen dataprep crawl` and assert it prints our stub JSON."""
     # ── Patch the symbol *before* the CLI module is imported ───────────────
     # ingenious.cli does `from ingenious.dataprep.cli import dataprep …`
     # which in turn imports Crawler.  By patching early we ensure the CLI

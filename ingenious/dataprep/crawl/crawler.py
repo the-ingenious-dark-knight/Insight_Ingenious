@@ -1,18 +1,17 @@
 """
-Thin, provider-agnostic **crawler facade** for Ingenious dataprep.
+*Public façade* sitting between **Insight Ingenious** pipelines/CLI and the
+*provider-specific* implementation found in `_scrapfly_impl.py`.
 
-Why split the concerns?
-
-* `Crawler` is what the CLI (`ingen dataprep crawl …`) and future
-  pipelines import.
-  It deliberately exposes **no Scrapfly-specific API** so that tomorrow we
-  could switch to, say, Playwright or Browserless with zero surface change.
-
-* `_scrapfly_impl.fetch_pages()` is the low-level adapter that knows how to
-  talk to Scrapfly and handle the key, retry policy, etc.
-
-This file therefore contains *only* orchestration glue and argument
-normalisation.
+Why a two-layer design?
+-----------------------
+1. **Vendor agnosticism** – `Crawler` deliberately has **no Scrapfly imports**.
+   If we decide to switch from Scrapfly to Playwright, Browserless, or an
+   internal fetch-service, only the private adapter file has to change.
+2. **Separation of concerns**
+   * `_scrapfly_impl.fetch_pages`   → *network I/O, retries, API-keys*
+   * `Crawler`                      → *orchestration & argument plumbing*
+3. **Testability** – Unit tests can patch **one** symbol (`fetch_pages`) to
+   avoid real HTTP calls while still covering the forwarding logic.
 """
 
 from __future__ import annotations
@@ -24,42 +23,66 @@ from ._scrapfly_impl import fetch_pages
 
 class Crawler:
     """
-    High-level crawler wrapper.
+    Vendor-neutral wrapper that clients instantiate.
 
-    Parameters
-    ----------
-    **cfg :
-        Arbitrary keyword arguments forwarded verbatim to the provider adapter
-        (`fetch_pages`).  Example:
+    Any keyword argument (`**cfg`) is forwarded *verbatim* to the low-level
+    `fetch_pages()` helper.  This makes the public surface stable even if we
+    later expose new provider features – callers simply pass them through
+    without the wrapper needing a new release.
 
-        ```python
-        Crawler(render_js=False, country="us")
-        ```
+    Examples
+    --------
+    Basic use with defaults::
+
+        page = Crawler().scrape("https://example.com")
+
+    Custom retry/JS options::
+
+        batch = Crawler(max_attempts=3,
+                        retry_on_status_code=[520],
+                        extra_scrapfly_cfg={"render_js": False}
+                       ).batch(urls)
     """
 
-    # --------------------------------------------------------------------- init
-    def __init__(self, **cfg):
-        # Do not touch/validate here; leave that to the provider module so that
-        # the wrapper stays vendor-neutral.
-        self.cfg = cfg
+    # ------------------------------------------------------------------ init #
+    def __init__(self, **cfg) -> None:
+        """
+        Store *all* supplied keyword arguments.
 
-    # ----------------------------------------------------------------- helpers
+        We do **not** try to validate the keys – that responsibility lives in
+        `_scrapfly_impl`.  Keeping the layer thin avoids duplicating rules and
+        lets the adapter evolve independently.
+        """
+        self.cfg = cfg  # stash for later forwarding
+
+    # -------------------------------------------------------------- .scrape #
     def scrape(self, url: str) -> Dict[str, str]:
         """
-        Fetch **one** page.
+        Fetch a **single** page.
 
-        Returned mapping is exactly the first element of `fetch_pages()`
-        so that call-sites don’t have to slice the list themselves.
+        We wrap the one-item *url* in a list because `fetch_pages` is a
+        batch-oriented API.  Returning the *first* element (index 0) saves
+        callers from `[0]` gymnastics.
         """
         return fetch_pages([url], **self.cfg)[0]
 
+    # --------------------------------------------------------------- .batch #
     def batch(self, urls: Iterable[str]) -> List[Dict[str, str]]:
         """
-        Fetch **many** pages in a single provider call.
+        Fetch **multiple** URLs in one provider call.
 
-        *Why convert to list?*
-        Because the underlying adapter may iterate over the sequence more than
-        once (e.g. for logging) – turning a lazy generator into a list avoids
-        surprises.
+        Parameters
+        ----------
+        urls
+            Any iterable of absolute URLs – generator, tuple, etc.
+
+        Design note
+        -----------
+        We eagerly convert *urls* to a list:
+
+        * guarantees a real container that can be iterated multiple times
+          (the provider or logging hooks might loop twice);
+        * preserves **input order** so callers can rely on positional mapping
+          between request and response lists.
         """
         return fetch_pages(list(urls), **self.cfg)

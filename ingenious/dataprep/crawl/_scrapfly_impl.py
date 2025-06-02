@@ -1,18 +1,19 @@
 """
-Provider adapter that fetches pages with the **Scrapfly SDK**
-(no LangChain dependency).
+Provider adapter for Insight Ingenious dataprep that uses the Scrapfly SDK.
 
-The function `fetch_pages()` is intentionally *thin*:
+This module centralizes all HTTP/fetch logic:
+1. **Single responsibility** – All network‐touching code lives here.
+2. **Testability** – Unit tests can stub `fetch_pages` to avoid real HTTP.
+3. **Replaceability** – Swap out Scrapfly by editing only this file.
 
-* handle API-key discovery (CLI arg › env var › optional .env)
-* normalise Scrapfly configuration
-* perform 1-to-N HTTP fetches
-* raise *early* if anything is wrong (missing key, bad status, empty body)
-* return a list of {"url", "content"} records – the contract expected by
-  ingenious.dataprep.crawl.Crawler
+Public contract
+---------------
+    fetch_pages(urls, …) → List[{"url": str, "content": str}]
 
-Nothing else – pagination, rate-limiting, retry logic, etc. – is pushed up to
-callers so the wrapper can stay provider-agnostic.
+Raises early if:
+* SCRAPFLY_API_KEY is missing
+* Scrapfly returns a non‐200 status on the final attempt
+* The response body is empty (often a blocked JS site or CAPTCHA)
 """
 
 from __future__ import annotations
@@ -20,101 +21,147 @@ from __future__ import annotations
 import logging
 import os
 from functools import lru_cache
-from typing import Dict, List
+from typing import List, Optional, Sequence, TypedDict
 
-from dotenv import load_dotenv, find_dotenv
+from dotenv import find_dotenv, load_dotenv
 from scrapfly import ScrapflyClient, ScrapeConfig
 from scrapfly.errors import ScrapflyError as ScrapflyException
 
 log = logging.getLogger(__name__)
 
-# ────────────────────────────── one-time .env convenience ──────────────────────
-# Local developers drop a `.env` next to their `config.yml`; CI will simply
-# ignore this because its environment is populated by secrets.
+# =========================================================================== #
+# 1. Resolve environment variables from an optional .env file (dev-only).
+#    • Production injects SCRAPFLY_API_KEY via CI secrets.
+#    • Local devs can keep credentials in a .env file.
+# =========================================================================== #
+
 _ENV_LOADED = load_dotenv(find_dotenv(usecwd=True), override=False)
 if _ENV_LOADED:
     log.debug(".env file loaded for Scrapfly key")
 
-# ───────────────────────────── default per-request options ─────────────────────
-DEFAULT_CONFIG: Dict[str, str | bool] = {
-    "render_js": True,  # use headless browser; needed for SPAs
-    "asp": True,  # enable Scrapfly’s anti-scraping protection bypass
-    "format": "markdown",  # cleaner to chunk/LLM-embed than raw HTML
+# =========================================================================== #
+# 2. Default per-request Scrapfly options – safe, broadly useful defaults.
+#    Callers may override via `extra_scrapfly_cfg`.
+# =========================================================================== #
+
+DEFAULT_CONFIG: dict[str, object] = {
+    "render_js": True,  # Use a headless browser (required for SPAs)
+    "asp": True,  # Enable Scrapfly anti-scraping bypass
+    "format": "markdown",  # Easier to chunk / embed than raw HTML
 }
 
-# Little alias for readability in type hints
-Page = Dict[str, str]
+# =========================================================================== #
+# 3. Retry policy – values chosen to cover **transient** failures only.
+# =========================================================================== #
+
+DEFAULT_RETRY_CODES: tuple[int, ...] = (408, 429, 500, 502, 503, 504)
+DEFAULT_MAX_ATTEMPTS = 5  # 1 initial try + 4 retries (total back-off ≈ 31s)
+DEFAULT_INITIAL_DELAY = 1  # seconds – first back-off step
+
+# =========================================================================== #
+# 4. Typed helper for the public payload – stricter than plain dict[str, str].
+# =========================================================================== #
 
 
-# ─────────────────────────────── client factory (cached) ───────────────────────
+class Page(TypedDict):
+    url: str
+    content: str
+
+
+# =========================================================================== #
+# 5. ScrapflyClient factory – cached so tight loops reuse connections.
+# =========================================================================== #
+
+
 @lru_cache(maxsize=1)
-def _client(api_key: str) -> ScrapflyClient:
-    """
-    ScrapflyClient is cheap, but caching avoids re-instantiation in tight loops
-    and makes the function thread-safe.
-    """
+def _client(api_key: str) -> ScrapflyClient:  # pragma: no cover
+    """Return a singleton ScrapflyClient for the given API key."""
     return ScrapflyClient(key=api_key)
 
 
-# ───────────────────────────────── public entry-point ──────────────────────────
+# =========================================================================== #
+# 6. Main helper that callers import.
+# =========================================================================== #
+
+
 def fetch_pages(
     urls: List[str],
     *,
     api_key: str | None = None,
-    extra_scrapfly_cfg: Dict | None = None,
+    extra_scrapfly_cfg: Optional[dict] = None,
+    max_attempts: int = DEFAULT_MAX_ATTEMPTS,
+    retry_on_status_code: Optional[Sequence[int]] = None,
+    delay: int = DEFAULT_INITIAL_DELAY,
 ) -> List[Page]:
     """
-    Fetch **each** URL and return a list of:
-
-        {"url": "<url>", "content": "<markdown|text>"}
+    Fetch each URL and return their readable content.
 
     Parameters
     ----------
-    urls:
-        One or many absolute URLs.
+    urls
+        One or many absolute URLs to scrape.
+    api_key
+        Explicit Scrapfly API key.  If omitted, falls back to the
+        SCRAPFLY_API_KEY environment variable (or loaded from .env).
+    extra_scrapfly_cfg
+        Dict merged over DEFAULT_CONFIG to tweak per-request options,
+        e.g. {"render_js": False, "country": "us"}.
+    max_attempts
+        Total tries (initial + retries) for each URL.  Passed to `tries=`.
+    retry_on_status_code
+        Iterable of upstream HTTP status codes (e.g., 403, 520) that warrant
+        retry in addition to the DEFAULT_RETRY_CODES set.
+    delay
+        Initial back-off delay (in seconds).  Scrapfly doubles this on each retry:
+        delay, delay*2, delay*4, …
 
-    api_key:
-        Explicit Scrapfly API key – overrides env/.env.  Useful for the CLI
-        flag `--api-key` or programmatic injection in tests.
-
-    extra_scrapfly_cfg:
-        Keyword arguments merged *over* DEFAULT_CONFIG, e.g.
-        `{"render_js": False, "country": "us"}`.
+    Returns
+    -------
+    List[Page]
+        A list of Page dicts, in the same order as the input URLs.
 
     Raises
     ------
     RuntimeError
-        * if the API key could not be resolved
-        * if Scrapfly returns non-200 status
-        * if the response body is empty (site blocked or JavaScript error)
-
-    ScrapflyException
-        Any lower-level SDK/network error bubbles up unchanged so callers can
-        decide whether to retry.
+        - SCRAPFLY_API_KEY missing
+        - Scrapfly returned non-200 on final attempt
+        - Response body empty (often blocked or CAPTCHA page)
+    ScrapflyError
+        Any lower-level SDK/network error; caller may catch and retry here.
     """
-    # ── Resolve API key (CLI arg ▸ env var) ────────────────────────────────────
+    # ── 6.1 Resolve credentials – fail early if missing ────────────────────
     api_key = api_key or os.getenv("SCRAPFLY_API_KEY")
     if not api_key:
         raise RuntimeError("SCRAPFLY_API_KEY not set (env var or .env)")
-
     client = _client(api_key)
-    cfg = {**DEFAULT_CONFIG, **(extra_scrapfly_cfg or {})}
 
+    # ── 6.2 Merge per-request options and derive retry codes ───────────────
+    cfg = {**DEFAULT_CONFIG, **(extra_scrapfly_cfg or {})}
+    retry_codes = (
+        tuple(retry_on_status_code) if retry_on_status_code else DEFAULT_RETRY_CODES
+    )
+
+    # ── 6.3 Iterate and scrape each URL ───────────────────────────────────
     pages: List[Page] = []
     for url in urls:
         try:
-            resp = client.scrape(ScrapeConfig(url=url, **cfg))
+            response = client.resilient_scrape(
+                scrape_config=ScrapeConfig(url=url, **cfg),
+                tries=max_attempts,
+                retry_on_status_code=retry_codes,
+                delay=delay,
+            )
         except ScrapflyException as exc:
-            # Expose HTTP/network issues to caller; keep stack-trace.
+            # Log and re-raise so callers can decide whether to retry at a higher level
             log.debug("Scrapfly exception for %s: %s", url, exc)
             raise
 
-        # ── Basic sanity checks before we claim success ───────────────────────
-        if resp.status_code != 200:
-            raise RuntimeError(f"Scrapfly HTTP {resp.status_code} for {url}")
-        if not resp.content.strip():
+        # ── 6.4 Post-flight sanity checks – catch edge cases early ──────────
+        if response.status_code != 200:
+            raise RuntimeError(f"Scrapfly HTTP {response.status_code} for {url}")
+        if not response.content.strip():
             raise RuntimeError(f"Empty body for {url}")
 
-        pages.append({"url": url, "content": resp.content})
+        pages.append({"url": url, "content": response.content})
 
     return pages
