@@ -67,3 +67,5 @@ Once the application is running, access the web UI at:
 4. The appropriate agents will process your request and respond
 
 > **Once you are able to run those commands successfully, being able to access the UI, and has loaded the sample prompts, you're good to go! (start reading more advanced docs.) Else, kindly let us know which step you had an issue. Other in-depth information will be discussed in other docs.**
+
+Next up: Building custom agents. Go to **CustomAgents.md**
