@@ -56,7 +56,6 @@ class ConversationPattern:
                     "get_or_create": True,
                 },
                 code_execution_config=False,
-                silent=False,
             )
         else:
             self.user_proxy = autogen.UserProxyAgent(
@@ -66,7 +65,6 @@ class ConversationPattern:
                 max_consecutive_auto_reply=2,
                 system_message="I enhance the user question with context",
                 code_execution_config=False,
-                silent=False,
             )
 
         self.researcher = autogen.ConversableAgent(

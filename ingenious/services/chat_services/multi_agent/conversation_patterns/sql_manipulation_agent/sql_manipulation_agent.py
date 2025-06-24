@@ -69,7 +69,6 @@ class ConversationPattern:
             human_input_mode="NEVER",
             system_message="I enhance the user question with context",
             code_execution_config=False,
-            silent=False,
         )
 
         self.planner = autogen.AssistantAgent(
