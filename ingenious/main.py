@@ -22,7 +22,10 @@ from ingenious.utils.namespace_utils import (
     import_module_with_fallback,
 )
 
-config = ingen_config.get_config(os.getenv("INGENIOUS_PROJECT_PATH", ""))
+
+# Delay config loading until needed
+def get_config():
+    return ingen_config.get_config(os.getenv("INGENIOUS_PROJECT_PATH", ""))
 
 
 # Configure logging
