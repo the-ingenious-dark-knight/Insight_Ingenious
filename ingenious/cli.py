@@ -310,9 +310,15 @@ def initialize_new_project():
 def run_prompt_tuner():
     """Run the prompt tuner web application."""
     from ingenious_prompt_tuner import create_app as prompt_tuner
+    import ingenious.config.config as ingen_config
 
+    config = ingen_config.get_config()
     app = prompt_tuner()
-    app.run(debug=True, host="0.0.0.0", port=80)
+    app.run(
+        debug=True,
+        host=config.web_configuration.ip_address,
+        port=config.web_configuration.port,
+    )
 
 
 if __name__ == "__cli__":

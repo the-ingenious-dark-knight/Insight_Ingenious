@@ -19,9 +19,7 @@ from ingenious.services.message_feedback_service import MessageFeedbackService
 
 logger = logging.getLogger(__name__)
 security = HTTPBasic()
-config: config_models.Config = Config.get_config(
-    os.getenv("INGENIOUS_PROJECT_PATH", "")
-)
+config: config_models.Config = Config.get_config()
 
 
 def get_openai_service():

@@ -86,7 +86,8 @@ def get_config(config_path=None) -> config_models.Config:
     if config_path is None:
         env_config_path = os.getenv("INGENIOUS_PROJECT_PATH")
         if env_config_path:
-            config_path = env_config_path
+            # If INGENIOUS_PROJECT_PATH is set, look for config.yml in that directory
+            config_path = Path(env_config_path) / "config.yml"
         else:
             # Use the default config file
             current_path = Path.cwd()
@@ -94,8 +95,8 @@ def get_config(config_path=None) -> config_models.Config:
 
     path = Path(config_path)
 
-    if path.exists:
-        if Path(config_path).is_file():
+    if path.exists():
+        if path.is_file():
             logger.debug("Config loaded from file")
             config = Config.from_yaml(config_path)
             return config

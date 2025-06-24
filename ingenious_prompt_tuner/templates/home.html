@@ -20,7 +20,8 @@
                 data-bs-dismiss="alert"
                 aria-label="Close"></button>
         <p>
-            This is the the home page of the Ingenious prompt tuning application. It is a development tool designed to help you iterate and ideate on AI agent prompts quickly and efficiently.
+            This is the the home page of the Ingenious prompt tuning application. It is a development tool designed to help
+            you iterate and ideate on AI agent prompts quickly and efficiently.
         </p>
         <p>Revisions folder is: {{ base_folder }}.</p>
     </div>
@@ -35,13 +36,13 @@
                 '
                 class="btn btn-outline-primary"
                 disabled>
-            <i class="bi bi-copy"></i>  Copy Selected Revision
+            <i class="bi bi-copy"></i> Copy Selected Revision
         </button>
         <button id="syncSampleData"
                 onclick="SyncSampleData()"
                 class="btn btn-outline-warning"
                 disabled>
-            <i class="bi bi-arrow-repeat"></i>  Sync Sample Data
+            <i class="bi bi-arrow-repeat"></i> Sync Sample Data
             <span id="syncSampleDataSpinner"
                   class="spinner-border spinner-border-sm"
                   role="status"
@@ -52,7 +53,7 @@
                 onclick="SyncPrompts()"
                 class="btn btn-outline-warning"
                 disabled>
-            <i class="bi bi-arrow-repeat"></i>  Sync Prompts
+            <i class="bi bi-arrow-repeat"></i> Sync Prompts
             <span id="syncPromptsSpinner"
                   class="spinner-border spinner-border-sm"
                   role="status"
@@ -62,7 +63,7 @@
         <button id="clearCookiesButton"
                 onclick="clearCookies()"
                 class="btn btn-outline-danger">
-            <i class="bi bi-trash"></i>  Clear Selection
+            <i class="bi bi-trash"></i> Clear Selection
         </button>
     </div>
     <table id="revisionsTable" class="display">
@@ -92,13 +93,13 @@
     <script src="https://cdn.datatables.net/2.2.1/js/dataTables.bootstrap5.js"></script>
     <script>
     function clearCookies() {
-        document.cookie.split(";").forEach(function(c) {
+        document.cookie.split(";").forEach(function (c) {
             document.cookie = c.trim().split("=")[0] + '=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/';
         });
         location.reload();
     }
 
-    async function UpdateButtonState(){
+    async function UpdateButtonState() {
         // Automatically select the record if a revision is stored in cookies
         const selectedRevision = await getSelectedRevision('selected_revision');
 
@@ -110,9 +111,9 @@
             document.getElementById('runTestsNav').style.display = 'block';
         }
         else {
-            $('#createRevisionButton').prop('disabled',true);
-            $('#syncSampleData').prop('disabled',true);
-            $('#syncPrompts').prop('disabled',true);
+            $('#createRevisionButton').prop('disabled', true);
+            $('#syncSampleData').prop('disabled', true);
+            $('#syncPrompts').prop('disabled', true);
             document.getElementById('editPromptsNav').style.display = 'none';
             document.getElementById('runTestsNav').style.display = 'none';
         }
@@ -120,7 +121,7 @@
 
     }
 
-    function SyncPrompts(){
+    function SyncPrompts() {
         const syncButton = document.getElementById('syncPrompts');
         const spinner = document.getElementById('syncPromptsSpinner');
         spinner.style.display = 'inline-block';
@@ -130,20 +131,20 @@
         fetch(url, {
             method: 'GET'
         })
-        .then(response => {
-            if (response.ok) {
-                alert('Prompts synced successfully');
-            } else {
-                alert('Failed to sync prompts');
-            }
-        })
-        .finally(() => {
-            spinner.style.display = 'none';
-            syncButton.disabled = false;
-        });
+            .then(response => {
+                if (response.ok) {
+                    alert('Prompts synced successfully');
+                } else {
+                    alert('Failed to sync prompts');
+                }
+            })
+            .finally(() => {
+                spinner.style.display = 'none';
+                syncButton.disabled = false;
+            });
     }
 
-    function SyncSampleData(){
+    function SyncSampleData() {
         const syncButton = document.getElementById('syncSampleData');
         const spinner = document.getElementById('syncSampleDataSpinner');
         spinner.style.display = 'inline-block';
@@ -153,22 +154,22 @@
         fetch(url, {
             method: 'GET'
         })
-        .then(response => {
-            if (response.ok) {
-                alert('Sample data synced successfully');
-            } else {
-                alert('Failed to sync sample data');
-            }
-        })
-        .finally(() => {
-            spinner.style.display = 'none';
-            syncButton.disabled = false;
-        });
+            .then(response => {
+                if (response.ok) {
+                    alert('Sample data synced successfully');
+                } else {
+                    alert('Failed to sync sample data');
+                }
+            })
+            .finally(() => {
+                spinner.style.display = 'none';
+                syncButton.disabled = false;
+            });
     }
 
-    function OpenUrl(url){
-            window.location.href(url);
-        }
+    function OpenUrl(url) {
+        window.location.href(url);
+    }
 
 
 
@@ -176,35 +177,35 @@
         return fetch("{{ url_for('index.get_selected_revision') }}", {
             method: 'GET'
         })
-        .then(response => {
-            if (response.ok) {
-                return response.json().then(data => {
-                    return data.revision;
-                });
-            } else {
-                alert('Failed to get selected cookie');
-                return null;
-            }
-        });
+            .then(response => {
+                if (response.ok) {
+                    return response.json().then(data => {
+                        return data.revision;
+                    });
+                } else {
+                    alert('Failed to get selected cookie');
+                    return null;
+                }
+            });
     }
 
     async function setSelectedRevision(revision_id) {
         return fetch(`{{ url_for('index.set_selected_revision') }}?revision_id=${revision_id}`, {
             method: 'GET'
         })
-        .then(response => {
-            if (response.ok) {
-                return null;
-            } else {
-                alert('Failed to get selected cookie');
-                return null;
-            }
-        });
+            .then(response => {
+                if (response.ok) {
+                    return null;
+                } else {
+                    alert('Failed to get selected cookie');
+                    return null;
+                }
+            });
     }
 
 
 
-    $(document).ready(async function() {
+    $(document).ready(async function () {
         table = $('#revisionsTable').DataTable({
             select: {
                 style: 'single'
@@ -213,26 +214,26 @@
         });
 
         table.on('select', function (e, dt, type, indexes) {
-                let rowData = table
-                    .rows(indexes)
-                    .data()
-                    .toArray();
+            let rowData = table
+                .rows(indexes)
+                .data()
+                .toArray();
 
-                var revisionName = rowData[0][0];
-                var revisionTitle = rowData[0][1];
-                setSelectedRevision(revisionName).then(() => {
-                    notice = 'The currently selected revision is <mark>'+revisionName + " -- " + revisionTitle+'</mark>'
-                    $('#selectedRevisionNotice').html(notice)
-                    UpdateButtonState().then(() => {
-                        // Additional actions if needed after button state update
-                    });
+            var revisionName = rowData[0][0];
+            var revisionTitle = rowData[0][1];
+            setSelectedRevision(revisionName).then(() => {
+                notice = 'The currently selected revision is <mark>' + revisionName + " -- " + revisionTitle + '</mark>'
+                $('#selectedRevisionNotice').html(notice)
+                UpdateButtonState().then(() => {
+                    // Additional actions if needed after button state update
                 });
+            });
 
         });
 
         const selectedRevision = await getSelectedRevision('selected_revision');
         if (selectedRevision) {
-            table.rows().every(function() {
+            table.rows().every(function () {
                 var data = this.data();
                 if (data[0] === selectedRevision) {
                     this.select();
