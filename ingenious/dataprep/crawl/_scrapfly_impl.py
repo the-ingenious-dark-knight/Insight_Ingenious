@@ -24,8 +24,18 @@ from functools import lru_cache
 from typing import List, Optional, Sequence, TypedDict
 
 from dotenv import find_dotenv, load_dotenv
-from scrapfly import ScrapflyClient, ScrapeConfig
-from scrapfly.errors import ScrapflyError as ScrapflyException
+
+try:
+    from scrapfly import ScrapflyClient, ScrapeConfig
+    from scrapfly.errors import ScrapflyError as ScrapflyException
+
+    SCRAPFLY_AVAILABLE = True
+except ImportError:
+    # Scrapfly is optional - only needed for actual crawling functionality
+    ScrapflyClient = None
+    ScrapeConfig = None
+    ScrapflyException = Exception
+    SCRAPFLY_AVAILABLE = False
 
 log = logging.getLogger(__name__)
 
@@ -74,8 +84,12 @@ class Page(TypedDict):
 
 
 @lru_cache(maxsize=1)
-def _client(api_key: str) -> ScrapflyClient:  # pragma: no cover
+def _client(api_key: str):  # pragma: no cover
     """Return a singleton ScrapflyClient for the given API key."""
+    if not SCRAPFLY_AVAILABLE:
+        raise ImportError(
+            "scrapfly is not installed. Install with: uv add scrapfly-sdk"
+        )
     return ScrapflyClient(key=api_key)
 
 
@@ -129,6 +143,11 @@ def fetch_pages(
     ScrapflyError
         Any lower-level SDK/network error; caller may catch and retry here.
     """
+    if not SCRAPFLY_AVAILABLE:
+        raise ImportError(
+            "scrapfly is not installed. Install with: uv add scrapfly-sdk"
+        )
+
     # ── 6.1 Resolve credentials – fail early if missing ────────────────────
     api_key = api_key or os.getenv("SCRAPFLY_API_KEY")
     if not api_key:

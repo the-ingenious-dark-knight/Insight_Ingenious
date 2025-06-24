@@ -332,7 +332,7 @@ class CliFunctions:
                     progress=progress, task_id=task_id
                 )
 
-                await repository_class.run(progress, task_id, **kwargs)
+                await repository_class.run()
 
             except (ImportError, AttributeError) as e:
                 raise ValueError(f"Batch Run Failed: {module_name}") from e

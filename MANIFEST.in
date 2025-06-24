@@ -1,0 +1,5 @@
+include ingenious/ingenious_extensions_template/*.yml
+include ingenious/ingenious_extensions_template/**/*.yml
+include ingenious/docker_template/*
+recursive-include ingenious/ingenious_extensions_template *
+recursive-include ingenious/docker_template *
