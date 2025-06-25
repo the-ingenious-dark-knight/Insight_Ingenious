@@ -1,3 +1,4 @@
+# ingenious/document_processing/cli.py
 """Insight Ingenious – Document‑processing CLI
 ===========================================
 Entry‑point for **command‑line** interaction with the document‑processing
@@ -9,7 +10,7 @@ Quick start
 -----------
 Run the extractor against a local or remote source and print blocks as NDJSON::
 
-    ingen_cli document-processing extract <SOURCE> [--engine pymupdf] [--out out.jsonl]
+    ingen_cli document-processing <SOURCE> [--engine pymupdf] [--out out.jsonl]
 
 Where *SOURCE* may be one of:
 
@@ -80,49 +81,46 @@ doc_app.__doc__ = "CLI group housing document‑processing commands."
 
 URL_RE: re.Pattern[str] = re.compile(r"^https?://", re.I)
 
+_SUPPORTED_SUFFIXES: tuple[str, ...] = (
+    "*.pdf",
+    "*.docx",
+    "*.pptx",
+    "*.png",
+    "*.jpg",
+    "*.jpeg",
+    "*.tiff",
+    "*.tif",
+)
+
 # ---------------------------------------------------------------------------
 # Helper functions
 # ---------------------------------------------------------------------------
 
 
 def _iter_sources(arg: Union[str, Path]) -> Iterable[Tuple[str, Union[bytes, Path]]]:
-    """Yield normalised sources derived from *arg*.
+    """Yield (label, src) pairs for URLs, files, or directories.
 
-    Parameters
-    ----------
-    arg
-        Either an *HTTP/S* URL, a single file, or a directory.
-
-    Yields
-    ------
-    tuple[str, bytes | pathlib.Path]
-        *label* – Human‑readable identifier used in logs and `source` metadata.
-
-        *src* – Raw **bytes** (downloaded file) *or* a
-        :pyclass:`~pathlib.Path` object.  The tuple is suitable for direct
-        consumption by :pydata:`_extract`.
-
-    Raises
-    ------
-    requests.HTTPError
-        Propagated when a URL fetch returns a non‑2xx status code.
+    The directory branch now discovers every file whose suffix
+    matches one of the extensions required by the registered
+    extractors (see _SUPPORTED_SUFFIXES).
     """
-
-    # Detect URL input
+    # 1. Remote URL ------------------------------------------------------
     if isinstance(arg, str) and URL_RE.match(arg):
-        response = requests.get(arg, timeout=30)
-        response.raise_for_status()
-        yield arg, response.content
+        resp = requests.get(arg, timeout=30)
+        resp.raise_for_status()
+        yield arg, resp.content
         return
 
-    # Local filesystem handling
+    # 2. Local path(s) ---------------------------------------------------
     path = Path(arg)
     if path.is_file():
         yield str(path), path
         return
 
-    for pdf_file in path.rglob("*.pdf"):
-        yield str(pdf_file), pdf_file
+    # 2 b. Directory – recurse once per pattern
+    for pattern in _SUPPORTED_SUFFIXES:
+        for item in path.rglob(pattern):
+            yield str(item), item
 
 
 # ---------------------------------------------------------------------------
@@ -131,7 +129,7 @@ def _iter_sources(arg: Union[str, Path]) -> Iterable[Tuple[str, Union[bytes, Pat
 
 
 @doc_app.command("extract")
-def extract_cmd(  # noqa: D401
+def extract_cmd(
     path: str = typer.Argument(..., help="PDF file, directory, or HTTP/S URL"),
     engine: str = typer.Option(
         "pymupdf",

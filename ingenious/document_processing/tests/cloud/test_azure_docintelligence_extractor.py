@@ -97,9 +97,8 @@ from ingenious.document_processing.extractor import _load
 # ---------------------------------------------------------------------
 # constants
 # ---------------------------------------------------------------------
-TEST_DATA_DIR = (
-    Path(__file__).parent / "data_azure_doc_intell"
-)  # you need to create and populate this folder.
+TEST_DATA_DIR = Path(__file__).parent / "data_azure_doc_intell"
+# You need to create and populate this folder.
 _SAMPLE_FILES = ("sample.pdf", "sample.png", "sample.jpg", "sample.tiff")
 
 # ---------------------------------------------------------------------

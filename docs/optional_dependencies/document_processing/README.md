@@ -30,8 +30,8 @@ uv pip install -e ".[document-processing,pdfminer,unstructured]"
 ### 2  Command‑line quick‑start
 
 ```bash
-# 1️⃣  Stream a remote PDF through Azure Document Intelligence
-ingen document-processing https://example.com/contract.pdf --engine azdocint --out pages_azdocint_pdf_scanned.jsonl
+# 1️⃣  Stream a remote PDF through pdfminer engine
+ingen document-processing https://example.com/contract.pdf --engine pdfminer --out pages_pdfminer.jsonl
 ```
 
 ---

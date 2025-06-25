@@ -137,8 +137,9 @@ class PyMuPDFExtractor(DocumentExtractor):
         bool
             ``True`` if the extractor *can* attempt to process *src*.
         """
-        if isinstance(src, (bytes, bytearray)):
+        if isinstance(src, (bytes, bytearray, io.BytesIO)):
             return True
+
         string_like = str(src).lower()
         return string_like.endswith(".pdf") or (
             mimetypes.guess_type(string_like)[0] == "application/pdf"
@@ -191,26 +192,35 @@ class PyMuPDFExtractor(DocumentExtractor):
         """
         logger.debug("PyMuPDFExtractor.extract(src=%r, type=%s)", src, type(src))
 
-        # ―― 1. Normalise input ―――――――――――――――――――――――――――――――――――――――――――
-        stream: io.BytesIO | None = None
+        # ── 0. Handle BytesIO explicitly ─────────────────────────────────────────
+        if isinstance(src, io.BytesIO):
+            # getvalue() returns a bytes object; no “+” operator used anywhere
+            src = src.getvalue()
+
+        # ── 1. Normalise input ───────────────────────────────────────────────────
+        stream_bytes: bytes | None = None
         if isinstance(src, (bytes, bytearray)):
-            stream = io.BytesIO(src)
-            src_for_open: str | io.BytesIO = stream
+            stream_bytes = bytes(src)  # ensures “bytes” type
+            src_for_open: bytes = stream_bytes
         else:
             if isinstance(src, Path):
-                src = str(src)
-            src_for_open = src  # type: ignore[assignment]
+                src_for_open = str(src)
+            else:
+                src_for_open = src  # str or URL already
 
-        # ―― 2. Open document ―――――――――――――――――――――――――――――――――――――――――――
+        # ── 2. Open document ─────────────────────────────────────────────────────
         try:
             doc = (
-                fitz.open(stream=src_for_open, filetype="pdf")  # type: ignore[arg‑type]
-                if stream
+                fitz.open(stream=src_for_open, filetype="pdf")
+                if stream_bytes is not None
                 else fitz.open(src_for_open)
             )
         except (fitz.FileDataError, RuntimeError) as exc:
             logger.warning("PyMuPDF failed on %r – %s", src, exc)
-            return  # silence error – caller decides what to do with partials
+            return
+
+        # block tuple spec:
+        # [0:x0, 1:y0, 2:x1, 3:y1, 4:text, 5:block_no, 6:block_type]
 
         # ―― 3. Iterate pages & 4. Extract blocks ―――――――――――――――――――――――――
         for page in doc:  # PyMuPDF page iterator (zero‑based .number)

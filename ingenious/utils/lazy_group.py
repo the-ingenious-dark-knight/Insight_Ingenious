@@ -126,7 +126,7 @@ class LazyGroup(TyperGroup):
     # ------------------------------------------------------------------
     # Click hook – discovery
     # ------------------------------------------------------------------
-    def list_commands(self, ctx) -> List[str]:  # noqa: D401 – imperative mood OK
+    def list_commands(self, ctx) -> List[str]:
         """Return *sorted* sub‑command names for Click’s help generator.
 
         Parameters
@@ -144,7 +144,7 @@ class LazyGroup(TyperGroup):
     # ------------------------------------------------------------------
     # Click hook – lazy import
     # ------------------------------------------------------------------
-    def get_command(self, ctx, name: str) -> Optional[Command]:  # noqa: D401
+    def get_command(self, ctx, name: str) -> Optional[Command]:
         """Import *name* on first use and hand the resulting command to Click.
 
         The method fetches ``(module_path, attr_name, extra_label)`` from

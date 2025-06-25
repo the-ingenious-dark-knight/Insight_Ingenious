@@ -138,8 +138,8 @@ def _poly_to_bbox(poly: Sequence[object] | None) -> tuple[float, float, float, f
         return 0.0, 0.0, 0.0, 0.0
 
     if isinstance(poly[0], dict):  # v3 – list[dict[str, float]]
-        xs = [cast(dict[str, float], pt)["x"] for pt in poly]  # type: ignore[index]
-        ys = [cast(dict[str, float], pt)["y"] for pt in poly]  # type: ignore[index]
+        xs = [cast(dict[str, float], pt)["x"] for pt in poly]
+        ys = [cast(dict[str, float], pt)["y"] for pt in poly]
     else:  # v4 – flat list[float]
         xs = list(poly)[::2]  # even indices
         ys = list(poly)[1::2]  # odd  indices
