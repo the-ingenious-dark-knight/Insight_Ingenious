@@ -143,33 +143,29 @@ def extract_cmd(
         help="Write NDJSON lines to this file instead of stdout.",
     ),
 ) -> None:
-    """Write extraction results to *stdout* or a file in **NDJSON** format.
-
-    One element per line is emitted to facilitate downstream streaming.  The
-    original schema of each element is preserved, and a ``source`` key is
-    injected to record provenance.
-
-    Parameters
-    ----------
-    path
-        Input resource: file, directory, or URL.
-    engine
-        Name of the extractor backend.
-    out
-        Destination file path; *None* writes to *stdout*.
+    """
+    Write extraction results to *stdout* or a file in **NDJSON** format.
     """
 
-    sink = open(out, "w", encoding="utf‑8") if out else sys.stdout
-    count = 0
+    def _stream_blocks(sink) -> int:
+        """Inner helper so we can share the write logic."""
+        count = 0
+        for label, src in _iter_sources(path):
+            for element in _extract(src, engine=engine):
+                element.setdefault("source", label)
+                sink.write(f"{json.dumps(element, ensure_ascii=False)}\n")
+                count += 1
+        return count
 
-    for label, src in _iter_sources(path):
-        for element in _extract(src, engine=engine):
-            element.setdefault("source", label)
-            sink.write(json.dumps(element, ensure_ascii=False) + "\n")
-            count += 1
+    if out is None:
+        # Directly stream to stdout – nothing to clean up.
+        written = _stream_blocks(sys.stdout)
+        target_label = "stdout"
+    else:
+        # Wrap the entire extraction loop in a *with* block so that the file
+        # descriptor is closed **even if `_extract` raises** midway through.
+        with open(out, "w", encoding="utf-8") as sink:
+            written = _stream_blocks(sink)
+        target_label = out
 
-    if sink is not sys.stdout:
-        sink.close()
-
-    target = out if out is not None else "stdout"
-    rprint(f"[green]✓ wrote {count} elements → {target}[/green]")
+    rprint(f"[green]✓ wrote {written} elements → {target_label}[/green]")
