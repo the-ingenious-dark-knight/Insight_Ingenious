@@ -1,4 +1,3 @@
-# ingenious/document_processing/cli.py
 """Insight Ingenious – Document‑processing CLI
 ===========================================
 Entry‑point for **command‑line** interaction with the document‑processing
