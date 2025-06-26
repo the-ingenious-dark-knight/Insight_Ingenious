@@ -19,6 +19,11 @@ class ConversationFlow:
     async def get_conversation_response(chatrequest: ChatRequest):
         message = chatrequest.user_prompt
         topics = chatrequest.topic
+        # Ensure topics is always a list
+        if topics is None:
+            topics = ["general"]
+        elif isinstance(topics, str):
+            topics = [topics]
         thread_memory = chatrequest.thread_memory
         memory_record_switch = chatrequest.memory_record
         event_type = chatrequest.event_type
@@ -34,7 +39,19 @@ class ConversationFlow:
 
         # Load Jinja environment for prompts
         working_dir = Path(os.getcwd())
-        template_path = working_dir / "ingenious" / "templates" / "prompts"
+        # Check if we're in the root project directory or need to look for the installed package
+        if (
+            working_dir / "Insight_Ingenious" / "ingenious" / "templates" / "prompts"
+        ).exists():
+            template_path = (
+                working_dir
+                / "Insight_Ingenious"
+                / "ingenious"
+                / "templates"
+                / "prompts"
+            )
+        else:
+            template_path = working_dir / "ingenious" / "templates" / "prompts"
         print(template_path)
         env = Environment(loader=FileSystemLoader(template_path), autoescape=True)
 
