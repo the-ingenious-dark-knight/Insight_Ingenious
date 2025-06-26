@@ -307,7 +307,7 @@ def initialize_new_project():
     console.print(
         "[warning]Before executing update config.yml and profiles.yml [/warning]"
     )
-    console.print("[info]To execute use ingen_cli[/info]")
+    console.print("[info]To execute use ingen[/info]")
 
 
 @app.command()

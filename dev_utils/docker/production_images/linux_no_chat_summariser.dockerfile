@@ -37,4 +37,4 @@ RUN pip install ./ingenious-1.0.0-py3-none-any.whl
 
 
 # Set the command to run the app
-CMD ["ingen_cli"]
+CMD ["ingen"]

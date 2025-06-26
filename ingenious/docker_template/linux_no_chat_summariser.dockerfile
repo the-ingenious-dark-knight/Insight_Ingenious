@@ -32,4 +32,4 @@ COPY ./ingenious_extensions /ingen_app/ingenious_extensions
 COPY ./tmp /ingen_app/tmp
 
 # Set the command to run the app
-CMD ["ingen_cli", "run-rest-api-server"]
+CMD ["ingen", "run-rest-api-server"]

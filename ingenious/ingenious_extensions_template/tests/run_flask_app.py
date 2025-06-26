@@ -160,7 +160,7 @@ def download_responses():
 def run_simple_tests():
     try:
         result = subprocess.run(
-            ["ingen_cli", "run-test-batch"], capture_output=True, text=True, check=False
+            ["ingen", "run-test-batch"], capture_output=True, text=True, check=False
         )
         status = "success" if result.returncode == 0 else "error"
         return jsonify({"status": status, "output": result.stdout or result.stderr})

@@ -37,4 +37,4 @@ WORKDIR /ingen_app/ingenious
 RUN pip install ..
 
 # Set the command to run the app
-CMD ["ingen_cli"]
+CMD ["ingen"]

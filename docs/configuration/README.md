@@ -13,7 +13,7 @@ Insight Ingenious uses a two-file configuration approach:
 
 ### Initial Setup
 
-When you run `ingen_cli initialize-new-project`, template configuration files are generated:
+When you run `ingen initialize-new-project`, template configuration files are generated:
 
 - `config.yml` in your project directory
 - `profiles.yml` in `~/.ingenious/` directory
@@ -36,69 +36,83 @@ Alternatively, for Azure deployments:
 ```yaml
 chat_history:
   database_type: "sqlite"  # or "cosmos"
-  database_name: "chat_history"
-  memory_path: "./tmp"
+  database_path: "./.tmp/high_level_logs.db"  # Path to SQLite database file
+  database_name: "chat_history"  # Name of the database (used for Cosmos DB)
+  memory_path: "./.tmp"  # Location for temporary memory/cache files (used by ChromaDB)
 
-profile: "development"  # Name of the profile to use from profiles.yml
+profile: "dev"  # Name of the profile to use from profiles.yml
 
 models:
-  - model: "gpt-4"
-    deployment_name: "gpt4"
-  - model: "gpt-3.5-turbo"
-    deployment_name: "gpt35turbo"
+  - model: "gpt-4o"
+    api_type: "azure"
+    api_version: "2024-08-01-preview"
 
 logging:
-  root_log_level: "INFO"
-  log_level: "DEBUG"
+  root_log_level: "debug"
+  log_level: "debug"
 
 tool_service:
-  enable: true
+  enable: false
 
 chat_service:
   type: "multi_agent"  # The type of chat service to use
 
 chainlit_configuration:
-  enable: true
+  enable: false
 
 azure_search_services:
-  - service: "knowledge-base"
+  - service: "default"
     endpoint: "https://your-search-service.search.windows.net"
 
+azure_sql_services:
+  database_name: "dbo"
+  table_name: "sample_table"
+
 web_configuration:
+  type: "fastapi"
+  ip_address: "0.0.0.0"
+  port: 80
   authentication:
     type: "basic"
     enable: true
 
 local_sql_db:
-  connection_string: "sqlite:///sample.db"
+  database_path: "/tmp/sample_sql.db"
+  sample_csv_path: "./ingenious/sample_dataset/cleaned_students_performance.csv"
+  sample_database_name: "sample_data"
 
-azure_sql_services:
-  database_name: "your_database"
-  table_name: "your_table"
+prompt_tuner:
+  mode: "fast_api"  # Mount in fast_api or standalone flask
 
 file_storage:
-  enable: true
-  storage_type: "local"  # or "azure"
-  path: "./files"
+  revisions:
+    enable: true
+    storage_type: "local"
+    container_name: "jrsrevisions"
+    path: ".files"
+    add_sub_folders: true
+  data:
+    enable: true
+    storage_type: "local"
+    container_name: "jrsdata"
+    path: ".files"
+    add_sub_folders: true
 ```
 
 ### profiles.yml
 
 ```yaml
-- name: "development"
+- name: "dev"
   models:
-    - model: "gpt-4"
+    - model: "gpt-4o"
       api_key: "your-api-key"
-      base_url: "https://your-openai-endpoint.openai.azure.com"
-    - model: "gpt-3.5-turbo"
-      api_key: "your-api-key"
-      base_url: "https://your-openai-endpoint.openai.azure.com"
+      base_url: "https://your-endpoint.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2024-08-01-preview"
 
   chat_history:
-    database_connection_string: ""
+    database_connection_string: "AccountEndpoint=..."
 
   azure_search_services:
-    - service: "knowledge-base"
+    - service: "default"
       key: "your-search-key"
 
   azure_sql_services:
@@ -106,24 +120,29 @@ file_storage:
 
   web_configuration:
     authentication:
+      enable: false
       username: "admin"
       password: "your-secure-password"
 
   receiver_configuration:
     enable: false
-    api_url: ""
-    api_key: ""
+    api_url: "https://your-api.azurewebsites.net/api/ai-response/publish"
+    api_key: "DevApiKey"
 
   chainlit_configuration:
+    enable: false
     authentication:
       enable: false
       github_client_id: ""
       github_secret: ""
 
   file_storage:
-    enable: true
-    storage_type: "local"
-    container_name: ""
+    revisions:
+      url: "https://your-storage.blob.core.windows.net/"
+      authentication_method: "default_credential"  # or "msi"
+    data:
+      url: "https://your-storage.blob.core.windows.net/"
+      authentication_method: "default_credential"  # or "msi"
 ```
 
 ## Configuration Options Explained
@@ -135,8 +154,9 @@ Controls how conversation history is stored:
 ```yaml
 chat_history:
   database_type: "sqlite"  # Options: "sqlite", "cosmos"
-  database_name: "chat_history"
-  memory_path: "./tmp"  # Where context memory files are stored
+  database_path: "./.tmp/high_level_logs.db"  # SQLite database file path
+  database_name: "chat_history"  # Database name (used for Cosmos DB)
+  memory_path: "./.tmp"  # Path for context memory files (used by ChromaDB)
 ```
 
 ### Models
@@ -145,17 +165,18 @@ Configures LLM models:
 
 ```yaml
 models:
-  - model: "gpt-4"  # Model identifier
-    deployment_name: "gpt4"  # Azure OpenAI deployment name
+  - model: "gpt-4o"  # Model identifier
+    api_type: "azure"  # API type (azure, openai)
+    api_version: "2024-08-01-preview"  # API version
 ```
 
 In `profiles.yml`:
 
 ```yaml
 models:
-  - model: "gpt-4"
+  - model: "gpt-4o"
     api_key: "your-api-key"  # OpenAI or Azure OpenAI API key
-    base_url: "https://your-endpoint.openai.azure.com"  # API endpoint
+    base_url: "https://your-endpoint.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2024-08-01-preview"  # API endpoint
 ```
 
 ### Logging
@@ -164,8 +185,8 @@ Controls logging levels:
 
 ```yaml
 logging:
-  root_log_level: "INFO"  # Global logging level
-  log_level: "DEBUG"  # Application-specific logging level
+  root_log_level: "debug"  # Global logging level (debug, info, warning, error)
+  log_level: "debug"  # Application-specific logging level
 ```
 
 ### Chat Service
@@ -202,7 +223,7 @@ Configures Azure Cognitive Search for knowledge bases:
 
 ```yaml
 azure_search_services:
-  - service: "knowledge-base"  # Service identifier
+  - service: "default"  # Service identifier
     endpoint: "https://your-search-service.search.windows.net"
 ```
 
@@ -210,16 +231,19 @@ In `profiles.yml`:
 
 ```yaml
 azure_search_services:
-  - service: "knowledge-base"
+  - service: "default"
     key: "your-search-key"  # Azure Search API key
 ```
 
 ### Web Configuration
 
-Controls API authentication:
+Controls API authentication and server settings:
 
 ```yaml
 web_configuration:
+  type: "fastapi"  # Web framework type
+  ip_address: "0.0.0.0"  # IP address to bind to
+  port: 80  # Port number
   authentication:
     type: "basic"  # Authentication type
     enable: true  # Whether authentication is required
@@ -230,44 +254,124 @@ In `profiles.yml`:
 ```yaml
 web_configuration:
   authentication:
+    enable: false  # Whether to enable authentication
     username: "admin"  # Basic auth username
     password: "your-secure-password"  # Basic auth password
 ```
 
 ### File Storage
 
-Configures file storage:
+Configures file storage with support for revisions and data storage:
 
 ```yaml
 file_storage:
-  enable: true
-  storage_type: "local"  # Options: "local", "azure"
-  path: "./files"  # Local storage path
+  revisions:
+    enable: true
+    storage_type: "local"  # Options: "local", "azure"
+    container_name: "jrsrevisions"  # Azure container name
+    path: ".files"  # Local storage path
+    add_sub_folders: true  # Whether to create sub-folders
+  data:
+    enable: true
+    storage_type: "local"  # Options: "local", "azure"
+    container_name: "jrsdata"  # Azure container name
+    path: ".files"  # Local storage path
+    add_sub_folders: true  # Whether to create sub-folders
 ```
 
-For Azure Blob Storage:
+For Azure Blob Storage in `profiles.yml`:
 
 ```yaml
 file_storage:
-  enable: true
-  storage_type: "azure"
-  container_name: "your-container"
+  revisions:
+    url: "https://your-storage.blob.core.windows.net/"
+    authentication_method: "default_credential"  # or "msi"
+  data:
+    url: "https://your-storage.blob.core.windows.net/"
+    authentication_method: "default_credential"  # or "msi"
 ```
 
-## Multiple Environments
+### Local SQL Database
 
-You can define multiple profiles in `profiles.yml` for different environments:
+Configures local SQL database for testing and development:
 
 ```yaml
-- name: "development"
-  # Development settings
-
-- name: "production"
-  # Production settings
+local_sql_db:
+  database_path: "/tmp/sample_sql.db"  # Path to SQLite database
+  sample_csv_path: "./ingenious/sample_dataset/cleaned_students_performance.csv"
+  sample_database_name: "sample_data"
 ```
 
-Then specify which profile to use in `config.yml`:
+### Azure SQL Services
+
+Configures Azure SQL Database:
 
 ```yaml
-profile: "development"  # or "production"
+azure_sql_services:
+  database_name: "dbo"  # Database name
+  table_name: "sample_table"  # Table name
 ```
+
+In `profiles.yml`:
+
+```yaml
+azure_sql_services:
+  database_connection_string: "Server=..."  # Azure SQL connection string
+```
+
+### Prompt Tuner
+
+Configures the prompt tuning interface:
+
+```yaml
+prompt_tuner:
+  mode: "fast_api"  # Options: "fast_api", "flask"
+```
+
+### Receiver Configuration
+
+Configures external API integration in `profiles.yml`:
+
+```yaml
+receiver_configuration:
+  enable: false
+  api_url: "https://your-api.azurewebsites.net/api/ai-response/publish"
+  api_key: "DevApiKey"
+```
+
+## Multi-Agent Conversation Flows
+
+Insight Ingenious supports several built-in conversation flows for different use cases:
+
+### Available Conversation Flows
+
+1. **knowledge_base_agent**: Search and retrieve information from Azure Cognitive Search indexes
+2. **sql_manipulation_agent**: Execute SQL queries and analyze database results
+3. **web_critic_agent**: Perform web search and fact-checking with criticism
+4. **pandas_agent**: Data analysis and manipulation using pandas
+5. **classification_agent**: Classify user input and route to appropriate topic agents
+6. **education_expert**: Specialized educational content and lesson planning
+
+### Configuring Conversation Flows
+
+The conversation flow is specified in the chat service configuration:
+
+```yaml
+chat_service:
+  type: "multi_agent"  # Enables multi-agent conversation flows
+```
+
+Each conversation flow has its own directory structure under:
+- `ingenious/services/chat_services/multi_agent/conversation_flows/`
+- `ingenious/services/chat_services/multi_agent/conversation_patterns/`
+
+### Custom Conversation Flows
+
+You can create custom conversation flows by:
+
+1. Creating a new directory under `conversation_flows/`
+2. Implementing the `ConversationFlow` class with a `get_conversation_response()` method
+3. Creating corresponding conversation patterns that define agent interactions
+4. Registering the flow in your configuration
+
+## Environment Variables

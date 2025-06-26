@@ -567,7 +567,7 @@ def run_live_progress():
     def generate():
         process = subprocess.Popen(
             args=[
-                "ingen_cli",
+                "ingen",
                 "run-test-batch",
                 "--run-args",
                 f"--max_processed_events={max_processed_events} --test_run_session_id={get_selected_revision_direct_call()}",
@@ -607,7 +607,7 @@ def run_live_progress():
 def run_simple_tests():
     try:
         result = subprocess.run(
-            ["ingen_cli", "run-test-batch"], capture_output=True, text=True, check=False
+            ["ingen", "run-test-batch"], capture_output=True, text=True, check=False
         )
         status = "success" if result.returncode == 0 else "error"
         return jsonify({"status": status, "output": result.stdout or result.stderr})
