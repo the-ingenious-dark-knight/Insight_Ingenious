@@ -78,13 +78,14 @@ from typing import Iterable, TypeAlias
 import fitz  # PyMuPDF
 
 from .base import DocumentExtractor, Element
+from ingenious.document_processing.fetcher import is_url, fetch
 
 logger = logging.getLogger(__name__)
 
 # =========================================================================
 # Public type aliases
 # =========================================================================
-Src: TypeAlias = str | bytes | os.PathLike[str]
+Src: TypeAlias = str | bytes | io.BytesIO | os.PathLike[str]
 
 
 # =========================================================================
@@ -112,34 +113,11 @@ class PyMuPDFExtractor(DocumentExtractor):
     # ------------------------------------------------------------------
     # Capability probe
     # ------------------------------------------------------------------
-    def supports(self, src: Src) -> bool:  # noqa: D401 – allow “Return *True* …”
-        """Return *True* when *src* plausibly represents a PDF document.
-
-        The heuristic is intentionally light‑weight:
-
-        1. **Bytes / bytearray** – we assume the caller pre‑validated content
-           type; returning *True* avoids unnecessary signature sniffing.
-        2. **Path‑like / str** – positive if the pathname ends with ``.pdf``
-           (case‑insensitive) *or* if :pymeth:`mimetypes.guess_type` resolves to
-           *application/pdf*.
-
-        This method is consumed by higher‑level *pipeline planners* that choose
-        an extractor based on input characteristics.
-
-        Parameters
-        ----------
-        src : Src
-            Filesystem path, URL string, :class:`~pathlib.Path`, or raw PDF
-            bytes.
-
-        Returns
-        -------
-        bool
-            ``True`` if the extractor *can* attempt to process *src*.
-        """
+    def supports(self, src: Src) -> bool:
         if isinstance(src, (bytes, bytearray, io.BytesIO)):
             return True
-
+        if isinstance(src, str) and is_url(src):
+            return True  # Accept any HTTP/S URL
         string_like = str(src).lower()
         return string_like.endswith(".pdf") or (
             mimetypes.guess_type(string_like)[0] == "application/pdf"
@@ -204,9 +182,22 @@ class PyMuPDFExtractor(DocumentExtractor):
             src_for_open: bytes = stream_bytes
         else:
             if isinstance(src, Path):
+                # local filesystem path → keep as str
                 src_for_open = str(src)
             else:
-                src_for_open = src  # str or URL already
+                # string that might be an HTTP/S URL
+                src_str = str(src)
+
+                if is_url(src_str):
+                    # ── remote PDF: download, guard size, then treat as bytes ──
+                    payload = fetch(src_str)
+                    if payload is None:  # network failure or > limit
+                        return
+                    stream_bytes = payload  # keep reference for cleanup
+                    src_for_open = stream_bytes  # fitz.open(stream=…, filetype='pdf')
+                else:
+                    # plain local path string
+                    src_for_open = src_str
 
         # ── 2. Open document ─────────────────────────────────────────────────────
         try:

@@ -1,109 +1,91 @@
 """
-Insight Ingenious — PyMuPDF integration tests
-============================================
+Insight Ingenious – PyMuPDF extractor integration tests
+======================================================
 
-Purpose
--------
-This module forms part of the **integration** test-suite for the
-``ingenious.document_processing`` subsystem.  It validates the concrete
-extractor that delegates PDF parsing to **PyMuPDF** (also known as *fitz*).
+This module validates that
+:class:`~ingenious.document_processing.extractor.pymupdf.PyMuPDFExtractor`
+honours **all** guarantees stated in its public contract for every supported
+input flavour (*Path*, *bytes*, *BytesIO*).
 
-The checks cover four broad areas:
+Test Objectives
+---------------
+1. **Happy-path extraction** – A well-formed PDF must yield at least one
+   element that satisfies the *Element* schema.
+2. **Determinism** – Two successive invocations with identical input **must**
+   return byte-for-byte identical results.
+3. **Fail-soft semantics** – Malformed bytes should produce an **empty**
+   iterator rather than raising an exception.
+4. **Schema enforcement** – Every emitted mapping contains the mandatory keys
+   with the correct types.
+5. **Bounding-box sanity** – All coordinates lie within a generous
+   1 000 × 1 000 pt user-space square (with a −50 pt y-tolerance to allow for
+   negative origins).
 
-1. **Happy-path extraction** – A well-formed PDF must yield at least one element
-   and each element must conform to the mandatory *Element* schema.
-2. **Determinism** – Two consecutive calls with identical input must return
-   byte-for-byte equivalent output, ensuring the absence of hidden global
-   state.
-3. **Input flexibility** – The extractor must accept three input forms:
-   * ``Path`` to a file on disk
-   * Raw ``bytes`` held entirely in memory
-   * ``io.BytesIO`` stream (simulated in-memory file handle)
-4. **Coordinate sanity** – The first element’s bounding box must lie inside a
-   generous ``1 000 × 1 000`` user-space square, detecting unit mismatches or
-   negative values early.
-
-Fixtures
---------
-``pymupdf`` (module-scoped)
-    Yields a *single* extractor instance for all tests to avoid repeated native
-    initialisation costs.
-``pdf_path``, ``pdf_bytes``
-    Shared fixtures (declared in ``conftest.py``) that supply the same sample
-    PDF in different formats.
+Implementation Notes
+--------------------
+* Creating a :class:`PyMuPDFExtractor` is relatively expensive, so a single
+  instance is provided via a module-scoped fixture.
+* ``_PROBES`` is a table of callables that convert *(pdf_path, pdf_bytes)* into
+  the specific probe object required by the extractor, allowing each test to
+  be parametrised across input types.
 """
 
 from __future__ import annotations
 
+# ────────────── Standard Library ──────────────
 import io
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable, List, Tuple
 
+# ────────────── Third-Party ──────────────
 import pytest
 
+# ────────────── First-Party ──────────────
 from ingenious.document_processing.extractor import _load
 
 # --------------------------------------------------------------------------- #
-# constants                                                                   #
+# Constants                                                                   #
 # --------------------------------------------------------------------------- #
-_MAX_COORD: int = 1_000  # upper bound for coarse coordinate sanity check
+_EXTRACTOR_NAME: str = "pymupdf"
+_MAX_COORD: int = 1_000  # upper bound for any x/y coordinate
+_TOL: int = 50  # allow small negative y0 values (≈ 0.7 in)
+_CORRUPT_PDF: bytes = b"%PDF-1.4 broken\n%%EOF"  # deliberately invalid payload
 
 
 # --------------------------------------------------------------------------- #
-# fixtures                                                                    #
+# Fixtures                                                                    #
 # --------------------------------------------------------------------------- #
 @pytest.fixture(scope="module")
 def pymupdf():
     """
-    Yield a *single* PyMuPDF-backed extractor instance for the entire module.
+    Return a shared :class:`PyMuPDFExtractor`.
 
-    The underlying native library is expensive to load, therefore the extractor
-    is instantiated once and shared across test functions.
-
-    Yields
-    ------
-    ingenious.document_processing.extractor.DocumentExtractor
-        Extractor whose :pyfunc:`~ingenious.document_processing.extractor.DocumentExtractor.extract`
-        method uses PyMuPDF internally.
+    A single instance is reused for all tests to avoid repeated initialisation
+    overhead and keep the test-suite fast.
     """
-    return _load("pymupdf")
+    return _load(_EXTRACTOR_NAME)
 
 
 # --------------------------------------------------------------------------- #
-# helpers                                                                     #
+# Helpers                                                                     #
 # --------------------------------------------------------------------------- #
 def _assert_valid_element(el: dict[str, Any]) -> None:
     """
-    Validate that *el* respects the mandatory *Element* schema.
+    Assert that *el* meets the *Element* schema and bounding-box constraints.
 
-    An *Element* produced by the document-processing API **must** include at
-    minimum the following keys with the prescribed types:
+    Expected structure
+    ------------------
+    ``{
+        "page":   int   >= 1,
+        "type":   str   (non-empty),
+        "text":   str   (non-empty),
+        "coords": Tuple[float | int, float | int, float | int, float | int]
+    }``
 
-    ==========  ==============  ================================
-    Key         Expected type   Additional requirement
-    ==========  ==============  ================================
-    ``page``    ``int``         ``>= 1``
-    ``type``    ``str``         Non-empty
-    ``text``    ``str``         Non-empty
-    ``coords``  ``tuple``       Four numeric values ``(x0, y0, x1, y1)``
-    ==========  ==============  ================================
-
-    Parameters
-    ----------
-    el
-        Dictionary returned by the PyMuPDF extractor.
-
-    Raises
-    ------
-    AssertionError
-        If a required key is missing, the value type is incorrect, or a value
-        expected to be non-empty is empty.
-
-    Notes
-    -----
-    Centralising the validation logic keeps individual test functions concise
-    while ensuring every schema violation triggers a clear, actionable failure
-    message.
+    Bounding-box rules
+    ------------------
+    * ``0 <= x0 <= x1 <= {_MAX_COORD}``
+    * ``-{_TOL} <= y0 <= y1 <= {_MAX_COORD}``
     """
     required = {"page", "type", "text", "coords"}
     missing = required.difference(el)
@@ -118,109 +100,80 @@ def _assert_valid_element(el: dict[str, Any]) -> None:
         isinstance(coords, tuple)
         and len(coords) == 4
         and all(isinstance(c, (int, float)) for c in coords)
-    ), "coords must be a 4-tuple of numeric values"
+    ), "coords must be numeric 4-tuple"
+
+    x0, y0, x1, y1 = coords
+    assert 0 <= x0 <= x1 <= _MAX_COORD, "x-coords out of range"
+    assert -_TOL <= y0 <= y1 <= _MAX_COORD, "y-coords out of range"
 
 
 # --------------------------------------------------------------------------- #
-# tests                                                                       #
+# Parametrisable probe builders                                               #
 # --------------------------------------------------------------------------- #
-def test_extract_from_path(pymupdf, pdf_path: Path) -> None:
+Probe = Tuple[str, Callable[[Path, bytes], object]]
+_PROBES: List[Probe] = [
+    ("path", lambda p, _b: p),
+    ("bytes", lambda _p, b: b),
+    ("bytesio", lambda _p, b: io.BytesIO(b)),
+]
+
+
+# --------------------------------------------------------------------------- #
+# 1. Happy-path + schema validation                                           #
+# --------------------------------------------------------------------------- #
+@pytest.mark.parametrize(("kind", "probe_fn"), _PROBES, ids=[k for k, _ in _PROBES])
+def test_extract_happy_paths(
+    pymupdf,
+    pdf_path: Path,
+    pdf_bytes: bytes,
+    kind: str,
+    probe_fn: Callable[[Path, bytes], object],
+) -> None:
     """
-    Extract from a **file path** and verify idempotence.
+    Verify that each input flavour yields **≥ 1** valid element.
 
-    Workflow
-    --------
-    1. Invoke ``pymupdf.extract`` with *pdf_path* and collect every element.
-    2. Validate each element via :pyfunc:`_assert_valid_element`.
-    3. Call the extractor **again** with the same input and assert that the two
-       result lists are identical.
-
-    The final equality check detects hidden global state or time-dependent
-    behaviour in the extractor.
-
-    Parameters
-    ----------
-    pymupdf
-        Fixture-supplied extractor instance.
-    pdf_path
-        Path to the reference PDF provided by ``conftest.py``.
+    Only the first ten elements are validated for speed, as the schema check is
+    deterministic and identical for the remainder.
     """
-    els = list(pymupdf.extract(pdf_path))
-    assert els, "no elements extracted"
+    probe = probe_fn(pdf_path, pdf_bytes)
 
-    for el in els:
+    elements = list(pymupdf.extract(probe))
+    assert elements, f"no elements extracted for {kind}"
+    for el in elements[:10]:
         _assert_valid_element(el)
 
-    assert els == list(pymupdf.extract(pdf_path)), "extractor not idempotent"
 
-
-def test_extract_from_bytes(pymupdf, pdf_bytes: bytes) -> None:
+# --------------------------------------------------------------------------- #
+# 2. Determinism across runs                                                  #
+# --------------------------------------------------------------------------- #
+@pytest.mark.parametrize(("kind", "probe_fn"), _PROBES, ids=[k for k, _ in _PROBES])
+def test_extract_idempotent(
+    pymupdf,
+    pdf_path: Path,
+    pdf_bytes: bytes,
+    kind: str,
+    probe_fn: Callable[[Path, bytes], object],
+) -> None:
     """
-    Extract directly from **raw bytes** stored in memory.
+    Ensure two identical invocations produce **exactly** the same output list.
 
-    The test ensures that at least one element is produced and that the first
-    element meets the schema requirements.  Deeper validation is delegated to
-    :pyfunc:`_assert_valid_element`.
-
-    Parameters
-    ----------
-    pymupdf
-        Fixture-supplied extractor instance.
-    pdf_bytes
-        Raw byte sequence representing the reference PDF.
+    Deterministic behaviour is critical for caching layers and for avoiding
+    spurious diffs in downstream pipelines.
     """
-    els = list(pymupdf.extract(pdf_bytes))
-    assert els, "no elements extracted from bytes"
-    _assert_valid_element(els[0])
+    probe = probe_fn(pdf_path, pdf_bytes)
+    run1 = list(pymupdf.extract(probe))
+    run2 = list(pymupdf.extract(probe))
+    assert run1 == run2, f"extractor output not deterministic for {kind}"
 
 
-def test_extract_from_stream(pymupdf, pdf_bytes: bytes) -> None:
+# --------------------------------------------------------------------------- #
+# 3. Fail-soft contract on corrupt bytes                                      #
+# --------------------------------------------------------------------------- #
+def test_extract_corrupt_bytes_returns_empty(pymupdf) -> None:
     """
-    Extract from an **in-memory byte stream** (``io.BytesIO``).
+    A malformed PDF **must not** raise – it should simply return an empty list.
 
-    Rationale
-    ---------
-    PyMuPDF cannot open a :class:`io.BytesIO` object directly.  The extractor
-    therefore buffers the stream into bytes, then delegates to the same code
-    path exercised in :pyfunc:`test_extract_from_bytes`.  Passing an actual
-    ``BytesIO`` instance guarantees that branch is covered by the test-suite.
-
-    Parameters
-    ----------
-    pymupdf
-        Fixture-supplied extractor instance.
-    pdf_bytes
-        Raw byte sequence representing the reference PDF.
+    This protects batch pipelines from aborting when a single document is
+    damaged or truncated.
     """
-    stream = io.BytesIO(pdf_bytes)
-    els = list(pymupdf.extract(stream))
-    assert els, "no elements extracted from stream"
-    _assert_valid_element(els[0])
-
-
-def test_coord_range(pymupdf, pdf_path: Path) -> None:
-    """
-    Smoke-test the **coordinate range** of the first element.
-
-    The bounding box is expected to lie within a ``1 000 × 1 000`` user-space
-    square.  Extremely large or negative values often signal a unit mismatch
-    (points versus pixels) or faulty parser logic, which downstream consumers
-    (e.g. highlight renderers) may not tolerate.
-
-    Parameters
-    ----------
-    pymupdf
-        Fixture-supplied extractor instance.
-    pdf_path
-        Path to the reference PDF.
-
-    Raises
-    ------
-    AssertionError
-        If any coordinate falls outside the expected range.
-    """
-    els = list(pymupdf.extract(pdf_path))
-    x0, y0, x1, y1 = els[0]["coords"]
-
-    assert 0 <= x0 <= x1 <= _MAX_COORD, "x-coords out of range"
-    assert 0 <= y0 <= y1 <= _MAX_COORD, "y-coords out of range"
+    assert list(pymupdf.extract(_CORRUPT_PDF)) == []

@@ -16,11 +16,11 @@ Branches under test
      :pyfunc:`pathlib.Path.rglob`.
 
 2. **Remote URL**
-   • Downloads bytes with :pypi:`requests`.
-   • Raises :class:`requests.HTTPError` for non-2×× responses.
+   • Downloads bytes via fetcher.fetch() (uses requests under the hood).
+   • *404* – iterator is empty (fail-soft, no exception).
 
 3. **Directory filtering**
-   • Ignores non-PDF files.
+   • Ignores files whose suffix isn’t in the allowed set (.pdf, .docx, …).
    • Yields nothing for an empty directory.
 
 Why it matters
@@ -55,48 +55,57 @@ REMOTE_PDF_URL: str = (
 # --------------------------------------------------------------------------- #
 class _StubResp:
     """
-    Ultra-light substitute for :class:`requests.Response`.
+    Tiny stand-in for :class:`requests.Response` used by tests.
 
-    Used to monkey-patch :pyfunc:`requests.get` so that the *remote URL* branch
-    of ``_iter_sources`` can be exercised **offline**.
-
-    Attributes
-    ----------
-    content : bytes
-        Body returned to client code.
-
-    Notes
-    -----
-    Only the surface area required by ``_iter_sources`` is implemented
-    (:pyattr:`content` and :pymeth:`raise_for_status`).
+    • Exposes just the attributes / methods that :func:`fetcher.fetch`
+      touches (`content`, `headers`, context-manager dunder methods,
+      `raise_for_status`, and `iter_content`).
+    • Keeps the implementation *micro-simple* so unit tests run fast and
+      don't need the real `requests` package on the wire.
     """
 
-    def __init__(self, payload: bytes, status_ok: bool = True) -> None:
-        """
-        Create a stub response.
-
-        Parameters
-        ----------
-        payload
-            Bytes exposed via :pyattr:`content`.
-        status_ok, optional
-            When *False* :pymeth:`raise_for_status` raises
-            :class:`requests.HTTPError`.  Defaults to *True*.
-        """
+    # ---------- construction -------------------------------------------------
+    def __init__(self, payload: bytes, *, status_ok: bool = True) -> None:
+        # In the real Response object `.content` is a *cached* property.
+        # Here we store the raw bytes directly.
         self.content: bytes = payload
+
+        # Controls whether `raise_for_status()` should succeed or raise.
         self._status_ok: bool = status_ok
 
-    def raise_for_status(self) -> None:  # noqa: D401
-        """
-        Mimic :pymeth:`requests.Response.raise_for_status`.
+        # fetcher.fetch() reads Content-Length *once* to pre-allocate a buffer.
+        self.headers: dict[str, str] = {"Content-Length": str(len(payload))}
 
-        Raises
-        ------
-        requests.HTTPError
-            If the instance was created with ``status_ok=False``.
+    # ---------- context-manager support --------------------------------------
+    # Needed because fetcher.fetch() uses `with requests.get(...) as r:`.
+    def __enter__(self):  # noqa: D401 – one-liner is fine
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        # No network sockets to release, so nothing to do.
+        # Returning *False* re-propagates any exception to the caller,
+        # exactly like the real Response implementation.
+        return False
+
+    # ---------- requests-like helpers ----------------------------------------
+    def raise_for_status(self) -> None:
+        """
+        Mirror :pymeth:`requests.Response.raise_for_status`.
+
+        For tests we only need the *404 path*, so we fake that:
+        `status_ok=False` triggers a :class:`requests.HTTPError`.
         """
         if not self._status_ok:
             raise HTTPError("404 – Not Found")
+
+    def iter_content(self, chunk_size: int = 1 << 14):
+        """
+        Yield payload in a single chunk.
+
+        The production code asks for 16 KiB chunks, but for unit tests
+        sending everything at once is sufficient and keeps things trivial.
+        """
+        yield self.content
 
 
 # --------------------------------------------------------------------------- #
@@ -158,7 +167,7 @@ def test_iter_sources_remote(
     Cases
     -----
     *200* – returns a ``(label, bytes)`` tuple.
-    *404* – raises :class:`requests.HTTPError`.
+    *404* – iterator is empty (fail-soft).
 
     Parameters
     ----------
@@ -169,10 +178,10 @@ def test_iter_sources_remote(
     ok
         Simulated HTTP status (*True* ⇒ 200, *False* ⇒ 404).
     """
-    import ingenious.document_processing.cli as cli_mod
+    from ingenious.document_processing.fetcher import requests
 
     monkeypatch.setattr(
-        cli_mod.requests,
+        requests,
         "get",
         lambda *_args, **_kwargs: _StubResp(pdf_bytes, status_ok=ok),
     )
@@ -180,10 +189,9 @@ def test_iter_sources_remote(
     if ok:
         lbl, src = next(_iter_sources(REMOTE_PDF_URL))
         assert lbl.startswith("http")
-        assert isinstance(src, bytes)
+        assert isinstance(src, bytes) and src == pdf_bytes
     else:
-        with pytest.raises(HTTPError):
-            next(_iter_sources(f"{REMOTE_PDF_URL}?missing"))
+        assert list(_iter_sources(f"{REMOTE_PDF_URL}?missing")) == []
 
 
 # --------------------------------------------------------------------------- #

@@ -14,7 +14,7 @@ Run the extractor against a local or remote source and print blocks as NDJSON::
 Where *SOURCE* may be one of:
 
 * Absolute or relative **file path** (PDF, DOCX, etc.).
-* **Directory** – recursively processes all ``*.pdf`` files.
+* **Directory** – recursively (case-insensitively) processes allowed files.
 * **HTTP/S URL** – downloads the resource first (30‑second timeout).
 
 Design principles
@@ -57,7 +57,6 @@ import sys
 from pathlib import Path
 from typing import Iterable, Tuple, Union
 
-import requests
 import typer
 from rich import print as rprint
 
@@ -80,16 +79,16 @@ doc_app.__doc__ = "CLI group housing document‑processing commands."
 
 URL_RE: re.Pattern[str] = re.compile(r"^https?://", re.I)
 
-_SUPPORTED_SUFFIXES: tuple[str, ...] = (
-    "*.pdf",
-    "*.docx",
-    "*.pptx",
-    "*.png",
-    "*.jpg",
-    "*.jpeg",
-    "*.tiff",
-    "*.tif",
-)
+_SUPPORTED_SUFFIXES: set[str] = {
+    ".pdf",
+    ".docx",
+    ".pptx",
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".tiff",
+    ".tif",
+}
 
 # ---------------------------------------------------------------------------
 # Helper functions
@@ -105,9 +104,13 @@ def _iter_sources(arg: Union[str, Path]) -> Iterable[Tuple[str, Union[bytes, Pat
     """
     # 1. Remote URL ------------------------------------------------------
     if isinstance(arg, str) and URL_RE.match(arg):
-        resp = requests.get(arg, timeout=30)
-        resp.raise_for_status()
-        yield arg, resp.content
+        from ingenious.document_processing.fetcher import fetch
+
+        payload = fetch(arg)
+        if payload is None:
+            rprint(f"[red]✗ download failed or exceeds size limit → {arg}[/red]")
+            return
+        yield arg, payload
         return
 
     # 2. Local path(s) ---------------------------------------------------
@@ -117,9 +120,13 @@ def _iter_sources(arg: Union[str, Path]) -> Iterable[Tuple[str, Union[bytes, Pat
         return
 
     # 2 b. Directory – recurse once per pattern
-    for pattern in _SUPPORTED_SUFFIXES:
-        for item in path.rglob(pattern):
-            yield str(item), item
+    if path.is_dir():
+        for item in path.rglob("*"):
+            if item.suffix.lower() in _SUPPORTED_SUFFIXES:
+                yield str(item), item
+
+    elif not path.exists():
+        rprint(f"[red]✗ no such file or directory: {path}[/red]")
 
 
 # ---------------------------------------------------------------------------
@@ -147,10 +154,10 @@ def extract_cmd(
     Write extraction results to *stdout* or a file in **NDJSON** format.
     """
 
-    def _stream_blocks(sink) -> int:
+    def _stream_blocks(src_path: str, sink) -> int:
         """Inner helper so we can share the write logic."""
         count = 0
-        for label, src in _iter_sources(path):
+        for label, src in _iter_sources(src_path):
             for element in _extract(src, engine=engine):
                 element.setdefault("source", label)
                 sink.write(f"{json.dumps(element, ensure_ascii=False)}\n")
@@ -159,13 +166,19 @@ def extract_cmd(
 
     if out is None:
         # Directly stream to stdout – nothing to clean up.
-        written = _stream_blocks(sys.stdout)
+        written = _stream_blocks(path, sys.stdout)
         target_label = "stdout"
     else:
+        # 🔸 PRE‑CHECK: prevent IsADirectoryError & give a clear message
+        if out.is_dir():
+            rprint(f"[red]✗ {out} is a directory; please supply a file path[/red]")
+            raise typer.Exit(code=2)
+
         # Wrap the entire extraction loop in a *with* block so that the file
         # descriptor is closed **even if `_extract` raises** midway through.
         with open(out, "w", encoding="utf-8") as sink:
-            written = _stream_blocks(sink)
+            written = _stream_blocks(path, sink)
         target_label = out
 
-    rprint(f"[green]✓ wrote {written} elements → {target_label}[/green]")
+    colour = "green" if written else "red"
+    rprint(f"[{colour}]✓ wrote {written} elements → {target_label}[/{colour}]")

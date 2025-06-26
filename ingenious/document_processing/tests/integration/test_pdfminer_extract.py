@@ -1,104 +1,237 @@
 """
-Insight Ingenious — integration tests for the PdfMiner adapter
-=============================================================
+Insight Ingenious — Integration test‑suite for *PDFMinerExtractor*
+===============================================================
 
-This module is part of the **integration** tier in the document-processing
-test-suite.  It probes the adaptor that wraps *pdfminer.six* and exposes it
-through :pyfunc:`ingenious.document_processing.extractor.extract`.
+This module contains **black‑box** integration tests that assert the public
+contract of :class:`ingenious.document_processing.extractor.pdfminer.PDFMinerExtractor`.
+It covers every officially supported input flavour and the two canonical error
+cases recognised by the engine.  Concretely, the suite guarantees that the
+extractor
 
-Objectives
-----------
-1. **Extraction sanity check**
-   *At least one* element returned by the adaptor must contain visible text when
-   parsing a well-formed reference PDF.  A zero-length result indicates a
-   regression that would silently drop content in production.
+1. **Accepts** the full input surface area:
+   • local :class:`pathlib.Path` objects
+   • in‑memory :class:`bytes` buffers
+   • :class:`io.BytesIO` streams
+   • **HTTP/S URL** strings (downloaded internally by the framework)
+2. **Extracts** at least one text‑bearing element from a well‑formed PDF.
+3. Is **deterministic** – two invocations over the *same* file yield a
+   bit‑for‑bit identical sequence of element mappings.
+4. **Fails soft** – instead of raising, the extractor returns an **empty
+   iterator** when
+   • the remote server responds with an HTTP error (4xx/5xx), or
+   • the remote PDF exceeds the 20 MiB safety guard.
 
-2. **Deterministic behaviour**
-   Running the extractor twice on identical input must yield byte-for-byte
-   identical output.  Determinism underpins reproducible research, cache keys
-   that depend on content digests, and straightforward debugging.
-
-Fixtures
---------
-* ``pdf_path`` – Path object pointing to a small, known-good sample PDF.
-* ``pdfminer_available`` – Boolean flag signalling whether *pdfminer.six* is
-  importable.  Tests are skipped gracefully on hosts where the dependency is
-  missing.
-
-The tests favour **clarity over cleverness**.  Assertions are intentionally
-explicit so that any failure message conveys a clear cause.
+These properties protect higher‑level RAG pipelines from nondeterminism and
+propagation of network errors.
 """
 
+from __future__ import annotations
+
+# ──────────── Standard Library ────────────
+import io
 from pathlib import Path
-from typing import List
+from typing import Any, Callable, Final, Iterator
 
+# ────────────── Third‑Party ───────────────
 import pytest
+import requests
 
+# ────────────── First‑Party ───────────────
 from ingenious.document_processing.extractor import _load
 
-_EXTRACTOR_NAME = "pdfminer"
+__all__: list[str] = [
+    "test_extract_happy_paths",
+    "test_extract_idempotent",
+    "test_url_404_fail_soft",
+    "test_url_oversize_guard",
+]
+
+# --------------------------------------------------------------------------- #
+# Constants                                                                   #
+# --------------------------------------------------------------------------- #
+EXTRACTOR_NAME: Final[str] = "pdfminer"
+_CHUNK: Final[int] = 1 << 14  # 16 KiB – mirrors Requests’ default stream size.
+_OVERSIZE_THRESHOLD: Final[int] = 20 << 20  # 20 MiB safety guard.
 
 
+# --------------------------------------------------------------------------- #
+# Helper objects & functions                                                  #
+# --------------------------------------------------------------------------- #
+class _StubResp:  # noqa: D101 – internal helper class.
+    """A *very* small shim that mimics the parts of :class:`requests.Response`
+    touched by the extractor.
+
+    Parameters
+    ----------
+    content
+        The byte payload returned when the extractor iterates over the
+        response’s content.
+    status_code
+        The HTTP status with which to initialise the stub.  Codes ≥ 400 cause
+        :pymeth:`raise_for_status` to raise :class:`requests.HTTPError`,
+        exactly like the real object does.
+    """
+
+    def __init__(self, content: bytes, status_code: int = 200) -> None:  # noqa: D401 – imperative mood acceptable.
+        self.content: bytes = content
+        self.status_code: int = status_code
+        # The extractor occasionally inspects *headers* for content‑length.
+        # Providing an empty mapping is sufficient for the tests.
+        self.headers: dict[str, str] = {}
+        self._raw: io.BytesIO = io.BytesIO(content)
+
+    # --------------------------------------------------------------------- #
+    # Public shim API                                                       #
+    # --------------------------------------------------------------------- #
+    def iter_content(self, chunk_size: int = _CHUNK) -> Iterator[bytes]:
+        """Yield *content* in ``chunk_size`` slices to emulate streaming."""
+
+        while True:
+            chunk = self._raw.read(chunk_size)
+            if not chunk:
+                break
+            yield chunk
+
+    def raise_for_status(self) -> None:
+        """Reproduce the behaviour of :pymeth:`requests.Response.raise_for_status`."""
+
+        if self.status_code >= 400:
+            raise requests.HTTPError(f"{self.status_code} error")
+
+
+def _monkey_download(monkeypatch: pytest.MonkeyPatch, payload: _StubResp) -> None:  # noqa: D401
+    """Redirect *all* `requests.get` calls inside the fetcher to *payload*.
+
+    The Insight Ingenious fetcher keeps a module‑level reference to
+    :func:`requests.get`.  Overwriting that symbol ensures **every** extractor
+    – regardless of its internal implementation – receives the same stubbed
+    response, making the tests completely deterministic and free of external
+    I/O.
+    """
+
+    target = "ingenious.document_processing.fetcher.requests.get"
+    monkeypatch.setattr(target, lambda *_a, **_k: payload, raising=True)
+
+
+# --------------------------------------------------------------------------- #
+# Test‑probe builders                                                         #
+# --------------------------------------------------------------------------- #
+ProbeBuilder = Callable[[Path], Any]
+
+_PROBES: list[tuple[str, ProbeBuilder]] = [
+    ("path", lambda p: p),
+    ("bytes", lambda p: p.read_bytes()),
+    ("bytesio", lambda p: io.BytesIO(p.read_bytes())),
+    ("url", lambda p: f"https://example.com/{p.name}"),
+]
+
+
+# --------------------------------------------------------------------------- #
+# Fixtures                                                                    #
+# --------------------------------------------------------------------------- #
+@pytest.fixture(scope="module")
+def pdfminer():  # noqa: D401 – fixture names should be lowercase nouns.
+    """Return a *single* PDFMiner extractor instance for the whole module."""
+
+    return _load(EXTRACTOR_NAME)
+
+
+# --------------------------------------------------------------------------- #
+# 1. Happy‑path matrix                                                        #
+# --------------------------------------------------------------------------- #
 @pytest.mark.usefixtures("pdfminer_available")
-def test_pdfminer_success(pdf_path: Path, pdfminer_available: bool) -> None:
+@pytest.mark.parametrize(
+    ("kind", "probe_fn"),
+    _PROBES,
+    ids=[k for k, _ in _PROBES],
+)
+def test_extract_happy_paths(
+    kind: str,
+    probe_fn: ProbeBuilder,
+    pdf_path: Path,
+    pdfminer,
+    pdfminer_available: bool,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Extract **some** text for each supported input type.
+
+    For URL probes, the remote download is stubbed so the test suite never
+    touches the network.
     """
-    Verify that the adaptor powered by PdfMiner extracts *some* text.
 
-    Parameters
-    ----------
-    pdf_path
-        Path to the sample PDF provided by the fixture.
-    pdfminer_available
-        Indicates whether *pdfminer.six* is installed on the test host.
-
-    Behaviour
-    ---------
-    * If ``pdfminer_available`` is ``False`` the test is skipped.
-    * Otherwise the extractor is invoked and the resulting list of element
-      dictionaries is scanned for at least one non-empty ``"text"`` field.
-
-    Raises
-    ------
-    AssertionError
-        Raised when no element contains a non-empty ``"text"`` value,
-        signalling that content extraction failed.
-    """
     if not pdfminer_available:
-        pytest.skip("pdfminer is not installed")
+        pytest.skip("pdfminer.six not installed")
 
-    pdfminer = _load(_EXTRACTOR_NAME)
-    texts: List[str] = [element["text"] for element in pdfminer.extract(pdf_path)]
+    probe = probe_fn(pdf_path)
 
-    assert any(texts), "PdfMiner extracted no text from a valid PDF"
+    if isinstance(probe, str) and probe.startswith("http"):
+        _monkey_download(monkeypatch, _StubResp(pdf_path.read_bytes()))
+
+    texts: list[str] = [blk["text"] for blk in pdfminer.extract(probe)]
+    assert any(texts), f"No text extracted for {kind!r} input"
 
 
-def test_pdfminer_idempotent(pdf_path: Path, pdfminer_available: bool) -> None:
-    """
-    Confirm that the extractor is deterministic.
+# --------------------------------------------------------------------------- #
+# 2. Determinism across runs                                                  #
+# --------------------------------------------------------------------------- #
 
-    Parameters
-    ----------
-    pdf_path
-        Path to the sample PDF used for this check.
-    pdfminer_available
-        Indicates whether *pdfminer.six* is installed on the test host.
 
-    Behaviour
-    ---------
-    * The extractor is called twice with identical input.
-    * The two result lists are compared for exact equality.
+def test_extract_idempotent(
+    pdfminer,
+    pdf_path: Path,
+    pdfminer_available: bool,
+) -> None:
+    """Verify that two extractions over the *same* file are identical."""
 
-    Raises
-    ------
-    AssertionError
-        Raised when the two outputs differ, meaning the extractor exhibits
-        non-deterministic behaviour.
-    """
     if not pdfminer_available:
-        pytest.skip("pdfminer is not installed")
+        pytest.skip("pdfminer.six not installed")
 
-    pdfminer = _load(_EXTRACTOR_NAME)
-    first_run = list(pdfminer.extract(pdf_path))
-    second_run = list(pdfminer.extract(pdf_path))
+    run1 = list(pdfminer.extract(pdf_path))
+    run2 = list(pdfminer.extract(pdf_path))
 
-    assert first_run == second_run, "Extractor output is not deterministic"
+    assert run1 == run2, "Extractor output is not deterministic"
+
+
+# --------------------------------------------------------------------------- #
+# 3. Fail‑soft: HTTP error                                                    #
+# --------------------------------------------------------------------------- #
+
+
+def test_url_404_fail_soft(
+    pdfminer,
+    pdf_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    pdfminer_available: bool,
+) -> None:
+    """Return an *empty iterator* when the server responds with **404 Not Found**."""
+
+    if not pdfminer_available:
+        pytest.skip("pdfminer.six not installed")
+
+    url = f"https://example.com/{pdf_path.name}"
+    _monkey_download(monkeypatch, _StubResp(b"", status_code=404))
+
+    assert list(pdfminer.extract(url)) == []
+
+
+# --------------------------------------------------------------------------- #
+# 4. Fail‑soft: oversized downloads                                          #
+# --------------------------------------------------------------------------- #
+
+
+def test_url_oversize_guard(
+    pdfminer,
+    monkeypatch: pytest.MonkeyPatch,
+    pdfminer_available: bool,
+) -> None:
+    """Skip **oversized** remote PDFs (> 20 MiB) and yield nothing."""
+
+    if not pdfminer_available:
+        pytest.skip("pdfminer.six not installed")
+
+    url = "https://example.com/huge.pdf"
+    big_payload = b"%PDF-1.7\n" + b"0" * (_OVERSIZE_THRESHOLD + 1)
+
+    _monkey_download(monkeypatch, _StubResp(big_payload))
+
+    assert list(pdfminer.extract(url)) == []

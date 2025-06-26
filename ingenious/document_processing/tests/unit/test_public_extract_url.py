@@ -1,84 +1,106 @@
 """
-Insight Ingenious — *extract* remote-download fail-soft tests
-===========================================================
+Insight Ingenious — *extract()* URL‑branch fail‑soft unit tests
+==============================================================
 
-This module belongs to the **unit** tier of the
-``ingenious.document_processing`` test-suite.  It validates the *fail-soft*
-contract of the public helper:
+This module houses **unit‑level** tests that assert the *fail‑soft* contract
+of the public helper :pyfunc:`ingenious.document_processing.extract` when it
+is asked to download a document from an HTTP/S URL.
 
-    >>> ingenious.document_processing.extract
+Fail‑soft contract
+------------------
+* **Never raise** — *all* parsing / network errors are swallowed internally.
+* **Return an empty list** — signalling that no elements were extracted.
 
-*Fail-soft* means that **invalid input must never raise**; instead the function
-returns an **empty list** so that downstream pipelines can continue operating.
-Here we probe the most brittle branch — downloading a *remote* PDF whose byte
-stream is deliberately corrupted.
+Test scenario
+-------------
+A stubbed *HTTP 200 OK* response delivers deliberately corrupted PDF bytes.
+The test verifies that ``extract``
 
-Test outline
-------------
-1. Monkey-patch :pyfunc:`requests.get` to return a synthetic
-   :class:`requests.Response` whose body contains a *minimal* but **malformed**
-   PDF payload.
-2. Invoke :pyfunc:`~ingenious.document_processing.extract` with a *dummy* URL
-   while relying on the **default extractor** (no ``engine`` argument).
-3. Assert that the return value is ``[]`` and that **no** exception escapes.
+1. downloads the payload via the usual fetcher pathway,
+2. detects the corruption, and
+3. yields ``[]`` without raising any exception.
+
+Why it matters
+--------------
+`extract` acts as a **safety boundary** for higher‑level RAG pipelines and web
+handlers: network glitches or malformed documents must never crash a long‑
+running batch job or an API request.
 """
 
 from __future__ import annotations
 
-from typing import Any
+# ──────────── Standard Library ────────────
+from typing import Any, Final, Iterator
 
+# ────────────── Third‑Party ───────────────
 import pytest
 from requests.models import Response
 
+# ────────────── First‑Party ───────────────
 from ingenious.document_processing import extract
 
+__all__: list[str] = [
+    "test_extract_downloads_and_fails_soft",
+]
+
 # --------------------------------------------------------------------------- #
-# constants                                                                   #
+# Constants                                                                   #
 # --------------------------------------------------------------------------- #
-_CORRUPT_PDF_BYTES: bytes = (
-    b"%PDF-1.7 broken\n%%EOF"  # minimal payload that crashes every PDF parser
-)
+_CORRUPT_PDF_BYTES: Final[bytes] = b"%PDF-1.7 broken\n%%EOF"
 
 
 # --------------------------------------------------------------------------- #
-# tests                                                                       #
+# Helper objects                                                              #
 # --------------------------------------------------------------------------- #
-def test_extract_downloads_and_fails_soft(monkeypatch: pytest.MonkeyPatch) -> None:
-    """
-    Ensure **fail-soft** behaviour when `extract` encounters a corrupt remote
-    PDF.
+class _FakeResp(Response):
+    """Minimal stub of :class:`requests.Response` for HTTP stubbing.
 
-    Workflow
-    --------
-    Arrange
-        Patch :pyfunc:`requests.get` so that it returns a 200-OK
-        :class:`requests.Response` whose ``content`` is a two-line, malformed
-        PDF header.
-    Act
-        Call :pyfunc:`ingenious.document_processing.extract` with a dummy URL,
-        relying on the *default* extractor (no ``engine`` argument supplied).
-    Assert
-        The helper **returns** an **empty list** and **raises no exception**.
+    Only the attributes/methods consumed by
+    :pyfunc:`ingenious.document_processing.fetcher.fetch` are implemented.
 
     Parameters
     ----------
-    monkeypatch
-        Built-in *pytest* fixture allowing temporary mutation of attributes
-        for the duration of the test.
+    body:
+        Raw payload returned by :pymeth:`iter_content`.
+    status:
+        HTTP status code to mimic (defaults to *200 OK*).
     """
-    # ── stub remote download ────────────────────────────────────────────
-    fake_resp = Response()
-    fake_resp.status_code = 200
-    fake_resp._content = _CORRUPT_PDF_BYTES  # type: ignore[attr-defined]
 
+    def __init__(self, body: bytes, status: int = 200) -> None:  # noqa: D401 – imperative mood is fine for __init__
+        super().__init__()
+        self.status_code = status
+        self._content = body
+        # Only *Content‑Length* is inspected upstream, so a single header suffices.
+        self.headers = {"Content-Length": str(len(body))}
+
+    # --------------------------------------------------------------------- #
+    # Public shim API                                                       #
+    # --------------------------------------------------------------------- #
+    def iter_content(self, chunk_size: int = 1 << 14) -> Iterator[bytes]:  # noqa: D401 – clear enough without “Returns”.
+        """Yield the entire *body* once to emulate a streamed download."""
+
+        yield self._content
+
+
+# --------------------------------------------------------------------------- #
+# Tests                                                                       #
+# --------------------------------------------------------------------------- #
+
+
+def test_extract_downloads_and_fails_soft(monkeypatch: pytest.MonkeyPatch) -> None:
+    """``extract`` should return ``[]`` *and* raise nothing for corrupt bytes."""
+
+    fake_resp: Response = _FakeResp(_CORRUPT_PDF_BYTES)
+
+    # ── Stub the global HTTP GET used by the fetcher. ────────────────────
     monkeypatch.setattr(
-        "ingenious.document_processing.requests.get",
-        lambda *args, **kwargs: fake_resp,
+        "ingenious.document_processing.fetcher.requests.get",
+        lambda *_a, **_k: fake_resp,
         raising=True,
     )
 
-    # ── exercise URL branch ─────────────────────────────────────────────
+    # ── Exercise the URL branch. ─────────────────────────────────────────
     result: list[dict[str, Any]] = list(extract("http://example.com/bad.pdf"))
 
-    # ── expectations ───────────────────────────────────────────────────
-    assert result == [], "extract should fail-soft and yield an empty list"
+    # ── Expectations. ────────────────────────────────────────────────────
+    assert result == [], "extract() should fail‑soft and yield an empty list"

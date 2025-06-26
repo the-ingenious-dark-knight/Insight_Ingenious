@@ -18,9 +18,6 @@ Covered scenarios
 2. **Unwritable output destination** – directing ``--out`` to a path without
    write permission must abort the run rather than silently ignoring the
    failure.
-
-3. **Standard output streaming** – piping NDJSON to *stdout* should
-   succeed, providing a baseline “happy path” for comparison.
 """
 
 from __future__ import annotations
@@ -143,23 +140,3 @@ def test_cli_unwritable_out(
     )
 
     assert result.exit_code != 0
-
-
-@pytest.mark.parametrize("cli_target", ["sub", "root"], ids=["doc_app", "root_app"])
-def test_cli_stdout_json_integrity(_cli, cli_target: str, pdf_path: Path) -> None:
-    """
-    Confirm that NDJSON can stream to *stdout* without raising errors.
-
-    This scenario provides a control case showing that a standard,
-    permission-free pathway completes successfully.  The test asserts that the
-    process exits with code zero and does not contain unexpected diagnostics in
-    its captured output.
-
-    Parameters
-    ----------
-    _cli, cli_target, pdf_path
-        See *test_cli_unknown_engine* for field descriptions.
-    """
-    result = _cli(cli_target, [str(pdf_path)])
-
-    assert result.exit_code == 0, result.output

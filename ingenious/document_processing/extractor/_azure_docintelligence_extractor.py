@@ -1,37 +1,33 @@
 """
-Insight Ingenious – Azure Document Intelligence extractor (non‑OCR)
-===================================================================
+Insight Ingenious – Azure AI Document Intelligence extractor
+===========================================================
 
-End‑to‑end wrapper around the Azure AI Document Intelligence
-*prebuilt‑document* model (v3.1 GA).  The class fulfils the
-:class:`ingenious.document_processing.extractor.base.DocumentExtractor`
-contract so it can be swapped with local back‑ends (PDFMiner, PyMuPDF,
-Unstructured, …) without touching downstream code.
+Wrapper around Azure AI **prebuilt-document v3.2 (GA)** that fulfils the
+:class:`~ingenious.document_processing.extractor.base.DocumentExtractor`
+protocol.  It can be swapped in wherever a local extractor
+(PDFMiner, PyMuPDF, Unstructured, …) is used.
 
-Key responsibilities
---------------------
-* **Upload** the user‑supplied source (bytes or file‑path) to the cloud
-  endpoint.
-* **Poll** the *operation‑location* URL until the analysis succeeds.
-* **Stream** paragraphs and tables to the caller as lightweight
-  ``Element`` mappings––one item at a time––so that gigantic reports can
-  be handled on commodity hardware.
-* **Fail‑soft**: any network / API / parsing error is recorded via
-  :pymod:`logging` *without* raising so that batch pipelines keep
-  marching on.
+Responsibilities
+----------------
+* **Upload** the source file *or* in-memory bytes to the Azure endpoint.
+* **Poll** the *operation-location* URL until the job finishes, **or** until a
+  budget of **300 requests / 600 s** (defaults) is exhausted.
+  Limits are configurable via ``AZDOCINT_MAX_POLLS`` and
+  ``AZDOCINT_MAX_SECS``.
+* **Stream** paragraphs and tables as lightweight ``Element`` mappings so even
+  very large documents can be processed on commodity hardware.
+* **Fail-soft** – network/API errors are logged and the generator returns
+  early; no exception is propagated.
 
-Environment variables
----------------------
-The extractor is stateless; credentials are sourced from the process
-environment for parity between containerised and local runs:
+Environment
+-----------
+``AZURE_DOC_INTEL_ENDPOINT``  – endpoint URL
+``AZURE_DOC_INTEL_KEY``       – API key
+``AZDOCINT_MAX_POLLS``        – *(optional)* max polling attempts (default 300)
+``AZDOCINT_MAX_SECS``         – *(optional)* max wall-clock seconds (default 600)
 
-``AZURE_DOC_INTEL_ENDPOINT``
-    Endpoint URL such as ``https://<resource>.cognitiveservices.azure.com``.
-``AZURE_DOC_INTEL_KEY``
-    API key for the above resource.
-``AZURE_DOC_INTEL_DUMP`` *(optional)*
-    Directory path. If set, the raw JSON response for every analysed
-    document is written there for post‑mortem debugging.
+*Credentials are read **once at import time**; set the variables **before**
+ importing this module.*
 
 Example
 -------
@@ -42,12 +38,12 @@ Example
 
 Notes
 -----
-* Only **born‑digital** files are supported – scanned PDFs require OCR
-  which is outside the scope of this extractor.
-* Table cells are *not* flattened; only table‑level metadata is emitted
-  so that callers can decide how to render complex spans.
-* Network round‑trips can be long‑running; the implementation sets a
-  generous timeout so that very large PDFs still succeed.
+* Accepts **PDF plus common image formats (PNG / JPEG / TIFF)**; Azure performs
+  OCR automatically for scanned pages.
+* Table cells are **not** flattened – only table-level metadata is emitted so
+  callers can render complex spans as they see fit.
+* Path inputs are read fully into memory before upload; extremely large files
+  may consume significant RAM until streaming uploads are implemented.
 """
 
 from __future__ import annotations
@@ -61,6 +57,7 @@ from typing import Final, Iterable, Sequence, TypeAlias, cast
 
 import requests
 
+from ingenious.document_processing.fetcher import is_url, fetch
 from .base import DocumentExtractor, Element
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -87,6 +84,9 @@ _SUPPORTED_MIME_TYPES: set[str] = {
     "image/jpeg",
     "image/tiff",
 }
+
+_MAX_POLL_ATTEMPTS: Final[int] = int(os.getenv("AZDOCINT_MAX_POLLS", "300"))
+_MAX_POLL_SECONDS: Final[int] = int(os.getenv("AZDOCINT_MAX_SECS", "600"))
 
 # ---------------------------------------------------------------------------
 # Helper functions (private)
@@ -197,6 +197,9 @@ class AzureDocIntelligenceExtractor(DocumentExtractor):
         if isinstance(src, (bytes, bytearray)):
             return True
 
+        if isinstance(src, str) and is_url(src):  # Accept any HTTP/S URL
+            return True
+
         mime, _ = mimetypes.guess_type(str(src))
         return bool(mime and mime in _SUPPORTED_MIME_TYPES)
 
@@ -229,11 +232,17 @@ class AzureDocIntelligenceExtractor(DocumentExtractor):
             )
             return
 
-        payload = _read_bytes(src)
-        if payload is None:
+        if isinstance(src, (bytes, bytearray)):
+            payload = src
+        elif isinstance(src, str) and is_url(src):
+            payload = fetch(src)
+        else:
+            payload = _read_bytes(src)
+
+        if payload is None:  # fail-soft on network / I/O errors
             return
 
-        url = _build_url(_ENV_ENDPOINT)
+        azure_doc_intel_url = _build_url(_ENV_ENDPOINT)
         headers = {
             "Ocp-Apim-Subscription-Key": _ENV_KEY,
             "Content-Type": "application/octet-stream",
@@ -241,7 +250,10 @@ class AzureDocIntelligenceExtractor(DocumentExtractor):
 
         try:
             submit = requests.post(
-                url, headers=headers, data=payload, timeout=_REQUEST_TIMEOUT_SEC
+                azure_doc_intel_url,
+                headers=headers,
+                data=payload,
+                timeout=_REQUEST_TIMEOUT_SEC,
             )
         except requests.RequestException as exc:  # pragma: no cover – network hiccup
             logger.warning("Request failed for %s – %s", src, exc)
@@ -261,24 +273,49 @@ class AzureDocIntelligenceExtractor(DocumentExtractor):
         # ------------------------------------------------------------------
         # Poll until the job is done (succeeded / failed)
         # ------------------------------------------------------------------
+        attempts: int = 0  # start at zero requests
+        start_ts = time.monotonic()
+
         while True:
+            elapsed = time.monotonic() - start_ts
+            if attempts >= _MAX_POLL_ATTEMPTS or elapsed > _MAX_POLL_SECONDS:
+                logger.error(
+                    "Azure analysis for %r exceeded polling budget "
+                    "(%s attempts, %.0f s); aborting",
+                    src,
+                    attempts,
+                    elapsed,
+                )
+                return
+
+            # 1️⃣ Network call
             try:
                 poll = requests.get(
                     poll_url, headers=headers, timeout=_REQUEST_TIMEOUT_SEC
                 )
-            except (
-                requests.RequestException
-            ) as exc:  # pragma: no cover – network hiccup
+                poll.raise_for_status()  # 🔸 ensure HTTP 2xx before JSON parse
+            except requests.RequestException as exc:  # pragma: no cover
                 logger.warning("Polling error – %s", exc)
                 return
 
-            status = poll.json().get("status")
+            attempts += 1  # 2️⃣ count the call *after* it happened
+
+            # 🔸 JSON guard
+            try:
+                data = poll.json()
+            except ValueError as exc:  # malformed JSON
+                logger.warning("Invalid JSON in polling response – %s", exc)
+                return
+
+            status = data.get("status")
+
             if status == "succeeded":
                 break
             if status in {"failed", "error"}:
                 logger.warning("Azure analysis failed – %s", poll.text)
                 return
-            time.sleep(_POLLER_DELAY_SEC)
+
+            time.sleep(_POLLER_DELAY_SEC)  # polite back-off
 
         result: dict = poll.json().get("analyzeResult", {})
 

@@ -23,14 +23,6 @@ This module executes **end-to-end, success-case** probes against the
    • Writes valid NDJSON records to an explicit ``--out`` destination.
    • Falls back to streaming NDJSON to *stdout* when no output file is
      requested.
-
-**Implementation notes**
-
-*   All Typer invocations are routed through the shared ``_cli`` fixture
-    exposed in *conftest.py* to avoid duplication and guarantee identical
-    command assembly across test modules.
-*   The helper functions in this file (_load_ndjson, _invoke_cli) are
-    intentionally lightweight wrappers to keep the test code readable.
 """
 
 from __future__ import annotations
@@ -43,11 +35,8 @@ from typing import Any, Final
 
 # ──────────── third-party ────────────
 import pytest
-from typer.testing import CliRunner, Result
 
 # ──────────── first-party ────────────
-from ingenious.cli import app as root_app
-from ingenious.document_processing.cli import doc_app
 from ingenious.document_processing.extractor import _ENGINES
 
 # --------------------------------------------------------------------------- #
@@ -58,7 +47,6 @@ PDF_URL: Final[str] = (
     "https://densebreast-info.org/wp-content/uploads/2024/06/"
     "Patient-Fact-Sheet-English061224.pdf"
 )
-_RUNNER: Final[CliRunner] = CliRunner()
 
 
 def _load_ndjson(stream: str) -> Iterator[dict[str, Any]]:
@@ -87,61 +75,6 @@ def _load_ndjson(stream: str) -> Iterator[dict[str, Any]]:
             yield json.loads(line)
 
 
-def _invoke_cli(
-    source: str,
-    engine: str | None = None,
-    out_file: Path | None = None,
-    kind: str = "sub",
-) -> Result:
-    """
-    Execute the document-processing CLI and capture the result.
-
-    This wrapper supports two entry-points:
-
-    * ``doc_app`` — the dedicated document-processing Typer application
-      (*kind* ``"sub"``).
-    * ``root_app`` — the monolithic Insight Ingenious CLI where
-      *document-processing* is mounted as a sub-command (*kind* ``"root"``).
-
-    Parameters
-    ----------
-    source:
-        Path or URL of the document to be parsed.
-    engine:
-        Name of the extraction engine to use.  If omitted, the CLI selects a
-        default engine based on file type and availability.
-    out_file:
-        Location to write the NDJSON output.  If *None*, the CLI writes to
-        *stdout*.
-    kind:
-        Choose ``"sub"`` for *doc_app* or ``"root"`` for *root_app*.
-
-    Returns
-    -------
-    Result
-        The Typer ``CliRunner`` result containing exit code, stdout, stderr and
-        any raised exception.
-    """
-    args: list[str] = []
-    target_app = root_app if kind == "root" else doc_app
-
-    if kind == "root":
-        # The root application expects the sub-command token first.
-        args.append("document-processing")
-
-    # Mandatory positional argument: the source path or URL.
-    args.append(source)
-
-    # Optional flags.
-    if engine is not None:
-        args.extend(["--engine", engine])
-
-    if out_file is not None:
-        args.extend(["--out", str(out_file)])
-
-    return _RUNNER.invoke(target_app, args)
-
-
 # --------------------------------------------------------------------------- #
 # test matrix                                                                 #
 # --------------------------------------------------------------------------- #
@@ -150,6 +83,7 @@ def _invoke_cli(
 @pytest.mark.parametrize("cli_kind", ["sub", "root"], ids=["doc_app", "root_app"])
 @pytest.mark.parametrize("engine", sorted(_ENGINES))
 def test_cli_local_pdf_ok(
+    _cli,
     cli_kind: str,
     engine: str,
     pdf_path: Path,
@@ -164,7 +98,7 @@ def test_cli_local_pdf_ok(
     * Output file exists and is non-empty.
     """
     out_file = tmp_path / f"{engine}.jsonl"
-    result = _invoke_cli(str(pdf_path), engine, out_file, cli_kind)
+    result = _cli(str(pdf_path), engine, out_file, cli_kind)
 
     assert result.exit_code == 0, result.output
     assert out_file.is_file() and out_file.stat().st_size > 0
@@ -173,6 +107,7 @@ def test_cli_local_pdf_ok(
 @pytest.mark.parametrize("cli_kind", ["sub", "root"], ids=["doc_app", "root_app"])
 @pytest.mark.parametrize("engine", sorted(_ENGINES))
 def test_cli_remote_pdf_ok(
+    _cli,
     cli_kind: str,
     engine: str,
     tmp_path: Path,
@@ -184,7 +119,7 @@ def test_cli_remote_pdf_ok(
     :pyfunc:`test_cli_local_pdf_ok`.
     """
     out_file = tmp_path / f"remote_{engine}.jsonl"
-    result = _invoke_cli(PDF_URL, engine, out_file, cli_kind)
+    result = _cli(PDF_URL, engine, out_file, cli_kind)
 
     assert result.exit_code == 0, result.output
     assert out_file.is_file() and out_file.stat().st_size > 0
@@ -192,6 +127,7 @@ def test_cli_remote_pdf_ok(
 
 @pytest.mark.parametrize("cli_kind", ["sub", "root"], ids=["doc_app", "root_app"])
 def test_cli_docx_unstructured_ok(
+    _cli,
     cli_kind: str,
     docx_path: Path,
     tmp_path: Path,
@@ -202,22 +138,47 @@ def test_cli_docx_unstructured_ok(
     This test guards against regressions in non-PDF handling.
     """
     out_file = tmp_path / "docx.jsonl"
-    result = _invoke_cli(str(docx_path), "unstructured", out_file, cli_kind)
+    result = _cli(str(docx_path), "unstructured", out_file, cli_kind)
 
     assert result.exit_code == 0, result.output
     assert out_file.is_file() and out_file.stat().st_size > 0
 
 
 @pytest.mark.parametrize("cli_kind", ["sub", "root"], ids=["doc_app", "root_app"])
-def test_cli_stdout_fallback_ok(cli_kind: str, pdf_path: Path) -> None:
+def test_cli_stdout_fallback_ok(_cli, cli_kind: str, pdf_path: Path) -> None:
     """
     Confirm that NDJSON records stream to *stdout* when ``--out`` is omitted.
 
     The captured *stdout* is parsed with :pyfunc:`_load_ndjson` and must
     contain at least one record with a ``"text"`` key.
     """
-    result = _invoke_cli(str(pdf_path), "pymupdf", kind=cli_kind)
+    result = _cli(str(pdf_path), "pymupdf", entry=cli_kind)
 
     assert result.exit_code == 0, result.output
     payloads = list(_load_ndjson(result.stdout))
     assert payloads and "text" in payloads[0]
+
+
+@pytest.mark.parametrize("cli_target", ["sub", "root"], ids=["doc_app", "root_app"])
+def test_cli_stdout_json_integrity(_cli, cli_target: str, pdf_path: Path) -> None:
+    """
+    Confirm that NDJSON streams cleanly to *stdout* when no --out flag is
+    given.
+
+    The CLI is invoked with a local PDF and no explicit --engine (therefore
+    using the default extractor).  Success criteria:
+
+    * exit code is 0;
+    * stdout contains **at least one** line that begins with “{”, i.e. a
+    valid NDJSON record;
+    * no unexpected diagnostics appear in the output.
+
+    Parameters
+    ----------
+    _cli, cli_target, pdf_path
+        See *test_cli_unknown_engine* for field descriptions.
+    """
+
+    result = _cli(str(pdf_path), entry=cli_target)
+    assert result.exit_code == 0, result.output
+    assert any(l.lstrip().startswith("{") for l in result.stdout.splitlines())

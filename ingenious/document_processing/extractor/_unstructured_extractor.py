@@ -57,9 +57,9 @@ import os
 import re
 import zipfile
 from pathlib import Path
-from typing import Any, Final, Iterable, TypeAlias, cast
-
+from typing import Any, Final, Iterable, TypeAlias
 from .base import DocumentExtractor, Element
+from ingenious.document_processing.fetcher import is_url, fetch
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +68,7 @@ logger = logging.getLogger(__name__)
 # --------------------------------------------------------------------------- #
 
 #: Accepted *src* argument types for :meth:`UnstructuredExtractor.extract`.
-Src: TypeAlias = str | bytes | os.PathLike[str]
+Src: TypeAlias = str | bytes | io.BytesIO | os.PathLike[str]
 
 #: Unicode hyphen that **never** breaks across lines.
 _NON_BREAKING_HYPHEN: Final[str] = "\u2011"
@@ -201,8 +201,12 @@ class UnstructuredExtractor(DocumentExtractor):
             otherwise ``False``.
 
         """
-        if isinstance(src, (bytes, bytearray)):
+        if isinstance(src, (bytes, bytearray, io.BytesIO)):
             return True
+
+        if isinstance(src, str) and is_url(src):
+            return True  # Accept any HTTP/S URL
+
         mime, _ = mimetypes.guess_type(str(src))
         return mime in _SUPPORTED_MIMES
 
@@ -252,47 +256,86 @@ class UnstructuredExtractor(DocumentExtractor):
             from unstructured.partition.docx import partition_docx
             from unstructured.partition.pdf import partition_pdf
             from unstructured.partition.pptx import partition_pptx
-        except ImportError as exc:  # pragma: no cover – optional dependency
+        except ImportError as exc:
             logger.error("Install `unstructured` to enable this extractor: %s", exc)
             return
 
-        # ----------------------------------------------------------------- #
-        # Step 0 – normalise *src*                                           #
-        # ----------------------------------------------------------------- #
+        # -----------------------------------------------------------------
+        # Step 0 – normalise *src*
+        #
+        # • Convert pathlib.Path → str so later checks work uniformly.
+        # • For in-memory data (bytes / bytearray / io.BytesIO) we move the
+        #   raw payload into a single `payload` variable.  All subsequent
+        #   sniffing and dispatch happens on that buffer.
+        # -----------------------------------------------------------------
         if isinstance(src, Path):
             src = str(src)
 
-        # -------------------- In-memory buffers -------------------------- #
-        if isinstance(src, (bytes, bytearray)):
-            head = bytes(src[:8])
+        # ---------- NEW: remote HTTP/S URL handling ----------------------
+        if isinstance(src, str) and is_url(src):
+            payload = fetch(src)
+            if payload is None:  # network failure or size guard triggered
+                return
+        else:
+            payload: bytes | None = None
 
-            # ---------- PDF bytes ---------------------------------------- #
-            if head.startswith(b"%PDF-"):
-                with io.BytesIO(cast(bytes, src)) as fp:
-                    u_elems = partition_pdf(file=fp)
+        if isinstance(src, io.BytesIO):
+            # io.BytesIO → pull the underlying bytes once.
+            payload = src.getvalue()
+        elif isinstance(src, (bytes, bytearray)):
+            # Accept raw bytes or bytearray verbatim.
+            payload = bytes(src)
 
-            # ---------- OOXML bytes (ZIP header) ------------------------- #
-            elif head.startswith(b"PK\x03\x04"):
-                with io.BytesIO(cast(bytes, src)) as fp, zipfile.ZipFile(fp) as zf:
-                    roots = {info.filename.split("/", 1)[0] for info in zf.infolist()}
+        if payload is not None:
+            # Look at the first few bytes to decide whether we have
+            #   • a PDF          (“%PDF-” header)
+            #   • an OOXML file  (ZIP magic bytes “PK\003\004”)
+            head = payload[:8]
 
-                with io.BytesIO(cast(bytes, src)) as fp:  # reopen at pos 0
-                    if "word" in roots:
-                        u_elems = partition_docx(file=fp)
-                    elif "ppt" in roots:
-                        u_elems = partition_pptx(file=fp)
-                    else:
-                        logger.warning("Unknown OOXML subtype – skipped buffer")
-                        return
-            else:
-                logger.warning("Unsupported binary buffer – skipped")
+            try:  # ← NEW universal guard
+                # ---------- PDF bytes ---------------------------------------- #
+                if head.startswith(b"%PDF-"):
+                    with io.BytesIO(payload) as fp:
+                        u_elems = partition_pdf(file=fp)
+
+                # ---------- OOXML bytes (DOCX / PPTX) ------------------------ #
+                elif head.startswith(b"PK\x03\x04"):
+                    # 1️⃣ Inspect ZIP to decide subtype
+                    with io.BytesIO(payload) as fp, zipfile.ZipFile(fp) as zf:
+                        roots = {
+                            info.filename.split("/", 1)[0] for info in zf.infolist()
+                        }
+
+                    # 2️⃣ Re-open for the real parse pass
+                    with io.BytesIO(payload) as fp:
+                        if "word" in roots:
+                            u_elems = partition_docx(file=fp)
+                        elif "ppt" in roots:
+                            u_elems = partition_pptx(file=fp)
+                        else:
+                            logger.warning("Unknown OOXML subtype – skipped buffer")
+                            return
+                else:
+                    logger.warning("Unsupported binary buffer – skipped")
+                    return
+
+            except Exception as exc:  # ← swallow vendor errors
+                logger.warning("Parsing failed for in-memory buffer – %s", exc)
                 return
 
-        # -------------------- File-path inputs --------------------------- #
+        # -----------------------------------------------------------------
+        # File-path inputs
+        #
+        # For disk-backed files we rely on the filename suffix; that’s enough
+        # because the extractor is explicitly scoped to three well-known
+        # formats (.pdf, .docx, .pptx).
+        # -----------------------------------------------------------------
         else:
             path = str(src)
             try:
                 if path.lower().endswith(".pdf"):
+                    # The “hi_res” strategy gives sharper page images when
+                    # unstructured falls back to OCR.
                     with open(path, "rb") as fp:
                         u_elems = partition_pdf(file=fp, strategy="hi_res")
                 elif path.lower().endswith(".docx"):
@@ -302,7 +345,9 @@ class UnstructuredExtractor(DocumentExtractor):
                 else:
                     logger.warning("Unsupported file type – %s", path)
                     return
-            except Exception as exc:  # pragma: no cover – I/O or vendor failure
+            except Exception as exc:
+                # Any vendor or I/O failure is swallowed so that batch jobs
+                # keep running even if one document is corrupt.
                 logger.warning("Parsing failed for %s – %s", src, exc)
                 return
 

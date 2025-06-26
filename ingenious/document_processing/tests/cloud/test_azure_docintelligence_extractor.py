@@ -1,225 +1,213 @@
 """
-Insight Ingenious – integration tests for AzureDocIntelligenceExtractor
-======================================================================
+Insight Ingenious – Integration tests for AzureDocIntelligenceExtractor
+=====================================================================
 
-This module contains **live** integration tests that exercise the
-:class:`~ingenious.document_processing.extractor.azure_doc_intelligence.AzureDocIntelligenceExtractor`
-(abbreviated throughout as *azdocint*).  Unlike unit tests that rely on
-mocked responses, these tests submit real files to Azure AI Document
-Intelligence’s *prebuilt-document* model and validate the structure of the
-streamed output.
+End‑to‑end ("live") tests that call Azure AI *prebuilt‑document* through the
+:class:`~ingenious.document_processing.extractor.azure_doc_intelligence.
+AzureDocIntelligenceExtractor` wrapper.
 
-Motivation
-----------
+The suite is **skipped automatically** unless *both* conditions hold:
 
-* Detect breaking changes in Azure’s service behaviour or API surface.
-* Verify that authentication, network configuration, and extractor plumbing
-  are working end-to-end in the current environment.
-* Provide developers with a quick sanity check before publishing changes that
-  affect the extractor.
+1.  Valid Azure credentials are detected via environment variables – either
+    ``AZURE_DOC_INTEL_ENDPOINT``/``AZURE_DOC_INTEL_KEY`` **or**
+    ``AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT``/``AZURE_DOCUMENT_INTELLIGENCE_KEY``.
+2.  The sample assets exist under
+    ``tests/integration/data_azure_doc_intell/``.
 
-How the tests work
-------------------
-
-1. For every sample filename in ``_SAMPLE_FILES`` a parametrised test case is
-   generated.
-2. The test case first calls :pyfunc:`_skip_if_invalid` which:
-
-   * skips the test when the required environment variables are absent, and
-   * skips the test when the sample asset is missing on disk.
-
-3. The extractor’s :pyfunc:`ingenious.document_processing.extractor.base.DocumentExtractor.extract`
-   coroutine is invoked through :pyfunc:`_run_extract`; the returned generator
-   is fully materialised so that network errors surface immediately.
-4. The resulting element list is asserted to be non-empty and each dictionary
-   is checked for the mandatory ``page`` and ``text`` keys.
-
-Environment variables
----------------------
-
-=============================  ============================================
-Variable                       Purpose
-=============================  ============================================
-``AZURE_DOC_INTEL_ENDPOINT``   Endpoint URL of the Azure resource
-``AZURE_DOC_INTEL_KEY``        Resource key (primary or secondary)
-
-*Legacy names*
-``AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT`` and
-``AZURE_DOCUMENT_INTELLIGENCE_KEY`` are also respected for backward
-compatibility.
-=============================  ============================================
-
-Sample assets
--------------
-
-The test data directory ``tests/data_azure_doc_intell`` ships with four tiny
-files that cover the most common input types:
-
-* PDF document (born-digital)
-* PNG, JPEG, and TIFF images containing printed text
-
-Developers may add additional samples; just include the filename in
-``_SAMPLE_FILES`` and commit the asset to the repository.
-
-Usage
+Goals
 -----
-
-Run the tests locally (assuming *pytest* is installed and the environment
-variables are set)::
-
-    uv run pytest -m integration tests/test_azure_doc_intelligence.py
-
-The *integration* marker allows the suite to be excluded during
-fast, offline unit-test runs.
-
-Notes
------
-
-*Network calls* These tests make outbound HTTPS requests.  In CI pipelines
-behind a proxy or strict firewall, ensure egress to
-``*.cognitiveservices.azure.com`` is permitted.
-
-*Cost* Each test processes a single-page document that stays well within the
-free tier quotas of Azure AI Document Intelligence.  Even a full CI matrix run
-should incur negligible cost.
+* **Fail‑soft** – missing credentials or assets never raise, they *skip* or
+  return an empty iterator.
+* **Determinism** – identical input ⇒ identical (byte‑for‑byte) output.
+* **Efficiency** – authentication is performed once per test module via a
+  scoped fixture.
 """
 
 from __future__ import annotations
 
+import contextlib
 import os
 from pathlib import Path
-from typing import Iterable
+from typing import Any, Iterator, List
 
 import pytest
 
 from ingenious.document_processing.extractor import _load
 
-# ---------------------------------------------------------------------
-# constants
-# ---------------------------------------------------------------------
-TEST_DATA_DIR = Path(__file__).parent / "data_azure_doc_intell"
-# You need to create and populate this folder.
-_SAMPLE_FILES = ("sample.pdf", "sample.png", "sample.jpg", "sample.tiff")
+# --------------------------------------------------------------------------- #
+# Constants                                                                   #
+# --------------------------------------------------------------------------- #
 
-# ---------------------------------------------------------------------
-# fixtures
-# ---------------------------------------------------------------------
+TEST_DATA_DIR: Path = Path(__file__).parent / "data_azure_doc_intell"
+SAMPLE_FILES: tuple[str, ...] = (
+    "sample.pdf",
+    "sample.png",
+    "sample.jpg",
+    "sample.tiff",
+)
+
+# --------------------------------------------------------------------------- #
+# Fixtures                                                                    #
+# --------------------------------------------------------------------------- #
 
 
 @pytest.fixture(scope="module")
 def azdocint():
-    """
-    Provide a **module-scoped** AzureDocIntelligenceExtractor instance.
+    """Return a single, lazily‑instantiated extractor for the entire module.
 
-    Loading the extractor once per module avoids repeatedly constructing
-    the underlying Azure client, which would be wasteful and slightly
-    slower.
-
-    Returns
-    -------
-    ingenious.document_processing.extractor.azure_doc_intelligence.AzureDocIntelligenceExtractor
-        Fully initialised extractor ready to process documents.
+    Azure authentication can be an expensive network round‑trip; holding a
+    *module‑scoped* instance prevents redundant handshakes in each test case.
     """
+
     return _load("azdocint")
 
 
-# ---------------------------------------------------------------------
-# helpers
-# ---------------------------------------------------------------------
+@pytest.fixture()
+def dummy_foo(tmp_path: Path) -> Path:
+    """Generate a temporary file with an unsupported ``.foo`` extension.
+
+    The file contents are irrelevant – only the *extension* is used to verify
+    that the extractor politely rejects unknown formats without raising.
+    """
+
+    path = tmp_path / "dummy.foo"
+    path.write_text("irrelevant", encoding="utf-8")
+    return path
+
+
+# --------------------------------------------------------------------------- #
+# Helper utilities                                                            #
+# --------------------------------------------------------------------------- #
+
+
 def _has_credentials() -> bool:
-    """
-    Check whether the environment contains both the endpoint and key.
+    """Return ``True`` when *both* an endpoint **and** a key variable exist.
 
-    Returns
-    -------
-    bool
-        ``True`` when authentication data is present; ``False`` otherwise.
+    The helper checks the two historical variable pairs so local setups using
+    either naming convention are supported transparently.
     """
-    endpoint_present = os.getenv("AZURE_DOC_INTEL_ENDPOINT") or os.getenv(
-        "AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT"
+
+    endpoint_vars = (
+        "AZURE_DOC_INTEL_ENDPOINT",
+        "AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT",
     )
-    key_present = os.getenv("AZURE_DOC_INTEL_KEY") or os.getenv(
-        "AZURE_DOCUMENT_INTELLIGENCE_KEY"
+    key_vars = (
+        "AZURE_DOC_INTEL_KEY",
+        "AZURE_DOCUMENT_INTELLIGENCE_KEY",
     )
-    return bool(endpoint_present and key_present)
+
+    return any(os.getenv(var) for var in endpoint_vars) and any(
+        os.getenv(var) for var in key_vars
+    )
 
 
-def _skip_if_invalid(file_path: Path) -> None:
-    """
-    Skip the current test when prerequisites are not satisfied.
-
-    The helper performs two independent checks:
-
-    1. Authentication variables must be present.
-    2. The sample file must exist on disk.
+def _skip_if_invalid(sample: Path) -> None:
+    """Skip the *calling* test when credentials or the sample asset are absent.
 
     Parameters
     ----------
-    file_path :
-        Absolute path to the sample asset needed by the test.
-
-    Raises
-    ------
-    pytest.skip :
-        Raised indirectly through :pyfunc:`pytest.skip` when a prerequisite
-        is missing.
+    sample:
+        Path to the sample file a test wishes to exercise.  When the required
+        pre‑conditions are not satisfied, :pydata:`pytest.skip` is invoked so
+        the overall suite still passes without error.
     """
+
     if not _has_credentials():
         pytest.skip("Azure credentials are not configured")
-    if not file_path.exists():
-        pytest.skip(f"Test asset not found: {file_path}")
+    if not sample.exists():
+        pytest.skip(f"Test asset not found: {sample}")
 
 
-def _run_extract(extractor, sample_path: Path) -> Iterable[dict]:
+@contextlib.contextmanager
+def _temporarily_clear_credentials() -> Iterator[None]:
+    """Context‑manager that removes Azure credential variables *temporarily*.
+
+    All environment variables starting with ``AZURE_DOC_`` or
+    ``AZURE_DOCUMENT_INTELLIGENCE_`` are popped for the duration of the context
+    in order to validate *fail‑soft* behaviour.  Originals are restored
+    afterwards so subsequent tests remain unaffected.
     """
-    Execute the extractor against *sample_path* and return the full result.
+
+    prefixes = (
+        "AZURE_DOC_",
+        "AZURE_DOCUMENT_INTELLIGENCE_",
+    )
+    saved: dict[str, str] = {
+        k: os.environ.pop(k) for k in list(os.environ) if k.startswith(prefixes)
+    }
+    try:
+        yield
+    finally:
+        os.environ.update(saved)
+
+
+def _collect_elements(extractor: Any, path: Path) -> List[dict[str, Any]]:
+    """Eagerly exhaust the extractor’s lazy generator and return a list.
+
+    The helper guarantees a *fully‑materialised* structure so that equality
+    comparisons are reliable during determinism checks.
 
     Parameters
     ----------
-    extractor :
-        Instance returned by :pyfunc:`azdocint`.
-    sample_path :
-        Local file path pointing to the document or image.
-
-    Returns
-    -------
-    list[dict]
-        Materialised list of element dictionaries emitted by the extractor.
-
-    Notes
-    -----
-    Materialising the generator inside this helper ensures that any
-    exceptions raised during iteration (network errors, data-parsing
-    problems, etc.) propagate to the calling test case immediately.
+    extractor:
+        An instance providing an ``extract(Path) -> Iterator[dict]`` interface.
+    path:
+        Path to the input document to be processed.
     """
-    return list(extractor.extract(sample_path))
+
+    return list(extractor.extract(path))
 
 
-# ---------------------------------------------------------------------
-# integration tests
-# ---------------------------------------------------------------------
+# --------------------------------------------------------------------------- #
+# Happy‑path tests                                                            #
+# --------------------------------------------------------------------------- #
 
 
 @pytest.mark.integration
-@pytest.mark.parametrize("sample_name", _SAMPLE_FILES)
-def test_extract_document(azdocint, sample_name: str) -> None:
-    """
-    Validate extraction for each sample file listed in ``_SAMPLE_FILES``.
+@pytest.mark.parametrize("sample_name", SAMPLE_FILES)
+def test_extract_document_smoke(azdocint, sample_name: str) -> None:
+    """Smoke‑test: every sample yields ≥1 non‑table element with page & text."""
 
-    The test asserts two conditions:
+    sample = TEST_DATA_DIR / sample_name
+    _skip_if_invalid(sample)
 
-    1. The extractor returns at least one element.
-    2. Every **non-table** element contains both ``page`` and ``text`` keys.
+    elems = _collect_elements(azdocint, sample)
+    assert elems, "0 elements returned"
 
-    Tables are skipped because they may legitimately omit ``text``.
-    """
-    sample_path = TEST_DATA_DIR / sample_name
-    _skip_if_invalid(sample_path)
+    non_tables = [e for e in elems if str(e.get("type", "")).lower() != "table"]
+    assert all("page" in e and "text" in e for e in non_tables)
 
-    elements = _run_extract(azdocint, sample_path)
-    assert elements, f"No elements extracted from {sample_name}"
 
-    non_table = [el for el in elements if str(el.get("type", "")).lower() != "table"]
-    assert all("page" in el and "text" in el for el in non_table), (
-        "At least one non-table element is missing the required keys"
-    )
+@pytest.mark.integration
+@pytest.mark.parametrize("sample_name", SAMPLE_FILES)
+def test_extract_idempotent(azdocint, sample_name: str) -> None:
+    """The extractor must be *deterministic* for identical input."""
+
+    sample = TEST_DATA_DIR / sample_name
+    _skip_if_invalid(sample)
+
+    run1 = _collect_elements(azdocint, sample)
+    run2 = _collect_elements(azdocint, sample)
+    assert run1 == run2, "Extractor output is not deterministic"
+
+
+# --------------------------------------------------------------------------- #
+# Negative‑path tests                                                         #
+# --------------------------------------------------------------------------- #
+
+
+def test_missing_credentials_returns_empty(azdocint, tmp_path: Path) -> None:
+    """Extractor returns ``[]`` (no raise) when all credentials are absent."""
+
+    bogus_pdf = tmp_path / "bogus.pdf"
+    bogus_pdf.write_bytes(b"%PDF-1.4\n%EOF\n")  # minimal stub
+
+    with _temporarily_clear_credentials():
+        assert list(azdocint.extract(bogus_pdf)) == []
+
+
+def test_unsupported_format_returns_empty(azdocint, dummy_foo: Path) -> None:
+    """Unsupported ``.foo`` file → ``supports()``⇒False and ``extract()``⇒[]"""
+
+    assert not azdocint.supports(dummy_foo)
+    assert list(azdocint.extract(dummy_foo)) == []
