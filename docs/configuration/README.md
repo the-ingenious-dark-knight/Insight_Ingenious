@@ -118,12 +118,6 @@ file_storage:
   azure_sql_services:
     database_connection_string: ""
 
-  web_configuration:
-    authentication:
-      enable: false
-      username: "admin"
-      password: "your-secure-password"
-
   receiver_configuration:
     enable: false
     api_url: "https://your-api.azurewebsites.net/api/ai-response/publish"
@@ -135,6 +129,12 @@ file_storage:
       enable: false
       github_client_id: ""
       github_secret: ""
+
+  web_configuration:
+    authentication:
+      enable: false
+      username: "admin"
+      password: "your-secure-password"
 
   file_storage:
     revisions:
@@ -350,7 +350,6 @@ Insight Ingenious supports several built-in conversation flows for different use
 3. **web_critic_agent**: Perform web search and fact-checking with criticism
 4. **pandas_agent**: Data analysis and manipulation using pandas
 5. **classification_agent**: Classify user input and route to appropriate topic agents
-6. **education_expert**: Specialized educational content and lesson planning
 
 ### Configuring Conversation Flows
 

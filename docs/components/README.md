@@ -17,7 +17,7 @@ The `ConversationPattern` class is the foundation for defining how agents intera
 | `pandas_agent` | Processes and analyzes data using pandas | Data analysis, visualization |
 | `sql_manipulation_agent` | Generates and executes SQL queries | Database interactions, data querying |
 | `web_critic_agent` | Searches the web and fact-checks information | Research, fact verification |
-| `education_expert` | Generates educational content and lesson plans | Educational material creation |
+| `education_expert` | Generates educational content and lesson plans | Educational material creation (pattern only) |
 
 #### Key Methods
 
@@ -174,11 +174,11 @@ The prompt tuner provides tools for developing and testing prompts:
 
 The CLI provides commands for managing the framework:
 
-- `initialize-new-project`: Creates a new project structure
+- `initialize-new-project`: Creates a new project structure with template files
 - `run-rest-api-server`: Starts the FastAPI server with REST endpoints
-- `run-test-batch`: Runs tests on agent prompts
+- `run-test-batch`: Runs tests on agent prompts with configurable options
 - `run-prompt-tuner`: Starts the prompt tuning web application
-- `dataprep`: Data preparation utilities including Scrapfly crawler
+- `dataprep`: Data preparation utilities including Scrapfly crawler for web scraping
 
 ## API Layer
 
