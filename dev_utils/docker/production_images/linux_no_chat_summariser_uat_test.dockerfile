@@ -14,12 +14,12 @@ WORKDIR /ingen_app
 # Add required dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        sudo \
-        lsof \
-        unixodbc \
-        unixodbc-dev \
-        libodbc2 \
-        libodbccr2 && \
+    sudo \
+    lsof \
+    unixodbc \
+    unixodbc-dev \
+    libodbc2 \
+    libodbccr2 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 

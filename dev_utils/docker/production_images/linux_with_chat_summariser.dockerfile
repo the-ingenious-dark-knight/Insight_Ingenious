@@ -14,12 +14,12 @@ WORKDIR /ingen_app
 # Add deadsnakes PPA and install Python 3.12
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        sudo \
-        lsof \
-        unixodbc \
-        unixodbc-dev \
-        libodbc2 \
-        libodbccr2 && \
+    sudo \
+    lsof \
+    unixodbc \
+    unixodbc-dev \
+    libodbc2 \
+    libodbccr2 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
