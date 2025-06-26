@@ -114,16 +114,23 @@ class ConversationPattern:
             max_round=10,
             speaker_selection_method="auto",
             send_introductions=True,
-            select_speaker_auto_verbose=False,
+            # select_speaker_auto_verbose=False,  # Removed: unsupported in current autogen version
             allowed_or_disallowed_speaker_transitions=graph_dict,
-            max_retries_for_selecting_speaker=1,
+            # max_retries_for_selecting_speaker=1,  # Removed: unsupported in current autogen version
             speaker_transitions_type="allowed",
             # select_speaker_prompt_template
         )
 
+        # Clean llm_config for GroupChatManager (remove functions/tools)
+        clean_llm_config = {
+            k: v
+            for k, v in self.default_llm_config.items()
+            if k not in ["functions", "tools", "function_call", "tool_choice"]
+        }
+
         manager = autogen.GroupChatManager(
             groupchat=groupchat,
-            llm_config=self.default_llm_config,
+            llm_config=clean_llm_config,
             is_termination_msg=self.termination_msg,
             code_execution_config=False,
         )
