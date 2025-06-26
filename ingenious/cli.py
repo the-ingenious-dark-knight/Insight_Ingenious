@@ -291,10 +291,15 @@ def initialize_new_project():
         profile_dir_path = Path(home_dir) / Path(".ingenious")
         os.makedirs(profile_dir_path, exist_ok=True)
         profile_path = profile_dir_path / Path("profiles.yml")
-        shutil.copy2(template_profile_path, profile_path)
-        console.print(
-            f"[info]Profile file created successfully created at {profile_path}[/info]"
-        )
+        if not profile_path.exists():
+            shutil.copy2(template_profile_path, profile_path)
+            console.print(
+                f"[info]Profile file created successfully at {profile_path}[/info]"
+            )
+        else:
+            console.print(
+                f"[info]Profile file already exists at {profile_path}. Preserving existing configuration.[/info]"
+            )
     else:
         console.print(
             f"[warning]Profile file template not found at {template_profile_path}. Skipping...[/warning]"
