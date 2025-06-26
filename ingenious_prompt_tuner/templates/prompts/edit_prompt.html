@@ -29,10 +29,10 @@
 {% block scripts %}
     <script src="https://unpkg.com/tiny-markdown-editor/dist/tiny-mde.min.js"></script>
     <script>
-    var tinyMDE = new TinyMDE.Editor({element: 'editor'});
+    var tinyMDE = new TinyMDE.Editor({ element: 'editor' });
     var commandBar = new TinyMDE.CommandBar({
-    element: "toolbar",
-    editor: tinyMDE,
-});
+        element: "toolbar",
+        editor: tinyMDE,
+    });
     </script>
 {% endblock %}

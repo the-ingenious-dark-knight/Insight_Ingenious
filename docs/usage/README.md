@@ -11,12 +11,11 @@ This guide shows how to use Insight Ingenious for various tasks.
 git clone https://github.com/Insight-Services-APAC/Insight_Ingenious.git
 cd Insight_Ingenious
 
-# Install dependencies
-uv venv
-uv pip install -e .
+# Install dependencies using uv
+uv sync
 
 # Initialize project
-ingen_cli initialize-new-project
+uv run ingen initialize-new-project
 ```
 
 ### Basic Configuration
@@ -36,26 +35,53 @@ Insight Ingenious provides a command-line interface with various utilities:
 ### Initialize a New Project
 
 ```bash
-ingen_cli initialize-new-project
+uv run ingen initialize-new-project
 ```
 
 This creates the folder structure and configuration files needed for your project.
 
+### Run REST API Server
+
+```bash
+uv run ingen run-rest-api-server [PROJECT_DIR] [PROFILE_DIR] [HOST] [PORT] [LOG_LEVEL]
+```
+
+Starts the FastAPI server that presents your agent workflows via REST endpoints.
+
+Options:
+- `PROJECT_DIR`: Path to the config file
+- `PROFILE_DIR`: Path to the profile file (defaults to `$HOME/.ingenious/profiles.yml`)
+- `HOST`: Host to run on (default: `0.0.0.0`, use `127.0.0.1` for local development)
+- `PORT`: Port number (default: from config)
+- `LOG_LEVEL`: Log level (DEBUG, INFO, WARNING, ERROR)
+
 ### Run Tests
 
 ```bash
-ingen_cli run-test-batch
+uv run ingen run-test-batch [--log-level LOG_LEVEL] [--run-args RUN_ARGS]
 ```
 
 Runs tests against your agent prompts.
 
-### Start the Application
+Options:
+- `--log-level`: Controls verbosity (DEBUG, INFO, WARNING, ERROR). Default: WARNING
+- `--run-args`: Key-value pairs for test runner (e.g., `--run-args='--test_name=TestName --test_type=TestType'`)
+
+### Run Prompt Tuner
 
 ```bash
-ingen_cli run-project
+uv run ingen run-prompt-tuner [--log-level LOG_LEVEL]
 ```
 
-Starts the FastAPI server with Chainlit UI.
+Starts the prompt tuner web application for fine-tuning your prompts.
+
+### Data Preparation
+
+```bash
+uv run ingen dataprep [COMMAND]
+```
+
+Data-preparation utilities including the Scrapfly crawler façade. Use `uv run ingen dataprep --help` for more details.
 
 ## Using the Web UI
 

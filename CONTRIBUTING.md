@@ -25,14 +25,12 @@ By participating in this project, you agree to abide by our code of conduct, whi
 
 3. Set up a development environment:
    ```bash
-   uv venv
-   uv pip install -e .
-   uv add pytest --dev
+   uv sync --extra dev
    ```
 
 4. Configure your project:
    ```bash
-   ingen_cli initialize-new-project
+   uv run ingen initialize-new-project
    ```
 
 ## Development Workflow
@@ -77,7 +75,7 @@ uv run pytest
 You can also use the test harness to verify agent behavior:
 
 ```bash
-ingen_cli run-test-batch
+uv run ingen run-test-batch
 ```
 
 ### Code Style

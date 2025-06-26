@@ -214,8 +214,10 @@ class Agents(BaseModel):
                 if model.model == agent.agent_model_name:
                     agent.model = model
                     break
-        if not agent.model:
-            raise ValueError(f"Model {agent.model_name} not found in config.yml")
+            if not agent.model:
+                raise ValueError(
+                    f"Model {agent.agent_model_name} not found in config.yml"
+                )
 
     def get_agents(self):
         return self._agents

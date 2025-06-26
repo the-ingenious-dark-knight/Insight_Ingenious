@@ -24,7 +24,7 @@ def view(
     filename: str,
     request: Request,
     credentials: Annotated[
-        HTTPBasicCredentials, Depends(igen_deps.get_security_service)
+        HTTPBasicCredentials, Depends(igen_deps.get_conditional_security)
     ],
     fs: FileStorage = Depends(igen_deps.get_file_storage_revisions),
 ):
@@ -42,7 +42,7 @@ def list(
     revision_id: str,
     request: Request,
     credentials: Annotated[
-        HTTPBasicCredentials, Depends(igen_deps.get_security_service)
+        HTTPBasicCredentials, Depends(igen_deps.get_conditional_security)
     ],
     fs: FileStorage = Depends(igen_deps.get_file_storage_revisions),
 ):
@@ -67,7 +67,7 @@ async def update(
     request: Request,
     update_request: UpdatePromptRequest,
     credentials: Annotated[
-        HTTPBasicCredentials, Depends(igen_deps.get_security_service)
+        HTTPBasicCredentials, Depends(igen_deps.get_conditional_security)
     ],
     fs: FileStorage = Depends(igen_deps.get_file_storage_revisions),
 ):

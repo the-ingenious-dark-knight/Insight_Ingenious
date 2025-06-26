@@ -24,9 +24,7 @@ router = APIRouter()
 )
 async def diagnostic(
     request: Request,
-    credentials: Annotated[
-        HTTPBasicCredentials, Depends(igen_deps.get_security_service)
-    ],
+    auth_user: Annotated[str, Depends(igen_deps.get_auth_user)],
 ):
     if request.method == "OPTIONS":
         return {"Allow": "GET, OPTIONS"}

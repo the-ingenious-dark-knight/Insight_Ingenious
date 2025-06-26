@@ -2,7 +2,6 @@ import importlib.resources as pkg_resources
 import logging
 import os
 
-from chainlit.utils import mount_chainlit
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -22,7 +21,10 @@ from ingenious.utils.namespace_utils import (
     import_module_with_fallback,
 )
 
-config = ingen_config.get_config(os.getenv("INGENIOUS_PROJECT_PATH", ""))
+
+# Delay config loading until needed
+def get_config():
+    return ingen_config.get_config(os.getenv("INGENIOUS_PROJECT_PATH", ""))
 
 
 # Configure logging
@@ -84,6 +86,8 @@ class FastAgentAPI:
 
         # Mount ChainLit
         if config.chainlit_configuration.enable:
+            from chainlit.utils import mount_chainlit
+
             chainlit_path = pkg_resources.files("ingenious.chainlit") / "app.py"
             mount_chainlit(app=self.app, target=str(chainlit_path), path="/chainlit")
 

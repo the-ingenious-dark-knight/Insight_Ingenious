@@ -18,22 +18,19 @@ This guide provides detailed information for developers who want to extend, modi
    cd Insight_Ingenious
    ```
 
-2. Create a virtual environment and install dependencies:
+2. Install dependencies and set up development environment:
    ```bash
-   uv venv
-   uv pip install -e .
-   uv add pytest --dev
-   uv add pre-commit --dev
+   uv sync --extra dev
    ```
 
 3. Set up pre-commit hooks:
    ```bash
-   pre-commit install
+   uv run pre-commit install
    ```
 
 4. Initialize the project:
    ```bash
-   ingen_cli initialize-new-project
+   uv run ingen initialize-new-project
    ```
 
 ## Project Structure
@@ -207,7 +204,7 @@ uv run pytest
 Use the test harness to test agent behavior:
 
 ```bash
-ingen_cli run-test-batch
+uv run ingen run-test-batch
 ```
 
 ### Testing Prompts
@@ -216,7 +213,7 @@ Use the prompt tuner for interactive testing:
 
 1. Start the server:
    ```bash
-   ingen_cli run-project
+   uv run ingen run-rest-api-server
    ```
 2. Navigate to http://localhost:8000/prompt-tuner
 3. Select a prompt to test

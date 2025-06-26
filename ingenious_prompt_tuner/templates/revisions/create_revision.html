@@ -18,24 +18,23 @@
 {% endblock %}
 {% block scripts %}
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('createRevisionForm');
-            form.addEventListener('submit', function(event) {
-                event.preventDefault(); // Prevent the default form submission
-                old_guid = null;
-                var new_guid = generateGUID();
-                if (getCookie('selected_revision') !== null)
-                {
-                    var old_guid = getCookie('selected_revision');
-                }
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('createRevisionForm');
+        form.addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent the default form submission
+            old_guid = null;
+            var new_guid = generateGUID();
+            if (getCookie('selected_revision') !== null) {
+                var old_guid = getCookie('selected_revision');
+            }
 
-                const formData = new FormData(form);
-                const url = "{{ url_for('index.save_revision') }}?new_guid=" + new_guid + "&old_guid=" + old_guid;
+            const formData = new FormData(form);
+            const url = "{{ url_for('index.save_revision') }}?new_guid=" + new_guid + "&old_guid=" + old_guid;
 
-                fetch(url, {
-                    method: 'POST',
-                    body: formData
-                })
+            fetch(url, {
+                method: 'POST',
+                body: formData
+            })
                 .then(response => {
                     if (response.ok) {
                         const revisionName = new_guid;
@@ -49,15 +48,15 @@
                     console.error('Error:', error);
                     alert('An error occurred');
                 });
-            });
         });
+    });
 
 
     function generateGUID() {
-            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-                const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-                return v.toString(16);
-            });
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
     }
     </script>
 {% endblock %}

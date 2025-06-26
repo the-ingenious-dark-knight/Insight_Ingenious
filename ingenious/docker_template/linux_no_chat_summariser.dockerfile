@@ -14,13 +14,13 @@ WORKDIR /ingen_app
 # Add required dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        sudo \
-        lsof \
-        unixodbc \
-        unixodbc-dev \
-        libodbc2 \
-        libodbccr2 \
-        git && \
+    sudo \
+    lsof \
+    unixodbc \
+    unixodbc-dev \
+    libodbc2 \
+    libodbccr2 \
+    git && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -32,4 +32,4 @@ COPY ./ingenious_extensions /ingen_app/ingenious_extensions
 COPY ./tmp /ingen_app/tmp
 
 # Set the command to run the app
-CMD ["ingen_cli", "run-rest-api-server"]
+CMD ["ingen", "run-rest-api-server"]

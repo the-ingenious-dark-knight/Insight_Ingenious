@@ -2,9 +2,14 @@ import logging
 import os
 import secrets
 
-from fastapi import Depends, HTTPException, status
+from dotenv import load_dotenv
+from fastapi import Depends, HTTPException, Request, status
+
+# Load environment variables from .env file
+load_dotenv()
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from typing_extensions import Annotated
+from typing import Optional
 
 import ingenious.config.config as Config
 import ingenious.models.config as config_models
@@ -19,12 +24,15 @@ from ingenious.services.message_feedback_service import MessageFeedbackService
 
 logger = logging.getLogger(__name__)
 security = HTTPBasic()
-config: config_models.Config = Config.get_config(
-    os.getenv("INGENIOUS_PROJECT_PATH", "")
-)
+
+
+def get_config():
+    """Get config dynamically to ensure environment variables are loaded"""
+    return Config.get_config()
 
 
 def get_openai_service():
+    config = get_config()
     model = config.models[0]
     return OpenAIService(
         azure_endpoint=str(model.base_url),
@@ -35,6 +43,7 @@ def get_openai_service():
 
 
 def get_chat_history_repository():
+    config = get_config()
     db_type_val = config.chat_history.database_type.lower()
     try:
         db_type = DatabaseClientType(db_type_val)
@@ -48,35 +57,88 @@ def get_chat_history_repository():
 
 
 def get_security_service(
-    credentials: Annotated[HTTPBasicCredentials, Depends(security)],
+    credentials: Annotated[HTTPBasicCredentials, Depends(security)] = None,
 ):
-    if config.web_configuration.authentication.enable:
-        current_username_bytes = credentials.username.encode("utf8")
-        correct_username_bytes = (
-            config.web_configuration.authentication.username.encode("utf-8")
-        )
-        is_correct_username = secrets.compare_digest(
-            current_username_bytes, correct_username_bytes
-        )
-        current_password_bytes = credentials.password.encode("utf8")
-        correct_password_bytes = (
-            config.web_configuration.authentication.password.encode("utf-8")
-        )
-        is_correct_password = secrets.compare_digest(
-            current_password_bytes, correct_password_bytes
-        )
-        if not (is_correct_username and is_correct_password):
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Incorrect username or password",
-                headers={"WWW-Authenticate": "Basic"},
-            )
-        return credentials.username
-    else:
-        # Raise warning if authentication is disabled
+    config = get_config()
+    if not config.web_configuration.authentication.enable:
+        # Authentication is disabled, allow access without checking credentials
         logger.warning(
             "Authentication is disabled. This is not recommended for production use."
         )
+        return "anonymous"  # Return something that indicates no auth
+
+    # Authentication is enabled, validate credentials
+    if credentials is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+
+    current_username_bytes = credentials.username.encode("utf8")
+    correct_username_bytes = config.web_configuration.authentication.username.encode(
+        "utf-8"
+    )
+    is_correct_username = secrets.compare_digest(
+        current_username_bytes, correct_username_bytes
+    )
+    current_password_bytes = credentials.password.encode("utf8")
+    correct_password_bytes = config.web_configuration.authentication.password.encode(
+        "utf-8"
+    )
+    is_correct_password = secrets.compare_digest(
+        current_password_bytes, correct_password_bytes
+    )
+    if not (is_correct_username and is_correct_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    return credentials.username
+
+
+def get_security_service_optional(
+    credentials: Optional[HTTPBasicCredentials] = None,
+):
+    """Optional security service that doesn't require credentials when auth is disabled"""
+    config = get_config()
+    if not config.web_configuration.authentication.enable:
+        # Authentication is disabled, don't require credentials
+        logger.warning(
+            "Authentication is disabled. This is not recommended for production use."
+        )
+        return None
+
+    # Authentication is enabled, require credentials
+    if credentials is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+
+    current_username_bytes = credentials.username.encode("utf8")
+    correct_username_bytes = config.web_configuration.authentication.username.encode(
+        "utf-8"
+    )
+    is_correct_username = secrets.compare_digest(
+        current_username_bytes, correct_username_bytes
+    )
+    current_password_bytes = credentials.password.encode("utf8")
+    correct_password_bytes = config.web_configuration.authentication.password.encode(
+        "utf-8"
+    )
+    is_correct_password = secrets.compare_digest(
+        current_password_bytes, correct_password_bytes
+    )
+    if not (is_correct_username and is_correct_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    return credentials.username
 
 
 def get_chat_service(
@@ -85,6 +147,7 @@ def get_chat_service(
     ],
     conversation_flow: str = "",
 ):
+    config = get_config()
     cs_type = config.chat_service.type
     return ChatService(
         chat_service_type=cs_type,
@@ -103,6 +166,7 @@ def get_message_feedback_service(
 
 
 def sync_templates():
+    config = get_config()
     if config.file_storage.storage_type == "local":
         return
     else:
@@ -119,12 +183,78 @@ def sync_templates():
 
 
 def get_file_storage_data() -> FileStorage:
+    config = get_config()
     return FileStorage(config, Category="data")
 
 
 def get_file_storage_revisions() -> FileStorage:
+    config = get_config()
     return FileStorage(config, Category="revisions")
 
 
-def get_config():
-    return config
+def get_project_config():
+    return get_config()
+
+
+def get_auth_user(request: Request) -> str:
+    """Get authenticated user - bypasses credentials check when auth is disabled"""
+    config = get_config()
+
+    if not config.web_configuration.authentication.enable:
+        # Authentication is disabled, allow access
+        logger.warning(
+            "Authentication is disabled. This is not recommended for production use."
+        )
+        return "anonymous"
+
+    # Authentication is enabled, extract and validate Basic Auth
+    auth_header = request.headers.get("Authorization", "")
+    if not auth_header.startswith("Basic "):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+
+    import base64
+
+    try:
+        credentials_str = base64.b64decode(auth_header[6:]).decode("utf-8")
+        username, password = credentials_str.split(":", 1)
+    except (ValueError, UnicodeDecodeError):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication format",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+
+    # Validate credentials
+    current_username_bytes = username.encode("utf8")
+    correct_username_bytes = config.web_configuration.authentication.username.encode(
+        "utf-8"
+    )
+    is_correct_username = secrets.compare_digest(
+        current_username_bytes, correct_username_bytes
+    )
+
+    current_password_bytes = password.encode("utf8")
+    correct_password_bytes = config.web_configuration.authentication.password.encode(
+        "utf-8"
+    )
+    is_correct_password = secrets.compare_digest(
+        current_password_bytes, correct_password_bytes
+    )
+
+    if not (is_correct_username and is_correct_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+
+    return username
+
+
+def get_conditional_security(request: Request) -> str:
+    """Get authenticated user - wrapper around get_auth_user for compatibility"""
+    return get_auth_user(request)

@@ -19,11 +19,6 @@ class ConversationFlow:
     async def get_conversation_response(chatrequest: ChatRequest):
         message = chatrequest.user_prompt
         topics = chatrequest.topic
-        # Ensure topics is always a list
-        if topics is None:
-            topics = ["general"]
-        elif isinstance(topics, str):
-            topics = [topics]
         thread_memory = chatrequest.thread_memory
         memory_record_switch = chatrequest.memory_record
         event_type = chatrequest.event_type
@@ -39,19 +34,7 @@ class ConversationFlow:
 
         # Load Jinja environment for prompts
         working_dir = Path(os.getcwd())
-        # Check if we're in the root project directory or need to look for the installed package
-        if (
-            working_dir / "Insight_Ingenious" / "ingenious" / "templates" / "prompts"
-        ).exists():
-            template_path = (
-                working_dir
-                / "Insight_Ingenious"
-                / "ingenious"
-                / "templates"
-                / "prompts"
-            )
-        else:
-            template_path = working_dir / "ingenious" / "templates" / "prompts"
+        template_path = working_dir / "ingenious" / "templates" / "prompts"
         print(template_path)
         env = Environment(loader=FileSystemLoader(template_path), autoescape=True)
 
@@ -103,15 +86,11 @@ class ConversationFlow:
 
             _classification_agent_pattern.add_topic_agent(topic, system_message)
 
-        # Get the conversation response (with timeout to prevent infinite loops in testing)
-        try:
-            res, memory_summary = await asyncio.wait_for(
-                _classification_agent_pattern.get_conversation_response(message),
-                timeout=30.0,  # 30 second timeout for testing
-            )
-        except asyncio.TimeoutError:
-            res = "Test conversation completed successfully (timeout reached for mock service testing)"
-            memory_summary = "Conversation flow infrastructure verified working"
+        # Get the conversation response
+        (
+            res,
+            memory_summary,
+        ) = await _classification_agent_pattern.get_conversation_response(message)
 
         # Clean up
         await _classification_agent_pattern.close()

@@ -7,7 +7,11 @@ from pathlib import Path
 from sysconfig import get_paths
 from typing import Optional
 
+from dotenv import load_dotenv
 import typer
+
+# Load environment variables from .env file
+load_dotenv()
 import uvicorn
 from rich import print
 from rich.console import Console
@@ -303,16 +307,22 @@ def initialize_new_project():
     console.print(
         "[warning]Before executing update config.yml and profiles.yml [/warning]"
     )
-    console.print("[info]To execute use ingen_cli[/info]")
+    console.print("[info]To execute use ingen[/info]")
 
 
 @app.command()
 def run_prompt_tuner():
     """Run the prompt tuner web application."""
     from ingenious_prompt_tuner import create_app as prompt_tuner
+    import ingenious.config.config as ingen_config
 
+    config = ingen_config.get_config()
     app = prompt_tuner()
-    app.run(debug=True, host="0.0.0.0", port=80)
+    app.run(
+        debug=True,
+        host=config.web_configuration.ip_address,
+        port=config.web_configuration.port,
+    )
 
 
 if __name__ == "__cli__":
