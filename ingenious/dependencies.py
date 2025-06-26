@@ -253,3 +253,8 @@ def get_auth_user(request: Request) -> str:
         )
 
     return username
+
+
+def get_conditional_security(request: Request) -> str:
+    """Get authenticated user - wrapper around get_auth_user for compatibility"""
+    return get_auth_user(request)

@@ -2,7 +2,6 @@ import importlib.resources as pkg_resources
 import logging
 import os
 
-from chainlit.utils import mount_chainlit
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -87,6 +86,8 @@ class FastAgentAPI:
 
         # Mount ChainLit
         if config.chainlit_configuration.enable:
+            from chainlit.utils import mount_chainlit
+
             chainlit_path = pkg_resources.files("ingenious.chainlit") / "app.py"
             mount_chainlit(app=self.app, target=str(chainlit_path), path="/chainlit")
 
