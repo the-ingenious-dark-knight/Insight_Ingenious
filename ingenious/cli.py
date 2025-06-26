@@ -7,7 +7,11 @@ from pathlib import Path
 from sysconfig import get_paths
 from typing import Optional
 
+from dotenv import load_dotenv
 import typer
+
+# Load environment variables from .env file
+load_dotenv()
 import uvicorn
 from rich import print
 from rich.console import Console

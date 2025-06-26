@@ -37,7 +37,7 @@ async def chat(
     chat_request: ChatRequest,
     chat_service: Annotated[ChatService, Depends(get_chat_service)],
     credentials: Annotated[
-        HTTPBasicCredentials, Depends(igen_deps.get_security_service)
+        HTTPBasicCredentials, Depends(igen_deps.get_conditional_security)
     ],
 ) -> ChatResponse:
     try:
