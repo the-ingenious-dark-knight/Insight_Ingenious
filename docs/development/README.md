@@ -6,7 +6,7 @@ This guide provides detailed information for developers who want to extend, modi
 
 ### Prerequisites
 
-- Python 3.10 or higher
+- Python 3.13 or higher
 - Git
 - [uv](https://docs.astral.sh/uv/) for Python package management
 
@@ -87,17 +87,20 @@ Conversation patterns define how agents interact:
   - `pandas_agent/`: Pattern for data analysis
   - `sql_manipulation_agent/`: Pattern for SQL query generation and execution
   - `web_critic_agent/`: Pattern for web search and fact-checking
+  - `education_expert/`: Pattern for educational content generation (pattern only, no flow)
 
 #### Flows
 
 Conversation flows implement specific use cases:
 
 - `conversation_flows/`: Contains flow implementations that use the patterns
-  - `classification_agent/`: Flow for classification
+  - `classification_agent/`: Flow for classification and routing
   - `knowledge_base_agent/`: Flow for knowledge base interactions
   - `pandas_agent/`: Flow for data analysis
   - `sql_manipulation_agent/`: Flow for SQL queries
   - `web_critic_agent/`: Flow for web search
+
+Note: `education_expert` exists as a pattern but does not have a corresponding flow implementation.
 
 ### Configuration System
 
@@ -215,7 +218,7 @@ Use the prompt tuner for interactive testing:
    ```bash
    uv run ingen run-rest-api-server
    ```
-2. Navigate to http://localhost:8000/prompt-tuner
+2. Navigate to http://localhost:80/prompt-tuner (or your configured port)
 3. Select a prompt to test
 4. Provide sample inputs and evaluate responses
 
@@ -237,8 +240,8 @@ Logs are printed to the console and can be redirected to files.
 
 When running in development mode, you can access:
 
-- http://localhost:8000/docs - API documentation
-- http://localhost:8000/prompt-tuner - Prompt tuning interface
+- http://localhost:80/docs - API documentation (or your configured port)
+- http://localhost:80/prompt-tuner - Prompt tuning interface
 
 ### Common Issues
 

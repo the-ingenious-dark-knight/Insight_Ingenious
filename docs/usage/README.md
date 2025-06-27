@@ -4,6 +4,11 @@ This guide shows how to use Insight Ingenious for various tasks.
 
 ## Getting Started
 
+### Prerequisites
+
+- Python 3.13 or higher
+- [uv](https://docs.astral.sh/uv/) for Python package management
+
 ### Installation
 
 ```bash
@@ -14,7 +19,7 @@ cd Insight_Ingenious
 # Install dependencies using uv
 uv sync
 
-# Initialize project
+# Initialize project (creates config templates and folder structure)
 uv run ingen initialize-new-project
 ```
 
@@ -43,17 +48,17 @@ This creates the folder structure and configuration files needed for your projec
 ### Run REST API Server
 
 ```bash
-uv run ingen run-rest-api-server [PROJECT_DIR] [PROFILE_DIR] [HOST] [PORT] [LOG_LEVEL]
+uv run ingen run-rest-api-server [PROJECT_DIR] [PROFILE_DIR] [HOST] [PORT] [RUN_DIR]
 ```
 
 Starts the FastAPI server that presents your agent workflows via REST endpoints.
 
-Options:
-- `PROJECT_DIR`: Path to the config file
+Arguments (all optional, positional):
+- `PROJECT_DIR`: Path to the config file (defaults to environment variable `INGENIOUS_PROJECT_PATH`)
 - `PROFILE_DIR`: Path to the profile file (defaults to `$HOME/.ingenious/profiles.yml`)
 - `HOST`: Host to run on (default: `0.0.0.0`, use `127.0.0.1` for local development)
-- `PORT`: Port number (default: from config)
-- `LOG_LEVEL`: Log level (DEBUG, INFO, WARNING, ERROR)
+- `PORT`: Port number (default: `80`)
+- `RUN_DIR`: Directory in which to launch the web server
 
 ### Run Tests
 
@@ -70,10 +75,10 @@ Options:
 ### Run Prompt Tuner
 
 ```bash
-uv run ingen run-prompt-tuner [--log-level LOG_LEVEL]
+uv run ingen run-prompt-tuner
 ```
 
-Starts the prompt tuner web application for fine-tuning your prompts.
+Starts the prompt tuner web application for fine-tuning your prompts. The application will run on the host and port specified in your configuration file.
 
 ### Data Preparation
 
@@ -88,20 +93,22 @@ Data-preparation utilities including the Scrapfly crawler façade. Use `uv run i
 ### Accessing the UI
 
 Once the application is running, access the web UI at:
-- http://localhost:8000 - Main application
-- http://localhost:8000/chainlit - Chainlit chat interface
-- http://localhost:8000/prompt-tuner - Prompt tuning interface
+- http://localhost:80 - Main application (or the port specified in your config)
+- http://localhost:80/chainlit - Chainlit chat interface
+- http://localhost:80/prompt-tuner - Prompt tuning interface
+
+Note: Default port is 80 as specified in config.yml. For local development, you may want to use a different port like 8000.
 
 ### Chatting with Agents
 
-1. Navigate to http://localhost:8000/chainlit
+1. Navigate to http://localhost:80/chainlit (or your configured port)
 2. Start a new conversation
 3. Type your message
 4. The appropriate agents will process your request and respond
 
 ### Tuning Prompts
 
-1. Navigate to http://localhost:8000/prompt-tuner
+1. Navigate to http://localhost:80/prompt-tuner (or your configured port)
 2. Log in with credentials from your `profiles.yml`
 3. Select the prompt template you want to edit
 4. Make changes and test with sample data
@@ -274,12 +281,12 @@ You can interact with Insight Ingenious through its REST API:
 
 ```bash
 # Start a conversation
-curl -X POST http://localhost:8000/api/v1/chat \
+curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -H "Authorization: Basic $(echo -n username:password | base64)" \
   -d '{
     "user_prompt": "Your message here",
-    "conversation_flow": "your_conversation_flow"
+    "conversation_flow": "classification_agent"
   }'
 ```
 
