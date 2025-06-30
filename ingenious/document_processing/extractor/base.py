@@ -57,10 +57,10 @@ shared resources internally.
 
 from __future__ import annotations
 
-import logging
 import os
+import logging
+import io
 from abc import ABC, abstractmethod
-from pathlib import Path
 from typing import TypedDict, TypeAlias, Generator
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -69,7 +69,7 @@ from typing import TypedDict, TypeAlias, Generator
 Coords: TypeAlias = tuple[float, float, float, float]
 """Bounding box given as ``(x0, y0, x1, y1)`` in PDF points."""
 
-Src: TypeAlias = str | bytes | os.PathLike[str] | Path
+Src: TypeAlias = str | bytes | io.BytesIO | os.PathLike[str]
 """Union of *source* types accepted by every extractor engine."""
 
 

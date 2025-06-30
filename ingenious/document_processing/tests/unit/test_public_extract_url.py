@@ -29,14 +29,11 @@ running batch job or an API request.
 
 from __future__ import annotations
 
-# ──────────── Standard Library ────────────
 from typing import Any, Final, Iterator
 
-# ────────────── Third‑Party ───────────────
 import pytest
 from requests.models import Response
 
-# ────────────── First‑Party ───────────────
 from ingenious.document_processing import extract
 
 __all__: list[str] = [
@@ -56,7 +53,7 @@ class _FakeResp(Response):
     """Minimal stub of :class:`requests.Response` for HTTP stubbing.
 
     Only the attributes/methods consumed by
-    :pyfunc:`ingenious.document_processing.fetcher.fetch` are implemented.
+    :pyfunc:`ingenious.document_processing.utils.fetcher.fetch` are implemented.
 
     Parameters
     ----------
@@ -85,8 +82,6 @@ class _FakeResp(Response):
 # --------------------------------------------------------------------------- #
 # Tests                                                                       #
 # --------------------------------------------------------------------------- #
-
-
 def test_extract_downloads_and_fails_soft(monkeypatch: pytest.MonkeyPatch) -> None:
     """``extract`` should return ``[]`` *and* raise nothing for corrupt bytes."""
 
@@ -94,7 +89,7 @@ def test_extract_downloads_and_fails_soft(monkeypatch: pytest.MonkeyPatch) -> No
 
     # ── Stub the global HTTP GET used by the fetcher. ────────────────────
     monkeypatch.setattr(
-        "ingenious.document_processing.fetcher.requests.get",
+        "ingenious.document_processing.utils.fetcher.requests.get",
         lambda *_a, **_k: fake_resp,
         raising=True,
     )

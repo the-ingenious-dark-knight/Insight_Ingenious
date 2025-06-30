@@ -68,7 +68,7 @@ from pdfminer.pdfparser import PDFSyntaxError
 
 
 from .base import DocumentExtractor, Element
-from ingenious.document_processing.fetcher import is_url, fetch
+from ingenious.document_processing.utils.fetcher import is_url, fetch
 
 logger = logging.getLogger(__name__)
 

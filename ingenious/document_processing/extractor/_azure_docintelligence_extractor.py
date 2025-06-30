@@ -57,7 +57,7 @@ from typing import Final, Iterable, Sequence, TypeAlias, cast
 
 import requests
 
-from ingenious.document_processing.fetcher import is_url, fetch
+from ingenious.document_processing.utils.fetcher import is_url, fetch
 from .base import DocumentExtractor, Element
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -88,11 +88,10 @@ _SUPPORTED_MIME_TYPES: set[str] = {
 _MAX_POLL_ATTEMPTS: Final[int] = int(os.getenv("AZDOCINT_MAX_POLLS", "300"))
 _MAX_POLL_SECONDS: Final[int] = int(os.getenv("AZDOCINT_MAX_SECS", "600"))
 
+
 # ---------------------------------------------------------------------------
 # Helper functions (private)
 # ---------------------------------------------------------------------------
-
-
 def _build_url(endpoint: str, model_id: str = "prebuilt-document") -> str:
     """Compose the *analyze‑document* endpoint URL.
 
@@ -171,8 +170,6 @@ def _read_bytes(src: Src) -> bytes | None:
 # ---------------------------------------------------------------------------
 # Extractor implementation
 # ---------------------------------------------------------------------------
-
-
 class AzureDocIntelligenceExtractor(DocumentExtractor):
     """Azure AI Document Intelligence *prebuilt‑document* wrapper.
 
@@ -186,7 +183,6 @@ class AzureDocIntelligenceExtractor(DocumentExtractor):
     # ------------------------------------------------------------------
     # Public helpers
     # ------------------------------------------------------------------
-
     def supports(self, src: Src) -> bool:
         """Tell whether *src* looks consumable by the Azure service.
 
@@ -206,7 +202,6 @@ class AzureDocIntelligenceExtractor(DocumentExtractor):
     # ------------------------------------------------------------------
     # Main extraction pipeline
     # ------------------------------------------------------------------
-
     def extract(self, src: Src) -> Iterable[Element]:
         """Yield paragraphs and table metadata extracted by Azure.
 
@@ -315,7 +310,7 @@ class AzureDocIntelligenceExtractor(DocumentExtractor):
                 logger.warning("Azure analysis failed – %s", poll.text)
                 return
 
-            time.sleep(_POLLER_DELAY_SEC)  # polite back-off
+            time.sleep(_POLLER_DELAY_SEC)
 
         result: dict = poll.json().get("analyzeResult", {})
 

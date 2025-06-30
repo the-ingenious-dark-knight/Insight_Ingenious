@@ -19,19 +19,16 @@ All public helpers carry full NumPy-style docstrings and are enumerated in
 
 from __future__ import annotations
 
-# ──────────────── standard library ────────────────
 import importlib
 import importlib.util
 from pathlib import Path
 from typing import Final, Iterator, Any
 from collections.abc import Callable
 
-# ──────────────── third-party ────────────────
 import pytest
 from typer.testing import CliRunner, Result
-import requests, json
+import requests
 
-# ─────────────── first-party ───────────────
 from ingenious.document_processing import extract as _extract_docs
 from ingenious.document_processing.extractor import _load
 from ingenious.document_processing.cli import doc_app
@@ -70,13 +67,12 @@ DEFAULT_TIMEOUT: Final[int] = 10  # seconds
 
 #: Two lightweight, publicly accessible PDFs hosted by DenseBreast-Info.
 PDF_URLS: list[str] = [
-    "https://densebreast-info.org/wp-content/uploads/2024/06/Patient-Fact-Sheet-English061224.pdf",
-    "https://densebreast-info.org/wp-content/uploads/2024/11/English_PatientBrochure_112924.pdf",
+    "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+    "https://unec.edu.az/application/uploads/2014/12/pdf-sample.pdf",
 ]
 
+
 # ───────────── helper functions ─────────────
-
-
 def _make_one_page_pdf() -> bytes:
     """Return a minimal single-page PDF as raw bytes (pure Python)."""
     return (
@@ -111,7 +107,7 @@ def _download(url: str, cache_dir: Path) -> Path:
     try:
         response = requests.get(url, timeout=DEFAULT_TIMEOUT)
         response.raise_for_status()
-    except requests.RequestException as exc:  # pragma: no cover – network specific
+    except requests.RequestException as exc:
         if destination.exists():
             pytest.xfail(f"Using cached PDF after download failure: {exc}")
             return destination
@@ -130,8 +126,6 @@ def _pdf_to_text(src: Path) -> str:
 
 # ───────────────────── fixtures ─────────────────────
 # Third-party modules -----------------------------------------------------------
-
-
 @pytest.fixture(scope="session")
 def fitz_mod():
     """Import and expose the *PyMuPDF* ``fitz`` module."""
@@ -151,8 +145,6 @@ def docx_mod():
 
 
 # Capability booleans ----------------------------------------------------------
-
-
 @pytest.fixture(scope="session")
 def pdfminer_available() -> bool:
     """Tell whether :pypi:`pdfminer.six` is importable."""
@@ -172,8 +164,6 @@ def pptx_available() -> bool:
 
 
 # Extractor helper -------------------------------------------------------------
-
-
 @pytest.fixture(scope="session")
 def pymupdf():
     """Return a session-scoped *PyMuPDF* extractor instance."""
@@ -181,8 +171,6 @@ def pymupdf():
 
 
 # PDF fixtures -----------------------------------------------------------------
-
-
 @pytest.fixture(scope="session", params=PDF_URLS, ids=lambda u: Path(u).name)
 def pdf_path(
     request: pytest.FixtureRequest, tmp_path_factory: pytest.TempPathFactory
@@ -199,8 +187,6 @@ def pdf_bytes(pdf_path: Path) -> bytes:
 
 
 # DOCX fixtures ----------------------------------------------------------------
-
-
 @pytest.fixture()
 def docx_path(tmp_path: Path, pdf_path: Path, docx_mod):
     """Generate a DOCX mirroring the textual content of *pdf_path*."""
@@ -217,8 +203,6 @@ def docx_path(tmp_path: Path, pdf_path: Path, docx_mod):
 
 
 # PPTX fixtures ----------------------------------------------------------------
-
-
 @pytest.fixture()
 def pptx_path(tmp_path: Path, pptx_available: bool) -> Path:
     """Create a minimal PPTX sample (requires *python-pptx*)."""
@@ -241,8 +225,6 @@ def pptx_bytes(pptx_path: Path) -> bytes:
 
 
 # Synthetic single-page PDF -----------------------------------------------------
-
-
 @pytest.fixture(scope="session")
 def sample_pdf_path(tmp_path_factory: pytest.TempPathFactory) -> Path:
     """Provide a simple one-page PDF stored in the session temp dir."""
@@ -259,8 +241,6 @@ def sample_pdf_bytes(sample_pdf_path: Path) -> bytes:
 
 
 # DOCX generated from the synthetic PDF ----------------------------------------
-
-
 @pytest.fixture(scope="session")
 def sample_docx_path(
     tmp_path_factory: pytest.TempPathFactory, sample_pdf_path: Path, docx_mod
@@ -285,8 +265,6 @@ def sample_docx_bytes(sample_docx_path: Path) -> bytes:
 
 
 # ───────────────── CLI-level shared helpers ──────────────────
-
-
 @pytest.fixture(scope="session")
 def cli_runner() -> CliRunner:
     """Singleton Typer test runner reused by every test."""

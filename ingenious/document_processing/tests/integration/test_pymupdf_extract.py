@@ -32,15 +32,12 @@ Implementation Notes
 
 from __future__ import annotations
 
-# ────────────── Standard Library ──────────────
 import io
 from pathlib import Path
 from typing import Any, Callable, List, Tuple
 
-# ────────────── Third-Party ──────────────
 import pytest
 
-# ────────────── First-Party ──────────────
 from ingenious.document_processing.extractor import _load
 
 # --------------------------------------------------------------------------- #

@@ -47,20 +47,15 @@ Dependencies
 
 from __future__ import annotations
 
-# ──────────────── standard library ────────────────
 from pathlib import Path
 
-# ──────────────── third-party ────────────────
-import fitz  # type: ignore – heavy import confined to the test body
-
-# ─────────────── first-party (fixture-only import; no direct code) ───────────────
-# The extractor under test is provided via the ``pymupdf`` fixture.
+import fitz
 
 __all__: list[str] = ["test_pymupdf_unicode"]
 
 
 # ───────────────────── tests ─────────────────────
-def test_pymupdf_unicode(pymupdf, tmp_path: Path) -> None:  # noqa: D401
+def test_pymupdf_unicode(pymupdf, tmp_path: Path) -> None:
     """Validate that :pyfunc:`pymupdf.extract` retains mixed-script text.
 
     Steps

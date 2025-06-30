@@ -78,19 +78,19 @@ from typing import Iterable, TypeAlias
 import fitz  # PyMuPDF
 
 from .base import DocumentExtractor, Element
-from ingenious.document_processing.fetcher import is_url, fetch
+from ingenious.document_processing.utils.fetcher import is_url, fetch
 
 logger = logging.getLogger(__name__)
 
-# =========================================================================
+# ------------------------------------------------------------------
 # Public type aliases
-# =========================================================================
+# ------------------------------------------------------------------
 Src: TypeAlias = str | bytes | io.BytesIO | os.PathLike[str]
 
 
-# =========================================================================
+# ------------------------------------------------------------------
 # Extractor implementation
-# =========================================================================
+# ------------------------------------------------------------------
 class PyMuPDFExtractor(DocumentExtractor):
     """Stream textual **elements** from a born‑digital PDF via PyMuPDF.
 
@@ -209,28 +209,37 @@ class PyMuPDFExtractor(DocumentExtractor):
         except (fitz.FileDataError, RuntimeError) as exc:
             logger.warning("PyMuPDF failed on %r – %s", src, exc)
             return
+        finally:
+            # Release potentially large in‑memory buffers *immediately*.
+            # This is especially important in worker processes that may keep
+            # thousands of PDFs in flight.
+            if stream_bytes is not None:
+                del stream_bytes
 
-        # block tuple spec:
-        # [0:x0, 1:y0, 2:x1, 3:y1, 4:text, 5:block_no, 6:block_type]
+        try:
+            # block tuple spec:
+            # [0:x0, 1:y0, 2:x1, 3:y1, 4:text, 5:block_no, 6:block_type]
+            # ―― 3. Iterate pages & 4. Extract blocks ―――――――――――――――――――――――――
+            for page in doc:  # PyMuPDF page iterator (zero‑based .number)
+                blocks = [
+                    blk
+                    for blk in page.get_text("blocks")
+                    if blk[6] == 0 and blk[4].strip()
+                ]
+                blocks.sort(key=lambda blk: (round(blk[1], 2), blk[0]))
 
-        # ―― 3. Iterate pages & 4. Extract blocks ―――――――――――――――――――――――――
-        for page in doc:  # PyMuPDF page iterator (zero‑based .number)
-            blocks = [
-                blk for blk in page.get_text("blocks") if blk[6] == 0 and blk[4].strip()
-            ]
-            blocks.sort(key=lambda blk: (round(blk[1], 2), blk[0]))
+                # ―― 5. Yield user‑facing Element dicts ―――――――――――――――――――――
+                for blk in blocks:
+                    yield {
+                        "page": operator.add(page.number, 1),  # 1‑based index
+                        "type": "NarrativeText",
+                        "text": blk[4].rstrip(),
+                        "coords": (blk[0], blk[1], blk[2], blk[3]),
+                    }
 
-            # ―― 5. Yield user‑facing Element dicts ―――――――――――――――――――――
-            for blk in blocks:
-                yield {
-                    "page": operator.add(page.number, 1),  # 1‑based index
-                    "type": "NarrativeText",
-                    "text": blk[4].rstrip(),
-                    "coords": (blk[0], blk[1], blk[2], blk[3]),
-                }
-
-        logger.debug("Processed %s pages from %r", doc.page_count, src)
-        doc.close()
+            logger.debug("Processed %s pages from %r", doc.page_count, src)
+        finally:
+            doc.close()
 
 
 __all__: list[str] = ["PyMuPDFExtractor"]

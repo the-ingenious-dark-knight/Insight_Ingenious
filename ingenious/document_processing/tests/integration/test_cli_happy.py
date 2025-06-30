@@ -27,25 +27,20 @@ This module executes **end-to-end, success-case** probes against the
 
 from __future__ import annotations
 
-# ──────────── standard library ────────────
 import json
 from collections.abc import Iterator
 from pathlib import Path
 from typing import Any, Final
 
-# ──────────── third-party ────────────
 import pytest
 
-# ──────────── first-party ────────────
 from ingenious.document_processing.extractor import _ENGINES
 
 # --------------------------------------------------------------------------- #
 # constants & helpers                                                         #
 # --------------------------------------------------------------------------- #
-
 PDF_URL: Final[str] = (
-    "https://densebreast-info.org/wp-content/uploads/2024/06/"
-    "Patient-Fact-Sheet-English061224.pdf"
+    "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
 )
 
 
@@ -78,8 +73,6 @@ def _load_ndjson(stream: str) -> Iterator[dict[str, Any]]:
 # --------------------------------------------------------------------------- #
 # test matrix                                                                 #
 # --------------------------------------------------------------------------- #
-
-
 @pytest.mark.parametrize("cli_kind", ["sub", "root"], ids=["doc_app", "root_app"])
 @pytest.mark.parametrize("engine", sorted(_ENGINES))
 def test_cli_local_pdf_ok(

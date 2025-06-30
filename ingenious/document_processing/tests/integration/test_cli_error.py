@@ -22,19 +22,16 @@ Covered scenarios
 
 from __future__ import annotations
 
-# ──────────── standard library ────────────
 import os
 import stat
 from pathlib import Path
 
-# ──────────── third-party ────────────
 import pytest
+
 
 # --------------------------------------------------------------------------- #
 # helpers                                                                     #
 # --------------------------------------------------------------------------- #
-
-
 def _make_unwritable_dir(parent: Path) -> Path:
     """
     Create a child directory that the current process cannot write to.
@@ -74,8 +71,6 @@ def _make_unwritable_dir(parent: Path) -> Path:
 # --------------------------------------------------------------------------- #
 # negative-path scenarios                                                     #
 # --------------------------------------------------------------------------- #
-
-
 @pytest.mark.parametrize("cli_target", ["sub", "root"], ids=["doc_app", "root_app"])
 def test_cli_unknown_engine(
     _cli, cli_target: str, pdf_path: Path, tmp_path: Path

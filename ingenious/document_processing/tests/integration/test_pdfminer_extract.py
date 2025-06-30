@@ -27,16 +27,13 @@ propagation of network errors.
 
 from __future__ import annotations
 
-# ──────────── Standard Library ────────────
 import io
 from pathlib import Path
 from typing import Any, Callable, Final, Iterator
 
-# ────────────── Third‑Party ───────────────
 import pytest
 import requests
 
-# ────────────── First‑Party ───────────────
 from ingenious.document_processing.extractor import _load
 
 __all__: list[str] = [
@@ -99,7 +96,7 @@ class _StubResp:  # noqa: D101 – internal helper class.
             raise requests.HTTPError(f"{self.status_code} error")
 
 
-def _monkey_download(monkeypatch: pytest.MonkeyPatch, payload: _StubResp) -> None:  # noqa: D401
+def _monkey_download(monkeypatch: pytest.MonkeyPatch, payload: _StubResp) -> None:
     """Redirect *all* `requests.get` calls inside the fetcher to *payload*.
 
     The Insight Ingenious fetcher keeps a module‑level reference to
@@ -109,7 +106,7 @@ def _monkey_download(monkeypatch: pytest.MonkeyPatch, payload: _StubResp) -> Non
     I/O.
     """
 
-    target = "ingenious.document_processing.fetcher.requests.get"
+    target = "ingenious.document_processing.utils.fetcher.requests.get"
     monkeypatch.setattr(target, lambda *_a, **_k: payload, raising=True)
 
 
@@ -130,7 +127,7 @@ _PROBES: list[tuple[str, ProbeBuilder]] = [
 # Fixtures                                                                    #
 # --------------------------------------------------------------------------- #
 @pytest.fixture(scope="module")
-def pdfminer():  # noqa: D401 – fixture names should be lowercase nouns.
+def pdfminer():
     """Return a *single* PDFMiner extractor instance for the whole module."""
 
     return _load(EXTRACTOR_NAME)
@@ -174,8 +171,6 @@ def test_extract_happy_paths(
 # --------------------------------------------------------------------------- #
 # 2. Determinism across runs                                                  #
 # --------------------------------------------------------------------------- #
-
-
 def test_extract_idempotent(
     pdfminer,
     pdf_path: Path,
@@ -195,8 +190,6 @@ def test_extract_idempotent(
 # --------------------------------------------------------------------------- #
 # 3. Fail‑soft: HTTP error                                                    #
 # --------------------------------------------------------------------------- #
-
-
 def test_url_404_fail_soft(
     pdfminer,
     pdf_path: Path,
@@ -217,8 +210,6 @@ def test_url_404_fail_soft(
 # --------------------------------------------------------------------------- #
 # 4. Fail‑soft: oversized downloads                                          #
 # --------------------------------------------------------------------------- #
-
-
 def test_url_oversize_guard(
     pdfminer,
     monkeypatch: pytest.MonkeyPatch,

@@ -59,7 +59,7 @@ import zipfile
 from pathlib import Path
 from typing import Any, Final, Iterable, TypeAlias
 from .base import DocumentExtractor, Element
-from ingenious.document_processing.fetcher import is_url, fetch
+from ingenious.document_processing.utils.fetcher import is_url, fetch
 
 logger = logging.getLogger(__name__)
 
@@ -117,7 +117,6 @@ class UnstructuredExtractor(DocumentExtractor):
     # --------------------------------------------------------------------- #
     # Private helpers                                                       #
     # --------------------------------------------------------------------- #
-
     @staticmethod
     def _coords_to_jsonable(
         coords: Any,  # noqa: ANN401 – vendor returns untyped objects
@@ -131,28 +130,38 @@ class UnstructuredExtractor(DocumentExtractor):
 
         1. Return a list of ``(x, y)`` tuples when the object exposes
            ``.points``.
-        2. Call :py:meth:`to_dict` when available.
+        2. Call :pymeth:`to_dict` when available.
         3. Fallback to :py:func:`str`.
 
         Parameters
         ----------
-        coords :
+        coords
             Raw coordinate payload attached to a partitioned element.
 
         Returns
         -------
         list[tuple[float, float]] | dict | str | None
             JSON-ready representation, or ``None`` when *coords* is falsy.
-
         """
         if coords is None:
             return None
+
+        # Prefer an explicit list[tuple[float, float]] when the vendor exposes
+        # ``.points`` (Polygon-style objects).
         try:
             return [(pt.x, pt.y) for pt in coords.points]
-        except Exception:  # pragma: no cover – vendor API drifts
-            if hasattr(coords, "to_dict"):
-                return coords.to_dict()  # type: ignore[attr-defined]
-            return str(coords)
+        except (AttributeError, TypeError):
+            pass  # fall through to the next strategy
+
+        # Next best: a serialisable mapping via ``to_dict``.
+        if hasattr(coords, "to_dict"):
+            try:
+                return coords.to_dict()
+            except (AttributeError, TypeError):
+                pass
+
+        # Last-resort fallback that is guaranteed to be JSON-serialisable.
+        return str(coords)
 
     @staticmethod
     def _normalise_text(text: str) -> str:
@@ -300,21 +309,26 @@ class UnstructuredExtractor(DocumentExtractor):
 
                 # ---------- OOXML bytes (DOCX / PPTX) ------------------------ #
                 elif head.startswith(b"PK\x03\x04"):
-                    # 1️⃣ Inspect ZIP to decide subtype
-                    with io.BytesIO(payload) as fp, zipfile.ZipFile(fp) as zf:
-                        roots = {
-                            info.filename.split("/", 1)[0] for info in zf.infolist()
-                        }
+                    # Use one BytesIO buffer for both ZIP sniffing and partitioning
+                    buf = io.BytesIO(payload)
+                    try:
+                        # 1️⃣ Detect OOXML subtype (DOCX vs PPTX) by inspecting top-level folders
+                        with zipfile.ZipFile(buf) as zf:
+                            roots = {
+                                info.filename.split("/", 1)[0] for info in zf.infolist()
+                            }
 
-                    # 2️⃣ Re-open for the real parse pass
-                    with io.BytesIO(payload) as fp:
-                        if "word" in roots:
-                            u_elems = partition_docx(file=fp)
-                        elif "ppt" in roots:
-                            u_elems = partition_pptx(file=fp)
+                        # 2️⃣ Rewind buffer and hand the *same* handle to unstructured
+                        buf.seek(0)
+                        if "word" in roots:  # DOCX
+                            u_elems = partition_docx(file=buf)
+                        elif "ppt" in roots:  # PPTX
+                            u_elems = partition_pptx(file=buf)
                         else:
                             logger.warning("Unknown OOXML subtype – skipped buffer")
                             return
+                    finally:
+                        buf.close()
                 else:
                     logger.warning("Unsupported binary buffer – skipped")
                     return

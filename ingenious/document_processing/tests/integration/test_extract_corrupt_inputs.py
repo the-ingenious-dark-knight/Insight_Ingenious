@@ -40,20 +40,16 @@ from the project root.
 
 from __future__ import annotations
 
-# ──────────── standard library ────────────
 from typing import Final
 
-# ──────────── third-party ────────────
 import pytest
 
-# ──────────── first-party ────────────
 from ingenious.document_processing.extractor import _ENGINES, extract
+
 
 # --------------------------------------------------------------------------- #
 # fixtures                                                                    #
 # --------------------------------------------------------------------------- #
-
-
 @pytest.fixture(scope="function")
 def corrupt_pdf_bytes() -> bytes:
     """
@@ -115,8 +111,6 @@ def test_extract_corrupt_bytes_returns_empty(
 # --------------------------------------------------------------------------- #
 # “unstructured” follows a strict contract: it escalates the upstream error   #
 # --------------------------------------------------------------------------- #
-
-
 @pytest.mark.xfail(
     reason=(
         "The unstructured backend pipelines bytes through pdf2image, which "

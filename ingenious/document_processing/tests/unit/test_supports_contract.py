@@ -37,14 +37,11 @@ Type aliases
 
 from __future__ import annotations
 
-# ──────────── standard library ────────────
 from pathlib import Path
 from typing import Callable, List
 
-# ────────────── third-party ──────────────
 import pytest
 
-# ─────────────── first-party ───────────────
 from ingenious.document_processing.extractor import _ENGINES, _load
 
 # --------------------------------------------------------------------------- #

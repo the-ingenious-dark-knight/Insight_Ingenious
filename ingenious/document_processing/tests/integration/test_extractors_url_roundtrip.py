@@ -1,4 +1,3 @@
-# tests/test_extractors_url_roundtrip.py
 """
 Sanity-check: every Insight Ingenious extractor should be able
 to take an HTTP/S URL and yield ≥ 1 Element.
@@ -26,11 +25,7 @@ from ingenious.document_processing.extractor import extract
 # --------------------------------------------------------------------------- #
 # constants & helpers                                                         #
 # --------------------------------------------------------------------------- #
-
-PDF_URL: Final[str] = (
-    "https://densebreast-info.org/wp-content/uploads/2024/06/"
-    "Patient-Fact-Sheet-English061224.pdf"
-)
+PDF_URL: Final[str] = "https://unec.edu.az/application/uploads/2014/12/pdf-sample.pdf"
 
 ENGINES: Final[list[str]] = ["pdfminer", "pymupdf", "unstructured", "azdocint"]
 
@@ -48,8 +43,6 @@ def _has_azure_creds() -> bool:
 # --------------------------------------------------------------------------- #
 # parameterised smoke test                                                    #
 # --------------------------------------------------------------------------- #
-
-
 @pytest.mark.parametrize("engine", ENGINES)
 def test_url_roundtrip(engine: str) -> None:
     """

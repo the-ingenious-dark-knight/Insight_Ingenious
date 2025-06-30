@@ -51,6 +51,7 @@ For OCR needs, use azdocint engine.
 
 from __future__ import annotations
 
+import os
 import json
 import re
 import sys
@@ -65,7 +66,6 @@ from ingenious.document_processing.extractor import extract as _extract
 # ---------------------------------------------------------------------------
 # Typer application
 # ---------------------------------------------------------------------------
-
 doc_app: typer.Typer = typer.Typer(
     no_args_is_help=True,
     help="Extract structured text from local or remote PDFs, DOCX documents, PNG images, and other supported files.",
@@ -74,12 +74,11 @@ doc_app: typer.Typer = typer.Typer(
 doc_app.__doc__ = "CLI group housing document‑processing commands."
 
 # ---------------------------------------------------------------------------
-# Constants & regexes
+# Constants & Patterns
 # ---------------------------------------------------------------------------
-
 URL_RE: re.Pattern[str] = re.compile(r"^https?://", re.I)
 
-_SUPPORTED_SUFFIXES: set[str] = {
+_SUPPORTED_SUFFIXES: tuple[str, ...] = (
     ".pdf",
     ".docx",
     ".pptx",
@@ -88,13 +87,12 @@ _SUPPORTED_SUFFIXES: set[str] = {
     ".jpeg",
     ".tiff",
     ".tif",
-}
+)
+
 
 # ---------------------------------------------------------------------------
 # Helper functions
 # ---------------------------------------------------------------------------
-
-
 def _iter_sources(arg: Union[str, Path]) -> Iterable[Tuple[str, Union[bytes, Path]]]:
     """Yield (label, src) pairs for URLs, files, or directories.
 
@@ -104,7 +102,7 @@ def _iter_sources(arg: Union[str, Path]) -> Iterable[Tuple[str, Union[bytes, Pat
     """
     # 1. Remote URL ------------------------------------------------------
     if isinstance(arg, str) and URL_RE.match(arg):
-        from ingenious.document_processing.fetcher import fetch
+        from ingenious.document_processing.utils.fetcher import fetch
 
         payload = fetch(arg)
         if payload is None:
@@ -119,11 +117,14 @@ def _iter_sources(arg: Union[str, Path]) -> Iterable[Tuple[str, Union[bytes, Pat
         yield str(path), path
         return
 
-    # 2 b. Directory – recurse once per pattern
+    # 2 b. Directory – single-pass, suffix-aware walk
     if path.is_dir():
-        for item in path.rglob("*"):
-            if item.suffix.lower() in _SUPPORTED_SUFFIXES:
-                yield str(item), item
+        for root, _dirs, files in os.walk(path):
+            for fname in files:
+                if not fname.lower().endswith(_SUPPORTED_SUFFIXES):
+                    continue
+                fpath = Path(root, fname)
+                yield str(fpath), fpath
 
     elif not path.exists():
         rprint(f"[red]✗ no such file or directory: {path}[/red]")
@@ -132,8 +133,6 @@ def _iter_sources(arg: Union[str, Path]) -> Iterable[Tuple[str, Union[bytes, Pat
 # ---------------------------------------------------------------------------
 # CLI command
 # ---------------------------------------------------------------------------
-
-
 @doc_app.command("extract")
 def extract_cmd(
     path: str = typer.Argument(..., help="PDF file, directory, or HTTP/S URL"),

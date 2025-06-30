@@ -24,7 +24,7 @@ Responsibilities
 Example
 -------
 ```python
-from ingenious.document_processing.fetcher import fetch, is_url
+from ingenious.document_processing.utils.fetcher import fetch, is_url
 
 url = "https://example.com/report.pdf"
 if is_url(url):
@@ -61,11 +61,10 @@ _MAX_MB: Final[int] = int(os.getenv("INGEN_MAX_DOWNLOAD_MB", "20"))
 #: Overall request timeout in **seconds**.
 _TIMEOUT: Final[int] = int(os.getenv("INGEN_URL_TIMEOUT_SEC", "30"))
 
+
 # --------------------------------------------------------------------------- #
 # Public helpers                                                              #
 # --------------------------------------------------------------------------- #
-
-
 def is_url(src: Union[str, os.PathLike[str]]) -> bool:
     """
     Return *True* if *src* looks like an absolute HTTP/S URL.

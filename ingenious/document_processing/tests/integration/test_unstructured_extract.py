@@ -32,16 +32,13 @@ catching high‑impact regressions.
 
 from __future__ import annotations
 
-# ────────────── standard library ──────────────
 import io
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Final, Iterable, Tuple
 
-# ────────────── third‑party ──────────────
 import pytest
 
-# ────────────── first‑party ──────────────
 from ingenious.document_processing.extractor import _load
 
 # --------------------------------------------------------------------------- #
@@ -70,11 +67,10 @@ _PROBES: Final[Iterable[Tuple[str, str, bool]]] = [
     ("pptx-bytes", "pptx_bytes", True),
 ]
 
+
 # --------------------------------------------------------------------------- #
 # helper assertions                                                           #
 # --------------------------------------------------------------------------- #
-
-
 def _assert_valid_element(element: dict[str, Any]) -> None:
     """Assert that *element* minimally satisfies the public *Element* contract.
 
@@ -101,8 +97,6 @@ def _assert_valid_element(element: dict[str, Any]) -> None:
 # --------------------------------------------------------------------------- #
 # fixtures                                                                    #
 # --------------------------------------------------------------------------- #
-
-
 @pytest.fixture(scope="module")
 def ux(unstructured_available: bool):
     """Provide a singleton :class:`UnstructuredExtractor` instance.
@@ -130,8 +124,6 @@ def src(request):  # noqa: D401 – simple fixture wrapper
 # --------------------------------------------------------------------------- #
 # 1. Happy‑path extraction + determinism                                      #
 # --------------------------------------------------------------------------- #
-
-
 @pytest.mark.integration
 @pytest.mark.parametrize(
     ("label", "fixture_name", "needs_pptx"), _PROBES, ids=[lbl for lbl, *_ in _PROBES]
@@ -172,8 +164,6 @@ def test_extract_happy_and_deterministic(
 # --------------------------------------------------------------------------- #
 # 2. Fail‑soft behaviour on corrupt bytes                                     #
 # --------------------------------------------------------------------------- #
-
-
 def test_extract_corrupt_bytes_returns_empty(ux) -> None:
     """Invalid PDF bytes must yield an empty iterator and raise **no** exceptions."""
     assert list(ux.extract(_CORRUPT_PDF)) == []
@@ -182,8 +172,6 @@ def test_extract_corrupt_bytes_returns_empty(ux) -> None:
 # --------------------------------------------------------------------------- #
 # 3. _coords_to_jsonable coverage                                             #
 # --------------------------------------------------------------------------- #
-
-
 @pytest.mark.parametrize(
     "coords, expected",
     [
@@ -207,8 +195,6 @@ def test_coords_to_jsonable_paths(ux, coords: Any, expected: Any) -> None:
 # --------------------------------------------------------------------------- #
 # 4. supports truth‑table                                                     #
 # --------------------------------------------------------------------------- #
-
-
 @pytest.mark.parametrize(
     "suffix, supported",
     [(".pdf", True), (".docx", True), (".pptx", True), (".foo", False)],
@@ -228,8 +214,6 @@ def test_supports_suffix_probe(
 # --------------------------------------------------------------------------- #
 # 5. extract rejects unknown suffix                                           #
 # --------------------------------------------------------------------------- #
-
-
 def test_extract_rejects_unknown_suffix(tmp_path: Path, ux) -> None:
     """Unsupported formats must be skipped **gracefully**.
 

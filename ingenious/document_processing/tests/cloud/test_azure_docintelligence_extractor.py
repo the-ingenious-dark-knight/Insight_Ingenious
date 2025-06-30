@@ -37,7 +37,6 @@ from ingenious.document_processing.extractor import _load
 # --------------------------------------------------------------------------- #
 # Constants                                                                   #
 # --------------------------------------------------------------------------- #
-
 TEST_DATA_DIR: Path = Path(__file__).parent / "data_azure_doc_intell"
 SAMPLE_FILES: tuple[str, ...] = (
     "sample.pdf",
@@ -46,11 +45,10 @@ SAMPLE_FILES: tuple[str, ...] = (
     "sample.tiff",
 )
 
+
 # --------------------------------------------------------------------------- #
 # Fixtures                                                                    #
 # --------------------------------------------------------------------------- #
-
-
 @pytest.fixture(scope="module")
 def azdocint():
     """Return a single, lazily‑instantiated extractor for the entire module.
@@ -78,8 +76,6 @@ def dummy_foo(tmp_path: Path) -> Path:
 # --------------------------------------------------------------------------- #
 # Helper utilities                                                            #
 # --------------------------------------------------------------------------- #
-
-
 def _has_credentials() -> bool:
     """Return ``True`` when *both* an endpoint **and** a key variable exist.
 
@@ -161,8 +157,6 @@ def _collect_elements(extractor: Any, path: Path) -> List[dict[str, Any]]:
 # --------------------------------------------------------------------------- #
 # Happy‑path tests                                                            #
 # --------------------------------------------------------------------------- #
-
-
 @pytest.mark.integration
 @pytest.mark.parametrize("sample_name", SAMPLE_FILES)
 def test_extract_document_smoke(azdocint, sample_name: str) -> None:
@@ -194,8 +188,6 @@ def test_extract_idempotent(azdocint, sample_name: str) -> None:
 # --------------------------------------------------------------------------- #
 # Negative‑path tests                                                         #
 # --------------------------------------------------------------------------- #
-
-
 def test_missing_credentials_returns_empty(azdocint, tmp_path: Path) -> None:
     """Extractor returns ``[]`` (no raise) when all credentials are absent."""
 
