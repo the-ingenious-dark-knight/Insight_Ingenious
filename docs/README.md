@@ -15,7 +15,7 @@ Feature packs you can install on demand
 
 - [Optional Dependencies Index](optional_dependencies/README.md)
 - [Dataprep Crawler](optional_dependencies/dataprep/README.md): Scrapfly-powered scraping CLI
-- [Document-processing](optional_dependencies/document_processing/README.md): Unified PDF/DOCX/PPTX extraction engines
+- [Document-processing](optional_dependencies/document_processing/README.md): Unified PDF / DOCX / PPTX / PNG / JPG / JPEG / TIFF / TIF extraction engines
 
 ## Quick Links
 

@@ -4,7 +4,7 @@ The *document‑processing* extra equips Insight Ingenious with a unified API 
 It is ideal for:
 
 * RAG pipelines that need paragraph‑level text with coordinates
-* Data‑prep flows that must normalise mixed PDF + DOCX + PPTX collections
+* Extraction flows that must gather data from mixed PDF + DOCX + PPTX collections
 * Quickly inspecting files from the command line without writing Python
 
 ---
@@ -23,7 +23,7 @@ uv pip install -e ".[document-processing,pdfminer,unstructured]"
 >
 > * *PyMuPDF* is the fastest path for standard PDFs.
 > * *PDFMiner* avoids native code – useful on Alpine or AWS Lambda.
-> * *Unstructured* adds DOCX, PPTX, HTML and exotic formats.
+> * *Unstructured* adds DOCX, PPTX.
 
 ---
 

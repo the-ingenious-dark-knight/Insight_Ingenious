@@ -42,7 +42,7 @@ docs/optional_dependencies/dataprep/README.md
 
 ### Document‑processing subsystem
 
-The *document‑processing* extra bundles lightweight extractors for PDF, DOCX, PPTX and plain‑text sources, together with a Typer‑based CLI for batch extraction.
+The *document‑processing* extra bundles extractors for PDF / DOCX / PPTX / PNG / JPG / JPEG / TIFF / TIF, together with a Typer‑based CLI for batch extraction.
 
 ```bash
 # core engines (PyMuPDF and Azure AI Document Intelligence wrapper)
