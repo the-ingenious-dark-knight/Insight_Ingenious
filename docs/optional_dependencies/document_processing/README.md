@@ -108,16 +108,17 @@ Create that folder and drop the files in before running `pytest -m integration`.
 If the folder or any file is missing, the tests are auto-skipped, so the rest of the suite still runs cleanly.
 
 ```bash
-# core engines only
+# Core engines only
 uv pip install -e ".[document-processing,tests]"
-
-uv run pytest
 ```
 
 Add `pdfminer` and `unstructured` extras to expand coverage:
 
 ```bash
 uv pip install -e ".[document-processing,pdfminer,unstructured,tests]"
+
+# Run all tests
+uv run pytest ingenious/document_processing/tests
 ```
 
 ---
