@@ -62,22 +62,16 @@ uv pip install --python .venv/bin/python -e ".[dataprep,tests]"
 export SCRAPFLY_API_KEY="sk_live_your_real_key_here"
 #   – or – add the same line to a .env at repo root
 
-# 3️⃣  Run the **fast, offline unit tests** (skips e2e)
-uv run pytest -q
+# 3️⃣  Run all tests for data prep
+uv run pytest ingenious/dataprep/tests
 
-# 4️⃣  Run the **live integration (e2e) suite**
-uv run pytest -m e2e -q
+# 4️⃣  Smoke‑test the new CLI commands
 
-# 5️⃣  Run **all tests** in one go
-uv run pytest -m "e2e or not e2e" -q
-
-# 6️⃣  Smoke‑test the new CLI commands
-
-## 6.a  Single‑page scrape (pretty JSON)
+## 4.a  Single‑page scrape (pretty JSON)
 ingen dataprep crawl \
   "https://www.medicalnewstoday.com/articles/tyrer-cuzick-score#summary"
 
-## 6.c  Batch scrape two URLs (NDJSON → file)
+## 4.c  Batch scrape two URLs (NDJSON → file)
 ingen dataprep batch \
   "https://www.volparahealth.com/news/how-breast-density-impacts-lifetime-cancer-risk" \
   "https://www.medicalnewstoday.com/articles/tyrer-cuzick-score#summary" \

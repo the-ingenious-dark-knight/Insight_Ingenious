@@ -39,3 +39,27 @@ All usage instructions live in:
 ```
 docs/optional_dependencies/dataprep/README.md
 ```
+
+### Document‑processing subsystem
+
+The *document‑processing* extra bundles extractors for PDF / DOCX / PPTX / PNG / JPG / JPEG / TIFF / TIF, together with a Typer‑based CLI for batch extraction.
+
+```bash
+# core engines (PyMuPDF and Azure AI Document Intelligence wrapper)
+uv pip install -e ".[document-processing]"
+
+# add optional engines and the test‑suite
+uv pip install -e ".[document-processing,pdfminer,unstructured,tests]"
+```
+
+| Extra name            | Purpose                                       | Extra packages pulled in                   |
+| --------------------- | --------------------------------------------- | ------------------------------------------ |
+| `document-processing` | PyMuPDF extractor, Azure DI client & CLI glue | `pymupdf`, `azure-ai-documentintelligence` |
+| `pdfminer`            | Pure‑Python PDF extractor (no native libs)    | `pdfminer.six`                             |
+| `unstructured`        | DOCX / PPTX / rich‑text extractor             | `unstructured[all-docs]`                   |
+
+Full usage details are provided in:
+
+```
+docs/optional_dependencies/document_processing/README.md
+```
