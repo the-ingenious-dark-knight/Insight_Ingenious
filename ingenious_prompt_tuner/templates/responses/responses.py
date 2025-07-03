@@ -173,22 +173,19 @@ def get_agent_response():
             # Load the agent chat data with our wrapper to handle the Response object
             agent_chat_data = json.loads(agent_response_md)
             agent_chat_wrapper = AgentChatWrapper.from_dict(agent_chat_data)
-            
+
             # Access the chat message content via our wrapper
             if agent_chat_wrapper.chat_response_wrapper:
-                message_content = agent_chat_wrapper.chat_response_wrapper.chat_message_content
+                message_content = (
+                    agent_chat_wrapper.chat_response_wrapper.chat_message_content
+                )
                 inner_messages = agent_chat_wrapper.chat_response_wrapper.inner_messages
-                
+
                 if inner_messages:
                     message_content += "\n\n### Inner Messages \n\n"
                     message_content += (
                         "```json\n"
-                        + json.dumps(
-                            {
-                                "inner_messages": inner_messages
-                            },
-                            indent=4
-                        )
+                        + json.dumps({"inner_messages": inner_messages}, indent=4)
                         + "\n\n```"
                     )
             else:
@@ -208,7 +205,11 @@ def get_agent_response():
                 event_type=event_type,
                 agent_name=agent_chat_wrapper.target_agent_name,
                 execution_time=f"{int((agent_chat_wrapper.end_time - agent_chat_wrapper.start_time) // 60)}:{int((agent_chat_wrapper.end_time - agent_chat_wrapper.start_time) % 60):02d}",
-                start_time=datetime.fromtimestamp(agent_chat_wrapper.start_time).strftime("%H:%M:%S") if agent_chat_wrapper.start_time else "",
+                start_time=datetime.fromtimestamp(
+                    agent_chat_wrapper.start_time
+                ).strftime("%H:%M:%S")
+                if agent_chat_wrapper.start_time
+                else "",
                 identifier_group=identifier_group,
             )
         except Exception as e:
@@ -251,12 +252,12 @@ def get_agent_inputs():
     agent_response_md = asyncio.run(
         utils.fs.read_file(file_name=file_name, file_path=output_path)
     )
-    
+
     try:
         # Load the agent chat data with our wrapper to handle the Response object
         agent_chat_data = json.loads(agent_response_md)
         agent_chat_wrapper = AgentChatWrapper.from_dict(agent_chat_data)
-        
+
         if input_type == "user_input":
             content = agent_chat_wrapper.user_message
         else:

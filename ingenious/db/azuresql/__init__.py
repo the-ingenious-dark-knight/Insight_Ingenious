@@ -1,8 +1,8 @@
 import json
-import os
 import uuid
 from datetime import datetime
 from typing import Dict, List, Optional
+
 import pyodbc
 
 import ingenious.config.config as Config
@@ -14,15 +14,17 @@ class azuresql_ChatHistoryRepository(IChatHistoryRepository):
     def __init__(self, config: Config.Config):
         self.connection_string = config.chat_history.database_connection_string
         if not self.connection_string:
-            raise ValueError("Azure SQL connection string is required for azuresql chat history repository")
-        
+            raise ValueError(
+                "Azure SQL connection string is required for azuresql chat history repository"
+            )
+
         self.connection = pyodbc.connect(self.connection_string)
         self.connection.autocommit = True
         self._create_tables()
 
     def _create_tables(self):
         cursor = self.connection.cursor()
-        
+
         # Create chat_history table
         cursor.execute("""
             IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='chat_history' AND xtype='U')
@@ -150,7 +152,7 @@ class azuresql_ChatHistoryRepository(IChatHistoryRepository):
         cursor = None
         try:
             cursor = self.connection.cursor()
-            
+
             if expect_results:
                 cursor.execute(sql, params)
                 rows = cursor.fetchall()
@@ -178,7 +180,7 @@ class azuresql_ChatHistoryRepository(IChatHistoryRepository):
         )
         row = cursor.fetchone()
         cursor.close()
-        
+
         if row:
             return IChatHistoryRepository.User(
                 id=row[0], identifier=row[1], metadata=row[2], createdAt=row[3]
@@ -250,7 +252,7 @@ class azuresql_ChatHistoryRepository(IChatHistoryRepository):
     ) -> IChatHistoryRepository.User:
         now = self.get_now()
         new_id = str(uuid.uuid4())
-        
+
         cursor = self.connection.cursor()
         cursor.execute(
             """
@@ -260,7 +262,7 @@ class azuresql_ChatHistoryRepository(IChatHistoryRepository):
             (new_id, identifier, json.dumps(metadata), now),
         )
         cursor.close()
-        
+
         return IChatHistoryRepository.User(
             id=uuid.UUID(new_id),
             identifier=identifier,
@@ -280,7 +282,7 @@ class azuresql_ChatHistoryRepository(IChatHistoryRepository):
         )
         row = cursor.fetchone()
         cursor.close()
-        
+
         if row:
             return IChatHistoryRepository.User(
                 id=row[0], identifier=row[1], metadata=row[2], createdAt=row[3]
@@ -293,7 +295,7 @@ class azuresql_ChatHistoryRepository(IChatHistoryRepository):
         cursor = self.connection.cursor()
         cursor.execute(
             """
-            SELECT user_id, thread_id, message_id, positive_feedback, timestamp, role, content, 
+            SELECT user_id, thread_id, message_id, positive_feedback, timestamp, role, content,
                    content_filter_results, tool_calls, tool_call_id, tool_call_function
             FROM chat_history
             WHERE message_id = ? AND thread_id = ?
@@ -302,7 +304,7 @@ class azuresql_ChatHistoryRepository(IChatHistoryRepository):
         )
         row = cursor.fetchone()
         cursor.close()
-        
+
         if row:
             return Message(
                 user_id=row[0],
@@ -330,10 +332,10 @@ class azuresql_ChatHistoryRepository(IChatHistoryRepository):
         cursor = self.connection.cursor()
         cursor.execute(
             """
-            SELECT TOP 5 user_id, thread_id, message_id, positive_feedback, timestamp, role, content, 
+            SELECT TOP 5 user_id, thread_id, message_id, positive_feedback, timestamp, role, content,
                    content_filter_results, tool_calls, tool_call_id, tool_call_function
             FROM (
-                SELECT user_id, thread_id, message_id, positive_feedback, timestamp, role, content, 
+                SELECT user_id, thread_id, message_id, positive_feedback, timestamp, role, content,
                        content_filter_results, tool_calls, tool_call_id, tool_call_function,
                        ROW_NUMBER() OVER (ORDER BY timestamp DESC) as rn
                 FROM chat_history
@@ -346,7 +348,7 @@ class azuresql_ChatHistoryRepository(IChatHistoryRepository):
         )
         rows = cursor.fetchall()
         cursor.close()
-        
+
         return [
             Message(
                 user_id=row[0],
@@ -376,7 +378,7 @@ class azuresql_ChatHistoryRepository(IChatHistoryRepository):
         )
         rows = cursor.fetchall()
         cursor.close()
-        
+
         return [
             IChatHistoryRepository.Thread(
                 id=row[0],
@@ -447,8 +449,8 @@ class azuresql_ChatHistoryRepository(IChatHistoryRepository):
         }
         parameters["metadata"] = json.dumps(step_dict.get("metadata", {}))
         parameters["generation"] = json.dumps(step_dict.get("generation", {}))
-        
-        columns = ", ".join(f'[{key}]' for key in parameters.keys())
+
+        columns = ", ".join(f"[{key}]" for key in parameters.keys())
         values = ", ".join("?" for key in parameters.keys())
         query = f"""
             INSERT INTO steps ({columns})
@@ -487,17 +489,13 @@ class azuresql_ChatHistoryRepository(IChatHistoryRepository):
             "tags": json.dumps(tags) if tags else None,
             "metadata": json.dumps(metadata) if metadata else None,
         }
-        
-        parameters = {
-            key: value for key, value in data.items() if value is not None
-        }
-        
-        columns = ", ".join(f'[{key}]' for key in parameters.keys())
+
+        parameters = {key: value for key, value in data.items() if value is not None}
+
+        columns = ", ".join(f"[{key}]" for key in parameters.keys())
         values = ", ".join("?" for key in parameters.keys())
-        updates = ", ".join(
-            f'[{key}] = ?' for key in parameters.keys() if key != "id"
-        )
-        
+        updates = ", ".join(f"[{key}] = ?" for key in parameters.keys() if key != "id")
+
         # Use MERGE for upsert in SQL Server
         query = f"""
             MERGE threads AS target
@@ -508,13 +506,13 @@ class azuresql_ChatHistoryRepository(IChatHistoryRepository):
                 INSERT ({columns})
                 VALUES ({values});
         """
-        
+
         # Prepare parameters for MERGE statement
-        merge_params = [thread_id] + list(parameters.values())[1:] + list(parameters.values())
-        
-        self.execute_sql(
-            sql=query, params=merge_params, expect_results=False
+        merge_params = (
+            [thread_id] + list(parameters.values())[1:] + list(parameters.values())
         )
+
+        self.execute_sql(sql=query, params=merge_params, expect_results=False)
 
         return ""
 
@@ -565,7 +563,7 @@ class azuresql_ChatHistoryRepository(IChatHistoryRepository):
         )
         row = cursor.fetchone()
         cursor.close()
-        
+
         if row:
             return Message(
                 user_id=row[0],
@@ -596,7 +594,7 @@ class azuresql_ChatHistoryRepository(IChatHistoryRepository):
         )
         rows = cursor.fetchall()
         cursor.close()
-        
+
         return [
             Message(
                 user_id=row[0],
