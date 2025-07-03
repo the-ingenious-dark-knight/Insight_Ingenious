@@ -207,6 +207,49 @@ class multi_agent_chat_service:
             logger.error(f"Error occurred while processing conversation flow: {e}")
             raise e
 
+        # Save chat history if memory_record is enabled
+        if getattr(chat_request, "memory_record", True):
+            try:
+                # Save user message
+                if chat_request.user_id and chat_request.thread_id:
+                    from ingenious.models.message import Message
+                    
+                    user_message_id = await self.chat_history_repository.add_message(
+                        Message(
+                            user_id=chat_request.user_id,
+                            thread_id=chat_request.thread_id,
+                            role="user",
+                            content=chat_request.user_prompt
+                        )
+                    )
+                    logger.info(f"Saved user message: {user_message_id}")
+                    
+                    # Save agent response
+                    agent_message_id = await self.chat_history_repository.add_message(
+                        Message(
+                            user_id=chat_request.user_id,
+                            thread_id=chat_request.thread_id,
+                            role="assistant",
+                            content=agent_response.agent_response
+                        )
+                    )
+                    logger.info(f"Saved agent message: {agent_message_id}")
+                    
+                    # Save memory summary if available
+                    if hasattr(agent_response, 'memory_summary') and agent_response.memory_summary:
+                        memory_id = await self.chat_history_repository.add_memory(
+                            Message(
+                                user_id=chat_request.user_id,
+                                thread_id=chat_request.thread_id,
+                                role="memory_assistant",
+                                content=agent_response.memory_summary
+                            )
+                        )
+                        logger.info(f"Saved memory: {memory_id}")
+                        
+            except Exception as e:
+                logger.warning(f"Failed to save chat history: {e}")
+
         return agent_response
 
 
