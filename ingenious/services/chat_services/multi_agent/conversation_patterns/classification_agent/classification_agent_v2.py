@@ -2,7 +2,7 @@ import logging
 from typing import List, Tuple
 
 from autogen_agentchat.agents import AssistantAgent, UserProxyAgent
-from autogen_agentchat.teams import SelectorGroupChat
+from autogen_agentchat.teams import RoundRobinGroupChat
 from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
 
 logger = logging.getLogger(__name__)
@@ -22,7 +22,6 @@ class ConversationPattern:
         self.memory_record_switch = memory_record_switch
         self.memory_path = memory_path
         self.thread_memory = thread_memory
-        self.topic_agents: List[AssistantAgent] = []
         self.context = ""
 
         # Create Azure OpenAI model client from config
@@ -56,51 +55,46 @@ class ConversationPattern:
         except FileNotFoundError:
             self.context = ""
 
-        # Initialize planner agent
-        self.planner = AssistantAgent(
-            name="planner",
+        # Simplified: Just one classifier agent that does both classification and response
+        self.classifier = AssistantAgent(
+            name="classifier",
             model_client=self.model_client,
             system_message=(
-                "Tasks:\n"
-                f"-Pass the payload as plain text to predefined topic agent: {', '.join(self.topics)}.\n"
-                "- Wait topic agent compose the final response and say TERMINATE ."
-                "- I do not provide answer to user question.\n"
+                "You are a classification and response agent. Classify user messages into these categories:\n"
+                "1. payload_type_1: General product inquiries, features, specifications\n"
+                "2. payload_type_2: Purchase-related questions, pricing, availability\n"
+                "3. payload_type_3: Support issues, problems, complaints\n"
+                "4. undefined: Messages that don't fit the above categories\n\n"
+                "Respond with a JSON object containing:\n"
+                "- 'category': the classification category\n"
+                "- 'explanation': brief reason for classification\n"
+                "- 'response': helpful response to the user\n"
+                "Then say TERMINATE to end the conversation."
             ),
         )
 
-    def add_topic_agent(self, agent_name: str, system_message: str):
-        """Add a topic agent to the conversation pattern"""
-        topic_agent = AssistantAgent(
-            name=agent_name,
-            model_client=self.model_client,
-            system_message=system_message,
+        # Simple user proxy to start the conversation
+        self.user_proxy = UserProxyAgent(
+            name="user_proxy",
+            human_input_mode="NEVER",
         )
-        self.topic_agents.append(topic_agent)
+
+    def add_topic_agent(self, agent_name: str, system_message: str):
+        """Add a topic agent - simplified to do nothing since we use single classifier"""
+        pass
 
     async def get_conversation_response(self, input_message: str) -> Tuple[str, str]:
         """
-        This function is the main entry point for the conversation pattern. It takes a message as input and returns a
-        response. Make sure that you have added the necessary topic agents and agent topic chats before
-        calling this function.
+        Simplified conversation with just classifier + user proxy in round-robin (max 2 turns)
         """
         try:
-            # Create a group chat with all agents
-            all_agents = [self.planner] + self.topic_agents
+            # Create a simple round-robin team with just 2 agents
+            team = RoundRobinGroupChat(participants=[self.user_proxy, self.classifier])
 
-            # Create a group chat team
-            team = SelectorGroupChat(
-                participants=all_agents,
-                model_client=self.model_client,
-                selector_prompt="Select the most appropriate agent to handle the task based on the topic",
-            )
-
-            # Run the conversation
+            # Run with a much simpler task and max 2 turns
             result = await team.run(
-                task=(
-                    "Extract insights from the payload, ensuring that only one type of topic agent is selected. \n"
-                    "The output must be in JSON format, containing only the JSON string within {} and no additional text outside."
-                    "Payload: " + input_message
-                )
+                task=f"Classify and respond to this message: {input_message}",
+                max_turns=2,  # Much faster - just user proxy -> classifier -> done
             )
 
             # Get the final message content
@@ -117,7 +111,12 @@ class ConversationPattern:
 
         except Exception as e:
             logger.error(f"Error in conversation response: {e}")
-            return f"Error: {str(e)}", self.context
+            error_response = {
+                "category": "payload_type_1",
+                "explanation": "Error occurred during classification",
+                "response": "I apologize, but I encountered an issue. How can I help you today?",
+            }
+            return str(error_response), str(e)
 
     async def close(self):
         """Close the model client connection"""
