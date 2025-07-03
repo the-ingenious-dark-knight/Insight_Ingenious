@@ -14,9 +14,7 @@ The `ConversationPattern` class is the foundation for defining how agents intera
 |---------|-------------|----------|
 | `classification_agent` | Classifies input and routes to topic-specific agents | Content classification, intent detection |
 | `knowledge_base_agent` | Searches and retrieves information from knowledge bases | Question answering, information retrieval |
-| `pandas_agent` | Processes and analyzes data using pandas | Data analysis, visualization |
 | `sql_manipulation_agent` | Generates and executes SQL queries | Database interactions, data querying |
-| `web_critic_agent` | Searches the web and fact-checks information | Research, fact verification |
 | `education_expert` | Generates educational content and lesson plans | Educational material creation (pattern only) |
 
 #### Key Methods
@@ -34,9 +32,7 @@ The `ConversationFlow` class implements specific use cases using conversation pa
 |------|-------------|--------------|
 | `classification_agent` | Routes inputs to specialized agents | `classification_agent` |
 | `knowledge_base_agent` | Answers questions using knowledge bases | `knowledge_base_agent` |
-| `pandas_agent` | Analyzes data and creates visualizations | `pandas_agent` |
 | `sql_manipulation_agent` | Executes SQL queries based on natural language | `sql_manipulation_agent` |
-| `web_critic_agent` | Searches the web and fact-checks information | `web_critic_agent` |
 
 #### Key Methods
 
@@ -53,7 +49,6 @@ Agents are specialized AI entities that perform specific tasks in the conversati
 | `AssistantAgent` | Standard agent for task completion | All patterns |
 | `UserProxyAgent` | Represents the user in agent conversations | All patterns |
 | `RetrieveUserProxyAgent` | User proxy with document retrieval capabilities | Knowledge-based patterns |
-| `MultimodalConversableAgent` | Agent that can process images and text | `pandas_agent` |
 
 #### Agent Definition
 

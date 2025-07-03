@@ -81,10 +81,6 @@ Insight Ingenious provides multiple conversation workflows with different config
 
 ### 📊 **Database Required**
 - `sql_manipulation_agent` - Execute SQL queries
-- `pandas_agent` - Data analysis with pandas
-
-### 🌐 **Web Search** (currently mock)
-- `web_critic_agent` - Web search and fact-checking
 
 **📋 See [Workflow Configuration Requirements](docs/workflows/README.md) for detailed setup instructions.**
 

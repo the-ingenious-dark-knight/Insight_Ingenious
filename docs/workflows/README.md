@@ -23,12 +23,6 @@ These workflows need Azure Cognitive Search configuration:
 These workflows need database connections:
 
 - **sql_manipulation_agent**: Execute SQL queries on Azure SQL or local databases
-- **pandas_agent**: Data analysis using local CSV/database files
-
-### 🌐 Requires Web Search Services
-These workflows need web search capabilities:
-
-- **web_critic_agent**: Perform web search and fact-checking
 
 ### 📄 Requires Document Processing Services
 These workflows need Azure Document Intelligence (optional):
@@ -139,45 +133,6 @@ azure_sql_services:
 
 ---
 
-### pandas_agent (Local Data Required)
-
-**Purpose**: Data analysis and visualization using pandas
-
-**Configuration Required**:
-```yaml
-# config.yml
-local_sql_db:
-  database_path: "/tmp/sample_sql.db"
-  sample_csv_path: "./ingenious/sample_dataset/cleaned_students_performance.csv"
-  sample_database_name: "sample_data"
-```
-
-**What you need to provide**:
-- CSV data file for analysis
-- Local SQLite database path
-
-**Without this configuration**: The workflow will fall back to mock data or fail during data operations.
-
----
-
-### web_critic_agent (Web Search Required)
-
-**Purpose**: Perform web search and fact-checking
-
-**Configuration Required**:
-```yaml
-# This workflow currently uses mock search results for testing
-# Production deployment would require web search API configuration
-```
-
-**What you need to provide**:
-- Currently uses mock data - no external configuration required for testing
-- Production use would require web search API (Bing, Google, etc.)
-
-**Without this configuration**: Works with mock data for testing purposes.
-
----
-
 ### classification_agent (Minimal Configuration)
 
 **Purpose**: Classify user input and route to appropriate topic agents
@@ -240,12 +195,12 @@ export AZURE_DOC_INTEL_KEY="your-api-key"
 4. Add Azure Search configuration to config files
 5. Test with knowledge_base_agent workflow
 
-### 3. Database Setup (sql_manipulation_agent, pandas_agent)
+### 3. Database Setup (sql_manipulation_agent)
 1. Complete minimal setup above
 2. Choose local SQLite or Azure SQL
 3. Configure database connection
 4. Prepare data (CSV for local, tables for Azure SQL)
-5. Test with sql_manipulation_agent or pandas_agent workflows
+5. Test with sql_manipulation_agent workflow
 
 ### 4. Full Setup (All workflows)
 1. Complete all setup steps above

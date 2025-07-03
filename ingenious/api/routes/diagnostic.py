@@ -63,20 +63,6 @@ async def workflow_status(
                 "optional_config": ["azure_sql_services", "local_sql_db"],
                 "external_services": ["Azure OpenAI", "Database (Azure SQL or SQLite)"],
             },
-            "pandas_agent": {
-                "description": "Data analysis and visualization using pandas",
-                "category": "Database Required",
-                "required_config": ["models", "chat_service", "local_sql_db"],
-                "optional_config": [],
-                "external_services": ["Azure OpenAI", "Local data files"],
-            },
-            "web_critic_agent": {
-                "description": "Perform web search and fact-checking",
-                "category": "Web Search (Mock)",
-                "required_config": ["models", "chat_service"],
-                "optional_config": [],
-                "external_services": ["Azure OpenAI"],
-            },
         }
 
         if workflow_name not in workflow_requirements:
@@ -196,8 +182,6 @@ async def list_workflows(
             "bike_insights",
             "knowledge_base_agent",
             "sql_manipulation_agent",
-            "pandas_agent",
-            "web_critic_agent",
         ]
 
         workflow_statuses = []

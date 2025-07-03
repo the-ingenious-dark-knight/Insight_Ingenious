@@ -94,36 +94,6 @@ curl -X POST http://localhost:8081/api/v1/chat \
 - Azure SQL Database OR local SQLite database
 - Database connection string in profiles.yml
 
-#### Pandas Agent
-Data analysis and visualization using pandas:
-
-```bash
-curl -X POST http://localhost:8081/api/v1/chat \
-  -H "Content-Type: application/json" \
-  -d '{
-    "user_prompt": "Analyze the dataset and create visualizations showing performance trends",
-    "conversation_flow": "pandas_agent"
-  }'
-```
-
-**Requirements:**
-- Local CSV data files
-- SQLite database configuration
-
-### 🌐 Web Search Workflows
-
-#### Web Critic Agent
-Perform web search and fact-checking (currently uses mock data):
-
-```bash
-curl -X POST http://localhost:8081/api/v1/chat \
-  -H "Content-Type: application/json" \
-  -d '{
-    "user_prompt": "Fact-check this claim: Solar energy is now cheaper than fossil fuels",
-    "conversation_flow": "web_critic_agent"
-  }'
-```
-
 ## 🔧 Configuration Management
 
 ### Check Workflow Status
@@ -369,8 +339,8 @@ def handle_webhook():
     # Route to appropriate workflow based on content
     if 'search' in user_message.lower():
         workflow = 'knowledge_base_agent'
-    elif 'data' in user_message.lower() or 'analysis' in user_message.lower():
-        workflow = 'pandas_agent'
+    elif 'sql' in user_message.lower() or 'database' in user_message.lower():
+        workflow = 'sql_manipulation_agent'
     else:
         workflow = 'classification_agent'
 
@@ -449,8 +419,7 @@ results = asyncio.run(process_batch(messages))
 - **Simple classification/routing**: `classification_agent`
 - **Domain-specific analysis**: `bike_insights` (or create custom)
 - **Knowledge retrieval**: `knowledge_base_agent`
-- **Data analysis**: `pandas_agent` or `sql_manipulation_agent`
-- **Fact-checking**: `web_critic_agent`
+- **Database queries**: `sql_manipulation_agent`
 
 ### 2. Handle Configuration Gracefully
 

@@ -84,9 +84,7 @@ Conversation patterns define how agents interact:
 - `conversation_patterns/`: Contains different conversation pattern implementations
   - `classification_agent/`: Pattern for classifying inputs and routing to specialized agents
   - `knowledge_base_agent/`: Pattern for knowledge retrieval and question answering
-  - `pandas_agent/`: Pattern for data analysis
   - `sql_manipulation_agent/`: Pattern for SQL query generation and execution
-  - `web_critic_agent/`: Pattern for web search and fact-checking
   - `education_expert/`: Pattern for educational content generation (pattern only, no flow)
 
 #### Flows
@@ -96,9 +94,7 @@ Conversation flows implement specific use cases:
 - `conversation_flows/`: Contains flow implementations that use the patterns
   - `classification_agent/`: Flow for classification and routing
   - `knowledge_base_agent/`: Flow for knowledge base interactions
-  - `pandas_agent/`: Flow for data analysis
   - `sql_manipulation_agent/`: Flow for SQL queries
-  - `web_critic_agent/`: Flow for web search
 
 Note: `education_expert` exists as a pattern but does not have a corresponding flow implementation.
 
