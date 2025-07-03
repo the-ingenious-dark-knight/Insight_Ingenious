@@ -35,6 +35,11 @@ class ChainlitConfig(BaseModel):
     )
 
 
+class PromptTunerConfig(BaseModel):
+    mode: str = Field("fast_api", description="Mode for the prompt tuner")
+    port: int = Field(8000, description="Port for the prompt tuner")
+
+
 class ChatServiceConfig(BaseModel):
     type: str = Field(
         "multi_agent", description="Right now only valid value is 'multi_agent'"
@@ -128,6 +133,7 @@ class Config(BaseModel):
     tool_service: ToolServiceConfig
     chat_service: ChatServiceConfig
     chainlit_configuration: ChainlitConfig
+    prompt_tuner: PromptTunerConfig
     azure_search_services: List[AzureSearchConfig]
     web_configuration: WebConfig
     local_sql_db: LocaldbConfig

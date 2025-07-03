@@ -550,7 +550,7 @@ def run_prompt_tuner():
     app.run(
         debug=True,
         host=config.web_configuration.ip_address,
-        port=config.web_configuration.port,
+        port=config.prompt_tuner.port,
     )
 
 

@@ -53,7 +53,7 @@ os.makedirs(functional_test_dir, exist_ok=True)
 
 USERNAME = ig_deps.config.web_configuration.authentication.username
 PASSWORD = ig_deps.config.web_configuration.authentication.password
-PORT = ig_deps.config.web_configuration.port
+PORT = ig_deps.config.prompt_tuner.port
 HOST = ig_deps.config.web_configuration.ip_address
 
 fs = FileStorage(config=ig_deps.config)

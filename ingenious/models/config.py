@@ -66,6 +66,11 @@ class ChainlitConfig(config_ns_models.ChainlitConfig):
         super().__init__(enable=config.enable, authentication=profile.authentication)
 
 
+class PromptTunerConfig(config_ns_models.PromptTunerConfig):
+    def __init__(self, config: config_ns_models.PromptTunerConfig):
+        super().__init__(mode=config.mode, port=config.port)
+
+
 class ChatServiceConfig(config_ns_models.ChatServiceConfig):
     def __init__(
         self,
@@ -222,6 +227,7 @@ class Config(BaseModel):
     tool_service: ToolServiceConfig
     chat_service: ChatServiceConfig
     chainlit_configuration: ChainlitConfig
+    prompt_tuner: PromptTunerConfig
     azure_search_services: List[AzureSearchConfig]
     web_configuration: WebConfig
     receiver_configuration: ReceiverConfig
@@ -241,6 +247,7 @@ class Config(BaseModel):
             chainlit_configuration=ChainlitConfig(
                 config.chainlit_configuration, profile.chainlit_configuration
             ),
+            prompt_tuner=PromptTunerConfig(config.prompt_tuner),
             azure_search_services=[],
             web_configuration=WebConfig(
                 config.web_configuration, profile.web_configuration
