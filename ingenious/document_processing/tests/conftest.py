@@ -21,18 +21,18 @@ from __future__ import annotations
 
 import importlib
 import importlib.util
-from pathlib import Path
-from typing import Final, Iterator, Any
 from collections.abc import Callable
+from pathlib import Path
+from typing import Any, Final, Iterator
 
 import pytest
-from typer.testing import CliRunner, Result
 import requests
+from typer.testing import CliRunner, Result
 
-from ingenious.document_processing import extract as _extract_docs
-from ingenious.document_processing.extractor import _load
-from ingenious.document_processing.cli import doc_app
 from ingenious.cli import app as root_app
+from ingenious.document_processing import extract as _extract_docs
+from ingenious.document_processing.cli import doc_app
+from ingenious.document_processing.extractor import _load
 
 __all__ = [
     # constants

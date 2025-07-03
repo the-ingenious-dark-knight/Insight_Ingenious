@@ -2,6 +2,7 @@ import datetime
 import json
 import os
 from pathlib import Path
+
 import markdown
 
 # Ingenious imports
@@ -10,8 +11,8 @@ import ingenious.dependencies as ingen_deps
 from ingenious.files.files_repository import FileStorage
 from ingenious.models.chat import ChatRequest
 from ingenious.services.chat_service import ChatService
-from ingenious.utils.stage_executor import ProgressConsoleWrapper
 from ingenious.utils.namespace_utils import get_file_from_namespace_with_fallback
+from ingenious.utils.stage_executor import ProgressConsoleWrapper
 
 
 class RunBatches:

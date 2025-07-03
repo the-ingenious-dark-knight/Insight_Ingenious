@@ -39,7 +39,6 @@ def convert_csv_to_md_tables(content):
     if content is None:
         return ""
 
-    matches = re.findall(pattern, content, flags=re.DOTALL)
     # Find all CSV blocks and their preceding headings
     pattern_with_heading = r"(#+\s[^\n]+)\n+``` csv\s*(.*?)\s*```"
     matches_with_heading = re.findall(pattern_with_heading, content, flags=re.DOTALL)

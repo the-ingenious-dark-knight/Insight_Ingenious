@@ -43,7 +43,7 @@ chat_history:
 profile: "dev"  # Name of the profile to use from profiles.yml
 
 models:
-  - model: "gpt-4o"
+  - model: "gpt-4.1-nano"
     api_type: "azure"
     api_version: "2024-08-01-preview"
 
@@ -104,9 +104,9 @@ file_storage:
 ```yaml
 - name: "dev"
   models:
-    - model: "gpt-4o"
+    - model: "gpt-4.1-nano"
       api_key: "your-api-key"
-      base_url: "https://your-endpoint.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2024-08-01-preview"
+      base_url: "https://your-endpoint.openai.azure.com/openai/deployments/gpt-4.1-nano/chat/completions?api-version=2024-08-01-preview"
 
   chat_history:
     database_connection_string: "AccountEndpoint=..."
@@ -165,7 +165,7 @@ Configures LLM models:
 
 ```yaml
 models:
-  - model: "gpt-4o"  # Model identifier
+  - model: "gpt-4.1-nano"  # Model identifier
     api_type: "azure"  # API type (azure, openai)
     api_version: "2024-08-01-preview"  # API version
 ```
@@ -174,9 +174,9 @@ In `profiles.yml`:
 
 ```yaml
 models:
-  - model: "gpt-4o"
+  - model: "gpt-4.1-nano"
     api_key: "your-api-key"  # OpenAI or Azure OpenAI API key
-    base_url: "https://your-endpoint.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2024-08-01-preview"  # API endpoint
+    base_url: "https://your-endpoint.openai.azure.com/openai/deployments/gpt-4.1-nano/chat/completions?api-version=2024-08-01-preview"  # API endpoint
 ```
 
 ### Logging
@@ -366,7 +366,7 @@ For `classification_agent` and `bike_insights`, you only need basic Azure OpenAI
 # config.yml
 profile: dev
 models:
-  - model: "gpt-4o"
+  - model: "gpt-4.1-nano"
     api_type: azure
     api_version: "2024-08-01-preview"
 chat_service:
@@ -377,7 +377,7 @@ chat_service:
 # profiles.yml
 - name: "dev"
   models:
-    - model: "gpt-4o"
+    - model: "gpt-4.1-nano"
       api_key: "your-api-key"
       base_url: "https://your-endpoint.openai.azure.com/..."
 ```

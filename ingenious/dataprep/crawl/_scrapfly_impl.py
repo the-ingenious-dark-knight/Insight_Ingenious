@@ -26,7 +26,7 @@ from typing import List, Optional, Sequence, TypedDict
 from dotenv import find_dotenv, load_dotenv
 
 try:
-    from scrapfly import ScrapflyClient, ScrapeConfig
+    from scrapfly import ScrapeConfig, ScrapflyClient
     from scrapfly.errors import ScrapflyError as ScrapflyException
 
     SCRAPFLY_AVAILABLE = True

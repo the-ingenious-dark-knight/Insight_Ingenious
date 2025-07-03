@@ -5,7 +5,7 @@ from typing import List
 from autogen_agentchat.agents import AssistantAgent
 from autogen_agentchat.base import Response
 from autogen_agentchat.messages import TextMessage
-from autogen_core import Agent, MessageContext, RoutedAgent, TopicId, message_handler
+from autogen_core import MessageContext, RoutedAgent, TopicId, message_handler
 from autogen_core.models import (
     AssistantMessage,
     FunctionExecutionResultMessage,
@@ -164,7 +164,7 @@ class RelayAgent(RoutedAgent):
         self._response_count += 1
         content = "## " + ctx.sender.type + "\n" + message.content
         self._agent_messages.append(content)
-        agent_chat = self._agent.add_agent_chat(
+        self._agent.add_agent_chat(
             content=content, identifier=self._data_identifier, ctx=ctx
         )
         # await self._agent.log(agent_chat=agent_chat, queue=queue)

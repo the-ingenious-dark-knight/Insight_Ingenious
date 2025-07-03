@@ -79,6 +79,6 @@ class functional_tests:
                 event_type=event_type,
             )
 
-            response = await self.chat_service.get_chat_response(chat_request)
+            await self.chat_service.get_chat_response(chat_request)
 
             # print(response)

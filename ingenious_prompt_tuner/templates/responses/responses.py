@@ -279,10 +279,10 @@ def get_responses():
     events_html = ""
 
     # get the agent which has the return_in_response set to True
-    return_agent = None
+    # return_agent = None
     for agent in agents.get_agents():
         if agent.return_in_response:
-            return_agent = agent
+            # return_agent = agent
             break
 
     events: List[Event] = []
@@ -364,7 +364,7 @@ def get_agent_response_from_file():
 @requires_auth
 @requires_selected_revision
 def run_live_progress():
-    utils: utils_class = current_app.utils
+    # utils: utils_class = current_app.utils
     max_processed_events = request.args.get("max_processed_events", default=1, type=int)
 
     def generate():

@@ -77,8 +77,9 @@ from typing import Iterable, TypeAlias
 
 import fitz  # PyMuPDF
 
+from ingenious.document_processing.utils.fetcher import fetch, is_url
+
 from .base import DocumentExtractor, Element
-from ingenious.document_processing.utils.fetcher import is_url, fetch
 
 logger = logging.getLogger(__name__)
 

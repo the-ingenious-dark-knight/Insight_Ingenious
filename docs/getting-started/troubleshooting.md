@@ -13,7 +13,7 @@ Common issues and solutions when working with Insight Ingenious.
    ```yaml
    - name: "dev"
      models:
-       - model: "gpt-4o"
+       - model: "gpt-4.1-nano"
          api_key: "your-actual-api-key"  # ← Make sure this is set
          base_url: "https://your-endpoint.openai.azure.com/..."
    ```

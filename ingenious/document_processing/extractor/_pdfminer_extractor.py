@@ -51,7 +51,6 @@ page, page order preserved).
 
 from __future__ import annotations
 
-
 import io
 import logging
 import mimetypes
@@ -66,9 +65,9 @@ from pdfminer.pdfdocument import PDFPasswordIncorrect
 from pdfminer.pdfpage import PDFTextExtractionNotAllowed
 from pdfminer.pdfparser import PDFSyntaxError
 
+from ingenious.document_processing.utils.fetcher import fetch, is_url
 
 from .base import DocumentExtractor, Element
-from ingenious.document_processing.utils.fetcher import is_url, fetch
 
 logger = logging.getLogger(__name__)
 

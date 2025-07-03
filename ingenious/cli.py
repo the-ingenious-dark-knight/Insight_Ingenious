@@ -9,8 +9,8 @@ from pathlib import Path
 from sysconfig import get_paths
 from typing import Optional
 
-from dotenv import load_dotenv
 import typer
+from dotenv import load_dotenv
 
 # Load environment variables from .env file
 load_dotenv()
@@ -66,7 +66,7 @@ def run_rest_api_server(
     profile_dir: Annotated[
         str,
         typer.Argument(
-            help="The path to the profile file. If left blank it will use '$HOME/.ingenious/profiles.yml'"
+            help="The path to the profile file. If left blank it will use './profiles.yml' if it exists, otherwise '$HOME/.ingenious/profiles.yml'"
         ),
     ] = None,
     host: Annotated[
@@ -116,11 +116,30 @@ def run_rest_api_server(
     """
     if project_dir is not None:
         os.environ["INGENIOUS_PROJECT_PATH"] = project_dir
+    elif os.getenv("INGENIOUS_PROJECT_PATH") is None:
+        # Default to config.yml in current directory
+        default_config_path = Path.cwd() / "config.yml"
+        if default_config_path.exists():
+            os.environ["INGENIOUS_PROJECT_PATH"] = str(default_config_path)
+            print(f"Using default config path: {default_config_path}")
 
     if profile_dir is None:
-        # get home directory
-        home_dir = os.path.expanduser("~")
-        profile_dir = Path(home_dir) / Path(".ingenious") / Path("profiles.yml")
+        # Check if environment variable is set
+        if os.getenv("INGENIOUS_PROFILE_PATH") is None:
+            # Try project directory first
+            project_profile_path = Path.cwd() / "profiles.yml"
+            if project_profile_path.exists():
+                profile_dir = project_profile_path
+                print(f"Using profiles.yml from project directory: {profile_dir}")
+            else:
+                # Fall back to home directory
+                home_dir = os.path.expanduser("~")
+                profile_dir = Path(home_dir) / Path(".ingenious") / Path("profiles.yml")
+                print(f"Using profiles.yml from home directory: {profile_dir}")
+        else:
+            profile_dir = Path(os.getenv("INGENIOUS_PROFILE_PATH"))
+    else:
+        profile_dir = Path(profile_dir)
 
     print(f"Profile path: {profile_dir}")
     os.environ["INGENIOUS_PROFILE_PATH"] = str(profile_dir).replace("\\", "/")
@@ -222,18 +241,19 @@ def initialize_new_project():
     Generate template folders for a new project using the Ingenious framework.
 
     Creates the following structure:
-    • config.yml - Project configuration (non-sensitive settings)
-    • ~/.ingenious/profiles.yml - Environment profiles (API keys, secrets)
+    • config.yml - Project configuration (non-sensitive settings) in project directory
+    • profiles.yml - Environment profiles (API keys, secrets) in project directory
+    • .env.example - Example environment variables file
     • ingenious_extensions/ - Your custom agents and workflows
     • docker/ - Docker deployment templates
     • tmp/ - Temporary files and memory
 
     NEXT STEPS after running this command:
-    1. Update config.yml with your project settings
-    2. Update ~/.ingenious/profiles.yml with your API keys and credentials
+    1. Copy .env.example to .env and fill in your credentials
+    2. Update config.yml and profiles.yml as needed for your project
     3. Set environment variables:
-       export INGENIOUS_PROJECT_PATH=/path/to/config.yml
-       export INGENIOUS_PROFILE_PATH=$HOME/.ingenious/profiles.yml
+       export INGENIOUS_PROJECT_PATH=$(pwd)/config.yml
+       export INGENIOUS_PROFILE_PATH=$(pwd)/profiles.yml
     4. Run: ingen run-rest-api-server
 
     For workflow-specific configuration requirements, see:
@@ -319,34 +339,42 @@ def initialize_new_project():
     gitignore_path = Path.cwd() / ".gitignore"
     if not gitignore_path.exists():
         with open(gitignore_path, "w") as f:
-            git_ignore_content = ["*.pyc", "__pycache__", "*.log", "/files/", "/tmp/"]
+            git_ignore_content = [
+                "*.pyc",
+                "__pycache__",
+                "*.log",
+                "/files/",
+                "/tmp/",
+                ".env",
+            ]
             f.write("\n".join(git_ignore_content))
 
-    # create a config file
+    # create a config file in project directory
     template_config_path = (
         templates_paths["ingenious_extensions"] / "config.template.yml"
     )
     if template_config_path.exists():
         config_path = Path.cwd() / "config.yml"
-        shutil.copy2(template_config_path, config_path)
-        console.print(
-            f"[info]Config file created successfully at {config_path}.[/info]"
-        )
+        if not config_path.exists():
+            shutil.copy2(template_config_path, config_path)
+            console.print(
+                f"[info]Config file created successfully at {config_path}.[/info]"
+            )
+        else:
+            console.print(
+                f"[info]Config file already exists at {config_path}. Preserving existing configuration.[/info]"
+            )
     else:
         console.print(
             f"[warning]Config file template not found at {template_config_path}. Skipping...[/warning]"
         )
 
-    # create profile file
+    # create profile file in project directory
     template_profile_path = (
         templates_paths["ingenious_extensions"] / "profiles.template.yml"
     )
     if template_profile_path.exists():
-        # Get user home directory
-        home_dir = os.path.expanduser("~")
-        profile_dir_path = Path(home_dir) / Path(".ingenious")
-        os.makedirs(profile_dir_path, exist_ok=True)
-        profile_path = profile_dir_path / Path("profiles.yml")
+        profile_path = Path.cwd() / "profiles.yml"
         if not profile_path.exists():
             shutil.copy2(template_profile_path, profile_path)
             console.print(
@@ -361,14 +389,38 @@ def initialize_new_project():
             f"[warning]Profile file template not found at {template_profile_path}. Skipping...[/warning]"
         )
 
+    # create .env.example file
+    template_env_example_path = templates_paths["ingenious_extensions"] / ".env.example"
+    if template_env_example_path.exists():
+        env_example_path = Path.cwd() / ".env.example"
+        if not env_example_path.exists():
+            shutil.copy2(template_env_example_path, env_example_path)
+            console.print(
+                f"[info].env.example file created successfully at {env_example_path}[/info]"
+            )
+        else:
+            console.print(
+                f"[info].env.example file already exists at {env_example_path}. Preserving existing file.[/info]"
+            )
+    else:
+        console.print(
+            f"[warning].env.example template not found at {template_env_example_path}. Skipping...[/warning]"
+        )
+
     console.print("[info]Folder generation process completed.[/info]")
+    console.print(
+        "[warning]Before executing, copy .env.example to .env and fill in your credentials[/warning]"
+    )
     console.print(
         "[warning]Before executing set the environment variables INGENIOUS_PROJECT_PATH and INGENIOUS_PROFILE_PATH [/warning]"
     )
     console.print(
-        "[warning]Before executing update config.yml and profiles.yml [/warning]"
+        "[info]Recommended: export INGENIOUS_PROJECT_PATH=$(pwd)/config.yml[/info]"
     )
-    console.print("[info]To execute use ingen[/info]")
+    console.print(
+        "[info]Recommended: export INGENIOUS_PROFILE_PATH=$(pwd)/profiles.yml[/info]"
+    )
+    console.print("[info]To execute use ingen run-rest-api-server[/info]")
 
 
 @app.command()
@@ -485,20 +537,20 @@ def workflow_requirements(
         console.print(f"\n[bold blue]📋 {workflow.upper()} REQUIREMENTS[/bold blue]\n")
         console.print(f"[bold]Description:[/bold] {info['description']}")
         console.print(f"[bold]Category:[/bold] {info['category']}")
-        console.print(f"[bold]External Services Needed:[/bold]")
+        console.print("[bold]External Services Needed:[/bold]")
         for req in info["requirements"]:
             console.print(f"  • {req}")
-        console.print(f"\n[bold]Configuration Required:[/bold]")
+        console.print("\n[bold]Configuration Required:[/bold]")
         for config in info["config_needed"]:
             console.print(f"  • {config}")
         if info["optional"]:
-            console.print(f"\n[bold]Optional:[/bold]")
+            console.print("\n[bold]Optional:[/bold]")
             for opt in info["optional"]:
                 console.print(f"  • {opt}")
 
-        console.print(f"\n[bold yellow]🧪 TEST COMMAND:[/bold yellow]")
-        console.print(f"curl -X POST http://localhost:8081/api/v1/chat \\")
-        console.print(f'  -H "Content-Type: application/json" \\')
+        console.print("\n[bold yellow]🧪 TEST COMMAND:[/bold yellow]")
+        console.print("curl -X POST http://localhost:8081/api/v1/chat \\")
+        console.print('  -H "Content-Type: application/json" \\')
         console.print(
             f'  -d \'{{"user_prompt": "Hello", "conversation_flow": "{workflow}"}}\''
         )
@@ -514,8 +566,8 @@ def workflow_requirements(
 @app.command()
 def run_prompt_tuner():
     """Run the prompt tuner web application."""
-    from ingenious_prompt_tuner import create_app as prompt_tuner
     import ingenious.config.config as ingen_config
+    from ingenious_prompt_tuner import create_app as prompt_tuner
 
     config = ingen_config.get_config()
     app = prompt_tuner()

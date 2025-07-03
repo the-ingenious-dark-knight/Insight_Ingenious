@@ -51,8 +51,8 @@ For OCR needs, use azdocint engine.
 
 from __future__ import annotations
 
-import os
 import json
+import os
 import re
 import sys
 from pathlib import Path

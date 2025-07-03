@@ -60,7 +60,7 @@ uv run ingen workflow-requirements classification_agent
 ```yaml
 profile: dev
 models:
-  - model: "gpt-4o"  # Your deployment name
+  - model: "gpt-4.1-nano"  # Your deployment name
     api_type: azure
     api_version: "2024-08-01-preview"
 
@@ -77,10 +77,10 @@ chat_history:
 ```yaml
 - name: "dev"
   models:
-    - model: "gpt-4o"  # Must match config.yml
+    - model: "gpt-4.1-nano"  # Must match config.yml
       api_key: "your-azure-openai-api-key"
-      base_url: "https://your-endpoint.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2024-08-01-preview"
-      deployment: "gpt-4o"
+      base_url: "https://your-endpoint.openai.azure.com/openai/deployments/gpt-4.1-nano/chat/completions?api-version=2024-08-01-preview"
+      deployment: "gpt-4.1-nano"
 ```
 
 ### 3. Set Environment Variables

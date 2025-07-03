@@ -61,7 +61,7 @@ def List_To_Csv(obj: List, row_header_columns, name):
         if not isinstance(row, dict):
             try:
                 row = row.__dict__
-            except:
+            except Exception:
                 print(f"Could not convert {row} to dictionary")
         writer.writerow([row[key] for key in row_header_columns])
     output += csv_output.getvalue() + "\n```"

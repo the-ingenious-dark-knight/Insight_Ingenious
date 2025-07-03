@@ -174,4 +174,4 @@ def test_cli_stdout_json_integrity(_cli, cli_target: str, pdf_path: Path) -> Non
 
     result = _cli(str(pdf_path), entry=cli_target)
     assert result.exit_code == 0, result.output
-    assert any(l.lstrip().startswith("{") for l in result.stdout.splitlines())
+    assert any(line.lstrip().startswith("{") for line in result.stdout.splitlines())

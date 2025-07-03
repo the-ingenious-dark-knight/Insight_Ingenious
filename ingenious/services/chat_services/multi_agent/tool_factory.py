@@ -3,12 +3,8 @@ Tool factory module for multi-agent conversation flows.
 Contains utility functions for AI search, SQL operations, and other tools.
 """
 
-import asyncio
 import json
-import sqlite3
 from typing import List, Tuple
-
-import ingenious.config.config as config
 
 
 class ToolFunctions:
@@ -63,7 +59,7 @@ class SQL_ToolFunctions:
             table_name = "test_table"
             column_names = ["id", "name", "value", "created_at"]
             return table_name, column_names
-        except Exception as e:
+        except Exception:
             return "unknown_table", ["id", "data"]
 
     @staticmethod
@@ -83,7 +79,7 @@ class SQL_ToolFunctions:
             table_name = "test_table"
             column_names = ["id", "name", "value", "created_at"]
             return database_name, table_name, column_names
-        except Exception as e:
+        except Exception:
             return "unknown_db", "unknown_table", ["id", "data"]
 
     @staticmethod

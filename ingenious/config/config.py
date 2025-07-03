@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import re
 from pathlib import Path
 
 import yaml
@@ -15,6 +16,32 @@ from ingenious.models import profile as profile_models
 logger = logging.getLogger(__name__)
 
 
+def substitute_environment_variables(yaml_content: str) -> str:
+    """
+    Substitute environment variables in YAML content.
+    Supports patterns like ${VAR_NAME} and ${VAR_NAME:default_value}
+    """
+
+    def replacer(match):
+        var_expr = match.group(1)
+        if ":" in var_expr:
+            var_name, default_value = var_expr.split(":", 1)
+            return os.getenv(var_name, default_value)
+        else:
+            var_name = var_expr
+            env_value = os.getenv(var_name)
+            if env_value is None:
+                logger.warning(
+                    f"Environment variable {var_name} not found and no default provided"
+                )
+                return match.group(0)  # Return original if no env var found
+            return env_value
+
+    # Pattern matches ${VAR_NAME} or ${VAR_NAME:default}
+    pattern = r"\$\{([^}]+)\}"
+    return re.sub(pattern, replacer, yaml_content)
+
+
 class Config(config_models.Config):
     """
     Class to handle loading the configuration file
@@ -24,10 +51,14 @@ class Config(config_models.Config):
     def from_yaml(file_path):
         with open(file_path, "r") as file:
             file_str = file.read()
+            # Substitute environment variables before parsing
+            file_str = substitute_environment_variables(file_str)
             return Config.from_yaml_str(file_str)
 
     @staticmethod
     def from_yaml_str(config_yml):
+        # Substitute environment variables in the YAML string
+        config_yml = substitute_environment_variables(config_yml)
         yaml_data = yaml.safe_load(config_yml)
         json_data = json.dumps(yaml_data)
         config_ns: config_ns_models.Config
