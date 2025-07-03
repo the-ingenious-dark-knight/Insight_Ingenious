@@ -43,4 +43,3 @@ class ConversationPattern:
 
         return result.summary, ""
 ```
-
