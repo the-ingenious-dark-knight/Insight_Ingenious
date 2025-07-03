@@ -8,6 +8,8 @@ class ModelConfig(BaseModel):
     model: str
     api_key: str
     base_url: str
+    deployment: str = ""
+    api_version: str = ""
 
 
 class ChatHistoryConfig(BaseModel):

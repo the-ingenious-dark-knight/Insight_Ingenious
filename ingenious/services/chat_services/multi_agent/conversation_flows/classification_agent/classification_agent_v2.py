@@ -28,7 +28,10 @@ class ConversationFlow:
         llm_config = {
             "model": _config.models[0].model,
             "api_key": _config.models[0].api_key,
-            "base_url": _config.models[0].base_url,
+            "azure_endpoint": _config.models[0].base_url,
+            "azure_deployment": _config.models[0].deployment,
+            "api_version": _config.models[0].api_version,
+            "api_type": "azure",
         }
         memory_path = _config.chat_history.memory_path
 

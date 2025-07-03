@@ -26,17 +26,15 @@ class ConversationPattern:
         self.context = ""
 
         # Create Azure OpenAI model client from config
-        # Extract base URL and endpoint for Azure OpenAI format
-        base_url = default_llm_config.get("base_url", "http://127.0.0.1:3001")
-        if "/openai/deployments/" in base_url:
-            # Extract the base endpoint without the deployment path
-            base_url = base_url.split("/openai/deployments/")[0]
-
         self.model_client = AzureOpenAIChatCompletionClient(
-            model=default_llm_config.get("model", "gpt-4o"),
+            model=default_llm_config.get(
+                "azure_deployment", default_llm_config.get("model", "gpt-4o")
+            ),
             api_key=default_llm_config.get("api_key", "mock-openai-key"),
-            azure_endpoint=base_url,
-            api_version="2024-08-01-preview",
+            azure_endpoint=default_llm_config.get(
+                "azure_endpoint", "http://127.0.0.1:3001"
+            ),
+            api_version=default_llm_config.get("api_version", "2024-08-01-preview"),
         )
 
         # Initialize context file

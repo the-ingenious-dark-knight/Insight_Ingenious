@@ -20,7 +20,16 @@ class ConversationFlow:
         thread_chat_history: list[str, str] = [],
     ) -> ChatResponse:
         _config = config.get_config()
-        llm_config = _config.models[0].__dict__
+        model_config = _config.models[0]
+        # Map Azure OpenAI config fields to expected autogen parameters
+        llm_config = {
+            "model": model_config.model,
+            "api_key": model_config.api_key,
+            "azure_endpoint": model_config.base_url,
+            "azure_deployment": model_config.deployment,
+            "api_version": model_config.api_version,
+            "api_type": "azure",
+        }
         memory_path = _config.chat_history.memory_path
 
         # Initialize the knowledge base agent pattern, you only need to add defined topics here

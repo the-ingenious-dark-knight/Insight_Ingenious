@@ -30,14 +30,24 @@ class ChatHistoryConfig(config_ns_models.ChatHistoryConfig):
 class ModelConfig(config_ns_models.ModelConfig):
     api_key: str
     base_url: str
+    deployment: str = ""
 
     def __init__(
         self, config: config_ns_models.ModelConfig, profile: profile_models.ModelConfig
     ):
+        # Get deployment and api_version from profile if available, otherwise from config
+        deployment = getattr(profile, "deployment", "") or getattr(
+            config, "deployment", ""
+        )
+        api_version = getattr(profile, "api_version", "") or getattr(
+            config, "api_version", ""
+        )
+
         super().__init__(
             model=config.model,
             api_type=config.api_type,
-            api_version=config.api_version,
+            api_version=api_version,
+            deployment=deployment,
             base_url=profile.base_url,
             api_key=profile.api_key,
         )
