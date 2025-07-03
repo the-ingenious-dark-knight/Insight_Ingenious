@@ -7,6 +7,10 @@ Insight Ingenious lets you orchestrate multiple AI agents and deploy them as an 
 
 ## Quickstart
 
+**Prerequisites:**
+
+- **Python 3.13 or higher**
+
 1. Clone the repository:
     ```bash
     git clone https://github.com/Insight-Services-APAC/Insight_Ingenious.git
