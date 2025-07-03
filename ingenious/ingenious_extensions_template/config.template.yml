@@ -2,10 +2,10 @@
 profile: dev # Defines the environment or profile for the deployment (e.g., dev, prod). NOTE this must match the profile in the profile.yml file
 # Models Configuration
 models:
-  - model: ${AZURE_OPENAI_MODEL_NAME:gpt-4o} # Specifies the model being used (e.g., GPT-4 in Azure deployment)
+  - model: ${AZURE_OPENAI_MODEL_NAME:gpt-4.1-nano} # Specifies the model being used (e.g., GPT-4 in Azure deployment)
     api_type: azure # API type indicates that the deployment is through Azure
-    api_version: ${AZURE_OPENAI_API_VERSION:2024-08-01-preview} # API version being used in the deployment
-    deployment: ${AZURE_OPENAI_DEPLOYMENT:gpt-4o} # Azure deployment name
+    api_version: ${AZURE_OPENAI_API_VERSION:2024-12-01-preview} # API version being used in the deployment
+    deployment: ${AZURE_OPENAI_DEPLOYMENT:gpt-4.1-nano} # Azure deployment name
 # Logging Configuration
 logging:
   root_log_level: debug # Root logging level for overall logging output (can be debug, info, warning, error)
