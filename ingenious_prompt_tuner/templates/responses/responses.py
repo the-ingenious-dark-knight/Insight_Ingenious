@@ -1,6 +1,7 @@
 import asyncio
 import json
 import subprocess
+from datetime import datetime
 from pathlib import Path
 from typing import List
 
@@ -20,6 +21,7 @@ import ingenious_prompt_tuner.payload as rp1
 from ingenious.models.agent import AgentChat, Agents
 from ingenious.models.test_data import Event, Events
 from ingenious_prompt_tuner.event_processor import functional_tests
+from ingenious_prompt_tuner.response_wrapper import AgentChatWrapper
 from ingenious_prompt_tuner.utilities import (
     get_selected_revision_direct_call,
     requires_auth,
@@ -167,38 +169,56 @@ def get_agent_response():
             <div class="markdown-content" markdown='1'><p>No response found - this agent may not be used for this event type</p></div>
         """
     else:
-        agent_chat: AgentChat = AgentChat(**json.loads(agent_response_md))
+        try:
+            # Load the agent chat data with our wrapper to handle the Response object
+            agent_chat_data = json.loads(agent_response_md)
+            agent_chat_wrapper = AgentChatWrapper.from_dict(agent_chat_data)
+            
+            # Access the chat message content via our wrapper
+            if agent_chat_wrapper.chat_response_wrapper:
+                message_content = agent_chat_wrapper.chat_response_wrapper.chat_message_content
+                inner_messages = agent_chat_wrapper.chat_response_wrapper.inner_messages
+                
+                if inner_messages:
+                    message_content += "\n\n### Inner Messages \n\n"
+                    message_content += (
+                        "```json\n"
+                        + json.dumps(
+                            {
+                                "inner_messages": inner_messages
+                            },
+                            indent=4
+                        )
+                        + "\n\n```"
+                    )
+            else:
+                message_content = "No message content available"
 
-        message_content = agent_chat.chat_response.chat_message.content
-        if agent_chat.chat_response.inner_messages:
-            message_content += "\n\n### Inner Messages \n\n"
-            message_content += (
-                "```json\n"
-                + agent_chat.model_dump_json(
-                    include={"chat_response"},
-                    # exclude={'chat_response': {'chat_message'}},
-                    indent=4,
-                )
-                + "\n\n```"
+            html_content = markdown.markdown(
+                message_content,
+                extensions=["extra", "md_in_html", "toc", "fenced_code", "codehilite"],
             )
 
-        html_content = markdown.markdown(
-            message_content,
-            extensions=["extra", "md_in_html", "toc", "fenced_code", "codehilite"],
-        )
-
-        agent_response_md1 = render_template(
-            "responses/agent_response.html",
-            agent_response=html_content,
-            prompt_tokens=agent_chat.prompt_tokens,
-            completion_tokens=agent_chat.completion_tokens,
-            identifier=identifier,
-            event_type=event_type,
-            agent_name=agent_chat.target_agent_name,
-            execution_time=agent_chat.get_execution_time_formatted(),
-            start_time=agent_chat.get_start_time_formatted(),
-            identifier_group=identifier_group,
-        )
+            agent_response_md1 = render_template(
+                "responses/agent_response.html",
+                agent_response=html_content,
+                prompt_tokens=agent_chat_wrapper.prompt_tokens,
+                completion_tokens=agent_chat_wrapper.completion_tokens,
+                identifier=identifier,
+                event_type=event_type,
+                agent_name=agent_chat_wrapper.target_agent_name,
+                execution_time=f"{int((agent_chat_wrapper.end_time - agent_chat_wrapper.start_time) // 60)}:{int((agent_chat_wrapper.end_time - agent_chat_wrapper.start_time) % 60):02d}",
+                start_time=datetime.fromtimestamp(agent_chat_wrapper.start_time).strftime("%H:%M:%S") if agent_chat_wrapper.start_time else "",
+                identifier_group=identifier_group,
+            )
+        except Exception as e:
+            # If there's an error, display it in the response
+            agent_response_md1 = f"""
+                <div class="markdown-content" markdown='1'>
+                <p>Error loading agent response: {str(e)}</p>
+                <pre>{agent_response_md}</pre>
+                </div>
+            """
     return agent_response_md1
 
 
@@ -231,28 +251,39 @@ def get_agent_inputs():
     agent_response_md = asyncio.run(
         utils.fs.read_file(file_name=file_name, file_path=output_path)
     )
-    agent_chat: AgentChat = AgentChat(**json.loads(agent_response_md))
+    
+    try:
+        # Load the agent chat data with our wrapper to handle the Response object
+        agent_chat_data = json.loads(agent_response_md)
+        agent_chat_wrapper = AgentChatWrapper.from_dict(agent_chat_data)
+        
+        if input_type == "user_input":
+            content = agent_chat_wrapper.user_message
+        else:
+            content = agent_chat_wrapper.system_prompt
 
-    if input_type == "user_input":
-        content = agent_chat.user_message
-    else:
-        content = agent_chat.system_prompt
+        # Convert any csv data to a table
+        content_csvs_converted = rp1.convert_csv_to_md_tables(content)
 
-    # Convert any csv data to a table
-    content_csvs_converted = rp1.convert_csv_to_md_tables(content)
+        html_content = markdown.markdown(
+            content_csvs_converted,
+            extensions=["extra", "md_in_html", "toc", "fenced_code", "codehilite"],
+        )
 
-    html_content = markdown.markdown(
-        content_csvs_converted,
-        extensions=["extra", "md_in_html", "toc", "fenced_code", "codehilite"],
-    )
-
-    agent_response_md1 = render_template(
-        "responses/agent_inputs.html",
-        agent_input=html_content,
-        input_type=input_type,
-        event_type=event_type,
-        agent_name=agent_chat.target_agent_name,
-    )
+        agent_response_md1 = render_template(
+            "responses/agent_inputs.html",
+            agent_input=html_content,
+            input_type=input_type,
+            event_type=event_type,
+            agent_name=agent_chat_wrapper.target_agent_name,
+        )
+    except Exception as e:
+        # If there's an error, display it in the response
+        agent_response_md1 = f"""
+            <div class="markdown-content">
+            <p>Error loading agent input: {str(e)}</p>
+            </div>
+        """
     return agent_response_md1
 
 
