@@ -8,7 +8,6 @@ ${VAR_NAME:default_value} or ${VAR_NAME}
 
 import os
 import re
-from typing import Any, Dict
 
 
 def substitute_env_vars(content: str) -> str:

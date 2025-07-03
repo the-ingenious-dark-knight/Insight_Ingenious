@@ -1,4 +1,3 @@
-import asyncio
 import os
 import uuid
 from datetime import datetime
@@ -22,7 +21,7 @@ class ConversationFlow:
         thread_memory = chatrequest.thread_memory
         memory_record_switch = chatrequest.memory_record
         event_type = chatrequest.event_type
-        thread_chat_history = chatrequest.thread_chat_history
+        # thread_chat_history = chatrequest.thread_chat_history
 
         _config = config.get_config()
         llm_config = {
@@ -46,7 +45,7 @@ class ConversationFlow:
             message, overBall, timestamp, match_id, feed_id = (
                 match.create_detailed_summary()
             )
-        except:
+        except Exception:
             message = "payload undefined"
             timestamp = str(datetime.now())
             match_id = "-"
@@ -81,7 +80,7 @@ class ConversationFlow:
                     feedId=feed_id,
                     overBall=overBall,
                 )
-            except Exception as e:
+            except Exception:
                 # Fallback system message if template not found
                 system_message = f"I **ONLY** respond when addressed by `planner`, focusing solely on insights about {topic}."
                 if topic == "undefined":

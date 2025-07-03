@@ -212,7 +212,7 @@ def home():
                 revisions = yaml.safe_load(f) or []
         else:
             revisions = []
-    except Exception as e:
+    except Exception:
         # If there are any file issues, just show empty revisions
         revisions = []
 

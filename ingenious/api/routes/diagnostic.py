@@ -2,7 +2,6 @@ import logging
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, Request
-from fastapi.security import HTTPBasicCredentials
 from typing_extensions import Annotated
 
 import ingenious.dependencies as igen_deps

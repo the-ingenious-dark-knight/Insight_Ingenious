@@ -74,10 +74,10 @@ without touching production code.
 from __future__ import annotations
 
 import os
-import time
-import pytest
 
+import pytest
 from scrapfly.errors import ScrapflyError  # explicit type used in assertions
+
 from ingenious.dataprep.crawl import Crawler
 
 # =========================================================================== #

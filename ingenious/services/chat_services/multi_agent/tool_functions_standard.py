@@ -33,15 +33,14 @@ class ToolFunctions:
             vector_queries=None,
         )  # vector_queries can input the query as a vector
         text_results = ""
-        title = ""
         for result in results:
             captions = result["@search.captions"]
             for caption in captions:
                 text_results = text_results + "; " + caption.text
-                if "title" in result:
-                    title = result["title"]
-                else:
-                    title = ""
+                # if "title" in result:
+                #     title = result["title"]
+                # else:
+                #     title = ""
         return text_results
 
     @staticmethod

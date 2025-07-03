@@ -1,5 +1,3 @@
-import json
-
 import autogen
 import autogen.retrieve_utils
 import autogen.runtime_logging
@@ -23,16 +21,16 @@ class ConversationPattern:
         response. Make sure that you have added the necessary topic agents and agent topic chats before
         calling this function.
         """
-        chat_history_json = json.dumps(thread_chat_history)
+        # chat_history_json = json.dumps(thread_chat_history)
         _educator = agents.GetAgent("education_expert")
         # _educator= agents.GetAgent("education_expert")
         educator_tasks = [_educator["Tasks"][0]["Tasks"]]
 
-        curriculum_expert = autogen.AssistantAgent(
-            name="curriculum_expert",
-            description="You are an curriculum expert assistant. Your role is to provide detailed lesson plans based on the Lesson Plans Summary.",
-            llm_config=self.default_llm_config,
-        )
+        # curriculum_expert = autogen.AssistantAgent(
+        #     name="curriculum_expert",
+        #     description="You are an curriculum expert assistant. Your role is to provide detailed lesson plans based on the Lesson Plans Summary.",
+        #     llm_config=self.default_llm_config,
+        # )
 
         educator = autogen.AssistantAgent(
             name="educator",
@@ -54,7 +52,7 @@ class ConversationPattern:
         # manager = autogen.GroupChatManager(groupchat=groupchat, llm_config=self.default_llm_config)
         # chat_results = user.initiate_chat(manager, message=educator_tasks[0])
 
-        chat_results = user.initiate_chats(
+        user.initiate_chats(
             [
                 {
                     "recipient": educator,

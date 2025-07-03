@@ -14,8 +14,8 @@ If this test fails the *public* interface of the CLI was broken by a refactor.
 from __future__ import annotations
 
 import importlib
-from typer.testing import CliRunner
 
+from typer.testing import CliRunner
 
 # =========================================================================== #
 # 1. Tiny stub that looks like the real Crawler but never touches the wire

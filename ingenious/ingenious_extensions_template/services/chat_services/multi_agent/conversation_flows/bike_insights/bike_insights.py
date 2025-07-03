@@ -37,7 +37,7 @@ class ConversationFlow(IConversationFlow):
         chat_request: ChatRequest,  # This needs to be an object that implements the IChatRequest model so you can extend this by creating a new model in the models folder
     ) -> ChatResponse:
         message = json.loads(chat_request.user_prompt)
-        event_type = chat_request.event_type
+        # event_type = chat_request.event_type
 
         #  Get your agents and agent chats from your custom class in models folder
         project_agents = ProjectAgents()
@@ -66,7 +66,7 @@ class ConversationFlow(IConversationFlow):
         logger.handlers = [llm_logger]
 
         # Note you can access llm models from the configuration array
-        llm_config = self.Get_Models()[0]
+        # llm_config = self.Get_Models()[0]
         # Note the base IConversationFlow gives you a logger for logging purposes
         self._logger.debug("Starting Flow")
 
@@ -168,8 +168,8 @@ class ConversationFlow(IConversationFlow):
             agent_name="summary", next_agent_topic="bike_lookup_agent"
         )
 
-        results = []
-        tasks = []
+        # results = []
+        # tasks = []
 
         runtime.start()
 
@@ -209,7 +209,7 @@ class ConversationFlow(IConversationFlow):
         )
 
         summary_response: AgentChat = next(
-            l for l in llm_logger._queue if l.chat_name == "summary"
+            chat for chat in llm_logger._queue if chat.chat_name == "summary"
         )
 
         message: ChatHistoryMessage = ChatHistoryMessage(

@@ -1,15 +1,6 @@
-import asyncio
-import json
-import os
-import uuid
-from datetime import datetime
-from pathlib import Path
-
-from jinja2 import Environment, FileSystemLoader
 from openai import AsyncAzureOpenAI
 
 import ingenious.config.config as config
-import ingenious.utils.match_parser as mp
 from ingenious.models.chat import ChatRequest
 
 
@@ -23,9 +14,9 @@ class ConversationFlow:
             topics = ["general"]
         elif isinstance(topics, str):
             topics = [topics]
-        thread_memory = chatrequest.thread_memory
-        memory_record_switch = chatrequest.memory_record
-        event_type = chatrequest.event_type
+        # thread_memory = chatrequest.thread_memory
+        # memory_record_switch = chatrequest.memory_record
+        # event_type = chatrequest.event_type
 
         _config = config.get_config()
 
@@ -74,7 +65,7 @@ Response: [helpful response to the user's message]
             memory_summary = f"Classified message: {message[:50]}..."
 
         except Exception as e:
-            result = f"Fast classification completed. Category: payload_type_1. Response: I understand you're looking for information. How can I help you today?"
+            result = "Fast classification completed. Category: payload_type_1. Response: I understand you're looking for information. How can I help you today?"
             memory_summary = f"Classification error handled: {str(e)[:50]}..."
 
         finally:

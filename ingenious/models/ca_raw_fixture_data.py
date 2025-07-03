@@ -941,12 +941,12 @@ class RootModel(BaseModel):
             balls = self.Get_All_Balls()
             if not isinstance(balls, list):
                 balls = []
-        except:
+        except Exception:
             balls = []
 
         try:
             players = {p.Id: {"Id": p.Id, "Name": p.DisplayName} for p in self.Players}
-        except:
+        except Exception:
             players = {}
 
         # Helper function to aggregate stats by a given key
@@ -967,7 +967,7 @@ class RootModel(BaseModel):
                     group["TotalRunsConceded"] += ball.get("RunsConceded", 0)
                     group["TotalRunsScored"] += ball.get("RunsScored", 0)
                     group["Wickets"] += 1 if ball.get("IsWicket", False) else 0
-                except:
+                except Exception:
                     pass
             return [{key: k, **v} for k, v in grouped_stats.items()]
 
@@ -978,7 +978,7 @@ class RootModel(BaseModel):
                 stat["BowlerName"] = players.get(
                     stat.get("BowlerPlayerId", ""), {}
                 ).get("Name", "Unknown")
-        except:
+        except Exception:
             stats_by_bowler = []
 
         # Aggregate by BattingPlayerId
@@ -998,7 +998,7 @@ class RootModel(BaseModel):
                     group["TotalRunsConceded"] += ball.get("RunsConceded", 0)
                     group["TotalRunsScored"] += ball.get("RunsScored", 0)
                     group["Wickets"] += 1 if ball.get("IsWicket", False) else 0
-                except:
+                except Exception:
                     pass
 
             stats_by_batter = [
@@ -1011,7 +1011,7 @@ class RootModel(BaseModel):
                 }
                 for k, v in stats_by_batter.items()
             ]
-        except:
+        except Exception:
             stats_by_batter = []
 
         # Aggregate by both BattingPlayerId and BowlerPlayerId
@@ -1036,7 +1036,7 @@ class RootModel(BaseModel):
                     group["TotalRunsConceded"] += ball.get("RunsConceded", 0)
                     group["TotalRunsScored"] += ball.get("RunsScored", 0)
                     group["Wickets"] += 1 if ball.get("IsWicket", False) else 0
-                except:
+                except Exception:
                     pass
 
             stats_by_batter_bowler = [
@@ -1049,7 +1049,7 @@ class RootModel(BaseModel):
                 }
                 for k, v in stats_by_batter_bowler.items()
             ]
-        except:
+        except Exception:
             stats_by_batter_bowler = []
 
         # Generate CSV strings if requested
@@ -1097,7 +1097,7 @@ class RootModel(BaseModel):
                     name="Player_Ball",
                 )
                 return csv_string
-            except:
+            except Exception:
                 return None
         else:
             return {
@@ -1632,7 +1632,7 @@ class RootModel(BaseModel):
             }
             summaries_overall.append(summary_overall)
 
-            summary_length = {"PlayerId": player_id, "PlayerName": player_name}
+            # summary_length = {"PlayerId": player_id, "PlayerName": player_name}
 
             def summarize_measures(
                 player_balls,

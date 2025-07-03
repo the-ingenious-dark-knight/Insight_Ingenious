@@ -7,12 +7,14 @@ from fastapi import Depends, HTTPException, Request, status
 
 # Load environment variables from .env file
 load_dotenv()
-from fastapi.security import HTTPBasic, HTTPBasicCredentials
-from typing_extensions import Annotated
+# Import mock service for testing
+import sys
 from typing import Optional
 
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from typing_extensions import Annotated
+
 import ingenious.config.config as Config
-import ingenious.models.config as config_models
 from ingenious.db.chat_history_repository import (
     ChatHistoryRepository,
     DatabaseClientType,
@@ -22,17 +24,7 @@ from ingenious.files.files_repository import FileStorage
 from ingenious.services.chat_service import ChatService
 from ingenious.services.message_feedback_service import MessageFeedbackService
 
-# Import mock service for testing
-import sys
-import os
-
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../../.."))
-try:
-    from mock_openai_service import MockOpenAIService
-
-    USE_MOCK = True
-except ImportError:
-    USE_MOCK = False
 
 logger = logging.getLogger(__name__)
 security = HTTPBasic()

@@ -57,11 +57,11 @@ shared resources internally.
 
 from __future__ import annotations
 
-import os
-import logging
 import io
+import logging
+import os
 from abc import ABC, abstractmethod
-from typing import TypedDict, TypeAlias, Generator
+from typing import Generator, TypeAlias, TypedDict
 
 # ────────────────────────────────────────────────────────────────────────────
 # Public type aliases

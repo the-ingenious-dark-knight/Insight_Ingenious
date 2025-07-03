@@ -160,7 +160,7 @@ class DataLayer(cl_data.BaseDataLayer):
     async def get_element(
         self, thread_id: str, element_id: str
     ) -> Optional["ElementDict"]:
-        print("Getting element: ", element)
+        print("Getting element: ", element_id)
         pass
 
     @queue_until_user_message()

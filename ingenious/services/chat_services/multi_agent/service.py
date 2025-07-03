@@ -46,7 +46,7 @@ class multi_agent_chat_service:
 
         # Initialize additional response fields - to be populated later
         chat_request.thread_chat_history = [{"role": "user", "content": ""}]
-        thread_memory = ""
+        # thread_memory = ""
 
         # Check if thread exists
         if not chat_request.thread_id:
@@ -132,7 +132,7 @@ class multi_agent_chat_service:
 
                 if len(params) == 1 and params[0] not in ["self", "cls"]:
                     # Single parameter - likely ChatRequest
-                    print(f"DEBUG: Using single ChatRequest parameter")
+                    print("DEBUG: Using single ChatRequest parameter")
                     response_task = (
                         conversation_flow_service_class.get_conversation_response(
                             chat_request
@@ -140,7 +140,7 @@ class multi_agent_chat_service:
                     )
                 else:
                     # Multiple parameters - individual arguments
-                    print(f"DEBUG: Using individual parameters")
+                    print("DEBUG: Using individual parameters")
                     response_task = (
                         conversation_flow_service_class.get_conversation_response(
                             message=chat_request.user_prompt,
@@ -160,7 +160,7 @@ class multi_agent_chat_service:
                         )
                     )
 
-                print(f"DEBUG: About to await response_task")
+                print("DEBUG: About to await response_task")
                 agent_response_tuple = await response_task
                 print(f"DEBUG: Got agent_response_tuple: {type(agent_response_tuple)}")
 
@@ -174,14 +174,14 @@ class multi_agent_chat_service:
                 # Handle different response types
                 if isinstance(agent_response_tuple, ChatResponse):
                     # Already a ChatResponse object
-                    print(f"DEBUG: Response is already ChatResponse")
+                    print("DEBUG: Response is already ChatResponse")
                     agent_response = agent_response_tuple
                 elif (
                     isinstance(agent_response_tuple, tuple)
                     and len(agent_response_tuple) == 2
                 ):
                     # Tuple response (response_text, memory_summary)
-                    print(f"DEBUG: Converting tuple response to ChatResponse")
+                    print("DEBUG: Converting tuple response to ChatResponse")
                     response_text, memory_summary = agent_response_tuple
                     agent_response = ChatResponse(
                         thread_id=chat_request.thread_id,
@@ -193,7 +193,7 @@ class multi_agent_chat_service:
                     )
                 else:
                     # Handle single response case
-                    print(f"DEBUG: Converting single response to ChatResponse")
+                    print("DEBUG: Converting single response to ChatResponse")
                     agent_response = ChatResponse(
                         thread_id=chat_request.thread_id,
                         message_id=str(uuid_module.uuid4()),

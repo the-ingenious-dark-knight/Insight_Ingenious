@@ -9,8 +9,8 @@ from pathlib import Path
 from sysconfig import get_paths
 from typing import Optional
 
-from dotenv import load_dotenv
 import typer
+from dotenv import load_dotenv
 
 # Load environment variables from .env file
 load_dotenv()
@@ -537,20 +537,20 @@ def workflow_requirements(
         console.print(f"\n[bold blue]📋 {workflow.upper()} REQUIREMENTS[/bold blue]\n")
         console.print(f"[bold]Description:[/bold] {info['description']}")
         console.print(f"[bold]Category:[/bold] {info['category']}")
-        console.print(f"[bold]External Services Needed:[/bold]")
+        console.print("[bold]External Services Needed:[/bold]")
         for req in info["requirements"]:
             console.print(f"  • {req}")
-        console.print(f"\n[bold]Configuration Required:[/bold]")
+        console.print("\n[bold]Configuration Required:[/bold]")
         for config in info["config_needed"]:
             console.print(f"  • {config}")
         if info["optional"]:
-            console.print(f"\n[bold]Optional:[/bold]")
+            console.print("\n[bold]Optional:[/bold]")
             for opt in info["optional"]:
                 console.print(f"  • {opt}")
 
-        console.print(f"\n[bold yellow]🧪 TEST COMMAND:[/bold yellow]")
-        console.print(f"curl -X POST http://localhost:8081/api/v1/chat \\")
-        console.print(f'  -H "Content-Type: application/json" \\')
+        console.print("\n[bold yellow]🧪 TEST COMMAND:[/bold yellow]")
+        console.print("curl -X POST http://localhost:8081/api/v1/chat \\")
+        console.print('  -H "Content-Type: application/json" \\')
         console.print(
             f'  -d \'{{"user_prompt": "Hello", "conversation_flow": "{workflow}"}}\''
         )
@@ -566,8 +566,8 @@ def workflow_requirements(
 @app.command()
 def run_prompt_tuner():
     """Run the prompt tuner web application."""
-    from ingenious_prompt_tuner import create_app as prompt_tuner
     import ingenious.config.config as ingen_config
+    from ingenious_prompt_tuner import create_app as prompt_tuner
 
     config = ingen_config.get_config()
     app = prompt_tuner()

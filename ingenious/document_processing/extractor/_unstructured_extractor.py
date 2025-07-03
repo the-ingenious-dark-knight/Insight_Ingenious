@@ -58,8 +58,10 @@ import re
 import zipfile
 from pathlib import Path
 from typing import Any, Final, Iterable, TypeAlias
+
+from ingenious.document_processing.utils.fetcher import fetch, is_url
+
 from .base import DocumentExtractor, Element
-from ingenious.document_processing.utils.fetcher import is_url, fetch
 
 logger = logging.getLogger(__name__)
 

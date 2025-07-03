@@ -344,9 +344,7 @@ class LLMUsageTracker(logging.Handler):
                     tool_call_function=None,
                 )
 
-                write_message = await self._chat_history_database.add_message(
-                    message=message
-                )
+                await self._chat_history_database.add_message(message=message)
 
     async def post_chats_to_queue(self, target_queue: asyncio.Queue[AgentChat]):
         for agent_chat in self._queue:

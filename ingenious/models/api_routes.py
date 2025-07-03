@@ -2,9 +2,8 @@ import logging
 from abc import ABC, abstractmethod
 
 from fastapi import APIRouter, FastAPI
-from fastapi.security import HTTPBasicCredentials
 
-from ingenious.dependencies import get_chat_history_repository, get_security_service
+from ingenious.dependencies import get_chat_history_repository
 from ingenious.models.config import Config
 
 

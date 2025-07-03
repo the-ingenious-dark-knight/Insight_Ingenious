@@ -44,7 +44,7 @@ from __future__ import annotations
 import json
 from json import JSONDecodeError
 from pathlib import Path
-from typing import Annotated, List, Optional, Dict, Any
+from typing import Annotated, Any, Dict, List, Optional
 
 import typer
 from rich import print as rprint

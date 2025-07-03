@@ -57,7 +57,8 @@ from typing import Final, Iterable, Sequence, TypeAlias, cast
 
 import requests
 
-from ingenious.document_processing.utils.fetcher import is_url, fetch
+from ingenious.document_processing.utils.fetcher import fetch, is_url
+
 from .base import DocumentExtractor, Element
 
 logger: logging.Logger = logging.getLogger(__name__)
