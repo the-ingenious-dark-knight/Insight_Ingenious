@@ -5,7 +5,7 @@
       base_url: ${AZURE_OPENAI_BASE_URL}
       deployment: ${AZURE_OPENAI_DEPLOYMENT:gpt-4.1-nano}
   chat_history:
-    database_connection_string: ${AZURE_COSMOS_CONNECTION_STRING:}
+    database_connection_string: ${AZURE_SQL_CONNECTION_STRING:}
   azure_search_services:
     - service: default
       key: ${AZURE_SEARCH_API_KEY:}

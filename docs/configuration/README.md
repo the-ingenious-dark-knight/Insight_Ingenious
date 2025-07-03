@@ -35,9 +35,9 @@ Alternatively, for Azure deployments:
 
 ```yaml
 chat_history:
-  database_type: "sqlite"  # or "cosmos"
+  database_type: "sqlite"  # or "azuresql"
   database_path: "./.tmp/high_level_logs.db"  # Path to SQLite database file
-  database_name: "chat_history"  # Name of the database (used for Cosmos DB)
+  database_name: "chat_history"  # Name of the database (used for Azure SQL)
   memory_path: "./.tmp"  # Location for temporary memory/cache files (used by ChromaDB)
 
 profile: "dev"  # Name of the profile to use from profiles.yml
@@ -153,9 +153,9 @@ Controls how conversation history is stored:
 
 ```yaml
 chat_history:
-  database_type: "sqlite"  # Options: "sqlite", "cosmos"
+  database_type: "sqlite"  # Options: "sqlite", "azuresql"
   database_path: "./.tmp/high_level_logs.db"  # SQLite database file path
-  database_name: "chat_history"  # Database name (used for Cosmos DB)
+  database_name: "chat_history"  # Database name (used for Azure SQL)
   memory_path: "./.tmp"  # Path for context memory files (used by ChromaDB)
 ```
 

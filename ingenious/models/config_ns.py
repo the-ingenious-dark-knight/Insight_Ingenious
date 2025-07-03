@@ -6,17 +6,17 @@ from pydantic import BaseModel, Field
 class ChatHistoryConfig(BaseModel):
     database_type: str = Field(
         "sqlite",
-        description="Type of the database (e.g., sqlite, cosmosdb). Default is sqlite",
+        description="Type of the database (e.g., sqlite, azuresql). Default is sqlite",
     )
     database_path: str = Field(
         "./tmp/high_level_logs.db",
         description="File path to the database, if applicable. Only used for sqlite",
     )
     database_connection_string: str = Field(
-        "", description="Connection string for the database. Only used for cosmosdb"
+        "", description="Connection string for the database. Only used for azuresql"
     )
     database_name: str = Field(
-        "", description="Name of the database. Only used for cosmosdb"
+        "", description="Name of the database. Only used for azuresql"
     )
     memory_path: str = Field("./tmp", description="Path to the memory storage.")
 

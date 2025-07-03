@@ -6,6 +6,7 @@ from pathlib import Path
 import yaml
 from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
+from pydantic import ValidationError
 
 from ingenious.models import profile as profile_models
 
@@ -48,7 +49,7 @@ class Profiles:
         json_data = json.dumps(yaml_data)
         try:
             profiles = profile_models.Profiles.model_validate_json(json_data).root
-        except profile_models.ValidationError as e:
+        except ValidationError as e:
             for error in e.errors():
                 print(
                     f"Validation error in \
