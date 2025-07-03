@@ -6,7 +6,7 @@ This guide covers the complete installation process for Insight Ingenious, inclu
 
 Before installing Insight Ingenious, ensure you have:
 
-1. **Python 3.8 or higher** installed on your system
+1. **Python 3.13 or higher** installed on your system
 2. **Git** for cloning the repository
 3. **uv** package manager (recommended) or pip
 

@@ -98,10 +98,6 @@ def run_rest_api_server(
 
     📊 Requires Database Configuration:
       • sql_manipulation_agent - Execute SQL queries
-      • pandas_agent - Data analysis with pandas
-
-    🌐 Requires Web Search (currently mock):
-      • web_critic_agent - Web search and fact-checking
 
     📄 Optional Azure Document Intelligence:
       • document-processing - Extract text from PDFs/images
@@ -481,26 +477,6 @@ def workflow_requirements(
             ],
             "optional": [],
         },
-        "pandas_agent": {
-            "description": "Data analysis and visualization using pandas",
-            "category": "📊 Requires Database",
-            "requirements": ["Azure OpenAI", "Local data files (CSV/SQLite)"],
-            "config_needed": [
-                "config.yml: local_sql_db with sample_csv_path",
-                "CSV data file for analysis",
-            ],
-            "optional": [],
-        },
-        "web_critic_agent": {
-            "description": "Perform web search and fact-checking",
-            "category": "🌐 Web Search (Mock)",
-            "requirements": ["Azure OpenAI"],
-            "config_needed": [
-                "config.yml: models, chat_service",
-                "profiles.yml: models with api_key",
-            ],
-            "optional": ["Web search API (currently uses mock data)"],
-        },
     }
 
     if workflow == "all":
@@ -574,7 +550,7 @@ def run_prompt_tuner():
     app.run(
         debug=True,
         host=config.web_configuration.ip_address,
-        port=config.web_configuration.port,
+        port=config.prompt_tuner.port,
     )
 
 

@@ -26,17 +26,6 @@ async def chat_profile():
             "you can ask me question like 'what are the columns?', 'can you give me the count by gender?'",
             icon="https://picsum.photos/250",
         ),
-        cl.ChatProfile(
-            name="web_critic_agent",
-            markdown_description="The underlying LLM model is optimised for sample sql database manipulation."
-            "you can ask me question like 'Write me a short story in 100 words based on the following: "
-            "The Australia men's national cricket team represents "
-            "Australia in men's international cricket. "
-            "It is the joint oldest team in Test cricket history,"
-            " playing in the first ever Test match in 1999;"
-            " the team current coach is Elliot Zhu.?'",
-            icon="https://picsum.photos/300",
-        ),
     ]
 
 

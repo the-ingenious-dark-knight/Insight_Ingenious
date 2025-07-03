@@ -68,8 +68,6 @@ curl -X POST http://localhost:8081/api/v1/chat \
 
 - **knowledge_base_agent**: Requires Azure Cognitive Search
 - **sql_manipulation_agent**: Requires database connection
-- **pandas_agent**: Requires local data files
-- **web_critic_agent**: Currently uses mock web search
 
 For detailed setup instructions, see [Workflow Configuration Requirements](../workflows/README.md).
 
@@ -379,30 +377,11 @@ curl -X POST http://localhost:80/api/v1/chat \
     "user_prompt": "Show me student performance statistics",
     "conversation_flow": "sql_manipulation_agent"
   }'
-
-# Data analysis (requires local CSV/database files)
-curl -X POST http://localhost:80/api/v1/chat \
-  -H "Content-Type: application/json" \
-  -d '{
-    "user_prompt": "Analyze the dataset and create visualizations",
-    "conversation_flow": "pandas_agent"
-  }'
 ```
 
-**Configuration needed**: Database connection strings or local data files
+**Configuration needed**: Database connection strings
 
-#### 🌐 Web Search Workflows
-Currently using mock data for testing:
-
-```bash
-# Web search and fact-checking (currently mock data)
-curl -X POST http://localhost:80/api/v1/chat \
-  -H "Content-Type: application/json" \
-  -d '{
-    "user_prompt": "Fact-check this claim about renewable energy",
-    "conversation_flow": "web_critic_agent"
-  }'
-```
+#### 🌐 Optional Features
 
 ### Error Responses
 

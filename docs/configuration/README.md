@@ -351,10 +351,6 @@ Insight Ingenious supports several built-in conversation flows for different use
 | `bike_insights` | Sample domain-specific analysis | Azure OpenAI only | ✅ Minimal |
 | `knowledge_base_agent` | Search knowledge bases | Azure OpenAI + Azure Search | 🔍 Moderate |
 | `sql_manipulation_agent` | Execute SQL queries | Azure OpenAI + Database | 📊 Moderate |
-| `pandas_agent` | Data analysis with pandas | Azure OpenAI + Local data | 📊 Moderate |
-| `web_critic_agent` | Web search and fact-checking | Azure OpenAI + Web search* | 🌐 Minimal* |
-
-*Currently uses mock data for testing
 
 ### Workflow-Specific Configuration
 
@@ -402,7 +398,7 @@ azure_search_services:
 
 #### 📊 Database Workflows
 
-For `sql_manipulation_agent` and `pandas_agent`:
+For `sql_manipulation_agent`:
 
 **Local SQLite option:**
 ```yaml

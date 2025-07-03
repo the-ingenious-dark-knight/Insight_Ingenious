@@ -650,7 +650,7 @@
         spinner.style.display = 'inline-block';
         icon.style.display = 'none';
 
-        fetch(`{{ url_for('get_agent_response') }}?identifier=${identifier}&agent_name=${agent_name}&event_type=${event_type}&identifier_group=${identifier_group}`)
+        fetch(`{{ url_for('responses.get_agent_response') }}?identifier=${identifier}&agent_name=${agent_name}&event_type=${event_type}&identifier_group=${identifier_group}`)
             .then(response => response.text())
             .then(html => {
                 const modal = document.createElement('div');

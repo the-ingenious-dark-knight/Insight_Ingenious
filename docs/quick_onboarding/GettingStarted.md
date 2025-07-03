@@ -107,7 +107,6 @@ For workflows requiring external services:
 
 - **knowledge_base_agent**: Requires Azure Cognitive Search
 - **sql_manipulation_agent**: Requires database connection
-- **pandas_agent**: Requires local data files
 
 Check requirements with:
 ```bash

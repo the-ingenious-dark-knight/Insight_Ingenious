@@ -7,6 +7,10 @@ Insight Ingenious lets you orchestrate multiple AI agents and deploy them as an 
 
 ## Quickstart
 
+**Prerequisites:**
+
+- **Python 3.13 or higher**
+
 1. Clone the repository:
     ```bash
     git clone https://github.com/Insight-Services-APAC/Insight_Ingenious.git
@@ -77,10 +81,6 @@ Insight Ingenious provides multiple conversation workflows with different config
 
 ### 📊 **Database Required**
 - `sql_manipulation_agent` - Execute SQL queries
-- `pandas_agent` - Data analysis with pandas
-
-### 🌐 **Web Search** (currently mock)
-- `web_critic_agent` - Web search and fact-checking
 
 **📋 See [Workflow Configuration Requirements](docs/workflows/README.md) for detailed setup instructions.**
 

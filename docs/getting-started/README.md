@@ -49,7 +49,6 @@ uv run ingen workflow-requirements classification_agent
 
 📊 Requires Database
   • sql_manipulation_agent: Execute SQL queries
-  • pandas_agent: Data analysis with pandas
 ```
 
 ## ⚙️ Basic Configuration
