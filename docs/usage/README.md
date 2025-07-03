@@ -33,6 +33,46 @@ uv run ingen initialize-new-project
    export INGENIOUS_PROFILE_PATH=~/.ingenious/profiles.yml
    ```
 
+## Understanding Workflows
+
+Insight Ingenious provides multiple conversation workflows, each with different capabilities and configuration requirements:
+
+### 📋 Check Workflow Requirements
+
+Before using any workflow, check what configuration is needed:
+
+```bash
+# See all available workflows
+uv run ingen workflow-requirements all
+
+# Check specific workflow requirements
+uv run ingen workflow-requirements classification_agent
+uv run ingen workflow-requirements knowledge_base_agent
+```
+
+### 🚀 Quick Start Workflows (Minimal Configuration)
+
+These workflows only need Azure OpenAI configuration:
+
+- **classification_agent**: Routes input to specialized agents
+- **bike_insights**: Sample domain-specific analysis
+
+```bash
+# Test minimal configuration workflow
+curl -X POST http://localhost:8081/api/v1/chat \
+  -H "Content-Type: application/json" \
+  -d '{"user_prompt": "Hello", "conversation_flow": "classification_agent"}'
+```
+
+### 🔍 Advanced Workflows (External Services Required)
+
+- **knowledge_base_agent**: Requires Azure Cognitive Search
+- **sql_manipulation_agent**: Requires database connection
+- **pandas_agent**: Requires local data files
+- **web_critic_agent**: Currently uses mock web search
+
+For detailed setup instructions, see [Workflow Configuration Requirements](../workflows/README.md).
+
 ## Using the CLI
 
 Insight Ingenious provides a command-line interface with various utilities:
@@ -275,19 +315,123 @@ async def get_conversation_response(self, chat_request: ChatRequest) -> ChatResp
 
 ## API Integration
 
+### Understanding Workflow Requirements
+
+Before using the REST API, understand which workflows need external service configuration:
+
+```bash
+# Check all workflow requirements
+uv run ingen workflow-requirements all
+
+# Check specific workflow
+uv run ingen workflow-requirements knowledge_base_agent
+```
+
 ### Using the REST API
 
 You can interact with Insight Ingenious through its REST API:
 
+#### ✅ Minimal Configuration Workflows
+These work with just Azure OpenAI setup:
+
 ```bash
-# Start a conversation
+# Classification agent - route input to specialized agents
 curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -H "Authorization: Basic $(echo -n username:password | base64)" \
   -d '{
-    "user_prompt": "Your message here",
+    "user_prompt": "Analyze this customer feedback: Great product!",
     "conversation_flow": "classification_agent"
   }'
+
+# Bike insights - sample domain-specific workflow
+curl -X POST http://localhost:80/api/v1/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_prompt": "Show bike sales trends",
+    "conversation_flow": "bike_insights"
+  }'
+```
+
+#### 🔍 Azure Search Required Workflows
+These require Azure Cognitive Search configuration:
+
+```bash
+# Knowledge base search (requires Azure Search service + indexes)
+curl -X POST http://localhost:80/api/v1/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_prompt": "Search for health and safety information",
+    "conversation_flow": "knowledge_base_agent"
+  }'
+```
+
+**Configuration needed**: Azure Search endpoint + API key in config files
+
+#### 📊 Database Required Workflows
+These require database connections:
+
+```bash
+# SQL queries (requires Azure SQL or local SQLite)
+curl -X POST http://localhost:80/api/v1/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_prompt": "Show me student performance statistics",
+    "conversation_flow": "sql_manipulation_agent"
+  }'
+
+# Data analysis (requires local CSV/database files)
+curl -X POST http://localhost:80/api/v1/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_prompt": "Analyze the dataset and create visualizations",
+    "conversation_flow": "pandas_agent"
+  }'
+```
+
+**Configuration needed**: Database connection strings or local data files
+
+#### 🌐 Web Search Workflows
+Currently using mock data for testing:
+
+```bash
+# Web search and fact-checking (currently mock data)
+curl -X POST http://localhost:80/api/v1/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_prompt": "Fact-check this claim about renewable energy",
+    "conversation_flow": "web_critic_agent"
+  }'
+```
+
+### Error Responses
+
+When workflows can't run due to missing configuration:
+
+```json
+{
+  "error": "Azure Search service not configured",
+  "workflow": "knowledge_base_agent",
+  "required_config": ["azure_search_services.endpoint", "azure_search_services.key"],
+  "documentation": "See docs/workflows/README.md for setup instructions"
+}
+```
+
+### Checking Configuration Status
+
+```bash
+# Check if configuration is complete for a workflow
+curl -X GET http://localhost:80/api/v1/workflow-status/knowledge_base_agent
+```
+
+Response:
+```json
+{
+  "workflow": "knowledge_base_agent",
+  "configured": true,
+  "missing_config": [],
+  "ready": true
+}
 ```
 
 ### Creating Custom API Routes

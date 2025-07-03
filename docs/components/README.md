@@ -188,10 +188,45 @@ The API layer is built with FastAPI:
 
 - `main.py`: Main FastAPI application
 - `api/routes/`: API route definitions
-  - `chat.py`: Chat endpoint
+  - `chat.py`: Chat endpoint for conversation workflows
+  - `diagnostic.py`: System diagnostics and workflow status endpoints
   - `message_feedback.py`: Feedback endpoint
-  - `diagnostic.py`: Diagnostic endpoints
   - `prompts.py`: Prompt management endpoints
+
+#### Key API Endpoints
+
+| Endpoint | Purpose | Description |
+|----------|---------|-------------|
+| `POST /api/v1/chat` | Execute workflows | Send messages to conversation workflows |
+| `GET /api/v1/workflows` | List workflows | Get all workflows and their configuration status |
+| `GET /api/v1/workflow-status/{workflow}` | Check status | Check if a specific workflow is properly configured |
+| `GET /api/v1/diagnostic` | System status | Get system diagnostic information |
+
+#### Workflow Status API
+
+Check configuration requirements and status:
+
+```bash
+# List all workflows and their status
+curl http://localhost:8081/api/v1/workflows
+
+# Check specific workflow configuration
+curl http://localhost:8081/api/v1/workflow-status/knowledge_base_agent
+```
+
+Example response:
+```json
+{
+  "workflow": "knowledge_base_agent",
+  "configured": false,
+  "missing_config": ["azure_search_services.key: Missing in profiles.yml"],
+  "required_config": ["models", "chat_service", "azure_search_services"],
+  "external_services": ["Azure OpenAI", "Azure Cognitive Search"],
+  "ready": false,
+  "test_command": "curl -X POST http://localhost:8081/api/v1/chat...",
+  "documentation": "See docs/workflows/README.md for setup instructions"
+}
+```
 
 ## Extension Points
 

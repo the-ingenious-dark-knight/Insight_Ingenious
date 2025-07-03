@@ -345,11 +345,102 @@ Insight Ingenious supports several built-in conversation flows for different use
 
 ### Available Conversation Flows
 
-1. **knowledge_base_agent**: Search and retrieve information from Azure Cognitive Search indexes
-2. **sql_manipulation_agent**: Execute SQL queries and analyze database results
-3. **web_critic_agent**: Perform web search and fact-checking with criticism
-4. **pandas_agent**: Data analysis and manipulation using pandas
-5. **classification_agent**: Classify user input and route to appropriate topic agents
+| Workflow | Description | External Services Required | Configuration Complexity |
+|----------|-------------|----------------------------|--------------------------|
+| `classification_agent` | Routes input to specialized agents | Azure OpenAI only | ✅ Minimal |
+| `bike_insights` | Sample domain-specific analysis | Azure OpenAI only | ✅ Minimal |
+| `knowledge_base_agent` | Search knowledge bases | Azure OpenAI + Azure Search | 🔍 Moderate |
+| `sql_manipulation_agent` | Execute SQL queries | Azure OpenAI + Database | 📊 Moderate |
+| `pandas_agent` | Data analysis with pandas | Azure OpenAI + Local data | 📊 Moderate |
+| `web_critic_agent` | Web search and fact-checking | Azure OpenAI + Web search* | 🌐 Minimal* |
+
+*Currently uses mock data for testing
+
+### Workflow-Specific Configuration
+
+#### 🚀 Quick Start: Minimal Configuration Workflows
+
+For `classification_agent` and `bike_insights`, you only need basic Azure OpenAI setup:
+
+```yaml
+# config.yml
+profile: dev
+models:
+  - model: "gpt-4o"
+    api_type: azure
+    api_version: "2024-08-01-preview"
+chat_service:
+  type: multi_agent
+```
+
+```yaml
+# profiles.yml
+- name: "dev"
+  models:
+    - model: "gpt-4o"
+      api_key: "your-api-key"
+      base_url: "https://your-endpoint.openai.azure.com/..."
+```
+
+#### 🔍 Knowledge Base Workflows
+
+For `knowledge_base_agent`, add Azure Search configuration:
+
+```yaml
+# config.yml (additional)
+azure_search_services:
+  - service: "default"
+    endpoint: "https://your-search-service.search.windows.net"
+```
+
+```yaml
+# profiles.yml (additional)
+azure_search_services:
+  - service: "default"
+    key: "your-search-key"
+```
+
+#### 📊 Database Workflows
+
+For `sql_manipulation_agent` and `pandas_agent`:
+
+**Local SQLite option:**
+```yaml
+# config.yml
+local_sql_db:
+  database_path: "/tmp/sample_sql.db"
+  sample_csv_path: "./data/your_data.csv"
+azure_sql_services:
+  database_name: "skip"  # Use "skip" for local mode
+```
+
+**Azure SQL option:**
+```yaml
+# config.yml
+azure_sql_services:
+  database_name: "your_database"
+  table_name: "your_table"
+```
+
+```yaml
+# profiles.yml
+azure_sql_services:
+  database_connection_string: "Server=tcp:yourserver.database.windows.net,..."
+```
+
+### Testing Workflows
+
+Use the CLI to check requirements and test workflows:
+
+```bash
+# Check what configuration is needed
+uv run ingen workflow-requirements knowledge_base_agent
+
+# Test a workflow
+curl -X POST http://localhost:8081/api/v1/chat \
+  -H "Content-Type: application/json" \
+  -d '{"user_prompt": "Hello", "conversation_flow": "classification_agent"}'
+```
 
 ### Configuring Conversation Flows
 

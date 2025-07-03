@@ -85,7 +85,34 @@ def run_rest_api_server(
     ] = "",
 ):
     """
-    This command will run a fastapi server and present your agent workflows via a rest endpoint.
+    Run a FastAPI server that presents your agent workflows via REST endpoints.
+
+    AVAILABLE WORKFLOWS & CONFIGURATION REQUIREMENTS:
+
+    ✅ Minimal Configuration (Azure OpenAI only):
+      • classification_agent - Route input to specialized agents
+      • bike_insights - Sample domain-specific workflow
+
+    🔍 Requires Azure Search Services:
+      • knowledge_base_agent - Search knowledge bases
+
+    📊 Requires Database Configuration:
+      • sql_manipulation_agent - Execute SQL queries
+      • pandas_agent - Data analysis with pandas
+
+    🌐 Requires Web Search (currently mock):
+      • web_critic_agent - Web search and fact-checking
+
+    📄 Optional Azure Document Intelligence:
+      • document-processing - Extract text from PDFs/images
+
+    For detailed configuration requirements, see:
+    docs/workflows/README.md
+
+    QUICK TEST:
+    curl -X POST http://localhost:PORT/api/v1/chat \\
+      -H "Content-Type: application/json" \\
+      -d '{"user_prompt": "Hello", "conversation_flow": "classification_agent"}'
     """
     if project_dir is not None:
         os.environ["INGENIOUS_PROJECT_PATH"] = project_dir
@@ -191,7 +218,27 @@ def run_test_batch(
 
 @app.command()
 def initialize_new_project():
-    """Generate template folders for a new project using the Ingenious framework."""
+    """
+    Generate template folders for a new project using the Ingenious framework.
+
+    Creates the following structure:
+    • config.yml - Project configuration (non-sensitive settings)
+    • ~/.ingenious/profiles.yml - Environment profiles (API keys, secrets)
+    • ingenious_extensions/ - Your custom agents and workflows
+    • docker/ - Docker deployment templates
+    • tmp/ - Temporary files and memory
+
+    NEXT STEPS after running this command:
+    1. Update config.yml with your project settings
+    2. Update ~/.ingenious/profiles.yml with your API keys and credentials
+    3. Set environment variables:
+       export INGENIOUS_PROJECT_PATH=/path/to/config.yml
+       export INGENIOUS_PROFILE_PATH=$HOME/.ingenious/profiles.yml
+    4. Run: ingen run-rest-api-server
+
+    For workflow-specific configuration requirements, see:
+    docs/workflows/README.md
+    """
     base_path = Path(__file__).parent
     templates_paths = {
         "docker": base_path / "docker_template",
@@ -322,6 +369,146 @@ def initialize_new_project():
         "[warning]Before executing update config.yml and profiles.yml [/warning]"
     )
     console.print("[info]To execute use ingen[/info]")
+
+
+@app.command()
+def workflow_requirements(
+    workflow: Annotated[
+        str,
+        typer.Argument(
+            help="Workflow name to check requirements for, or 'all' to list all workflows"
+        ),
+    ] = "all",
+):
+    """
+    Show configuration requirements for conversation workflows.
+
+    Use this command to understand what external services and configuration
+    are needed for each workflow before attempting to use them.
+    """
+    workflows = {
+        "classification_agent": {
+            "description": "Route input to specialized agents based on content",
+            "category": "✅ Minimal Configuration",
+            "requirements": ["Azure OpenAI"],
+            "config_needed": [
+                "config.yml: models, chat_service",
+                "profiles.yml: models with api_key and base_url",
+            ],
+            "optional": [],
+        },
+        "bike_insights": {
+            "description": "Sample domain-specific workflow for bike sales analysis",
+            "category": "✅ Minimal Configuration",
+            "requirements": ["Azure OpenAI"],
+            "config_needed": [
+                "config.yml: models, chat_service",
+                "profiles.yml: models with api_key and base_url",
+            ],
+            "optional": [],
+        },
+        "knowledge_base_agent": {
+            "description": "Search and retrieve information from knowledge bases",
+            "category": "🔍 Requires Azure Search",
+            "requirements": ["Azure OpenAI", "Azure Cognitive Search"],
+            "config_needed": [
+                "config.yml: azure_search_services with endpoint",
+                "profiles.yml: azure_search_services with API key",
+                "Pre-configured search indexes",
+            ],
+            "optional": [],
+        },
+        "sql_manipulation_agent": {
+            "description": "Execute SQL queries based on natural language",
+            "category": "📊 Requires Database",
+            "requirements": ["Azure OpenAI", "Database (Azure SQL or SQLite)"],
+            "config_needed": [
+                "For Azure SQL: profiles.yml: azure_sql_services with connection_string",
+                "For Local: config.yml: local_sql_db with database_path and CSV",
+                "config.yml: azure_sql_services with database_name/table_name",
+            ],
+            "optional": [],
+        },
+        "pandas_agent": {
+            "description": "Data analysis and visualization using pandas",
+            "category": "📊 Requires Database",
+            "requirements": ["Azure OpenAI", "Local data files (CSV/SQLite)"],
+            "config_needed": [
+                "config.yml: local_sql_db with sample_csv_path",
+                "CSV data file for analysis",
+            ],
+            "optional": [],
+        },
+        "web_critic_agent": {
+            "description": "Perform web search and fact-checking",
+            "category": "🌐 Web Search (Mock)",
+            "requirements": ["Azure OpenAI"],
+            "config_needed": [
+                "config.yml: models, chat_service",
+                "profiles.yml: models with api_key",
+            ],
+            "optional": ["Web search API (currently uses mock data)"],
+        },
+    }
+
+    if workflow == "all":
+        console.print(
+            "\n[bold blue]📋 INSIGHT INGENIOUS WORKFLOW REQUIREMENTS[/bold blue]\n"
+        )
+
+        # Group by category
+        categories = {}
+        for name, info in workflows.items():
+            cat = info["category"]
+            if cat not in categories:
+                categories[cat] = []
+            categories[cat].append((name, info))
+
+        for category, workflow_list in categories.items():
+            console.print(f"[bold]{category}[/bold]")
+            for name, info in workflow_list:
+                console.print(f"  • [cyan]{name}[/cyan]: {info['description']}")
+            console.print()
+
+        console.print(
+            "[bold yellow]💡 TIP:[/bold yellow] Use 'ingen workflow-requirements <workflow_name>' for detailed requirements"
+        )
+        console.print(
+            "[bold yellow]📖 DOCS:[/bold yellow] See docs/workflows/README.md for complete configuration guide"
+        )
+        console.print(
+            "[bold yellow]🧪 TEST:[/bold yellow] Start with classification_agent (minimal configuration)"
+        )
+
+    elif workflow in workflows:
+        info = workflows[workflow]
+        console.print(f"\n[bold blue]📋 {workflow.upper()} REQUIREMENTS[/bold blue]\n")
+        console.print(f"[bold]Description:[/bold] {info['description']}")
+        console.print(f"[bold]Category:[/bold] {info['category']}")
+        console.print(f"[bold]External Services Needed:[/bold]")
+        for req in info["requirements"]:
+            console.print(f"  • {req}")
+        console.print(f"\n[bold]Configuration Required:[/bold]")
+        for config in info["config_needed"]:
+            console.print(f"  • {config}")
+        if info["optional"]:
+            console.print(f"\n[bold]Optional:[/bold]")
+            for opt in info["optional"]:
+                console.print(f"  • {opt}")
+
+        console.print(f"\n[bold yellow]🧪 TEST COMMAND:[/bold yellow]")
+        console.print(f"curl -X POST http://localhost:8081/api/v1/chat \\")
+        console.print(f'  -H "Content-Type: application/json" \\')
+        console.print(
+            f'  -d \'{{"user_prompt": "Hello", "conversation_flow": "{workflow}"}}\''
+        )
+
+    else:
+        console.print(f"[bold red]❌ Unknown workflow: {workflow}[/bold red]")
+        console.print("\n[bold]Available workflows:[/bold]")
+        for name in workflows.keys():
+            console.print(f"  • {name}")
+        console.print("\nUse 'ingen workflow-requirements all' to see all workflows")
 
 
 @app.command()
