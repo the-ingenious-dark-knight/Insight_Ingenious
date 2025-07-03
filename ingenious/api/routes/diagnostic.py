@@ -12,6 +12,226 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
+@router.get(
+    "/workflow-status/{workflow_name}",
+    responses={
+        200: {"model": dict, "description": "Workflow configuration status"},
+        400: {"model": HTTPError, "description": "Bad Request"},
+        404: {"model": HTTPError, "description": "Workflow Not Found"},
+    },
+)
+async def workflow_status(
+    workflow_name: str,
+    request: Request,
+    auth_user: Annotated[str, Depends(igen_deps.get_auth_user)],
+):
+    """
+    Check the configuration status of a specific workflow.
+
+    Returns information about whether the workflow is properly configured
+    and what external services or configuration might be missing.
+    """
+    try:
+        config = igen_deps.get_config()
+
+        # Define workflow requirements
+        workflow_requirements = {
+            "classification_agent": {
+                "description": "Route input to specialized agents based on content",
+                "category": "Minimal Configuration",
+                "required_config": ["models", "chat_service"],
+                "optional_config": [],
+                "external_services": ["Azure OpenAI"],
+            },
+            "bike_insights": {
+                "description": "Sample domain-specific workflow for bike sales analysis",
+                "category": "Minimal Configuration",
+                "required_config": ["models", "chat_service"],
+                "optional_config": [],
+                "external_services": ["Azure OpenAI"],
+            },
+            "knowledge_base_agent": {
+                "description": "Search and retrieve information from knowledge bases",
+                "category": "Azure Search Required",
+                "required_config": ["models", "chat_service", "azure_search_services"],
+                "optional_config": [],
+                "external_services": ["Azure OpenAI", "Azure Cognitive Search"],
+            },
+            "sql_manipulation_agent": {
+                "description": "Execute SQL queries based on natural language",
+                "category": "Database Required",
+                "required_config": ["models", "chat_service"],
+                "optional_config": ["azure_sql_services", "local_sql_db"],
+                "external_services": ["Azure OpenAI", "Database (Azure SQL or SQLite)"],
+            },
+            "pandas_agent": {
+                "description": "Data analysis and visualization using pandas",
+                "category": "Database Required",
+                "required_config": ["models", "chat_service", "local_sql_db"],
+                "optional_config": [],
+                "external_services": ["Azure OpenAI", "Local data files"],
+            },
+            "web_critic_agent": {
+                "description": "Perform web search and fact-checking",
+                "category": "Web Search (Mock)",
+                "required_config": ["models", "chat_service"],
+                "optional_config": [],
+                "external_services": ["Azure OpenAI"],
+            },
+        }
+
+        if workflow_name not in workflow_requirements:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Unknown workflow: {workflow_name}. Available: {list(workflow_requirements.keys())}",
+            )
+
+        requirements = workflow_requirements[workflow_name]
+        missing_config = []
+        configured = True
+
+        # Check basic configuration
+        if not config.models or len(config.models) == 0:
+            missing_config.append("models: No models configured")
+            configured = False
+        else:
+            # Check if model has required fields (these would be in profiles.yml)
+            model = config.models[0]
+            if not hasattr(model, "api_key") or not model.api_key:
+                missing_config.append("models.api_key: Missing in profiles.yml")
+                configured = False
+            if not hasattr(model, "base_url") or not model.base_url:
+                missing_config.append("models.base_url: Missing in profiles.yml")
+                configured = False
+
+        if not config.chat_service or config.chat_service.type != "multi_agent":
+            missing_config.append("chat_service.type: Must be 'multi_agent'")
+            configured = False
+
+        # Check workflow-specific requirements
+        if "azure_search_services" in requirements["required_config"]:
+            if (
+                not config.azure_search_services
+                or len(config.azure_search_services) == 0
+            ):
+                missing_config.append("azure_search_services: Not configured")
+                configured = False
+            else:
+                search_service = config.azure_search_services[0]
+                if not search_service.endpoint:
+                    missing_config.append("azure_search_services.endpoint: Missing")
+                    configured = False
+                if not hasattr(search_service, "key") or not search_service.key:
+                    missing_config.append(
+                        "azure_search_services.key: Missing in profiles.yml"
+                    )
+                    configured = False
+
+        if "local_sql_db" in requirements["required_config"]:
+            if not hasattr(config, "local_sql_db") or not config.local_sql_db:
+                missing_config.append("local_sql_db: Not configured")
+                configured = False
+            else:
+                if not config.local_sql_db.database_path:
+                    missing_config.append("local_sql_db.database_path: Missing")
+                    configured = False
+                if not config.local_sql_db.sample_csv_path:
+                    missing_config.append("local_sql_db.sample_csv_path: Missing")
+                    configured = False
+
+        # For SQL manipulation agent, check either Azure SQL or local is configured
+        if workflow_name == "sql_manipulation_agent":
+            has_azure_sql = (
+                hasattr(config, "azure_sql_services")
+                and config.azure_sql_services
+                and hasattr(config.azure_sql_services, "database_connection_string")
+                and config.azure_sql_services.database_connection_string
+            )
+            has_local_sql = (
+                hasattr(config, "local_sql_db")
+                and config.local_sql_db
+                and config.local_sql_db.database_path
+            )
+
+            if not has_azure_sql and not has_local_sql:
+                missing_config.append(
+                    "database: Neither Azure SQL nor local SQLite configured"
+                )
+                configured = False
+
+        return {
+            "workflow": workflow_name,
+            "description": requirements["description"],
+            "category": requirements["category"],
+            "configured": configured,
+            "missing_config": missing_config,
+            "required_config": requirements["required_config"],
+            "external_services": requirements["external_services"],
+            "ready": configured,
+            "test_command": f'curl -X POST http://localhost:{config.web_configuration.port}/api/v1/chat -H "Content-Type: application/json" -d \'{{"user_prompt": "Hello", "conversation_flow": "{workflow_name}"}}\'',
+            "documentation": "See docs/workflows/README.md for detailed setup instructions",
+        }
+
+    except Exception as e:
+        logger.exception(e)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get(
+    "/workflows",
+    responses={
+        200: {"model": dict, "description": "List all workflows and their status"},
+        400: {"model": HTTPError, "description": "Bad Request"},
+    },
+)
+async def list_workflows(
+    request: Request,
+    auth_user: Annotated[str, Depends(igen_deps.get_auth_user)],
+):
+    """
+    List all available workflows and their configuration status.
+    """
+    try:
+        workflows = [
+            "classification_agent",
+            "bike_insights",
+            "knowledge_base_agent",
+            "sql_manipulation_agent",
+            "pandas_agent",
+            "web_critic_agent",
+        ]
+
+        workflow_statuses = []
+        for workflow in workflows:
+            # Get status for each workflow
+            status = await workflow_status(workflow, request, auth_user)
+            workflow_statuses.append(status)
+
+        # Group by category
+        by_category = {}
+        for status in workflow_statuses:
+            category = status["category"]
+            if category not in by_category:
+                by_category[category] = []
+            by_category[category].append(status)
+
+        return {
+            "workflows": workflow_statuses,
+            "by_category": by_category,
+            "summary": {
+                "total": len(workflows),
+                "configured": len([w for w in workflow_statuses if w["configured"]]),
+                "unconfigured": len(
+                    [w for w in workflow_statuses if not w["configured"]]
+                ),
+            },
+        }
+
+    except Exception as e:
+        logger.exception(e)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.api_route(
     "/diagnostic",
     methods=["GET", "OPTIONS"],

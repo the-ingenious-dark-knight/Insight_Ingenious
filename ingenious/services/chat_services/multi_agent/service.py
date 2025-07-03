@@ -146,7 +146,10 @@ class multi_agent_chat_service:
                             message=chat_request.user_prompt,
                             topics=chat_request.topic
                             if isinstance(chat_request.topic, list)
-                            else [chat_request.topic],
+                            and chat_request.topic
+                            else [chat_request.topic]
+                            if chat_request.topic
+                            else [],
                             thread_memory=getattr(chat_request, "thread_memory", ""),
                             memory_record_switch=getattr(
                                 chat_request, "memory_record", True

@@ -44,10 +44,34 @@ ingen_cli initialize-new-project
 
 This creates the necessary folder structure and configuration files.
 
+### Check Workflow Requirements
+
+Before starting, understand what each workflow needs:
+
+```bash
+# See all available workflows and their requirements
+ingen_cli workflow-requirements all
+
+# Check specific workflow requirements
+ingen_cli workflow-requirements classification_agent
+```
+
+### Start with Minimal Configuration
+
+For quick testing, start with workflows that only need Azure OpenAI:
+
+1. Update `config.yml` with your Azure OpenAI model settings
+2. Update `~/.ingenious/profiles.yml` with your API key and endpoint
+3. Set environment variables:
+   ```bash
+   export INGENIOUS_PROJECT_PATH=/path/to/config.yml
+   export INGENIOUS_PROFILE_PATH=$HOME/.ingenious/profiles.yml
+   ```
+
 ### Start the Application
 
 ```bash
-ingen_cli run-project
+ingen_cli run-rest-api-server
 ```
 
 Starts the FastAPI server with Chainlit UI.
@@ -61,11 +85,37 @@ Once the application is running, access the web UI at:
 
 ### Testing chat with the agents
 
+#### Quick Test (Minimal Configuration)
+Test with workflows that only need Azure OpenAI:
+
 1. Navigate to http://localhost:8000/chainlit
 2. Start a new conversation
-3. Type your message
-4. The appropriate agents will process your request and respond
+3. Try these workflows:
+   - "Hello" with `classification_agent`
+   - "Analyze bike sales" with `bike_insights`
 
-> **Once you are able to run those commands successfully, being able to access the UI, and has loaded the sample prompts, you're good to go! (start reading more advanced docs.) Else, kindly let us know which step you had an issue. Other in-depth information will be discussed in other docs.**
+#### API Testing
+```bash
+# Test classification agent (minimal config needed)
+curl -X POST http://localhost:8081/api/v1/chat \
+  -H "Content-Type: application/json" \
+  -d '{"user_prompt": "Hello world", "conversation_flow": "classification_agent"}'
+```
+
+#### Advanced Workflows
+For workflows requiring external services:
+
+- **knowledge_base_agent**: Requires Azure Cognitive Search
+- **sql_manipulation_agent**: Requires database connection
+- **pandas_agent**: Requires local data files
+
+Check requirements with:
+```bash
+ingen_cli workflow-requirements <workflow_name>
+```
+
+See [Workflow Configuration Requirements](../workflows/README.md) for detailed setup.
+
+> **Once you are able to run those commands successfully, access the UI, and test basic workflows, you're good to go! For advanced workflows requiring external services, check their specific configuration requirements.**
 
 Next up: Building custom agents. Go to **CustomAgents.md**

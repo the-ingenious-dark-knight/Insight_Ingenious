@@ -2,22 +2,50 @@
 
 Welcome to the Insight Ingenious documentation. This collection of guides will help you understand, use, and extend the framework.
 
-## Table of Contents
+## 🚀 Getting Started
 
-- [Quickstart](quick_onboarding/GettingStarted.md): A very simple guide to get you started working with the Insight Ingenious library.
+**Start here if you're new to Insight Ingenious:**
 
-- [Architecture Overview](architecture/README.md): High-level architecture and design principles
-- [Configuration Guide](configuration/README.md): How to configure the framework
-- [Usage Guide](usage/README.md): How to use the framework for common tasks
-- [Development Guide](development/README.md): Information for developers extending the framework
-- [Components Reference](components/README.md): Detailed reference for framework components
+- [🏁 **Quick Start Guide**](getting-started/README.md): Step-by-step setup and first workflow
+- [⚙️ **Workflow Requirements**](workflows/README.md): **Essential guide to understand what each workflow needs**
+- [🔧 **Configuration Setup**](configuration/README.md): Detailed configuration instructions
 
-### Optional Dependencies
-Feature packs you can install on demand
+## 📖 User Guides
 
-- [Optional Dependencies Index](optional_dependencies/README.md)
-- [Dataprep Crawler](optional_dependencies/dataprep/README.md): Scrapfly-powered scraping CLI
-- [Document-processing](optional_dependencies/document_processing/README.md): Unified PDF / DOCX / PPTX / PNG / JPG / JPEG / TIFF / TIF extraction engines
+**For using Insight Ingenious:**
+
+- [� **All Guides**](guides/README.md): Complete guide index and overview
+- [🌐 **API Integration**](guides/api-integration.md): REST API usage and examples
+- [🎨 **Web Interface**](guides/web-interface.md): Using the Chainlit UI and prompt tuner
+- [📊 **Data Preparation**](guides/data-preparation/): Data processing and preparation workflows
+- [📄 **Document Processing**](guides/document-processing/): Document analysis and extraction
+
+## 🛠️ Developer Guides
+
+**For extending and customizing:**
+
+- [🏗️ **Architecture Overview**](architecture/README.md): System design and components
+- [🔨 **Development Setup**](development/README.md): Setting up development environment
+- [🔌 **Extensions & Customization**](extensions/README.md): Creating custom agents, patterns, and templates
+
+## 📚 Reference
+
+**Detailed technical information:**
+
+- [🧩 **Components Reference**](components/README.md): Framework components and APIs
+- [📝 **Configuration Reference**](configuration/README.md): Complete configuration options
+- [� **Installation Guide**](getting-started/installation.md): Complete installation instructions
+
+## 🎯 Quick Navigation
+
+| I want to... | Go to... |
+|---------------|----------|
+| **Get started quickly** | [Quick Start Guide](getting-started/README.md) |
+| **Understand workflow requirements** | [Workflow Requirements](workflows/README.md) |
+| **Set up Azure services** | [Configuration Setup](configuration/README.md) |
+| **Use the API** | [API Integration](guides/api-integration.md) |
+| **Create custom extensions** | [Extensions Guide](extensions/README.md) |
+| **Troubleshoot issues** | [Troubleshooting](getting-started/troubleshooting.md) |
 
 ## Quick Links
 

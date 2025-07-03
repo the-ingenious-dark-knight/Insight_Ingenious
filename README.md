@@ -30,10 +30,59 @@ Insight Ingenious lets you orchestrate multiple AI agents and deploy them as an 
     uv run ingen initialize-new-project
     ```
 
-5. Run pre-commit hooks on all files:
+5. **Check workflow requirements** (Important!):
+    ```bash
+    # See all available workflows and their configuration requirements
+    uv run ingen workflow-requirements all
+
+    # Check specific workflow requirements
+    uv run ingen workflow-requirements classification_agent
+    ```
+
+6. **Configure your services**:
+   - Update `config.yml` with your project settings
+   - Update `~/.ingenious/profiles.yml` with API keys and credentials
+   - Set environment variables:
+     ```bash
+     export INGENIOUS_PROJECT_PATH=/path/to/config.yml
+     export INGENIOUS_PROFILE_PATH=$HOME/.ingenious/profiles.yml
+     ```
+
+7. **Start with minimal configuration** workflows:
+   ```bash
+   # Start the server
+   uv run ingen run-rest-api-server
+
+   # Test basic workflow (only needs Azure OpenAI)
+   curl -X POST http://localhost:8081/api/v1/chat \
+     -H "Content-Type: application/json" \
+     -d '{"user_prompt": "Hello", "conversation_flow": "classification_agent"}'
+   ```
+
+8. Run pre-commit hooks on all files:
     ```bash
     uv run pre-commit run --all-files
     ```
+
+## 🎯 Workflow Categories
+
+Insight Ingenious provides multiple conversation workflows with different configuration requirements:
+
+### ✅ **Minimal Configuration** (Azure OpenAI only)
+- `classification_agent` - Route input to specialized agents
+- `bike_insights` - Sample domain-specific analysis
+
+### 🔍 **Azure Search Required**
+- `knowledge_base_agent` - Search knowledge bases
+
+### 📊 **Database Required**
+- `sql_manipulation_agent` - Execute SQL queries
+- `pandas_agent` - Data analysis with pandas
+
+### 🌐 **Web Search** (currently mock)
+- `web_critic_agent` - Web search and fact-checking
+
+**📋 See [Workflow Configuration Requirements](docs/workflows/README.md) for detailed setup instructions.**
 
 ## Project Structure
 
@@ -62,13 +111,14 @@ Insight Ingenious lets you orchestrate multiple AI agents and deploy them as an 
 
 For detailed documentation, see the [docs/](docs/) directory:
 
-- [Architecture Overview](docs/architecture/README.md)
-- [Configuration Guide](docs/configuration/README.md)
-- [Usage Examples](docs/usage/README.md)
-- [Development Guide](docs/development/README.md)
-- [Components Reference](docs/components/README.md)
-- [Optional Dependencies Index](docs/optional_dependencies/README.md)
-  - [Dataprep Crawler](docs/optional_dependencies/dataprep/README.md) – Scrapfly-powered scraping CLI
+- **[Getting Started](docs/getting-started/README.md)** - **Quick start guide and installation**
+- **[Workflow Configuration Requirements](docs/workflows/README.md)** - **Essential guide to configure workflows**
+- [User Guides](docs/guides/README.md) - Feature-specific usage guides
+- [Extensions & Customization](docs/extensions/README.md) - Creating custom components
+- [Configuration Guide](docs/configuration/README.md) - Detailed configuration reference
+- [Architecture Overview](docs/architecture/README.md) - System design and architecture
+- [Development Guide](docs/development/README.md) - Contributing and development setup
+- [Components Reference](docs/components/README.md) - Technical component documentation
 
 ## Contributing
 

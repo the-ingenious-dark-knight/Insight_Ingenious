@@ -27,7 +27,17 @@ class RoutedAssistantAgent(RoutedAgent, ABC):
         self, agent: Agent, data_identifier: str, next_agent_topic: str = None, tools=[]
     ) -> None:
         super().__init__(agent.agent_name)
-        self._model_client = AzureOpenAIChatCompletionClient(**agent.model.__dict__)
+
+        # Map model config parameters to AzureOpenAIChatCompletionClient parameters
+        azure_config = {
+            "model": agent.model.model,
+            "api_key": agent.model.api_key,
+            "azure_endpoint": agent.model.base_url,
+            "azure_deployment": agent.model.deployment or agent.model.model,
+            "api_version": agent.model.api_version,
+        }
+
+        self._model_client = AzureOpenAIChatCompletionClient(**azure_config)
         assistant_agent = AssistantAgent(
             name=agent.agent_name,
             system_message=agent.system_prompt,
@@ -176,7 +186,17 @@ class RoutedResponseOutputAgent(RoutedAgent, ABC):
     ) -> None:
         super().__init__(agent.agent_name)
         self._next_agent_topic = next_agent_topic
-        model_client = AzureOpenAIChatCompletionClient(**agent.model.__dict__)
+
+        # Map model config parameters to AzureOpenAIChatCompletionClient parameters
+        azure_config = {
+            "model": agent.model.model,
+            "api_key": agent.model.api_key,
+            "azure_endpoint": agent.model.base_url,
+            "azure_deployment": agent.model.deployment or agent.model.model,
+            "api_version": agent.model.api_version,
+        }
+
+        model_client = AzureOpenAIChatCompletionClient(**azure_config)
         assistant_agent = AssistantAgent(
             name=agent.agent_name,
             system_message=agent.system_prompt,
