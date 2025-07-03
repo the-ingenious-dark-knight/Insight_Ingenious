@@ -28,7 +28,7 @@ class ConversationPattern:
         # Create Azure OpenAI model client from config
         self.model_client = AzureOpenAIChatCompletionClient(
             model=default_llm_config.get(
-                "azure_deployment", default_llm_config.get("model", "gpt-4o")
+                "azure_deployment", default_llm_config.get("model", "gpt-4.1-nano")
             ),
             api_key=default_llm_config.get("api_key", "mock-openai-key"),
             azure_endpoint=default_llm_config.get(

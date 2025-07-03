@@ -1,9 +1,9 @@
 - name: dev
   models:
-    - model: ${AZURE_OPENAI_MODEL_NAME:gpt-4o}
+    - model: ${AZURE_OPENAI_MODEL_NAME:gpt-4.1-nano}
       api_key: ${AZURE_OPENAI_API_KEY}
       base_url: ${AZURE_OPENAI_BASE_URL}
-      deployment: ${AZURE_OPENAI_DEPLOYMENT:gpt-4o}
+      deployment: ${AZURE_OPENAI_DEPLOYMENT:gpt-4.1-nano}
   chat_history:
     database_connection_string: ${AZURE_COSMOS_CONNECTION_STRING:}
   azure_search_services:
