@@ -5,7 +5,7 @@ import enum
 
 class DatabaseClientType(enum.Enum):
     SQLITE = "sqlite"
-    COSMOS = "cosmos"
+    AZURESQL = "azuresql"
 
 
 # Define an interface or base class for the database client

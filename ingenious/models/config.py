@@ -10,7 +10,7 @@ from ingenious.models import profile as profile_models
 
 class ChatHistoryConfig(config_ns_models.ChatHistoryConfig):
     database_connection_string: str = Field(
-        "", description="Connection string for the database. Only used for cosmosdb"
+        "", description="Connection string for the database. Only used for azuresql"
     )
 
     def __init__(

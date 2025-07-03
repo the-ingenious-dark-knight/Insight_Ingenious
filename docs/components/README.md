@@ -137,7 +137,7 @@ The `ChatHistoryRepository` interface defines chat history storage:
 #### Implementations
 
 - `SQLiteChatHistoryRepository`: Stores chat history in SQLite
-- `CosmosChatHistoryRepository`: Stores chat history in Azure Cosmos DB
+- `AzureSQLChatHistoryRepository`: Stores chat history in Azure SQL Database
 
 ### FileStorage
 
