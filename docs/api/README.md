@@ -31,8 +31,8 @@ graph TB
     end
     
     subgraph "🎯 API Endpoints"
-        CHAT_API[💬 Chat API<br/>/api/chat]
-        WORKFLOW_API[🔄 Workflow API<br/>/api/workflow]
+        CHAT_API[💬 Chat API<br/>/api/v1/chat]
+        WORKFLOW_API[🔄 Workflow API<br/>/api/v1/workflow]
         HEALTH_API[❤️ Health API<br/>/health]
         ADMIN_API[👑 Admin API<br/>/admin]
     end
@@ -114,15 +114,15 @@ sequenceDiagram
 ```mermaid
 graph LR
     subgraph "💬 Chat Endpoints"
-        CHAT_POST[POST /api/chat<br/>Send Message]
-        CHAT_HISTORY[GET /api/chat/history<br/>Get Chat History]
-        CHAT_CLEAR[DELETE /api/chat/history<br/>Clear History]
+        CHAT_POST[POST /api/v1/chat<br/>Send Message]
+        CHAT_HISTORY[GET /api/v1/chat/history<br/>Get Chat History]
+        CHAT_CLEAR[DELETE /api/v1/chat/history<br/>Clear History]
     end
     
     subgraph "🔄 Workflow Endpoints"
-        WORKFLOW_LIST[GET /api/workflows<br/>List Workflows]
-        WORKFLOW_POST[POST /api/workflow<br/>Execute Workflow]
-        WORKFLOW_STATUS[GET /api/workflow/{id}<br/>Check Status]
+        WORKFLOW_LIST[GET /api/v1/workflows<br/>List Workflows]
+        WORKFLOW_POST[POST /api/v1/workflow<br/>Execute Workflow]
+        WORKFLOW_STATUS[GET /api/v1/workflow/{id}<br/>Check Status]
     end
     
     subgraph "❤️ System Endpoints"

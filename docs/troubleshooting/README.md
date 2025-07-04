@@ -278,7 +278,7 @@ uv run ingen status
 
 # 4. Test workflows
 echo "4. Testing workflows..."
-uv run ingen workflows | grep -q "bike-insights" && echo "✅ bike_insights available"
+uv run ingen workflows | grep -q "bike_insights" && echo "✅ bike_insights available"
 
 echo "✅ All tests passed!"
 ```

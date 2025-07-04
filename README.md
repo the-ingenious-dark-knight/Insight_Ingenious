@@ -79,20 +79,24 @@ Insight Ingenious provides multiple conversation workflows with different config
   - `api/`: API endpoints and routes
   - `chainlit/`: Web UI components
   - `config/`: Configuration management
+  - `core/`: Core logging and utilities
+  - `dataprep/`: Data preparation utilities
   - `db/`: Database integration
+  - `document_processing/`: Document analysis and processing
+  - `errors/`: Error handling and custom exceptions
+  - `external_services/`: External service integrations
   - `files/`: File storage utilities
   - `models/`: Data models and schemas
   - `services/`: Core services including chat and agent services
   - `templates/`: Prompt templates and HTML templates
   - `utils/`: Utility functions
-
-- `ingenious_extensions_template/`: Template for custom extensions
-  - `api/`: Custom API routes
-  - `models/`: Custom data models
-  - `sample_data/`: Sample data for testing
-  - `services/`: Custom agent services
-  - `templates/`: Custom prompt templates
-  - `tests/`: Test harness for agent prompts
+  - `ingenious_extensions_template/`: Template for custom extensions
+    - `api/`: Custom API routes
+    - `models/`: Custom data models
+    - `sample_data/`: Sample data for testing
+    - `services/`: Custom agent services
+    - `templates/`: Custom prompt templates
+    - `tests/`: Test harness for agent prompts
 
 - `ingenious_prompt_tuner/`: Tool for tuning and testing prompts
 

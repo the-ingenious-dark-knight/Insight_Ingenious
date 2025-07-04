@@ -68,14 +68,14 @@ Show available workflows and their requirements.
 **Examples:**
 ```bash
 ingen workflows                      # List all workflows
-ingen workflows classification-agent # Show specific workflow details
+ingen workflows classification_agent # Show specific workflow details
 ```
 
 **Available Workflows:**
-- `classification-agent` - Route input to specialized agents (minimal config)
-- `bike-insights` - Sample domain-specific analysis (minimal config)
-- `knowledge-base-agent` - Search knowledge bases (requires Azure Search)
-- `sql-manipulation-agent` - Execute SQL queries (requires database)
+- `classification_agent` - Route input to specialized agents (minimal config)
+- `bike_insights` - Sample domain-specific analysis (minimal config)
+- `knowledge_base_agent` - Search knowledge bases (requires Azure Search)
+- `sql_manipulation_agent` - Execute SQL queries (requires database)
 
 ### `ingen test`
 Run agent workflow tests.
