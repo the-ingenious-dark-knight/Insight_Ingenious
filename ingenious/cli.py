@@ -99,8 +99,10 @@ def serve(
     ] = "0.0.0.0",
     port: Annotated[
         int,
-        typer.Option("--port", help="Port to bind the server (default: 80)"),
-    ] = 80,
+        typer.Option(
+            "--port", help="Port to bind the server (default: 80 or $WEB_PORT)"
+        ),
+    ] = int(os.getenv("WEB_PORT", "80")),
     no_prompt_tuner: Annotated[
         bool,
         typer.Option("--no-prompt-tuner", help="Disable the prompt tuner interface"),
