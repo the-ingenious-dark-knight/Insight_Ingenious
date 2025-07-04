@@ -20,7 +20,7 @@ cd Insight_Ingenious
 uv sync
 
 # Initialize project (creates config templates and folder structure)
-uv run ingen initialize-new-project
+uv run ingen init
 ```
 
 ### Basic Configuration
@@ -33,6 +33,16 @@ uv run ingen initialize-new-project
    export INGENIOUS_PROFILE_PATH=~/.ingenious/profiles.yml
    ```
 
+### Quick Setup Check
+
+```bash
+# Check your configuration status
+uv run ingen status
+
+# Get comprehensive help
+uv run ingen help
+```
+
 ## Understanding Workflows
 
 Insight Ingenious provides multiple conversation workflows, each with different capabilities and configuration requirements:
@@ -43,71 +53,85 @@ Before using any workflow, check what configuration is needed:
 
 ```bash
 # See all available workflows
-uv run ingen workflow-requirements all
+uv run ingen workflows
 
 # Check specific workflow requirements
-uv run ingen workflow-requirements classification_agent
-uv run ingen workflow-requirements knowledge_base_agent
+uv run ingen workflows classification-agent
+uv run ingen workflows knowledge-base-agent
 ```
 
 ### 🚀 Quick Start Workflows (Minimal Configuration)
 
 These workflows only need Azure OpenAI configuration:
 
-- **classification_agent**: Routes input to specialized agents
-- **bike_insights**: Sample domain-specific analysis
+- **classification-agent**: Routes input to specialized agents
+- **bike-insights**: Sample domain-specific analysis
 
 ```bash
 # Test minimal configuration workflow
-curl -X POST http://localhost:8081/api/v1/chat \
+curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
-  -d '{"user_prompt": "Hello", "conversation_flow": "classification_agent"}'
+  -d '{"user_prompt": "Hello", "conversation_flow": "classification-agent"}'
 ```
 
 ### 🔍 Advanced Workflows (External Services Required)
 
-- **knowledge_base_agent**: Requires Azure Cognitive Search
-- **sql_manipulation_agent**: Requires database connection
+- **knowledge-base-agent**: Requires Azure Cognitive Search
+- **sql-manipulation-agent**: Requires database connection
 
 For detailed setup instructions, see [Workflow Configuration Requirements](../workflows/README.md).
 
 ## Using the CLI
 
-Insight Ingenious provides a command-line interface with various utilities:
+Insight Ingenious provides an intuitive command-line interface:
 
-### Initialize a New Project
-
-```bash
-uv run ingen initialize-new-project
-```
-
-This creates the folder structure and configuration files needed for your project.
-
-### Run REST API Server
+### Core Commands
 
 ```bash
-uv run ingen run-rest-api-server [PROJECT_DIR] [PROFILE_DIR] [HOST] [PORT] [RUN_DIR]
+# Initialize a new project
+uv run ingen init
+
+# Check configuration status
+uv run ingen status
+
+# Start the API server
+uv run ingen serve
+
+# List available workflows
+uv run ingen workflows
+
+# Run tests
+uv run ingen test
+
+# Get comprehensive help
+uv run ingen help
 ```
 
-Starts the FastAPI server that presents your agent workflows via REST endpoints.
-
-Arguments (all optional, positional):
-- `PROJECT_DIR`: Path to the config file (defaults to environment variable `INGENIOUS_PROJECT_PATH`)
-- `PROFILE_DIR`: Path to the profile file (defaults to `$HOME/.ingenious/profiles.yml`)
-- `HOST`: Host to run on (default: `0.0.0.0`, use `127.0.0.1` for local development)
-- `PORT`: Port number (default: `80`)
-- `RUN_DIR`: Directory in which to launch the web server
-
-### Run Tests
+### Server Management
 
 ```bash
-uv run ingen run-test-batch [--log-level LOG_LEVEL] [--run-args RUN_ARGS]
+# Start server with default settings
+uv run ingen serve
+
+# Start with custom configuration
+uv run ingen serve --config ./my-config.yml --port 8080
+
+# Start without prompt tuner
+uv run ingen serve --no-prompt-tuner
 ```
 
-Runs tests against your agent prompts.
+### Testing and Development
 
-Options:
-- `--log-level`: Controls verbosity (DEBUG, INFO, WARNING, ERROR). Default: WARNING
+```bash
+# Run all tests
+uv run ingen test
+
+# Run tests with debug logging
+uv run ingen test --log-level DEBUG
+
+# Start prompt tuner standalone
+uv run ingen prompt-tuner --port 5000
+```
 - `--run-args`: Key-value pairs for test runner (e.g., `--run-args='--test_name=TestName --test_type=TestType'`)
 
 ### Prompt Tuner (Integrated with FastAPI)
