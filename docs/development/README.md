@@ -1,6 +1,6 @@
 ---
 title: "🛠️ Development Guide"
-layout: single
+layout: mermaid
 permalink: /development/
 sidebar:
   nav: "docs"
@@ -23,61 +23,141 @@ This guide provides detailed information for developers who want to extend, modi
 
 ### Setting Up for Development
 
-1. Clone the repository:
+```mermaid
+flowchart TD
+    START([🚀 Start Development Setup]) --> CLONE[📥 Clone Repository]
+    CLONE --> INSTALL[📦 Install Dependencies]
+    INSTALL --> HOOKS[🪝 Setup Pre-commit Hooks]
+    HOOKS --> INIT[⚙️ Initialize Project]
+    INIT --> VERIFY[✅ Verify Setup]
+    VERIFY --> READY([🎉 Ready for Development])
+    
+    classDef start fill:#c8e6c9
+    classDef process fill:#e1f5fe
+    classDef end fill:#dcedc8
+    
+    class START,READY start
+    class CLONE,INSTALL,HOOKS,INIT,VERIFY process
+```
+
+1. **Clone the repository:**
    ```bash
    git clone https://github.com/Insight-Services-APAC/Insight_Ingenious.git
    cd Insight_Ingenious
    ```
 
-2. Install dependencies and set up development environment:
+2. **Install dependencies and set up development environment:**
    ```bash
    uv sync --extra dev
    ```
 
-3. Set up pre-commit hooks:
+3. **Set up pre-commit hooks:**
    ```bash
    uv run pre-commit install
    ```
 
-4. Initialize the project:
+4. **Initialize the project:**
    ```bash
    uv run ingen initialize-new-project
    ```
 
-## Project Structure
+## Project Architecture
 
-### Core Framework
+### 🏗️ Core Framework Structure
 
-- `ingenious/`: Core framework code
-  - `api/`: API endpoints and routes
-  - `chainlit/`: Web UI components
-  - `config/`: Configuration management
-  - `db/`: Database integration
-  - `files/`: File storage utilities
-  - `models/`: Data models and schemas
-  - `services/`: Core services including chat and agent services
-  - `templates/`: Prompt templates and HTML templates
-  - `utils/`: Utility functions
+```mermaid
+graph TB
+    subgraph "🎯 Core Framework"
+        API[🌐 API Layer<br/>FastAPI Routes]
+        CHAINLIT[🎨 Chainlit UI<br/>Web Interface]
+        CONFIG[⚙️ Configuration<br/>Management]
+        DB[🗄️ Database<br/>Integration]
+        FILES[📁 File Storage<br/>Utilities]
+        MODELS[📊 Data Models<br/>& Schemas]
+        SERVICES[🔧 Core Services<br/>Chat & Agents]
+        TEMPLATES[📝 Templates<br/>Prompts & HTML]
+        UTILS[🛠️ Utilities<br/>Helper Functions]
+    end
+    
+    subgraph "🔌 Extensions"
+        EXT_API[🔗 Custom API<br/>Routes]
+        EXT_MODELS[📈 Custom Models<br/>Data Structures]
+        EXT_SERVICES[🤖 Custom Agents<br/>& Services]
+        EXT_TEMPLATES[📋 Custom Templates<br/>Domain Prompts]
+        SAMPLE_DATA[📄 Sample Data<br/>Test Files]
+        TESTS[🧪 Test Harness<br/>Agent Testing]
+    end
+    
+    subgraph "🎛️ Development Tools"
+        PROMPT_TUNER[🎯 Prompt Tuner<br/>Testing Tool]
+        CLI[⌨️ CLI Tools<br/>Management]
+        DOCS[📚 Documentation<br/>Jekyll Site]
+    end
+    
+    API --> EXT_API
+    MODELS --> EXT_MODELS
+    SERVICES --> EXT_SERVICES
+    TEMPLATES --> EXT_TEMPLATES
+    
+    SERVICES --> PROMPT_TUNER
+    CLI --> CONFIG
+    DOCS --> TEMPLATES
+    
+    classDef core fill:#e3f2fd
+    classDef extensions fill:#f1f8e9
+    classDef tools fill:#fff3e0
+    
+    class API,CHAINLIT,CONFIG,DB,FILES,MODELS,SERVICES,TEMPLATES,UTILS core
+    class EXT_API,EXT_MODELS,EXT_SERVICES,EXT_TEMPLATES,SAMPLE_DATA,TESTS extensions
+    class PROMPT_TUNER,CLI,DOCS tools
+```
 
-### Extensions Template
+### 📁 Directory Structure
 
-- `ingenious_extensions_template/`: Template for custom extensions
-  - `api/`: Custom API routes
-  - `models/`: Custom data models
-  - `sample_data/`: Sample data for testing
-  - `services/`: Custom agent services
-  - `templates/`: Custom prompt templates
-  - `tests/`: Test harness for agent prompts
-
-### Prompt Tuner
-
-- `ingenious_prompt_tuner/`: Tool for tuning and testing prompts
+```mermaid
+graph LR
+    subgraph "📂 ingenious/"
+        CORE_API[🌐 api/]
+        CORE_CHAINLIT[🎨 chainlit/]
+        CORE_CONFIG[⚙️ config/]
+        CORE_DB[🗄️ db/]
+        CORE_FILES[📁 files/]
+        CORE_MODELS[📊 models/]
+        CORE_SERVICES[🔧 services/]
+        CORE_TEMPLATES[📝 templates/]
+        CORE_UTILS[🛠️ utils/]
+    end
+    
+    subgraph "🔌 ingenious_extensions_template/"
+        EXT_API[🔗 api/]
+        EXT_MODELS[📈 models/]
+        EXT_SAMPLE[📄 sample_data/]
+        EXT_SERVICES[🤖 services/]
+        EXT_TEMPLATES[📋 templates/]
+        EXT_TESTS[🧪 tests/]
+    end
+    
+    subgraph "🎛️ ingenious_prompt_tuner/"
+        TUNER_AUTH[🔐 auth.py]
+        TUNER_PROCESSOR[⚡ event_processor.py]
+        TUNER_PAYLOAD[📦 payload.py]
+        TUNER_WRAPPER[🎁 response_wrapper.py]
+    end
+    
+    classDef core fill:#e3f2fd
+    classDef extensions fill:#f1f8e9
+    classDef tuner fill:#fff3e0
+    
+    class CORE_API,CORE_CHAINLIT,CORE_CONFIG,CORE_DB,CORE_FILES,CORE_MODELS,CORE_SERVICES,CORE_TEMPLATES,CORE_UTILS core
+    class EXT_API,EXT_MODELS,EXT_SAMPLE,EXT_SERVICES,EXT_TEMPLATES,EXT_TESTS extensions
+    class TUNER_AUTH,TUNER_PROCESSOR,TUNER_PAYLOAD,TUNER_WRAPPER tuner
+```
 
 ## Core Components
 
-### Multi-Agent Framework
+### 🤖 Multi-Agent Framework
 
-The multi-agent framework is the heart of Insight Ingenious. It consists of:
+The multi-agent framework is the heart of Insight Ingenious:
 
 #### Interfaces
 
@@ -299,3 +379,359 @@ Create focused pull requests:
 - Include tests for new functionality
 - Update documentation
 - Pass all CI checks
+
+## Development Workflow
+
+### 🤖 Agent Development
+
+```mermaid
+graph TB
+    subgraph "🤖 Agent Development"
+        AGENT_INTERFACE[🎯 IAgent Interface]
+        BASE_AGENT[👤 BaseAgent Class]
+        CUSTOM_AGENT[🔧 Custom Agent<br/>Implementation]
+    end
+    
+    subgraph "📋 Pattern Development"
+        PATTERN_INTERFACE[🔄 IConversationPattern]
+        BASE_PATTERN[📝 BasePattern Class]
+        CUSTOM_PATTERN[🎭 Custom Pattern<br/>Implementation]
+    end
+    
+    subgraph "🔧 Service Integration"
+        CHAT_SERVICE[💬 MultiAgentChatService]
+        WORKFLOW_SERVICE[⚡ WorkflowService]
+        CUSTOM_SERVICE[🛠️ Custom Service<br/>Implementation]
+    end
+    
+    subgraph "📦 Registration System"
+        AGENT_REGISTRY[📋 Agent Registry]
+        PATTERN_REGISTRY[📋 Pattern Registry]
+        SERVICE_REGISTRY[📋 Service Registry]
+    end
+    
+    AGENT_INTERFACE --> BASE_AGENT
+    BASE_AGENT --> CUSTOM_AGENT
+    CUSTOM_AGENT --> AGENT_REGISTRY
+    
+    PATTERN_INTERFACE --> BASE_PATTERN
+    BASE_PATTERN --> CUSTOM_PATTERN
+    CUSTOM_PATTERN --> PATTERN_REGISTRY
+    
+    CHAT_SERVICE --> WORKFLOW_SERVICE
+    WORKFLOW_SERVICE --> CUSTOM_SERVICE
+    CUSTOM_SERVICE --> SERVICE_REGISTRY
+    
+    AGENT_REGISTRY --> CHAT_SERVICE
+    PATTERN_REGISTRY --> CHAT_SERVICE
+    
+    classDef interface fill:#e3f2fd
+    classDef base fill:#f1f8e9
+    classDef custom fill:#fff3e0
+    classDef registry fill:#fce4ec
+    
+    class AGENT_INTERFACE,PATTERN_INTERFACE interface
+    class BASE_AGENT,BASE_PATTERN,CHAT_SERVICE,WORKFLOW_SERVICE base
+    class CUSTOM_AGENT,CUSTOM_PATTERN,CUSTOM_SERVICE custom
+    class AGENT_REGISTRY,PATTERN_REGISTRY,SERVICE_REGISTRY registry
+```
+
+#### 🆕 Creating a New Agent
+
+```mermaid
+sequenceDiagram
+    participant Dev as 👨‍💻 Developer
+    participant Template as 📋 Agent Template
+    participant Base as 👤 BaseAgent
+    participant Registry as 📋 Agent Registry
+    participant Service as 💬 Chat Service
+    participant Test as 🧪 Test Suite
+    
+    Dev->>Template: 1. Copy agent template
+    Template->>Base: 2. Inherit from BaseAgent
+    Dev->>Base: 3. Implement required methods
+    Note over Dev,Base: - process_message()<br/>- get_system_prompt()<br/>- configure_tools()
+    
+    Dev->>Registry: 4. Register agent
+    Registry->>Service: 5. Make available to service
+    Dev->>Test: 6. Write unit tests
+    Test->>Dev: 7. Validate implementation
+    Dev->>Service: 8. Integration testing
+    Service->>Dev: 9. Deploy to environment
+```
+
+#### 🎭 Creating a Custom Conversation Pattern
+
+```mermaid
+flowchart TD
+    START([🚀 Start Pattern Development]) --> DESIGN[🎨 Design Conversation Flow]
+    DESIGN --> INTERFACE[🔧 Implement IConversationPattern]
+    INTERFACE --> LOGIC[⚡ Implement Flow Logic]
+    LOGIC --> VALIDATE[✅ Validate Pattern]
+    VALIDATE --> REGISTER[📋 Register Pattern]
+    REGISTER --> TEST[🧪 Integration Testing]
+    TEST --> DEPLOY[🚀 Deploy Pattern]
+    
+    LOGIC --> SEQUENTIAL{Pattern Type?}
+    SEQUENTIAL -->|Sequential| SEQ_LOGIC[➡️ Sequential Logic]
+    SEQUENTIAL -->|Parallel| PAR_LOGIC[⚡ Parallel Logic]
+    SEQUENTIAL -->|Conditional| COND_LOGIC[🔀 Conditional Logic]
+    SEQUENTIAL -->|Custom| CUSTOM_LOGIC[🎯 Custom Logic]
+    
+    SEQ_LOGIC --> VALIDATE
+    PAR_LOGIC --> VALIDATE
+    COND_LOGIC --> VALIDATE
+    CUSTOM_LOGIC --> VALIDATE
+    
+    classDef start fill:#c8e6c9
+    classDef process fill:#e1f5fe
+    classDef decision fill:#fff9c4
+    classDef pattern fill:#f3e5f5
+    
+    class START start
+    class DESIGN,INTERFACE,LOGIC,VALIDATE,REGISTER,TEST,DEPLOY process
+    class SEQUENTIAL decision
+    class SEQ_LOGIC,PAR_LOGIC,COND_LOGIC,CUSTOM_LOGIC pattern
+```
+
+### 🧪 Testing Framework
+
+#### Test Architecture
+
+```mermaid
+graph TB
+    subgraph "🧪 Test Types"
+        UNIT[🔬 Unit Tests<br/>Individual Components]
+        INTEGRATION[🔗 Integration Tests<br/>Component Interaction]
+        E2E[🌐 End-to-End Tests<br/>Full Workflows]
+        PERFORMANCE[⚡ Performance Tests<br/>Load & Stress]
+    end
+    
+    subgraph "🎯 Test Targets"
+        AGENTS[🤖 Agent Testing]
+        PATTERNS[📋 Pattern Testing]
+        API[🌐 API Testing]
+        UI[🎨 UI Testing]
+    end
+    
+    subgraph "🛠️ Test Tools"
+        PYTEST[🐍 pytest<br/>Test Framework]
+        MOCK[🎭 Mock Objects<br/>Service Mocking]
+        FIXTURES[📋 Test Fixtures<br/>Sample Data]
+        COVERAGE[📊 Coverage Reports<br/>Code Coverage]
+    end
+    
+    UNIT --> AGENTS
+    UNIT --> PATTERNS
+    INTEGRATION --> API
+    E2E --> UI
+    
+    AGENTS --> PYTEST
+    PATTERNS --> PYTEST
+    API --> PYTEST
+    UI --> PYTEST
+    
+    PYTEST --> MOCK
+    PYTEST --> FIXTURES
+    PYTEST --> COVERAGE
+    
+    classDef tests fill:#e3f2fd
+    classDef targets fill:#f1f8e9
+    classDef tools fill:#fff3e0
+    
+    class UNIT,INTEGRATION,E2E,PERFORMANCE tests
+    class AGENTS,PATTERNS,API,UI targets
+    class PYTEST,MOCK,FIXTURES,COVERAGE tools
+```
+
+#### Testing Best Practices
+
+1. **🔬 Unit Testing**: Test individual components in isolation
+2. **🔗 Integration Testing**: Test component interactions
+3. **🌐 End-to-End Testing**: Test complete user workflows
+4. **📊 Coverage**: Maintain >80% code coverage
+5. **🎭 Mocking**: Mock external services and dependencies
+6. **📋 Fixtures**: Use consistent test data
+
+### 🚀 Deployment Pipeline
+
+```mermaid
+flowchart LR
+    subgraph "💻 Development"
+        CODE[👨‍💻 Code Changes]
+        COMMIT[📝 Git Commit]
+        PUSH[📤 Git Push]
+    end
+    
+    subgraph "🔍 CI Pipeline"
+        LINT[🎨 Code Linting]
+        TEST[🧪 Run Tests]
+        BUILD[🏗️ Build Package]
+        SECURITY[🔒 Security Scan]
+    end
+    
+    subgraph "📦 Staging"
+        DEPLOY_STAGE[🎭 Deploy to Staging]
+        SMOKE_TEST[💨 Smoke Tests]
+        INTEGRATION_TEST[🔗 Integration Tests]
+    end
+    
+    subgraph "🚀 Production"
+        DEPLOY_PROD[🌐 Deploy to Production]
+        MONITOR[📊 Monitor Health]
+        ROLLBACK[🔄 Rollback if Needed]
+    end
+    
+    CODE --> COMMIT
+    COMMIT --> PUSH
+    PUSH --> LINT
+    LINT --> TEST
+    TEST --> BUILD
+    BUILD --> SECURITY
+    SECURITY --> DEPLOY_STAGE
+    DEPLOY_STAGE --> SMOKE_TEST
+    SMOKE_TEST --> INTEGRATION_TEST
+    INTEGRATION_TEST --> DEPLOY_PROD
+    DEPLOY_PROD --> MONITOR
+    MONITOR --> ROLLBACK
+    
+    classDef dev fill:#e8f5e8
+    classDef ci fill:#fff3e0
+    classDef staging fill:#e3f2fd
+    classDef prod fill:#fce4ec
+    
+    class CODE,COMMIT,PUSH dev
+    class LINT,TEST,BUILD,SECURITY ci
+    class DEPLOY_STAGE,SMOKE_TEST,INTEGRATION_TEST staging
+    class DEPLOY_PROD,MONITOR,ROLLBACK prod
+```
+
+### 🔧 Extension Development Guide
+
+#### Step-by-Step Extension Creation
+
+```mermaid
+graph TD
+    START([🎯 Extension Idea]) --> PLAN[📋 Plan Extension]
+    PLAN --> TEMPLATE[📄 Copy Extension Template]
+    TEMPLATE --> IMPLEMENT[🔧 Implement Components]
+    
+    IMPLEMENT --> AGENT{Need Custom Agent?}
+    AGENT -->|Yes| CREATE_AGENT[🤖 Create Custom Agent]
+    AGENT -->|No| PATTERN{Need Custom Pattern?}
+    
+    CREATE_AGENT --> PATTERN
+    PATTERN -->|Yes| CREATE_PATTERN[📋 Create Custom Pattern]
+    PATTERN -->|No| API{Need Custom API?}
+    
+    CREATE_PATTERN --> API
+    API -->|Yes| CREATE_API[🌐 Create API Routes]
+    API -->|No| TEST_EXT[🧪 Test Extension]
+    
+    CREATE_API --> TEST_EXT
+    TEST_EXT --> REGISTER[📋 Register Extension]
+    REGISTER --> DEPLOY[🚀 Deploy Extension]
+    DEPLOY --> MONITOR[📊 Monitor Performance]
+    
+    classDef start fill:#c8e6c9
+    classDef process fill:#e1f5fe
+    classDef decision fill:#fff9c4
+    classDef create fill:#f3e5f5
+    classDef end fill:#dcedc8
+    
+    class START start
+    class PLAN,TEMPLATE,IMPLEMENT,TEST_EXT,REGISTER,DEPLOY,MONITOR process
+    class AGENT,PATTERN,API decision
+    class CREATE_AGENT,CREATE_PATTERN,CREATE_API create
+```
+
+### 📚 Key Development Concepts
+
+#### Agent Lifecycle
+
+```mermaid
+stateDiagram-v2
+    [*] --> Initialized: Create Agent
+    Initialized --> Configured: Load Configuration
+    Configured --> Ready: Register with Service
+    Ready --> Processing: Receive Message
+    Processing --> Thinking: Analyze Input
+    Thinking --> Acting: Execute Tools
+    Acting --> Responding: Generate Response
+    Responding --> Ready: Send Response
+    Ready --> Shutdown: Service Stop
+    Shutdown --> [*]
+    
+    Processing --> Error: Exception
+    Thinking --> Error: LLM Error
+    Acting --> Error: Tool Error
+    Error --> Ready: Handle Error
+```
+
+### 🔍 Debugging and Troubleshooting
+
+#### Debug Flow
+
+```mermaid
+flowchart TD
+    ISSUE([🚨 Issue Detected]) --> IDENTIFY{🔍 Identify Type}
+    
+    IDENTIFY -->|Agent Issue| AGENT_DEBUG[🤖 Agent Debugging]
+    IDENTIFY -->|Pattern Issue| PATTERN_DEBUG[📋 Pattern Debugging]
+    IDENTIFY -->|API Issue| API_DEBUG[🌐 API Debugging]
+    IDENTIFY -->|Config Issue| CONFIG_DEBUG[⚙️ Config Debugging]
+    
+    AGENT_DEBUG --> LOGS[📝 Check Agent Logs]
+    PATTERN_DEBUG --> FLOW[🔄 Trace Flow Logic]
+    API_DEBUG --> REQUESTS[📡 Trace API Requests]
+    CONFIG_DEBUG --> SETTINGS[⚙️ Validate Settings]
+    
+    LOGS --> ANALYZE[🔬 Analyze Issues]
+    FLOW --> ANALYZE
+    REQUESTS --> ANALYZE
+    SETTINGS --> ANALYZE
+    
+    ANALYZE --> FIX[🔧 Apply Fix]
+    FIX --> TEST[🧪 Test Fix]
+    TEST --> VERIFY[✅ Verify Resolution]
+    VERIFY --> DONE([✅ Issue Resolved])
+    
+    classDef issue fill:#ffcdd2
+    classDef debug fill:#fff3e0
+    classDef process fill:#e1f5fe
+    classDef fix fill:#c8e6c9
+    
+    class ISSUE issue
+    class AGENT_DEBUG,PATTERN_DEBUG,API_DEBUG,CONFIG_DEBUG debug
+    class LOGS,FLOW,REQUESTS,SETTINGS,ANALYZE process
+    class FIX,TEST,VERIFY,DONE fix
+```
+
+## Contributing Guidelines
+
+### 🤝 Contribution Process
+
+1. **🍴 Fork the Repository**: Create your own fork
+2. **🌿 Create Feature Branch**: Use descriptive branch names
+3. **💻 Implement Changes**: Follow coding standards
+4. **🧪 Add Tests**: Ensure proper test coverage
+5. **📝 Update Documentation**: Keep docs current
+6. **📤 Submit Pull Request**: Use PR template
+7. **🔍 Code Review**: Address reviewer feedback
+8. **🎉 Merge**: Celebrate your contribution!
+
+### 📝 Code Style Guidelines
+
+- **🐍 Python**: Follow PEP 8 standards
+- **📏 Line Length**: Maximum 88 characters
+- **🏷️ Type Hints**: Use type annotations
+- **📚 Docstrings**: Document all public methods
+- **🧪 Tests**: Write tests for new features
+- **🔐 Security**: Follow security best practices
+
+## Next Steps
+
+- 📖 Read the [Architecture Guide](/architecture/) for system design
+- 🔧 Check the [Configuration Guide](/configuration/) for setup
+- 🚀 Try the [Getting Started Guide](/getting-started/) for quick setup
+- 📡 Explore the [API Documentation](/api/) for integration
