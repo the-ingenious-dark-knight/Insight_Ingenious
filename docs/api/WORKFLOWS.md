@@ -1,3 +1,14 @@
+---
+title: "🚀 API Workflow Documentation"
+layout: single
+permalink: /api/workflows/
+sidebar:
+  nav: "docs"
+toc: true
+toc_label: "API Workflows"
+toc_icon: "api"
+---
+
 # 🚀 Ingenious API Workflow Documentation
 
 This document provides detailed API usage examples for all available workflows in the Insight Ingenious framework.

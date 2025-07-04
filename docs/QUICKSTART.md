@@ -1,3 +1,14 @@
+---
+title: "⚡ Quick Start Guide"
+layout: single
+permalink: /quickstart/
+sidebar:
+  nav: "docs"
+toc: true
+toc_label: "Quick Start Steps"
+toc_icon: "bolt"
+---
+
 # ⚡ Quick Start Guide
 
 Get Insight Ingenious up and running in 5 minutes!
