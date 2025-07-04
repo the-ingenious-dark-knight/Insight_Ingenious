@@ -7,18 +7,14 @@ body:
     attributes:
       value: |
         Need help with configuration? Please provide as much detail as possible about your setup and the issue you're facing.
-
   - type: textarea
     id: issue
     attributes:
       label: Configuration Issue
       description: Describe the configuration problem you're experiencing
-      placeholder: |
-        What configuration issue are you facing? 
-        For example: "I can't get Azure OpenAI to work", "SQL workflow returns errors", etc.
+      placeholder: "What configuration issue are you facing? \nFor example: \"I can't get Azure OpenAI to work\", \"SQL workflow returns errors\", etc.\n"
     validations:
       required: true
-
   - type: dropdown
     id: setup_stage
     attributes:
@@ -34,7 +30,6 @@ body:
         - Runtime/operational issues
     validations:
       required: true
-
   - type: dropdown
     id: workflow_target
     attributes:
@@ -51,7 +46,6 @@ body:
         - Not sure/General setup
     validations:
       required: true
-
   - type: textarea
     id: steps_taken
     attributes:
@@ -64,7 +58,6 @@ body:
         3. etc.
     validations:
       required: true
-
   - type: textarea
     id: environment
     attributes:
@@ -78,7 +71,6 @@ body:
         - Deployment target: [local, Azure, other cloud]
     validations:
       required: true
-
   - type: textarea
     id: config_structure
     attributes:
@@ -93,7 +85,7 @@ body:
             api_type: azure
         # ... other relevant config
         ```
-        
+
         profiles.yml structure (NO SENSITIVE DATA):
         ```yaml
         - name: "dev"
@@ -103,7 +95,6 @@ body:
               base_url: "https://your-endpoint.openai.azure.com/..."
         # ... other structure info
         ```
-
   - type: textarea
     id: error_output
     attributes:
@@ -113,7 +104,6 @@ body:
         ```
         Paste error messages or logs here
         ```
-
   - type: textarea
     id: azure_services
     attributes:
@@ -127,7 +117,6 @@ body:
         - [ ] Azure Document Intelligence
         - [ ] Azure Storage/Blob
         - [ ] Other: ___________
-
   - type: checkboxes
     id: checklist
     attributes:

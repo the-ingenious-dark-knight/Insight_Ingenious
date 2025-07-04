@@ -7,7 +7,6 @@ body:
     attributes:
       value: |
         Need help building custom agents, extensions, or conversation patterns? Please provide details about what you're trying to achieve.
-
   - type: dropdown
     id: extension_type
     attributes:
@@ -24,7 +23,6 @@ body:
         - Other custom component
     validations:
       required: true
-
   - type: textarea
     id: goal
     attributes:
@@ -38,7 +36,6 @@ body:
         - "Create a conversation pattern for customer support"
     validations:
       required: true
-
   - type: textarea
     id: current_progress
     attributes:
@@ -50,7 +47,6 @@ body:
         - Templates you've created
         - Configuration you've set up
         - Tests you've run
-
   - type: textarea
     id: specific_issue
     attributes:
@@ -64,7 +60,6 @@ body:
         - Best practices you're unsure about
     validations:
       required: true
-
   - type: textarea
     id: code_samples
     attributes:
@@ -76,14 +71,13 @@ body:
         class MyCustomAgent:
             # ... your implementation
         ```
-        
+
         ```yaml
         # Your configuration
         conversation_flows:
           my_custom_flow:
             # ... your flow config
         ```
-
   - type: dropdown
     id: framework_area
     attributes:
@@ -101,7 +95,6 @@ body:
         - Chainlit Web UI
         - Extensions Template (ingenious_extensions_template/)
         - Not sure
-
   - type: textarea
     id: documentation_checked
     attributes:
@@ -114,7 +107,6 @@ body:
         - [ ] CONTRIBUTING.md
         - [ ] Code examples in ingenious_extensions_template/
         - [ ] Other: ____________
-
   - type: textarea
     id: environment
     attributes:
@@ -125,7 +117,6 @@ body:
         - Python version: [e.g., 3.13.1]
         - Insight Ingenious version: [e.g., 0.1.0]
         - Development setup: [local, Azure, other]
-
   - type: dropdown
     id: experience_level
     attributes:
@@ -136,7 +127,6 @@ body:
         - Used basic workflows, new to extensions
         - Some experience with extensions
         - Experienced user
-
   - type: checkboxes
     id: help_type
     attributes:
@@ -151,7 +141,6 @@ body:
         - label: Architecture guidance
         - label: Performance optimization
         - label: Testing strategies
-
   - type: checkboxes
     id: checklist
     attributes:
