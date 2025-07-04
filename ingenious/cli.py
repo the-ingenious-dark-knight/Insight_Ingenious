@@ -384,7 +384,8 @@ def init():
     • profiles.yml - Environment profiles (API keys, secrets)  
     • .env.example - Example environment variables
     • ingenious_extensions/ - Your custom agents and workflows
-    • docker/ - Docker deployment templates
+    • Dockerfile - Docker containerization setup
+    • .dockerignore - Docker build exclusions
     • tmp/ - Temporary files and memory storage
 
     NEXT STEPS after running this command:
@@ -410,7 +411,8 @@ def initialize_new_project():
     • profiles.yml - Environment profiles (API keys, secrets) in project directory
     • .env.example - Example environment variables file
     • ingenious_extensions/ - Your custom agents and workflows
-    • docker/ - Docker deployment templates
+    • Dockerfile - Docker containerization setup at project root
+    • .dockerignore - Docker build exclusions at project root
     • tmp/ - Temporary files and memory
 
     NEXT STEPS after running this command:
@@ -456,6 +458,10 @@ def initialize_new_project():
                 for item in template_path.iterdir():
                     src_path = template_path / item
                     dst_path = destination / item.name
+
+                    # Skip Docker files when copying to ingenious_extensions - they'll be copied to project root separately
+                    if folder_name == "ingenious_extensions" and item.name in ["Dockerfile", ".dockerignore", "start.sh"]:
+                        continue
 
                     if src_path.is_dir():
                         if "__pycache__" not in src_path.parts:
@@ -591,6 +597,62 @@ def initialize_new_project():
     else:
         console.print(
             f"[warning].env.example templates not found. Skipping...[/warning]"
+        )
+
+    # Create Docker files at project root
+    docker_file_path = templates_paths["ingenious_extensions"] / "Dockerfile"
+    dockerignore_file_path = templates_paths["ingenious_extensions"] / ".dockerignore"
+    start_sh_file_path = templates_paths["ingenious_extensions"] / "start.sh"
+    
+    if docker_file_path.exists():
+        project_docker_path = Path.cwd() / "Dockerfile"
+        if not project_docker_path.exists():
+            shutil.copy2(docker_file_path, project_docker_path)
+            console.print(
+                f"[info]Dockerfile created successfully at {project_docker_path}[/info]"
+            )
+        else:
+            console.print(
+                f"[info]Dockerfile already exists at {project_docker_path}. Preserving existing file.[/info]"
+            )
+    else:
+        console.print(
+            f"[warning]Dockerfile template not found. Skipping...[/warning]"
+        )
+    
+    if dockerignore_file_path.exists():
+        project_dockerignore_path = Path.cwd() / ".dockerignore"
+        if not project_dockerignore_path.exists():
+            shutil.copy2(dockerignore_file_path, project_dockerignore_path)
+            console.print(
+                f"[info].dockerignore created successfully at {project_dockerignore_path}[/info]"
+            )
+        else:
+            console.print(
+                f"[info].dockerignore already exists at {project_dockerignore_path}. Preserving existing file.[/info]"
+            )
+    else:
+        console.print(
+            f"[warning].dockerignore template not found. Skipping...[/warning]"
+        )
+    
+    if start_sh_file_path.exists():
+        project_start_sh_path = Path.cwd() / "start.sh"
+        if not project_start_sh_path.exists():
+            shutil.copy2(start_sh_file_path, project_start_sh_path)
+            # Make start.sh executable
+            import stat
+            project_start_sh_path.chmod(project_start_sh_path.stat().st_mode | stat.S_IEXEC)
+            console.print(
+                f"[info]start.sh created successfully at {project_start_sh_path}[/info]"
+            )
+        else:
+            console.print(
+                f"[info]start.sh already exists at {project_start_sh_path}. Preserving existing file.[/info]"
+            )
+    else:
+        console.print(
+            f"[warning]start.sh template not found. Skipping...[/warning]"
         )
 
     console.print("[info]✅ Project initialization completed![/info]")
