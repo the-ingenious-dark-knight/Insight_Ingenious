@@ -5,7 +5,6 @@ from typing import Dict
 
 import matplotlib.pyplot as plt
 import pandas as pd
-import pyodbc
 from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
 
@@ -13,6 +12,14 @@ import ingenious.config.config as ingen_config
 from ingenious.utils.load_sample_data import sqlite_sample_db
 
 _config = ingen_config.get_config()
+
+# Only import pyodbc if we're using Azure SQL
+if _config.azure_sql_services.database_name != "skip":
+    try:
+        import pyodbc
+    except ImportError:
+        print("Warning: pyodbc not available for Azure SQL connections")
+        pyodbc = None
 
 
 class ToolFunctions:
@@ -82,6 +89,10 @@ class PandasExecutor:
 
 # SQL Tools TODO: need a better way to wrap these functions
 def get_conn(_config):
+    if pyodbc is None:
+        raise ImportError(
+            "pyodbc is required for Azure SQL connections but is not available"
+        )
     connection_string = _config.azure_sql_services.database_connection_string
     # credential = identity.DefaultAzureCredential(exclude_interactive_browser_credential=False)
     # token_bytes = credential.get_token("https://database.windows.net/.default").token.encode("UTF-16-LE")
@@ -95,7 +106,10 @@ def get_conn(_config):
 if _config.azure_sql_services.database_name == "skip":
     test_db = sqlite_sample_db()  # this is for local sql initialisation
 else:
-    conn, cursor = get_conn(_config)
+    if pyodbc is not None:
+        conn, cursor = get_conn(_config)
+    else:
+        print("Warning: Azure SQL configured but pyodbc not available")
 
 
 class SQL_ToolFunctions:
