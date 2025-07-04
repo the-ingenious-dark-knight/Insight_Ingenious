@@ -124,7 +124,7 @@ When the user asks what columns are available, just list them without running a 
 
         # Create the group chat with round-robin configuration
         group_chat = RoundRobinGroupChat(
-            agents=[sql_assistant, user_proxy],
+            participants=[sql_assistant, user_proxy],
             termination_condition=termination,
             max_turns=10,
         )
