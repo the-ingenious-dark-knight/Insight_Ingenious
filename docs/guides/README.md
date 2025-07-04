@@ -1,5 +1,5 @@
 ---
-title: "📖 User Guides"
+title: "User Guides"
 layout: single
 permalink: /guides/
 sidebar:

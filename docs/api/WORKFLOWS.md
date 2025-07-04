@@ -1,5 +1,5 @@
 ---
-title: "🚀 API Workflow Documentation"
+title: "API Workflow Documentation"
 layout: single
 permalink: /api/workflows/
 sidebar:
@@ -9,19 +9,19 @@ toc_label: "API Workflows"
 toc_icon: "api"
 ---
 
-# 🚀 Ingenious API Workflow Documentation
+# Ingenious API Workflow Documentation
 
 This document provides detailed API usage examples for all available workflows in the Insight Ingenious framework.
 
-## 📡 Base API Information
+## Base API Information
 
 - **Base URL**: `http://localhost:80` (or your configured port)
 - **Endpoint**: `POST /api/v1/chat`
 - **Content-Type**: `application/json`
 
-## 🔥 Available Workflows
+## Available Workflows
 
-### ⭐ 1. bike_insights - **"Hello World" Workflow (START HERE!)**
+### 1. bike_insights - **"Hello World" Workflow (START HERE!)**
 
 **Purpose**: The recommended first workflow - showcases multi-agent coordination through comprehensive bike sales analysis. This is the "Hello World" of Ingenious!
 

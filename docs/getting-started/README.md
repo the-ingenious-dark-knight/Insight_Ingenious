@@ -1,5 +1,5 @@
 ---
-title: "🏁 Quick Start Guide"
+title: "Quick Start Guide"
 layout: single
 permalink: /getting-started/
 sidebar:
@@ -9,19 +9,19 @@ toc_label: "Quick Start Steps"
 toc_icon: "rocket"
 ---
 
-# 🏁 Quick Start Guide
+# Quick Start Guide
 
 Get up and running with Insight Ingenious in minutes! This guide will walk you through the essential steps to start using conversation workflows.
 
-## 📋 Prerequisites
+## Prerequisites
 
 - **Python 3.13+**
 - **[uv](https://docs.astral.sh/uv/)** for package management
 - **Azure OpenAI** account with API access
 
-## 🚀 Installation
+## Installation
 
-For complete installation instructions, including optional dependencies for advanced features, see the [📦 Installation Guide](./installation.md).
+For complete installation instructions, including optional dependencies for advanced features, see the [Installation Guide](./installation.md).
 
 **Quick install for basic functionality:**
 
@@ -62,7 +62,7 @@ uv run ingen workflow-requirements classification_agent
   • sql_manipulation_agent: Execute SQL queries
 ```
 
-## ⚙️ Basic Configuration
+## Basic Configuration
 
 ### 2. Configure Azure OpenAI
 
@@ -100,7 +100,7 @@ export INGENIOUS_PROJECT_PATH="$(pwd)/config.yml"
 export INGENIOUS_PROFILE_PATH="$HOME/.ingenious/profiles.yml"
 ```
 
-## 🧪 Test Your Setup
+## Test Your Setup
 
 ### 4. Start with Minimal Configuration
 
@@ -139,9 +139,9 @@ curl http://localhost:8081/api/v1/workflows
 curl http://localhost:8081/api/v1/workflow-status/classification_agent
 ```
 
-## 🎯 Next Steps
+## Next Steps
 
-### ✅ Working? Great! Try These:
+### Working? Great! Try These:
 
 1. **Test different workflows**:
    ```bash
@@ -153,20 +153,20 @@ curl http://localhost:8081/api/v1/workflow-status/classification_agent
 
 2. **Explore the web interface** at http://localhost:8081/chainlit
 
-### 🔧 Want More? Add Advanced Workflows:
+### Want More? Add Advanced Workflows:
 
 - **🔍 Knowledge Base Search**: [Setup Azure Search](../configuration/README.md#azure-search-services)
 - **📊 Database Queries**: [Setup Database Integration](../configuration/README.md#database-configuration)
 - **📄 Document Processing**: [Setup Document Processing](../guides/document-processing/)
 
-### 📖 Learn More:
+### Learn More:
 
 - [**Workflow Requirements**](../workflows/README.md) - Understand what each workflow needs
 - [**Configuration Guide**](../configuration/README.md) - Detailed configuration options
 - [**API Integration**](../guides/api-integration.md) - Advanced API usage
 - [**Creating Custom Extensions**](../extensions/README.md) - Build your own workflows and agents
 
-## 🆘 Troubleshooting
+## Troubleshooting
 
 ### Common Issues:
 

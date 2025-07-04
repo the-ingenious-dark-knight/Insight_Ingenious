@@ -1,6 +1,6 @@
 ---
-title: "🛠️ Development Guide"
-layout: mermaid
+title: "Development Guide"
+layout: single
 permalink: /development/
 sidebar:
   nav: "docs"
@@ -25,12 +25,12 @@ This guide provides detailed information for developers who want to extend, modi
 
 ```mermaid
 flowchart TD
-    START([🚀 Start Development Setup]) --> CLONE[📥 Clone Repository]
-    CLONE --> INSTALL[📦 Install Dependencies]
-    INSTALL --> HOOKS[🪝 Setup Pre-commit Hooks]
-    HOOKS --> INIT[⚙️ Initialize Project]
-    INIT --> VERIFY[✅ Verify Setup]
-    VERIFY --> READY([🎉 Ready for Development])
+    START([Start Development Setup]) --> CLONE[Clone Repository]
+    CLONE --> INSTALL[Install Dependencies]
+    INSTALL --> HOOKS[Setup Pre-commit Hooks]
+    HOOKS --> INIT[Initialize Project]
+    INIT --> VERIFY[Verify Setup]
+    VERIFY --> READY([Ready for Development])
     
     classDef start fill:#c8e6c9
     classDef process fill:#e1f5fe
@@ -63,35 +63,35 @@ flowchart TD
 
 ## Project Architecture
 
-### 🏗️ Core Framework Structure
+### Core Framework Structure
 
 ```mermaid
 graph TB
-    subgraph "🎯 Core Framework"
-        API[🌐 API Layer<br/>FastAPI Routes]
-        CHAINLIT[🎨 Chainlit UI<br/>Web Interface]
-        CONFIG[⚙️ Configuration<br/>Management]
-        DB[🗄️ Database<br/>Integration]
-        FILES[📁 File Storage<br/>Utilities]
-        MODELS[📊 Data Models<br/>& Schemas]
-        SERVICES[🔧 Core Services<br/>Chat & Agents]
-        TEMPLATES[📝 Templates<br/>Prompts & HTML]
-        UTILS[🛠️ Utilities<br/>Helper Functions]
+    subgraph "Core Framework"
+        API[API Layer<br/>FastAPI Routes]
+        CHAINLIT[Chainlit UI<br/>Web Interface]
+        CONFIG[Configuration<br/>Management]
+        DB[Database<br/>Integration]
+        FILES[File Storage<br/>Utilities]
+        MODELS[Data Models<br/>& Schemas]
+        SERVICES[Core Services<br/>Chat & Agents]
+        TEMPLATES[Templates<br/>Prompts & HTML]
+        UTILS[Utilities<br/>Helper Functions]
     end
     
-    subgraph "🔌 Extensions"
-        EXT_API[🔗 Custom API<br/>Routes]
-        EXT_MODELS[📈 Custom Models<br/>Data Structures]
-        EXT_SERVICES[🤖 Custom Agents<br/>& Services]
-        EXT_TEMPLATES[📋 Custom Templates<br/>Domain Prompts]
-        SAMPLE_DATA[📄 Sample Data<br/>Test Files]
-        TESTS[🧪 Test Harness<br/>Agent Testing]
+    subgraph "Extensions"
+        EXT_API[Custom API<br/>Routes]
+        EXT_MODELS[Custom Models<br/>Data Structures]
+        EXT_SERVICES[Custom Agents<br/>& Services]
+        EXT_TEMPLATES[Custom Templates<br/>Domain Prompts]
+        SAMPLE_DATA[Sample Data<br/>Test Files]
+        TESTS[Test Harness<br/>Agent Testing]
     end
     
-    subgraph "🎛️ Development Tools"
-        PROMPT_TUNER[🎯 Prompt Tuner<br/>Testing Tool]
-        CLI[⌨️ CLI Tools<br/>Management]
-        DOCS[📚 Documentation<br/>Jekyll Site]
+    subgraph "Development Tools"
+        PROMPT_TUNER[Prompt Tuner<br/>Testing Tool]
+        CLI[CLI Tools<br/>Management]
+        DOCS[Documentation<br/>Jekyll Site]
     end
     
     API --> EXT_API

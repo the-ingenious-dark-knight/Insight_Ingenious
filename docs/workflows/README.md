@@ -1,6 +1,6 @@
 ---
-title: "🔄 Workflow Requirements"
-layout: mermaid
+title: "Workflow Requirements"
+layout: single
 permalink: /workflows/
 sidebar:
   nav: "docs"
@@ -17,26 +17,26 @@ This guide outlines the configuration requirements for each conversation workflo
 
 ```mermaid
 graph TB
-    subgraph "🎯 Workflow Types"
-        CLASSIFICATION[🔍 Classification Agent<br/>Route to specialists]
-        BIKE[🚴 Bike Insights<br/>Sales analysis]
-        KNOWLEDGE[📚 Knowledge Base<br/>Information retrieval]
-        SQL[🗄️ SQL Manipulation<br/>Database queries]
-        DOCUMENT[📄 Document Processing<br/>Text extraction]
+    subgraph "Workflow Types"
+        CLASSIFICATION[Classification Agent<br/>Route to specialists]
+        BIKE[Bike Insights<br/>Sales analysis]
+        KNOWLEDGE[Knowledge Base<br/>Information retrieval]
+        SQL[SQL Manipulation<br/>Database queries]
+        DOCUMENT[Document Processing<br/>Text extraction]
     end
     
-    subgraph "⚙️ Configuration Levels"
-        MINIMAL[✅ Minimal Config<br/>Azure OpenAI only]
-        SEARCH[🔍 + Azure Search]
-        DATABASE[🗄️ + Database]
-        SERVICES[📄 + Document Services]
+    subgraph "Configuration Levels"
+        MINIMAL[Minimal Config<br/>Azure OpenAI only]
+        SEARCH[+ Azure Search]
+        DATABASE[+ Database]
+        SERVICES[+ Document Services]
     end
     
-    subgraph "🌐 External Dependencies"
-        AZURE_OPENAI[🧠 Azure OpenAI]
-        AZURE_SEARCH[🔍 Azure Cognitive Search]
-        AZURE_SQL[🗄️ Azure SQL Database]
-        AZURE_DOC[📄 Azure Document Intelligence]
+    subgraph "External Dependencies"
+        AZURE_OPENAI[Azure OpenAI]
+        AZURE_SEARCH[Azure Cognitive Search]
+        AZURE_SQL[Azure SQL Database]
+        AZURE_DOC[Azure Document Intelligence]
     end
     
     CLASSIFICATION --> MINIMAL

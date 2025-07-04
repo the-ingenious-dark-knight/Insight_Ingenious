@@ -1,5 +1,5 @@
 docs:
-  - title: "🚀 Getting Started"
+  - title: "Getting Started"
     children:
       - title: "Quick Start Guide"
         url: /getting-started/
@@ -10,7 +10,7 @@ docs:
       - title: "Troubleshooting"
         url: /troubleshooting/
 
-  - title: "📖 User Guides"
+  - title: "User Guides"
     children:
       - title: "All Guides"
         url: /guides/
@@ -23,7 +23,7 @@ docs:
       - title: "Document Processing"
         url: /guides/document-processing/
 
-  - title: "🛠️ Developer Guides"
+  - title: "Developer Guides"
     children:
       - title: "Architecture Overview"
         url: /architecture/
@@ -34,7 +34,7 @@ docs:
       - title: "Components Reference"
         url: /components/
 
-  - title: "📚 Reference"
+  - title: "Reference"
     children:
       - title: "API Reference"
         url: /api/
@@ -47,7 +47,7 @@ docs:
       - title: "Workflow Requirements"
         url: /workflows/
 
-  - title: "📋 Additional Resources"
+  - title: "Additional Resources"
     children:
       - title: "Quick Onboarding"
         url: /quick_onboarding/

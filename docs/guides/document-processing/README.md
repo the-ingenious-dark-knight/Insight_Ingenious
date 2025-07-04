@@ -1,6 +1,8 @@
 ## Document‑processing Optional Dependency
 
-The *document‑processing* extra equips Insight Ingenious with a unified API and CLI for turning **born‑digital** documents into structured text blocks.
+The *document‑processing* extra equips Insight Ingenious with a unified API and CLI for tu---
+
+Happy extracting!ng **born‑digital** documents into structured text blocks.
 It is ideal for:
 
 * RAG pipelines that need paragraph‑level text with coordinates

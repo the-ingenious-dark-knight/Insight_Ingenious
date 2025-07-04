@@ -1,6 +1,6 @@
 ---
-title: "🏗️ Architecture Overview"
-layout: mermaid
+title: "Architecture Overview"
+layout: single
 permalink: /architecture/
 sidebar:
   nav: "docs"
@@ -19,37 +19,37 @@ Insight Ingenious is designed with a modular architecture that allows for extens
 
 ```mermaid
 graph TB
-    subgraph "🌐 Client Layer"
-        UI[🎨 Web UI<br/>Chainlit Interface]
-        API_CLIENT[📱 API Clients<br/>External Applications]
+    subgraph "Client Layer"
+        UI[Web UI<br/>Chainlit Interface]
+        API_CLIENT[API Clients<br/>External Applications]
     end
     
-    subgraph "🔗 API Gateway"
-        API[🚀 FastAPI<br/>REST Endpoints]
-        AUTH[🔐 Authentication<br/>& Authorization]
+    subgraph "API Gateway"
+        API[FastAPI<br/>REST Endpoints]
+        AUTH[Authentication<br/>& Authorization]
     end
     
-    subgraph "🤖 Core Engine"
-        AGENT_SERVICE[🎯 Agent Service<br/>Conversation Manager]
-        FLOW_ENGINE[⚡ Flow Engine<br/>Pattern Orchestrator]
-        LLM_SERVICE[🧠 LLM Service<br/>Azure OpenAI Integration]
+    subgraph "Core Engine"
+        AGENT_SERVICE[Agent Service<br/>Conversation Manager]
+        FLOW_ENGINE[Flow Engine<br/>Pattern Orchestrator]
+        LLM_SERVICE[LLM Service<br/>Azure OpenAI Integration]
     end
     
-    subgraph "🔧 Extension Layer"
-        CUSTOM_AGENTS[👥 Custom Agents<br/>Domain Specialists]
-        PATTERNS[📋 Conversation Patterns<br/>Workflow Templates]
-        TOOLS[🛠️ Custom Tools<br/>External Integrations]
+    subgraph "Extension Layer"
+        CUSTOM_AGENTS[Custom Agents<br/>Domain Specialists]
+        PATTERNS[Conversation Patterns<br/>Workflow Templates]
+        TOOLS[Custom Tools<br/>External Integrations]
     end
     
-    subgraph "💾 Storage Layer"
-        CONFIG[⚙️ Configuration<br/>YAML Files]
-        HISTORY[📚 Chat History<br/>Session Management]
-        FILES[📁 File Storage<br/>Documents & Assets]
+    subgraph "Storage Layer"
+        CONFIG[Configuration<br/>YAML Files]
+        HISTORY[Chat History<br/>Session Management]
+        FILES[File Storage<br/>Documents & Assets]
     end
     
-    subgraph "🌐 External Services"
-        AZURE[☁️ Azure OpenAI<br/>GPT Models]
-        EXTERNAL_API[🔌 External APIs<br/>Data Sources]
+    subgraph "External Services"
+        AZURE[Azure OpenAI<br/>GPT Models]
+        EXTERNAL_API[External APIs<br/>Data Sources]
     end
     
     UI --> API
@@ -84,31 +84,31 @@ graph TB
 
 ## Detailed Component Architecture
 
-### 🤖 Multi-Agent Framework
+### Multi-Agent Framework
 
 The heart of Insight Ingenious is its multi-agent framework, which enables sophisticated AI conversations:
 
 ```mermaid
 graph LR
-    subgraph "🎯 Agent Service"
-        MANAGER[👨‍💼 Conversation Manager]
-        COORDINATOR[🎭 Agent Coordinator]
-        STATE[📊 State Manager]
+    subgraph "Agent Service"
+        MANAGER[Conversation Manager]
+        COORDINATOR[Agent Coordinator]
+        STATE[State Manager]
     end
     
-    subgraph "👥 Agent Types"
-        BIKE[🚴 Bike Analysis Agent]
-        SENTIMENT[😊 Sentiment Agent]
-        FISCAL[💰 Fiscal Agent]
-        SUMMARY[📝 Summary Agent]
-        CUSTOM[🔧 Custom Agents]
+    subgraph "Agent Types"
+        BIKE[Bike Analysis Agent]
+        SENTIMENT[Sentiment Agent]
+        FISCAL[Fiscal Agent]
+        SUMMARY[Summary Agent]
+        CUSTOM[Custom Agents]
     end
     
-    subgraph "📋 Conversation Patterns"
-        SEQUENTIAL[➡️ Sequential Pattern]
-        PARALLEL[⚡ Parallel Pattern]
-        CONDITIONAL[🔀 Conditional Pattern]
-        HIERARCHICAL[🌳 Hierarchical Pattern]
+    subgraph "Conversation Patterns"
+        SEQUENTIAL[Sequential Pattern]
+        PARALLEL[Parallel Pattern]
+        CONDITIONAL[Conditional Pattern]
+        HIERARCHICAL[Hierarchical Pattern]
     end
     
     MANAGER --> COORDINATOR
@@ -133,7 +133,7 @@ graph LR
     class SEQUENTIAL,PARALLEL,CONDITIONAL,HIERARCHICAL patterns
 ```
 
-### 🔗 API Layer Architecture
+### API Layer Architecture
 
 The API layer provides secure, scalable access to the system:
 
@@ -159,7 +159,7 @@ sequenceDiagram
     FastAPI-->>Client: JSON Response
 ```
 
-### 🎨 Web UI Integration
+### Web UI Integration
 
 The Chainlit integration provides an intuitive user experience:
 
@@ -199,7 +199,7 @@ graph TD
     class CHAT_SERVICE,FILE_SERVICE,AUTH_SERVICE backend
 ```
 
-### 💾 Storage Architecture
+### Storage Architecture
 
 The storage layer handles persistence and configuration:
 
@@ -254,7 +254,7 @@ graph TB
 
 ## Data Flow Architecture
 
-### 🔄 Request Processing Flow
+### Request Processing Flow
 
 ```mermaid
 flowchart TD
@@ -294,7 +294,7 @@ flowchart TD
     class ERROR_RESPONSE error
 ```
 
-### 🤖 Multi-Agent Conversation Flow
+### Multi-Agent Conversation Flow
 
 ```mermaid
 sequenceDiagram
@@ -337,7 +337,7 @@ sequenceDiagram
 
 ## Extension Points & Customization
 
-### 🔧 Extension Architecture
+### Extension Architecture
 
 ```mermaid
 graph TB
@@ -393,7 +393,7 @@ graph TB
 
 ## Key Classes and Interfaces
 
-### 🤖 Core Agent Framework
+### Core Agent Framework
 
 ```mermaid
 classDiagram
@@ -457,7 +457,7 @@ classDiagram
 
 ## Configuration Architecture
 
-### ⚙️ Configuration Management
+### Configuration Management
 
 ```mermaid
 graph TB
@@ -502,7 +502,7 @@ graph TB
 
 ## Deployment Architecture
 
-### 🚀 Deployment Options
+### Deployment Options
 
 ```mermaid
 graph TB
@@ -563,7 +563,7 @@ graph TB
 
 ## Security Architecture
 
-### 🔐 Security Model
+### Security Model
 
 ```mermaid
 graph TB
@@ -618,7 +618,7 @@ graph TB
 
 ## Performance & Scalability
 
-### ⚡ Performance Architecture
+### Performance Architecture
 
 ```mermaid
 graph TB
