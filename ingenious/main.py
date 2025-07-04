@@ -43,6 +43,7 @@ class FastAgentAPI:
         # Mount Flask Prompt Tuner App if enabled
         if config.prompt_tuner.enable:
             import ingenious_prompt_tuner as prompt_tuner
+
             self.flask_app = prompt_tuner.create_app_for_fastapi()
             # Mount Flask App
             self.app.mount("/prompt-tuner", WSGIMiddleware(self.flask_app))

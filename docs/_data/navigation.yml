@@ -9,7 +9,6 @@ docs:
         url: /configuration/
       - title: "Troubleshooting"
         url: /troubleshooting/
-
   - title: "User Guides"
     children:
       - title: "All Guides"
@@ -22,7 +21,6 @@ docs:
         url: /guides/data-preparation/
       - title: "Document Processing"
         url: /guides/document-processing/
-
   - title: "Developer Guides"
     children:
       - title: "Architecture Overview"
@@ -33,7 +31,6 @@ docs:
         url: /extensions/
       - title: "Components Reference"
         url: /components/
-
   - title: "Reference"
     children:
       - title: "API Reference"
@@ -46,7 +43,6 @@ docs:
         url: /configuration/
       - title: "Workflow Requirements"
         url: /workflows/
-
   - title: "Additional Resources"
     children:
       - title: "Quick Onboarding"

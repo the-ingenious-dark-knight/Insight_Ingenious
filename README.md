@@ -12,7 +12,7 @@ Get up and running in 5 minutes with Azure OpenAI!
 ### Prerequisites
 - ✅ Python 3.13+
 - ✅ Azure OpenAI API credentials
-- ✅ [uv package manager](https://docs.astral.sh/uv/) 
+- ✅ [uv package manager](https://docs.astral.sh/uv/)
 
 ### 5-Minute Setup
 
@@ -30,14 +30,25 @@ Get up and running in 5 minutes with Azure OpenAI!
     nano .env  # Add AZURE_OPENAI_API_KEY and AZURE_OPENAI_BASE_URL
     ```
 
-3. **Set Environment and Start**:
+3. **Validate Setup** (Recommended):
     ```bash
     export INGENIOUS_PROJECT_PATH=$(pwd)/config.yml
     export INGENIOUS_PROFILE_PATH=$(pwd)/profiles.yml
+    uv run ingen validate  # Check configuration before starting
+    ```
+
+4. **Start the Server**:
+    ```bash
     uv run ingen serve
     ```
 
-4. **Test the API**:
+5. **Verify Health**:
+    ```bash
+    # Check server health
+    curl http://localhost:80/health
+    ```
+
+6. **Test the API**:
     ```bash
     # Test bike insights workflow (the "Hello World" of Ingenious)
     curl -X POST http://localhost:80/api/v1/chat \
@@ -62,7 +73,7 @@ Insight Ingenious provides multiple conversation workflows with different config
 ### ⭐ **"Hello World" Workflow** (Azure OpenAI only)
 - `bike_insights` - **The recommended starting point** - Comprehensive bike sales analysis showcasing multi-agent coordination
 
-### ✅ **Simple Text Processing** (Azure OpenAI only)  
+### ✅ **Simple Text Processing** (Azure OpenAI only)
 - `classification_agent` - Route input to specialized agents based on content
 
 ### 🔍 **Azure Search Required**

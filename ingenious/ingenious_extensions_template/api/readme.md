@@ -44,7 +44,7 @@ class SalesAnalyticsResponse(BaseModel):
 async def get_sales_analytics(request: SalesAnalyticsRequest):
     """
     🧠 Analyze bike sales data and return comprehensive insights
-    
+
     This endpoint processes bike sales data and returns:
     - Sales volume and revenue metrics
     - Top performing products
@@ -54,23 +54,23 @@ async def get_sales_analytics(request: SalesAnalyticsRequest):
     try:
         # Process the data
         bike_data = RootModel(stores=request.stores)
-        
+
         # Calculate metrics
         total_sales = sum(
             sum(sale.quantity_sold for sale in store.bike_sales)
             for store in bike_data.stores
         )
-        
+
         # Get AI-powered insights using the bike_insights workflow
         chat_request = ChatRequest(
             user_prompt=bike_data.json(),
             conversation_flow="bike_insights",
             thread_id=f"api_call_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         )
-        
+
         # Execute workflow (you'd get chat_service from dependency injection)
         # ai_response = await chat_service.get_chat_response(chat_request)
-        
+
         return SalesAnalyticsResponse(
             total_sales=total_sales,
             revenue=calculate_revenue(bike_data),
@@ -78,7 +78,7 @@ async def get_sales_analytics(request: SalesAnalyticsRequest):
             sentiment_summary=analyze_sentiment(bike_data),
             recommendations=["Focus on top performers", "Address comfort issues"]
         )
-        
+
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Analysis failed: {str(e)}")
 
@@ -97,7 +97,7 @@ from .bike_analytics import router as bike_router
 def register_custom_routes(app: FastAPI):
     """Register all custom API routes"""
     app.include_router(bike_router)
-    
+
     # Add more routers here
     # app.include_router(customer_router)
     # app.include_router(inventory_router)
@@ -135,11 +135,11 @@ async def trigger_workflow(
     background_tasks: BackgroundTasks
 ):
     """🚀 Trigger AI workflow asynchronously"""
-    
+
     # Validate workflow exists
     if workflow_name not in ["bike_insights", "customer_analysis"]:
         raise HTTPException(status_code=404, detail="Workflow not found")
-    
+
     # Queue background processing
     task_id = str(uuid.uuid4())
     background_tasks.add_task(
@@ -148,7 +148,7 @@ async def trigger_workflow(
         workflow_name=workflow_name,
         data=data
     )
-    
+
     return {
         "task_id": task_id,
         "status": "queued",
@@ -176,13 +176,13 @@ async def export_sales_report(
     date_to: str = None
 ):
     """📊 Export sales data in various formats"""
-    
+
     if format not in ["csv", "json", "excel"]:
         raise HTTPException(status_code=400, detail="Unsupported format")
-    
+
     # Get data from your workflow
     sales_data = await get_sales_data(date_from, date_to)
-    
+
     if format == "csv":
         csv_content = sales_data.to_csv()
         return Response(
@@ -192,18 +192,18 @@ async def export_sales_report(
         )
     elif format == "json":
         return sales_data.dict()
-    
+
 @router.post("/webhooks/external-system")
 async def handle_external_webhook(payload: Dict[str, Any]):
     """🔗 Handle webhooks from external systems"""
-    
+
     # Transform external data format to your models
     transformed_data = transform_external_to_internal(payload)
-    
+
     # Trigger appropriate workflow
     if payload.get("event_type") == "new_sales":
         await trigger_sales_analysis(transformed_data)
-    
+
     return {"status": "processed", "event_type": payload.get("event_type")}
 ```
 
@@ -216,7 +216,7 @@ from fastapi.testclient import TestClient
 
 def test_sales_analytics_endpoint():
     """Test bike sales analytics API"""
-    
+
     test_data = {
         "stores": [
             {
@@ -239,9 +239,9 @@ def test_sales_analytics_endpoint():
             }
         ]
     }
-    
+
     response = client.post("/api/v1/bikes/analytics", json=test_data)
-    
+
     assert response.status_code == 200
     result = response.json()
     assert result["total_sales"] == 5
@@ -249,11 +249,11 @@ def test_sales_analytics_endpoint():
 
 def test_data_validation_endpoint():
     """Test data validation API"""
-    
+
     # Valid data
     valid_response = client.post("/api/v1/bikes/validate-sales-data", json=valid_data)
     assert valid_response.json()["valid"] is True
-    
+
     # Invalid data
     invalid_data = {"invalid": "structure"}
     invalid_response = client.post("/api/v1/bikes/validate-sales-data", json=invalid_data)
@@ -267,7 +267,7 @@ curl -X POST http://localhost:8081/api/v1/bikes/analytics \
   -H "Content-Type: application/json" \
   -d @../sample_data/bike_sales_april_2023.json
 
-# Test validation endpoint  
+# Test validation endpoint
 curl -X POST http://localhost:8081/api/v1/bikes/validate-sales-data \
   -H "Content-Type: application/json" \
   -d '{"stores": []}'
@@ -295,29 +295,29 @@ async def complex_analysis(
 ) -> AnalysisResponse:
     """
     🧠 Perform complex business analysis using AI workflows
-    
+
     This endpoint combines multiple AI agents to provide comprehensive analysis:
-    
+
     **Features:**
     - Multi-agent processing for different data aspects
     - Configurable confidence thresholds
     - Optional predictive modeling
     - Real-time insights generation
-    
+
     **Parameters:**
     - `data`: Input data following the defined schema
     - `include_predictions`: Whether to include future trend predictions
     - `confidence_threshold`: Minimum confidence for including insights (0.0-1.0)
-    
+
     **Returns:**
     - Comprehensive analysis report
     - Actionable recommendations
     - Quality scores and confidence metrics
-    
+
     **Example Usage:**
     ```python
     import requests
-    
+
     response = requests.post("/api/v1/bikes/complex-analysis", json={
         "stores": [...],
         "analysis_type": "comprehensive"
@@ -339,7 +339,7 @@ async def get_conversation_history(
     chat_repo: ChatHistoryRepository = Depends()
 ):
     """📚 Get conversation history for a thread"""
-    
+
     messages = await chat_repo.get_thread_messages(thread_id)
     return {
         "thread_id": thread_id,
@@ -365,23 +365,23 @@ async def upload_sales_data(
     file_repo: FileRepository = Depends()
 ):
     """📁 Upload and process sales data file"""
-    
+
     # Save uploaded file
     file_path = await file_repo.save_file(
         container="sales-data",
         file_name=file.filename,
         content=await file.read()
     )
-    
+
     # Process the file
     if file.filename.endswith('.json'):
         # Parse and validate JSON data
         content = await file_repo.read_file("sales-data", file.filename)
         sales_data = RootModel.parse_raw(content)
-        
+
         # Trigger analysis workflow
         analysis_result = await trigger_sales_analysis(sales_data)
-        
+
         return {
             "file_path": file_path,
             "status": "processed",

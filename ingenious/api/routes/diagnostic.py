@@ -1,4 +1,6 @@
 import logging
+import time
+from datetime import datetime
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -263,3 +265,74 @@ async def diagnostic(
     except Exception as e:
         logger.exception(e)
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get(
+    "/health",
+    responses={
+        200: {"model": dict, "description": "System health status"},
+        503: {"model": HTTPError, "description": "Service Unavailable"},
+    },
+)
+async def health_check():
+    """
+    Health check endpoint for monitoring system status.
+
+    Returns basic system information and configuration status.
+    Useful for load balancers, monitoring systems, and quick validation.
+    """
+    try:
+        start_time = time.time()
+
+        # Check basic configuration availability
+        try:
+            _ = igen_deps.get_config()
+            config_status = "ok"
+        except Exception as e:
+            logger.warning(f"Configuration check failed: {e}")
+            config_status = "error"
+
+        # Check profile availability
+        try:
+            _ = igen_deps.get_profile()
+            profile_status = "ok"
+        except Exception as e:
+            logger.warning(f"Profile check failed: {e}")
+            profile_status = "error"
+
+        response_time = round((time.time() - start_time) * 1000, 2)  # ms
+
+        # Determine overall status
+        overall_status = (
+            "healthy"
+            if config_status == "ok" and profile_status == "ok"
+            else "degraded"
+        )
+
+        health_data = {
+            "status": overall_status,
+            "timestamp": datetime.utcnow().isoformat(),
+            "response_time_ms": response_time,
+            "components": {"configuration": config_status, "profile": profile_status},
+            "version": "1.0.0",  # Could be pulled from package info
+            "uptime": "available",  # Could track actual uptime if needed
+        }
+
+        # Return 503 if any critical components are down
+        if overall_status == "degraded":
+            raise HTTPException(status_code=503, detail=health_data)
+
+        return health_data
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Health check failed: {e}")
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "status": "unhealthy",
+                "timestamp": datetime.utcnow().isoformat(),
+                "error": str(e),
+            },
+        )

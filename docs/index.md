@@ -10,7 +10,7 @@ header:
     - label: "View on GitHub"
       url: "https://github.com/Insight-Services-APAC/Insight_Ingenious"
 excerpt: "A powerful conversation workflow framework for building AI-powered applications with Azure OpenAI."
-intro: 
+intro:
   - excerpt: 'Insight Ingenious provides a comprehensive framework for creating sophisticated AI-powered conversation workflows with enterprise-grade features.'
 feature_row:
   - alt: "Quick Start"
@@ -85,7 +85,7 @@ Insight Ingenious offers powerful features for building sophisticated AI applica
 ### Getting Started
 Perfect for newcomers to Insight Ingenious. Learn the basics and get your first workflow running.
 
-### User Guides  
+### User Guides
 Comprehensive guides for using all features, from basic operations to advanced workflows.
 
 ### Developer Guides

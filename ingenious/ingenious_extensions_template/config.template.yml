@@ -8,7 +8,6 @@
 # PROFILE CONFIGURATION
 # =============================================================================
 profile: dev
-
 # =============================================================================
 # MODEL CONFIGURATION
 # =============================================================================
@@ -17,14 +16,12 @@ models:
     api_type: azure
     api_version: ${AZURE_OPENAI_API_VERSION:2024-12-01-preview}
     deployment: ${AZURE_OPENAI_DEPLOYMENT:gpt-4.1-nano}
-
 # =============================================================================
 # LOGGING CONFIGURATION
 # =============================================================================
 logging:
   root_log_level: debug
   log_level: debug
-
 # =============================================================================
 # CHAT HISTORY CONFIGURATION
 # =============================================================================
@@ -33,30 +30,25 @@ chat_history:
   database_path: ./.tmp/high_level_logs.db
   database_name: ToDoList
   memory_path: ./.tmp
-
 # =============================================================================
 # SERVICE CONFIGURATION
 # =============================================================================
 chat_service:
   type: multi_agent
-
 tool_service:
   enable: false
-
 # =============================================================================
 # AZURE SEARCH SERVICES
 # =============================================================================
 azure_search_services:
   - service: default
     endpoint: ${AZURE_SEARCH_ENDPOINT:https://your-search-service.search.windows.net}
-
 # =============================================================================
 # AZURE SQL SERVICES
 # =============================================================================
 azure_sql_services:
   database_name: ${AZURE_SQL_DATABASE_NAME:dbo}
   table_name: ${AZURE_SQL_TABLE_NAME:sample_table}
-
 # =============================================================================
 # WEB CONFIGURATION
 # =============================================================================
@@ -67,19 +59,16 @@ web_configuration:
   authentication:
     enable: ${WEB_AUTH_ENABLE:true}
     type: basic
-
 # =============================================================================
 # CHAINLIT CONFIGURATION
 # =============================================================================
 chainlit_configuration:
   enable: false
-
 # =============================================================================
 # PROMPT TUNER CONFIGURATION
 # =============================================================================
 prompt_tuner:
   mode: "fast_api"
-
 # =============================================================================
 # LOCAL SQL DATABASE
 # =============================================================================
@@ -87,7 +76,6 @@ local_sql_db:
   database_path: ${LOCAL_SQL_DB_PATH:/tmp/sample_sql.db}
   sample_csv_path: ${LOCAL_SQL_CSV_PATH:./ingenious/sample_dataset/cleaned_students_performance.csv}
   sample_database_name: ${LOCAL_SQL_DB_NAME:sample_data}
-
 # =============================================================================
 # FILE STORAGE CONFIGURATION
 # =============================================================================

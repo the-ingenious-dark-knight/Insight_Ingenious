@@ -5,7 +5,7 @@ This directory contains **Pydantic data models** that define the structure of yo
 ## 🎯 **Purpose**
 
 Custom models serve multiple critical functions:
-- **🔒 Data Validation** - Ensure incoming data matches expected structure  
+- **🔒 Data Validation** - Ensure incoming data matches expected structure
 - **📝 Type Safety** - Catch errors early with strong typing
 - **🔄 Serialization** - Convert between JSON, CSV, and Python objects
 - **📖 Documentation** - Self-documenting code with clear data contracts
@@ -18,7 +18,7 @@ The template includes a complete set of models for the bike insights workflow:
 ```python
 class RootModel_Bike(BaseModel):
     brand: str
-    model: str  
+    model: str
     year: int
     price: float
 
@@ -52,7 +52,7 @@ class RootModel_Store(BaseModel):
 ```python
 class RootModel(BaseModel):
     stores: List[RootModel_Store]
-    
+
     def display_bike_sales_as_table(self):
         """Convert sales data to CSV format for AI agents"""
         # Implementation details...
@@ -72,14 +72,14 @@ class YourCustomModel(BaseModel):
     id: str
     name: str
     created_at: datetime
-    
+
     # Optional fields with defaults
     status: str = "active"
     metadata: Optional[dict] = None
-    
+
     # Validated fields with constraints
     score: float = Field(..., ge=0, le=100, description="Score between 0-100")
-    
+
     # Custom validation
     @validator('name')
     def name_must_not_be_empty(cls, v):
@@ -92,26 +92,26 @@ class YourCustomModel(BaseModel):
 ```python
 class ProductModel(BaseModel):
     """✅ Good practices demonstrated"""
-    
+
     # Clear, descriptive field names
     product_id: str = Field(..., description="Unique product identifier")
     display_name: str = Field(..., min_length=1, max_length=200)
-    
+
     # Proper typing
     price: float = Field(..., gt=0, description="Price in USD")
     tags: List[str] = Field(default_factory=list)
-    
+
     # Enums for constrained values
     category: ProductCategory  # Define enum separately
-    
+
     # Nested models for complex data
     specifications: ProductSpecs
-    
+
     # Helper methods
     def to_display_format(self) -> str:
         """Convert to human-readable format"""
         return f"{self.display_name} - ${self.price:.2f}"
-    
+
     def to_csv_row(self) -> dict:
         """Convert to flat dictionary for CSV export"""
         return {
@@ -132,19 +132,19 @@ class BadModel(BaseModel):
 ```python
 class ConversationPayload(BaseModel):
     """Model for AI workflow input"""
-    
+
     # Required workflow metadata
     revision_id: str
     identifier: str
     conversation_flow: str
-    
+
     # Your domain data
     business_data: YourCustomModel
-    
+
     # Optional context
     user_context: Optional[dict] = None
     previous_results: Optional[List[dict]] = None
-    
+
     def prepare_for_agents(self) -> str:
         """Convert to format suitable for AI agents"""
         return json.dumps({
@@ -165,15 +165,15 @@ from ingenious.utils.model_utils import Listable_Object_To_Csv
 
 class ReportModel(BaseModel):
     products: List[ProductModel]
-    
+
     def to_csv_report(self) -> str:
         """Generate CSV report for AI analysis"""
         csv_data = Listable_Object_To_Csv(
-            self.products, 
+            self.products,
             ProductModel
         )
         return "## Product Analysis\n" + csv_data
-    
+
     def get_summary_stats(self) -> dict:
         """Calculate summary statistics"""
         return {
@@ -211,7 +211,7 @@ def test_product_model_validation():
     }
     product = ProductModel(**valid_data)
     assert product.price == 2500.0
-    
+
     # ❌ Invalid data
     with pytest.raises(ValidationError):
         ProductModel(product_id="", price=-100)  # Empty ID, negative price
@@ -227,19 +227,19 @@ def test_data_transformation():
 ```python
 def test_workflow_integration():
     """Test model with actual AI workflow"""
-    
+
     # Create test payload
     payload = ConversationPayload(
         revision_id="test-123",
-        identifier="test-run-456", 
+        identifier="test-run-456",
         conversation_flow="product_analysis",
         business_data=ProductModel(**test_data)
     )
-    
+
     # Test serialization
     json_str = payload.prepare_for_agents()
     assert "test-123" in json_str
-    
+
     # Test deserialization
     loaded = ConversationPayload.parse_raw(payload.json())
     assert loaded.revision_id == "test-123"
@@ -251,7 +251,7 @@ def test_workflow_integration():
 ```
 models/
 ├── bikes.py          # All bike-related models
-├── customers.py      # Customer and review models  
+├── customers.py      # Customer and review models
 ├── analytics.py      # Reporting and metrics models
 └── __init__.py       # Import organization
 ```
@@ -282,10 +282,10 @@ from models.bikes import RootModel
 async def process_bike_data(chat_request: ChatRequest):
     # Parse incoming data with your model
     bike_data = RootModel.parse_raw(chat_request.user_prompt)
-    
+
     # Use model methods for data preparation
     table_data = bike_data.display_bike_sales_as_table()
-    
+
     # Pass structured data to agents
     await agent.process(table_data)
 ```
