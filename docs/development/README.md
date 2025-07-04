@@ -1,6 +1,6 @@
 ---
 title: "Development Guide"
-layout: mermaid
+layout: single
 permalink: /development/
 sidebar:
   nav: "docs"

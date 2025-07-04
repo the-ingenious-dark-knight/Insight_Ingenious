@@ -1,51 +1,40 @@
-<!-- Mermaid.js support for diagrams -->
-<script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
-<script>
-  mermaid.initialize({
-    startOnLoad: true,
-    theme: 'default',
-    themeVariables: {
-      primaryColor: '#0366d6',
-      primaryTextColor: '#24292e',
-      primaryBorderColor: '#e1e4e8',
-      lineColor: '#959da5',
-      secondaryColor: '#f6f8fa',
-      tertiaryColor: '#ffffff'
-    },
-    flowchart: {
-      useMaxWidth: true,
-      htmlLabels: true,
-      curve: 'basis'
-    },
-    sequence: {
-      useMaxWidth: true,
-      wrap: true
-    },
-    journey: {
-      useMaxWidth: true
-    }
-  });
-</script>
+<!-- Modern Mermaid.js support for GitHub Pages -->
+<!-- 
+  This include is now deprecated in favor of the global CDN approach.
+  Mermaid is loaded via _config.yml after_footer_scripts and assets/js/mermaid-init.js
+  
+  To use Mermaid diagrams in your pages:
+  1. Use regular markdown code blocks with 'mermaid' language
+  2. The diagrams will automatically render on page load
+  
+  Example:
+  ```mermaid
+  graph TD;
+      A-->B;
+      A-->C;
+      B-->D;
+      C-->D;
+  ```
+-->
 
 <style>
-  .mermaid {
+  /* Mermaid diagram styling */
+  .language-mermaid {
     text-align: center;
     margin: 20px 0;
+    overflow-x: auto;
   }
   
-  .mermaid svg {
+  .language-mermaid svg {
     max-width: 100%;
     height: auto;
   }
   
-  /* Dark mode support */
-  @media (prefers-color-scheme: dark) {
-    .mermaid {
-      filter: invert(1) hue-rotate(180deg);
-    }
-    
-    .mermaid text {
-      fill: #ffffff !important;
-    }
+  /* Ensure proper rendering in different themes */
+  .language-mermaid .node rect,
+  .language-mermaid .node circle,
+  .language-mermaid .node ellipse,
+  .language-mermaid .node polygon {
+    stroke-width: 1px;
   }
 </style>

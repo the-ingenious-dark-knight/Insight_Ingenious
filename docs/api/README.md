@@ -1,6 +1,6 @@
 ---
-title: "📡 API Reference"
-layout: mermaid
+title: "API Reference"
+layout: single
 permalink: /api/
 sidebar:
   nav: "docs"

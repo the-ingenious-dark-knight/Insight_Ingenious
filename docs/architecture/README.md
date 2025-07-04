@@ -1,6 +1,6 @@
 ---
 title: "Architecture Overview"
-layout: mermaid
+layout: single
 permalink: /architecture/
 sidebar:
   nav: "docs"

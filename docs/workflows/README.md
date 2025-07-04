@@ -1,6 +1,6 @@
 ---
 title: "Workflow Requirements"
-layout: mermaid
+layout: single
 permalink: /workflows/
 sidebar:
   nav: "docs"
