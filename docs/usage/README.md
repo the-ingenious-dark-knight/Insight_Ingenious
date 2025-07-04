@@ -110,13 +110,17 @@ Options:
 - `--log-level`: Controls verbosity (DEBUG, INFO, WARNING, ERROR). Default: WARNING
 - `--run-args`: Key-value pairs for test runner (e.g., `--run-args='--test_name=TestName --test_type=TestType'`)
 
-### Run Prompt Tuner
+### Prompt Tuner (Integrated with FastAPI)
+
+The prompt tuner is now integrated with the main FastAPI application and accessible at `/prompt-tuner/`.
+
+To run the application with the prompt tuner enabled:
 
 ```bash
-uv run ingen run-prompt-tuner
+uv run ingen run-rest-api-server --enable-prompt-tuner
 ```
 
-Starts the prompt tuner web application for fine-tuning your prompts. The application will run on the host and port specified in your configuration file.
+The prompt tuner will be accessible at `http://localhost:{port}/prompt-tuner/` where `{port}` is the port configured in your configuration file.
 
 ### Data Preparation
 

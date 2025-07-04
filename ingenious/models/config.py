@@ -68,7 +68,7 @@ class ChainlitConfig(config_ns_models.ChainlitConfig):
 
 class PromptTunerConfig(config_ns_models.PromptTunerConfig):
     def __init__(self, config: config_ns_models.PromptTunerConfig):
-        super().__init__(mode=config.mode, port=config.port)
+        super().__init__(mode=config.mode, enable=config.enable)
 
 
 class ChatServiceConfig(config_ns_models.ChatServiceConfig):

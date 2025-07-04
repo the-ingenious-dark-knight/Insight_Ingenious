@@ -83,6 +83,10 @@ def run_rest_api_server(
         str,
         typer.Argument(help="The directory in which to launch the web server."),
     ] = "",
+    enable_prompt_tuner: Annotated[
+        bool,
+        typer.Option(help="Enable the prompt tuner interface. Default is True."),
+    ] = True,
 ):
     """
     Run a FastAPI server that presents your agent workflows via REST endpoints.
@@ -142,6 +146,9 @@ def run_rest_api_server(
     import ingenious.config.config as ingen_config
 
     config = ingen_config.get_config()
+    
+    # Override prompt tuner setting based on CLI flag
+    config.prompt_tuner.enable = enable_prompt_tuner
 
     # We need to clean this up and probrably separate overall system config from fast api, eg. set the config here in cli and then pass it to FastAgentAPI
     # As soon as we import FastAgentAPI, config will be loaded hence to ensure that the environment variables above are loaded first we need to import FastAgentAPI after setting the environment variables
@@ -539,19 +546,7 @@ def workflow_requirements(
         console.print("\nUse 'ingen workflow-requirements all' to see all workflows")
 
 
-@app.command()
-def run_prompt_tuner():
-    """Run the prompt tuner web application."""
-    import ingenious.config.config as ingen_config
-    from ingenious_prompt_tuner import create_app as prompt_tuner
 
-    config = ingen_config.get_config()
-    app = prompt_tuner()
-    app.run(
-        debug=True,
-        host=config.web_configuration.ip_address,
-        port=config.web_configuration.port,
-    )
 
 
 if __name__ == "__cli__":
