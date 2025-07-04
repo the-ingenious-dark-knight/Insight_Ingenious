@@ -245,6 +245,10 @@ def run_rest_api_server(
     
     # Override prompt tuner setting based on CLI flag
     config.prompt_tuner.enable = enable_prompt_tuner
+    
+    # Override host and port from CLI parameters
+    config.web_configuration.ip_address = host
+    config.web_configuration.port = port
 
     # We need to clean this up and probrably separate overall system config from fast api, eg. set the config here in cli and then pass it to FastAgentAPI
     # As soon as we import FastAgentAPI, config will be loaded hence to ensure that the environment variables above are loaded first we need to import FastAgentAPI after setting the environment variables
@@ -505,16 +509,24 @@ def initialize_new_project():
             ]
             f.write("\n".join(git_ignore_content))
 
-    # create a config file in project directory
+    # create a config file in project directory - prefer minimal template
+    minimal_config_path = (
+        templates_paths["ingenious_extensions"] / "config.minimal.yml"
+    )
     template_config_path = (
         templates_paths["ingenious_extensions"] / "config.template.yml"
     )
-    if template_config_path.exists():
+    
+    # Use minimal template if available, otherwise fall back to full template
+    source_config_path = minimal_config_path if minimal_config_path.exists() else template_config_path
+    
+    if source_config_path.exists():
         config_path = Path.cwd() / "config.yml"
         if not config_path.exists():
-            shutil.copy2(template_config_path, config_path)
+            shutil.copy2(source_config_path, config_path)
+            template_type = "minimal" if source_config_path == minimal_config_path else "full"
             console.print(
-                f"[info]Config file created successfully at {config_path}.[/info]"
+                f"[info]Config file created successfully at {config_path} using {template_type} template.[/info]"
             )
         else:
             console.print(
@@ -522,19 +534,27 @@ def initialize_new_project():
             )
     else:
         console.print(
-            f"[warning]Config file template not found at {template_config_path}. Skipping...[/warning]"
+            f"[warning]Config file templates not found. Skipping...[/warning]"
         )
 
-    # create profile file in project directory
+    # create profile file in project directory - prefer minimal template
+    minimal_profile_path = (
+        templates_paths["ingenious_extensions"] / "profiles.minimal.yml"
+    )
     template_profile_path = (
         templates_paths["ingenious_extensions"] / "profiles.template.yml"
     )
-    if template_profile_path.exists():
+    
+    # Use minimal template if available, otherwise fall back to full template
+    source_profile_path = minimal_profile_path if minimal_profile_path.exists() else template_profile_path
+    
+    if source_profile_path.exists():
         profile_path = Path.cwd() / "profiles.yml"
         if not profile_path.exists():
-            shutil.copy2(template_profile_path, profile_path)
+            shutil.copy2(source_profile_path, profile_path)
+            template_type = "minimal" if source_profile_path == minimal_profile_path else "full"
             console.print(
-                f"[info]Profile file created successfully at {profile_path}[/info]"
+                f"[info]Profile file created successfully at {profile_path} using {template_type} template[/info]"
             )
         else:
             console.print(
@@ -542,17 +562,23 @@ def initialize_new_project():
             )
     else:
         console.print(
-            f"[warning]Profile file template not found at {template_profile_path}. Skipping...[/warning]"
+            f"[warning]Profile file templates not found. Skipping...[/warning]"
         )
 
-    # create .env.example file
+    # create .env.example file - prefer minimal template
+    minimal_env_path = templates_paths["ingenious_extensions"] / ".env.minimal"
     template_env_example_path = templates_paths["ingenious_extensions"] / ".env.example"
-    if template_env_example_path.exists():
+    
+    # Use minimal template if available, otherwise fall back to full template
+    source_env_path = minimal_env_path if minimal_env_path.exists() else template_env_example_path
+    
+    if source_env_path.exists():
         env_example_path = Path.cwd() / ".env.example"
         if not env_example_path.exists():
-            shutil.copy2(template_env_example_path, env_example_path)
+            shutil.copy2(source_env_path, env_example_path)
+            template_type = "minimal" if source_env_path == minimal_env_path else "full"
             console.print(
-                f"[info].env.example file created successfully at {env_example_path}[/info]"
+                f"[info].env.example file created successfully at {env_example_path} using {template_type} template[/info]"
             )
         else:
             console.print(
@@ -560,7 +586,7 @@ def initialize_new_project():
             )
     else:
         console.print(
-            f"[warning].env.example template not found at {template_env_example_path}. Skipping...[/warning]"
+            f"[warning].env.example templates not found. Skipping...[/warning]"
         )
 
     console.print("[info]✅ Project initialization completed![/info]")
@@ -631,6 +657,13 @@ def workflow_requirements(
                 "profiles.yml: models with api_key and base_url",
             ],
             "optional": [],
+            "example_curl": """curl -X POST http://localhost:80/api/v1/chat \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "user_prompt": "Analyze this customer feedback: Great product!",
+    "conversation_flow": "classification_agent"
+  }'""",
+            "note": "Simple text classification - good for testing"
         },
         "bike-insights": {
             "description": "Sample domain-specific workflow for bike sales analysis",
@@ -641,6 +674,13 @@ def workflow_requirements(
                 "profiles.yml: models with api_key and base_url",
             ],
             "optional": [],
+            "example_curl": """curl -X POST http://localhost:80/api/v1/chat \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "user_prompt": "{\\"stores\\": [{\\"name\\": \\"Test Store\\", \\"location\\": \\"NSW\\", \\"bike_sales\\": [{\\"product_code\\": \\"TEST-001\\", \\"quantity_sold\\": 2, \\"sale_date\\": \\"2023-04-01\\", \\"year\\": 2023, \\"month\\": \\"April\\", \\"customer_review\\": {\\"rating\\": 4.5, \\"comment\\": \\"Great bike!\\"}}], \\"bike_stock\\": []}], \\"revision_id\\": \\"test-1\\", \\"identifier\\": \\"test\\"}",
+    "conversation_flow": "bike_insights"
+  }'""",
+            "note": "⚠️  bike_insights expects JSON data in user_prompt field"
         },
         "knowledge-base-agent": {
             "description": "Search and retrieve information from knowledge bases",
@@ -744,12 +784,19 @@ def workflow_requirements(
             for opt in info["optional"]:
                 console.print(f"  • {opt}")
 
+        # Show special note if available
+        if "note" in info:
+            console.print(f"\n[bold yellow]⚠️  Note:[/bold yellow] {info['note']}")
+
         console.print("\n[bold yellow]🧪 TEST COMMAND:[/bold yellow]")
-        console.print("curl -X POST http://localhost:80/api/v1/chat \\")
-        console.print('  -H "Content-Type: application/json" \\')
-        console.print(
-            f'  -d \'{{"user_prompt": "Hello", "conversation_flow": "{workflow}"}}\''
-        )
+        if "example_curl" in info:
+            console.print(info["example_curl"])
+        else:
+            console.print("curl -X POST http://localhost:80/api/v1/chat \\")
+            console.print('  -H "Content-Type: application/json" \\')
+            console.print(
+                f'  -d \'{{"user_prompt": "Hello", "conversation_flow": "{workflow}"}}\''
+            )
 
     else:
         console.print(f"[bold red]❌ Unknown workflow: {workflow}[/bold red]")

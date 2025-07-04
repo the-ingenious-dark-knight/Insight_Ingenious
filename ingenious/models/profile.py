@@ -21,8 +21,8 @@ class AzureSqlConfig(BaseModel):
 
 
 class AzureSearchConfig(BaseModel):
-    service: str
-    key: str
+    service: str = "default"
+    key: str = ""
 
 
 class ChainlitAuthConfig(BaseModel):
@@ -44,9 +44,9 @@ class ChatServiceConfig(BaseModel):
 
 
 class WebAuthConfig(BaseModel):
-    type: str = ""
-    enable: bool = True
-    username: str = ""
+    type: str = "basic"
+    enable: bool = False
+    username: str = "admin"
     password: str = ""
 
 
@@ -55,9 +55,9 @@ class WebConfig(BaseModel):
 
 
 class ReceiverConfig(BaseModel):
-    enable: bool = True
+    enable: bool = False
     api_url: str = ""
-    api_key: str = ""
+    api_key: str = "DevApiKey"
 
 
 class LoggingConfig(BaseModel):

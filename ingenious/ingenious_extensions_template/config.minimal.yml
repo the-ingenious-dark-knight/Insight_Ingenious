@@ -1,0 +1,99 @@
+# =============================================================================
+# Insight Ingenious Configuration - Minimal Working Template
+# =============================================================================
+# This template provides minimal configuration for bike_insights and classification_agent workflows
+# Copy this file to config.yml and set your Azure OpenAI credentials in .env
+
+# =============================================================================
+# PROFILE CONFIGURATION
+# =============================================================================
+profile: dev
+
+# =============================================================================
+# MODEL CONFIGURATION
+# =============================================================================
+models:
+  - model: ${AZURE_OPENAI_MODEL_NAME:gpt-4.1-nano}
+    api_type: azure
+    api_version: ${AZURE_OPENAI_API_VERSION:2024-12-01-preview}
+    deployment: ${AZURE_OPENAI_DEPLOYMENT:gpt-4.1-nano}
+
+# =============================================================================
+# LOGGING CONFIGURATION
+# =============================================================================
+logging:
+  root_log_level: info
+  log_level: info
+
+# =============================================================================
+# CHAT HISTORY CONFIGURATION
+# =============================================================================
+chat_history:
+  database_type: sqlite
+  database_path: ./.tmp/chat_history.db
+  database_name: ChatHistory
+  memory_path: ./.tmp
+
+# =============================================================================
+# SERVICE CONFIGURATION
+# =============================================================================
+chat_service:
+  type: multi_agent
+
+tool_service:
+  enable: false
+
+# =============================================================================
+# WEB CONFIGURATION
+# =============================================================================
+web_configuration:
+  type: fastapi
+  ip_address: ${WEB_IP_ADDRESS:0.0.0.0}
+  port: ${WEB_PORT:80}
+  authentication:
+    enable: false
+    type: basic
+
+# =============================================================================
+# AZURE SEARCH SERVICES (Optional - can be empty for basic workflows)
+# =============================================================================
+azure_search_services:
+  - service: default
+    endpoint: ${AZURE_SEARCH_ENDPOINT:}
+
+# =============================================================================
+# AZURE SQL SERVICES (Optional - can be empty for basic workflows)
+# =============================================================================
+azure_sql_services:
+  database_name: ${AZURE_SQL_DATABASE_NAME:}
+  table_name: ${AZURE_SQL_TABLE_NAME:}
+
+# =============================================================================
+# CHAINLIT CONFIGURATION (Web UI - Optional)
+# =============================================================================
+chainlit_configuration:
+  enable: false
+
+# =============================================================================
+# PROMPT TUNER CONFIGURATION
+# =============================================================================
+prompt_tuner:
+  mode: "fast_api"
+  enable: true
+
+# =============================================================================
+# LOCAL SQL DATABASE (Optional)
+# =============================================================================
+local_sql_db:
+  database_path: ${LOCAL_SQL_DB_PATH:./.tmp/local.db}
+  sample_csv_path: ${LOCAL_SQL_CSV_PATH:}
+  sample_database_name: ${LOCAL_SQL_DB_NAME:sample_data}
+
+# =============================================================================
+# FILE STORAGE (Optional - using local storage by default)
+# =============================================================================
+file_storage:
+  enable: true
+  storage_type: local
+  container_name: ""
+  path: "./"
