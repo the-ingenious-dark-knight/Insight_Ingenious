@@ -391,57 +391,313 @@ graph TB
     class REGISTRY,LOADER,VALIDATOR registry
 ```
 
-The API layer provides programmatic access to the system:
+## Key Classes and Interfaces
 
-- REST API endpoints for chat interactions
-- Authentication and security
-- Integration points for custom extensions
+### 🤖 Core Agent Framework
 
-### 3. Web UI
+```mermaid
+classDiagram
+    class IConversationPattern {
+        <<interface>>
+        +execute(context: ConversationContext)
+        +validate(input: Any)
+        +get_pattern_type()
+    }
+    
+    class IConversationFlow {
+        <<interface>>
+        +start_conversation(query: str)
+        +process_step(step: ConversationStep)
+        +finalize_conversation()
+    }
+    
+    class BaseAgent {
+        <<abstract>>
+        +name: str
+        +description: str
+        +tools: List[Tool]
+        +process_message(message: str)
+        +get_system_prompt()
+    }
+    
+    class BikeAnalysisAgent {
+        +analyze_sales_data()
+        +generate_insights()
+        +create_visualizations()
+    }
+    
+    class SentimentAgent {
+        +analyze_sentiment()
+        +extract_emotions()
+        +score_satisfaction()
+    }
+    
+    class FiscalAgent {
+        +calculate_revenue()
+        +analyze_profitability()
+        +forecast_trends()
+    }
+    
+    class MultiAgentChatService {
+        +agents: Dict[str, BaseAgent]
+        +patterns: Dict[str, IConversationPattern]
+        +orchestrate_conversation()
+        +manage_state()
+    }
+    
+    IConversationPattern <|.. SequentialPattern
+    IConversationPattern <|.. ParallelPattern
+    IConversationFlow <|.. BikeInsightsFlow
+    BaseAgent <|-- BikeAnalysisAgent
+    BaseAgent <|-- SentimentAgent
+    BaseAgent <|-- FiscalAgent
+    MultiAgentChatService --> BaseAgent
+    MultiAgentChatService --> IConversationPattern
+```
 
-The Chainlit integration provides a user-friendly web interface:
+## Configuration Architecture
 
-- Interactive chat interface
-- Visualization of agent responses
-- User authentication
+### ⚙️ Configuration Management
 
-### 4. Storage Layer
+```mermaid
+graph TB
+    subgraph "📁 Configuration Sources"
+        CONFIG_FILE[📄 config.yml<br/>Project Configuration]
+        PROFILES_FILE[🔐 profiles.yml<br/>Environment Secrets]
+        ENV_VARS[🌍 Environment Variables]
+        CLI_ARGS[⌨️ Command Line Args]
+    end
+    
+    subgraph "🔄 Configuration Processing"
+        LOADER[📖 Configuration Loader]
+        VALIDATOR[✅ Schema Validator]
+        MERGER[🔀 Configuration Merger]
+    end
+    
+    subgraph "💾 Runtime Configuration"
+        APP_CONFIG[⚙️ Application Config]
+        AGENT_CONFIG[🤖 Agent Configurations]
+        SERVICE_CONFIG[🔧 Service Settings]
+    end
+    
+    CONFIG_FILE --> LOADER
+    PROFILES_FILE --> LOADER
+    ENV_VARS --> LOADER
+    CLI_ARGS --> LOADER
+    
+    LOADER --> VALIDATOR
+    VALIDATOR --> MERGER
+    MERGER --> APP_CONFIG
+    MERGER --> AGENT_CONFIG
+    MERGER --> SERVICE_CONFIG
+    
+    classDef source fill:#e8f5e8
+    classDef process fill:#fff3e0
+    classDef runtime fill:#e3f2fd
+    
+    class CONFIG_FILE,PROFILES_FILE,ENV_VARS,CLI_ARGS source
+    class LOADER,VALIDATOR,MERGER process
+    class APP_CONFIG,AGENT_CONFIG,SERVICE_CONFIG runtime
+```
 
-The storage layer handles persistence:
+## Deployment Architecture
 
-- Chat history storage
-- File management
-- Configuration storage
+### 🚀 Deployment Options
 
-### 5. Extensions Layer
+```mermaid
+graph TB
+    subgraph "🖥️ Local Development"
+        LOCAL_API[🔧 FastAPI Dev Server]
+        LOCAL_UI[🎨 Chainlit Dev UI]
+        LOCAL_DB[💾 SQLite Database]
+    end
+    
+    subgraph "🐳 Docker Deployment"
+        DOCKER_API[📦 API Container]
+        DOCKER_UI[📦 UI Container]
+        DOCKER_DB[📦 Database Container]
+        DOCKER_COMPOSE[🔧 Docker Compose]
+    end
+    
+    subgraph "☁️ Cloud Deployment"
+        CLOUD_API[🌐 API Service]
+        CLOUD_UI[🎨 Web App]
+        CLOUD_DB[💾 Managed Database]
+        CLOUD_STORAGE[📁 Object Storage]
+    end
+    
+    subgraph "🔧 External Services"
+        AZURE_OPENAI[🧠 Azure OpenAI]
+        MONITORING[📊 Application Insights]
+        LOGGING[📝 Centralized Logging]
+    end
+    
+    LOCAL_API --> LOCAL_UI
+    LOCAL_API --> LOCAL_DB
+    
+    DOCKER_COMPOSE --> DOCKER_API
+    DOCKER_COMPOSE --> DOCKER_UI
+    DOCKER_COMPOSE --> DOCKER_DB
+    
+    CLOUD_API --> CLOUD_UI
+    CLOUD_API --> CLOUD_DB
+    CLOUD_API --> CLOUD_STORAGE
+    
+    LOCAL_API --> AZURE_OPENAI
+    DOCKER_API --> AZURE_OPENAI
+    CLOUD_API --> AZURE_OPENAI
+    
+    CLOUD_API --> MONITORING
+    CLOUD_API --> LOGGING
+    
+    classDef local fill:#e8f5e8
+    classDef docker fill:#e3f2fd
+    classDef cloud fill:#fff3e0
+    classDef external fill:#fce4ec
+    
+    class LOCAL_API,LOCAL_UI,LOCAL_DB local
+    class DOCKER_API,DOCKER_UI,DOCKER_DB,DOCKER_COMPOSE docker
+    class CLOUD_API,CLOUD_UI,CLOUD_DB,CLOUD_STORAGE cloud
+    class AZURE_OPENAI,MONITORING,LOGGING external
+```
 
-The extensions layer allows for customization:
+## Security Architecture
 
-- Custom agents and conversation patterns
-- Domain-specific prompts and templates
-- Integration with external systems
+### 🔐 Security Model
 
-## Data Flow
+```mermaid
+graph TB
+    subgraph "🛡️ Authentication Layer"
+        API_KEY[🔑 API Key Validation]
+        JWT_TOKEN[🎫 JWT Tokens]
+        SESSION_MGR[👤 Session Management]
+    end
+    
+    subgraph "🔒 Authorization Layer"
+        RBAC[👥 Role-Based Access]
+        PERMISSIONS[📋 Permission System]
+        RESOURCE_GUARD[🛡️ Resource Protection]
+    end
+    
+    subgraph "🔐 Data Protection"
+        ENCRYPTION[🔒 Data Encryption]
+        SECRETS_MGR[🗝️ Secrets Management]
+        AUDIT_LOG[📝 Audit Logging]
+    end
+    
+    subgraph "🌐 Network Security"
+        HTTPS[🔐 HTTPS/TLS]
+        CORS[🌍 CORS Policy]
+        RATE_LIMIT[⏱️ Rate Limiting]
+    end
+    
+    API_KEY --> RBAC
+    JWT_TOKEN --> RBAC
+    SESSION_MGR --> RBAC
+    
+    RBAC --> PERMISSIONS
+    PERMISSIONS --> RESOURCE_GUARD
+    
+    RESOURCE_GUARD --> ENCRYPTION
+    ENCRYPTION --> SECRETS_MGR
+    SECRETS_MGR --> AUDIT_LOG
+    
+    HTTPS --> CORS
+    CORS --> RATE_LIMIT
+    
+    classDef auth fill:#e8f5e8
+    classDef authz fill:#fff3e0
+    classDef data fill:#e3f2fd
+    classDef network fill:#fce4ec
+    
+    class API_KEY,JWT_TOKEN,SESSION_MGR auth
+    class RBAC,PERMISSIONS,RESOURCE_GUARD authz
+    class ENCRYPTION,SECRETS_MGR,AUDIT_LOG data
+    class HTTPS,CORS,RATE_LIMIT network
+```
 
-1. User input arrives through API or UI
-2. The chat service processes the request
-3. The appropriate conversation flow is selected
-4. Agents collaborate based on conversation pattern
-5. Results are returned to the user and stored
+## Performance & Scalability
 
-## Configuration System
+### ⚡ Performance Architecture
 
-Insight Ingenious uses a two-file configuration approach:
+```mermaid
+graph TB
+    subgraph "⚡ Caching Strategy"
+        REDIS[🔴 Redis Cache]
+        MEMORY[💾 In-Memory Cache]
+        CDN[🌐 CDN Cache]
+    end
+    
+    subgraph "📊 Load Balancing"
+        LOAD_BALANCER[⚖️ Load Balancer]
+        API_INSTANCES[🔧 API Instances]
+        HEALTH_CHECK[❤️ Health Checks]
+    end
+    
+    subgraph "🔄 Async Processing"
+        TASK_QUEUE[📋 Task Queue]
+        WORKERS[👷 Background Workers]
+        SCHEDULER[⏰ Job Scheduler]
+    end
+    
+    subgraph "📈 Monitoring"
+        METRICS[📊 Performance Metrics]
+        ALERTS[🚨 Alert System]
+        DASHBOARDS[📈 Monitoring Dashboard]
+    end
+    
+    REDIS --> MEMORY
+    MEMORY --> CDN
+    
+    LOAD_BALANCER --> API_INSTANCES
+    LOAD_BALANCER --> HEALTH_CHECK
+    
+    TASK_QUEUE --> WORKERS
+    WORKERS --> SCHEDULER
+    
+    METRICS --> ALERTS
+    ALERTS --> DASHBOARDS
+    
+    API_INSTANCES --> REDIS
+    API_INSTANCES --> TASK_QUEUE
+    API_INSTANCES --> METRICS
+    
+    classDef cache fill:#e8f5e8
+    classDef balance fill:#fff3e0
+    classDef async fill:#e3f2fd
+    classDef monitor fill:#fce4ec
+    
+    class REDIS,MEMORY,CDN cache
+    class LOAD_BALANCER,API_INSTANCES,HEALTH_CHECK balance
+    class TASK_QUEUE,WORKERS,SCHEDULER async
+    class METRICS,ALERTS,DASHBOARDS monitor
+```
 
-- `config.yml`: Project-specific, non-sensitive configuration
-- `profiles.yml`: Environment-specific, sensitive configuration (API keys, credentials)
+## Extension Development
 
-## Extension Points
+The system is designed for extensibility at several key points:
 
-The system is designed for extensibility at several points:
+- **🤖 Custom Agents**: Create specialized agents for specific domains
+- **📋 Conversation Patterns**: Define new ways agents can interact
+- **🔄 Conversation Flows**: Implement domain-specific conversation flows
+- **🔌 Custom API Routes**: Add new API endpoints
+- **📊 Custom Models**: Define domain-specific data models
+- **🛠️ Custom Tools**: Integrate with external systems and APIs
 
-- **Custom Agents**: Create specialized agents for specific domains
-- **Conversation Patterns**: Define new ways agents can interact
-- **Conversation Flows**: Implement domain-specific conversation flows
-- **Custom API Routes**: Add new API endpoints
-- **Custom Models**: Define domain-specific data models
+### Development Best Practices
+
+1. **🏗️ Modular Design**: Keep components loosely coupled
+2. **🧪 Test Coverage**: Maintain comprehensive test suites
+3. **📝 Documentation**: Document all public APIs and interfaces
+4. **🔐 Security**: Follow security best practices for all extensions
+5. **⚡ Performance**: Consider performance implications of custom code
+6. **🔄 Compatibility**: Ensure backward compatibility when possible
+
+For detailed development instructions, see the [Development Guide](/development/).
+
+## Next Steps
+
+- 📖 Read the [Getting Started Guide](/getting-started/) to begin using the system
+- 🛠️ Follow the [Development Guide](/development/) to start extending the framework
+- 🔧 Check the [Configuration Guide](/configuration/) for setup details
+- 📡 Explore the [API Documentation](/api/) for integration options
