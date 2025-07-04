@@ -1,0 +1,78 @@
+# =============================================================================
+# Insight Ingenious Profiles - Minimal Working Template
+# =============================================================================
+# This template provides minimal profile configuration that works out of the box
+# Set your Azure OpenAI credentials in .env file
+
+# =============================================================================
+# DEVELOPMENT PROFILE - Minimal Configuration
+# =============================================================================
+- name: dev
+  
+  # =============================================================================
+  # MODEL CONFIGURATION - Required for all workflows
+  # =============================================================================
+  models:
+    - model: ${AZURE_OPENAI_MODEL_NAME:gpt-4.1-nano}
+      api_key: ${AZURE_OPENAI_API_KEY}
+      base_url: ${AZURE_OPENAI_BASE_URL}
+      deployment: ${AZURE_OPENAI_DEPLOYMENT:gpt-4.1-nano}
+      api_version: ${AZURE_OPENAI_API_VERSION:2024-12-01-preview}
+  
+  # =============================================================================
+  # CHAT HISTORY CONFIGURATION - Using local SQLite (no external DB needed)
+  # =============================================================================
+  chat_history:
+    database_connection_string: ""
+  
+  # =============================================================================
+  # AZURE SEARCH SERVICES - Optional (empty for minimal setup)
+  # =============================================================================
+  azure_search_services:
+    - service: default
+      key: ""
+  
+  # =============================================================================
+  # AZURE SQL SERVICES - Optional (empty for minimal setup)
+  # =============================================================================
+  azure_sql_services:
+    database_connection_string: ""
+  
+  # =============================================================================
+  # RECEIVER CONFIGURATION - Disabled by default
+  # =============================================================================
+  receiver_configuration:
+    enable: false
+    api_url: ""
+    api_key: "DevApiKey"
+  
+  # =============================================================================
+  # CHAINLIT CONFIGURATION - Disabled by default
+  # =============================================================================
+  chainlit_configuration:
+    enable: false
+    authentication:
+      enable: false
+      github_secret: ""
+      github_client_id: ""
+  
+  # =============================================================================
+  # WEB CONFIGURATION - No authentication by default
+  # =============================================================================
+  web_configuration:
+    authentication:
+      enable: false
+      username: "admin"
+      password: ""
+      type: "basic"
+  
+  # =============================================================================
+  # FILE STORAGE - Using local storage (no cloud storage needed)
+  # =============================================================================
+  file_storage:
+    revisions:
+      url: ""
+      authentication_method: "default_credential"
+    data:
+      url: ""
+      authentication_method: "default_credential"

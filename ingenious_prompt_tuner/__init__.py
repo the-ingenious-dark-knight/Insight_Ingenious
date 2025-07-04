@@ -88,3 +88,11 @@ def create_app():
     app.register_blueprint(responses.bp)
 
     return app
+
+
+def create_app_for_fastapi():
+    """
+    Create a Flask app specifically for mounting in FastAPI.
+    This is the same as create_app() but with a more explicit name.
+    """
+    return create_app()

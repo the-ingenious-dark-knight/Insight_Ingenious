@@ -1,3 +1,14 @@
+---
+title: "🛠️ Development Guide"
+layout: single
+permalink: /development/
+sidebar:
+  nav: "docs"
+toc: true
+toc_label: "Development Topics"
+toc_icon: "code"
+---
+
 # Development Guide
 
 This guide provides detailed information for developers who want to extend, modify, or contribute to Insight Ingenious.

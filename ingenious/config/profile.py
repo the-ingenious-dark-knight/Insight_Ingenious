@@ -50,11 +50,28 @@ class Profiles:
         try:
             profiles = profile_models.Profiles.model_validate_json(json_data).root
         except ValidationError as e:
+            print("❌ Profile validation failed! Common issues and solutions:")
             for error in e.errors():
-                print(
-                    f"Validation error in \
-                    field '{error['loc']}': {error['msg']}"
-                )
+                field_path = " -> ".join(str(x) for x in error['loc'])
+                error_msg = error['msg']
+                
+                print(f"   🔸 Field: {field_path}")
+                print(f"      Error: {error_msg}")
+                
+                # Provide helpful suggestions based on common errors
+                if 'string_type' in error_msg and field_path.endswith('api_key'):
+                    print("      💡 Tip: Make sure AZURE_OPENAI_API_KEY is set in your .env file")
+                elif 'string_type' in error_msg and field_path.endswith('base_url'):
+                    print("      💡 Tip: Make sure AZURE_OPENAI_BASE_URL is set in your .env file")
+                elif 'string_type' in error_msg and 'password' in field_path:
+                    print("      💡 Tip: Set WEB_AUTH_PASSWORD='' in .env or disable web auth")
+                elif 'string_type' in error_msg and any(x in field_path for x in ['azure_search', 'azure_sql', 'storage']):
+                    print("      💡 Tip: For minimal setup, these can be empty strings ('')")
+                else:
+                    print(f"      💡 Tip: Check your profiles.yml file and .env variables")
+                print()
+            
+            print("📖 For help: see PLAN.md or run 'ingen workflows bike_insights' (Hello World)")
             raise e
         except Exception as e:
             print(f"Unexpected error during validation: {e}")

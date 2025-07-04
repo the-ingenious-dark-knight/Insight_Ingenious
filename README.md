@@ -5,76 +5,65 @@ A powerful framework for building, managing, and deploying multi-agent AI conver
 ## Overview
 Insight Ingenious lets you orchestrate multiple AI agents and deploy them as an API for seamless integration into your applications.
 
-## Quickstart
+## ⚡ Quick Start
 
-**Prerequisites:**
+Get up and running in 5 minutes with Azure OpenAI!
 
-- **Python 3.13 or higher**
+### Prerequisites
+- ✅ Python 3.13+
+- ✅ Azure OpenAI API credentials
+- ✅ [uv package manager](https://docs.astral.sh/uv/) 
 
-1. Clone the repository:
+### 5-Minute Setup
+
+1. **Install and Initialize**:
     ```bash
-    git clone https://github.com/Insight-Services-APAC/Insight_Ingenious.git
-    cd Insight_Ingenious
+    # From your project directory
+    uv pip install -e ./Insight_Ingenious
+    uv run ingen init
     ```
 
-2. Install [uv](https://docs.astral.sh/uv/) for Python package and environment management (if not already installed):
+2. **Configure Credentials**:
     ```bash
-    curl -LsSf https://astral.sh/uv/install.sh | sh
+    # Edit .env with your Azure OpenAI credentials
+    cp .env.example .env
+    nano .env  # Add AZURE_OPENAI_API_KEY and AZURE_OPENAI_BASE_URL
     ```
 
-3. Set up the project and install dependencies:
+3. **Set Environment and Start**:
     ```bash
-    uv sync
-    uv run pre-commit install
-    uv pip install -e .
+    export INGENIOUS_PROJECT_PATH=$(pwd)/config.yml
+    export INGENIOUS_PROFILE_PATH=$(pwd)/profiles.yml
+    uv run ingen serve
     ```
 
-4. Initialize a new project:
+4. **Test the API**:
     ```bash
-    uv run ingen initialize-new-project
+    # Test bike insights workflow (the "Hello World" of Ingenious)
+    curl -X POST http://localhost:80/api/v1/chat \
+      -H "Content-Type: application/json" \
+      -d '{
+        "user_prompt": "{\"stores\": [{\"name\": \"QuickStart Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"QS-001\", \"quantity_sold\": 1, \"sale_date\": \"2023-04-15\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 5.0, \"comment\": \"Perfect bike for getting started!\"}}], \"bike_stock\": []}], \"revision_id\": \"quickstart-1\", \"identifier\": \"hello-world\"}",
+        "conversation_flow": "bike_insights"
+      }'
     ```
 
-5. **Check workflow requirements** (Important!):
-    ```bash
-    # See all available workflows and their configuration requirements
-    uv run ingen workflow-requirements all
+🎉 **That's it!** You should see a comprehensive JSON response with insights from multiple AI agents analyzing the bike sales data.
 
-    # Check specific workflow requirements
-    uv run ingen workflow-requirements classification_agent
-    ```
-
-6. **Configure your services**:
-   - Update `config.yml` with your project settings
-   - Update `~/.ingenious/profiles.yml` with API keys and credentials
-   - Set environment variables:
-     ```bash
-     export INGENIOUS_PROJECT_PATH=/path/to/config.yml
-     export INGENIOUS_PROFILE_PATH=$HOME/.ingenious/profiles.yml
-     ```
-
-7. **Start with minimal configuration** workflows:
-   ```bash
-   # Start the server
-   uv run ingen run-rest-api-server
-
-   # Test basic workflow (only needs Azure OpenAI)
-   curl -X POST http://localhost:8081/api/v1/chat \
-     -H "Content-Type: application/json" \
-     -d '{"user_prompt": "Hello", "conversation_flow": "classification_agent"}'
-   ```
-
-8. Run pre-commit hooks on all files:
-    ```bash
-    uv run pre-commit run --all-files
-    ```
+### 📚 Detailed Setup
+- **📖 Complete guide**: [docs/QUICKSTART.md](docs/QUICKSTART.md) - Full walkthrough with examples
+- **🔧 Troubleshooting**: [docs/troubleshooting/README.md](docs/troubleshooting/README.md) - Common issues & fixes
+- **📡 API Reference**: [docs/api/WORKFLOWS.md](docs/api/WORKFLOWS.md) - All endpoints & workflows
 
 ## 🎯 Workflow Categories
 
 Insight Ingenious provides multiple conversation workflows with different configuration requirements:
 
-### ✅ **Minimal Configuration** (Azure OpenAI only)
-- `classification_agent` - Route input to specialized agents
-- `bike_insights` - Sample domain-specific analysis
+### ⭐ **"Hello World" Workflow** (Azure OpenAI only)
+- `bike_insights` - **The recommended starting point** - Comprehensive bike sales analysis showcasing multi-agent coordination
+
+### ✅ **Simple Text Processing** (Azure OpenAI only)  
+- `classification_agent` - Route input to specialized agents based on content
 
 ### 🔍 **Azure Search Required**
 - `knowledge_base_agent` - Search knowledge bases
@@ -111,8 +100,11 @@ Insight Ingenious provides multiple conversation workflows with different config
 
 For detailed documentation, see the [docs/](docs/) directory:
 
-- **[Getting Started](docs/getting-started/README.md)** - **Quick start guide and installation**
-- **[Workflow Configuration Requirements](docs/workflows/README.md)** - **Essential guide to configure workflows**
+- **[⚡ Quick Start Guide](docs/QUICKSTART.md)** - **Complete 5-minute setup with examples**
+- **[🛠️ Troubleshooting](docs/troubleshooting/README.md)** - **Common issues and solutions**
+- **[📡 API Reference](docs/api/WORKFLOWS.md)** - **All endpoints and workflows**
+- [Getting Started](docs/getting-started/README.md) - Installation and setup details
+- [Workflow Configuration Requirements](docs/workflows/README.md) - Service setup for different workflows
 - [User Guides](docs/guides/README.md) - Feature-specific usage guides
 - [Extensions & Customization](docs/extensions/README.md) - Creating custom components
 - [Configuration Guide](docs/configuration/README.md) - Detailed configuration reference

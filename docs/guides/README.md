@@ -1,3 +1,14 @@
+---
+title: "📖 User Guides"
+layout: single
+permalink: /guides/
+sidebar:
+  nav: "docs"
+toc: true
+toc_label: "Available Guides"
+toc_icon: "book"
+---
+
 # User Guides
 
 This section provides detailed guides for using specific features and capabilities of Insight Ingenious.

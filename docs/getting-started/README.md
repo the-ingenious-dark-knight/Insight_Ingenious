@@ -1,3 +1,14 @@
+---
+title: "🏁 Quick Start Guide"
+layout: single
+permalink: /getting-started/
+sidebar:
+  nav: "docs"
+toc: true
+toc_label: "Quick Start Steps"
+toc_icon: "rocket"
+---
+
 # 🏁 Quick Start Guide
 
 Get up and running with Insight Ingenious in minutes! This guide will walk you through the essential steps to start using conversation workflows.

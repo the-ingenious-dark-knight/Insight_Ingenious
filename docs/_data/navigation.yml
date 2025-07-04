@@ -1,0 +1,57 @@
+docs:
+  - title: "🚀 Getting Started"
+    children:
+      - title: "Quick Start Guide"
+        url: /getting-started/
+      - title: "Installation"
+        url: /getting-started/installation/
+      - title: "Configuration"
+        url: /configuration/
+      - title: "Troubleshooting"
+        url: /troubleshooting/
+
+  - title: "📖 User Guides"
+    children:
+      - title: "All Guides"
+        url: /guides/
+      - title: "API Integration"
+        url: /guides/api-integration/
+      - title: "Web Interface"
+        url: /guides/web-interface/
+      - title: "Data Preparation"
+        url: /guides/data-preparation/
+      - title: "Document Processing"
+        url: /guides/document-processing/
+
+  - title: "🛠️ Developer Guides"
+    children:
+      - title: "Architecture Overview"
+        url: /architecture/
+      - title: "Development Setup"
+        url: /development/
+      - title: "Extensions & Customization"
+        url: /extensions/
+      - title: "Components Reference"
+        url: /components/
+
+  - title: "📚 Reference"
+    children:
+      - title: "API Reference"
+        url: /api/
+      - title: "Workflow API"
+        url: /api/workflows/
+      - title: "CLI Reference"
+        url: /CLI_REFERENCE/
+      - title: "Configuration Reference"
+        url: /configuration/
+      - title: "Workflow Requirements"
+        url: /workflows/
+
+  - title: "📋 Additional Resources"
+    children:
+      - title: "Quick Onboarding"
+        url: /quick_onboarding/
+      - title: "Usage Examples"
+        url: /usage/
+      - title: "Templates"
+        url: /templates/

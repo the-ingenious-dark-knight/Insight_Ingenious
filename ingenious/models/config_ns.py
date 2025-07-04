@@ -37,7 +37,7 @@ class ChainlitConfig(BaseModel):
 
 class PromptTunerConfig(BaseModel):
     mode: str = Field("fast_api", description="Mode for the prompt tuner")
-    port: int = Field(8000, description="Port for the prompt tuner")
+    enable: bool = Field(True, description="Enable or disable the prompt tuner")
 
 
 class ChatServiceConfig(BaseModel):

@@ -1,3 +1,14 @@
+---
+title: "⚙️ Configuration Guide"
+layout: single
+permalink: /configuration/
+sidebar:
+  nav: "docs"
+toc: true
+toc_label: "Configuration Options"
+toc_icon: "cogs"
+---
+
 # Configuration Guide
 
 This guide explains how to configure Insight Ingenious for your project.

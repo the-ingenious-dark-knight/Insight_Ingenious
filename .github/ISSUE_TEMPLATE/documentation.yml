@@ -7,7 +7,6 @@ body:
     attributes:
       value: |
         Help us improve our documentation! Report issues or suggest improvements to make Insight Ingenious easier to understand and use.
-
   - type: dropdown
     id: doc_type
     attributes:
@@ -26,7 +25,6 @@ body:
         - Error messages/help text
     validations:
       required: true
-
   - type: textarea
     id: issue_description
     attributes:
@@ -42,7 +40,6 @@ body:
         - Typos or formatting issues
     validations:
       required: true
-
   - type: textarea
     id: current_content
     attributes:
@@ -50,7 +47,6 @@ body:
       description: Quote or reference the current documentation content that needs improvement
       placeholder: |
         If you're referring to specific existing content, please quote it here or provide a link to the section.
-
   - type: textarea
     id: suggested_improvement
     attributes:
@@ -59,7 +55,6 @@ body:
       placeholder: |
         Describe your suggested improvement or provide better wording/examples.
         If you have specific text to suggest, please include it.
-
   - type: textarea
     id: location
     attributes:
@@ -73,7 +68,6 @@ body:
         - API docstring in ingenious/api/chat.py
     validations:
       required: true
-
   - type: dropdown
     id: audience
     attributes:
@@ -88,7 +82,6 @@ body:
         - All users
     validations:
       required: true
-
   - type: dropdown
     id: priority
     attributes:
@@ -101,7 +94,6 @@ body:
         - Critical - Blocking user adoption
     validations:
       required: true
-
   - type: textarea
     id: context
     attributes:
@@ -113,7 +105,6 @@ body:
         - "Multiple users have asked about this in discussions"
         - "This caused issues during deployment"
         - "The current example doesn't work with latest Azure services"
-
   - type: checkboxes
     id: improvement_type
     attributes:
@@ -128,7 +119,6 @@ body:
         - label: Update outdated information
         - label: Improve organization/structure
         - label: Add troubleshooting information
-
   - type: checkboxes
     id: checklist
     attributes:

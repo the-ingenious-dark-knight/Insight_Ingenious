@@ -39,9 +39,13 @@ class FastAgentAPI:
 
         # Initialize FastAPI app
         self.app = FastAPI(title="FastAgent API", version="1.0.0")
-        import ingenious_prompt_tuner as prompt_tuner
 
-        self.flask_app = prompt_tuner.create_app()
+        # Mount Flask Prompt Tuner App if enabled
+        if config.prompt_tuner.enable:
+            import ingenious_prompt_tuner as prompt_tuner
+            self.flask_app = prompt_tuner.create_app_for_fastapi()
+            # Mount Flask App
+            self.app.mount("/prompt-tuner", WSGIMiddleware(self.flask_app))
 
         # TODO: Add CORS option to config.
         origins = [
@@ -90,9 +94,6 @@ class FastAgentAPI:
 
             chainlit_path = pkg_resources.files("ingenious.chainlit") / "app.py"
             mount_chainlit(app=self.app, target=str(chainlit_path), path="/chainlit")
-
-        # Mount Flask App
-        self.app.mount("/prompt-tuner", WSGIMiddleware(self.flask_app))
 
         # Redirect `/` to `/docs`
         self.app.get("/", tags=["Root"])(self.redirect_to_docs)

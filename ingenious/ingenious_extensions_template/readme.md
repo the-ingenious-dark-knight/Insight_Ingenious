@@ -1,16 +1,174 @@
-## Folder Description & Purpose
+# Insight Ingenious Extensions Template
 
-This folder contains the files you will need to create a project using the Ingenious Accelerator.
+Welcome to your **Insight Ingenious** project! This template provides everything you need to build, customize, and deploy AI-powered multi-agent conversation workflows.
 
-## Folder Structure
+## 🚀 **Quick Start**
 
-- models: Contains pydantic models that you will use to customise your project agents and data objects.
-- sample_data: Contains sample data that you can use to test your project.
-- services: Contains the custom multi-agent services that you will use to customise your project.
-- templates: Contains text based templates such as agent prompts.
-- tests: not used. To be removed in future versions.
+### **1. Initial Setup**
+After running `uv run ingen initialize-new-project`, you should have:
+- ✅ `config.yml` - Project configuration  
+- ✅ `profiles.yml` - API keys and credentials
+- ✅ `.env.example` - Environment variables template
+- ✅ This project structure with sample workflows
 
-## To get started
-- Review and update config.yml to match your project requirements.
-- Create a profile.yml and store in your user home directory. This file will contain sensitive information such as API keys.
-- Add environment variables to point to your profile.yml file and config.yml file.
+### **2. Test the Built-in Bike Insights Workflow**
+
+The template includes a complete **bike sales analysis workflow** that you can test immediately:
+
+```bash
+# 1. Start the server
+uv run ingen run-rest-api-server
+
+# 2. Test the bike insights workflow
+curl -X POST http://localhost:8081/api/v1/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_prompt": "Analyze bike sales trends for April 2023",
+    "conversation_flow": "bike_insights"
+  }'
+```
+
+## 📁 **Project Structure**
+
+| Folder | Purpose | Key Files |
+|--------|---------|-----------|
+| **📁 models/** | Custom data models | `bikes.py` - Sample bike sales models |
+| **📁 sample_data/** | Test data files | `bike_sales_april_2023.json` - Sample dataset |
+| **📁 services/** | Multi-agent workflows | `bike_insights/` - Complete workflow example |
+| **📁 templates/** | Agent prompts | `bike_lookup_agent_prompt.jinja` - Sample prompt |
+| **📁 tests/** | Test harness | `run_tests.py` - Automated testing |
+| **📁 api/** | Custom API routes | Add your own REST endpoints |
+
+## 🧠 **Understanding the Bike Insights Workflow**
+
+This sample workflow demonstrates a complete multi-agent system:
+
+### **Agents Involved:**
+- **📊 Customer Sentiment Agent** - Analyzes customer reviews and ratings
+- **💰 Fiscal Analysis Agent** - Processes sales data and trends  
+- **🔍 Bike Lookup Agent** - Retrieves product information using tools
+- **📝 Summary Agent** - Generates comprehensive reports
+- **🤖 User Proxy** - Orchestrates agent interactions
+
+### **Data Flow:**
+1. **Input:** JSON payload with bike sales data
+2. **Processing:** Multiple agents analyze different aspects simultaneously
+3. **Tools:** Bike price lookup function for real-time data
+4. **Output:** Comprehensive analysis report with insights and recommendations
+
+### **Sample Input Data Structure:**
+```json
+{
+  "stores": [
+    {
+      "name": "Bike World Sydney",
+      "location": "NSW", 
+      "bike_sales": [
+        {
+          "product_code": "EB-SPECIALIZED-2023-TV",
+          "quantity_sold": 5,
+          "sale_date": "2023-04-01",
+          "customer_review": {
+            "rating": 4.0,
+            "comment": "Great bike for commuting!"
+          }
+        }
+      ],
+      "bike_stock": [...]
+    }
+  ]
+}
+```
+
+## 🛠️ **Customizing the Workflow**
+
+### **Modify the Bike Insights Workflow:**
+
+1. **📝 Update Prompts:** Edit files in `templates/prompts/`
+   - `customer_sentiment_agent_prompt.jinja` - Change how reviews are analyzed
+   - `fiscal_analysis_agent_prompt.jinja` - Modify sales analysis approach
+   - `summary_prompt.jinja` - Customize final report format
+
+2. **🔧 Add New Agents:** 
+   - Create new prompt files in `templates/prompts/`
+   - Register them in `services/chat_services/multi_agent/conversation_flows/bike_insights/bike_insights.py`
+
+3. **📊 Modify Data Models:**
+   - Edit `models/bikes.py` to change data structure
+   - Update sample data in `sample_data/bike_sales_april_2023.json`
+
+### **Create Your Own Workflow:**
+
+1. **Copy the bike_insights structure:**
+   ```bash
+   cp -r services/chat_services/multi_agent/conversation_flows/bike_insights \
+         services/chat_services/multi_agent/conversation_flows/your_workflow
+   ```
+
+2. **Update the conversation flow file:**
+   - Rename the class and methods
+   - Modify agent registration and tools
+   - Update data processing logic
+
+3. **Create custom data models in `models/` folder**
+
+4. **Add sample data to `sample_data/` folder**
+
+## 🧪 **Testing Your Workflows**
+
+### **Run Tests:**
+```bash
+# Run the built-in test harness
+cd tests
+python run_tests.py
+```
+
+### **Test Individual Components:**
+```bash
+# Test data model validation
+python -c "
+from models.bikes import RootModel
+import json
+with open('sample_data/bike_sales_april_2023.json') as f:
+    data = json.load(f)
+    model = RootModel(**data)
+    print('✅ Data model validation passed')
+"
+```
+
+## 🌐 **Web Interface**
+
+Access your workflows through the web interface:
+
+- **💬 Chat Interface:** http://localhost:8081/chainlit
+- **🔧 Prompt Tuner:** http://localhost:8081/prompt-tuner  
+- **📖 API Documentation:** http://localhost:8081/docs
+
+## 📚 **Next Steps**
+
+### **🎯 Learn More:**
+- [📖 Configuration Guide](../docs/configuration/README.md) - Detailed setup options
+- [🔌 Extensions Guide](../docs/extensions/README.md) - Advanced customization
+- [🌐 API Integration](../docs/guides/api-integration.md) - REST API usage
+
+### **🚀 Advanced Features:**
+- **🔍 Knowledge Base Search** - Add Azure Cognitive Search integration
+- **📊 Database Queries** - Connect to SQL databases  
+- **📄 Document Processing** - Analyze PDFs and documents
+
+### **💡 Example Projects to Build:**
+- **📈 Financial Analysis** - Stock/crypto analysis workflows
+- **🏥 Healthcare Insights** - Patient data analysis
+- **🛒 E-commerce Analytics** - Customer behavior analysis
+- **📱 Social Media Monitoring** - Sentiment tracking workflows
+
+## 🆘 **Need Help?**
+
+- **📋 Workflow Requirements:** Check `uv run ingen workflow-requirements all`
+- **🔧 Configuration Issues:** See [Troubleshooting Guide](../docs/getting-started/troubleshooting.md)
+- **💻 Development:** Review [Development Guide](../docs/development/README.md)
+- **🐛 Issues:** Check the [GitHub Issues](https://github.com/Insight-Services-APAC/Insight_Ingenious/issues)
+
+---
+
+**🎉 Happy Building!** You now have a powerful foundation for creating AI-powered multi-agent workflows. Start by exploring the bike insights example, then customize it for your specific use case.
