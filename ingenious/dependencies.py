@@ -35,6 +35,13 @@ def get_config():
     return Config.get_config()
 
 
+def get_profile():
+    """Get profile dynamically to ensure environment variables are loaded"""
+    import ingenious.config.profile as Profile
+
+    return Profile.Profiles(os.getenv("INGENIOUS_PROFILE_PATH", ""))
+
+
 def get_openai_service():
     config = get_config()
     model = config.models[0]

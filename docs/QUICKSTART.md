@@ -72,6 +72,55 @@ curl -X POST http://localhost:80/api/v1/chat \
 
 🎉 **That's it!** You should see a comprehensive JSON response with analysis from multiple AI agents - this showcases the multi-agent coordination that makes Ingenious powerful!
 
+## 📊 Data Format Examples
+
+### Simple bike_insights Request (Basic)
+```json
+{
+  "user_prompt": "{\"stores\": [{\"name\": \"Test Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"B-001\", \"quantity_sold\": 1, \"sale_date\": \"2024-01-15\", \"year\": 2024, \"month\": \"January\", \"customer_review\": {\"rating\": 5.0, \"comment\": \"Great bike!\"}}], \"bike_stock\": []}], \"revision_id\": \"test-1\", \"identifier\": \"example\"}",
+  "conversation_flow": "bike_insights"
+}
+```
+
+### Advanced bike_insights Request (With Stock Data)
+```json
+{
+  "user_prompt": "{\"stores\": [{\"name\": \"Premium Bikes\", \"location\": \"Sydney\", \"bike_sales\": [{\"product_code\": \"PB-2024-001\", \"quantity_sold\": 3, \"sale_date\": \"2024-01-15\", \"year\": 2024, \"month\": \"January\", \"customer_review\": {\"rating\": 4.8, \"comment\": \"Excellent quality!\"}}], \"bike_stock\": [{\"bike\": {\"brand\": \"Specialized\", \"model\": \"Turbo Vado\", \"year\": 2024, \"price\": 2899.99, \"battery_capacity\": 0.75, \"motor_power\": 500}, \"quantity\": 5}]}], \"revision_id\": \"advanced-1\", \"identifier\": \"example\"}",
+  "conversation_flow": "bike_insights"
+}
+```
+
+### bike_stock Object Format
+The `bike_stock` array requires objects with this structure:
+```json
+{
+  "bike": {
+    "brand": "string",      // Required: Bike manufacturer
+    "model": "string",      // Required: Bike model name  
+    "year": 2024,          // Required: Manufacturing year
+    "price": 2899.99,      // Required: Price in dollars
+    // Optional fields for electric bikes:
+    "battery_capacity": 0.75,  // kWh
+    "motor_power": 500,        // Watts
+    // Optional fields for mountain bikes:
+    "suspension": "full",      // Type of suspension
+    // Optional fields for road bikes:
+    "frame_material": "carbon" // Frame material
+  },
+  "quantity": 5             // Required: Stock quantity
+}
+```
+
+### Multiple Stores Example
+```bash
+curl -X POST http://localhost:80/api/v1/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_prompt": "{\"stores\": [{\"name\": \"Store A\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"A-001\", \"quantity_sold\": 2, \"sale_date\": \"2024-01-10\", \"year\": 2024, \"month\": \"January\", \"customer_review\": {\"rating\": 4.5, \"comment\": \"Good value\"}}], \"bike_stock\": []}, {\"name\": \"Store B\", \"location\": \"VIC\", \"bike_sales\": [{\"product_code\": \"B-001\", \"quantity_sold\": 1, \"sale_date\": \"2024-01-12\", \"year\": 2024, \"month\": \"January\", \"customer_review\": {\"rating\": 5.0, \"comment\": \"Perfect!\"}}], \"bike_stock\": []}], \"revision_id\": \"multi-store-1\", \"identifier\": \"comparison\"}",
+    "conversation_flow": "bike_insights"
+  }'
+```
+
 ---
 
 ## 🛠️ One-Line Setup Script

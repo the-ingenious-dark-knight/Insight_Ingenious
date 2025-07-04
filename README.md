@@ -30,14 +30,25 @@ Get up and running in 5 minutes with Azure OpenAI!
     nano .env  # Add AZURE_OPENAI_API_KEY and AZURE_OPENAI_BASE_URL
     ```
 
-3. **Set Environment and Start**:
+3. **Validate Setup** (Recommended):
     ```bash
     export INGENIOUS_PROJECT_PATH=$(pwd)/config.yml
     export INGENIOUS_PROFILE_PATH=$(pwd)/profiles.yml
+    uv run ingen validate  # Check configuration before starting
+    ```
+
+4. **Start the Server**:
+    ```bash
     uv run ingen serve
     ```
 
-4. **Test the API**:
+5. **Verify Health**:
+    ```bash
+    # Check server health
+    curl http://localhost:80/health
+    ```
+
+6. **Test the API**:
     ```bash
     # Test bike insights workflow (the "Hello World" of Ingenious)
     curl -X POST http://localhost:80/api/v1/chat \

@@ -23,27 +23,27 @@
   # CHAT HISTORY CONFIGURATION - Using local SQLite (no external DB needed)
   # =============================================================================
   chat_history:
-    database_connection_string: ""
+    database_connection_string: "placeholder_connection_string"
   
   # =============================================================================
   # AZURE SEARCH SERVICES - Optional (empty for minimal setup)
   # =============================================================================
   azure_search_services:
     - service: default
-      key: ""
+      key: "placeholder_key"
   
   # =============================================================================
   # AZURE SQL SERVICES - Optional (empty for minimal setup)
   # =============================================================================
   azure_sql_services:
-    database_connection_string: ""
+    database_connection_string: "placeholder_connection_string"
   
   # =============================================================================
   # RECEIVER CONFIGURATION - Disabled by default
   # =============================================================================
   receiver_configuration:
     enable: false
-    api_url: ""
+    api_url: "placeholder_url"
     api_key: "DevApiKey"
   
   # =============================================================================
@@ -53,8 +53,8 @@
     enable: false
     authentication:
       enable: false
-      github_secret: ""
-      github_client_id: ""
+      github_secret: "placeholder_secret"
+      github_client_id: "placeholder_client_id"
   
   # =============================================================================
   # WEB CONFIGURATION - No authentication by default
@@ -63,7 +63,7 @@
     authentication:
       enable: false
       username: "admin"
-      password: ""
+      password: "placeholder_password"
       type: "basic"
   
   # =============================================================================
@@ -71,8 +71,8 @@
   # =============================================================================
   file_storage:
     revisions:
-      url: ""
+      url: "placeholder_url"
       authentication_method: "default_credential"
     data:
-      url: ""
+      url: "placeholder_url"
       authentication_method: "default_credential"

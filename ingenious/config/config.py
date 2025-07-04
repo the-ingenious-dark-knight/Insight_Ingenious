@@ -66,14 +66,43 @@ class Config(config_models.Config):
         try:
             config_ns = config_ns_models.Config.model_validate_json(json_data)
         except ValidationError as e:
+            # Enhanced error messages with helpful suggestions
+            error_messages = []
             for error in e.errors():
-                logger.debug(
-                    f"Validation error in \
-                    field '{error['loc']}': {error['msg']}"
-                )
-            raise e
+                field_path = '.'.join(str(part) for part in error['loc'])
+                error_msg = error['msg']
+                error_type = error['type']
+                
+                # Provide helpful suggestions based on common errors
+                suggestion = ""
+                if "string_type" in error_type and "endpoint" in field_path:
+                    suggestion = "\n💡 Suggestion: Use a placeholder like 'https://placeholder.search.windows.net' if you don't have Azure Search"
+                elif "string_type" in error_type and "database" in field_path:
+                    suggestion = "\n💡 Suggestion: Use a placeholder like 'placeholder_db' if you don't have a database"
+                elif "string_type" in error_type and "csv_path" in field_path:
+                    suggestion = "\n💡 Suggestion: Use a placeholder like './sample_data.csv' if you don't have CSV files"
+                elif "string_type" in error_type and any(x in field_path for x in ["key", "secret", "password"]):
+                    suggestion = "\n💡 Suggestion: Use a placeholder like 'placeholder_key' for unused services"
+                elif "string_type" in error_type and "url" in field_path:
+                    suggestion = "\n💡 Suggestion: Use a placeholder like 'placeholder_url' for unused services"
+                
+                enhanced_msg = f"❌ Configuration Error in '{field_path}': {error_msg}{suggestion}"
+                error_messages.append(enhanced_msg)
+                logger.debug(enhanced_msg)
+            
+            # Create a comprehensive error message
+            full_error_msg = "\n🔧 Configuration Validation Failed:\n" + "\n".join(error_messages)
+            full_error_msg += "\n\n🚀 Quick Fix: Run 'ingen init' to regenerate config files with valid placeholders"
+            full_error_msg += "\n📖 Or see: docs/QUICKSTART.md for configuration examples"
+            
+            # Create a new exception with enhanced message
+            enhanced_error = ValidationError.from_exception_data("Config", e.errors())
+            enhanced_error.args = (full_error_msg,)
+            raise enhanced_error
         except Exception as e:
             logger.debug(f"Unexpected error during validation: {e}")
+            enhanced_msg = f"🔧 Configuration Error: {str(e)}\n💡 Try running 'ingen validate' to diagnose issues"
+            e.args = (enhanced_msg,)
             raise e
 
         profile_data: profile_models.Profiles = Profiles(

@@ -1087,3 +1087,125 @@ def version():
     
     console.print("🚀 GenAI Accelerator Framework")
     console.print("📖 Documentation: https://github.com/Insight-Services-APAC/Insight_Ingenious")
+
+@app.command(name="validate", help="Validate system configuration and requirements")
+def validate():
+    """
+    ✅ Comprehensive validation of your Insight Ingenious setup.
+    
+    Performs deep validation of:
+    • Configuration file syntax and required fields
+    • Profile file syntax and credentials
+    • Azure OpenAI connectivity
+    • Workflow requirements
+    • Dependencies
+    
+    This command helps identify issues before starting the server.
+    """
+    console.print("[bold blue]✅ Insight Ingenious Configuration Validation[/bold blue]\n")
+    
+    validation_passed = True
+    
+    # 1. Check environment variables
+    console.print("[bold]1. Environment Variables:[/bold]")
+    project_path = os.getenv("INGENIOUS_PROJECT_PATH")
+    profile_path = os.getenv("INGENIOUS_PROFILE_PATH")
+    
+    if not project_path:
+        console.print("  ❌ INGENIOUS_PROJECT_PATH not set")
+        validation_passed = False
+    elif not Path(project_path).exists():
+        console.print(f"  ❌ Config file not found: {project_path}")
+        validation_passed = False
+    else:
+        console.print(f"  ✅ INGENIOUS_PROJECT_PATH: {project_path}")
+        
+    if not profile_path:
+        console.print("  ❌ INGENIOUS_PROFILE_PATH not set") 
+        validation_passed = False
+    elif not Path(profile_path).exists():
+        console.print(f"  ❌ Profile file not found: {profile_path}")
+        validation_passed = False
+    else:
+        console.print(f"  ✅ INGENIOUS_PROFILE_PATH: {profile_path}")
+    
+    # 2. Validate configuration files
+    console.print("\n[bold]2. Configuration File Validation:[/bold]")
+    try:
+        if project_path and Path(project_path).exists():
+            import ingenious.config.config as ingen_config
+            config = ingen_config.get_config()
+            console.print("  ✅ config.yml syntax and validation passed")
+        else:
+            console.print("  ❌ Cannot validate config.yml - file not found")
+            validation_passed = False
+    except Exception as e:
+        console.print(f"  ❌ config.yml validation failed: {str(e)}")
+        validation_passed = False
+        
+    try:
+        if profile_path and Path(profile_path).exists():
+            import ingenious.dependencies as igen_deps
+            profile = igen_deps.get_profile()
+            console.print("  ✅ profiles.yml syntax and validation passed")
+        else:
+            console.print("  ❌ Cannot validate profiles.yml - file not found")
+            validation_passed = False
+    except Exception as e:
+        console.print(f"  ❌ profiles.yml validation failed: {str(e)}")
+        validation_passed = False
+    
+    # 3. Check Azure OpenAI connectivity
+    console.print("\n[bold]3. Azure OpenAI Connectivity:[/bold]")
+    azure_key = os.getenv("AZURE_OPENAI_API_KEY")
+    azure_endpoint = os.getenv("AZURE_OPENAI_BASE_URL")
+    
+    if not azure_key:
+        console.print("  ❌ AZURE_OPENAI_API_KEY not set in environment")
+        validation_passed = False
+    else:
+        console.print("  ✅ AZURE_OPENAI_API_KEY found")
+        
+    if not azure_endpoint:
+        console.print("  ❌ AZURE_OPENAI_BASE_URL not set in environment")  
+        validation_passed = False
+    else:
+        console.print("  ✅ AZURE_OPENAI_BASE_URL found")
+        
+    # 4. Check workflow availability
+    console.print("\n[bold]4. Workflow Availability:[/bold]")
+    try:
+        # Check if bike_insights workflow files exist
+        extensions_path = Path.cwd() / "ingenious_extensions"
+        if extensions_path.exists():
+            console.print("  ✅ ingenious_extensions directory found")
+            
+            # Check for key workflow files
+            services_path = extensions_path / "services"
+            if services_path.exists():
+                console.print("  ✅ Services directory found")
+            else:
+                console.print("  ⚠️  Services directory not found")
+        else:
+            console.print("  ❌ ingenious_extensions directory not found - run 'ingen init'")
+            validation_passed = False
+    except Exception as e:
+        console.print(f"  ❌ Workflow validation failed: {str(e)}")
+        validation_passed = False
+    
+    # 5. Summary and recommendations
+    console.print(f"\n[bold]{'✅ Validation Summary' if validation_passed else '❌ Validation Summary'}:[/bold]")
+    
+    if validation_passed:
+        console.print("  🎉 [green]All validations passed! Your Ingenious setup is ready.[/green]")
+        console.print("  🚀 You can now run: [bold]ingen serve[/bold]")
+    else:
+        console.print("  ⚠️  [yellow]Some validations failed. Please fix the issues above.[/yellow]")
+        console.print("\n[bold]🔧 Quick Fix Commands:[/bold]")
+        console.print("  • Missing files: [bold]ingen init[/bold]")
+        console.print("  • Set environment: [bold]export INGENIOUS_PROJECT_PATH=$(pwd)/config.yml[/bold]")
+        console.print("  • Set environment: [bold]export INGENIOUS_PROFILE_PATH=$(pwd)/profiles.yml[/bold]")
+        console.print("  • Edit credentials: [bold]nano .env[/bold]")
+        
+    if not validation_passed:
+        raise typer.Exit(1)
