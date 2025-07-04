@@ -1,6 +1,4 @@
-from autogen_agentchat.agents import AssistantAgent, UserProxyAgent
-from autogen_agentchat.conditions import MaxMessageTermination, TextMentionTermination
-from autogen_agentchat.teams import RoundRobinGroupChat
+from autogen_agentchat.agents import AssistantAgent
 from autogen_core import CancellationToken
 from autogen_core.tools import FunctionTool
 from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
@@ -117,18 +115,6 @@ When the user asks what columns are available, just list them without running a 
             reflect_on_tool_use=True,
         )
 
-        user_proxy = UserProxyAgent("user_proxy")
-
-        # Set up termination conditions
-        termination = TextMentionTermination("TERMINATE") | MaxMessageTermination(10)
-
-        # Create the group chat with round-robin configuration
-        group_chat = RoundRobinGroupChat(
-            participants=[sql_assistant, user_proxy],
-            termination_condition=termination,
-            max_turns=10,
-        )
-
         # Create cancellation token
         cancellation_token = CancellationToken()
 
@@ -137,14 +123,20 @@ When the user asks what columns are available, just list them without running a 
             f"Context: {context}\n\nUser question: {message}" if context else message
         )
 
-        # Run the conversation
-        result = await group_chat.run(
-            task=user_msg, cancellation_token=cancellation_token
+        # Use the SQL assistant directly with on_messages for a simpler interaction
+        from autogen_agentchat.messages import TextMessage
+
+        # Send the message directly to the SQL assistant
+        response = await sql_assistant.on_messages(
+            messages=[TextMessage(content=user_msg, source="user")],
+            cancellation_token=cancellation_token,
         )
 
-        # Extract the response
+        # Extract the response content
         final_message = (
-            result.messages[-1].content if result.messages else "No response generated"
+            response.chat_message.content
+            if response.chat_message
+            else "No response generated"
         )
 
         # Update context for future conversations
