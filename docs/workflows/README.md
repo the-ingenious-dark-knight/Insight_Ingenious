@@ -131,19 +131,19 @@ flowchart TD
     DOC_AGENT --> RESPONSE
     CHAT_AGENT --> RESPONSE
     
-    RESPONSE --> END([🏁 End])
+    RESPONSE --> FINISH([🏁 End])
     
     classDef start fill:#c8e6c9
     classDef decision fill:#fff9c4
     classDef workflow fill:#e1f5fe
     classDef agent fill:#f3e5f5
-    classDef end fill:#ffcdd2
+    classDef finish fill:#ffcdd2
     
     class START start
     class CLASSIFY decision
     class BIKE_FLOW,KNOWLEDGE_FLOW,SQL_FLOW,DOC_FLOW,CHAT_FLOW workflow
     class BIKE_AGENT,KNOWLEDGE_AGENT,SQL_AGENT,DOC_AGENT,CHAT_AGENT agent
-    class RESPONSE,END end
+    class RESPONSE,FINISH finish
 ```
 
 ### � Knowledge Base Workflow
