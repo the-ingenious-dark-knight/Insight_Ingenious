@@ -73,7 +73,7 @@ curl -X POST http://localhost:80/api/v1/chat \
 
 **Agents Involved**:
 - 📊 **fiscal_analysis_agent**: Analyzes sales data and trends
-- 💭 **customer_sentiment_agent**: Processes customer reviews and ratings  
+- 💭 **customer_sentiment_agent**: Processes customer reviews and ratings
 - 🔍 **bike_lookup_agent**: Retrieves bike prices and specifications
 - 📝 **summary**: Aggregates insights from all agents
 
@@ -127,7 +127,7 @@ curl -X POST http://localhost:80/api/v1/chat \
 
 **Purpose**: Search and retrieve information from configured knowledge bases
 
-**Requirements**: 
+**Requirements**:
 - Azure Search Service configured
 - Knowledge base indexed
 
@@ -202,19 +202,19 @@ Make it executable: `chmod +x test_workflows.sh`
 ## 🚨 Common Issues & Solutions
 
 ### 1. "Expecting value: line 1 column 1 (char 0)"
-**Problem**: bike_insights workflow expects JSON data in user_prompt  
+**Problem**: bike_insights workflow expects JSON data in user_prompt
 **Solution**: Ensure user_prompt contains properly escaped JSON string
 
 ### 2. "Class ConversationFlow not found"
-**Problem**: Workflow name incorrect or workflow not available  
+**Problem**: Workflow name incorrect or workflow not available
 **Solution**: Use correct workflow names (underscores, not hyphens)
 
 ### 3. "Validation error in field"
-**Problem**: Missing or invalid configuration  
+**Problem**: Missing or invalid configuration
 **Solution**: Check profiles.yml and .env files for required values
 
 ### 4. Server runs on wrong port
-**Problem**: Port parameter not working  
+**Problem**: Port parameter not working
 **Solution**: Check WEB_PORT environment variable or config.yml
 
 ---
@@ -239,7 +239,7 @@ INGENIOUS_PROFILE_PATH=./profiles.yml
 ## 📚 Additional Resources
 
 - 📖 **Configuration Guide**: `/docs/configuration/README.md`
-- 🏗️ **Custom Workflows**: `/docs/extensions/README.md`  
+- 🏗️ **Custom Workflows**: `/docs/extensions/README.md`
 - 🐛 **Troubleshooting**: `/docs/troubleshooting/README.md`
 - 🧪 **Testing Guide**: `/docs/testing/README.md`
 

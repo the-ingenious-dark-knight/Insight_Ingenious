@@ -17,7 +17,7 @@ templates/
 ├── prompts/                           # AI Agent Prompts
 │   ├── bike_lookup_agent_prompt.jinja    # Product lookup agent
 │   ├── customer_sentiment_agent_prompt.jinja # Review analysis
-│   ├── fiscal_analysis_agent_prompt.jinja    # Sales analysis  
+│   ├── fiscal_analysis_agent_prompt.jinja    # Sales analysis
 │   └── summary_prompt.jinja              # Final report generation
 ├── html/                              # Web Interface (optional)
 │   ├── custom_dashboard.html             # Custom analytics dashboard
@@ -36,10 +36,10 @@ templates/
 ### ROLE
 You are a **Customer Experience Analyst** specializing in extracting insights from customer reviews and feedback data.
 
-### OBJECTIVE  
+### OBJECTIVE
 Analyze customer reviews for bike sales data and provide:
 1. **Sentiment Distribution** - Percentage breakdown (Positive/Negative/Neutral)
-2. **Key Themes** - Most common topics in reviews  
+2. **Key Themes** - Most common topics in reviews
 3. **Pain Points** - Specific issues customers mention
 4. **Recommendations** - Actionable steps to improve customer satisfaction
 
@@ -72,7 +72,7 @@ Structure your analysis as:
 
 ### Sentiment Distribution
 - **Positive:** XX% (ratings 4-5)
-- **Neutral:** XX% (rating 3)  
+- **Neutral:** XX% (rating 3)
 - **Negative:** XX% (ratings 1-2)
 
 ### 🔍 Key Themes Identified
@@ -86,7 +86,7 @@ Structure your analysis as:
 
 ### 🎯 Recommendations
 1. **Short-term:** [immediate actions]
-2. **Medium-term:** [process improvements]  
+2. **Medium-term:** [process improvements]
 3. **Long-term:** [strategic changes]
 
 Remember: Focus on **specific, actionable insights** rather than generic observations.
@@ -134,7 +134,7 @@ The data will be provided as a structured table. Look for:
 1. **[Product Name]** - [X units, $Y revenue]
 2. **[Product Name]** - [X units, $Y revenue]
 
-#### Underperformers  
+#### Underperformers
 - **[Product Name]** - [reason for low performance]
 
 ### 🌍 Geographic Analysis
@@ -159,7 +159,7 @@ Ensure all insights are **quantified** and **actionable**.
 ### ROLE
 [Clear, specific role definition]
 
-### CONTEXT  
+### CONTEXT
 [Background information the agent needs]
 
 ### TASK
@@ -207,7 +207,7 @@ Due to large dataset size, focus on:
 - Representative sampling across all stores
 - Key trend identification rather than exhaustive analysis
 {% else %}
-### COMPREHENSIVE ANALYSIS  
+### COMPREHENSIVE ANALYSIS
 With this dataset size, provide detailed analysis of:
 - Every transaction and review
 - Granular patterns and outliers
@@ -226,7 +226,7 @@ Focus on immediate actionable insights only. Skip detailed explanations.
 {# templates/reports/executive_summary.md.jinja #}
 
 # 📈 Executive Sales Summary
-**Generated:** {{ timestamp }}  
+**Generated:** {{ timestamp }}
 **Period:** {{ analysis_period }}
 **Analyst:** {{ agent_name }}
 
@@ -236,7 +236,7 @@ Focus on immediate actionable insights only. Skip detailed explanations.
 ### {{ finding.title }}
 {{ finding.description }}
 
-**Impact:** {{ finding.impact }}  
+**Impact:** {{ finding.impact }}
 **Confidence:** {{ finding.confidence }}%
 {% endfor %}
 
@@ -254,8 +254,8 @@ Focus on immediate actionable insights only. Skip detailed explanations.
 ### {{ rec.priority | upper }}: {{ rec.title }}
 {{ rec.description }}
 
-**Expected Impact:** {{ rec.impact }}  
-**Timeline:** {{ rec.timeline }}  
+**Expected Impact:** {{ rec.impact }}
+**Timeline:** {{ rec.timeline }}
 **Resources Required:** {{ rec.resources }}
 {% endfor %}
 
@@ -275,7 +275,7 @@ Focus on immediate actionable insights only. Skip detailed explanations.
 <body>
     <div class="dashboard-container">
         <h1>{{ dashboard_title }}</h1>
-        
+
         <div class="metrics-grid">
             {% for metric in key_metrics %}
             <div class="metric-card">
@@ -318,14 +318,14 @@ def validate_templates():
     """Validate all Jinja2 templates"""
     template_dir = Path(__file__).parent
     env = Environment(loader=FileSystemLoader(template_dir))
-    
+
     errors = []
-    
+
     # Test all .jinja files
     for template_file in template_dir.rglob("*.jinja"):
         try:
             template = env.get_template(str(template_file.relative_to(template_dir)))
-            
+
             # Test with sample data
             sample_data = {
                 "analysis_date": "2024-01-15",
@@ -333,15 +333,15 @@ def validate_templates():
                 "stores": [{"name": "Test Store", "location": "NSW"}],
                 "key_findings": [{"title": "Test Finding", "description": "Test"}]
             }
-            
+
             rendered = template.render(**sample_data)
             print(f"✅ {template_file.name} - Valid")
-            
+
         except TemplateError as e:
             error_msg = f"❌ {template_file.name} - Error: {e}"
             print(error_msg)
             errors.append(error_msg)
-    
+
     return len(errors) == 0
 
 if __name__ == "__main__":
@@ -355,15 +355,15 @@ if __name__ == "__main__":
 ```python
 class PromptTester:
     """Test prompt effectiveness with sample data"""
-    
+
     def test_prompt_quality(self, prompt_name: str, test_data: dict):
         """Test if prompt produces quality responses"""
-        
+
         # Load and render prompt
         env = Environment(loader=FileSystemLoader('templates/prompts'))
         template = env.get_template(f"{prompt_name}.jinja")
         rendered_prompt = template.render(**test_data)
-        
+
         # Test criteria
         quality_checks = {
             "has_clear_role": "### ROLE" in rendered_prompt,
@@ -372,11 +372,11 @@ class PromptTester:
             "appropriate_length": 200 < len(rendered_prompt) < 2000,
             "no_template_errors": "{{" not in rendered_prompt and "}}" not in rendered_prompt
         }
-        
+
         # Calculate quality score
         passed_checks = sum(quality_checks.values())
         quality_score = passed_checks / len(quality_checks)
-        
+
         return {
             "prompt_name": prompt_name,
             "quality_score": quality_score,
@@ -384,7 +384,7 @@ class PromptTester:
             "rendered_length": len(rendered_prompt),
             "suggestions": self.get_improvement_suggestions(quality_checks)
         }
-    
+
     def get_improvement_suggestions(self, checks: dict) -> List[str]:
         suggestions = []
         if not checks["has_clear_role"]:
@@ -415,16 +415,16 @@ templates/prompts/
 ```python
 async def ab_test_prompts(base_prompt: str, variants: List[str], test_data: dict):
     """Compare different prompt versions"""
-    
+
     results = []
-    
+
     for i, prompt_version in enumerate([base_prompt] + variants):
         # Run test with this prompt version
         response = await run_agent_with_prompt(prompt_version, test_data)
-        
+
         # Evaluate response quality
         quality_score = evaluate_response_quality(response)
-        
+
         results.append({
             "version": f"v{i}",
             "prompt": prompt_version,
@@ -433,10 +433,10 @@ async def ab_test_prompts(base_prompt: str, variants: List[str], test_data: dict
             "response_length": len(response),
             "key_metrics": extract_metrics(response)
         })
-    
+
     # Find best performing version
     best_version = max(results, key=lambda x: x["quality_score"])
-    
+
     return {
         "winner": best_version,
         "all_results": results,

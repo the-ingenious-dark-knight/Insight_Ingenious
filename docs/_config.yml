@@ -1,24 +1,19 @@
 # Site Settings
 title: "Insight Ingenious Documentation"
 description: >-
-  Comprehensive documentation for Insight Ingenious - A powerful conversation workflow framework
-  for building AI-powered applications with Azure OpenAI.
-
+  Comprehensive documentation for Insight Ingenious - A powerful conversation workflow framework for building AI-powered applications with Azure OpenAI.
 # Repository information
 repository: "Insight-Services-APAC/Insight_Ingenious"
 baseurl: "/Insight_Ingenious"
 url: "https://insight-services-apac.github.io"
-
 # Theme
 remote_theme: "mmistakes/minimal-mistakes@4.27.1"
-
 # Build settings
 markdown: kramdown
 highlighter: rouge
 lsi: false
 excerpt_separator: "\n\n"
 incremental: false
-
 # Plugins
 plugins:
   - jekyll-paginate
@@ -26,7 +21,6 @@ plugins:
   - jekyll-gist
   - jekyll-feed
   - jekyll-include-cache
-
 # Markdown Processing
 kramdown:
   input: GFM
@@ -40,10 +34,8 @@ kramdown:
   syntax_highlighter: rouge
   syntax_highlighter_opts:
     css_class: 'highlight'
-
 # Enable Mermaid.js support
 mermaid: true
-
 # Author
 author:
   name: "Insight Services APAC"
@@ -52,14 +44,12 @@ author:
     - label: "GitHub"
       icon: "fab fa-fw fa-github"
       url: "https://github.com/Insight-Services-APAC"
-
 # Site Footer
 footer:
   links:
     - label: "GitHub"
       icon: "fab fa-fw fa-github"
       url: "https://github.com/Insight-Services-APAC/Insight_Ingenious"
-
 # Defaults
 defaults:
   # _posts
@@ -82,13 +72,11 @@ defaults:
       author_profile: false
       sidebar:
         nav: "docs"
-
 # Collections
 collections:
   docs:
     output: true
     permalink: /:collection/:name/
-
 # Navigation
 navigation:
   - title: "Quick Start"
@@ -101,7 +89,6 @@ navigation:
     url: /architecture/
   - title: "Development"
     url: /development/
-
 # Exclude from processing
 exclude:
   - .asset-cache
@@ -125,47 +112,24 @@ exclude:
   - package.json
   - tmp
   - vendor
-
 # Reading Files
 include:
   - .htaccess
   - _pages
-
-# Conversion
-markdown: kramdown
-highlighter: rouge
-lsi: false
-excerpt_separator: "\n\n"
-incremental: false
-
-# Markdown Processing
-kramdown:
-  input: GFM
-  hard_wrap: false
-  auto_ids: true
-  footnote_nr: 1
-  entity_output: as_char
-  toc_levels: 1..6
-  smart_quotes: lsquo,rsquo,ldquo,rdquo
-  enable_coderay: false
-
 # Sass/SCSS
 sass:
   sass_dir: _sass
   style: compressed
-
 # Outputting
 permalink: /:categories/:title/
 paginate: 5
 paginate_path: /page:num/
 timezone: # https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-
 # HTML Compression
 compress_html:
   clippings: all
   ignore:
     envs: development
-
 # Archives
 category_archive:
   type: liquid
@@ -173,14 +137,12 @@ category_archive:
 tag_archive:
   type: liquid
   path: /tags/
-
 # SEO Related
 google_site_verification:
 bing_site_verification:
 alexa_site_verification:
 yandex_site_verification:
 naver_site_verification:
-
 # Social Sharing
 twitter:
   username:
@@ -193,16 +155,13 @@ social:
   name: Insight Services APAC
   links:
     - "https://github.com/Insight-Services-APAC"
-
 # Analytics
 analytics:
   provider: false
-
 # Search
 search: true
 search_full_content: true
 search_provider: lunr
-
 # Mermaid.js Configuration
 after_footer_scripts:
   - https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js

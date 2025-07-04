@@ -12,7 +12,7 @@ Get up and running in 5 minutes with Azure OpenAI!
 ### Prerequisites
 - ✅ Python 3.13+
 - ✅ Azure OpenAI API credentials
-- ✅ [uv package manager](https://docs.astral.sh/uv/) 
+- ✅ [uv package manager](https://docs.astral.sh/uv/)
 
 ### 5-Minute Setup
 
@@ -73,7 +73,7 @@ Insight Ingenious provides multiple conversation workflows with different config
 ### ⭐ **"Hello World" Workflow** (Azure OpenAI only)
 - `bike_insights` - **The recommended starting point** - Comprehensive bike sales analysis showcasing multi-agent coordination
 
-### ✅ **Simple Text Processing** (Azure OpenAI only)  
+### ✅ **Simple Text Processing** (Azure OpenAI only)
 - `classification_agent` - Route input to specialized agents based on content
 
 ### 🔍 **Azure Search Required**

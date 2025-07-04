@@ -16,7 +16,7 @@ Get Insight Ingenious up and running in 5 minutes!
 ## 🚀 Prerequisites
 
 - ✅ Python 3.13+
-- ✅ uv package manager  
+- ✅ uv package manager
 - ✅ Azure OpenAI API credentials
 
 ## 📦 5-Minute Setup
@@ -96,7 +96,7 @@ The `bike_stock` array requires objects with this structure:
 {
   "bike": {
     "brand": "string",      // Required: Bike manufacturer
-    "model": "string",      // Required: Bike model name  
+    "model": "string",      // Required: Bike model name
     "year": 2024,          // Required: Manufacturing year
     "price": 2899.99,      // Required: Price in dollars
     // Optional fields for electric bikes:
@@ -156,7 +156,7 @@ Run with: `chmod +x setup.sh && ./setup.sh`
 # Check system status
 uv run ingen status
 
-# List available workflows  
+# List available workflows
 uv run ingen workflows
 
 # Test specific workflow requirements
@@ -182,23 +182,23 @@ curl -s http://localhost:80/health || echo "Server not running"
 ## Available Workflows
 
 ### bike_insights (Hello World - **START HERE!**)
-**Purpose**: The "Hello World" of Ingenious - comprehensive bike sales analysis showcasing multi-agent coordination  
-**Requirements**: Azure OpenAI only  
-**Input**: JSON with bike sales data  
+**Purpose**: The "Hello World" of Ingenious - comprehensive bike sales analysis showcasing multi-agent coordination
+**Requirements**: Azure OpenAI only
+**Input**: JSON with bike sales data
 **Why start here?**: Demonstrates the full power of multi-agent workflows
 
 ### classification_agent (Simple Alternative)
-**Purpose**: Text classification and routing (try this if bike_insights seems complex)  
-**Requirements**: Azure OpenAI only  
-**Input**: Plain text  
+**Purpose**: Text classification and routing (try this if bike_insights seems complex)
+**Requirements**: Azure OpenAI only
+**Input**: Plain text
 
 ### knowledge_base_agent (Advanced)
-**Purpose**: Knowledge base search  
-**Requirements**: Azure OpenAI + Azure Search  
+**Purpose**: Knowledge base search
+**Requirements**: Azure OpenAI + Azure Search
 
-### 📊 sql_manipulation_agent (Advanced)  
-**Purpose**: Natural language to SQL  
-**Requirements**: Azure OpenAI + Database connection  
+### 📊 sql_manipulation_agent (Advanced)
+**Purpose**: Natural language to SQL
+**Requirements**: Azure OpenAI + Database connection
 
 ---
 
@@ -270,7 +270,7 @@ Once you have the basic setup working:
 ## 💡 Pro Tips
 
 - **Start with `bike_insights`** - it's the "Hello World" that shows off Ingenious's power
-- Use `classification_agent` only if you want something simpler  
+- Use `classification_agent` only if you want something simpler
 - Check `uv run ingen status` when things break
 - The minimal templates work better than full templates
 - Environment variables override config file values

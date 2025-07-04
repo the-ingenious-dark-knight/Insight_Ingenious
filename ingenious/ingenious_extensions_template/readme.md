@@ -6,7 +6,7 @@ Welcome to your **Insight Ingenious** project! This template provides everything
 
 ### **1. Initial Setup**
 After running `uv run ingen initialize-new-project`, you should have:
-- ✅ `config.yml` - Project configuration  
+- ✅ `config.yml` - Project configuration
 - ✅ `profiles.yml` - API keys and credentials
 - ✅ `.env.example` - Environment variables template
 - ✅ This project structure with sample workflows
@@ -45,7 +45,7 @@ This sample workflow demonstrates a complete multi-agent system:
 
 ### **Agents Involved:**
 - **📊 Customer Sentiment Agent** - Analyzes customer reviews and ratings
-- **💰 Fiscal Analysis Agent** - Processes sales data and trends  
+- **💰 Fiscal Analysis Agent** - Processes sales data and trends
 - **🔍 Bike Lookup Agent** - Retrieves product information using tools
 - **📝 Summary Agent** - Generates comprehensive reports
 - **🤖 User Proxy** - Orchestrates agent interactions
@@ -62,7 +62,7 @@ This sample workflow demonstrates a complete multi-agent system:
   "stores": [
     {
       "name": "Bike World Sydney",
-      "location": "NSW", 
+      "location": "NSW",
       "bike_sales": [
         {
           "product_code": "EB-SPECIALIZED-2023-TV",
@@ -89,7 +89,7 @@ This sample workflow demonstrates a complete multi-agent system:
    - `fiscal_analysis_agent_prompt.jinja` - Modify sales analysis approach
    - `summary_prompt.jinja` - Customize final report format
 
-2. **🔧 Add New Agents:** 
+2. **🔧 Add New Agents:**
    - Create new prompt files in `templates/prompts/`
    - Register them in `services/chat_services/multi_agent/conversation_flows/bike_insights/bike_insights.py`
 
@@ -141,7 +141,7 @@ with open('sample_data/bike_sales_april_2023.json') as f:
 Access your workflows through the web interface:
 
 - **💬 Chat Interface:** http://localhost:8081/chainlit
-- **🔧 Prompt Tuner:** http://localhost:8081/prompt-tuner  
+- **🔧 Prompt Tuner:** http://localhost:8081/prompt-tuner
 - **📖 API Documentation:** http://localhost:8081/docs
 
 ## 📚 **Next Steps**
@@ -153,7 +153,7 @@ Access your workflows through the web interface:
 
 ### **🚀 Advanced Features:**
 - **🔍 Knowledge Base Search** - Add Azure Cognitive Search integration
-- **📊 Database Queries** - Connect to SQL databases  
+- **📊 Database Queries** - Connect to SQL databases
 - **📄 Document Processing** - Analyze PDFs and documents
 
 ### **💡 Example Projects to Build:**

@@ -21,7 +21,7 @@ curl -X POST http://localhost:80/api/v1/chat \
 curl -X POST http://localhost:80/api/v1/chat \
    -H "Content-Type: application/json" \
    -d '{
-   "user_prompt": "Analyze this feedback: Great product!", 
+   "user_prompt": "Analyze this feedback: Great product!",
    "conversation_flow": "classification_agent"
    }'
 ```
@@ -136,8 +136,8 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
    ```bash
    # ✅ Correct
    "conversation_flow": "bike_insights"
-   
-   # ❌ Wrong  
+
+   # ❌ Wrong
    "conversation_flow": "bike-insights"
    ```
 

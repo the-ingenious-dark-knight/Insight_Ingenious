@@ -69,10 +69,10 @@ class Config(config_models.Config):
             # Enhanced error messages with helpful suggestions
             error_messages = []
             for error in e.errors():
-                field_path = '.'.join(str(part) for part in error['loc'])
-                error_msg = error['msg']
-                error_type = error['type']
-                
+                field_path = ".".join(str(part) for part in error["loc"])
+                error_msg = error["msg"]
+                error_type = error["type"]
+
                 # Provide helpful suggestions based on common errors
                 suggestion = ""
                 if "string_type" in error_type and "endpoint" in field_path:
@@ -81,20 +81,28 @@ class Config(config_models.Config):
                     suggestion = "\n💡 Suggestion: Use a placeholder like 'placeholder_db' if you don't have a database"
                 elif "string_type" in error_type and "csv_path" in field_path:
                     suggestion = "\n💡 Suggestion: Use a placeholder like './sample_data.csv' if you don't have CSV files"
-                elif "string_type" in error_type and any(x in field_path for x in ["key", "secret", "password"]):
+                elif "string_type" in error_type and any(
+                    x in field_path for x in ["key", "secret", "password"]
+                ):
                     suggestion = "\n💡 Suggestion: Use a placeholder like 'placeholder_key' for unused services"
                 elif "string_type" in error_type and "url" in field_path:
                     suggestion = "\n💡 Suggestion: Use a placeholder like 'placeholder_url' for unused services"
-                
-                enhanced_msg = f"❌ Configuration Error in '{field_path}': {error_msg}{suggestion}"
+
+                enhanced_msg = (
+                    f"❌ Configuration Error in '{field_path}': {error_msg}{suggestion}"
+                )
                 error_messages.append(enhanced_msg)
                 logger.debug(enhanced_msg)
-            
+
             # Create a comprehensive error message
-            full_error_msg = "\n🔧 Configuration Validation Failed:\n" + "\n".join(error_messages)
+            full_error_msg = "\n🔧 Configuration Validation Failed:\n" + "\n".join(
+                error_messages
+            )
             full_error_msg += "\n\n🚀 Quick Fix: Run 'ingen init' to regenerate config files with valid placeholders"
-            full_error_msg += "\n📖 Or see: docs/QUICKSTART.md for configuration examples"
-            
+            full_error_msg += (
+                "\n📖 Or see: docs/QUICKSTART.md for configuration examples"
+            )
+
             # Create a new exception with enhanced message
             enhanced_error = ValidationError.from_exception_data("Config", e.errors())
             enhanced_error.args = (full_error_msg,)

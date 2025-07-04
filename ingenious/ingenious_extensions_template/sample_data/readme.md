@@ -8,7 +8,7 @@ This directory contains sample datasets for testing and developing your AI workf
 Complete dataset for the **bike_insights** workflow demonstration:
 
 - **📈 Sales Records:** 1000+ bike sales transactions
-- **🏪 Multiple Stores:** Sydney, Melbourne, Brisbane locations  
+- **🏪 Multiple Stores:** Sydney, Melbourne, Brisbane locations
 - **⭐ Customer Reviews:** Ratings and detailed feedback
 - **📦 Inventory Data:** Stock levels and product specifications
 - **🔄 Realistic Patterns:** Seasonal trends and customer behavior
@@ -24,7 +24,7 @@ Complete dataset for the **bike_insights** workflow demonstration:
         {
           "product_code": "EB-SPECIALIZED-2023-TV",
           "quantity_sold": 5,
-          "sale_date": "2023-04-01", 
+          "sale_date": "2023-04-01",
           "year": 2023,
           "month": "April",
           "customer_review": {
@@ -130,13 +130,13 @@ with open('sample_data/bike_sales_april_2023.json') as f:
 
 ### **3. Data Categories to Include**
 - **📊 Positive Examples** - High ratings, good sales
-- **⚠️ Edge Cases** - Low ratings, unusual patterns  
+- **⚠️ Edge Cases** - Low ratings, unusual patterns
 - **🔄 Variety** - Different locations, products, time periods
 - **📈 Trends** - Seasonal patterns, product popularity
 
 ## 🎯 **Sample Data for Different Workflows**
 
-### **📊 Classification Agent** 
+### **📊 Classification Agent**
 ```json
 {
   "user_input": "I love this product, fast delivery!",
@@ -169,7 +169,7 @@ with open('sample_data/bike_sales_april_2023.json') as f:
 prompt = """
 Generate realistic bike sales data for testing:
 - 5 different stores across Australia
-- 20 sales transactions per store  
+- 20 sales transactions per store
 - Mix of electric, road, and mountain bikes
 - Customer reviews with ratings 1-5
 - Realistic product codes and pricing
@@ -188,7 +188,7 @@ from models.bikes import RootModel
 
 def validate_sample_data():
     sample_dir = Path(__file__).parent
-    
+
     # Validate JSON files
     for json_file in sample_dir.glob("*.json"):
         try:
@@ -198,8 +198,8 @@ def validate_sample_data():
             print(f"✅ {json_file.name} - Valid")
         except Exception as e:
             print(f"❌ {json_file.name} - Error: {e}")
-    
-    # Validate YAML files  
+
+    # Validate YAML files
     for yaml_file in sample_dir.glob("*.yml"):
         try:
             with open(yaml_file) as f:
@@ -228,7 +228,7 @@ if __name__ == "__main__":
 ## 📚 **Related Documentation**
 
 - **🔧 Data Models:** See `../models/README.md`
-- **🧪 Testing:** See `../tests/README.md`  
+- **🧪 Testing:** See `../tests/README.md`
 - **🌊 Workflows:** See `../services/README.md`
 - **📖 Configuration:** See project root `config.yml`
 

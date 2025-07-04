@@ -6,7 +6,7 @@ This directory contains testing infrastructure for validating your AI workflows,
 
 The test harness enables:
 - **🤖 Automated Testing** - Run workflows with sample data automatically
-- **📊 Response Validation** - Check AI output quality and consistency  
+- **📊 Response Validation** - Check AI output quality and consistency
 - **🔄 Regression Testing** - Ensure changes don't break existing functionality
 - **📈 Performance Monitoring** - Track response times and token usage
 - **🎛️ Prompt Tuning** - A/B test different prompt variations
@@ -41,24 +41,24 @@ class RunBatches:
     async def run(self):
         # 1. Generate unique test thread ID
         thread_id = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-        
+
         # 2. Create realistic test payload
         test_payload = {
             "revision_id": "test_revision_001",
             "identifier": str(uuid.uuid4()),
             "stores": [...]  # Sample bike sales data
         }
-        
+
         # 3. Execute chat service with bike_insights workflow
         chat_request = ChatRequest(
             thread_id=thread_id,
             user_prompt=json.dumps(test_payload),
             conversation_flow="bike_insights"
         )
-        
+
         # 4. Get response and save results
         response = await chat_service.get_chat_response(chat_request)
-        
+
         # 5. Generate test report
         self.save_test_output(response, thread_id)
 ```
@@ -69,7 +69,7 @@ Lightweight testing for quick validation:
 ```python
 # Direct API call without full framework setup
 test_payload = {
-    "revision_id": "test_revision_001", 
+    "revision_id": "test_revision_001",
     "identifier": str(uuid.uuid4()),
     "stores": [...]  # Minimal test data
 }
@@ -99,22 +99,22 @@ async def test_your_workflow():
         # Your domain-specific data here
         "your_data": {...}
     }
-    
+
     # Create chat request
     chat_request = ChatRequest(
         thread_id=f"test_{datetime.now().strftime('%Y%m%d%H%M%S')}",
         user_prompt=json.dumps(test_data),
         conversation_flow="your_workflow_name"
     )
-    
+
     # Execute and validate
     response = await chat_service.get_chat_response(chat_request)
-    
+
     # Assertions
     assert response.response_text is not None
     assert len(response.response_text) > 100  # Meaningful response
     assert "error" not in response.response_text.lower()
-    
+
     print(f"✅ Test passed: {chat_request.conversation_flow}")
     return response
 
@@ -126,7 +126,7 @@ if __name__ == "__main__":
 ```python
 class TestDataManager:
     """Manage multiple test scenarios"""
-    
+
     def get_test_scenarios(self):
         return [
             {
@@ -136,7 +136,7 @@ class TestDataManager:
                 "expected_keywords": ["growth", "success", "revenue"]
             },
             {
-                "name": "low_rating_scenario", 
+                "name": "low_rating_scenario",
                 "description": "Test with poor customer reviews",
                 "data": self.generate_low_rating_data(),
                 "expected_keywords": ["concern", "improvement", "issue"]
@@ -148,7 +148,7 @@ class TestDataManager:
                 "expected_keywords": ["seasonal", "trend", "pattern"]
             }
         ]
-    
+
     def validate_response(self, response: str, expected_keywords: List[str]) -> bool:
         """Check if response contains expected analysis"""
         response_lower = response.lower()
@@ -163,7 +163,7 @@ from typing import Dict, Any
 
 class PerformanceMonitor:
     """Monitor workflow performance metrics"""
-    
+
     async def run_performance_test(self, workflow_name: str, iterations: int = 5):
         results = {
             "workflow": workflow_name,
@@ -172,34 +172,34 @@ class PerformanceMonitor:
             "token_usage": [],
             "success_rate": 0
         }
-        
+
         successful_runs = 0
-        
+
         for i in range(iterations):
             start_time = time.time()
-            
+
             try:
                 response = await self.execute_workflow(workflow_name)
                 end_time = time.time()
-                
+
                 # Record metrics
                 response_time = end_time - start_time
                 results["response_times"].append(response_time)
-                
+
                 # Extract token usage if available
                 if hasattr(response, 'token_count'):
                     results["token_usage"].append(response.token_count)
-                
+
                 successful_runs += 1
                 print(f"✅ Run {i+1}: {response_time:.2f}s")
-                
+
             except Exception as e:
                 print(f"❌ Run {i+1} failed: {e}")
-        
+
         # Calculate success rate
         results["success_rate"] = successful_runs / iterations
         results["avg_response_time"] = sum(results["response_times"]) / len(results["response_times"])
-        
+
         return results
 ```
 
@@ -216,7 +216,7 @@ class PerformanceMonitor:
 
 ## Response Analysis
 - **Response Length:** 2,847 characters
-- **Processing Time:** 12.3 seconds  
+- **Processing Time:** 12.3 seconds
 - **Token Usage:** 1,234 tokens
 - **Agents Involved:** customer_sentiment_agent, fiscal_analysis_agent, summary
 
@@ -229,10 +229,10 @@ class PerformanceMonitor:
 ## Agent Responses
 ### Customer Sentiment Agent
 - Positive sentiment: 67%
-- Negative sentiment: 18% 
+- Negative sentiment: 18%
 - Neutral sentiment: 15%
 
-### Fiscal Analysis Agent  
+### Fiscal Analysis Agent
 - Total revenue: $2.4M
 - Top product: Giant Defy Road Bike
 - Best location: Sydney CBD
@@ -247,38 +247,38 @@ class PerformanceMonitor:
 ```python
 class ResponseQualityEvaluator:
     """Evaluate AI response quality automatically"""
-    
+
     def score_response(self, response: str, workflow: str) -> Dict[str, Any]:
         scores = {
             "completeness": 0,
-            "relevance": 0, 
+            "relevance": 0,
             "actionability": 0,
             "clarity": 0,
             "overall": 0
         }
-        
+
         # Check completeness (did it address all key areas?)
         if workflow == "bike_insights":
             required_sections = ["sales", "sentiment", "recommendations"]
-            found_sections = sum(1 for section in required_sections 
+            found_sections = sum(1 for section in required_sections
                                if section in response.lower())
             scores["completeness"] = found_sections / len(required_sections)
-        
+
         # Check for specific insights vs generic responses
         specific_indicators = ["$", "%", "increased", "decreased", "specific product names"]
-        specificity = sum(1 for indicator in specific_indicators 
+        specificity = sum(1 for indicator in specific_indicators
                          if indicator in response.lower())
         scores["relevance"] = min(specificity / 3, 1.0)  # Cap at 1.0
-        
+
         # Check for actionable recommendations
         action_words = ["recommend", "suggest", "should", "could", "improve"]
-        actionability = sum(1 for word in action_words 
+        actionability = sum(1 for word in action_words
                           if word in response.lower())
         scores["actionability"] = min(actionability / 3, 1.0)
-        
+
         # Overall score
         scores["overall"] = sum(scores.values()) / len(scores) * 100
-        
+
         return scores
 ```
 
@@ -288,20 +288,20 @@ class ResponseQualityEvaluator:
 ```python
 class PromptTester:
     """Test different prompt variations"""
-    
+
     async def compare_prompts(self, base_prompt: str, variations: List[str], test_data: dict):
         results = []
-        
+
         for i, variation in enumerate([base_prompt] + variations):
             # Update prompt in system
             await self.update_agent_prompt("summary", variation)
-            
+
             # Run test
             response = await self.run_test_with_data(test_data)
-            
+
             # Evaluate
             quality_score = self.evaluate_response(response)
-            
+
             results.append({
                 "prompt_id": f"variation_{i}",
                 "prompt": variation[:100] + "..." if len(variation) > 100 else variation,
@@ -309,10 +309,10 @@ class PromptTester:
                 "response_length": len(response),
                 "response": response
             })
-        
+
         # Find best performing prompt
         best_prompt = max(results, key=lambda x: x["quality_score"])
-        
+
         return {
             "best_prompt": best_prompt,
             "all_results": results,
@@ -335,22 +335,22 @@ python test_regression.py --baseline=outputs/baseline/ --current=outputs/current
 ```python
 async def stress_test_workflow(workflow_name: str, concurrent_requests: int = 10):
     """Test workflow under load"""
-    
+
     async def single_request():
         return await execute_workflow(workflow_name)
-    
+
     # Run concurrent requests
     tasks = [single_request() for _ in range(concurrent_requests)]
     start_time = time.time()
-    
+
     results = await asyncio.gather(*tasks, return_exceptions=True)
-    
+
     end_time = time.time()
-    
+
     # Analyze results
     successful = [r for r in results if not isinstance(r, Exception)]
     failed = [r for r in results if isinstance(r, Exception)]
-    
+
     print(f"📊 Load Test Results:")
     print(f"   Total requests: {concurrent_requests}")
     print(f"   Successful: {len(successful)}")
