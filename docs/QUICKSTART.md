@@ -130,20 +130,20 @@ curl -s http://localhost:80/health || echo "Server not running"
 
 ---
 
-## 🎯 Available Workflows
+## Available Workflows
 
-### ⭐ bike_insights (Hello World - **START HERE!**)
+### bike_insights (Hello World - **START HERE!**)
 **Purpose**: The "Hello World" of Ingenious - comprehensive bike sales analysis showcasing multi-agent coordination  
 **Requirements**: Azure OpenAI only  
 **Input**: JSON with bike sales data  
 **Why start here?**: Demonstrates the full power of multi-agent workflows
 
-### ✅ classification_agent (Simple Alternative)
+### classification_agent (Simple Alternative)
 **Purpose**: Text classification and routing (try this if bike_insights seems complex)  
 **Requirements**: Azure OpenAI only  
 **Input**: Plain text  
 
-### 🔍 knowledge_base_agent (Advanced)
+### knowledge_base_agent (Advanced)
 **Purpose**: Knowledge base search  
 **Requirements**: Azure OpenAI + Azure Search  
 

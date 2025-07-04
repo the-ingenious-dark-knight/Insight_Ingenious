@@ -82,7 +82,9 @@ Edit `_data/navigation.yml` to add your new page to the sidebar navigation.
 ### Images and Assets
 Place images in `assets/images/` and reference them with:
 ```markdown
+<!-- Example image reference (ensure image exists in assets/images/):
 ![Alt text](/assets/images/your-image.png)
+-->
 ```
 
 ## 🎨 Theme Customization

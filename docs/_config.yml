@@ -47,7 +47,6 @@ mermaid: true
 # Author
 author:
   name: "Insight Services APAC"
-  avatar: "/assets/images/logo.png"
   bio: "Enterprise AI Solutions"
   links:
     - label: "GitHub"
@@ -189,7 +188,6 @@ facebook:
   username:
   app_id:
   publisher:
-og_image: /assets/images/site-logo.png
 social:
   type: Organization
   name: Insight Services APAC

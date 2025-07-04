@@ -43,13 +43,13 @@ Welcome to the Insight Ingenious documentation. This collection of guides will h
 
 **Detailed technical information:**
 
-- [📡 **API Reference**](api/README.md): Complete REST API documentation and examples
-- [🔄 **Workflow API**](api/WORKFLOWS.md): Detailed workflow endpoint documentation
-- [🧩 **Components Reference**](components/README.md): Framework components and APIs
-- [📝 **Configuration Reference**](configuration/README.md): Complete configuration options
-- [📦 **Installation Guide**](getting-started/installation.md): Complete installation instructions
+- [**API Reference**](api/README.md): Complete REST API documentation and examples
+- [**Workflow API**](api/WORKFLOWS.md): Detailed workflow endpoint documentation
+- [**Components Reference**](components/README.md): Framework components and APIs
+- [**Configuration Reference**](configuration/README.md): Complete configuration options
+- [**Installation Guide**](getting-started/installation.md): Complete installation instructions
 
-## 🎯 Quick Navigation
+## Quick Navigation
 
 | I want to... | Go to... |
 |---------------|----------|

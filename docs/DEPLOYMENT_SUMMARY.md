@@ -1,10 +1,10 @@
-# 🚀 GitHub Pages Documentation Setup - Complete Guide
+# GitHub Pages Documentation Setup - Complete Guide
 
-## 📋 What Has Been Accomplished
+## What Has Been Accomplished
 
 The Insight Ingenious documentation has been fully transformed into a professional GitHub Pages site using Jekyll and the Minimal Mistakes theme. Here's a comprehensive overview of all changes made:
 
-### 🏗️ Core Jekyll Infrastructure
+### Core Jekyll Infrastructure
 
 #### 1. Configuration Files Created
 - **`_config.yml`** - Main Jekyll configuration with:
@@ -42,7 +42,7 @@ All major documentation files have been updated with proper Jekyll front matter 
 - Table of contents configuration
 - SEO-friendly metadata
 
-### 📁 Updated Documentation Files
+### Updated Documentation Files
 
 #### Core Documentation
 - ✅ `README.md` - Main documentation overview
@@ -58,7 +58,7 @@ All major documentation files have been updated with proper Jekyll front matter 
 - ✅ `api/README.md` - API reference homepage
 - ✅ `api/WORKFLOWS.md` - Workflow API documentation
 
-### 🔧 Automation and Deployment
+### Automation and Deployment
 
 #### GitHub Actions Workflow
 - **`.github/workflows/docs.yml`** - Automated build and deploy pipeline:
@@ -72,7 +72,7 @@ All major documentation files have been updated with proper Jekyll front matter 
 - Placeholder files to maintain directory structure
 - Optimized for responsive images and modern web standards
 
-### 🎨 Theme and Design Features
+### Theme and Design Features
 
 #### Minimal Mistakes Theme Integration
 - **Professional appearance** with responsive design
@@ -89,7 +89,7 @@ All major documentation files have been updated with proper Jekyll front matter 
 - **Clear typography hierarchy** for readability
 - **Cross-reference linking** between related sections
 
-## 🚀 How to Enable GitHub Pages
+## How to Enable GitHub Pages
 
 ### Step 1: Repository Settings
 1. Navigate to your repository on GitHub
@@ -109,14 +109,14 @@ https://insight-services-apac.github.io/Insight_Ingenious/
 
 The first deployment may take 5-10 minutes. Subsequent updates will deploy automatically when you push changes to the main branch.
 
-## 📊 Site Features and Capabilities
+## Site Features and Capabilities
 
-### 🔍 Built-in Search
+### Built-in Search
 - Full-text search across all documentation
 - Instant results with highlighting
 - Mobile-friendly search interface
 
-### 📱 Responsive Design
+### Responsive Design
 - Optimized for desktop, tablet, and mobile devices
 - Touch-friendly navigation on mobile
 - Readable typography across all screen sizes
@@ -133,13 +133,13 @@ The first deployment may take 5-10 minutes. Subsequent updates will deploy autom
 - CDN delivery through GitHub Pages
 - Minimal JavaScript for quick interactions
 
-### 🔧 Developer-Friendly Features
+### Developer-Friendly Features
 - Syntax highlighting for 100+ languages
 - Code copy buttons
 - Downloadable code examples
 - API endpoint documentation with examples
 
-## 📝 Content Management Best Practices
+## Content Management Best Practices
 
 ### Adding New Documentation
 1. Create new `.md` files in appropriate directories
@@ -164,7 +164,7 @@ The first deployment may take 5-10 minutes. Subsequent updates will deploy autom
 - Create logical URL structure with permalinks
 - Cross-link related content
 
-## 🛠️ Maintenance and Updates
+## Maintenance and Updates
 
 ### Regular Maintenance Tasks
 - **Monthly**: Update Gemfile dependencies
@@ -184,7 +184,7 @@ The first deployment may take 5-10 minutes. Subsequent updates will deploy autom
 - Maintain consistent formatting and style
 - Keep information current with software updates
 
-## 🎯 Benefits of This Setup
+## Benefits of This Setup
 
 ### For Users
 - **Easy navigation** with logical structure
@@ -204,7 +204,7 @@ The first deployment may take 5-10 minutes. Subsequent updates will deploy autom
 - **Better user onboarding** experience
 - **Reduced support burden** through clear documentation
 
-## 🔮 Future Enhancements
+## Future Enhancements
 
 ### Potential Improvements
 - **Custom domain** setup for branded URL
@@ -233,7 +233,7 @@ The documentation is now fully configured and ready for GitHub Pages deployment.
 - ✅ Easy content management
 - ✅ Integration with GitHub workflow
 
-Simply enable GitHub Pages in your repository settings, and your documentation site will be live! 🎉
+Simply enable GitHub Pages in your repository settings, and your documentation site will be live!
 
 **Next Steps:**
 1. Enable GitHub Pages in repository settings
