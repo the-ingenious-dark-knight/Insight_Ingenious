@@ -1,12 +1,12 @@
-import autogen
-import autogen.retrieve_utils
-import autogen.runtime_logging
+from autogen_agentchat.agents import AssistantAgent, UserProxyAgent
+from autogen_agentchat.conditions import MaxMessageTermination, TextMentionTermination
+from autogen_agentchat.teams import RoundRobinGroupChat
+from autogen_core import CancellationToken
+from autogen_core.tools import FunctionTool
+from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
 
 import ingenious.config.config as config
 from ingenious.models.chat import ChatResponse
-from ingenious.services.chat_services.multi_agent.conversation_patterns.knowledge_base_agent.knowledge_base_agent import (
-    ConversationPattern,
-)
 from ingenious.services.chat_services.multi_agent.tool_factory import ToolFunctions
 
 
@@ -22,64 +22,122 @@ class ConversationFlow:
         # Get configuration for the LLM
         _config = config.get_config()
         model_config = _config.models[0]
-        # Map Azure OpenAI config fields to expected autogen parameters
-        llm_config = {
+
+        # Configure Azure OpenAI client for v0.4
+        azure_config = {
             "model": model_config.model,
             "api_key": model_config.api_key,
             "azure_endpoint": model_config.base_url,
-            "azure_deployment": model_config.deployment,
+            "azure_deployment": model_config.deployment or model_config.model,
             "api_version": model_config.api_version,
-            "api_type": "azure",
         }
+
+        # Create the model client
+        model_client = AzureOpenAIChatCompletionClient(**azure_config)
         memory_path = _config.chat_history.memory_path
 
-        # Initialize the knowledge base agent pattern, you only need to add defined topics here
-        agent_pattern = ConversationPattern(
-            default_llm_config=llm_config,
-            topics=topics,
-            memory_record_switch=memory_record_switch,
-            memory_path=memory_path,
-            thread_memory=thread_memory,
+        # Set up context handling
+        if not thread_memory:
+            with open(f"{memory_path}/context.md", "w") as memory_file:
+                memory_file.write("New conversation. Continue based on user question.")
+        else:
+            with open(f"{memory_path}/context.md", "w") as memory_file:
+                memory_file.write(thread_memory)
+
+        with open(f"{memory_path}/context.md", "r") as memory_file:
+            context = memory_file.read()
+
+        # Create search tool function
+        async def search_tool(
+            search_query: str, index_name: str = "index-document-set-1"
+        ) -> str:
+            """Search for information in Azure Cognitive Search index"""
+            try:
+                return ToolFunctions.aisearch(
+                    search_query=search_query, index_name=index_name
+                )
+            except Exception as e:
+                return f"Search error: {str(e)}"
+
+        search_function_tool = FunctionTool(
+            search_tool,
+            description="Search for information in Azure Cognitive Search. Use index-document-set-1 for health topics and index-document-set-2 for safety topics.",
         )
 
-        agent_pattern.search_agent = autogen.AssistantAgent(
-            name="search_agent",
-            system_message=(
-                "Tasks: "
-                " - I write search_query from the information given by `researcher`. "
-                " - I **Always** suggest call function `search_tool`."
-                " - I make my own decision on conducting the search."
-                " - I can use the below arguments for the `search_tool`: "
-                " - if the query is about health, please use argument: search_query str, index_name: 'index-document-set-1'; "
-                " - if the query is about safety, please use argument: search_query str, index_name: 'index-document-set-2' "
-                "Rules for compose the query: "
-                f"- if the context is in predefined topics: {', '.join(agent_pattern.topics)}, "
-                f"  I will compose query using the relevant index. "
-                f"- if the question is not in predefined topics: {', '.join(agent_pattern.topics)} or lacks specific context,  "
-                f"  I will use keywords derived from the user question and search in all indexes: 'index-document-set-1', 'index-document-set-2'."
-                "Other Rules: "
-                " - My response MUST be based on the information found in the search results, without introducing any additional or external details. "
-                " - If there is no result from search, say 'no information can be found'. "
-                " - DO NOT give empty response. "
-                " - DO NOT do repeated search."
-                " - DO NOT terminate conversation."
-                " - DO NOT ask questions."
-            ),
-            description=(
-                """I am **ONLY** allowed to speak **immediately** after `researcher`."""
-            ),
-            llm_config=llm_config,
+        # Create the search assistant agent
+        search_system_message = f"""You are a knowledge base search assistant.
+
+Tasks:
+- Help users find information by searching knowledge bases
+- Use the search_tool to look up information in Azure Cognitive Search indexes
+- Always base your responses on search results, not general knowledge
+- If no information is found, clearly state that
+
+Guidelines for search queries:
+- For health-related questions, use index-document-set-1
+- For safety-related questions, use index-document-set-2
+- For other topics, try searching both indexes
+- Use precise, focused search terms
+
+The available topics are: {", ".join(topics) if topics else "general topics"}
+
+Format your responses clearly with proper citations to sources when available.
+TERMINATE your response when the task is complete.
+"""
+
+        # Set up the agent team with the search assistant and a user proxy
+        search_assistant = AssistantAgent(
+            name="search_assistant",
+            system_message=search_system_message,
+            model_client=model_client,
+            tools=[search_function_tool],
+            reflect_on_tool_use=True,
         )
 
-        autogen.register_function(
-            ToolFunctions.aisearch,
-            caller=agent_pattern.search_agent,
-            executor=agent_pattern.planner,
-            name="search_tool",
-            description="Use this tool to perform ai search.",
+        user_proxy = UserProxyAgent("user_proxy")
+
+        # Set up termination conditions
+        termination = TextMentionTermination("TERMINATE") | MaxMessageTermination(10)
+
+        # Create the group chat with round-robin configuration
+        group_chat = RoundRobinGroupChat(
+            agents=[search_assistant, user_proxy],
+            termination_condition=termination,
+            max_turns=10,
         )
 
-        # Get the conversation response using the pattern
-        res, memory_summary = await agent_pattern.get_conversation_response(message)
+        # Create cancellation token
+        cancellation_token = CancellationToken()
 
-        return res, memory_summary
+        # Prepare user message with context
+        user_msg = (
+            f"Context: {context}\n\nUser question: {message}" if context else message
+        )
+
+        # Run the conversation
+        result = await group_chat.run(
+            task=user_msg, cancellation_token=cancellation_token
+        )
+
+        # Extract the response
+        final_message = (
+            result.messages[-1].content if result.messages else "No response generated"
+        )
+
+        # Update context for future conversations if memory recording is enabled
+        if memory_record_switch:
+            with open(f"{memory_path}/context.md", "w") as memory_file:
+                memory_file.write(final_message)
+
+        # Make sure to close the model client connection when done
+        await model_client.close()
+
+        # Return the response
+        return ChatResponse(
+            thread_id="",
+            message_id="",
+            agent_response=final_message,
+            token_count=0,
+            max_token_count=0,
+            memory_summary=final_message,
+        ), final_message

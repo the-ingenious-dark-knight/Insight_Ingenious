@@ -43,31 +43,57 @@ class sqlite_sample_db:
                 connection.close()
 
     def _create_table(self):
-        with self.connection:
-            # Create table for the CSV data
-            self.connection.execute("""
-                CREATE TABLE IF NOT EXISTS students_performance (
-                    gender TEXT,
-                    race_ethnicity TEXT,
-                    parental_education TEXT,
-                    lunch TEXT,
-                    test_prep_course TEXT,
-                    math_score INTEGER,
-                    reading_score INTEGER,
-                    writing_score INTEGER
+        # Dynamic table creation based on CSV structure
+        csv_path = self._config.local_sql_db.sample_csv_path
+        if os.path.exists(csv_path):
+            df = pd.read_csv(csv_path)
+            # Infer SQL types from pandas dtypes
+            column_definitions = []
+            for col, dtype in df.dtypes.items():
+                if dtype == "int64":
+                    column_definitions.append(f"{col} INTEGER")
+                elif dtype == "float64":
+                    column_definitions.append(f"{col} REAL")
+                else:
+                    column_definitions.append(f"{col} TEXT")
+
+            table_name = self._config.local_sql_db.sample_database_name
+            create_sql = f"""
+                CREATE TABLE IF NOT EXISTS {table_name} (
+                    {", ".join(column_definitions)}
                 );
-            """)
+            """
+
+            with self.connection:
+                self.connection.execute(create_sql)
+                print(
+                    f"Created table {table_name} with columns: {', '.join(column_definitions)}"
+                )
+        else:
+            # Fallback to hardcoded students_performance table for backwards compatibility
+            with self.connection:
+                self.connection.execute("""
+                    CREATE TABLE IF NOT EXISTS students_performance (
+                        gender TEXT,
+                        race_ethnicity TEXT,
+                        parental_education TEXT,
+                        lunch TEXT,
+                        test_prep_course TEXT,
+                        math_score INTEGER,
+                        reading_score INTEGER,
+                        writing_score INTEGER
+                    );
+                """)
 
     def _load_csv_data(self):
         # Load CSV file into a DataFrame
         csv_path = self._config.local_sql_db.sample_csv_path
         if os.path.exists(csv_path):
             df = pd.read_csv(csv_path)
-            # Load data into the students_performance table
+            table_name = self._config.local_sql_db.sample_database_name
+            # Load data into the table
             with self.connection:
-                df.to_sql(
-                    "sample_data", self.connection, if_exists="replace", index=False
-                )
-            print("CSV data loaded into sample_data table.")
+                df.to_sql(table_name, self.connection, if_exists="replace", index=False)
+            print(f"CSV data loaded into {table_name} table.")
         else:
             print(f"CSV file not found at {csv_path}.")

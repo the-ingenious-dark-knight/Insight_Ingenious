@@ -1,4 +1,7 @@
-from openai import AsyncAzureOpenAI
+from autogen_agentchat.agents import AssistantAgent
+from autogen_agentchat.messages import TextMessage
+from autogen_core import CancellationToken
+from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
 
 import ingenious.config.config as config
 from ingenious.models.chat import ChatRequest
@@ -9,35 +12,35 @@ class ConversationFlow:
     async def get_conversation_response(chatrequest: ChatRequest):
         message = chatrequest.user_prompt
         topics = chatrequest.topic
+
         # Ensure topics is always a list
         if topics is None:
             topics = ["general"]
         elif isinstance(topics, str):
             topics = [topics]
-        # thread_memory = chatrequest.thread_memory
-        # memory_record_switch = chatrequest.memory_record
-        # event_type = chatrequest.event_type
 
         _config = config.get_config()
+        model_config = _config.models[0]
 
-        # Create a direct Azure OpenAI client (much faster than AutoGen)
-        client = AsyncAzureOpenAI(
-            api_key=_config.models[0].api_key,
-            azure_endpoint=_config.models[0].base_url,
-            api_version=_config.models[0].api_version,
-        )
+        # Configure Azure OpenAI client for v0.4
+        azure_config = {
+            "model": model_config.model,
+            "api_key": model_config.api_key,
+            "azure_endpoint": model_config.base_url,
+            "azure_deployment": model_config.deployment or model_config.model,
+            "api_version": model_config.api_version,
+        }
 
-        # Simple classification prompt
-        classification_prompt = f"""
+        # Create the model client
+        model_client = AzureOpenAIChatCompletionClient(**azure_config)
+
+        # Create classification system prompt
+        classification_system_prompt = """
 You are a classification assistant. Classify the following user message into one of these categories:
 1. payload_type_1: General product inquiries, features, specifications
 2. payload_type_2: Purchase-related questions, pricing, availability
 3. payload_type_3: Support issues, problems, complaints
 4. undefined: Messages that don't fit the above categories
-
-User message: "{message}"
-
-Respond with just the category name (e.g., "payload_type_1") and a brief explanation of why this message fits that category.
 
 Format your response as:
 Category: [category_name]
@@ -45,23 +48,24 @@ Explanation: [brief explanation]
 Response: [helpful response to the user's message]
 """
 
+        # Create the classification agent
+        classification_agent = AssistantAgent(
+            name="classification_agent",
+            system_message=classification_system_prompt,
+            model_client=model_client,
+        )
+
+        # Create cancellation token
+        cancellation_token = CancellationToken()
+
         try:
-            # Make a single, fast API call
-            response = await client.chat.completions.create(
-                model=_config.models[0].deployment or _config.models[0].model,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "You are a helpful classification assistant.",
-                    },
-                    {"role": "user", "content": classification_prompt},
-                ],
-                temperature=0.3,
-                max_tokens=500,
-                timeout=10.0,  # 10 second timeout
+            # Send the user message to the classification agent
+            response = await classification_agent.on_messages(
+                messages=[TextMessage(content=message, source="user")],
+                cancellation_token=cancellation_token,
             )
 
-            result = response.choices[0].message.content
+            result = response.chat_message.content
             memory_summary = f"Classified message: {message[:50]}..."
 
         except Exception as e:
@@ -69,6 +73,7 @@ Response: [helpful response to the user's message]
             memory_summary = f"Classification error handled: {str(e)[:50]}..."
 
         finally:
-            await client.close()
+            # Make sure to close the model client connection when done
+            await model_client.close()
 
         return result, memory_summary

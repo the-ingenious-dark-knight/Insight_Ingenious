@@ -1,13 +1,15 @@
-import autogen
-import autogen.retrieve_utils
-import autogen.runtime_logging
+from autogen_agentchat.agents import AssistantAgent, UserProxyAgent
+from autogen_agentchat.conditions import MaxMessageTermination, TextMentionTermination
+from autogen_agentchat.teams import RoundRobinGroupChat
+from autogen_core import CancellationToken
+from autogen_core.tools import FunctionTool
+from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
 
 import ingenious.config.config as config
 from ingenious.models.chat import ChatResponse
-from ingenious.services.chat_services.multi_agent.conversation_patterns.sql_manipulation_agent.sql_manipulation_agent import (
-    ConversationPattern,
+from ingenious.services.chat_services.multi_agent.tool_functions_standard import (
+    SQL_ToolFunctions,
 )
-from ingenious.services.chat_services.multi_agent.tool_factory import SQL_ToolFunctions
 
 
 class ConversationFlow:
@@ -21,93 +23,143 @@ class ConversationFlow:
     ) -> ChatResponse:
         _config = config.get_config()
         model_config = _config.models[0]
-        # Map Azure OpenAI config fields to expected autogen parameters
-        llm_config = {
+
+        # Configure Azure OpenAI client for v0.4
+        azure_config = {
             "model": model_config.model,
             "api_key": model_config.api_key,
             "azure_endpoint": model_config.base_url,
-            "azure_deployment": model_config.deployment,
+            "azure_deployment": model_config.deployment or model_config.model,
             "api_version": model_config.api_version,
-            "api_type": "azure",
         }
+
+        # Create the model client
+        model_client = AzureOpenAIChatCompletionClient(**azure_config)
         memory_path = _config.chat_history.memory_path
 
-        # Initialize the knowledge base agent pattern, you only need to add defined topics here
-        agent_pattern = ConversationPattern(
-            default_llm_config=llm_config,
-            topics=topics,
-            memory_record_switch=memory_record_switch,
-            memory_path=memory_path,
-            thread_memory=thread_memory,
-        )
+        # Set up context handling
+        if not thread_memory:
+            with open(f"{memory_path}/context.md", "w") as memory_file:
+                memory_file.write("New conversation. Continue based on user question.")
+        else:
+            with open(f"{memory_path}/context.md", "w") as memory_file:
+                memory_file.write(thread_memory)
 
+        with open(f"{memory_path}/context.md", "r") as memory_file:
+            context = memory_file.read()
+
+        # Create SQL tool functions
         if _config.azure_sql_services.database_name == "skip":
-            table_name, column_names = SQL_ToolFunctions.get_db_attr(
-                _config
-            )  # enable this for local sql
-            sql_writer = autogen.AssistantAgent(
-                "sql_writer",
-                llm_config=llm_config,
-                system_message=(
-                    f"""Finish all tasks:
-                        - Send SQL query to `sql_writer` the tool in the format of "SELECT ... FROM {table_name}", including grouping or aggregation as needed.
-                        - DO not change schema and table names,
-                        - The target table contains the following columns: {", ".join(column_names)}.
-                        - When composing summary statistics just do the mean.
-                        - When user asks what columns are available, just give them the list, no sql query is needed.
-                        - Format your output based on the number of rows:
-                          - **Single Row**: Use the format `{{column_name: value, column_name: value}}`.
-                          - **Multiple Rows**: Use a list format with each row as a dictionary, e.g., `[{{column_name: value}}, {{column_name: value}}]`.
-                        """
-                ),
-                description=(
-                    """I am **ONLY** allowed to speak **immediately** after `researcher`."""
-                ),
-                is_termination_msg=agent_pattern.termination_msg,
+            table_name, column_names = SQL_ToolFunctions.get_db_attr(_config)
+
+            # Create SQL tool as function
+            async def execute_sql_tool(query: str) -> str:
+                """Execute SQL query on local database"""
+                return SQL_ToolFunctions.execute_sql_local(query)
+
+            sql_tool = FunctionTool(
+                execute_sql_tool,
+                description=f"Execute SQL query on local database with table '{table_name}' and columns: {', '.join(column_names)}",
             )
 
-            agent_pattern.sql_writer = sql_writer
-            autogen.register_function(
-                SQL_ToolFunctions.execute_sql_local,
-                caller=agent_pattern.sql_writer,
-                executor=agent_pattern.planner,
-                name="sql_writer",
-                description="Use this tool to perform sql query.",
-            )
+            system_message = f"""You are a SQL expert that helps write and execute SQL queries.
 
+Tasks:
+- Write SQL queries to answer user questions about data
+- Use the 'execute_sql_tool' to run queries
+- Format your response based on the number of rows:
+  - Single Row: Use the format {{column_name: value, column_name: value}}
+  - Multiple Rows: Use a list format with each row as a dictionary
+
+The target table contains the following columns: {", ".join(column_names)}.
+Use "SELECT ... FROM {table_name}" format for your queries.
+DO NOT change schema or table names.
+When composing summary statistics, use functions like AVG(), COUNT(), etc.
+When the user asks what columns are available, just list them without running a query.
+"""
         else:
             database_name, table_name, column_names = (
                 SQL_ToolFunctions.get_azure_db_attr(_config)
-            )  # enable this for azure sql
-            sql_writer = autogen.AssistantAgent(
-                "sql_writer",
-                llm_config=llm_config,
-                system_message=(
-                    f"""Finish below tasks:
-                        - Send SQL query to `sql_writer` in the format of "SELECT ... FROM {database_name}.{table_name}", including grouping or aggregation as needed.
-                        - DO not change schema and table names,
-                        - When composing summary statistics just do the mean.
-                        - The target table contains the following columns: {", ".join(column_names)}.
-                        - Format your output based on the number of rows:
-                          - **Single Row**: Use the format `{{column_name: value, column_name: value}}`.
-                          - **Multiple Rows**: Use a list format with each row as a dictionary, e.g., `[{{column_name: value}}, {{column_name: value}}]`.
-                        """
-                ),
-                description=(
-                    """I am **ONLY** allowed to speak **immediately** after `researcher`."""
-                ),
-                is_termination_msg=agent_pattern.termination_msg,
             )
 
-            agent_pattern.sql_writer = sql_writer
-            autogen.register_function(
-                SQL_ToolFunctions.execute_sql_azure,
-                caller=agent_pattern.sql_writer,
-                executor=agent_pattern.planner,
-                name="sql_writer",
-                description="Use this tool to perform sql query.",
+            # Create SQL tool as function
+            async def execute_sql_tool(query: str) -> str:
+                """Execute SQL query on Azure database"""
+                return SQL_ToolFunctions.execute_sql_azure(query)
+
+            sql_tool = FunctionTool(
+                execute_sql_tool,
+                description=f"Execute SQL query on Azure database with table '{database_name}.{table_name}' and columns: {', '.join(column_names)}",
             )
 
-        # Get the conversation response using the pattern
-        res, memory_summary = await agent_pattern.get_conversation_response(message)
-        return res, memory_summary
+            system_message = f"""You are a SQL expert that helps write and execute SQL queries.
+
+Tasks:
+- Write SQL queries to answer user questions about data
+- Use the 'execute_sql_tool' to run queries
+- Format your response based on the number of rows:
+  - Single Row: Use the format {{column_name: value, column_name: value}}
+  - Multiple Rows: Use a list format with each row as a dictionary
+
+The target table contains the following columns: {", ".join(column_names)}.
+Use "SELECT ... FROM {database_name}.{table_name}" format for your queries.
+DO NOT change schema or table names.
+When composing summary statistics, use functions like AVG(), COUNT(), etc.
+When the user asks what columns are available, just list them without running a query.
+"""
+
+        # Set up the agent team with the SQL assistant and a user proxy
+        sql_assistant = AssistantAgent(
+            name="sql_assistant",
+            system_message=system_message,
+            model_client=model_client,
+            tools=[sql_tool],
+            reflect_on_tool_use=True,
+        )
+
+        user_proxy = UserProxyAgent("user_proxy")
+
+        # Set up termination conditions
+        termination = TextMentionTermination("TERMINATE") | MaxMessageTermination(10)
+
+        # Create the group chat with round-robin configuration
+        group_chat = RoundRobinGroupChat(
+            agents=[sql_assistant, user_proxy],
+            termination_condition=termination,
+            max_turns=10,
+        )
+
+        # Create cancellation token
+        cancellation_token = CancellationToken()
+
+        # Prepare user message with context
+        user_msg = (
+            f"Context: {context}\n\nUser question: {message}" if context else message
+        )
+
+        # Run the conversation
+        result = await group_chat.run(
+            task=user_msg, cancellation_token=cancellation_token
+        )
+
+        # Extract the response
+        final_message = (
+            result.messages[-1].content if result.messages else "No response generated"
+        )
+
+        # Update context for future conversations
+        with open(f"{memory_path}/context.md", "w") as memory_file:
+            memory_file.write(final_message)
+
+        # Make sure to close the model client connection when done
+        await model_client.close()
+
+        # Return the response
+        return ChatResponse(
+            thread_id="",
+            message_id="",
+            agent_response=final_message,
+            token_count=0,
+            max_token_count=0,
+            memory_summary=final_message,
+        )
