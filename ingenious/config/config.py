@@ -7,6 +7,7 @@ from pathlib import Path
 import yaml
 from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
+from pydantic import ValidationError
 
 from ingenious.config.profile import Profiles
 from ingenious.models import config as config_models
@@ -64,7 +65,7 @@ class Config(config_models.Config):
         config_ns: config_ns_models.Config
         try:
             config_ns = config_ns_models.Config.model_validate_json(json_data)
-        except config_models.ValidationError as e:
+        except ValidationError as e:
             for error in e.errors():
                 logger.debug(
                     f"Validation error in \
