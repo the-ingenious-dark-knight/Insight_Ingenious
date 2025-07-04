@@ -10,9 +10,9 @@ This document provides detailed API usage examples for all available workflows i
 
 ## 🔥 Available Workflows
 
-### 1. 🚴 bike_insights - Bike Sales Analysis
+### ⭐ 1. bike_insights - **"Hello World" Workflow (START HERE!)**
 
-**Purpose**: Multi-agent workflow for comprehensive bike sales data analysis
+**Purpose**: The recommended first workflow - showcases multi-agent coordination through comprehensive bike sales analysis. This is the "Hello World" of Ingenious!
 
 **Required Input Format**:
 ```json
@@ -22,12 +22,12 @@ This document provides detailed API usage examples for all available workflows i
 }
 ```
 
-**Example Request**:
+**Hello World Example**:
 ```bash
 curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
-    "user_prompt": "{\"stores\": [{\"name\": \"Bike World Sydney\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"EB-SPECIALIZED-2023-TV\", \"quantity_sold\": 3, \"sale_date\": \"2023-04-15\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 4.2, \"comment\": \"Great bike for commuting!\"}}], \"bike_stock\": []}], \"revision_id\": \"test-001\", \"identifier\": \"april-sales\"}",
+    "user_prompt": "{\"stores\": [{\"name\": \"Hello Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"HELLO-001\", \"quantity_sold\": 1, \"sale_date\": \"2023-04-01\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 5.0, \"comment\": \"Perfect introduction to Ingenious!\"}}], \"bike_stock\": []}], \"revision_id\": \"hello-1\", \"identifier\": \"world\"}",
     "conversation_flow": "bike_insights"
   }'
 ```
@@ -82,9 +82,9 @@ curl -X POST http://localhost:80/api/v1/chat \
 
 ---
 
-### 2. 🎯 classification_agent - Input Classification
+### 2. ✅ classification_agent - Simple Text Processing
 
-**Purpose**: Routes user input to appropriate specialized agents based on content
+**Purpose**: Basic text classification and routing (simpler alternative to bike_insights)
 
 **Required Input Format**:
 ```json
@@ -163,17 +163,17 @@ Save this as `test_workflows.sh`:
 
 echo "🧪 Testing Ingenious Workflows..."
 
-# Test 1: bike_insights
-echo "📊 Testing bike_insights workflow..."
+# Test 1: bike_insights (Hello World)
+echo "⭐ Testing bike_insights workflow (Hello World)..."
 curl -s -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
-    "user_prompt": "{\"stores\": [{\"name\": \"Test Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"TEST-001\", \"quantity_sold\": 2, \"sale_date\": \"2023-04-01\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 4.5, \"comment\": \"Great bike!\"}}], \"bike_stock\": []}], \"revision_id\": \"test-1\", \"identifier\": \"test\"}",
+    "user_prompt": "{\"stores\": [{\"name\": \"Hello Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"HELLO-001\", \"quantity_sold\": 1, \"sale_date\": \"2023-04-01\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 5.0, \"comment\": \"Perfect introduction to Ingenious!\"}}], \"bike_stock\": []}], \"revision_id\": \"hello-1\", \"identifier\": \"world\"}",
     "conversation_flow": "bike_insights"
   }' | jq '.message_id, .token_count'
 
-# Test 2: classification_agent  
-echo "🎯 Testing classification_agent workflow..."
+# Test 2: classification_agent (Simple Alternative)
+echo "✅ Testing classification_agent workflow (Simple Alternative)..."
 curl -s -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
@@ -210,7 +210,7 @@ Make it executable: `chmod +x test_workflows.sh`
 
 ## 🔧 Configuration Requirements
 
-### Minimal Setup (bike_insights + classification_agent)
+### Hello World Setup (bike_insights + classification_agent)
 ```env
 AZURE_OPENAI_API_KEY=your-key
 AZURE_OPENAI_BASE_URL=your-endpoint

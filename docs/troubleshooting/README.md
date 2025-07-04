@@ -2,7 +2,33 @@
 
 This guide helps you resolve common issues when setting up and using the Insight Ingenious framework.
 
-## 🚨 Common Setup Issues
+## � Quick Test Commands
+
+### Hello World Test (bike_insights)
+```bash
+# The "Hello World" of Ingenious - try this first!
+curl -X POST http://localhost:80/api/v1/chat \
+   -H "Content-Type: application/json" \
+   -d '{
+   "user_prompt": "{\"stores\": [{\"name\": \"Hello Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"HELLO-001\", \"quantity_sold\": 1, \"sale_date\": \"2023-04-01\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 5.0, \"comment\": \"Perfect introduction!\"}}], \"bike_stock\": []}], \"revision_id\": \"hello-1\", \"identifier\": \"world\"}",
+   "conversation_flow": "bike_insights"
+   }'
+```
+
+### Simple Alternative Test (classification_agent)
+```bash
+# If bike_insights seems too complex, try this simpler workflow
+curl -X POST http://localhost:80/api/v1/chat \
+   -H "Content-Type: application/json" \
+   -d '{
+   "user_prompt": "Analyze this feedback: Great product!", 
+   "conversation_flow": "classification_agent"
+   }'
+```
+
+---
+
+## �🚨 Common Setup Issues
 
 ### 1. Profile Validation Errors
 

@@ -39,13 +39,16 @@ Get up and running in 5 minutes with Azure OpenAI!
 
 4. **Test the API**:
     ```bash
-    # Test bike insights workflow
+    # Test bike insights workflow (the "Hello World" of Ingenious)
     curl -X POST http://localhost:80/api/v1/chat \
       -H "Content-Type: application/json" \
-      -d '{"user_prompt": "Hello", "conversation_flow": "classification_agent"}'
+      -d '{
+        "user_prompt": "{\"stores\": [{\"name\": \"QuickStart Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"QS-001\", \"quantity_sold\": 1, \"sale_date\": \"2023-04-15\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 5.0, \"comment\": \"Perfect bike for getting started!\"}}], \"bike_stock\": []}], \"revision_id\": \"quickstart-1\", \"identifier\": \"hello-world\"}",
+        "conversation_flow": "bike_insights"
+      }'
     ```
 
-🎉 **That's it!** You should see a JSON response from the AI agent.
+🎉 **That's it!** You should see a comprehensive JSON response with insights from multiple AI agents analyzing the bike sales data.
 
 ### 📚 Detailed Setup
 - **📖 Complete guide**: [docs/QUICKSTART.md](docs/QUICKSTART.md) - Full walkthrough with examples
@@ -56,9 +59,11 @@ Get up and running in 5 minutes with Azure OpenAI!
 
 Insight Ingenious provides multiple conversation workflows with different configuration requirements:
 
-### ✅ **Minimal Configuration** (Azure OpenAI only)
-- `classification_agent` - Route input to specialized agents
-- `bike_insights` - Sample domain-specific analysis
+### ⭐ **"Hello World" Workflow** (Azure OpenAI only)
+- `bike_insights` - **The recommended starting point** - Comprehensive bike sales analysis showcasing multi-agent coordination
+
+### ✅ **Simple Text Processing** (Azure OpenAI only)  
+- `classification_agent` - Route input to specialized agents based on content
 
 ### 🔍 **Azure Search Required**
 - `knowledge_base_agent` - Search knowledge bases

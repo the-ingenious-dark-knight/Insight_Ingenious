@@ -71,7 +71,7 @@ class Profiles:
                     print(f"      💡 Tip: Check your profiles.yml file and .env variables")
                 print()
             
-            print("📖 For help: see PLAN.md or run 'ingen workflows bike_insights'")
+            print("📖 For help: see PLAN.md or run 'ingen workflows bike_insights' (Hello World)")
             raise e
         except Exception as e:
             print(f"Unexpected error during validation: {e}")

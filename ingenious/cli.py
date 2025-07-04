@@ -189,9 +189,11 @@ def run_rest_api_server(
 
     AVAILABLE WORKFLOWS & CONFIGURATION REQUIREMENTS:
 
-    ✅ Minimal Configuration (Azure OpenAI only):
+    ⭐ "Hello World" Workflow (Azure OpenAI only):
+      • bike_insights - **RECOMMENDED STARTING POINT** - Multi-agent bike sales analysis
+      
+    ✅ Simple Text Processing (Azure OpenAI only):
       • classification_agent - Route input to specialized agents
-      • bike_insights - Sample domain-specific workflow
 
     🔍 Requires Azure Search Services:
       • knowledge_base_agent - Search knowledge bases
@@ -205,10 +207,13 @@ def run_rest_api_server(
     For detailed configuration requirements, see:
     docs/workflows/README.md
 
-    QUICK TEST:
+    QUICK TEST (Hello World):
     curl -X POST http://localhost:PORT/api/v1/chat \\
       -H "Content-Type: application/json" \\
-      -d '{"user_prompt": "Hello", "conversation_flow": "classification_agent"}'
+      -d '{
+        "user_prompt": "{\\"stores\\": [{\\"name\\": \\"Hello Store\\", \\"location\\": \\"NSW\\", \\"bike_sales\\": [{\\"product_code\\": \\"HELLO-001\\", \\"quantity_sold\\": 1, \\"sale_date\\": \\"2023-04-01\\", \\"year\\": 2023, \\"month\\": \\"April\\", \\"customer_review\\": {\\"rating\\": 5.0, \\"comment\\": \\"Great first experience!\\"}}], \\"bike_stock\\": []}], \\"revision_id\\": \\"hello-1\\", \\"identifier\\": \\"world\\"}",
+        "conversation_flow": "bike_insights"
+      }'
     """
     if project_dir is not None:
         os.environ["INGENIOUS_PROJECT_PATH"] = project_dir
@@ -648,8 +653,8 @@ def workflow_requirements(
     """
     workflows = {
         "classification-agent": {
-            "description": "Route input to specialized agents based on content",
-            "category": "✅ Minimal Configuration",
+            "description": "Simple text classification and routing (easier alternative to bike_insights)",
+            "category": "✅ Simple Text Processing",
             "requirements": ["Azure OpenAI"],
             "config_needed": [
                 "config.yml: models, chat_service",
@@ -662,11 +667,11 @@ def workflow_requirements(
     "user_prompt": "Analyze this customer feedback: Great product!",
     "conversation_flow": "classification_agent"
   }'""",
-            "note": "Simple text classification - good for testing"
+            "note": "Simple text classification - try this if bike_insights seems too complex"
         },
         "bike-insights": {
-            "description": "Sample domain-specific workflow for bike sales analysis",
-            "category": "✅ Minimal Configuration", 
+            "description": "⭐ **HELLO WORLD WORKFLOW** - Multi-agent bike sales analysis (RECOMMENDED START HERE!)",
+            "category": "⭐ Hello World Workflow", 
             "requirements": ["Azure OpenAI"],
             "config_needed": [
                 "config.yml: models, chat_service",
@@ -676,10 +681,10 @@ def workflow_requirements(
             "example_curl": """curl -X POST http://localhost:80/api/v1/chat \\
   -H "Content-Type: application/json" \\
   -d '{
-    "user_prompt": "{\\"stores\\": [{\\"name\\": \\"Test Store\\", \\"location\\": \\"NSW\\", \\"bike_sales\\": [{\\"product_code\\": \\"TEST-001\\", \\"quantity_sold\\": 2, \\"sale_date\\": \\"2023-04-01\\", \\"year\\": 2023, \\"month\\": \\"April\\", \\"customer_review\\": {\\"rating\\": 4.5, \\"comment\\": \\"Great bike!\\"}}], \\"bike_stock\\": []}], \\"revision_id\\": \\"test-1\\", \\"identifier\\": \\"test\\"}",
+    "user_prompt": "{\\"stores\\": [{\\"name\\": \\"Hello Store\\", \\"location\\": \\"NSW\\", \\"bike_sales\\": [{\\"product_code\\": \\"HELLO-001\\", \\"quantity_sold\\": 1, \\"sale_date\\": \\"2023-04-01\\", \\"year\\": 2023, \\"month\\": \\"April\\", \\"customer_review\\": {\\"rating\\": 5.0, \\"comment\\": \\"Perfect introduction to Ingenious!\\"}}], \\"bike_stock\\": []}], \\"revision_id\\": \\"hello-1\\", \\"identifier\\": \\"world\\"}",
     "conversation_flow": "bike_insights"
   }'""",
-            "note": "⚠️  bike_insights expects JSON data in user_prompt field"
+            "note": "🌟 This is the recommended first workflow - showcases multi-agent coordination!"
         },
         "knowledge-base-agent": {
             "description": "Search and retrieve information from knowledge bases",
@@ -705,18 +710,35 @@ def workflow_requirements(
         },
         # Legacy names for backward compatibility
         "classification_agent": {
-            "description": "⚠️  DEPRECATED: Use 'classification-agent' instead",
-            "category": "✅ Minimal Configuration",
+            "description": "✅ Simple text processing - Use 'classification-agent' or 'classification_agent' (both work!)",
+            "category": "✅ Simple Text Processing",
             "requirements": ["Azure OpenAI"],
-            "config_needed": ["See 'classification-agent' for details"],
+            "config_needed": [
+                "config.yml: models, chat_service",
+                "profiles.yml: models with api_key and base_url",
+            ],
             "optional": [],
+            "example_curl": """curl -X POST http://localhost:80/api/v1/chat \\
+  -H "Content-Type: application/json" \\
+  -d '{"user_prompt": "Hello, can you help me?", "conversation_flow": "classification_agent"}'""",
+            "note": "Simple alternative if bike_insights seems too complex"
         },
         "bike_insights": {
-            "description": "⚠️  DEPRECATED: Use 'bike-insights' instead", 
-            "category": "✅ Minimal Configuration",
+            "description": "⭐ **HELLO WORLD WORKFLOW** - Use 'bike-insights' or 'bike_insights' (both work!)", 
+            "category": "⭐ Hello World Workflow",
             "requirements": ["Azure OpenAI"],
-            "config_needed": ["See 'bike-insights' for details"],
+            "config_needed": [
+                "config.yml: models, chat_service",
+                "profiles.yml: models with api_key and base_url",
+            ],
             "optional": [],
+            "example_curl": """curl -X POST http://localhost:80/api/v1/chat \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "user_prompt": "{\\"stores\\": [{\\"name\\": \\"Hello Store\\", \\"location\\": \\"NSW\\", \\"bike_sales\\": [{\\"product_code\\": \\"HELLO-001\\", \\"quantity_sold\\": 1, \\"sale_date\\": \\"2023-04-01\\", \\"year\\": 2023, \\"month\\": \\"April\\", \\"customer_review\\": {\\"rating\\": 5.0, \\"comment\\": \\"Perfect introduction!\\"}}], \\"bike_stock\\": []}], \\"revision_id\\": \\"hello-1\\", \\"identifier\\": \\"world\\"}",
+    "conversation_flow": "bike_insights"
+  }'""",
+            "note": "🌟 This is the Hello World workflow - try it first!"
         },
         "knowledge_base_agent": {
             "description": "⚠️  DEPRECATED: Use 'knowledge-base-agent' instead",
@@ -758,13 +780,13 @@ def workflow_requirements(
             console.print()
 
         console.print(
-            "[bold yellow]💡 TIP:[/bold yellow] Use 'ingen workflows <workflow-name>' for detailed requirements"
+            "[bold yellow]💡 TIP:[/bold yellow] Start with bike_insights (the \"Hello World\" of Ingenious)"
         )
         console.print(
             "[bold yellow]📖 DOCS:[/bold yellow] See docs/workflows/README.md for complete configuration guide"
         )
         console.print(
-            "[bold yellow]🧪 TEST:[/bold yellow] Start with classification-agent (minimal configuration)"
+            "[bold yellow]🧪 TEST:[/bold yellow] Try 'ingen workflows bike_insights' for a working example"
         )
 
     elif workflow in workflows:

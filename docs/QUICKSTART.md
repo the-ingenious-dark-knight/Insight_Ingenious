@@ -50,16 +50,16 @@ uv run ingen serve
 
 ### Step 5: Test the API
 ```bash
-# Test bike insights workflow
+# Test bike insights workflow (the "Hello World" of Ingenious!)
 curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
-    "user_prompt": "{\"stores\": [{\"name\": \"Test Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"TEST-001\", \"quantity_sold\": 2, \"sale_date\": \"2023-04-01\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 4.5, \"comment\": \"Great bike!\"}}], \"bike_stock\": []}], \"revision_id\": \"test-1\", \"identifier\": \"quickstart\"}",
+    "user_prompt": "{\"stores\": [{\"name\": \"QuickStart Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"QS-001\", \"quantity_sold\": 1, \"sale_date\": \"2023-04-15\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 5.0, \"comment\": \"Perfect bike for getting started!\"}}], \"bike_stock\": []}], \"revision_id\": \"quickstart-1\", \"identifier\": \"hello-world\"}",
     "conversation_flow": "bike_insights"
   }'
 ```
 
-🎉 **That's it!** You should see a JSON response with analysis from multiple AI agents.
+🎉 **That's it!** You should see a comprehensive JSON response with analysis from multiple AI agents - this showcases the multi-agent coordination that makes Ingenious powerful!
 
 ---
 
@@ -121,13 +121,14 @@ curl -s http://localhost:80/health || echo "Server not running"
 
 ## 🎯 Available Workflows
 
-### 🚴 bike_insights (Recommended for Testing)
-**Purpose**: Comprehensive bike sales analysis  
+### ⭐ bike_insights (Hello World - **START HERE!**)
+**Purpose**: The "Hello World" of Ingenious - comprehensive bike sales analysis showcasing multi-agent coordination  
 **Requirements**: Azure OpenAI only  
 **Input**: JSON with bike sales data  
+**Why start here?**: Demonstrates the full power of multi-agent workflows
 
-### 🎯 classification_agent (Simple Test)
-**Purpose**: Text classification and routing  
+### ✅ classification_agent (Simple Alternative)
+**Purpose**: Text classification and routing (try this if bike_insights seems complex)  
 **Requirements**: Azure OpenAI only  
 **Input**: Plain text  
 
@@ -178,7 +179,7 @@ uv run ingen workflows
 ```bash
 # Check server logs in terminal
 # Verify JSON format for bike_insights
-# Test with classification_agent first (simpler)
+# Try with classification_agent first if bike_insights seems complex
 ```
 
 ---
@@ -208,8 +209,8 @@ Once you have the basic setup working:
 
 ## 💡 Pro Tips
 
-- Start with `classification_agent` for simple testing
-- Use `bike_insights` to see multi-agent coordination
+- **Start with `bike_insights`** - it's the "Hello World" that shows off Ingenious's power
+- Use `classification_agent` only if you want something simpler  
 - Check `uv run ingen status` when things break
 - The minimal templates work better than full templates
 - Environment variables override config file values
