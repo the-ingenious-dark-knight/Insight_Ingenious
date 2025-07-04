@@ -421,7 +421,6 @@ def initialize_new_project():
     """
     base_path = Path(__file__).parent
     templates_paths = {
-        "docker": base_path / "docker_template",
         "ingenious_extensions": base_path / "ingenious_extensions_template",
         "tmp": None,  # No template, just create the folder
     }
