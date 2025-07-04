@@ -56,28 +56,28 @@ Before using any workflow, check what configuration is needed:
 uv run ingen workflows
 
 # Check specific workflow requirements
-uv run ingen workflows classification-agent
-uv run ingen workflows knowledge-base-agent
+uv run ingen workflows classification_agent
+uv run ingen workflows knowledge_base_agent
 ```
 
 ### 🚀 Quick Start Workflows (Minimal Configuration)
 
 These workflows only need Azure OpenAI configuration:
 
-- **classification-agent**: Routes input to specialized agents
-- **bike-insights**: Sample domain-specific analysis
+- **classification_agent**: Routes input to specialized agents
+- **bike_insights**: Sample domain-specific analysis
 
 ```bash
 # Test minimal configuration workflow
 curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
-  -d '{"user_prompt": "Hello", "conversation_flow": "classification-agent"}'
+  -d '{"user_prompt": "Hello", "conversation_flow": "classification_agent"}'
 ```
 
 ### 🔍 Advanced Workflows (External Services Required)
 
-- **knowledge-base-agent**: Requires Azure Cognitive Search
-- **sql-manipulation-agent**: Requires database connection
+- **knowledge_base_agent**: Requires Azure Cognitive Search
+- **sql_manipulation_agent**: Requires database connection
 
 For detailed setup instructions, see [Workflow Configuration Requirements](../workflows/README.md).
 
