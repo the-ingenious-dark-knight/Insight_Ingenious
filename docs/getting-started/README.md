@@ -83,7 +83,7 @@ chat_history:
   memory_path: "./.tmp"
 ```
 
-**Edit `~/.ingenious/profiles.yml`:**
+**Edit `profiles.yml`:**
 ```yaml
 - name: "dev"
   models:
@@ -97,7 +97,7 @@ chat_history:
 
 ```bash
 export INGENIOUS_PROJECT_PATH="$(pwd)/config.yml"
-export INGENIOUS_PROFILE_PATH="$HOME/.ingenious/profiles.yml"
+export INGENIOUS_PROFILE_PATH="$(pwd)/profiles.yml"
 ```
 
 ## Test Your Setup

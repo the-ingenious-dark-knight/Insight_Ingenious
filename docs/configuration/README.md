@@ -26,8 +26,7 @@ Insight Ingenious uses a two-file configuration approach:
 
 When you run `ingen init`, template configuration files are generated:
 
-- `config.yml` in your project directory
-- `profiles.yml` in `~/.ingenious/` directory
+- `config.yml` and `profiles.yml` in your project directory
 
 ### Environment Variables
 

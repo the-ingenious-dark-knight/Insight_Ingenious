@@ -38,11 +38,11 @@ Once you ran `uv run ingen init` successfully, you need to deal with two configu
 
 ### Configuration Files
 1. Edit `config.yml` in your project directory (**_Note: you may need to coordinate with your team lead with this so that you may be provided the necessary credentials._**)
-2. Create or edit `profiles.yml` in `~/.ingenious/`
+2. Create or edit `profiles.yml` in `path/to/your/project`
 3. Set environment variables. Replace `path/to/your/project` below with an actual file path, then run this in your terminal application:
    ```bash
    export INGENIOUS_PROJECT_PATH=/path/to/your/project/config.yml
-   export INGENIOUS_PROFILE_PATH=~/.ingenious/profiles.yml
+   export INGENIOUS_PROFILE_PATH=/path/to/your/project/profiles.yml
    ```
 
 ## Testing out the CLI
@@ -72,11 +72,11 @@ uv run ingen workflows classification-agent
 For quick testing, start with workflows that only need Azure OpenAI:
 
 1. Update `config.yml` with your Azure OpenAI model settings
-2. Update `~/.ingenious/profiles.yml` with your API key and endpoint
+2. Update `profiles.yml` with your API key and endpoint
 3. Set environment variables:
    ```bash
    export INGENIOUS_PROJECT_PATH=/path/to/config.yml
-   export INGENIOUS_PROFILE_PATH=$HOME/.ingenious/profiles.yml
+   export INGENIOUS_PROFILE_PATH=/path/to/profiles.yml
    ```
 
 ### Start the Application

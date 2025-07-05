@@ -141,7 +141,7 @@ python -c "import ingenious; print('Insight Ingenious installed successfully')"
 - Check your internet connection
 - If behind a corporate firewall, configure proxy settings
 
-For more troubleshooting help, see the [Troubleshooting Guide](./troubleshooting.md).
+For more troubleshooting help, see the [Troubleshooting Guide](/troubleshooting/).
 
 ## Development Installation
 
