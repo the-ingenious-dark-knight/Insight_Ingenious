@@ -234,7 +234,13 @@ uv run ingen workflows
 
 # Use correct name (hyphens preferred, underscores legacy)
 "conversation_flow": "bike-insights"  # ✅ Preferred
-"conversation_flow": "bike_insights"  # ✅ Legacy (still works)
+"conversation_flow": "bike-insights"  # ✅ Preferred (hyphenated)
+    }
+
+    // Legacy format (still supported):
+    {
+      "user_prompt": "Your bike sales data here...",
+      "conversation_flow": "bike_insights"  # ✅ Legacy (still works)
 ```
 
 ### API returning errors?
