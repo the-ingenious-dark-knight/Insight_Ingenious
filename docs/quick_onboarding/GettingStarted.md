@@ -79,16 +79,16 @@ Starts the FastAPI server with Chainlit UI.
 ### Testing the UI
 
 Once the application is running, access the web UI at:
-- http://localhost:8000 - Main application
-- http://localhost:8000/chainlit - Chainlit chat interface
-- http://localhost:8000/prompt-tuner - Prompt tuning interface
+- http://localhost:80 - Main application
+- http://localhost:80/chainlit - Chainlit chat interface
+- http://localhost:80/prompt-tuner - Prompt tuning interface
 
 ### Testing chat with the agents
 
 #### Quick Test (Minimal Configuration)
 Test with workflows that only need Azure OpenAI:
 
-1. Navigate to http://localhost:8000/chainlit
+1. Navigate to http://localhost:80/chainlit
 2. Start a new conversation
 3. Try these workflows:
    - "Hello" with `classification_agent`

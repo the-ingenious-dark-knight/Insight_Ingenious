@@ -211,22 +211,15 @@ graph TB
 sequenceDiagram
     participant User
     participant SQLAgent
-    participant QueryValidator
-    participant Database
     participant AzureOpenAI
-    participant SecurityGuard
+    participant Database
 
     User->>SQLAgent: "Show me sales by region"
     SQLAgent->>AzureOpenAI: Convert natural language to SQL
     AzureOpenAI-->>SQLAgent: Generated SQL query
 
-    SQLAgent->>QueryValidator: Validate SQL syntax
-    QueryValidator-->>SQLAgent: ✅ Syntax valid
-
-    SQLAgent->>SecurityGuard: Check security constraints
-    SecurityGuard-->>SQLAgent: ✅ Query approved
-
     SQLAgent->>Database: Execute SQL query
+    Note over Database: Supports both:<br/>- Azure SQL Database<br/>- Local SQLite
     Database-->>SQLAgent: Query results
 
     SQLAgent->>AzureOpenAI: Format results for user
@@ -234,7 +227,7 @@ sequenceDiagram
 
     SQLAgent-->>User: "Sales by region analysis"
 
-    Note over SecurityGuard: Prevents:<br/>- DROP/DELETE operations<br/>- Unauthorized table access<br/>- Injection attacks
+    Note over SQLAgent,Database: Configuration determines:<br/>- Azure SQL vs SQLite<br/>- Database connection details<br/>- Query timeout settings
 ```
 
 ### 📄 Document Processing Workflow

@@ -147,7 +147,7 @@ sequenceDiagram
     participant Storage
 
     Client->>FastAPI: POST /api/chat
-    FastAPI->>Auth: Validate API Key
+    FastAPI->>Auth: Check Authentication
     Auth-->>FastAPI: ✅ Authorized
     FastAPI->>AgentService: Process Request
     AgentService->>Storage: Load Chat History
@@ -568,54 +568,50 @@ graph TB
 ```mermaid
 graph TB
     subgraph "🛡️ Authentication Layer"
-        API_KEY[🔑 API Key Validation]
-        JWT_TOKEN[🎫 JWT Tokens]
-        SESSION_MGR[👤 Session Management]
+        BASIC_AUTH[� HTTP Basic Authentication]
+        CONFIG_AUTH[⚙️ Configurable Authentication]
+        NO_AUTH[� Anonymous Access Option]
     end
 
-    subgraph "🔒 Authorization Layer"
-        RBAC[👥 Role-Based Access]
-        PERMISSIONS[📋 Permission System]
-        RESOURCE_GUARD[🛡️ Resource Protection]
-    end
-
-    subgraph "🔐 Data Protection"
-        ENCRYPTION[🔒 Data Encryption]
-        SECRETS_MGR[🗝️ Secrets Management]
-        AUDIT_LOG[📝 Audit Logging]
+    subgraph "� Data Protection"
+        AZURE_SECRETS[�️ Azure Service Keys]
+        CONFIG_SECRETS[� Profile Configuration]
+        ENV_VARS[🌐 Environment Variables]
     end
 
     subgraph "🌐 Network Security"
         HTTPS[🔐 HTTPS/TLS]
         CORS[🌍 CORS Policy]
-        RATE_LIMIT[⏱️ Rate Limiting]
+        FASTAPI_SEC[⚡ FastAPI Security]
     end
 
-    API_KEY --> RBAC
-    JWT_TOKEN --> RBAC
-    SESSION_MGR --> RBAC
+    subgraph "🔒 External Service Security"
+        AZURE_AUTH[🧠 Azure OpenAI Authentication]
+        SEARCH_AUTH[� Azure Search Authentication]
+        SQL_AUTH[🗄️ Database Authentication]
+    end
 
-    RBAC --> PERMISSIONS
-    PERMISSIONS --> RESOURCE_GUARD
-
-    RESOURCE_GUARD --> ENCRYPTION
-    ENCRYPTION --> SECRETS_MGR
-    SECRETS_MGR --> AUDIT_LOG
+    BASIC_AUTH --> CONFIG_AUTH
+    CONFIG_AUTH --> NO_AUTH
+    AZURE_SECRETS --> CONFIG_SECRETS
+    CONFIG_SECRETS --> ENV_VARS
 
     HTTPS --> CORS
-    CORS --> RATE_LIMIT
+    CORS --> FASTAPI_SEC
+
+    AZURE_AUTH --> SEARCH_AUTH
+    SEARCH_AUTH --> SQL_AUTH
 
     classDef auth fill:#e8f5e8
-    classDef authz fill:#fff3e0
-    classDef data fill:#e3f2fd
-    classDef network fill:#fce4ec
+    classDef data fill:#fff3e0
+    classDef network fill:#e3f2fd
+    classDef external fill:#fce4ec
 
-    class API_KEY,JWT_TOKEN,SESSION_MGR auth
-    class RBAC,PERMISSIONS,RESOURCE_GUARD authz
-    class ENCRYPTION,SECRETS_MGR,AUDIT_LOG data
-    class HTTPS,CORS,RATE_LIMIT network
+    class BASIC_AUTH,CONFIG_AUTH,NO_AUTH auth
+    class AZURE_SECRETS,CONFIG_SECRETS,ENV_VARS data
+    class HTTPS,CORS,FASTAPI_SEC network
+    class AZURE_AUTH,SEARCH_AUTH,SQL_AUTH external
 ```
-
 ## Performance & Scalability
 
 ### Performance Architecture
