@@ -7,7 +7,7 @@ Complete guide to using the Insight Ingenious REST API for integrating conversat
 ### Basic API Call
 
 ```bash
-curl -X POST http://localhost:8081/api/v1/chat \
+curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Hello, how are you?",
@@ -37,7 +37,7 @@ These work with just Azure OpenAI setup:
 Route input to specialized agents based on content:
 
 ```bash
-curl -X POST http://localhost:8081/api/v1/chat \
+curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Analyze this customer feedback: Great product, fast delivery!",
@@ -49,7 +49,7 @@ curl -X POST http://localhost:8081/api/v1/chat \
 Sample domain-specific workflow for business analysis:
 
 ```bash
-curl -X POST http://localhost:8081/api/v1/chat \
+curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Show me bike sales trends for April 2023",
@@ -63,7 +63,7 @@ curl -X POST http://localhost:8081/api/v1/chat \
 Search and retrieve information from Azure Cognitive Search indexes:
 
 ```bash
-curl -X POST http://localhost:8081/api/v1/chat \
+curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Find health and safety information about workplace hazards",
@@ -82,7 +82,7 @@ curl -X POST http://localhost:8081/api/v1/chat \
 Execute SQL queries based on natural language:
 
 ```bash
-curl -X POST http://localhost:8081/api/v1/chat \
+curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Show me the average student performance by subject",
@@ -102,10 +102,10 @@ Before using a workflow, check if it's properly configured:
 
 ```bash
 # Check all workflows
-curl http://localhost:8081/api/v1/workflows
+curl http://localhost:80/api/v1/workflows
 
 # Check specific workflow
-curl http://localhost:8081/api/v1/workflow-status/knowledge-base-agent
+curl http://localhost:80/api/v1/workflow-status/knowledge-base-agent
 ```
 
 Example response:
@@ -119,7 +119,7 @@ Example response:
   "required_config": ["models", "chat_service", "azure_search_services"],
   "external_services": ["Azure OpenAI", "Azure Cognitive Search"],
   "ready": false,
-  "test_command": "curl -X POST http://localhost:8081/api/v1/chat...",
+  "test_command": "curl -X POST http://localhost:80/api/v1/chat...",
   "documentation": "See docs/workflows/README.md for setup instructions"
 }
 ```
@@ -132,7 +132,7 @@ When authentication is enabled:
 
 ```bash
 # Using basic auth
-curl -X POST http://localhost:8081/api/v1/chat \
+curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -H "Authorization: Basic $(echo -n username:password | base64)" \
   -d '{
@@ -159,7 +159,7 @@ Maintain conversation context using thread IDs:
 
 ```bash
 # First message
-curl -X POST http://localhost:8081/api/v1/chat \
+curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Hello, my name is John",
@@ -168,7 +168,7 @@ curl -X POST http://localhost:8081/api/v1/chat \
   }'
 
 # Follow-up message (same thread_id)
-curl -X POST http://localhost:8081/api/v1/chat \
+curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "What did I just tell you my name was?",
@@ -180,7 +180,7 @@ curl -X POST http://localhost:8081/api/v1/chat \
 ### Get Conversation History
 
 ```bash
-curl http://localhost:8081/api/v1/conversations/user-john-session-1
+curl http://localhost:80/api/v1/conversations/user-john-session-1
 ```
 
 ## 📝 Request & Response Reference
@@ -280,7 +280,7 @@ def call_ingenious_api(prompt, workflow, thread_id=None):
 
     try:
         response = requests.post(
-            "http://localhost:8081/api/v1/chat",
+            "http://localhost:80/api/v1/chat",
             headers={"Content-Type": "application/json"},
             json=payload,
             timeout=30
@@ -346,7 +346,7 @@ def handle_webhook():
 
     # Call Insight Ingenious API
     response = requests.post(
-        "http://localhost:8081/api/v1/chat",
+        "http://localhost:80/api/v1/chat",
         json={
             "user_prompt": user_message,
             "conversation_flow": workflow,
@@ -387,7 +387,7 @@ async def process_batch(messages, workflow="classification-agent"):
         }
 
         async with session.post(
-            "http://localhost:8081/api/v1/chat",
+            "http://localhost:80/api/v1/chat",
             json=payload
         ) as response:
             if response.status == 200:
@@ -430,7 +430,7 @@ def ensure_workflow_ready(workflow_name):
     """Check if workflow is properly configured"""
 
     response = requests.get(
-        f"http://localhost:8081/api/v1/workflow-status/{workflow_name}"
+        f"http://localhost:80/api/v1/workflow-status/{workflow_name}"
     )
 
     if response.status_code == 200:
@@ -487,7 +487,7 @@ def monitor_api_call(prompt, workflow):
 
     try:
         response = requests.post(
-            "http://localhost:8081/api/v1/chat",
+            "http://localhost:80/api/v1/chat",
             json={"user_prompt": prompt, "conversation_flow": workflow},
             timeout=30
         )

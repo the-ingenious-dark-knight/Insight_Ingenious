@@ -111,7 +111,7 @@ Test workflows that only need Azure OpenAI:
 uv run ingen serve
 
 # In another terminal, test the API
-curl -X POST http://localhost:8081/api/v1/chat \
+curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Hello, please classify this message",
@@ -123,9 +123,9 @@ curl -X POST http://localhost:8081/api/v1/chat \
 
 Once the server is running:
 
-- **Main API**: http://localhost:8081/docs
-- **Chat Interface**: http://localhost:8081/chainlit
-- **Prompt Tuner**: http://localhost:8081/prompt-tuner
+- **Main API**: http://localhost:80/docs
+- **Chat Interface**: http://localhost:80/chainlit
+- **Prompt Tuner**: http://localhost:80/prompt-tuner
 
 ### 6. Check Configuration Status
 
@@ -133,10 +133,10 @@ Verify your workflows are properly configured:
 
 ```bash
 # Check all workflows
-curl http://localhost:8081/api/v1/workflows
+curl http://localhost:80/api/v1/workflows
 
 # Check specific workflow
-curl http://localhost:8081/api/v1/workflow-status/classification-agent
+curl http://localhost:80/api/v1/workflow-status/classification-agent
 ```
 
 ## Next Steps
@@ -146,12 +146,12 @@ curl http://localhost:8081/api/v1/workflow-status/classification-agent
 1. **Test different workflows**:
    ```bash
    # Try bike insights workflow
-   curl -X POST http://localhost:8081/api/v1/chat \
+   curl -X POST http://localhost:80/api/v1/chat \
      -H "Content-Type: application/json" \
      -d '{"user_prompt": "Analyze bike sales trends", "conversation_flow": "bike-insights"}'
    ```
 
-2. **Explore the web interface** at http://localhost:8081/chainlit
+2. **Explore the web interface** at http://localhost:80/chainlit
 
 ### Want More? Add Advanced Workflows:
 

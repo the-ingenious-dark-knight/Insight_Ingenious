@@ -97,7 +97,7 @@ Test with workflows that only need Azure OpenAI:
 #### API Testing
 ```bash
 # Test classification agent (minimal config needed)
-curl -X POST http://localhost:8081/api/v1/chat \
+curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{"user_prompt": "Hello world", "conversation_flow": "classification-agent"}'
 ```

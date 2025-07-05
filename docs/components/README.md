@@ -203,10 +203,10 @@ Check configuration requirements and status:
 
 ```bash
 # List all workflows and their status
-curl http://localhost:8081/api/v1/workflows
+curl http://localhost:80/api/v1/workflows
 
 # Check specific workflow configuration
-curl http://localhost:8081/api/v1/workflow-status/knowledge-base-agent
+curl http://localhost:80/api/v1/workflow-status/knowledge-base-agent
 ```
 
 Example response:
@@ -218,7 +218,7 @@ Example response:
   "required_config": ["models", "chat_service", "azure_search_services"],
   "external_services": ["Azure OpenAI", "Azure Cognitive Search"],
   "ready": false,
-  "test_command": "curl -X POST http://localhost:8081/api/v1/chat...",
+  "test_command": "curl -X POST http://localhost:80/api/v1/chat...",
   "documentation": "See docs/workflows/README.md for setup instructions"
 }
 ```

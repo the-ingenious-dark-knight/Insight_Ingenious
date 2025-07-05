@@ -613,17 +613,17 @@ Use these commands to test specific workflows:
 
 ```bash
 # Test basic configuration
-curl -X POST http://localhost:8081/api/v1/chat \
+curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{"user_prompt": "Hello", "conversation_flow": "classification-agent"}'
 
 # Test knowledge base (requires Azure Search)
-curl -X POST http://localhost:8081/api/v1/chat \
+curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{"user_prompt": "Search for health information", "conversation_flow": "knowledge-base-agent"}'
 
 # Test SQL queries (requires database)
-curl -X POST http://localhost:8081/api/v1/chat \
+curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{"user_prompt": "Show me student performance data", "conversation_flow": "sql-manipulation-agent"}'
 ```

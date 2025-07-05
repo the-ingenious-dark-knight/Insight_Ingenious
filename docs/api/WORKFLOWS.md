@@ -25,7 +25,7 @@ This document provides detailed API usage examples for all available workflows i
 
 **Purpose**: The recommended first workflow - showcases multi-agent coordination through comprehensive bike sales analysis. This is the "Hello World" of Ingenious!
 
-**Availability**: Created when you run `ingen init` (part of project template, not core library)
+**Availability**: Created when you run `ingen init` (part of project template)
 
 **Required Input Format**:
 ```json
