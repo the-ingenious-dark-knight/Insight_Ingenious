@@ -53,7 +53,7 @@ uv run ingen workflows
 
 # Check specific workflow requirements
 uv run ingen workflows classification-agent
-uv run ingen workflows knowledge_base_agent
+uv run ingen workflows knowledge-base-agent
 ```
 
 ### 🚀 Quick Start Workflows (Minimal Configuration)
@@ -384,7 +384,7 @@ curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Search for health and safety information",
-    "conversation_flow": "knowledge_base_agent"
+    "conversation_flow": "knowledge-base-agent"
   }'
 ```
 
@@ -399,7 +399,7 @@ curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Show me student performance statistics",
-    "conversation_flow": "sql_manipulation_agent"
+    "conversation_flow": "sql-manipulation-agent"
   }'
 ```
 

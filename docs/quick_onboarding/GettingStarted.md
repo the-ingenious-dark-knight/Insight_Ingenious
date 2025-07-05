@@ -105,8 +105,8 @@ curl -X POST http://localhost:8081/api/v1/chat \
 #### Advanced Workflows
 For workflows requiring external services:
 
-- **knowledge_base_agent**: Requires Azure Cognitive Search
-- **sql_manipulation_agent**: Requires database connection
+- **knowledge-base-agent**: Requires Azure Cognitive Search
+- **sql-manipulation-agent**: Requires database connection
 
 Check requirements with:
 ```bash

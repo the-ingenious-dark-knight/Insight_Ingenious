@@ -13,8 +13,8 @@ The `ConversationPattern` class is the foundation for defining how agents intera
 | Pattern | Description | Use Case |
 |---------|-------------|----------|
 | `classification-agent` | Classifies input and routes to topic-specific agents | Content classification, intent detection |
-| `knowledge_base_agent` | Searches and retrieves information from knowledge bases | Question answering, information retrieval |
-| `sql_manipulation_agent` | Generates and executes SQL queries | Database interactions, data querying |
+| `knowledge-base-agent` | Searches and retrieves information from knowledge bases | Question answering, information retrieval |
+| `sql-manipulation-agent` | Generates and executes SQL queries | Database interactions, data querying |
 | `education_expert` | Generates educational content and lesson plans | Educational material creation (pattern only) |
 
 #### Key Methods
@@ -31,8 +31,8 @@ The `ConversationFlow` class implements specific use cases using conversation pa
 | Flow | Description | Pattern Used |
 |------|-------------|--------------|
 | `classification-agent` | Routes inputs to specialized agents | `classification-agent` |
-| `knowledge_base_agent` | Answers questions using knowledge bases | `knowledge_base_agent` |
-| `sql_manipulation_agent` | Executes SQL queries based on natural language | `sql_manipulation_agent` |
+| `knowledge-base-agent` | Answers questions using knowledge bases | `knowledge-base-agent` |
+| `sql-manipulation-agent` | Executes SQL queries based on natural language | `sql-manipulation-agent` |
 
 #### Key Methods
 
@@ -206,13 +206,13 @@ Check configuration requirements and status:
 curl http://localhost:8081/api/v1/workflows
 
 # Check specific workflow configuration
-curl http://localhost:8081/api/v1/workflow-status/knowledge_base_agent
+curl http://localhost:8081/api/v1/workflow-status/knowledge-base-agent
 ```
 
 Example response:
 ```json
 {
-  "workflow": "knowledge_base_agent",
+  "workflow": "knowledge-base-agent",
   "configured": false,
   "missing_config": ["azure_search_services.key: Missing in profiles.yml"],
   "required_config": ["models", "chat_service", "azure_search_services"],

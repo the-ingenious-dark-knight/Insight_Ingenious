@@ -52,14 +52,14 @@ uv run ingen workflows classification-agent
 **Output Example:**
 ```
 ✅ Minimal Configuration
-  • classification-agent: Route input to specialized agents
-  • bike-insights: Sample domain-specific workflow
+  • classification-agent: Route input to specialized agents (core library)
+  • bike-insights: Sample domain-specific workflow (project template)
 
 🔍 Requires Azure Search
-  • knowledge-base-agent: Search knowledge bases
+  • knowledge-base-agent: Search knowledge bases (core library)
 
 📊 Requires Database
-  • sql_manipulation_agent: Execute SQL queries
+  • sql-manipulation-agent: Execute SQL queries (core library)
 ```
 
 ## Basic Configuration

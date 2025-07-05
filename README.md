@@ -74,15 +74,11 @@ Insight Ingenious provides multiple conversation workflows with different config
 
 ### ✅ **Core Workflows** (Azure OpenAI only)
 - `classification-agent` - Route input to specialized agents based on content
+- `knowledge-base-agent` - Search knowledge bases (requires Azure Search Service)
+- `sql-manipulation-agent` - Execute SQL queries (requires database connection)
 
 ### ⭐ **"Hello World" Workflow** (Available via project template)
 - `bike-insights` - **The recommended starting point** - Comprehensive bike sales analysis showcasing multi-agent coordination (created when you run `ingen init`)
-
-### 🔍 **Azure Search Required**
-- `knowledge-base-agent` - Search knowledge bases
-
-### 📊 **Database Required**
-- `sql-manipulation-agent` - Execute SQL queries
 
 **📋 See [Workflow Configuration Requirements](docs/workflows/README.md) for detailed setup instructions.**
 

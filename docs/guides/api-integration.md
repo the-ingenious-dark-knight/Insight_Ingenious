@@ -105,13 +105,13 @@ Before using a workflow, check if it's properly configured:
 curl http://localhost:8081/api/v1/workflows
 
 # Check specific workflow
-curl http://localhost:8081/api/v1/workflow-status/knowledge_base_agent
+curl http://localhost:8081/api/v1/workflow-status/knowledge-base-agent
 ```
 
 Example response:
 ```json
 {
-  "workflow": "knowledge_base_agent",
+  "workflow": "knowledge-base-agent",
   "configured": false,
   "missing_config": [
     "azure_search_services.key: Missing in profiles.yml"
@@ -255,7 +255,7 @@ curl http://localhost:8081/api/v1/conversations/user-john-session-1
 ```json
 {
   "detail": "Azure Search service not configured",
-  "workflow": "knowledge_base_agent",
+  "workflow": "knowledge-base-agent",
   "required_config": ["azure_search_services.endpoint", "azure_search_services.key"],
   "documentation": "See docs/workflows/README.md for setup instructions"
 }
@@ -314,7 +314,7 @@ def call_ingenious_api(prompt, workflow, thread_id=None):
 
 # Usage examples
 call_ingenious_api("Hello", "classification-agent")
-call_ingenious_api("Search for safety info", "knowledge_base_agent")
+call_ingenious_api("Search for safety info", "knowledge-base-agent")
 ```
 
 ## 🔄 Integration Patterns
@@ -338,9 +338,9 @@ def handle_webhook():
 
     # Route to appropriate workflow based on content
     if 'search' in user_message.lower():
-        workflow = 'knowledge_base_agent'
+        workflow = 'knowledge-base-agent'
     elif 'sql' in user_message.lower() or 'database' in user_message.lower():
-        workflow = 'sql_manipulation_agent'
+        workflow = 'sql-manipulation-agent'
     else:
         workflow = 'classification-agent'
 

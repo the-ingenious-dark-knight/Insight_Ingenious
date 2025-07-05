@@ -86,7 +86,7 @@ chmod 600 ~/.ingenious/profiles.yml
 
 **❌ Error: "Search service not configured"**
 
-**Solution for `knowledge_base_agent`:**
+**Solution for `knowledge-base-agent`:**
 1. Add Azure Search to `config.yml`:
    ```yaml
    azure_search_services:
@@ -103,7 +103,7 @@ chmod 600 ~/.ingenious/profiles.yml
 
 **❌ Error: "Database connection failed"**
 
-**Solution for `sql_manipulation_agent`:**
+**Solution for `sql-manipulation-agent`:**
 
 *Option 1: Use Local SQLite*
 ```yaml
