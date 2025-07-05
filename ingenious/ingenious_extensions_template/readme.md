@@ -99,8 +99,9 @@ This sample workflow demonstrates a complete multi-agent system:
 
 ### **Create Your Own Workflow:**
 
-1. **Copy the bike_insights structure:**
+1. **Copy the bike-insights structure:**
    ```bash
+   # Note: Directory name uses underscores (bike_insights) but API uses hyphens (bike-insights)
    cp -r services/chat_services/multi_agent/conversation_flows/bike_insights \
          services/chat_services/multi_agent/conversation_flows/your_workflow
    ```
