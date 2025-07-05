@@ -28,7 +28,7 @@ graph TB
         FASTAPI[⚡ FastAPI Application]
         CHAT_API[💬 Chat API<br/>/api/v1/chat]
         DIAGNOSTIC_API[🔄 Diagnostic API<br/>/api/v1/workflow-status]
-        HEALTH_API[❤️ Health API<br/>/health]
+        HEALTH_API[❤️ Health API<br/>/api/v1/health]
     end
 
     subgraph "🤖 Backend Services"
@@ -126,7 +126,7 @@ graph LR
     end
 
     subgraph "❤️ System Endpoints"
-        HEALTH[GET /health<br/>Health Check]
+        HEALTH[GET /api/v1/health<br/>Health Check]
     end
 
     subgraph "� Additional Endpoints"
@@ -158,7 +158,7 @@ flowchart TD
     AUTH -->|Unauthorized| ERROR_401[❌ 401 Unauthorized]
 
     LOAD_CONTEXT --> SELECT_WORKFLOW{🔄 Select Workflow}
-    SELECT_WORKFLOW --> BIKE_INSIGHTS[🚴 bike_insights]
+    SELECT_WORKFLOW --> BIKE_INSIGHTS[🚴 bike-insights]
     SELECT_WORKFLOW --> CLASSIFICATION[� classification_agent]
     SELECT_WORKFLOW --> KNOWLEDGE_BASE[🔍 knowledge_base_agent]
     SELECT_WORKFLOW --> SQL_AGENT[�️ sql_manipulation_agent]
@@ -210,7 +210,7 @@ sequenceDiagram
     participant LLM as 🧠 Azure OpenAI
 
     Client->>API: POST /api/v1/chat
-    Note over Client,API: {"user_prompt": "data",<br/>"conversation_flow": "bike_insights"}
+    Note over Client,API: {"user_prompt": "data",<br/>"conversation_flow": "bike-insights"}
 
     API->>ChatService: Process chat request
     ChatService->>WorkflowEngine: Load conversation flow
@@ -298,13 +298,13 @@ Complete documentation for all available workflow endpoints, including:
 
 #### Health Check
 ```bash
-GET /health
+GET /api/v1/health
 ```
 Returns the health status of the API service.
 
 #### List Available Workflows
 ```bash
-GET /workflows
+GET /api/v1/workflows
 ```
 Returns a list of all available workflow types and their configurations.
 

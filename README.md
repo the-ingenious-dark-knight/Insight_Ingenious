@@ -45,7 +45,7 @@ Get up and running in 5 minutes with Azure OpenAI!
 5. **Verify Health**:
     ```bash
     # Check server health
-    curl http://localhost:80/health
+    curl http://localhost:80/api/v1/health
     ```
 
 6. **Test the API**:

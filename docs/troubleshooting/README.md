@@ -4,20 +4,20 @@ This guide helps you resolve common issues when setting up and using the Insight
 
 ## � Quick Test Commands
 
-### Hello World Test (bike_insights)
+### Hello World Test (bike-insights)
 ```bash
 # The "Hello World" of Ingenious - try this first!
 curl -X POST http://localhost:80/api/v1/chat \
    -H "Content-Type: application/json" \
    -d '{
    "user_prompt": "{\"stores\": [{\"name\": \"Hello Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"HELLO-001\", \"quantity_sold\": 1, \"sale_date\": \"2023-04-01\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 5.0, \"comment\": \"Perfect introduction!\"}}], \"bike_stock\": []}], \"revision_id\": \"hello-1\", \"identifier\": \"world\"}",
-   "conversation_flow": "bike_insights"
+   "conversation_flow": "bike-insights"
    }'
 ```
 
 ### Simple Alternative Test (classification_agent)
 ```bash
-# If bike_insights seems too complex, try this simpler workflow
+# If bike-insights seems too complex, try this simpler workflow
 curl -X POST http://localhost:80/api/v1/chat \
    -H "Content-Type: application/json" \
    -d '{
@@ -135,20 +135,20 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
 1. **Use correct workflow names**:
    ```bash
    # ✅ Correct
-   "conversation_flow": "bike_insights"
-
-   # ❌ Wrong
    "conversation_flow": "bike-insights"
+
+   # ❌ Wrong (legacy)
+   "conversation_flow": "bike_insights"
    ```
 
-2. **Check bike_insights input format**:
+2. **Check bike-insights input format**:
    ```bash
-   # bike_insights needs JSON in user_prompt
+   # bike-insights needs JSON in user_prompt
    curl -X POST http://localhost:80/api/v1/chat \
      -H "Content-Type: application/json" \
      -d '{
        "user_prompt": "{\"stores\": [...], \"revision_id\": \"test\", \"identifier\": \"test\"}",
-       "conversation_flow": "bike_insights"
+       "conversation_flow": "bike-insights"
      }'
    ```
 
@@ -168,7 +168,7 @@ uv run ingen workflows
 
 ### Check Specific Workflow Requirements
 ```bash
-uv run ingen workflows bike_insights
+uv run ingen workflows bike-insights
 ```
 
 ### Test Installation
@@ -242,14 +242,14 @@ Class ConversationFlow not found in module
 ### Minimal Test
 ```bash
 # Test server is running
-curl -s http://localhost:80/health || echo "Server not responding"
+curl -s http://localhost:80/api/v1/health || echo "Server not responding"
 
-# Test bike_insights workflow
+# Test bike-insights workflow
 curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "{\"stores\": [], \"revision_id\": \"test\", \"identifier\": \"test\"}",
-    "conversation_flow": "bike_insights"
+    "conversation_flow": "bike-insights"
   }' | jq '.message_id // "ERROR"'
 ```
 
@@ -278,7 +278,7 @@ uv run ingen status
 
 # 4. Test workflows
 echo "4. Testing workflows..."
-uv run ingen workflows | grep -q "bike_insights" && echo "✅ bike_insights available"
+uv run ingen workflows | grep -q "bike-insights" && echo "✅ bike-insights available"
 
 echo "✅ All tests passed!"
 ```
@@ -329,8 +329,8 @@ uv run ingen workflows
 | Import errors | `uv pip install -e ./Insight_Ingenious` |
 | Profile validation | Use `profiles.minimal.yml` template |
 | Port not working | Set `WEB_PORT` environment variable |
-| Workflow not found | Both `bike_insights` and `bike-insights` work (use either) |
-| JSON parse error | Escape quotes in `user_prompt` for bike_insights |
+| Workflow not found | Use `bike-insights` (preferred) or `bike_insights` (legacy) |
+| JSON parse error | Escape quotes in `user_prompt` for bike-insights |
 | Server won't start | Check port availability and config.yml |
 
 ### Still Need Help?
