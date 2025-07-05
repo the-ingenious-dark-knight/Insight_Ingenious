@@ -61,10 +61,10 @@ async def get_sales_analytics(request: SalesAnalyticsRequest):
             for store in bike_data.stores
         )
 
-        # Get AI-powered insights using the bike_insights workflow
+        # Get AI-powered insights using the bike-insights workflow
         chat_request = ChatRequest(
             user_prompt=bike_data.json(),
-            conversation_flow="bike_insights",
+            conversation_flow="bike-insights",
             thread_id=f"api_call_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         )
 
@@ -137,7 +137,7 @@ async def trigger_workflow(
     """🚀 Trigger AI workflow asynchronously"""
 
     # Validate workflow exists
-    if workflow_name not in ["bike_insights", "customer_analysis"]:
+    if workflow_name not in ["bike-insights", "customer_analysis"]:
         raise HTTPException(status_code=404, detail="Workflow not found")
 
     # Queue background processing
@@ -273,7 +273,7 @@ curl -X POST http://localhost:8081/api/v1/bikes/validate-sales-data \
   -d '{"stores": []}'
 
 # Test workflow trigger
-curl -X POST http://localhost:8081/api/v1/bikes/trigger-analysis/bike_insights \
+curl -X POST http://localhost:8081/api/v1/bikes/trigger-analysis/bike-insights \
   -H "Content-Type: application/json" \
   -d @../sample_data/bike_sales_april_2023.json
 ```

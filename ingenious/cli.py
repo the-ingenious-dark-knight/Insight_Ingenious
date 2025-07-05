@@ -186,7 +186,7 @@ def run_rest_api_server(
     AVAILABLE WORKFLOWS & CONFIGURATION REQUIREMENTS:
 
     ⭐ "Hello World" Workflow (Azure OpenAI only):
-      • bike_insights - **RECOMMENDED STARTING POINT** - Multi-agent bike sales analysis
+      • bike-insights - **RECOMMENDED STARTING POINT** - Multi-agent bike sales analysis
 
     ✅ Simple Text Processing (Azure OpenAI only):
       • classification_agent - Route input to specialized agents
@@ -208,7 +208,7 @@ def run_rest_api_server(
       -H "Content-Type: application/json" \\
       -d '{
         "user_prompt": "{\\"stores\\": [{\\"name\\": \\"Hello Store\\", \\"location\\": \\"NSW\\", \\"bike_sales\\": [{\\"product_code\\": \\"HELLO-001\\", \\"quantity_sold\\": 1, \\"sale_date\\": \\"2023-04-01\\", \\"year\\": 2023, \\"month\\": \\"April\\", \\"customer_review\\": {\\"rating\\": 5.0, \\"comment\\": \\"Great first experience!\\"}}], \\"bike_stock\\": []}], \\"revision_id\\": \\"hello-1\\", \\"identifier\\": \\"world\\"}",
-        "conversation_flow": "bike_insights"
+        "conversation_flow": "bike-insights"
       }'
     """
     if project_dir is not None:
@@ -382,12 +382,12 @@ def init():
     • profiles.yml - Environment profiles (API keys, secrets)
     • .env.example - Example environment variables
     • ingenious_extensions/ - Your custom agents and workflows
-    • templates/prompts/quickstart-1/ - Ready-to-use bike_insights workflow templates
+    • templates/prompts/quickstart-1/ - Ready-to-use bike-insights workflow templates
     • Dockerfile - Docker containerization setup
     • .dockerignore - Docker build exclusions
     • tmp/ - Temporary files and memory storage
 
-    🎯 INCLUDES: Pre-configured quickstart-1 templates for immediate bike_insights testing!
+    🎯 INCLUDES: Pre-configured quickstart-1 templates for immediate bike-insights testing!
 
     NEXT STEPS after running this command:
     1. Copy .env.example to .env and add your credentials
@@ -413,7 +413,7 @@ def initialize_new_project():
     • profiles.yml - Environment profiles (API keys, secrets) in project directory
     • .env.example - Example environment variables file
     • ingenious_extensions/ - Your custom agents and workflows
-    • templates/prompts/quickstart-1/ - Pre-configured bike_insights workflow templates
+    • templates/prompts/quickstart-1/ - Pre-configured bike-insights workflow templates
     • Dockerfile - Docker containerization setup at project root
     • .dockerignore - Docker build exclusions at project root
     • tmp/ - Temporary files and memory
@@ -717,7 +717,7 @@ def initialize_new_project():
                     f"[info]✅ {templates_copied} quickstart-1 templates created successfully at {quickstart_templates_destination}[/info]"
                 )
                 console.print(
-                    "[info]🎯 Ready for bike_insights workflow testing![/info]"
+                    "[info]🎯 Ready for bike-insights workflow testing![/info]"
                 )
             else:
                 console.print(
@@ -775,7 +775,7 @@ def initialize_new_project():
                         f"[info]✅ {templates_copied} quickstart-1 templates created from base templates[/info]"
                     )
                     console.print(
-                        "[info]🎯 Ready for bike_insights workflow testing![/info]"
+                        "[info]🎯 Ready for bike-insights workflow testing![/info]"
                     )
 
             except Exception as e:
@@ -795,7 +795,7 @@ def initialize_new_project():
     console.print("• Check configuration: ingen status")
     console.print("• List workflows: ingen workflows")
     console.print("• Get help: ingen --help")
-    console.print("\n[bold green]🎯 Ready for bike_insights workflow![/bold green]")
+    console.print("\n[bold green]🎯 Ready for bike-insights workflow![/bold green]")
     console.print("• Quickstart-1 templates are pre-configured")
     console.print(
         "• Test immediately with: curl -X POST http://localhost:80/api/v1/chat ..."
@@ -841,7 +841,7 @@ def workflow_requirements(
     """
     workflows = {
         "classification-agent": {
-            "description": "Simple text classification and routing (easier alternative to bike_insights)",
+            "description": "Simple text classification and routing (easier alternative to bike-insights)",
             "category": "✅ Simple Text Processing",
             "requirements": ["Azure OpenAI"],
             "config_needed": [
@@ -855,7 +855,7 @@ def workflow_requirements(
     "user_prompt": "Analyze this customer feedback: Great product!",
     "conversation_flow": "classification_agent"
   }'""",
-            "note": "Simple text classification - try this if bike_insights seems too complex",
+            "note": "Simple text classification - try this if bike-insights seems too complex",
         },
         "bike-insights": {
             "description": "⭐ **HELLO WORLD WORKFLOW** - Multi-agent bike sales analysis (RECOMMENDED START HERE!)",
@@ -870,7 +870,7 @@ def workflow_requirements(
   -H "Content-Type: application/json" \\
   -d '{
     "user_prompt": "{\\"stores\\": [{\\"name\\": \\"Hello Store\\", \\"location\\": \\"NSW\\", \\"bike_sales\\": [{\\"product_code\\": \\"HELLO-001\\", \\"quantity_sold\\": 1, \\"sale_date\\": \\"2023-04-01\\", \\"year\\": 2023, \\"month\\": \\"April\\", \\"customer_review\\": {\\"rating\\": 5.0, \\"comment\\": \\"Perfect introduction to Ingenious!\\"}}], \\"bike_stock\\": []}], \\"revision_id\\": \\"hello-1\\", \\"identifier\\": \\"world\\"}",
-    "conversation_flow": "bike_insights"
+    "conversation_flow": "bike-insights"
   }'""",
             "note": "🌟 This is the recommended first workflow - showcases multi-agent coordination!",
         },
@@ -909,7 +909,7 @@ def workflow_requirements(
             "example_curl": """curl -X POST http://localhost:80/api/v1/chat \\
   -H "Content-Type: application/json" \\
   -d '{"user_prompt": "Hello, can you help me?", "conversation_flow": "classification_agent"}'""",
-            "note": "Simple alternative if bike_insights seems too complex",
+            "note": "Simple alternative if bike-insights seems too complex",
         },
         "bike_insights": {
             "description": "⭐ **HELLO WORLD WORKFLOW** - Use 'bike-insights' or 'bike_insights' (both work!)",
@@ -924,7 +924,7 @@ def workflow_requirements(
   -H "Content-Type: application/json" \\
   -d '{
     "user_prompt": "{\\"stores\\": [{\\"name\\": \\"Hello Store\\", \\"location\\": \\"NSW\\", \\"bike_sales\\": [{\\"product_code\\": \\"HELLO-001\\", \\"quantity_sold\\": 1, \\"sale_date\\": \\"2023-04-01\\", \\"year\\": 2023, \\"month\\": \\"April\\", \\"customer_review\\": {\\"rating\\": 5.0, \\"comment\\": \\"Perfect introduction!\\"}}], \\"bike_stock\\": []}], \\"revision_id\\": \\"hello-1\\", \\"identifier\\": \\"world\\"}",
-    "conversation_flow": "bike_insights"
+    "conversation_flow": "bike-insights"
   }'""",
             "note": "🌟 This is the Hello World workflow - try it first!",
         },
@@ -968,13 +968,13 @@ def workflow_requirements(
             console.print()
 
         console.print(
-            '[bold yellow]💡 TIP:[/bold yellow] Start with bike_insights (the "Hello World" of Ingenious)'
+            '[bold yellow]💡 TIP:[/bold yellow] Start with bike-insights (the "Hello World" of Ingenious)'
         )
         console.print(
             "[bold yellow]📖 DOCS:[/bold yellow] See docs/workflows/README.md for complete configuration guide"
         )
         console.print(
-            "[bold yellow]🧪 TEST:[/bold yellow] Try 'ingen workflows bike_insights' for a working example"
+            "[bold yellow]🧪 TEST:[/bold yellow] Try 'ingen workflows bike-insights' for a working example"
         )
 
     elif workflow in workflows:
@@ -1381,7 +1381,7 @@ def validate():
     # 4. Check workflow availability
     console.print("\n[bold]4. Workflow Availability:[/bold]")
     try:
-        # Check if bike_insights workflow files exist
+        # Check if bike-insights workflow files exist
         extensions_path = Path.cwd() / "ingenious_extensions"
         if extensions_path.exists():
             console.print("  ✅ ingenious_extensions directory found")

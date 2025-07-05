@@ -24,7 +24,7 @@ curl -X POST http://localhost:8081/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Analyze bike sales trends for April 2023",
-    "conversation_flow": "bike_insights"
+    "conversation_flow": "bike-insights"
   }'
 ```
 
@@ -39,7 +39,7 @@ curl -X POST http://localhost:8081/api/v1/chat \
 | **📁 tests/** | Test harness | `run_tests.py` - Automated testing |
 | **📁 api/** | Custom API routes | Add your own REST endpoints |
 
-## 🧠 **Understanding the Bike Insights Workflow**
+## 🧠 **Understanding the Bike-Insights Workflow**
 
 This sample workflow demonstrates a complete multi-agent system:
 

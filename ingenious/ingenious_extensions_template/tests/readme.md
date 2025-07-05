@@ -25,7 +25,7 @@ python run_tests_flat.py
 
 ### **Expected Output**
 ```
-🧪 Running test for bike_insights workflow...
+🧪 Running test for bike-insights workflow...
 📊 Processing bike sales data for April 2023...
 ✅ Test completed successfully
 📄 Results saved to functional_test_outputs/
@@ -49,11 +49,11 @@ class RunBatches:
             "stores": [...]  # Sample bike sales data
         }
 
-        # 3. Execute chat service with bike_insights workflow
+        # 3. Execute chat service with bike-insights workflow
         chat_request = ChatRequest(
             thread_id=thread_id,
             user_prompt=json.dumps(test_payload),
-            conversation_flow="bike_insights"
+            conversation_flow="bike-insights"
         )
 
         # 4. Get response and save results
@@ -210,7 +210,7 @@ class PerformanceMonitor:
 # Test Batch Results
 
 ## Configuration
-- **Workflow:** bike_insights
+- **Workflow:** bike-insights
 - **Thread ID:** 20241204123045
 - **Test Data:** bike_sales_april_2023.json
 
@@ -258,7 +258,7 @@ class ResponseQualityEvaluator:
         }
 
         # Check completeness (did it address all key areas?)
-        if workflow == "bike_insights":
+        if workflow == "bike-insights":
             required_sections = ["sales", "sentiment", "recommendations"]
             found_sections = sum(1 for section in required_sections
                                if section in response.lower())

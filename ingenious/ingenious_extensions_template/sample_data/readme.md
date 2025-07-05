@@ -5,7 +5,7 @@ This directory contains sample datasets for testing and developing your AI workf
 ## 📊 **Available Sample Data**
 
 ### **🚴 Bike Sales Data (`bike_sales_april_2023.json`)**
-Complete dataset for the **bike_insights** workflow demonstration:
+Complete dataset for the **bike-insights** workflow demonstration:
 
 - **📈 Sales Records:** 1000+ bike sales transactions
 - **🏪 Multiple Stores:** Sydney, Melbourne, Brisbane locations
@@ -59,7 +59,7 @@ Test event definitions for the test harness:
   event_type: default
   file_name: bike_sales_april_2023.json
   response_content: no response generated
-  conversation_flow: "bike_insights"
+  conversation_flow: "bike-insights"
   identifier_group: "week1"
 ```
 
@@ -71,7 +71,7 @@ Test event definitions for the test harness:
 curl -X POST http://localhost:8081/api/v1/chat \
   -H "Content-Type: application/json" \
   -d @sample_data/bike_sales_april_2023.json \
-  --data-urlencode "conversation_flow=bike_insights"
+  --data-urlencode "conversation_flow=bike-insights"
 ```
 
 ### **2. Run Automated Tests**
