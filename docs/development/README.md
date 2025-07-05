@@ -34,7 +34,6 @@ flowchart TD
 
     classDef start fill:#c8e6c9
     classDef process fill:#e1f5fe
-    classDef end fill:#dcedc8
 
     class START,READY start
     class CLONE,INSTALL,HOOKS,INIT,VERIFY process
@@ -736,4 +735,5 @@ flowchart TD
 - 📖 Read the [Architecture Guide](/architecture/) for system design
 - 🔧 Check the [Configuration Guide](/configuration/) for setup
 - 🚀 Try the [Getting Started Guide](/getting-started/) for quick setup
+- 📡 Explore the [API Documentation](/api/) for integration
 - 📡 Explore the [API Documentation](/api/) for integration

@@ -26,10 +26,10 @@ graph TB
 
     subgraph "🎯 API Layer"
         FASTAPI[⚡ FastAPI Application]
-        CHAT_API[💬 Chat API<br/>/api/v1/chat]
-        DIAGNOSTIC_API[🔄 Diagnostic API<br/>/api/v1/workflow-status<br/>/api/v1/workflows<br/>/api/v1/diagnostic<br/>/api/v1/health]
-        PROMPTS_API[📝 Prompts API<br/>/api/v1/prompts]
-        FEEDBACK_API[💬 Feedback API<br/>/api/v1/messages/{message_id}/feedback]
+        CHAT_API[💬 Chat API\n/api/v1/chat]
+        DIAGNOSTIC_API[🔄 Diagnostic API\n/api/v1/workflow-status\n/api/v1/workflows\n/api/v1/diagnostic\n/api/v1/health]
+        PROMPTS_API[📝 Prompts API\n/api/v1/prompts]
+        FEEDBACK_API[💬 Feedback API\n/api/v1/messages/_message_id_/feedback]
     end
 
     subgraph "🤖 Backend Services"
@@ -109,7 +109,7 @@ sequenceDiagram
     API-->>Gateway: HTTP Response
     Gateway-->>Client: JSON Response
 
-    Note over Client,Storage: Error handling at each step<br/>with appropriate HTTP status codes
+    Note over Client,Storage: Error handling at each step\nwith appropriate HTTP status codes
 ```
 
 ## 📡 Core API Endpoints
@@ -119,24 +119,24 @@ sequenceDiagram
 ```mermaid
 graph LR
     subgraph "💬 Chat Endpoints"
-        CHAT_POST[POST /api/v1/chat<br/>Send Message]
+        CHAT_POST[POST /api/v1/chat\nSend Message]
     end
 
     subgraph "🔄 Diagnostic Endpoints"
-        WORKFLOW_STATUS[GET /api/v1/workflow-status/{name}<br/>Check Workflow Status]
-        WORKFLOWS_LIST[GET /api/v1/workflows<br/>List All Workflows]
-        DIAGNOSTIC[GET /api/v1/diagnostic<br/>System Diagnostic]
+        WORKFLOW_STATUS[GET /api/v1/workflow-status/_name_\nCheck Workflow Status]
+        WORKFLOWS_LIST[GET /api/v1/workflows\nList All Workflows]
+        DIAGNOSTIC[GET /api/v1/diagnostic\nSystem Diagnostic]
     end
 
     subgraph "❤️ System Endpoints"
-        HEALTH[GET /api/v1/health<br/>Health Check]
+        HEALTH[GET /api/v1/health\nHealth Check]
     end
 
     subgraph "📝 Management Endpoints"
-        PROMPTS_VIEW[GET /api/v1/prompts/view/{revision_id}/{filename}<br/>View Prompt]
-        PROMPTS_LIST[GET /api/v1/prompts/list/{revision_id}<br/>List Prompts]
-        PROMPTS_UPDATE[POST /api/v1/prompts/update/{revision_id}/{filename}<br/>Update Prompt]
-        FEEDBACK[PUT /api/v1/messages/{message_id}/feedback<br/>Message Feedback]
+        PROMPTS_VIEW[GET /api/v1/prompts/view/_revision_id_/_filename_\nView Prompt]
+        PROMPTS_LIST[GET /api/v1/prompts/list/_revision_id_\nList Prompts]
+        PROMPTS_UPDATE[POST /api/v1/prompts/update/_revision_id_/_filename_\nUpdate Prompt]
+        FEEDBACK[PUT /api/v1/messages/_message_id_/feedback\nMessage Feedback]
     end
 
     classDef chat fill:#e8f5e8
@@ -212,7 +212,7 @@ sequenceDiagram
     participant LLM as 🧠 Azure OpenAI
 
     Client->>API: POST /api/v1/chat
-    Note over Client,API: {"user_prompt": "Help with SQL queries",<br/>"conversation_flow": "sql-manipulation-agent"}
+    Note over Client,API: {"user_prompt": "Help with SQL queries",\n"conversation_flow": "sql-manipulation-agent"}
 
     API->>ChatService: Process chat request
     ChatService->>MultiAgentService: Load conversation flow
@@ -244,13 +244,13 @@ sequenceDiagram
 ```mermaid
 graph TB
     subgraph "🔑 Authentication Methods"
-        BASIC_AUTH[� HTTP Basic Authentication<br/>Username/Password]
-        NO_AUTH[🚪 Authentication Disabled<br/>Anonymous Access]
+        BASIC_AUTH[🔐 HTTP Basic Authentication\nUsername/Password]
+        NO_AUTH[🚪 Authentication Disabled\nAnonymous Access]
     end
 
     subgraph "🛡️ Security Features"
-        HTTPS_TLS[🔐 HTTPS/TLS<br/>Transport Encryption]
-        CONFIG_AUTH[⚙️ Configurable Authentication<br/>Enable/Disable via Config]
+        HTTPS_TLS[🔐 HTTPS/TLS\nTransport Encryption]
+        CONFIG_AUTH[⚙️ Configurable Authentication\nEnable/Disable via Config]
     end
 
     subgraph "✅ Validation Steps"
