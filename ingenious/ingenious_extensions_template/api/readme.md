@@ -263,17 +263,17 @@ def test_data_validation_endpoint():
 ### **Manual Testing with cURL**
 ```bash
 # Test analytics endpoint
-curl -X POST http://localhost:8081/api/v1/bikes/analytics \
+curl -X POST http://localhost:80/api/v1/bikes/analytics \
   -H "Content-Type: application/json" \
   -d @../sample_data/bike_sales_april_2023.json
 
 # Test validation endpoint
-curl -X POST http://localhost:8081/api/v1/bikes/validate-sales-data \
+curl -X POST http://localhost:80/api/v1/bikes/validate-sales-data \
   -H "Content-Type: application/json" \
   -d '{"stores": []}'
 
 # Test workflow trigger
-curl -X POST http://localhost:8081/api/v1/bikes/trigger-analysis/bike-insights \
+curl -X POST http://localhost:80/api/v1/bikes/trigger-analysis/bike-insights \
   -H "Content-Type: application/json" \
   -d @../sample_data/bike_sales_april_2023.json
 ```
@@ -282,8 +282,8 @@ curl -X POST http://localhost:8081/api/v1/bikes/trigger-analysis/bike-insights \
 
 ### **Automatic Documentation**
 Your custom APIs will automatically appear in the FastAPI documentation:
-- **📖 Interactive Docs:** http://localhost:8081/docs
-- **📋 API Schema:** http://localhost:8081/redoc
+- **📖 Interactive Docs:** http://localhost:80/docs
+- **📋 API Schema:** http://localhost:80/redoc
 
 ### **Documentation Best Practices**
 ```python

@@ -183,7 +183,7 @@ curl http://localhost:80/api/v1/workflow-status/classification-agent
 - Either configure Azure Search or use minimal workflows like `classification-agent`
 
 **❌ Server won't start**
-- Check if port 8081 is already in use
+- Check if port 80 is already in use
 - Verify your `config.yml` file is valid YAML
 
 ### Get Help:

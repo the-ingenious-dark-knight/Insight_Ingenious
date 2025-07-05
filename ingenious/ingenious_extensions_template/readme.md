@@ -17,10 +17,10 @@ The template includes a complete **bike sales analysis workflow** that you can t
 
 ```bash
 # 1. Start the server
-uv run ingen run-rest-api-server
+uv run ingen serve
 
 # 2. Test the bike insights workflow
-curl -X POST http://localhost:8081/api/v1/chat \
+curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Analyze bike sales trends for April 2023",
@@ -141,9 +141,9 @@ with open('sample_data/bike_sales_april_2023.json') as f:
 
 Access your workflows through the web interface:
 
-- **💬 Chat Interface:** http://localhost:8081/chainlit
-- **🔧 Prompt Tuner:** http://localhost:8081/prompt-tuner
-- **📖 API Documentation:** http://localhost:8081/docs
+- **💬 Chat Interface:** http://localhost:80/chainlit
+- **🔧 Prompt Tuner:** http://localhost:80/prompt-tuner
+- **📖 API Documentation:** http://localhost:80/docs
 
 ## 📚 **Next Steps**
 
