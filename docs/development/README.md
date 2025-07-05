@@ -58,7 +58,7 @@ flowchart TD
 
 4. **Initialize the project:**
    ```bash
-   uv run ingen initialize-new-project
+   uv run ingen init
    ```
 
 ## Project Architecture
@@ -294,7 +294,7 @@ uv run pytest
 Use the test harness to test agent behavior:
 
 ```bash
-uv run ingen run-test-batch
+uv run ingen test
 ```
 
 ### Testing Prompts
@@ -303,7 +303,7 @@ Use the prompt tuner for interactive testing:
 
 1. Start the server:
    ```bash
-   uv run ingen run-rest-api-server
+   uv run ingen serve
    ```
 2. Navigate to http://localhost:80/prompt-tuner (or your configured port)
 3. Select a prompt to test
