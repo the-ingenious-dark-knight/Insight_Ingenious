@@ -76,12 +76,15 @@ ingen workflows bike-insights            # Show bike insights workflow (recommen
 ```
 
 **Available Workflows:**
-- `classification-agent` - Route input to specialized agents (minimal config)
-- `bike-insights` - Sample domain-specific analysis (minimal config) ⭐ **RECOMMENDED**
-- `knowledge-base-agent` - Search knowledge bases (requires Azure Search)
-- `sql-manipulation-agent` - Execute SQL queries (requires database)
+- `classification-agent` - Route input to specialized agents (core library, minimal config)
+- `bike-insights` - Sample domain-specific analysis (project template, minimal config) ⭐ **RECOMMENDED**
+- `knowledge-base-agent` - Search knowledge bases (core library, requires Azure Search)
+- `sql-manipulation-agent` - Execute SQL queries (core library, requires database)
 
-**Note:** Legacy underscore names (`classification_agent`, `bike_insights`, etc.) are still supported for backward compatibility.
+**Note:**
+- Core library workflows are always available
+- Template workflows like `bike-insights` are created with `ingen init`
+- Legacy underscore names (`classification_agent`, `bike_insights`, etc.) are still supported for backward compatibility
 
 ### `ingen test`
 Run agent workflow tests.

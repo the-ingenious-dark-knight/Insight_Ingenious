@@ -25,6 +25,8 @@ This document provides detailed API usage examples for all available workflows i
 
 **Purpose**: The recommended first workflow - showcases multi-agent coordination through comprehensive bike sales analysis. This is the "Hello World" of Ingenious!
 
+**Availability**: Created when you run `ingen init` (part of project template, not core library)
+
 **Required Input Format**:
 ```json
 {
@@ -97,6 +99,8 @@ curl -X POST http://localhost:80/api/v1/chat \
 
 **Purpose**: Basic text classification and routing (simpler alternative to bike-insights)
 
+**Availability**: Core library (always available)
+
 **Required Input Format**:
 ```json
 {
@@ -127,6 +131,8 @@ curl -X POST http://localhost:80/api/v1/chat \
 
 **Purpose**: Search and retrieve information from configured knowledge bases
 
+**Availability**: Core library (always available)
+
 **Requirements**:
 - Azure Search Service configured
 - Knowledge base indexed
@@ -146,6 +152,8 @@ curl -X POST http://localhost:80/api/v1/chat \
 ### 4. 📊 sql-manipulation-agent - Database Queries
 
 **Purpose**: Execute SQL queries based on natural language input
+
+**Availability**: Core library (always available)
 
 **Requirements**:
 - Database connection configured

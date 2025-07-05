@@ -173,9 +173,9 @@ The multi-agent framework is the heart of Insight Ingenious:
 Conversation patterns define how agents interact:
 
 - `conversation_patterns/`: Contains different conversation pattern implementations
-  - `classification_agent/`: Pattern for classifying inputs and routing to specialized agents
-  - `knowledge_base_agent/`: Pattern for knowledge retrieval and question answering
-  - `sql_manipulation_agent/`: Pattern for SQL query generation and execution
+  - `classification_agent/`: Pattern for classifying inputs and routing to specialized agents (legacy folder name)
+  - `knowledge_base_agent/`: Pattern for knowledge retrieval and question answering (legacy folder name)
+  - `sql_manipulation_agent/`: Pattern for SQL query generation and execution (legacy folder name)
   - `education_expert/`: Pattern for educational content generation (pattern only, no flow)
 
 #### Flows
@@ -183,11 +183,13 @@ Conversation patterns define how agents interact:
 Conversation flows implement specific use cases:
 
 - `conversation_flows/`: Contains flow implementations that use the patterns
-  - `classification_agent/`: Flow for classification and routing
-  - `knowledge_base_agent/`: Flow for knowledge base interactions
-  - `sql_manipulation_agent/`: Flow for SQL queries
+  - `classification_agent/`: Flow for classification and routing (legacy folder name)
+  - `knowledge_base_agent/`: Flow for knowledge base interactions (legacy folder name)
+  - `sql_manipulation_agent/`: Flow for SQL queries (legacy folder name)
 
-Note: `education_expert` exists as a pattern but does not have a corresponding flow implementation.
+Note:
+- `education_expert` exists as a pattern but does not have a corresponding flow implementation
+- Folder names use underscores for historical reasons, but API calls should use hyphens (e.g., `classification-agent`)
 
 ### Configuration System
 

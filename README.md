@@ -61,6 +61,8 @@ Get up and running in 5 minutes with Azure OpenAI!
 
 🎉 **That's it!** You should see a comprehensive JSON response with insights from multiple AI agents analyzing the bike sales data.
 
+**Note**: The `bike-insights` workflow is created when you run `ingen init` - it's part of the project template, not the core library.
+
 ### 📚 Detailed Setup
 - **📖 Complete guide**: [docs/QUICKSTART.md](docs/QUICKSTART.md) - Full walkthrough with examples
 - **🔧 Troubleshooting**: [docs/troubleshooting/README.md](docs/troubleshooting/README.md) - Common issues & fixes
@@ -70,11 +72,11 @@ Get up and running in 5 minutes with Azure OpenAI!
 
 Insight Ingenious provides multiple conversation workflows with different configuration requirements:
 
-### ⭐ **"Hello World" Workflow** (Azure OpenAI only)
-- `bike-insights` - **The recommended starting point** - Comprehensive bike sales analysis showcasing multi-agent coordination
-
-### ✅ **Simple Text Processing** (Azure OpenAI only)
+### ✅ **Core Workflows** (Azure OpenAI only)
 - `classification-agent` - Route input to specialized agents based on content
+
+### ⭐ **"Hello World" Workflow** (Available via project template)
+- `bike-insights` - **The recommended starting point** - Comprehensive bike sales analysis showcasing multi-agent coordination (created when you run `ingen init`)
 
 ### 🔍 **Azure Search Required**
 - `knowledge-base-agent` - Search knowledge bases

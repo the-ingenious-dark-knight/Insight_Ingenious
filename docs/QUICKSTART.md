@@ -184,19 +184,21 @@ curl -s http://localhost:80/api/v1/health || echo "Server not running"
 ### bike-insights (Hello World - **START HERE!**)
 **Purpose**: The "Hello World" of Ingenious - comprehensive bike sales analysis showcasing multi-agent coordination
 **Requirements**: Azure OpenAI only
+**Availability**: Created when you run `ingen init` (part of project template)
 **Input**: JSON with bike sales data
 **Why start here?**: Demonstrates the full power of multi-agent workflows
 
 ### classification-agent (Simple Alternative)
 **Purpose**: Text classification and routing (try this if bike-insights seems complex)
 **Requirements**: Azure OpenAI only
+**Availability**: Core library (always available)
 **Input**: Plain text
 
-### knowledge_base_agent (Advanced)
+### knowledge-base-agent (Advanced)
 **Purpose**: Knowledge base search
 **Requirements**: Azure OpenAI + Azure Search
 
-### 📊 sql_manipulation_agent (Advanced)
+### 📊 sql-manipulation-agent (Advanced)
 **Purpose**: Natural language to SQL
 **Requirements**: Azure OpenAI + Database connection
 

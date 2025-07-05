@@ -159,9 +159,9 @@ flowchart TD
 
     LOAD_CONTEXT --> SELECT_WORKFLOW{🔄 Select Workflow}
     SELECT_WORKFLOW --> BIKE_INSIGHTS[🚴 bike-insights]
-    SELECT_WORKFLOW --> CLASSIFICATION[� classification_agent]
-    SELECT_WORKFLOW --> KNOWLEDGE_BASE[🔍 knowledge_base_agent]
-    SELECT_WORKFLOW --> SQL_AGENT[�️ sql_manipulation_agent]
+    SELECT_WORKFLOW --> CLASSIFICATION[🔍 classification-agent]
+    SELECT_WORKFLOW --> KNOWLEDGE_BASE[🔍 knowledge-base-agent]
+    SELECT_WORKFLOW --> SQL_AGENT[🗄️ sql-manipulation-agent]
 
     BIKE_INSIGHTS --> PROCESS_MESSAGE[⚡ Process Multi-Agent Workflow]
     CLASSIFICATION --> PROCESS_MESSAGE

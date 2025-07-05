@@ -296,9 +296,9 @@ These workflows only require basic Azure OpenAI configuration:
 
 ## Configuration Requirements by Workflow
 
-### ✅ Minimal Configuration Workflows
+### ✅ Core Library Workflows (Minimal Configuration)
 
-These workflows only require basic Azure OpenAI configuration:
+These workflows are included in the core library and only require basic Azure OpenAI configuration:
 
 #### 🔍 Classification Agent
 Routes input to specialized agents based on content analysis.
@@ -340,8 +340,10 @@ dev:
     api_key: "your-api-key"
 ```
 
-#### 🚴 Bike Insights
-Sample domain-specific workflow for bike sales analysis.
+### ⭐ Template-Based Workflows (Available via `ingen init`)
+
+#### 🚴 Bike Insights ("Hello World")
+Sample domain-specific workflow for bike sales analysis. Created when you run `ingen init`.
 
 ```mermaid
 graph TB
