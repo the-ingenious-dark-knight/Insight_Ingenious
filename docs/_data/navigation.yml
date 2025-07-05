@@ -6,7 +6,7 @@ docs:
       - title: "Installation"
         url: /getting-started/installation/
       - title: "Basic Configuration"
-        url: /configuration/
+        url: /getting-started/installation/
       - title: "Quick Troubleshooting"
         url: /getting-started/troubleshooting/
   - title: "User Guides"
