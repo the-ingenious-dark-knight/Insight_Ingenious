@@ -33,11 +33,11 @@ uv run ingen init
 ### Basic Configuration
 
 1. Edit `config.yml` in your project directory
-2. Create or edit `profiles.yml` in `~/.ingenious/`
+2. Create or edit `profiles.yml` in your project directory
 3. Set environment variables:
    ```bash
    export INGENIOUS_PROJECT_PATH=/path/to/your/project/config.yml
-   export INGENIOUS_PROFILE_PATH=~/.ingenious/profiles.yml
+   export INGENIOUS_PROFILE_PATH=/path/to/your/project/profiles.yml
    ```
 
 ### Quick Setup Check

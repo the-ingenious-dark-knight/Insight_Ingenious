@@ -5,10 +5,10 @@ docs:
         url: /getting-started/
       - title: "Installation"
         url: /getting-started/installation/
-      - title: "Configuration"
+      - title: "Basic Configuration"
         url: /configuration/
-      - title: "Troubleshooting"
-        url: /troubleshooting/
+      - title: "Quick Troubleshooting"
+        url: /getting-started/troubleshooting/
   - title: "User Guides"
     children:
       - title: "All Guides"
@@ -39,7 +39,7 @@ docs:
         url: /api/workflows/
       - title: "CLI Reference"
         url: /CLI_REFERENCE/
-      - title: "Configuration Reference"
+      - title: "Complete Configuration Reference"
         url: /configuration/
       - title: "Workflow Requirements"
         url: /workflows/
@@ -49,3 +49,5 @@ docs:
         url: /quick_onboarding/
       - title: "Usage Examples"
         url: /usage/
+      - title: "Comprehensive Troubleshooting"
+        url: /troubleshooting/

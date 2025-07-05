@@ -1,3 +1,14 @@
+---
+title: "Quick Troubleshooting"
+layout: single
+permalink: /getting-started/troubleshooting/
+sidebar:
+  nav: "docs"
+toc: true
+toc_label: "Quick Fixes"
+toc_icon: "tools"
+---
+
 # 🆘 Troubleshooting Guide
 
 Common issues and solutions when working with Insight Ingenious.
@@ -9,7 +20,7 @@ Common issues and solutions when working with Insight Ingenious.
 **❌ Error: "Azure OpenAI API key not found"**
 
 **Solution:**
-1. Check your `~/.ingenious/profiles.yml` file:
+1. Check your `profiles.yml` file:
    ```yaml
    - name: "dev"
      models:
@@ -21,7 +32,7 @@ Common issues and solutions when working with Insight Ingenious.
 2. Verify environment variables:
    ```bash
    echo $INGENIOUS_PROFILE_PATH
-   # Should show: /home/user/.ingenious/profiles.yml
+   # Should show: <pwd>/profiles.yml
    ```
 
 3. Test configuration loading:
@@ -44,11 +55,11 @@ Common issues and solutions when working with Insight Ingenious.
 ```bash
 # Set correct paths
 export INGENIOUS_PROJECT_PATH="$(pwd)/config.yml"
-export INGENIOUS_PROFILE_PATH="$HOME/.ingenious/profiles.yml"
+export INGENIOUS_PROFILE_PATH="$(pwd)/profiles.yml"
 
 # Verify files exist
 ls -la config.yml
-ls -la ~/.ingenious/profiles.yml
+ls -la profiles.yml
 ```
 
 **❌ Error: "Permission denied accessing profiles.yml"**
@@ -56,7 +67,7 @@ ls -la ~/.ingenious/profiles.yml
 **Solution:**
 ```bash
 # Fix permissions
-chmod 600 ~/.ingenious/profiles.yml
+chmod 600 profiles.yml
 ```
 
 ## 🚀 Workflow Issues

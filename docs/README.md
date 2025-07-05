@@ -46,7 +46,7 @@ Welcome to the Insight Ingenious documentation. This enterprise-grade Python lib
 - [**API Reference**](api/README.md): Complete REST API documentation and examples
 - [**Workflow API**](api/WORKFLOWS.md): Detailed workflow endpoint documentation
 - [**Components Reference**](components/README.md): Framework components and APIs
-- [**Configuration Reference**](configuration/README.md): Complete configuration options
+- [**Configuration Reference**](/configuration/): Complete configuration options
 - [**Installation Guide**](getting-started/installation.md): Complete installation instructions
 
 ## Quick Navigation
@@ -58,7 +58,7 @@ Welcome to the Insight Ingenious documentation. This enterprise-grade Python lib
 | **Set up Azure services** | [Configuration Setup](configuration/README.md) |
 | **Use the API** | [API Reference](api/README.md) |
 | **Create custom extensions** | [Extensions Guide](extensions/README.md) |
-| **Troubleshoot issues** | [Troubleshooting](getting-started/troubleshooting.md) |
+| **Troubleshoot issues** | [Troubleshooting](/troubleshooting/) |
 
 ## Quick Links
 
