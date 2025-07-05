@@ -1,7 +1,7 @@
 ---
 title: "⚙️ Configuration Guide"
 layout: single
-permalink: /configuration/
+permalink: /getting-started/configuration/
 sidebar:
   nav: "docs"
 toc: true
