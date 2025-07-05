@@ -13,7 +13,10 @@ from ingenious.dependencies import get_openai_service
 from ingenious.errors.content_filter_error import ContentFilterError
 from ingenious.files.files_repository import FileStorage
 from ingenious.models.chat import IChatRequest, IChatResponse
-from ingenious.utils.namespace_utils import import_class_with_fallback
+from ingenious.utils.namespace_utils import (
+    import_class_with_fallback,
+    normalize_workflow_name,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -86,9 +89,15 @@ class multi_agent_chat_service:
                 self.conversation_flow = chat_request.conversation_flow
             if not self.conversation_flow:
                 raise ValueError(f"conversation_flow4 not set {chat_request}")
-            module_name = f"services.chat_services.multi_agent.conversation_flows.{self.conversation_flow.lower()}.{self.conversation_flow.lower()}"
+
+            # Normalize workflow name to support both hyphenated and underscored formats
+            normalized_flow = normalize_workflow_name(self.conversation_flow)
+            module_name = f"services.chat_services.multi_agent.conversation_flows.{normalized_flow}.{normalized_flow}"
             class_name = "ConversationFlow"
             print(f"DEBUG: Loading module: {module_name}, class: {class_name}")
+            print(
+                f"DEBUG: Original workflow name: {self.conversation_flow}, normalized: {normalized_flow}"
+            )
 
             conversation_flow_service_class = import_class_with_fallback(
                 module_name, class_name

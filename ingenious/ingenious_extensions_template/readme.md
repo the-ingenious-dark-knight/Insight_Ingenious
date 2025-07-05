@@ -17,14 +17,14 @@ The template includes a complete **bike sales analysis workflow** that you can t
 
 ```bash
 # 1. Start the server
-uv run ingen run-rest-api-server
+uv run ingen serve
 
 # 2. Test the bike insights workflow
-curl -X POST http://localhost:8081/api/v1/chat \
+curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Analyze bike sales trends for April 2023",
-    "conversation_flow": "bike_insights"
+    "conversation_flow": "bike-insights"
   }'
 ```
 
@@ -39,7 +39,7 @@ curl -X POST http://localhost:8081/api/v1/chat \
 | **📁 tests/** | Test harness | `run_tests.py` - Automated testing |
 | **📁 api/** | Custom API routes | Add your own REST endpoints |
 
-## 🧠 **Understanding the Bike Insights Workflow**
+## 🧠 **Understanding the Bike-Insights Workflow**
 
 This sample workflow demonstrates a complete multi-agent system:
 
@@ -99,8 +99,9 @@ This sample workflow demonstrates a complete multi-agent system:
 
 ### **Create Your Own Workflow:**
 
-1. **Copy the bike_insights structure:**
+1. **Copy the bike-insights structure:**
    ```bash
+   # Note: Directory name uses underscores (bike_insights) but API uses hyphens (bike-insights)
    cp -r services/chat_services/multi_agent/conversation_flows/bike_insights \
          services/chat_services/multi_agent/conversation_flows/your_workflow
    ```
@@ -140,9 +141,9 @@ with open('sample_data/bike_sales_april_2023.json') as f:
 
 Access your workflows through the web interface:
 
-- **💬 Chat Interface:** http://localhost:8081/chainlit
-- **🔧 Prompt Tuner:** http://localhost:8081/prompt-tuner
-- **📖 API Documentation:** http://localhost:8081/docs
+- **💬 Chat Interface:** http://localhost:80/chainlit
+- **🔧 Prompt Tuner:** http://localhost:80/prompt-tuner
+- **📖 API Documentation:** http://localhost:80/docs
 
 ## 📚 **Next Steps**
 

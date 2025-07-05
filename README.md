@@ -1,9 +1,9 @@
 # Insight Ingenious
 
-A powerful framework for building, managing, and deploying multi-agent AI conversations.
+An enterprise-grade Python library for quickly setting up APIs to interact with AI Agents, featuring tight integrations with Microsoft Azure services and comprehensive utilities for debugging and customization.
 
 ## Overview
-Insight Ingenious lets you orchestrate multiple AI agents and deploy them as an API for seamless integration into your applications.
+Insight Ingenious is a production-ready library that enables developers to rapidly deploy sophisticated AI agent APIs with minimal configuration. Built specifically for enterprise environments, it provides seamless Microsoft Azure integrations, robust debugging tools, and extensive customization capabilities for building scalable AI-powered applications.
 
 ## ⚡ Quick Start
 
@@ -45,7 +45,7 @@ Get up and running in 5 minutes with Azure OpenAI!
 5. **Verify Health**:
     ```bash
     # Check server health
-    curl http://localhost:80/health
+    curl http://localhost:80/api/v1/health
     ```
 
 6. **Test the API**:
@@ -55,11 +55,13 @@ Get up and running in 5 minutes with Azure OpenAI!
       -H "Content-Type: application/json" \
       -d '{
         "user_prompt": "{\"stores\": [{\"name\": \"QuickStart Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"QS-001\", \"quantity_sold\": 1, \"sale_date\": \"2023-04-15\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 5.0, \"comment\": \"Perfect bike for getting started!\"}}], \"bike_stock\": []}], \"revision_id\": \"quickstart-1\", \"identifier\": \"hello-world\"}",
-        "conversation_flow": "bike_insights"
+        "conversation_flow": "bike-insights"
       }'
     ```
 
 🎉 **That's it!** You should see a comprehensive JSON response with insights from multiple AI agents analyzing the bike sales data.
+
+**Note**: The `bike-insights` workflow is created when you run `ingen init` - it's part of the project template setup, not included in the core library.
 
 ### 📚 Detailed Setup
 - **📖 Complete guide**: [docs/QUICKSTART.md](docs/QUICKSTART.md) - Full walkthrough with examples
@@ -70,19 +72,19 @@ Get up and running in 5 minutes with Azure OpenAI!
 
 Insight Ingenious provides multiple conversation workflows with different configuration requirements:
 
-### ⭐ **"Hello World" Workflow** (Azure OpenAI only)
-- `bike_insights` - **The recommended starting point** - Comprehensive bike sales analysis showcasing multi-agent coordination
+### ✅ **Core Workflows (Azure OpenAI only)**
+- `classification-agent` - Route input to specialized agents based on content
 
-### ✅ **Simple Text Processing** (Azure OpenAI only)
-- `classification_agent` - Route input to specialized agents based on content
+### 🔍 **Core Workflows (Require Additional Services)**
+- `knowledge-base-agent` - Search knowledge bases (requires Azure Search Service)
+- `sql-manipulation-agent` - Execute SQL queries (requires database connection)
 
-### 🔍 **Azure Search Required**
-- `knowledge_base_agent` - Search knowledge bases
-
-### 📊 **Database Required**
-- `sql_manipulation_agent` - Execute SQL queries
+### ⭐ **"Hello World" Workflow** (Available via project template)
+- `bike-insights` - **The recommended starting point** - Comprehensive bike sales analysis showcasing multi-agent coordination (created when you run `ingen init`)
 
 **📋 See [Workflow Configuration Requirements](docs/workflows/README.md) for detailed setup instructions.**
+
+**🔄 Naming Formats**: Workflows support both hyphenated (`bike-insights`) and underscored (`bike_insights`) naming formats for backward compatibility. New projects should use hyphenated names.
 
 ## Project Structure
 

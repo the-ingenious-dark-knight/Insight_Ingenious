@@ -1,3 +1,16 @@
+---
+title: "Web Interface Guide"
+layout: single
+permalink: /guides/web-interface/
+sidebar:
+  nav: "docs"
+toc: true
+toc_label: "Web Interface"
+toc_icon: "globe"
+---
+
+# 🎨 Web Interface Guide
+
 ## API Integration
 
 ### Using the REST API
@@ -6,7 +19,7 @@ You can interact with Insight Ingenious through its REST API:
 
 ```bash
 # Start a conversation
-curl -X POST http://localhost:8000/api/v1/chat \
+curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -H "Authorization: Basic $(echo -n username:password | base64)" \
   -d '{

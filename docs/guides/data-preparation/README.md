@@ -1,3 +1,14 @@
+---
+title: "Data Preparation Guide"
+layout: single
+permalink: /guides/data-preparation/
+sidebar:
+  nav: "docs"
+toc: true
+toc_label: "Data Preparation"
+toc_icon: "database"
+---
+
 # Dataprep Crawler (Scrapfly)
 
 This optional pack lets you scrape web pages straight from the **Insight Ingenious** CLI.

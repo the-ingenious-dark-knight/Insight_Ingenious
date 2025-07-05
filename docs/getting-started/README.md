@@ -11,7 +11,7 @@ toc_icon: "rocket"
 
 # Quick Start Guide
 
-Get up and running with Insight Ingenious in minutes! This guide will walk you through the essential steps to start using conversation workflows.
+Get up and running with Insight Ingenious in minutes! This enterprise-grade Python library enables rapid deployment of AI agent APIs with seamless Microsoft Azure integrations. This guide will walk you through the essential steps to start building production-ready AI agent endpoints.
 
 ## Prerequisites
 
@@ -30,11 +30,11 @@ For complete installation instructions, including optional dependencies for adva
 git clone https://github.com/Insight-Services-APAC/Insight_Ingenious.git
 cd Insight_Ingenious
 
-# Install dependencies
-uv sync
+# Install the library
+uv pip install -e .
 
-# Initialize project structure
-uv run ingen initialize-new-project
+# Initialize project structure for API deployment
+uv run ingen init
 ```
 
 ### 1. Check Available Workflows
@@ -43,23 +43,23 @@ Before configuring anything, see what workflows are available:
 
 ```bash
 # See all workflows and their requirements
-uv run ingen workflow-requirements all
+uv run ingen workflows
 
 # Check specific workflow requirements
-uv run ingen workflow-requirements classification_agent
+uv run ingen workflows classification-agent
 ```
 
 **Output Example:**
 ```
 ✅ Minimal Configuration
-  • classification_agent: Route input to specialized agents
-  • bike_insights: Sample domain-specific workflow
+  • classification-agent: Route input to specialized agents (core library)
+  • bike-insights: Sample domain-specific workflow (project template)
 
 🔍 Requires Azure Search
-  • knowledge_base_agent: Search knowledge bases
+  • knowledge-base-agent: Search knowledge bases (core library)
 
 📊 Requires Database
-  • sql_manipulation_agent: Execute SQL queries
+  • sql-manipulation-agent: Execute SQL queries (core library)
 ```
 
 ## Basic Configuration
@@ -108,14 +108,14 @@ Test workflows that only need Azure OpenAI:
 
 ```bash
 # Start the server
-uv run ingen run-rest-api-server
+uv run ingen serve
 
 # In another terminal, test the API
-curl -X POST http://localhost:8081/api/v1/chat \
+curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Hello, please classify this message",
-    "conversation_flow": "classification_agent"
+    "conversation_flow": "classification-agent"
   }'
 ```
 
@@ -123,9 +123,9 @@ curl -X POST http://localhost:8081/api/v1/chat \
 
 Once the server is running:
 
-- **Main API**: http://localhost:8081/docs
-- **Chat Interface**: http://localhost:8081/chainlit
-- **Prompt Tuner**: http://localhost:8081/prompt-tuner
+- **Main API**: http://localhost:80/docs
+- **Chat Interface**: http://localhost:80/chainlit
+- **Prompt Tuner**: http://localhost:80/prompt-tuner
 
 ### 6. Check Configuration Status
 
@@ -133,10 +133,10 @@ Verify your workflows are properly configured:
 
 ```bash
 # Check all workflows
-curl http://localhost:8081/api/v1/workflows
+curl http://localhost:80/api/v1/workflows
 
 # Check specific workflow
-curl http://localhost:8081/api/v1/workflow-status/classification_agent
+curl http://localhost:80/api/v1/workflow-status/classification-agent
 ```
 
 ## Next Steps
@@ -146,12 +146,12 @@ curl http://localhost:8081/api/v1/workflow-status/classification_agent
 1. **Test different workflows**:
    ```bash
    # Try bike insights workflow
-   curl -X POST http://localhost:8081/api/v1/chat \
+   curl -X POST http://localhost:80/api/v1/chat \
      -H "Content-Type: application/json" \
-     -d '{"user_prompt": "Analyze bike sales trends", "conversation_flow": "bike_insights"}'
+     -d '{"user_prompt": "Analyze bike sales trends", "conversation_flow": "bike-insights"}'
    ```
 
-2. **Explore the web interface** at http://localhost:8081/chainlit
+2. **Explore the web interface** at http://localhost:80/chainlit
 
 ### Want More? Add Advanced Workflows:
 
@@ -176,14 +176,14 @@ curl http://localhost:8081/api/v1/workflow-status/classification_agent
 
 **❌ "conversation_flow not set"**
 - Ensure you specify `conversation_flow` in your API request
-- Use `ingen workflow-requirements all` to see available workflows
+- Use `ingen workflows` to see available workflows
 
 **❌ "Search service not configured"**
-- You're trying to use `knowledge_base_agent` without Azure Search
-- Either configure Azure Search or use minimal workflows like `classification_agent`
+- You're trying to use `knowledge-base-agent` without Azure Search
+- Either configure Azure Search or use minimal workflows like `classification-agent`
 
 **❌ Server won't start**
-- Check if port 8081 is already in use
+- Check if port 80 is already in use
 - Verify your `config.yml` file is valid YAML
 
 ### Get Help:

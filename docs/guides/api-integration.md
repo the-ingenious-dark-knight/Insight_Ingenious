@@ -1,3 +1,14 @@
+---
+title: "API Integration Guide"
+layout: single
+permalink: /guides/api-integration/
+sidebar:
+  nav: "docs"
+toc: true
+toc_label: "API Integration"
+toc_icon: "plug"
+---
+
 # 🌐 API Integration Guide
 
 Complete guide to using the Insight Ingenious REST API for integrating conversation workflows into your applications.
@@ -7,11 +18,11 @@ Complete guide to using the Insight Ingenious REST API for integrating conversat
 ### Basic API Call
 
 ```bash
-curl -X POST http://localhost:8081/api/v1/chat \
+curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Hello, how are you?",
-    "conversation_flow": "classification_agent"
+    "conversation_flow": "classification-agent"
   }'
 ```
 
@@ -37,11 +48,11 @@ These work with just Azure OpenAI setup:
 Route input to specialized agents based on content:
 
 ```bash
-curl -X POST http://localhost:8081/api/v1/chat \
+curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Analyze this customer feedback: Great product, fast delivery!",
-    "conversation_flow": "classification_agent"
+    "conversation_flow": "classification-agent"
   }'
 ```
 
@@ -49,11 +60,11 @@ curl -X POST http://localhost:8081/api/v1/chat \
 Sample domain-specific workflow for business analysis:
 
 ```bash
-curl -X POST http://localhost:8081/api/v1/chat \
+curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Show me bike sales trends for April 2023",
-    "conversation_flow": "bike_insights"
+    "conversation_flow": "bike-insights"
   }'
 ```
 
@@ -63,11 +74,11 @@ curl -X POST http://localhost:8081/api/v1/chat \
 Search and retrieve information from Azure Cognitive Search indexes:
 
 ```bash
-curl -X POST http://localhost:8081/api/v1/chat \
+curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Find health and safety information about workplace hazards",
-    "conversation_flow": "knowledge_base_agent"
+    "conversation_flow": "knowledge-base-agent"
   }'
 ```
 
@@ -82,11 +93,11 @@ curl -X POST http://localhost:8081/api/v1/chat \
 Execute SQL queries based on natural language:
 
 ```bash
-curl -X POST http://localhost:8081/api/v1/chat \
+curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Show me the average student performance by subject",
-    "conversation_flow": "sql_manipulation_agent"
+    "conversation_flow": "sql-manipulation-agent"
   }'
 ```
 
@@ -102,16 +113,16 @@ Before using a workflow, check if it's properly configured:
 
 ```bash
 # Check all workflows
-curl http://localhost:8081/api/v1/workflows
+curl http://localhost:80/api/v1/workflows
 
 # Check specific workflow
-curl http://localhost:8081/api/v1/workflow-status/knowledge_base_agent
+curl http://localhost:80/api/v1/workflow-status/knowledge-base-agent
 ```
 
 Example response:
 ```json
 {
-  "workflow": "knowledge_base_agent",
+  "workflow": "knowledge-base-agent",
   "configured": false,
   "missing_config": [
     "azure_search_services.key: Missing in profiles.yml"
@@ -119,7 +130,7 @@ Example response:
   "required_config": ["models", "chat_service", "azure_search_services"],
   "external_services": ["Azure OpenAI", "Azure Cognitive Search"],
   "ready": false,
-  "test_command": "curl -X POST http://localhost:8081/api/v1/chat...",
+  "test_command": "curl -X POST http://localhost:80/api/v1/chat...",
   "documentation": "See docs/workflows/README.md for setup instructions"
 }
 ```
@@ -132,12 +143,12 @@ When authentication is enabled:
 
 ```bash
 # Using basic auth
-curl -X POST http://localhost:8081/api/v1/chat \
+curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -H "Authorization: Basic $(echo -n username:password | base64)" \
   -d '{
     "user_prompt": "Hello",
-    "conversation_flow": "classification_agent"
+    "conversation_flow": "classification-agent"
   }'
 ```
 
@@ -159,20 +170,20 @@ Maintain conversation context using thread IDs:
 
 ```bash
 # First message
-curl -X POST http://localhost:8081/api/v1/chat \
+curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Hello, my name is John",
-    "conversation_flow": "classification_agent",
+    "conversation_flow": "classification-agent",
     "thread_id": "user-john-session-1"
   }'
 
 # Follow-up message (same thread_id)
-curl -X POST http://localhost:8081/api/v1/chat \
+curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "What did I just tell you my name was?",
-    "conversation_flow": "classification_agent",
+    "conversation_flow": "classification-agent",
     "thread_id": "user-john-session-1"
   }'
 ```
@@ -180,7 +191,7 @@ curl -X POST http://localhost:8081/api/v1/chat \
 ### Get Conversation History
 
 ```bash
-curl http://localhost:8081/api/v1/conversations/user-john-session-1
+curl http://localhost:80/api/v1/conversations/user-john-session-1
 ```
 
 ## 📝 Request & Response Reference
@@ -225,7 +236,7 @@ curl http://localhost:8081/api/v1/conversations/user-john-session-1
 {
   "detail": "conversation_flow not set",
   "workflow": null,
-  "available_workflows": ["classification_agent", "bike_insights", "..."]
+  "available_workflows": ["classification-agent", "bike-insights", "..."]
 }
 ```
 
@@ -233,7 +244,7 @@ curl http://localhost:8081/api/v1/conversations/user-john-session-1
 ```json
 {
   "detail": "Unknown workflow: invalid_workflow",
-  "available_workflows": ["classification_agent", "bike_insights", "..."]
+  "available_workflows": ["classification-agent", "bike-insights", "..."]
 }
 ```
 
@@ -255,7 +266,7 @@ curl http://localhost:8081/api/v1/conversations/user-john-session-1
 ```json
 {
   "detail": "Azure Search service not configured",
-  "workflow": "knowledge_base_agent",
+  "workflow": "knowledge-base-agent",
   "required_config": ["azure_search_services.endpoint", "azure_search_services.key"],
   "documentation": "See docs/workflows/README.md for setup instructions"
 }
@@ -280,7 +291,7 @@ def call_ingenious_api(prompt, workflow, thread_id=None):
 
     try:
         response = requests.post(
-            "http://localhost:8081/api/v1/chat",
+            "http://localhost:80/api/v1/chat",
             headers={"Content-Type": "application/json"},
             json=payload,
             timeout=30
@@ -313,8 +324,8 @@ def call_ingenious_api(prompt, workflow, thread_id=None):
         print(f"Unexpected error: {e}")
 
 # Usage examples
-call_ingenious_api("Hello", "classification_agent")
-call_ingenious_api("Search for safety info", "knowledge_base_agent")
+call_ingenious_api("Hello", "classification-agent")
+call_ingenious_api("Search for safety info", "knowledge-base-agent")
 ```
 
 ## 🔄 Integration Patterns
@@ -338,15 +349,15 @@ def handle_webhook():
 
     # Route to appropriate workflow based on content
     if 'search' in user_message.lower():
-        workflow = 'knowledge_base_agent'
+        workflow = 'knowledge-base-agent'
     elif 'sql' in user_message.lower() or 'database' in user_message.lower():
-        workflow = 'sql_manipulation_agent'
+        workflow = 'sql-manipulation-agent'
     else:
-        workflow = 'classification_agent'
+        workflow = 'classification-agent'
 
     # Call Insight Ingenious API
     response = requests.post(
-        "http://localhost:8081/api/v1/chat",
+        "http://localhost:80/api/v1/chat",
         json={
             "user_prompt": user_message,
             "conversation_flow": workflow,
@@ -376,7 +387,7 @@ For processing multiple requests:
 import asyncio
 import aiohttp
 
-async def process_batch(messages, workflow="classification_agent"):
+async def process_batch(messages, workflow="classification-agent"):
     """Process multiple messages in parallel"""
 
     async def process_single(session, message, index):
@@ -387,7 +398,7 @@ async def process_batch(messages, workflow="classification_agent"):
         }
 
         async with session.post(
-            "http://localhost:8081/api/v1/chat",
+            "http://localhost:80/api/v1/chat",
             json=payload
         ) as response:
             if response.status == 200:
@@ -416,10 +427,10 @@ results = asyncio.run(process_batch(messages))
 
 ### 1. Choose the Right Workflow
 
-- **Simple classification/routing**: `classification_agent`
-- **Domain-specific analysis**: `bike_insights` (or create custom)
-- **Knowledge retrieval**: `knowledge_base_agent`
-- **Database queries**: `sql_manipulation_agent`
+- **Simple classification/routing**: `classification-agent`
+- **Domain-specific analysis**: `bike-insights` (or create custom)
+- **Knowledge retrieval**: `knowledge-base-agent`
+- **Database queries**: `sql-manipulation-agent`
 
 ### 2. Handle Configuration Gracefully
 
@@ -430,7 +441,7 @@ def ensure_workflow_ready(workflow_name):
     """Check if workflow is properly configured"""
 
     response = requests.get(
-        f"http://localhost:8081/api/v1/workflow-status/{workflow_name}"
+        f"http://localhost:80/api/v1/workflow-status/{workflow_name}"
     )
 
     if response.status_code == 200:
@@ -487,7 +498,7 @@ def monitor_api_call(prompt, workflow):
 
     try:
         response = requests.post(
-            "http://localhost:8081/api/v1/chat",
+            "http://localhost:80/api/v1/chat",
             json={"user_prompt": prompt, "conversation_flow": workflow},
             timeout=30
         )

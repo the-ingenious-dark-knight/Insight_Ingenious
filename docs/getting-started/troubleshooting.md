@@ -68,17 +68,17 @@ chmod 600 ~/.ingenious/profiles.yml
 **Solution:**
 1. Check available workflows:
    ```bash
-   uv run ingen workflow-requirements all
+   uv run ingen workflows
    ```
 
 2. Use exact workflow names in API calls:
    ```bash
    # ✅ Correct
-   curl -X POST http://localhost:8081/api/v1/chat \
-     -d '{"user_prompt": "Hello", "conversation_flow": "classification_agent"}'
+   curl -X POST http://localhost:80/api/v1/chat \
+     -d '{"user_prompt": "Hello", "conversation_flow": "classification-agent"}'
 
    # ❌ Wrong
-   curl -X POST http://localhost:8081/api/v1/chat \
+   curl -X POST http://localhost:80/api/v1/chat \
      -d '{"user_prompt": "Hello", "conversation_flow": "classify"}'
    ```
 
@@ -86,7 +86,7 @@ chmod 600 ~/.ingenious/profiles.yml
 
 **❌ Error: "Search service not configured"**
 
-**Solution for `knowledge_base_agent`:**
+**Solution for `knowledge-base-agent`:**
 1. Add Azure Search to `config.yml`:
    ```yaml
    azure_search_services:
@@ -103,7 +103,7 @@ chmod 600 ~/.ingenious/profiles.yml
 
 **❌ Error: "Database connection failed"**
 
-**Solution for `sql_manipulation_agent`:**
+**Solution for `sql-manipulation-agent`:**
 
 *Option 1: Use Local SQLite*
 ```yaml
@@ -137,7 +137,7 @@ azure_sql_services:
 2. Kill the process or use a different port:
    ```bash
    # Use different port
-   uv run ingen run-rest-api-server --port 8082
+   uv run ingen serve --port 8082
    ```
 
 3. Or change the port in `config.yml`:
@@ -176,9 +176,9 @@ azure_sql_services:
 
 2. Use basic auth in requests:
    ```bash
-   curl -X POST http://localhost:8081/api/v1/chat \
+   curl -X POST http://localhost:80/api/v1/chat \
      -H "Authorization: Basic $(echo -n username:password | base64)" \
-     -d '{"user_prompt": "Hello", "conversation_flow": "classification_agent"}'
+     -d '{"user_prompt": "Hello", "conversation_flow": "classification-agent"}'
    ```
 
 3. Or disable authentication for testing:
@@ -197,11 +197,11 @@ azure_sql_services:
 Ensure correct JSON format:
 ```bash
 # ✅ Correct format
-curl -X POST http://localhost:8081/api/v1/chat \
+curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Your message here",
-    "conversation_flow": "classification_agent",
+    "conversation_flow": "classification-agent",
     "thread_id": "optional-thread-id"
   }'
 ```
@@ -220,13 +220,13 @@ Optional fields:
 
 ```bash
 # 1. Check all workflow configurations
-curl http://localhost:8081/api/v1/workflows
+curl http://localhost:80/api/v1/workflows
 
 # 2. Check specific workflow
-curl http://localhost:8081/api/v1/workflow-status/classification_agent
+curl http://localhost:80/api/v1/workflow-status/classification-agent
 
 # 3. Check system diagnostics
-curl http://localhost:8081/api/v1/diagnostic
+curl http://localhost:80/api/v1/diagnostic
 ```
 
 ### Enable Debug Logging
@@ -286,19 +286,19 @@ If things are broken, reset to a clean state:
 rm -rf .tmp/
 
 # 3. Verify configuration
-uv run ingen workflow-requirements all
+uv run ingen workflows
 
 # 4. Test minimal workflow first
-uv run ingen run-rest-api-server
-curl -X POST http://localhost:8081/api/v1/chat \
+uv run ingen serve
+curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
-  -d '{"user_prompt": "Hello", "conversation_flow": "classification_agent"}'
+  -d '{"user_prompt": "Hello", "conversation_flow": "classification-agent"}'
 ```
 
 ### Progressive Setup
 
-1. **Start simple**: Get `classification_agent` working first
-2. **Add complexity**: Then try `knowledge_base_agent`
+1. **Start simple**: Get `classification-agent` working first
+2. **Add complexity**: Then try `knowledge-base-agent`
 3. **Debug incrementally**: Don't configure everything at once
 
 ## 🆘 Getting Help
@@ -317,7 +317,7 @@ Include:
 - Error messages and logs
 - Steps to reproduce
 - Operating system and Python version
-- Output of `uv run ingen workflow-requirements all`
+- Output of `uv run ingen workflows`
 
 ### Quick Diagnostic Info:
 
@@ -328,10 +328,10 @@ uv --version
 python --version
 
 echo "=== Configuration Status ==="
-uv run ingen workflow-requirements all
+uv run ingen workflows
 
 echo "=== Workflow Status ==="
-curl -s http://localhost:8081/api/v1/workflows || echo "Server not running"
+curl -s http://localhost:80/api/v1/workflows || echo "Server not running"
 ```
 
 ---

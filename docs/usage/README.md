@@ -1,3 +1,14 @@
+---
+title: "Usage Examples"
+layout: single
+permalink: /usage/
+sidebar:
+  nav: "docs"
+toc: true
+toc_label: "Usage Examples"
+toc_icon: "play"
+---
+
 # Usage Guide
 
 This guide shows how to use Insight Ingenious for various tasks.
@@ -12,12 +23,8 @@ This guide shows how to use Insight Ingenious for various tasks.
 ### Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/Insight-Services-APAC/Insight_Ingenious.git
-cd Insight_Ingenious
-
-# Install dependencies using uv
-uv sync
+# Install from your existing Insight_Ingenious directory
+uv pip install -e ./Insight_Ingenious
 
 # Initialize project (creates config templates and folder structure)
 uv run ingen init
@@ -56,28 +63,28 @@ Before using any workflow, check what configuration is needed:
 uv run ingen workflows
 
 # Check specific workflow requirements
-uv run ingen workflows classification_agent
-uv run ingen workflows knowledge_base_agent
+uv run ingen workflows classification-agent
+uv run ingen workflows knowledge-base-agent
 ```
 
 ### 🚀 Quick Start Workflows (Minimal Configuration)
 
 These workflows only need Azure OpenAI configuration:
 
-- **classification_agent**: Routes input to specialized agents
-- **bike_insights**: Sample domain-specific analysis
+- **classification-agent**: Routes input to specialized agents
+- **bike-insights**: Sample domain-specific analysis
 
 ```bash
 # Test minimal configuration workflow
 curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
-  -d '{"user_prompt": "Hello", "conversation_flow": "classification_agent"}'
+  -d '{"user_prompt": "Hello", "conversation_flow": "classification-agent"}'
 ```
 
 ### 🔍 Advanced Workflows (External Services Required)
 
-- **knowledge_base_agent**: Requires Azure Cognitive Search
-- **sql_manipulation_agent**: Requires database connection
+- **knowledge-base-agent**: Requires Azure Cognitive Search
+- **sql-manipulation-agent**: Requires database connection
 
 For detailed setup instructions, see [Workflow Configuration Requirements](../workflows/README.md).
 
@@ -141,7 +148,7 @@ The prompt tuner is now integrated with the main FastAPI application and accessi
 To run the application with the prompt tuner enabled:
 
 ```bash
-uv run ingen run-rest-api-server --enable-prompt-tuner
+uv run ingen serve --enable-prompt-tuner
 ```
 
 The prompt tuner will be accessible at `http://localhost:{port}/prompt-tuner/` where `{port}` is the port configured in your configuration file.
@@ -347,10 +354,10 @@ Before using the REST API, understand which workflows need external service conf
 
 ```bash
 # Check all workflow requirements
-uv run ingen workflow-requirements all
+uv run ingen workflows
 
 # Check specific workflow
-uv run ingen workflow-requirements knowledge_base_agent
+uv run ingen workflows knowledge-base-agent
 ```
 
 ### Using the REST API
@@ -367,7 +374,7 @@ curl -X POST http://localhost:80/api/v1/chat \
   -H "Authorization: Basic $(echo -n username:password | base64)" \
   -d '{
     "user_prompt": "Analyze this customer feedback: Great product!",
-    "conversation_flow": "classification_agent"
+    "conversation_flow": "classification-agent"
   }'
 
 # Bike insights - sample domain-specific workflow
@@ -375,7 +382,7 @@ curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Show bike sales trends",
-    "conversation_flow": "bike_insights"
+    "conversation_flow": "bike-insights"
   }'
 ```
 
@@ -388,7 +395,7 @@ curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Search for health and safety information",
-    "conversation_flow": "knowledge_base_agent"
+    "conversation_flow": "knowledge-base-agent"
   }'
 ```
 
@@ -403,7 +410,7 @@ curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Show me student performance statistics",
-    "conversation_flow": "sql_manipulation_agent"
+    "conversation_flow": "sql-manipulation-agent"
   }'
 ```
 
@@ -418,7 +425,7 @@ When workflows can't run due to missing configuration:
 ```json
 {
   "error": "Azure Search service not configured",
-  "workflow": "knowledge_base_agent",
+  "workflow": "knowledge-base-agent",
   "required_config": ["azure_search_services.endpoint", "azure_search_services.key"],
   "documentation": "See docs/workflows/README.md for setup instructions"
 }
@@ -428,13 +435,13 @@ When workflows can't run due to missing configuration:
 
 ```bash
 # Check if configuration is complete for a workflow
-curl -X GET http://localhost:80/api/v1/workflow-status/knowledge_base_agent
+curl -X GET http://localhost:80/api/v1/workflow-status/knowledge-base-agent
 ```
 
 Response:
 ```json
 {
-  "workflow": "knowledge_base_agent",
+  "workflow": "knowledge-base-agent",
   "configured": true,
   "missing_config": [],
   "ready": true

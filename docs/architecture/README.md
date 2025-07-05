@@ -11,11 +11,11 @@ toc_icon: "sitemap"
 
 # Architecture Overview
 
-This document describes the high-level architecture of Insight Ingenious, explaining its key components and how they interact.
+This document describes the high-level architecture of Insight Ingenious, an enterprise-grade Python library designed for rapid deployment of AI agent         CHAT_INTERFACE[💬 IChatService Interface]PIs with tight Microsoft Azure integrations and comprehensive debugging capabilities.
 
 ## System Architecture
 
-Insight Ingenious is designed with a modular architecture that allows for extensibility and customization. The system consists of the following main components:
+Insight Ingenious is architected as a production-ready library with enterprise-grade features including seamless Azure service integrations, robust debugging tools, and extensive customization capabilities. The system consists of the following main components:
 
 ```mermaid
 graph TB
@@ -31,7 +31,7 @@ graph TB
 
     subgraph "Core Engine"
         AGENT_SERVICE[Agent Service<br/>Conversation Manager]
-        FLOW_ENGINE[Flow Engine<br/>Pattern Orchestrator]
+        PATTERN_SERVICE[Pattern Service<br/>Conversation Orchestrator]
         LLM_SERVICE[LLM Service<br/>Azure OpenAI Integration]
     end
 
@@ -43,7 +43,7 @@ graph TB
 
     subgraph "Storage Layer"
         CONFIG[Configuration<br/>YAML Files]
-        HISTORY[Chat History<br/>Session Management]
+        HISTORY[Chat History<br/>SQLite Database]
         FILES[File Storage<br/>Documents & Assets]
     end
 
@@ -56,15 +56,15 @@ graph TB
     API_CLIENT --> API
     API --> AUTH
     AUTH --> AGENT_SERVICE
-    AGENT_SERVICE --> FLOW_ENGINE
+    AGENT_SERVICE --> PATTERN_SERVICE
     AGENT_SERVICE --> LLM_SERVICE
-    FLOW_ENGINE --> PATTERNS
+    PATTERN_SERVICE --> PATTERNS
     AGENT_SERVICE --> CUSTOM_AGENTS
     CUSTOM_AGENTS --> TOOLS
     LLM_SERVICE --> AZURE
     TOOLS --> EXTERNAL_API
     AGENT_SERVICE --> HISTORY
-    FLOW_ENGINE --> CONFIG
+    PATTERN_SERVICE --> CONFIG
     AGENT_SERVICE --> FILES
 
     classDef clientLayer fill:#e1f5fe
@@ -76,7 +76,7 @@ graph TB
 
     class UI,API_CLIENT clientLayer
     class API,AUTH apiLayer
-    class AGENT_SERVICE,FLOW_ENGINE,LLM_SERVICE coreLayer
+    class AGENT_SERVICE,PATTERN_SERVICE,LLM_SERVICE coreLayer
     class CUSTOM_AGENTS,PATTERNS,TOOLS extensionLayer
     class CONFIG,HISTORY,FILES storageLayer
     class AZURE,EXTERNAL_API externalLayer
@@ -97,40 +97,38 @@ graph LR
     end
 
     subgraph "Agent Types"
-        BIKE[Bike Analysis Agent]
-        SENTIMENT[Sentiment Agent]
-        FISCAL[Fiscal Agent]
-        SUMMARY[Summary Agent]
+        CURRICULUM[Curriculum Expert]
+        EDUCATION[Education Expert]
+        LESSON[Lesson Planner]
         CUSTOM[Custom Agents]
     end
 
-    subgraph "Conversation Patterns"
-        SEQUENTIAL[Sequential Pattern]
-        PARALLEL[Parallel Pattern]
-        CONDITIONAL[Conditional Pattern]
-        HIERARCHICAL[Hierarchical Pattern]
+    subgraph "Conversation Flows"
+        CLASSIFICATION[Classification Agent]
+        KNOWLEDGE[Knowledge Base Agent]
+        SQL[SQL Manipulation Agent]
+        EDUCATION_FLOW[Education Expert Flow]
     end
 
     MANAGER --> COORDINATOR
     COORDINATOR --> STATE
-    COORDINATOR --> BIKE
-    COORDINATOR --> SENTIMENT
-    COORDINATOR --> FISCAL
-    COORDINATOR --> SUMMARY
+    COORDINATOR --> CURRICULUM
+    COORDINATOR --> EDUCATION
+    COORDINATOR --> LESSON
     COORDINATOR --> CUSTOM
 
-    MANAGER --> SEQUENTIAL
-    MANAGER --> PARALLEL
-    MANAGER --> CONDITIONAL
-    MANAGER --> HIERARCHICAL
+    MANAGER --> CLASSIFICATION
+    MANAGER --> KNOWLEDGE
+    MANAGER --> SQL
+    MANAGER --> EDUCATION_FLOW
 
     classDef service fill:#e3f2fd
     classDef agents fill:#f1f8e9
     classDef patterns fill:#fff8e1
 
     class MANAGER,COORDINATOR,STATE service
-    class BIKE,SENTIMENT,FISCAL,SUMMARY,CUSTOM agents
-    class SEQUENTIAL,PARALLEL,CONDITIONAL,HIERARCHICAL patterns
+    class CURRICULUM,EDUCATION,LESSON,CUSTOM agents
+    class CLASSIFICATION,KNOWLEDGE,SQL,EDUCATION_FLOW patterns
 ```
 
 ### API Layer Architecture
@@ -147,7 +145,7 @@ sequenceDiagram
     participant Storage
 
     Client->>FastAPI: POST /api/chat
-    FastAPI->>Auth: Validate API Key
+    FastAPI->>Auth: Check Authentication
     Auth-->>FastAPI: ✅ Authorized
     FastAPI->>AgentService: Process Request
     AgentService->>Storage: Load Chat History
@@ -212,7 +210,7 @@ graph TB
 
     subgraph "📚 Chat Storage"
         HISTORY[💬 Chat History<br/>SQLite/Database]
-        SESSIONS[👤 User Sessions<br/>Memory/Redis]
+        SESSIONS[👤 User Sessions<br/>In-Memory Storage]
     end
 
     subgraph "📁 File Storage"
@@ -263,15 +261,15 @@ flowchart TD
     INPUT_VALIDATION -->|❌ Invalid| ERROR_RESPONSE[❌ Error Response]
 
     LOAD_CONTEXT --> SELECT_WORKFLOW{🎯 Select Workflow}
-    SELECT_WORKFLOW --> BIKE_WORKFLOW[🚴 Bike Analysis]
-    SELECT_WORKFLOW --> SENTIMENT_WORKFLOW[😊 Sentiment Analysis]
-    SELECT_WORKFLOW --> FISCAL_WORKFLOW[💰 Fiscal Analysis]
-    SELECT_WORKFLOW --> CUSTOM_WORKFLOW[🔧 Custom Workflow]
+    SELECT_WORKFLOW --> CLASSIFICATION_WORKFLOW[🔍 Classification Agent]
+    SELECT_WORKFLOW --> EDUCATION_WORKFLOW[🎓 Education Expert]
+    SELECT_WORKFLOW --> KNOWLEDGE_WORKFLOW[🔍 Knowledge Base Agent]
+    SELECT_WORKFLOW --> SQL_WORKFLOW[🗄️ SQL Manipulation Agent]
 
-    BIKE_WORKFLOW --> AGENT_COORDINATION[👥 Agent Coordination]
-    SENTIMENT_WORKFLOW --> AGENT_COORDINATION
-    FISCAL_WORKFLOW --> AGENT_COORDINATION
-    CUSTOM_WORKFLOW --> AGENT_COORDINATION
+    CLASSIFICATION_WORKFLOW --> AGENT_COORDINATION[👥 Agent Coordination]
+    EDUCATION_WORKFLOW --> AGENT_COORDINATION
+    KNOWLEDGE_WORKFLOW --> AGENT_COORDINATION
+    SQL_WORKFLOW --> AGENT_COORDINATION
 
     AGENT_COORDINATION --> LLM_PROCESSING[🧠 LLM Processing]
     LLM_PROCESSING --> RESPONSE_FORMATTING[📝 Format Response]
@@ -290,7 +288,7 @@ flowchart TD
     class START,END startEnd
     class LOAD_CONTEXT,AGENT_COORDINATION,LLM_PROCESSING,RESPONSE_FORMATTING,SAVE_HISTORY,SEND_RESPONSE process
     class INPUT_VALIDATION,SELECT_WORKFLOW decision
-    class BIKE_WORKFLOW,SENTIMENT_WORKFLOW,FISCAL_WORKFLOW,CUSTOM_WORKFLOW workflow
+    class CLASSIFICATION_WORKFLOW,EDUCATION_WORKFLOW,KNOWLEDGE_WORKFLOW,SQL_WORKFLOW workflow
     class ERROR_RESPONSE error
 ```
 
@@ -301,38 +299,35 @@ sequenceDiagram
     participant User
     participant API
     participant Manager
-    participant Agent1 as 🚴 Bike Agent
-    participant Agent2 as 😊 Sentiment Agent
-    participant Agent3 as 💰 Fiscal Agent
-    participant Summary as 📝 Summary Agent
+    participant Agent1 as 🔍 Classification Agent
+    participant Agent2 as 🎓 Education Expert
+    participant Agent3 as 🔍 Knowledge Agent
+    participant Agent4 as 🗄️ SQL Agent
     participant LLM as 🧠 Azure OpenAI
 
-    User->>API: "Analyze bike sales performance"
-    API->>Manager: Route to bike_insights workflow
+    User->>API: "Help me understand database design"
+    API->>Manager: Route to classification-agent workflow
 
     Note over Manager: Initialize conversation pattern
-    Manager->>Agent1: Analyze bike sales data
-    Agent1->>LLM: Request data analysis
-    LLM-->>Agent1: Sales metrics & trends
-    Agent1-->>Manager: Sales analysis complete
+    Manager->>Agent1: Classify user intent
+    Agent1->>LLM: Request intent analysis
+    LLM-->>Agent1: Intent: Educational query
+    Agent1-->>Manager: Route to Education Expert
 
-    Manager->>Agent2: Analyze customer sentiment
-    Agent2->>LLM: Sentiment analysis request
-    LLM-->>Agent2: Customer satisfaction metrics
-    Agent2-->>Manager: Sentiment analysis complete
+    Manager->>Agent2: Handle educational query
+    Agent2->>LLM: Educational content request
+    LLM-->>Agent2: Database design concepts
+    Agent2-->>Manager: Educational content ready
 
-    Manager->>Agent3: Analyze financial impact
-    Agent3->>LLM: Financial calculation request
-    LLM-->>Agent3: Revenue & profit analysis
-    Agent3-->>Manager: Financial analysis complete
+    opt If further clarification needed
+        Manager->>Agent3: Search knowledge base
+        Agent3->>LLM: Knowledge retrieval request
+        LLM-->>Agent3: Additional resources
+        Agent3-->>Manager: Supporting materials
+    end
 
-    Manager->>Summary: Compile comprehensive report
-    Summary->>LLM: Summarization request
-    LLM-->>Summary: Executive summary
-    Summary-->>Manager: Final report ready
-
-    Manager-->>API: Complete analysis
-    API-->>User: Comprehensive bike sales report
+    Manager-->>API: Complete response
+    API-->>User: Comprehensive educational response
 ```
 
 ## Extension Points & Customization
@@ -343,52 +338,52 @@ sequenceDiagram
 graph TB
     subgraph "🏭 Core Framework"
         CORE_API[🔧 Core API]
-        CORE_AGENTS[👤 Base Agents]
+        CORE_FLOWS[👤 Base Conversation Flows]
         CORE_PATTERNS[📋 Base Patterns]
     end
 
     subgraph "🎯 Extension Interface"
-        AGENT_INTERFACE[🤖 IAgent Interface]
-        PATTERN_INTERFACE[🔄 IPattern Interface]
-        TOOL_INTERFACE[🛠️ ITool Interface]
+        FLOW_INTERFACE[🤖 IConversationFlow Interface]
+        PATTERN_INTERFACE[🔄 IConversationPattern Interface]
+        CHAT_INTERFACE[� IChatService Interface]
     end
 
     subgraph "🔌 Custom Extensions"
-        CUSTOM_AGENT[👥 Custom Agent<br/>Domain Expert]
+        CUSTOM_FLOW[👥 Custom Flow<br/>Domain Expert]
         CUSTOM_PATTERN[🎭 Custom Pattern<br/>Workflow Logic]
-        CUSTOM_TOOL[⚙️ Custom Tool<br/>External Integration]
+        CUSTOM_TOOLS[⚙️ Custom Tools<br/>External Integration]
     end
 
     subgraph "📦 Extension Registry"
-        REGISTRY[📋 Extension Registry]
-        LOADER[⚡ Dynamic Loader]
-        VALIDATOR[✅ Validation Engine]
+        NAMESPACE_LOADER[📋 Namespace Utils]
+        DYNAMIC_LOADER[⚡ Dynamic Loader]
+        CONFIG_VALIDATOR[✅ Config Validation]
     end
 
-    CORE_API --> AGENT_INTERFACE
-    CORE_AGENTS --> AGENT_INTERFACE
+    CORE_API --> FLOW_INTERFACE
+    CORE_FLOWS --> FLOW_INTERFACE
     CORE_PATTERNS --> PATTERN_INTERFACE
 
-    AGENT_INTERFACE --> CUSTOM_AGENT
+    FLOW_INTERFACE --> CUSTOM_FLOW
     PATTERN_INTERFACE --> CUSTOM_PATTERN
-    TOOL_INTERFACE --> CUSTOM_TOOL
+    CHAT_INTERFACE --> CUSTOM_TOOLS
 
-    CUSTOM_AGENT --> REGISTRY
-    CUSTOM_PATTERN --> REGISTRY
-    CUSTOM_TOOL --> REGISTRY
+    CUSTOM_FLOW --> NAMESPACE_LOADER
+    CUSTOM_PATTERN --> NAMESPACE_LOADER
+    CUSTOM_TOOLS --> NAMESPACE_LOADER
 
-    REGISTRY --> LOADER
-    REGISTRY --> VALIDATOR
+    NAMESPACE_LOADER --> DYNAMIC_LOADER
+    NAMESPACE_LOADER --> CONFIG_VALIDATOR
 
     classDef core fill:#e3f2fd
     classDef interface fill:#f1f8e9
     classDef custom fill:#fff3e0
     classDef registry fill:#fce4ec
 
-    class CORE_API,CORE_AGENTS,CORE_PATTERNS core
-    class AGENT_INTERFACE,PATTERN_INTERFACE,TOOL_INTERFACE interface
-    class CUSTOM_AGENT,CUSTOM_PATTERN,CUSTOM_TOOL custom
-    class REGISTRY,LOADER,VALIDATOR registry
+    class CORE_API,CORE_FLOWS,CORE_PATTERNS core
+    class FLOW_INTERFACE,PATTERN_INTERFACE,CHAT_INTERFACE interface
+    class CUSTOM_FLOW,CUSTOM_PATTERN,CUSTOM_TOOLS custom
+    class NAMESPACE_LOADER,DYNAMIC_LOADER,CONFIG_VALIDATOR registry
 ```
 
 ## Key Classes and Interfaces
@@ -411,48 +406,78 @@ classDiagram
         +finalize_conversation()
     }
 
-    class BaseAgent {
-        <<abstract>>
-        +name: str
-        +description: str
-        +tools: List[Tool]
+    class IChatService {
+        <<interface>>
+        +get_chat_response(request: ChatRequest)
         +process_message(message: str)
-        +get_system_prompt()
     }
 
-    class BikeAnalysisAgent {
-        +analyze_sales_data()
-        +generate_insights()
-        +create_visualizations()
+    class AgentMarkdownDefinition {
+        +title: str
+        +description: str
+        +system_prompt: str
+        +tasks: List[str]
     }
 
-    class SentimentAgent {
-        +analyze_sentiment()
-        +extract_emotions()
-        +score_satisfaction()
+    class EducationExpertFlow {
+        +create_curriculum()
+        +plan_lessons()
+        +assess_progress()
     }
 
-    class FiscalAgent {
-        +calculate_revenue()
-        +analyze_profitability()
-        +forecast_trends()
+    class CurriculumExpertFlow {
+        +design_curriculum()
+        +structure_content()
+        +define_objectives()
+    }
+
+    class LessonPlannerFlow {
+        +plan_lessons()
+        +create_activities()
+        +set_assessments()
+    }
+
+    class KnowledgeBaseAgentFlow {
+        +search_knowledge()
+        +retrieve_information()
+        +format_results()
+    }
+
+    class SqlManipulationAgentFlow {
+        +parse_nl_query()
+        +generate_sql()
+        +execute_query()
+        +format_results()
     }
 
     class MultiAgentChatService {
-        +agents: Dict[str, BaseAgent]
+        +conversation_flows: Dict[str, IConversationFlow]
         +patterns: Dict[str, IConversationPattern]
         +orchestrate_conversation()
         +manage_state()
     }
 
-    IConversationPattern <|.. SequentialPattern
-    IConversationPattern <|.. ParallelPattern
-    IConversationFlow <|.. BikeInsightsFlow
-    BaseAgent <|-- BikeAnalysisAgent
-    BaseAgent <|-- SentimentAgent
-    BaseAgent <|-- FiscalAgent
-    MultiAgentChatService --> BaseAgent
+    class ConversationPattern {
+        +execute_in_sequence()
+        +handle_dependencies()
+    }
+
+    class ClassificationAgentFlow {
+        +classify_intent()
+        +route_to_agent()
+        +handle_routing()
+    }
+    IConversationFlow <|.. ClassificationAgentFlow
+    IConversationFlow <|.. EducationExpertFlow
+    IConversationFlow <|.. CurriculumExpertFlow
+    IConversationFlow <|.. LessonPlannerFlow
+    IConversationFlow <|.. KnowledgeBaseAgentFlow
+    IConversationFlow <|.. SqlManipulationAgentFlow
+    IConversationPattern <|.. ConversationPattern
+    IChatService <|.. MultiAgentChatService
+    MultiAgentChatService --> IConversationFlow
     MultiAgentChatService --> IConversationPattern
+    MultiAgentChatService --> AgentMarkdownDefinition
 ```
 
 ## Configuration Architecture
@@ -568,54 +593,50 @@ graph TB
 ```mermaid
 graph TB
     subgraph "🛡️ Authentication Layer"
-        API_KEY[🔑 API Key Validation]
-        JWT_TOKEN[🎫 JWT Tokens]
-        SESSION_MGR[👤 Session Management]
+        BASIC_AUTH[� HTTP Basic Authentication]
+        CONFIG_AUTH[⚙️ Configurable Authentication]
+        NO_AUTH[� Anonymous Access Option]
     end
 
-    subgraph "🔒 Authorization Layer"
-        RBAC[👥 Role-Based Access]
-        PERMISSIONS[📋 Permission System]
-        RESOURCE_GUARD[🛡️ Resource Protection]
-    end
-
-    subgraph "🔐 Data Protection"
-        ENCRYPTION[🔒 Data Encryption]
-        SECRETS_MGR[🗝️ Secrets Management]
-        AUDIT_LOG[📝 Audit Logging]
+    subgraph "� Data Protection"
+        AZURE_SECRETS[�️ Azure Service Keys]
+        CONFIG_SECRETS[� Profile Configuration]
+        ENV_VARS[🌐 Environment Variables]
     end
 
     subgraph "🌐 Network Security"
         HTTPS[🔐 HTTPS/TLS]
         CORS[🌍 CORS Policy]
-        RATE_LIMIT[⏱️ Rate Limiting]
+        FASTAPI_SEC[⚡ FastAPI Security]
     end
 
-    API_KEY --> RBAC
-    JWT_TOKEN --> RBAC
-    SESSION_MGR --> RBAC
+    subgraph "🔒 External Service Security"
+        AZURE_AUTH[🧠 Azure OpenAI Authentication]
+        SEARCH_AUTH[� Azure Search Authentication]
+        SQL_AUTH[🗄️ Database Authentication]
+    end
 
-    RBAC --> PERMISSIONS
-    PERMISSIONS --> RESOURCE_GUARD
-
-    RESOURCE_GUARD --> ENCRYPTION
-    ENCRYPTION --> SECRETS_MGR
-    SECRETS_MGR --> AUDIT_LOG
+    BASIC_AUTH --> CONFIG_AUTH
+    CONFIG_AUTH --> NO_AUTH
+    AZURE_SECRETS --> CONFIG_SECRETS
+    CONFIG_SECRETS --> ENV_VARS
 
     HTTPS --> CORS
-    CORS --> RATE_LIMIT
+    CORS --> FASTAPI_SEC
+
+    AZURE_AUTH --> SEARCH_AUTH
+    SEARCH_AUTH --> SQL_AUTH
 
     classDef auth fill:#e8f5e8
-    classDef authz fill:#fff3e0
-    classDef data fill:#e3f2fd
-    classDef network fill:#fce4ec
+    classDef data fill:#fff3e0
+    classDef network fill:#e3f2fd
+    classDef external fill:#fce4ec
 
-    class API_KEY,JWT_TOKEN,SESSION_MGR auth
-    class RBAC,PERMISSIONS,RESOURCE_GUARD authz
-    class ENCRYPTION,SECRETS_MGR,AUDIT_LOG data
-    class HTTPS,CORS,RATE_LIMIT network
+    class BASIC_AUTH,CONFIG_AUTH,NO_AUTH auth
+    class AZURE_SECRETS,CONFIG_SECRETS,ENV_VARS data
+    class HTTPS,CORS,FASTAPI_SEC network
+    class AZURE_AUTH,SEARCH_AUTH,SQL_AUTH external
 ```
-
 ## Performance & Scalability
 
 ### Performance Architecture
@@ -623,8 +644,8 @@ graph TB
 ```mermaid
 graph TB
     subgraph "⚡ Caching Strategy"
-        REDIS[🔴 Redis Cache]
-        MEMORY[💾 In-Memory Cache]
+        MEMORY[� In-Memory Cache]
+        FILE_CACHE[� File-based Cache]
         CDN[🌐 CDN Cache]
     end
 
@@ -635,9 +656,9 @@ graph TB
     end
 
     subgraph "🔄 Async Processing"
-        TASK_QUEUE[📋 Task Queue]
-        WORKERS[👷 Background Workers]
-        SCHEDULER[⏰ Job Scheduler]
+        ASYNC_HANDLERS[📋 Async Request Handlers]
+        BACKGROUND_TASKS[👷 Background Tasks]
+        SCHEDULER[⏰ Task Scheduler]
     end
 
     subgraph "📈 Monitoring"
@@ -646,20 +667,20 @@ graph TB
         DASHBOARDS[📈 Monitoring Dashboard]
     end
 
-    REDIS --> MEMORY
-    MEMORY --> CDN
+    MEMORY --> FILE_CACHE
+    FILE_CACHE --> CDN
 
     LOAD_BALANCER --> API_INSTANCES
     LOAD_BALANCER --> HEALTH_CHECK
 
-    TASK_QUEUE --> WORKERS
-    WORKERS --> SCHEDULER
+    ASYNC_HANDLERS --> BACKGROUND_TASKS
+    BACKGROUND_TASKS --> SCHEDULER
 
     METRICS --> ALERTS
     ALERTS --> DASHBOARDS
 
-    API_INSTANCES --> REDIS
-    API_INSTANCES --> TASK_QUEUE
+    API_INSTANCES --> MEMORY
+    API_INSTANCES --> ASYNC_HANDLERS
     API_INSTANCES --> METRICS
 
     classDef cache fill:#e8f5e8
@@ -667,9 +688,9 @@ graph TB
     classDef async fill:#e3f2fd
     classDef monitor fill:#fce4ec
 
-    class REDIS,MEMORY,CDN cache
+    class MEMORY,FILE_CACHE,CDN cache
     class LOAD_BALANCER,API_INSTANCES,HEALTH_CHECK balance
-    class TASK_QUEUE,WORKERS,SCHEDULER async
+    class ASYNC_HANDLERS,BACKGROUND_TASKS,SCHEDULER async
     class METRICS,ALERTS,DASHBOARDS monitor
 ```
 

@@ -1,6 +1,17 @@
+---
+title: "Components Reference"
+layout: single
+permalink: /components/
+sidebar:
+  nav: "docs"
+toc: true
+toc_label: "Components"
+toc_icon: "cogs"
+---
+
 # Components Reference
 
-This document provides detailed information about the key components of the Insight Ingenious framework.
+This document provides detailed information about the key components of the Insight Ingenious library - an enterprise-grade Python library for building AI agent APIs with Microsoft Azure integrations and comprehensive debugging utilities.
 
 ## Multi-Agent Framework
 
@@ -12,9 +23,9 @@ The `ConversationPattern` class is the foundation for defining how agents intera
 
 | Pattern | Description | Use Case |
 |---------|-------------|----------|
-| `classification_agent` | Classifies input and routes to topic-specific agents | Content classification, intent detection |
-| `knowledge_base_agent` | Searches and retrieves information from knowledge bases | Question answering, information retrieval |
-| `sql_manipulation_agent` | Generates and executes SQL queries | Database interactions, data querying |
+| `classification-agent` | Classifies input and routes to topic-specific agents | Content classification, intent detection |
+| `knowledge-base-agent` | Searches and retrieves information from knowledge bases | Question answering, information retrieval |
+| `sql-manipulation-agent` | Generates and executes SQL queries | Database interactions, data querying |
 | `education_expert` | Generates educational content and lesson plans | Educational material creation (pattern only) |
 
 #### Key Methods
@@ -30,9 +41,9 @@ The `ConversationFlow` class implements specific use cases using conversation pa
 
 | Flow | Description | Pattern Used |
 |------|-------------|--------------|
-| `classification_agent` | Routes inputs to specialized agents | `classification_agent` |
-| `knowledge_base_agent` | Answers questions using knowledge bases | `knowledge_base_agent` |
-| `sql_manipulation_agent` | Executes SQL queries based on natural language | `sql_manipulation_agent` |
+| `classification-agent` | Routes inputs to specialized agents | `classification-agent` |
+| `knowledge-base-agent` | Answers questions using knowledge bases | `knowledge-base-agent` |
+| `sql-manipulation-agent` | Executes SQL queries based on natural language | `sql-manipulation-agent` |
 
 #### Key Methods
 
@@ -169,8 +180,8 @@ The prompt tuner provides tools for developing and testing prompts:
 
 The CLI provides commands for managing the framework:
 
-- `initialize-new-project`: Creates a new project structure with template files
-- `run-rest-api-server`: Starts the FastAPI server with REST endpoints
+- `init`: Creates a new project structure with template files
+- `serve`: Starts the FastAPI server with REST endpoints
 - `run-test-batch`: Runs tests on agent prompts with configurable options
 - `run-prompt-tuner`: Starts the prompt tuning web application
 - `dataprep`: Data preparation utilities including Scrapfly crawler for web scraping
@@ -203,22 +214,22 @@ Check configuration requirements and status:
 
 ```bash
 # List all workflows and their status
-curl http://localhost:8081/api/v1/workflows
+curl http://localhost:80/api/v1/workflows
 
 # Check specific workflow configuration
-curl http://localhost:8081/api/v1/workflow-status/knowledge_base_agent
+curl http://localhost:80/api/v1/workflow-status/knowledge-base-agent
 ```
 
 Example response:
 ```json
 {
-  "workflow": "knowledge_base_agent",
+  "workflow": "knowledge-base-agent",
   "configured": false,
   "missing_config": ["azure_search_services.key: Missing in profiles.yml"],
   "required_config": ["models", "chat_service", "azure_search_services"],
   "external_services": ["Azure OpenAI", "Azure Cognitive Search"],
   "ready": false,
-  "test_command": "curl -X POST http://localhost:8081/api/v1/chat...",
+  "test_command": "curl -X POST http://localhost:80/api/v1/chat...",
   "documentation": "See docs/workflows/README.md for setup instructions"
 }
 ```

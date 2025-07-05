@@ -1,3 +1,14 @@
+---
+title: "Quick Onboarding"
+layout: single
+permalink: /quick_onboarding/
+sidebar:
+  nav: "docs"
+toc: true
+toc_label: "Onboarding Steps"
+toc_icon: "rocket"
+---
+
 # Basic Onboarding
 
 > This is a very simple guide just to get you started playing with the Ingenious playground.
@@ -20,10 +31,10 @@ uv venv
 uv pip install -e .
 
 # Initialize project
-ingen_cli initialize-new-project
+uv run ingen init
 ```
 ## Initializing the project
-Once you ran `ingen_cli` successfully, you need to deal with two configuration files--`config.yml` and `profiles.yml`.
+Once you ran `uv run ingen init` successfully, you need to deal with two configuration files--`config.yml` and `profiles.yml`.
 
 ### Configuration Files
 1. Edit `config.yml` in your project directory (**_Note: you may need to coordinate with your team lead with this so that you may be provided the necessary credentials._**)
@@ -39,7 +50,7 @@ Once you ran `ingen_cli` successfully, you need to deal with two configuration f
 ### Initialize a new project
 
 ```bash
-ingen_cli initialize-new-project
+uv run ingen init
 ```
 
 This creates the necessary folder structure and configuration files.
@@ -50,10 +61,10 @@ Before starting, understand what each workflow needs:
 
 ```bash
 # See all available workflows and their requirements
-ingen_cli workflow-requirements all
+uv run ingen workflows
 
 # Check specific workflow requirements
-ingen_cli workflow-requirements classification_agent
+uv run ingen workflows classification-agent
 ```
 
 ### Start with Minimal Configuration
@@ -71,7 +82,7 @@ For quick testing, start with workflows that only need Azure OpenAI:
 ### Start the Application
 
 ```bash
-ingen_cli run-rest-api-server
+uv run ingen serve
 ```
 
 Starts the FastAPI server with Chainlit UI.
@@ -79,38 +90,38 @@ Starts the FastAPI server with Chainlit UI.
 ### Testing the UI
 
 Once the application is running, access the web UI at:
-- http://localhost:8000 - Main application
-- http://localhost:8000/chainlit - Chainlit chat interface
-- http://localhost:8000/prompt-tuner - Prompt tuning interface
+- http://localhost:80 - Main application
+- http://localhost:80/chainlit - Chainlit chat interface
+- http://localhost:80/prompt-tuner - Prompt tuning interface
 
 ### Testing chat with the agents
 
 #### Quick Test (Minimal Configuration)
 Test with workflows that only need Azure OpenAI:
 
-1. Navigate to http://localhost:8000/chainlit
+1. Navigate to http://localhost:80/chainlit
 2. Start a new conversation
 3. Try these workflows:
-   - "Hello" with `classification_agent`
-   - "Analyze bike sales" with `bike_insights`
+   - "Hello" with `classification-agent`
+   - "Analyze bike sales" with `bike-insights`
 
 #### API Testing
 ```bash
 # Test classification agent (minimal config needed)
-curl -X POST http://localhost:8081/api/v1/chat \
+curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
-  -d '{"user_prompt": "Hello world", "conversation_flow": "classification_agent"}'
+  -d '{"user_prompt": "Hello world", "conversation_flow": "classification-agent"}'
 ```
 
 #### Advanced Workflows
 For workflows requiring external services:
 
-- **knowledge_base_agent**: Requires Azure Cognitive Search
-- **sql_manipulation_agent**: Requires database connection
+- **knowledge-base-agent**: Requires Azure Cognitive Search
+- **sql-manipulation-agent**: Requires database connection
 
 Check requirements with:
 ```bash
-ingen_cli workflow-requirements <workflow_name>
+uv run ingen workflows <workflow_name>
 ```
 
 See [Workflow Configuration Requirements](../workflows/README.md) for detailed setup.

@@ -6,6 +6,22 @@ from pathlib import Path
 from sysconfig import get_paths
 
 
+def normalize_workflow_name(workflow_name: str) -> str:
+    """
+    Normalize workflow names to support both hyphenated and underscored formats.
+    Converts hyphens to underscores for module path compatibility.
+
+    Args:
+        workflow_name (str): The workflow name (e.g., "bike-insights" or "bike_insights")
+
+    Returns:
+        str: The normalized workflow name with underscores (e.g., "bike_insights")
+    """
+    if not workflow_name:
+        return workflow_name
+    return workflow_name.replace("-", "_").lower()
+
+
 def print_namespace_modules(namespace):
     package = importlib.import_module(namespace)
     if hasattr(package, "__path__"):

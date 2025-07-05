@@ -11,7 +11,7 @@ toc_icon: "book"
 
 # Insight Ingenious Documentation
 
-Welcome to the Insight Ingenious documentation. This collection of guides will help you understand, use, and extend the framework.
+Welcome to the Insight Ingenious documentation. This enterprise-grade Python library enables rapid deployment of AI agent APIs with tight Microsoft Azure integrations and comprehensive debugging tools. This collection of guides will help you understand, use, and extend the library.
 
 ## 🚀 Getting Started
 

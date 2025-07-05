@@ -11,7 +11,7 @@ toc_icon: "project-diagram"
 
 # Workflow Configuration Requirements
 
-This guide outlines the configuration requirements for each conversation workflow in Insight Ingenious. Understanding these requirements will help you determine what external services and configurations are needed for each workflow.
+This guide outlines the configuration requirements for each conversation workflow in Insight Ingenious - an enterprise-grade Python library for AI agent APIs. Understanding these requirements will help you determine what Microsoft Azure services and configurations are needed for each workflow, along with available debugging and customization options.
 
 ## Workflow Architecture Overview
 
@@ -19,117 +19,97 @@ This guide outlines the configuration requirements for each conversation workflo
 graph TB
     subgraph "Workflow Types"
         CLASSIFICATION[Classification Agent<br/>Route to specialists]
-        BIKE[Bike Insights<br/>Sales analysis]
-        KNOWLEDGE[Knowledge Base<br/>Information retrieval]
-        SQL[SQL Manipulation<br/>Database queries]
-        DOCUMENT[Document Processing<br/>Text extraction]
+        KNOWLEDGE[Knowledge Base Agent<br/>Information retrieval]
+        SQL[SQL Manipulation Agent<br/>Database queries]
+        EDUCATION[Education Expert<br/>Educational content]
     end
 
     subgraph "Configuration Levels"
         MINIMAL[Minimal Config<br/>Azure OpenAI only]
         SEARCH[+ Azure Search]
         DATABASE[+ Database]
-        SERVICES[+ Document Services]
     end
 
     subgraph "External Dependencies"
         AZURE_OPENAI[Azure OpenAI]
         AZURE_SEARCH[Azure Cognitive Search]
         AZURE_SQL[Azure SQL Database]
-        AZURE_DOC[Azure Document Intelligence]
     end
 
     CLASSIFICATION --> MINIMAL
-    BIKE --> MINIMAL
+    EDUCATION --> MINIMAL
 
     KNOWLEDGE --> SEARCH
 
     SQL --> DATABASE
-
-    DOCUMENT --> SERVICES
 
     MINIMAL --> AZURE_OPENAI
     SEARCH --> AZURE_OPENAI
     SEARCH --> AZURE_SEARCH
     DATABASE --> AZURE_OPENAI
     DATABASE --> AZURE_SQL
-    SERVICES --> AZURE_OPENAI
-    SERVICES --> AZURE_DOC
 
     classDef workflow fill:#e3f2fd
     classDef config fill:#f1f8e9
     classDef external fill:#fff3e0
 
-    class CLASSIFICATION,BIKE,KNOWLEDGE,SQL,DOCUMENT workflow
-    class MINIMAL,SEARCH,DATABASE,SERVICES config
-    class AZURE_OPENAI,AZURE_SEARCH,AZURE_SQL,AZURE_DOC external
+    class CLASSIFICATION,EDUCATION,KNOWLEDGE,SQL workflow
+    class MINIMAL,SEARCH,DATABASE config
+    class AZURE_OPENAI,AZURE_SEARCH,AZURE_SQL external
 ```
 
 ## Detailed Workflow Flows
 
-### 🚴 Bike Insights Workflow
+### 🔍 Classification Agent Workflow
 
 ```mermaid
 sequenceDiagram
     participant User
     participant API
     participant Coordinator
-    participant BikeAgent as 🚴 Bike Agent
-    participant SentimentAgent as 😊 Sentiment Agent
-    participant FiscalAgent as 💰 Fiscal Agent
-    participant SummaryAgent as 📝 Summary Agent
+    participant ClassificationAgent as 🔍 Classification Agent
+    participant EducationAgent as 🎓 Education Expert
+    participant KnowledgeAgent as 🔍 Knowledge Base Agent
+    participant SQLAgent as 🗄️ SQL Agent
     participant AzureOpenAI as 🧠 Azure OpenAI
 
-    User->>API: "Analyze bike sales for Q2"
-    API->>Coordinator: Initialize bike_insights workflow
+    User->>API: "Help me with database queries"
+    API->>Coordinator: Initialize classification-agent workflow
 
-    Note over Coordinator: Load bike sales data
-    Coordinator->>BikeAgent: Analyze sales performance
-    BikeAgent->>AzureOpenAI: Request sales analysis
-    AzureOpenAI-->>BikeAgent: Sales metrics & trends
+    Coordinator->>ClassificationAgent: Classify user intent
+    ClassificationAgent->>AzureOpenAI: Analyze query type
+    AzureOpenAI-->>ClassificationAgent: Intent: SQL Query
 
-    par Parallel Analysis
-        Coordinator->>SentimentAgent: Analyze customer feedback
-        SentimentAgent->>AzureOpenAI: Sentiment analysis
-        AzureOpenAI-->>SentimentAgent: Customer satisfaction scores
-    and
-        Coordinator->>FiscalAgent: Calculate financial impact
-        FiscalAgent->>AzureOpenAI: Financial calculations
-        AzureOpenAI-->>FiscalAgent: Revenue & profit analysis
-    end
+    ClassificationAgent->>Coordinator: Route to SQL Agent
+    Coordinator->>SQLAgent: Handle database query
+    SQLAgent->>AzureOpenAI: Generate SQL solution
+    AzureOpenAI-->>SQLAgent: SQL query & explanation
 
-    Coordinator->>SummaryAgent: Compile comprehensive report
-    SummaryAgent->>AzureOpenAI: Summarize findings
-    AzureOpenAI-->>SummaryAgent: Executive summary
-
-    SummaryAgent-->>Coordinator: Final report
+    SQLAgent-->>Coordinator: Formatted response
     Coordinator-->>API: Complete analysis
-    API-->>User: Comprehensive bike sales report
+    API-->>User: SQL solution with explanation
 ```
 
-### 🔍 Classification Agent Workflow
+### 🔍 Classification Agent Workflow Flow
 
 ```mermaid
 flowchart TD
     START([👤 User Input]) --> CLASSIFY{🔍 Classify Intent}
 
-    CLASSIFY -->|Sales Query| BIKE_FLOW[🚴 Bike Insights Flow]
+    CLASSIFY -->|Educational Query| EDUCATION_FLOW[🎓 Education Expert Flow]
     CLASSIFY -->|Technical Question| KNOWLEDGE_FLOW[📚 Knowledge Base Flow]
     CLASSIFY -->|Data Query| SQL_FLOW[🗄️ SQL Query Flow]
-    CLASSIFY -->|Document Task| DOC_FLOW[📄 Document Processing Flow]
-    CLASSIFY -->|General Chat| CHAT_FLOW[💬 General Chat Flow]
+    CLASSIFY -->|General Classification| CLASSIFICATION_FLOW[🔍 Classification Flow]
 
-    BIKE_FLOW --> BIKE_AGENT[🚴 Bike Analysis Agent]
+    EDUCATION_FLOW --> EDUCATION_AGENT[🎓 Education Expert]
     KNOWLEDGE_FLOW --> KNOWLEDGE_AGENT[📚 Knowledge Agent]
     SQL_FLOW --> SQL_AGENT[🗄️ SQL Agent]
-    DOC_FLOW --> DOC_AGENT[📄 Document Agent]
-    CHAT_FLOW --> CHAT_AGENT[💬 Chat Agent]
+    CLASSIFICATION_FLOW --> CLASSIFICATION_AGENT[🔍 Classification Agent]
 
-    BIKE_AGENT --> RESPONSE[📤 Formatted Response]
+    EDUCATION_AGENT --> RESPONSE[📤 Formatted Response]
     KNOWLEDGE_AGENT --> RESPONSE
     SQL_AGENT --> RESPONSE
-    DOC_AGENT --> RESPONSE
-    CHAT_AGENT --> RESPONSE
+    CLASSIFICATION_AGENT --> RESPONSE
 
     RESPONSE --> FINISH([🏁 End])
 
@@ -141,12 +121,12 @@ flowchart TD
 
     class START start
     class CLASSIFY decision
-    class BIKE_FLOW,KNOWLEDGE_FLOW,SQL_FLOW,DOC_FLOW,CHAT_FLOW workflow
-    class BIKE_AGENT,KNOWLEDGE_AGENT,SQL_AGENT,DOC_AGENT,CHAT_AGENT agent
+    class EDUCATION_FLOW,KNOWLEDGE_FLOW,SQL_FLOW,CLASSIFICATION_FLOW workflow
+    class EDUCATION_AGENT,KNOWLEDGE_AGENT,SQL_AGENT,CLASSIFICATION_AGENT agent
     class RESPONSE,FINISH finish
 ```
 
-### � Knowledge Base Workflow
+### 🔍 Knowledge Base Workflow
 
 ```mermaid
 graph TB
@@ -205,28 +185,21 @@ graph TB
     class AZURE_OPENAI,CONTEXT_SYNTHESIS,RESPONSE_GENERATION ai
 ```
 
-### �️ SQL Manipulation Workflow
+### 🗄️ SQL Manipulation Workflow
 
 ```mermaid
 sequenceDiagram
     participant User
     participant SQLAgent
-    participant QueryValidator
-    participant Database
     participant AzureOpenAI
-    participant SecurityGuard
+    participant Database
 
     User->>SQLAgent: "Show me sales by region"
     SQLAgent->>AzureOpenAI: Convert natural language to SQL
     AzureOpenAI-->>SQLAgent: Generated SQL query
 
-    SQLAgent->>QueryValidator: Validate SQL syntax
-    QueryValidator-->>SQLAgent: ✅ Syntax valid
-
-    SQLAgent->>SecurityGuard: Check security constraints
-    SecurityGuard-->>SQLAgent: ✅ Query approved
-
     SQLAgent->>Database: Execute SQL query
+    Note over Database: Supports both:<br/>- Azure SQL Database<br/>- Local SQLite
     Database-->>SQLAgent: Query results
 
     SQLAgent->>AzureOpenAI: Format results for user
@@ -234,78 +207,14 @@ sequenceDiagram
 
     SQLAgent-->>User: "Sales by region analysis"
 
-    Note over SecurityGuard: Prevents:<br/>- DROP/DELETE operations<br/>- Unauthorized table access<br/>- Injection attacks
-```
-
-### 📄 Document Processing Workflow
-
-```mermaid
-graph TB
-    subgraph "📁 Document Input"
-        UPLOAD[📤 File Upload]
-        VALIDATION[✅ File Validation]
-        FORMAT_CHECK[📋 Format Check]
-    end
-
-    subgraph "🔍 Document Analysis"
-        AZURE_DOC_INTEL[📄 Azure Document Intelligence]
-        OCR[👁️ OCR Processing]
-        LAYOUT_ANALYSIS[📐 Layout Analysis]
-        TEXT_EXTRACTION[📝 Text Extraction]
-    end
-
-    subgraph "🧠 Content Processing"
-        AZURE_OPENAI[🧠 Azure OpenAI]
-        CONTENT_ANALYSIS[📊 Content Analysis]
-        ENTITY_EXTRACTION[🏷️ Entity Extraction]
-        SUMMARIZATION[📋 Summarization]
-    end
-
-    subgraph "💾 Output Generation"
-        STRUCTURED_DATA[📊 Structured Data]
-        INSIGHTS[💡 Key Insights]
-        FORMATTED_RESPONSE[📝 Formatted Response]
-    end
-
-    UPLOAD --> VALIDATION
-    VALIDATION --> FORMAT_CHECK
-    FORMAT_CHECK --> AZURE_DOC_INTEL
-
-    AZURE_DOC_INTEL --> OCR
-    AZURE_DOC_INTEL --> LAYOUT_ANALYSIS
-    AZURE_DOC_INTEL --> TEXT_EXTRACTION
-
-    TEXT_EXTRACTION --> AZURE_OPENAI
-    AZURE_OPENAI --> CONTENT_ANALYSIS
-    AZURE_OPENAI --> ENTITY_EXTRACTION
-    AZURE_OPENAI --> SUMMARIZATION
-
-    CONTENT_ANALYSIS --> STRUCTURED_DATA
-    ENTITY_EXTRACTION --> INSIGHTS
-    SUMMARIZATION --> FORMATTED_RESPONSE
-
-    classDef input fill:#e8f5e8
-    classDef analysis fill:#fff3e0
-    classDef processing fill:#e3f2fd
-    classDef output fill:#fce4ec
-
-    class UPLOAD,VALIDATION,FORMAT_CHECK input
-    class AZURE_DOC_INTEL,OCR,LAYOUT_ANALYSIS,TEXT_EXTRACTION analysis
-    class AZURE_OPENAI,CONTENT_ANALYSIS,ENTITY_EXTRACTION,SUMMARIZATION processing
-    class STRUCTURED_DATA,INSIGHTS,FORMATTED_RESPONSE output
+    Note over SQLAgent,Database: Configuration determines:<br/>- Azure SQL vs SQLite<br/>- Database connection details<br/>- Query timeout settings
 ```
 
 ## Configuration Requirements by Workflow
 
-### ✅ Minimal Configuration Workflows
+### ✅ Core Library Workflows (Azure OpenAI only)
 
-These workflows only require basic Azure OpenAI configuration:
-
-## Configuration Requirements by Workflow
-
-### ✅ Minimal Configuration Workflows
-
-These workflows only require basic Azure OpenAI configuration:
+These workflows are included in the core library and only require basic Azure OpenAI configuration:
 
 #### 🔍 Classification Agent
 Routes input to specialized agents based on content analysis.
@@ -347,43 +256,44 @@ dev:
     api_key: "your-api-key"
 ```
 
-#### 🚴 Bike Insights
-Sample domain-specific workflow for bike sales analysis.
+### ⭐ Template-Based Workflows (Azure OpenAI only)
+
+#### 🚴 Bike Insights ("Hello World" Template)
+Sample domain-specific workflow for bike sales analysis. Available in the `ingenious_extensions_template` when you run `ingen init`.
+
+> **Note:** This workflow exists as a template example in `ingenious_extensions_template/`, not as a core workflow. It demonstrates how to build custom domain-specific workflows.
 
 ```mermaid
 graph TB
     subgraph "Required Services"
-        AZURE_OPENAI[🧠 Azure OpenAI<br/>Multi-Agent Processing]
+        AZURE_OPENAI[🧠 Azure OpenAI\nMulti-Agent Processing]
     end
 
-    subgraph "Sample Data"
-        BIKE_DATA[🚴 Bike Sales Data<br/>JSON Sample Files]
+    subgraph "Template Files"
+        BIKE_DATA[🚴 Bike Sales Data\nJSON Sample Files]
+        BIKE_MODELS[📊 Bike Data Models\nPydantic Schemas]
     end
 
-    subgraph "Agent Coordination"
-        BIKE_AGENT[🚴 Bike Analysis Agent]
-        SENTIMENT_AGENT[😊 Sentiment Agent]
-        FISCAL_AGENT[💰 Fiscal Agent]
-        SUMMARY_AGENT[📝 Summary Agent]
+    subgraph "Template Agents"
+        BIKE_AGENT[🚴 Bike Analysis Agent\nTemplate Example]
+        AGENT_FLOW[🔄 Conversation Flow\nTemplate Pattern]
     end
 
     AZURE_OPENAI --> BIKE_AGENT
-    AZURE_OPENAI --> SENTIMENT_AGENT
-    AZURE_OPENAI --> FISCAL_AGENT
-    AZURE_OPENAI --> SUMMARY_AGENT
-
     BIKE_DATA --> BIKE_AGENT
+    BIKE_MODELS --> BIKE_AGENT
+    BIKE_AGENT --> AGENT_FLOW
 
     classDef service fill:#e3f2fd
-    classDef data fill:#f1f8e9
+    classDef template fill:#f1f8e9
     classDef agent fill:#fff3e0
 
     class AZURE_OPENAI service
-    class BIKE_DATA data
-    class BIKE_AGENT,SENTIMENT_AGENT,FISCAL_AGENT,SUMMARY_AGENT agent
+    class BIKE_DATA,BIKE_MODELS template
+    class BIKE_AGENT,AGENT_FLOW agent
 ```
 
-### 🔍 Azure Search Required Workflows
+### 🔍 Core Library Workflows (Azure Search Required)
 
 #### 📚 Knowledge Base Agent
 Search and retrieve information from knowledge bases.
@@ -442,7 +352,7 @@ dev:
     api_key: "your-search-api-key"
 ```
 
-### 📊 Database Required Workflows
+### 📊 Core Library Workflows (Database Required)
 
 #### 🗄️ SQL Manipulation Agent
 Execute SQL queries on Azure SQL or local databases.
@@ -501,69 +411,6 @@ dev:
     # connection_string: "your-full-connection-string"
 ```
 
-### 📄 Document Processing Workflows
-
-#### 📄 Document Processing Agent
-Extract text from PDFs, DOCX, images using OCR.
-
-```mermaid
-graph TB
-    subgraph "Required Services"
-        AZURE_OPENAI[🧠 Azure OpenAI<br/>Content Analysis]
-        AZURE_DOC_INTEL[📄 Azure Document Intelligence<br/>OCR & Text Extraction]
-    end
-
-    subgraph "Supported Formats"
-        PDF[📕 PDF Files<br/>Text & Scanned]
-        DOCX[📄 Word Documents<br/>DOCX Format]
-        IMAGES[🖼️ Images<br/>PNG, JPG, TIFF]
-        FORMS[📋 Forms<br/>Structured Documents]
-    end
-
-    subgraph "Processing Pipeline"
-        UPLOAD[📤 File Upload]
-        FORMAT_DETECTION[🔍 Format Detection]
-        OCR_PROCESSING[👁️ OCR Processing]
-        LAYOUT_ANALYSIS[📐 Layout Analysis]
-        TEXT_EXTRACTION[📝 Text Extraction]
-        CONTENT_ANALYSIS[📊 Content Analysis]
-    end
-
-    PDF --> UPLOAD
-    DOCX --> UPLOAD
-    IMAGES --> UPLOAD
-    FORMS --> UPLOAD
-
-    UPLOAD --> FORMAT_DETECTION
-    FORMAT_DETECTION --> AZURE_DOC_INTEL
-    AZURE_DOC_INTEL --> OCR_PROCESSING
-    AZURE_DOC_INTEL --> LAYOUT_ANALYSIS
-    AZURE_DOC_INTEL --> TEXT_EXTRACTION
-    TEXT_EXTRACTION --> AZURE_OPENAI
-    AZURE_OPENAI --> CONTENT_ANALYSIS
-
-    classDef service fill:#e3f2fd
-    classDef format fill:#f1f8e9
-    classDef processing fill:#fff3e0
-
-    class AZURE_OPENAI,AZURE_DOC_INTEL service
-    class PDF,DOCX,IMAGES,FORMS format
-    class UPLOAD,FORMAT_DETECTION,OCR_PROCESSING,LAYOUT_ANALYSIS,TEXT_EXTRACTION,CONTENT_ANALYSIS processing
-```
-
-**Additional Configuration Required:**
-```yaml
-# config.yml (additional)
-document_intelligence:
-  endpoint: "https://your-doc-intel.cognitiveservices.azure.com/"
-  api_version: "2023-07-31"
-
-# profiles.yml (additional)
-dev:
-  document_intelligence:
-    api_key: "your-document-intelligence-api-key"
-```
-
 ## Workflow Selection Guide
 
 ### 🎯 Choosing the Right Workflow
@@ -576,7 +423,6 @@ flowchart TD
     DECISION -->|Analyze business data<br/>with multiple perspectives| BIKE_INSIGHTS[🚴 Bike Insights]
     DECISION -->|Search through<br/>documents and knowledge| KNOWLEDGE[📚 Knowledge Base Agent]
     DECISION -->|Query databases<br/>with natural language| SQL[🗄️ SQL Manipulation]
-    DECISION -->|Extract text from<br/>documents and images| DOCUMENT[📄 Document Processing]
 
     CLASSIFICATION --> SETUP_MINIMAL[⚙️ Minimal Setup<br/>Azure OpenAI only]
     BIKE_INSIGHTS --> SETUP_MINIMAL
@@ -585,12 +431,9 @@ flowchart TD
 
     SQL --> SETUP_DATABASE[🗄️ Database Setup<br/>+ Database Connection]
 
-    DOCUMENT --> SETUP_SERVICES[📄 Full Services Setup<br/>+ Document Intelligence]
-
     SETUP_MINIMAL --> READY[✅ Ready to Use]
     SETUP_SEARCH --> READY
     SETUP_DATABASE --> READY
-    SETUP_SERVICES --> READY
 
     classDef start fill:#c8e6c9
     classDef decision fill:#fff9c4
@@ -600,8 +443,8 @@ flowchart TD
 
     class START start
     class DECISION decision
-    class CLASSIFICATION,BIKE_INSIGHTS,KNOWLEDGE,SQL,DOCUMENT workflow
-    class SETUP_MINIMAL,SETUP_SEARCH,SETUP_DATABASE,SETUP_SERVICES setup
+    class CLASSIFICATION,BIKE_INSIGHTS,KNOWLEDGE,SQL workflow
+    class SETUP_MINIMAL,SETUP_SEARCH,SETUP_DATABASE setup
     class READY ready
 ```
 
@@ -618,210 +461,3 @@ For detailed setup instructions, see:
 - [Getting Started](/getting-started/) - Quick start tutorial
 - [Development Guide](/development/) - Advanced customization
 - [API Documentation](/api/) - Integration details
-  database_path: "./.tmp/high_level_logs.db"
-  memory_path: "./.tmp"
-```
-
-#### profiles.yml
-```yaml
-- name: "dev"
-  models:
-    - model: "gpt-4.1-nano"  # Must match config.yml
-      api_key: "your-azure-openai-api-key"
-      base_url: "https://your-endpoint.openai.azure.com/openai/deployments/gpt-4.1-nano/chat/completions?api-version=2024-08-01-preview"
-      deployment: "gpt-4.1-nano"  # Your deployment name
-```
-
----
-
-### knowledge_base_agent (Azure Search Required)
-
-**Purpose**: Search and retrieve information from Azure Cognitive Search indexes
-
-**Additional Configuration Required**:
-
-#### config.yml
-```yaml
-azure_search_services:
-  - service: "default"
-    endpoint: "https://your-search-service.search.windows.net"
-```
-
-#### profiles.yml
-```yaml
-azure_search_services:
-  - service: "default"
-    key: "your-azure-search-api-key"
-```
-
-**What you need to provide**:
-- Azure Cognitive Search service endpoint
-- Azure Cognitive Search API key
-- Pre-configured search indexes (referenced in the workflow as 'index-document-set-1', 'index-document-set-2')
-
-**Without this configuration**: The workflow will fail when trying to search knowledge bases.
-
----
-
-### sql_manipulation_agent (Database Required)
-
-**Purpose**: Execute SQL queries based on natural language input
-
-**Configuration Options**:
-
-#### Option 1: Local SQLite Database
-```yaml
-# config.yml
-local_sql_db:
-  database_path: "/tmp/sample_sql.db"
-  sample_csv_path: "./ingenious/sample_dataset/cleaned_students_performance.csv"
-  sample_database_name: "sample_data"
-
-azure_sql_services:
-  database_name: "skip"  # Use "skip" to enable local mode
-```
-
-#### Option 2: Azure SQL Database
-```yaml
-# config.yml
-azure_sql_services:
-  database_name: "your_database"
-  table_name: "your_table"
-```
-
-```yaml
-# profiles.yml
-azure_sql_services:
-  database_connection_string: "Server=tcp:yourserver.database.windows.net,1433;Database=yourdatabase;User ID=yourusername;Password=yourpassword;Encrypt=true;TrustServerCertificate=false;Connection Timeout=30;"
-```
-
-**What you need to provide**:
-- For local: CSV file or SQLite database
-- For Azure: Azure SQL connection string with proper credentials
-
-**Without this configuration**: The workflow will fail when trying to execute SQL queries.
-
----
-
-### classification_agent (Minimal Configuration)
-
-**Purpose**: Classify user input and route to appropriate topic agents
-
-**Configuration Required**: Only basic Azure OpenAI configuration (see "All Workflows" section above)
-
-**What you need to provide**: Just Azure OpenAI credentials
-
-**Without this configuration**: Will not work - requires Azure OpenAI for classification logic.
-
----
-
-### bike_insights (Minimal Configuration)
-
-**Purpose**: Sample domain-specific workflow for bike sales analysis
-
-**Configuration Required**: Only basic Azure OpenAI configuration (see "All Workflows" section above)
-
-**What you need to provide**: Just Azure OpenAI credentials
-
-**Without this configuration**: Will not work - requires Azure OpenAI for analysis.
-
----
-
-### document-processing (Optional Azure Services)
-
-**Purpose**: Extract text from PDFs, DOCX, images using various engines
-
-**Configuration Options**:
-
-#### Basic (No external services)
-Works with local engines: pymupdf, pdfminer, unstructured
-
-#### Advanced OCR (Azure Document Intelligence)
-For better OCR and semantic extraction:
-
-**Environment Variables Required**:
-```bash
-export AZURE_DOC_INTEL_ENDPOINT="https://your-resource.cognitiveservices.azure.com"
-export AZURE_DOC_INTEL_KEY="your-api-key"
-```
-
-**What you need to provide**:
-- Azure Document Intelligence service endpoint
-- Azure Document Intelligence API key
-
-**Without this configuration**: Falls back to local extraction engines (limited OCR capabilities).
-
-## Quick Start Guide
-
-### 1. Minimal Setup (classification_agent, bike_insights)
-1. Configure Azure OpenAI in `config.yml` and `profiles.yml`
-2. Run: `uv run ingen run-rest-api-server`
-3. Test with classification_agent or bike_insights workflows
-
-### 2. Knowledge Base Setup (knowledge_base_agent)
-1. Complete minimal setup above
-2. Set up Azure Cognitive Search service
-3. Create and populate search indexes
-4. Add Azure Search configuration to config files
-5. Test with knowledge_base_agent workflow
-
-### 3. Database Setup (sql_manipulation_agent)
-1. Complete minimal setup above
-2. Choose local SQLite or Azure SQL
-3. Configure database connection
-4. Prepare data (CSV for local, tables for Azure SQL)
-5. Test with sql_manipulation_agent workflow
-
-### 4. Full Setup (All workflows)
-1. Complete all setup steps above
-2. Optionally configure Azure Document Intelligence
-3. Test all workflows
-
-## Testing Configuration
-
-Use these commands to test specific workflows:
-
-```bash
-# Test basic configuration
-curl -X POST http://localhost:8081/api/v1/chat \
-  -H "Content-Type: application/json" \
-  -d '{"user_prompt": "Hello", "conversation_flow": "classification_agent"}'
-
-# Test knowledge base (requires Azure Search)
-curl -X POST http://localhost:8081/api/v1/chat \
-  -H "Content-Type: application/json" \
-  -d '{"user_prompt": "Search for health information", "conversation_flow": "knowledge_base_agent"}'
-
-# Test SQL queries (requires database)
-curl -X POST http://localhost:8081/api/v1/chat \
-  -H "Content-Type: application/json" \
-  -d '{"user_prompt": "Show me student performance data", "conversation_flow": "sql_manipulation_agent"}'
-```
-
-## Troubleshooting
-
-### Common Issues
-
-1. **"Azure OpenAI API key not found"**
-   - Check profiles.yml has correct API key
-   - Verify INGENIOUS_PROFILE_PATH environment variable
-
-2. **"Search service not configured"**
-   - Add Azure Search configuration to config.yml and profiles.yml
-   - Verify search service endpoint and API key
-
-3. **"Database connection failed"**
-   - Check connection string in profiles.yml
-   - Verify database exists and is accessible
-   - For local SQLite, check file path and permissions
-
-4. **"Document processing failed"**
-   - For Azure: Check AZURE_DOC_INTEL_ENDPOINT and AZURE_DOC_INTEL_KEY
-   - For local: Install required optional dependencies
-
-### Getting Help
-
-1. Check logs for specific error messages
-2. Verify configuration files against templates
-3. Test connection to external services independently
-4. Review the [Configuration Guide](../configuration/README.md) for detailed setup instructions

@@ -22,6 +22,9 @@ ingen init
 # Check your configuration
 ingen status
 
+# Validate setup (recommended)
+ingen validate
+
 # Start the server
 ingen serve
 
@@ -67,15 +70,21 @@ Show available workflows and their requirements.
 
 **Examples:**
 ```bash
-ingen workflows                      # List all workflows
-ingen workflows classification_agent # Show specific workflow details
+ingen workflows                          # List all workflows
+ingen workflows classification-agent     # Show specific workflow details
+ingen workflows bike-insights            # Show bike insights workflow (recommended start)
 ```
 
 **Available Workflows:**
-- `classification_agent` - Route input to specialized agents (minimal config)
-- `bike_insights` - Sample domain-specific analysis (minimal config)
-- `knowledge_base_agent` - Search knowledge bases (requires Azure Search)
-- `sql_manipulation_agent` - Execute SQL queries (requires database)
+- `classification-agent` - Route input to specialized agents (core library, minimal config)
+- `bike-insights` - Sample domain-specific analysis (project template, minimal config) ⭐ **RECOMMENDED**
+- `knowledge-base-agent` - Search knowledge bases (core library, requires Azure Search)
+- `sql-manipulation-agent` - Execute SQL queries (core library, requires database)
+
+**Note:**
+- Core library workflows are always available
+- Template workflows like `bike-insights` are created with `ingen init`
+- Legacy underscore names (`classification_agent`, `bike_insights`, etc.) are still supported for backward compatibility
 
 ### `ingen test`
 Run agent workflow tests.
@@ -99,6 +108,23 @@ Validates:
 - Configuration files
 - Dependencies
 - Available workflows
+
+### `ingen validate`
+Comprehensive validation of your Insight Ingenious setup.
+
+**What it validates:**
+- Configuration file syntax and required fields
+- Profile file syntax and credentials
+- Azure OpenAI connectivity
+- Workflow requirements
+- Dependencies
+
+**Usage:**
+```bash
+ingen validate  # Recommended before starting server
+```
+
+This command helps identify issues before starting the server and provides specific fix recommendations.
 
 ### `ingen version`
 Show version information.
@@ -134,15 +160,20 @@ ingen dataprep crawl https://example.com --pretty
 ingen dataprep batch https://a.com https://b.com --out results.ndjson
 ```
 
-### `ingen document-processing`
+### `ingen document-processing <path>`
 Extract text from documents (PDF, DOCX, images).
 
-**Subcommands:**
-- `extract <path>` - Extract text from file/directory/URL
+**Arguments:**
+- `path` - File path, directory, or HTTP/S URL
+
+**Options:**
+- `--engine, -e` - Extractor backend (pymupdf, pdfminer, unstructured) (default: pymupdf)
+- `--out, -o` - Output file for NDJSON results (default: stdout)
 
 **Example:**
 ```bash
-ingen document-processing extract document.pdf --engine pymupdf --out extracted.jsonl
+ingen document-processing document.pdf --engine pymupdf --out extracted.jsonl
+ingen document-processing https://example.com/doc.pdf --out results.jsonl
 ```
 
 ## Environment Setup

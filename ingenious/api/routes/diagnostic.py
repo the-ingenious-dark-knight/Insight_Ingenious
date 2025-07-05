@@ -8,6 +8,7 @@ from typing_extensions import Annotated
 
 import ingenious.dependencies as igen_deps
 from ingenious.models.http_error import HTTPError
+from ingenious.utils.namespace_utils import normalize_workflow_name
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -34,6 +35,9 @@ async def workflow_status(
     """
     try:
         config = igen_deps.get_config()
+
+        # Normalize workflow name to handle both hyphenated and underscored formats
+        normalized_workflow_name = normalize_workflow_name(workflow_name)
 
         # Define workflow requirements
         workflow_requirements = {
@@ -67,13 +71,14 @@ async def workflow_status(
             },
         }
 
-        if workflow_name not in workflow_requirements:
+        # Check against normalized name
+        if normalized_workflow_name not in workflow_requirements:
             raise HTTPException(
                 status_code=404,
-                detail=f"Unknown workflow: {workflow_name}. Available: {list(workflow_requirements.keys())}",
+                detail=f"Unknown workflow: {workflow_name} (normalized: {normalized_workflow_name}). Available: {list(workflow_requirements.keys())}",
             )
 
-        requirements = workflow_requirements[workflow_name]
+        requirements = workflow_requirements[normalized_workflow_name]
         missing_config = []
         configured = True
 
@@ -177,9 +182,11 @@ async def list_workflows(
 ):
     """
     List all available workflows and their configuration status.
+    Supports both hyphenated (bike-insights) and underscored (bike_insights) naming formats.
     """
     try:
-        workflows = [
+        # Base workflows (using underscored format as canonical)
+        base_workflows = [
             "classification_agent",
             "bike_insights",
             "knowledge_base_agent",
@@ -187,9 +194,18 @@ async def list_workflows(
         ]
 
         workflow_statuses = []
-        for workflow in workflows:
+        for workflow in base_workflows:
             # Get status for each workflow
             status = await workflow_status(workflow, request, auth_user)
+
+            # Add supported naming formats to the status
+            hyphenated_name = workflow.replace("_", "-")
+            status["supported_names"] = (
+                [workflow, hyphenated_name]
+                if workflow != hyphenated_name
+                else [workflow]
+            )
+
             workflow_statuses.append(status)
 
         # Group by category
@@ -204,12 +220,13 @@ async def list_workflows(
             "workflows": workflow_statuses,
             "by_category": by_category,
             "summary": {
-                "total": len(workflows),
+                "total": len(base_workflows),
                 "configured": len([w for w in workflow_statuses if w["configured"]]),
                 "unconfigured": len(
                     [w for w in workflow_statuses if not w["configured"]]
                 ),
             },
+            "naming_note": "Workflows support both hyphenated (bike-insights) and underscored (bike_insights) naming formats",
         }
 
     except Exception as e:

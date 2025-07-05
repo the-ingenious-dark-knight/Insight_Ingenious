@@ -11,7 +11,7 @@ toc_icon: "cogs"
 
 # Configuration Guide
 
-This guide explains how to configure Insight Ingenious for your project.
+This guide explains how to configure Insight Ingenious - an enterprise-grade Python library for AI agent APIs - for your specific deployment and Microsoft Azure service integrations. The library provides comprehensive configuration options for enterprise environments, debugging tools, and customization requirements.
 
 ## Configuration Overview
 
@@ -356,18 +356,20 @@ Insight Ingenious supports several built-in conversation flows for different use
 
 ### Available Conversation Flows
 
-| Workflow | Description | External Services Required | Configuration Complexity |
-|----------|-------------|----------------------------|--------------------------|
-| `classification_agent` | Routes input to specialized agents | Azure OpenAI only | ✅ Minimal |
-| `bike_insights` | Sample domain-specific analysis | Azure OpenAI only | ✅ Minimal |
-| `knowledge_base_agent` | Search knowledge bases | Azure OpenAI + Azure Search | 🔍 Moderate |
-| `sql_manipulation_agent` | Execute SQL queries | Azure OpenAI + Database | 📊 Moderate |
+| Workflow | Description | External Services Required | Configuration Complexity | Availability |
+|----------|-------------|----------------------------|--------------------------|--------------|
+| `classification-agent` | Routes input to specialized agents | Azure OpenAI only | ✅ Minimal | Core library |
+| `knowledge-base-agent` | Search knowledge bases | Azure OpenAI + Azure Search | 🔍 Moderate | Core library |
+| `sql-manipulation-agent` | Execute SQL queries | Azure OpenAI + Database | 📊 Moderate | Core library |
+| `bike-insights` | Sample domain-specific analysis | Azure OpenAI only | ✅ Minimal | Extension template* |
+
+*Created when you run `ingen init` - part of project template, not core library.
 
 ### Workflow-Specific Configuration
 
 #### 🚀 Quick Start: Minimal Configuration Workflows
 
-For `classification_agent` and `bike_insights`, you only need basic Azure OpenAI setup:
+For `classification-agent` and `bike-insights` (if created via `ingen init`), you only need basic Azure OpenAI setup:
 
 ```yaml
 # config.yml
@@ -391,7 +393,7 @@ chat_service:
 
 #### 🔍 Knowledge Base Workflows
 
-For `knowledge_base_agent`, add Azure Search configuration:
+For `knowledge-base-agent`, add Azure Search configuration:
 
 ```yaml
 # config.yml (additional)
@@ -409,7 +411,7 @@ azure_search_services:
 
 #### 📊 Database Workflows
 
-For `sql_manipulation_agent`:
+For `sql-manipulation-agent`:
 
 **Local SQLite option:**
 ```yaml
@@ -441,12 +443,12 @@ Use the CLI to check requirements and test workflows:
 
 ```bash
 # Check what configuration is needed
-uv run ingen workflow-requirements knowledge_base_agent
+uv run ingen workflows knowledge-base-agent
 
 # Test a workflow
-curl -X POST http://localhost:8081/api/v1/chat \
+curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
-  -d '{"user_prompt": "Hello", "conversation_flow": "classification_agent"}'
+  -d '{"user_prompt": "Hello", "conversation_flow": "classification-agent"}'
 ```
 
 ### Configuring Conversation Flows

@@ -21,15 +21,17 @@ This document provides detailed API usage examples for all available workflows i
 
 ## Available Workflows
 
-### 1. bike_insights - **"Hello World" Workflow (START HERE!)**
+### 1. bike-insights - **"Hello World" Workflow (START HERE!)**
 
 **Purpose**: The recommended first workflow - showcases multi-agent coordination through comprehensive bike sales analysis. This is the "Hello World" of Ingenious!
+
+**Availability**: Created when you run `ingen init` (part of project template)
 
 **Required Input Format**:
 ```json
 {
   "user_prompt": "{\"stores\": [...], \"revision_id\": \"unique-id\", \"identifier\": \"identifier\"}",
-  "conversation_flow": "bike_insights"
+  "conversation_flow": "bike-insights"
 }
 ```
 
@@ -39,7 +41,7 @@ curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "{\"stores\": [{\"name\": \"Hello Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"HELLO-001\", \"quantity_sold\": 1, \"sale_date\": \"2023-04-01\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 5.0, \"comment\": \"Perfect introduction to Ingenious!\"}}], \"bike_stock\": []}], \"revision_id\": \"hello-1\", \"identifier\": \"world\"}",
-    "conversation_flow": "bike_insights"
+    "conversation_flow": "bike-insights"
   }'
 ```
 
@@ -72,10 +74,10 @@ curl -X POST http://localhost:80/api/v1/chat \
 ```
 
 **Agents Involved**:
-- 📊 **fiscal_analysis_agent**: Analyzes sales data and trends
-- 💭 **customer_sentiment_agent**: Processes customer reviews and ratings
-- 🔍 **bike_lookup_agent**: Retrieves bike prices and specifications
-- 📝 **summary**: Aggregates insights from all agents
+- � **classification_agent**: Classifies and routes user queries
+- 🎓 **education_expert**: Handles educational content queries
+- � **knowledge_base_agent**: Searches knowledge bases
+- �️ **sql_manipulation_agent**: Processes database queries
 
 **Response Format**:
 ```json
@@ -93,15 +95,19 @@ curl -X POST http://localhost:80/api/v1/chat \
 
 ---
 
-### 2. ✅ classification_agent - Simple Text Processing
+### 2. ✅ classification-agent - Simple Text Processing
 
-**Purpose**: Basic text classification and routing (simpler alternative to bike_insights)
+**Purpose**: Basic text classification and routing
+
+**Availability**: Core library workflow
+
+**Required Configuration**: Azure OpenAI only
 
 **Required Input Format**:
 ```json
 {
   "user_prompt": "Your question or input text here",
-  "conversation_flow": "classification_agent"
+  "conversation_flow": "classification-agent"
 }
 ```
 
@@ -111,7 +117,7 @@ curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Analyze this customer feedback: The bike was excellent!",
-    "conversation_flow": "classification_agent"
+    "conversation_flow": "classification-agent"
   }'
 ```
 
@@ -123,9 +129,11 @@ curl -X POST http://localhost:80/api/v1/chat \
 
 ---
 
-### 3. 🔍 knowledge_base_agent - Knowledge Search
+### 3. 🔍 knowledge-base-agent - Knowledge Search
 
 **Purpose**: Search and retrieve information from configured knowledge bases
+
+**Availability**: Core library (always available)
 
 **Requirements**:
 - Azure Search Service configured
@@ -137,15 +145,17 @@ curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Find information about bike maintenance",
-    "conversation_flow": "knowledge_base_agent"
+    "conversation_flow": "knowledge-base-agent"
   }'
 ```
 
 ---
 
-### 4. 📊 sql_manipulation_agent - Database Queries
+### 4. 📊 sql-manipulation-agent - Database Queries
 
 **Purpose**: Execute SQL queries based on natural language input
+
+**Availability**: Core library (always available)
 
 **Requirements**:
 - Database connection configured
@@ -157,7 +167,7 @@ curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Show me the top selling bikes in the last month",
-    "conversation_flow": "sql_manipulation_agent"
+    "conversation_flow": "sql-manipulation-agent"
   }'
 ```
 
@@ -174,22 +184,22 @@ Save this as `test_workflows.sh`:
 
 echo "🧪 Testing Ingenious Workflows..."
 
-# Test 1: bike_insights (Hello World)
-echo "⭐ Testing bike_insights workflow (Hello World)..."
+# Test 1: bike-insights (Hello World)
+echo "⭐ Testing bike-insights workflow (Hello World)..."
 curl -s -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "{\"stores\": [{\"name\": \"Hello Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"HELLO-001\", \"quantity_sold\": 1, \"sale_date\": \"2023-04-01\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 5.0, \"comment\": \"Perfect introduction to Ingenious!\"}}], \"bike_stock\": []}], \"revision_id\": \"hello-1\", \"identifier\": \"world\"}",
-    "conversation_flow": "bike_insights"
+    "conversation_flow": "bike-insights"
   }' | jq '.message_id, .token_count'
 
-# Test 2: classification_agent (Simple Alternative)
-echo "✅ Testing classification_agent workflow (Simple Alternative)..."
+# Test 2: classification-agent (Simple Alternative)
+echo "✅ Testing classification-agent workflow (Simple Alternative)..."
 curl -s -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "This is a test message for classification",
-    "conversation_flow": "classification_agent"
+    "conversation_flow": "classification-agent"
   }' | jq '.message_id, .token_count'
 
 echo "✅ Tests completed!"
@@ -202,12 +212,12 @@ Make it executable: `chmod +x test_workflows.sh`
 ## 🚨 Common Issues & Solutions
 
 ### 1. "Expecting value: line 1 column 1 (char 0)"
-**Problem**: bike_insights workflow expects JSON data in user_prompt
+**Problem**: bike-insights workflow expects JSON data in user_prompt
 **Solution**: Ensure user_prompt contains properly escaped JSON string
 
 ### 2. "Class ConversationFlow not found"
 **Problem**: Workflow name incorrect or workflow not available
-**Solution**: Use correct workflow names (underscores, not hyphens)
+**Solution**: Use correct workflow names (prefer hyphens: `bike-insights`, `classification-agent`)
 
 ### 3. "Validation error in field"
 **Problem**: Missing or invalid configuration
@@ -221,7 +231,7 @@ Make it executable: `chmod +x test_workflows.sh`
 
 ## 🔧 Configuration Requirements
 
-### Hello World Setup (bike_insights + classification_agent)
+### Hello World Setup (bike-insights + classification-agent)
 ```env
 AZURE_OPENAI_API_KEY=your-key
 AZURE_OPENAI_BASE_URL=your-endpoint
@@ -230,8 +240,8 @@ INGENIOUS_PROFILE_PATH=./profiles.yml
 ```
 
 ### Advanced Setup (all workflows)
-- Azure Search Service (knowledge_base_agent)
-- Database connection (sql_manipulation_agent)
+- Azure Search Service (knowledge-base-agent)
+- Database connection (sql-manipulation-agent)
 - Additional authentication settings
 
 ---

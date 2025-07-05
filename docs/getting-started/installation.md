@@ -1,3 +1,14 @@
+---
+title: "Installation Guide"
+layout: single
+permalink: /getting-started/installation/
+sidebar:
+  nav: "docs"
+toc: true
+toc_label: "Installation Steps"
+toc_icon: "download"
+---
+
 # Installation Guide
 
 This guide covers the complete installation process for Insight Ingenious, including optional dependencies for advanced features.

@@ -1,4 +1,19 @@
-## Document‑processing Optional Dependency
+---
+title: "Document Processing Guide"
+layout: single
+permalink: /guides/document-processing/
+sidebar:
+  nav: "docs"
+toc: true
+toc_label: "Document Processing"
+toc_icon: "file-alt"
+---
+
+# Document Processing Guide
+
+## Document-processing Optional Dependency
+
+The *document-processing* extra equips Insight Ingenious with a unified API and CLI for turning **born-digital** documents into structured text blocks.cument‑processing Optional Dependency
 
 The *document‑processing* extra equips Insight Ingenious with a unified API and CLI for tu---
 

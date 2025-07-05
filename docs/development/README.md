@@ -11,7 +11,7 @@ toc_icon: "code"
 
 # Development Guide
 
-This guide provides detailed information for developers who want to extend, modify, or contribute to Insight Ingenious.
+This guide provides detailed information for developers who want to extend, modify, or contribute to Insight Ingenious - an enterprise-grade Python library for building AI agent APIs with Microsoft Azure integrations. The library's architecture supports extensive customization and debugging capabilities for enterprise development teams.
 
 ## Development Environment Setup
 
@@ -34,7 +34,6 @@ flowchart TD
 
     classDef start fill:#c8e6c9
     classDef process fill:#e1f5fe
-    classDef end fill:#dcedc8
 
     class START,READY start
     class CLONE,INSTALL,HOOKS,INIT,VERIFY process
@@ -58,7 +57,7 @@ flowchart TD
 
 4. **Initialize the project:**
    ```bash
-   uv run ingen initialize-new-project
+   uv run ingen init
    ```
 
 ## Project Architecture
@@ -173,21 +172,23 @@ The multi-agent framework is the heart of Insight Ingenious:
 Conversation patterns define how agents interact:
 
 - `conversation_patterns/`: Contains different conversation pattern implementations
-  - `classification_agent/`: Pattern for classifying inputs and routing to specialized agents
-  - `knowledge_base_agent/`: Pattern for knowledge retrieval and question answering
-  - `sql_manipulation_agent/`: Pattern for SQL query generation and execution
-  - `education_expert/`: Pattern for educational content generation (pattern only, no flow)
+  - `classification_agent/`: Pattern for classifying inputs and routing to specialized agents (API: `classification-agent`)
+  - `knowledge_base_agent/`: Pattern for knowledge retrieval and question answering (API: `knowledge-base-agent`)
+  - `sql_manipulation_agent/`: Pattern for SQL query generation and execution (API: `sql-manipulation-agent`)
+  - `education_expert/`: Pattern for educational content generation (pattern only, no direct API)
 
 #### Flows
 
 Conversation flows implement specific use cases:
 
 - `conversation_flows/`: Contains flow implementations that use the patterns
-  - `classification_agent/`: Flow for classification and routing
-  - `knowledge_base_agent/`: Flow for knowledge base interactions
-  - `sql_manipulation_agent/`: Flow for SQL queries
+  - `classification_agent/`: Flow for classification and routing (API: `classification-agent`)
+  - `knowledge_base_agent/`: Flow for knowledge base interactions (API: `knowledge-base-agent`)
+  - `sql_manipulation_agent/`: Flow for SQL queries (API: `sql-manipulation-agent`)
 
-Note: `education_expert` exists as a pattern but does not have a corresponding flow implementation.
+Note:
+- `education_expert` exists as a pattern but does not have a corresponding flow implementation
+- Folder names use underscores for historical reasons, but API calls should use hyphens (e.g., `classification-agent`)
 
 ### Configuration System
 
@@ -294,7 +295,7 @@ uv run pytest
 Use the test harness to test agent behavior:
 
 ```bash
-uv run ingen run-test-batch
+uv run ingen test
 ```
 
 ### Testing Prompts
@@ -303,7 +304,7 @@ Use the prompt tuner for interactive testing:
 
 1. Start the server:
    ```bash
-   uv run ingen run-rest-api-server
+   uv run ingen serve
    ```
 2. Navigate to http://localhost:80/prompt-tuner (or your configured port)
 3. Select a prompt to test
@@ -387,53 +388,53 @@ Create focused pull requests:
 ```mermaid
 graph TB
     subgraph "🤖 Agent Development"
-        AGENT_INTERFACE[🎯 IAgent Interface]
-        BASE_AGENT[👤 BaseAgent Class]
+        AGENT_MARKDOWN[📄 Agent Markdown Definition]
+        AGENT_FLOW[🔄 IConversationFlow]
         CUSTOM_AGENT[🔧 Custom Agent<br/>Implementation]
     end
 
     subgraph "📋 Pattern Development"
         PATTERN_INTERFACE[🔄 IConversationPattern]
-        BASE_PATTERN[📝 BasePattern Class]
+        PATTERN_IMPL[📝 ConversationPattern]
         CUSTOM_PATTERN[🎭 Custom Pattern<br/>Implementation]
     end
 
     subgraph "🔧 Service Integration"
         CHAT_SERVICE[💬 MultiAgentChatService]
-        WORKFLOW_SERVICE[⚡ WorkflowService]
+        CHAT_INTERFACE[📞 IChatService]
         CUSTOM_SERVICE[🛠️ Custom Service<br/>Implementation]
     end
 
     subgraph "📦 Registration System"
-        AGENT_REGISTRY[📋 Agent Registry]
-        PATTERN_REGISTRY[📋 Pattern Registry]
-        SERVICE_REGISTRY[📋 Service Registry]
+        NAMESPACE_UTILS[📋 Namespace Utils]
+        DYNAMIC_LOADER[⚡ Dynamic Loader]
+        CONFIG_VALIDATION[✅ Config Validation]
     end
 
-    AGENT_INTERFACE --> BASE_AGENT
-    BASE_AGENT --> CUSTOM_AGENT
-    CUSTOM_AGENT --> AGENT_REGISTRY
+    AGENT_MARKDOWN --> AGENT_FLOW
+    AGENT_FLOW --> CUSTOM_AGENT
+    CUSTOM_AGENT --> NAMESPACE_UTILS
 
-    PATTERN_INTERFACE --> BASE_PATTERN
-    BASE_PATTERN --> CUSTOM_PATTERN
-    CUSTOM_PATTERN --> PATTERN_REGISTRY
+    PATTERN_INTERFACE --> PATTERN_IMPL
+    PATTERN_IMPL --> CUSTOM_PATTERN
+    CUSTOM_PATTERN --> NAMESPACE_UTILS
 
-    CHAT_SERVICE --> WORKFLOW_SERVICE
-    WORKFLOW_SERVICE --> CUSTOM_SERVICE
-    CUSTOM_SERVICE --> SERVICE_REGISTRY
+    CHAT_INTERFACE --> CHAT_SERVICE
+    CHAT_SERVICE --> CUSTOM_SERVICE
+    CUSTOM_SERVICE --> NAMESPACE_UTILS
 
-    AGENT_REGISTRY --> CHAT_SERVICE
-    PATTERN_REGISTRY --> CHAT_SERVICE
+    NAMESPACE_UTILS --> DYNAMIC_LOADER
+    NAMESPACE_UTILS --> CONFIG_VALIDATION
 
     classDef interface fill:#e3f2fd
     classDef base fill:#f1f8e9
     classDef custom fill:#fff3e0
     classDef registry fill:#fce4ec
 
-    class AGENT_INTERFACE,PATTERN_INTERFACE interface
-    class BASE_AGENT,BASE_PATTERN,CHAT_SERVICE,WORKFLOW_SERVICE base
+    class AGENT_FLOW,PATTERN_INTERFACE,CHAT_INTERFACE interface
+    class AGENT_MARKDOWN,PATTERN_IMPL,CHAT_SERVICE base
     class CUSTOM_AGENT,CUSTOM_PATTERN,CUSTOM_SERVICE custom
-    class AGENT_REGISTRY,PATTERN_REGISTRY,SERVICE_REGISTRY registry
+    class NAMESPACE_UTILS,DYNAMIC_LOADER,CONFIG_VALIDATION registry
 ```
 
 #### 🆕 Creating a New Agent
@@ -442,17 +443,17 @@ graph TB
 sequenceDiagram
     participant Dev as 👨‍💻 Developer
     participant Template as 📋 Agent Template
-    participant Base as 👤 BaseAgent
+    participant AgentMD as 📄 Agent Markdown
     participant Registry as 📋 Agent Registry
     participant Service as 💬 Chat Service
     participant Test as 🧪 Test Suite
 
     Dev->>Template: 1. Copy agent template
-    Template->>Base: 2. Inherit from BaseAgent
-    Dev->>Base: 3. Implement required methods
-    Note over Dev,Base: - process_message()<br/>- get_system_prompt()<br/>- configure_tools()
+    Template->>AgentMD: 2. Create agent.md file
+    Dev->>AgentMD: 3. Define agent properties
+    Note over Dev,AgentMD: - Title & Description<br/>- System Prompt<br/>- Tasks & Instructions
 
-    Dev->>Registry: 4. Register agent
+    Dev->>Registry: 4. Register agent flow
     Registry->>Service: 5. Make available to service
     Dev->>Test: 6. Write unit tests
     Test->>Dev: 7. Validate implementation
@@ -734,4 +735,5 @@ flowchart TD
 - 📖 Read the [Architecture Guide](/architecture/) for system design
 - 🔧 Check the [Configuration Guide](/configuration/) for setup
 - 🚀 Try the [Getting Started Guide](/getting-started/) for quick setup
+- 📡 Explore the [API Documentation](/api/) for integration
 - 📡 Explore the [API Documentation](/api/) for integration
