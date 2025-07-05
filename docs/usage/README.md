@@ -414,7 +414,7 @@ When workflows can't run due to missing configuration:
 ```json
 {
   "error": "Azure Search service not configured",
-  "workflow": "knowledge_base_agent",
+  "workflow": "knowledge-base-agent",
   "required_config": ["azure_search_services.endpoint", "azure_search_services.key"],
   "documentation": "See docs/workflows/README.md for setup instructions"
 }
@@ -424,13 +424,13 @@ When workflows can't run due to missing configuration:
 
 ```bash
 # Check if configuration is complete for a workflow
-curl -X GET http://localhost:80/api/v1/workflow-status/knowledge_base_agent
+curl -X GET http://localhost:80/api/v1/workflow-status/knowledge-base-agent
 ```
 
 Response:
 ```json
 {
-  "workflow": "knowledge_base_agent",
+  "workflow": "knowledge-base-agent",
   "configured": true,
   "missing_config": [],
   "ready": true
