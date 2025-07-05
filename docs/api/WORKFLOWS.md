@@ -99,7 +99,9 @@ curl -X POST http://localhost:80/api/v1/chat \
 
 **Purpose**: Basic text classification and routing (simpler alternative to bike-insights)
 
-**Availability**: Core library (always available)
+**Availability**: Core library workflow
+
+**Required Configuration**: Azure OpenAI only
 
 **Required Input Format**:
 ```json
