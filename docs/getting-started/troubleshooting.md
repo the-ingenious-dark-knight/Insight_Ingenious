@@ -68,7 +68,7 @@ chmod 600 ~/.ingenious/profiles.yml
 **Solution:**
 1. Check available workflows:
    ```bash
-   uv run ingen workflow-requirements all
+   uv run ingen workflows
    ```
 
 2. Use exact workflow names in API calls:
@@ -137,7 +137,7 @@ azure_sql_services:
 2. Kill the process or use a different port:
    ```bash
    # Use different port
-   uv run ingen run-rest-api-server --port 8082
+   uv run ingen serve --port 8082
    ```
 
 3. Or change the port in `config.yml`:
@@ -286,10 +286,10 @@ If things are broken, reset to a clean state:
 rm -rf .tmp/
 
 # 3. Verify configuration
-uv run ingen workflow-requirements all
+uv run ingen workflows
 
 # 4. Test minimal workflow first
-uv run ingen run-rest-api-server
+uv run ingen serve
 curl -X POST http://localhost:8081/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{"user_prompt": "Hello", "conversation_flow": "classification_agent"}'
@@ -317,7 +317,7 @@ Include:
 - Error messages and logs
 - Steps to reproduce
 - Operating system and Python version
-- Output of `uv run ingen workflow-requirements all`
+- Output of `uv run ingen workflows`
 
 ### Quick Diagnostic Info:
 
@@ -328,7 +328,7 @@ uv --version
 python --version
 
 echo "=== Configuration Status ==="
-uv run ingen workflow-requirements all
+uv run ingen workflows
 
 echo "=== Workflow Status ==="
 curl -s http://localhost:8081/api/v1/workflows || echo "Server not running"

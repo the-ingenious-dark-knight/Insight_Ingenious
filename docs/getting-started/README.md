@@ -30,11 +30,11 @@ For complete installation instructions, including optional dependencies for adva
 git clone https://github.com/Insight-Services-APAC/Insight_Ingenious.git
 cd Insight_Ingenious
 
-# Install dependencies
-uv sync
+# Install the framework
+uv pip install -e .
 
 # Initialize project structure
-uv run ingen initialize-new-project
+uv run ingen init
 ```
 
 ### 1. Check Available Workflows
@@ -43,10 +43,10 @@ Before configuring anything, see what workflows are available:
 
 ```bash
 # See all workflows and their requirements
-uv run ingen workflow-requirements all
+uv run ingen workflows
 
 # Check specific workflow requirements
-uv run ingen workflow-requirements classification_agent
+uv run ingen workflows classification-agent
 ```
 
 **Output Example:**
@@ -108,7 +108,7 @@ Test workflows that only need Azure OpenAI:
 
 ```bash
 # Start the server
-uv run ingen run-rest-api-server
+uv run ingen serve
 
 # In another terminal, test the API
 curl -X POST http://localhost:8081/api/v1/chat \
@@ -176,7 +176,7 @@ curl http://localhost:8081/api/v1/workflow-status/classification_agent
 
 **❌ "conversation_flow not set"**
 - Ensure you specify `conversation_flow` in your API request
-- Use `ingen workflow-requirements all` to see available workflows
+- Use `ingen workflows` to see available workflows
 
 **❌ "Search service not configured"**
 - You're trying to use `knowledge_base_agent` without Azure Search

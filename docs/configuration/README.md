@@ -441,7 +441,7 @@ Use the CLI to check requirements and test workflows:
 
 ```bash
 # Check what configuration is needed
-uv run ingen workflow-requirements knowledge_base_agent
+uv run ingen workflows knowledge-base-agent
 
 # Test a workflow
 curl -X POST http://localhost:8081/api/v1/chat \

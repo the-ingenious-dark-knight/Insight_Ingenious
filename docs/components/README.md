@@ -169,8 +169,8 @@ The prompt tuner provides tools for developing and testing prompts:
 
 The CLI provides commands for managing the framework:
 
-- `initialize-new-project`: Creates a new project structure with template files
-- `run-rest-api-server`: Starts the FastAPI server with REST endpoints
+- `init`: Creates a new project structure with template files
+- `serve`: Starts the FastAPI server with REST endpoints
 - `run-test-batch`: Runs tests on agent prompts with configurable options
 - `run-prompt-tuner`: Starts the prompt tuning web application
 - `dataprep`: Data preparation utilities including Scrapfly crawler for web scraping

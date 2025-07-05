@@ -329,7 +329,7 @@ uv run ingen workflows
 | Import errors | `uv pip install -e ./Insight_Ingenious` |
 | Profile validation | Use `profiles.minimal.yml` template |
 | Port not working | Set `WEB_PORT` environment variable |
-| Workflow not found | Check spelling: `bike_insights` not `bike-insights` |
+| Workflow not found | Both `bike_insights` and `bike-insights` work (use either) |
 | JSON parse error | Escape quotes in `user_prompt` for bike_insights |
 | Server won't start | Check port availability and config.yml |
 

@@ -748,7 +748,7 @@ export AZURE_DOC_INTEL_KEY="your-api-key"
 
 ### 1. Minimal Setup (classification-agent, bike-insights)
 1. Configure Azure OpenAI in `config.yml` and `profiles.yml`
-2. Run: `uv run ingen run-rest-api-server`
+2. Run: `uv run ingen serve`
 3. Test with classification-agent or bike-insights workflows
 
 ### 2. Knowledge Base Setup (knowledge-base-agent)

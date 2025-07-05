@@ -12,12 +12,8 @@ This guide shows how to use Insight Ingenious for various tasks.
 ### Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/Insight-Services-APAC/Insight_Ingenious.git
-cd Insight_Ingenious
-
-# Install dependencies using uv
-uv sync
+# Install from your existing Insight_Ingenious directory
+uv pip install -e ./Insight_Ingenious
 
 # Initialize project (creates config templates and folder structure)
 uv run ingen init
@@ -141,7 +137,7 @@ The prompt tuner is now integrated with the main FastAPI application and accessi
 To run the application with the prompt tuner enabled:
 
 ```bash
-uv run ingen run-rest-api-server --enable-prompt-tuner
+uv run ingen serve --enable-prompt-tuner
 ```
 
 The prompt tuner will be accessible at `http://localhost:{port}/prompt-tuner/` where `{port}` is the port configured in your configuration file.
@@ -347,10 +343,10 @@ Before using the REST API, understand which workflows need external service conf
 
 ```bash
 # Check all workflow requirements
-uv run ingen workflow-requirements all
+uv run ingen workflows
 
 # Check specific workflow
-uv run ingen workflow-requirements knowledge_base_agent
+uv run ingen workflows knowledge-base-agent
 ```
 
 ### Using the REST API

@@ -20,10 +20,10 @@ uv venv
 uv pip install -e .
 
 # Initialize project
-ingen_cli initialize-new-project
+uv run ingen init
 ```
 ## Initializing the project
-Once you ran `ingen_cli` successfully, you need to deal with two configuration files--`config.yml` and `profiles.yml`.
+Once you ran `uv run ingen init` successfully, you need to deal with two configuration files--`config.yml` and `profiles.yml`.
 
 ### Configuration Files
 1. Edit `config.yml` in your project directory (**_Note: you may need to coordinate with your team lead with this so that you may be provided the necessary credentials._**)
@@ -39,7 +39,7 @@ Once you ran `ingen_cli` successfully, you need to deal with two configuration f
 ### Initialize a new project
 
 ```bash
-ingen_cli initialize-new-project
+uv run ingen init
 ```
 
 This creates the necessary folder structure and configuration files.
@@ -50,10 +50,10 @@ Before starting, understand what each workflow needs:
 
 ```bash
 # See all available workflows and their requirements
-ingen_cli workflow-requirements all
+uv run ingen workflows
 
 # Check specific workflow requirements
-ingen_cli workflow-requirements classification_agent
+uv run ingen workflows classification-agent
 ```
 
 ### Start with Minimal Configuration
@@ -71,7 +71,7 @@ For quick testing, start with workflows that only need Azure OpenAI:
 ### Start the Application
 
 ```bash
-ingen_cli run-rest-api-server
+uv run ingen serve
 ```
 
 Starts the FastAPI server with Chainlit UI.
@@ -110,7 +110,7 @@ For workflows requiring external services:
 
 Check requirements with:
 ```bash
-ingen_cli workflow-requirements <workflow_name>
+uv run ingen workflows <workflow_name>
 ```
 
 See [Workflow Configuration Requirements](../workflows/README.md) for detailed setup.
