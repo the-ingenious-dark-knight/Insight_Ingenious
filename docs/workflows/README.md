@@ -19,9 +19,9 @@ This guide outlines the configuration requirements for each conversation workflo
 graph TB
     subgraph "Workflow Types"
         CLASSIFICATION[Classification Agent<br/>Route to specialists]
-        BIKE[Bike Insights<br/>Sales analysis]
-        KNOWLEDGE[Knowledge Base<br/>Information retrieval]
-        SQL[SQL Manipulation<br/>Database queries]
+        KNOWLEDGE[Knowledge Base Agent<br/>Information retrieval]
+        SQL[SQL Manipulation Agent<br/>Database queries]
+        EDUCATION[Education Expert<br/>Educational content]
     end
 
     subgraph "Configuration Levels"
@@ -37,7 +37,7 @@ graph TB
     end
 
     CLASSIFICATION --> MINIMAL
-    BIKE --> MINIMAL
+    EDUCATION --> MINIMAL
 
     KNOWLEDGE --> SEARCH
 
@@ -53,73 +53,63 @@ graph TB
     classDef config fill:#f1f8e9
     classDef external fill:#fff3e0
 
-    class CLASSIFICATION,BIKE,KNOWLEDGE,SQL workflow
+    class CLASSIFICATION,EDUCATION,KNOWLEDGE,SQL workflow
     class MINIMAL,SEARCH,DATABASE config
     class AZURE_OPENAI,AZURE_SEARCH,AZURE_SQL external
 ```
 
 ## Detailed Workflow Flows
 
-### 🚴 Bike Insights Workflow
+### � Classification Agent Workflow
 
 ```mermaid
 sequenceDiagram
     participant User
     participant API
     participant Coordinator
-    participant BikeAgent as 🚴 Bike Agent
-    participant SentimentAgent as 😊 Sentiment Agent
-    participant FiscalAgent as 💰 Fiscal Agent
-    participant SummaryAgent as 📝 Summary Agent
+    participant ClassificationAgent as � Classification Agent
+    participant EducationAgent as 🎓 Education Expert
+    participant KnowledgeAgent as � Knowledge Base Agent
+    participant SQLAgent as �️ SQL Agent
     participant AzureOpenAI as 🧠 Azure OpenAI
 
-    User->>API: "Analyze bike sales for Q2"
-    API->>Coordinator: Initialize bike-insights workflow
+    User->>API: "Help me with database queries"
+    API->>Coordinator: Initialize classification-agent workflow
 
-    Note over Coordinator: Load bike sales data
-    Coordinator->>BikeAgent: Analyze sales performance
-    BikeAgent->>AzureOpenAI: Request sales analysis
-    AzureOpenAI-->>BikeAgent: Sales metrics & trends
+    Coordinator->>ClassificationAgent: Classify user intent
+    ClassificationAgent->>AzureOpenAI: Analyze query type
+    AzureOpenAI-->>ClassificationAgent: Intent: SQL Query
 
-    par Parallel Analysis
-        Coordinator->>SentimentAgent: Analyze customer feedback
-        SentimentAgent->>AzureOpenAI: Sentiment analysis
-        AzureOpenAI-->>SentimentAgent: Customer satisfaction scores
-    and
-        Coordinator->>FiscalAgent: Calculate financial impact
-        FiscalAgent->>AzureOpenAI: Financial calculations
-        AzureOpenAI-->>FiscalAgent: Revenue & profit analysis
-    end
+    ClassificationAgent->>Coordinator: Route to SQL Agent
+    Coordinator->>SQLAgent: Handle database query
+    SQLAgent->>AzureOpenAI: Generate SQL solution
+    AzureOpenAI-->>SQLAgent: SQL query & explanation
 
-    Coordinator->>SummaryAgent: Compile comprehensive report
-    SummaryAgent->>AzureOpenAI: Summarize findings
-    AzureOpenAI-->>SummaryAgent: Executive summary
-
-    SummaryAgent-->>Coordinator: Final report
+    SQLAgent-->>Coordinator: Formatted response
     Coordinator-->>API: Complete analysis
-    API-->>User: Comprehensive bike sales report
+    API-->>User: SQL solution with explanation
 ```
 
-### 🔍 Classification Agent Workflow
+### 🔍 Classification Agent Workflow Flow
 
 ```mermaid
 flowchart TD
     START([👤 User Input]) --> CLASSIFY{🔍 Classify Intent}
 
-    CLASSIFY -->|Sales Query| BIKE_FLOW[🚴 Bike Insights Flow]
+    CLASSIFY -->|Educational Query| EDUCATION_FLOW[🎓 Education Expert Flow]
     CLASSIFY -->|Technical Question| KNOWLEDGE_FLOW[📚 Knowledge Base Flow]
     CLASSIFY -->|Data Query| SQL_FLOW[🗄️ SQL Query Flow]
-    CLASSIFY -->|General Chat| CHAT_FLOW[💬 General Chat Flow]
+    CLASSIFY -->|General Classification| CLASSIFICATION_FLOW[� Classification Flow]
 
-    BIKE_FLOW --> BIKE_AGENT[🚴 Bike Analysis Agent]
+    EDUCATION_FLOW --> EDUCATION_AGENT[🎓 Education Expert]
     KNOWLEDGE_FLOW --> KNOWLEDGE_AGENT[📚 Knowledge Agent]
     SQL_FLOW --> SQL_AGENT[🗄️ SQL Agent]
-    CHAT_FLOW --> CHAT_AGENT[💬 Chat Agent]
+    CLASSIFICATION_FLOW --> CLASSIFICATION_AGENT[� Classification Agent]
 
-    BIKE_AGENT --> RESPONSE[📤 Formatted Response]
+    EDUCATION_AGENT --> RESPONSE[📤 Formatted Response]
     KNOWLEDGE_AGENT --> RESPONSE
     SQL_AGENT --> RESPONSE
-    CHAT_AGENT --> RESPONSE
+    CLASSIFICATION_AGENT --> RESPONSE
 
     RESPONSE --> FINISH([🏁 End])
 
@@ -131,8 +121,8 @@ flowchart TD
 
     class START start
     class CLASSIFY decision
-    class BIKE_FLOW,KNOWLEDGE_FLOW,SQL_FLOW,CHAT_FLOW workflow
-    class BIKE_AGENT,KNOWLEDGE_AGENT,SQL_AGENT,CHAT_AGENT agent
+    class EDUCATION_FLOW,KNOWLEDGE_FLOW,SQL_FLOW,CLASSIFICATION_FLOW workflow
+    class EDUCATION_AGENT,KNOWLEDGE_AGENT,SQL_AGENT,CLASSIFICATION_AGENT agent
     class RESPONSE,FINISH finish
 ```
 
@@ -268,8 +258,10 @@ dev:
 
 ### ⭐ Template-Based Workflows (Azure OpenAI only)
 
-#### 🚴 Bike Insights ("Hello World")
-Sample domain-specific workflow for bike sales analysis. Created when you run `ingen init`.
+#### 🚴 Bike Insights ("Hello World" Template)
+Sample domain-specific workflow for bike sales analysis. Available in the `ingenious_extensions_template` when you run `ingen init`.
+
+> **Note:** This workflow exists as a template example in `ingenious_extensions_template/`, not as a core workflow. It demonstrates how to build custom domain-specific workflows.
 
 ```mermaid
 graph TB
@@ -277,31 +269,28 @@ graph TB
         AZURE_OPENAI[🧠 Azure OpenAI<br/>Multi-Agent Processing]
     end
 
-    subgraph "Sample Data"
+    subgraph "Template Files"
         BIKE_DATA[🚴 Bike Sales Data<br/>JSON Sample Files]
+        BIKE_MODELS[📊 Bike Data Models<br/>Pydantic Schemas]
     end
 
-    subgraph "Agent Coordination"
-        BIKE_AGENT[🚴 Bike Analysis Agent]
-        SENTIMENT_AGENT[😊 Sentiment Agent]
-        FISCAL_AGENT[💰 Fiscal Agent]
-        SUMMARY_AGENT[📝 Summary Agent]
+    subgraph "Template Agents"
+        BIKE_AGENT[🚴 Bike Analysis Agent<br/>(Template Example)]
+        AGENT_FLOW[� Conversation Flow<br/>(Template Pattern)]
     end
 
     AZURE_OPENAI --> BIKE_AGENT
-    AZURE_OPENAI --> SENTIMENT_AGENT
-    AZURE_OPENAI --> FISCAL_AGENT
-    AZURE_OPENAI --> SUMMARY_AGENT
-
     BIKE_DATA --> BIKE_AGENT
+    BIKE_MODELS --> BIKE_AGENT
+    BIKE_AGENT --> AGENT_FLOW
 
     classDef service fill:#e3f2fd
-    classDef data fill:#f1f8e9
+    classDef template fill:#f1f8e9
     classDef agent fill:#fff3e0
 
     class AZURE_OPENAI service
-    class BIKE_DATA data
-    class BIKE_AGENT,SENTIMENT_AGENT,FISCAL_AGENT,SUMMARY_AGENT agent
+    class BIKE_DATA,BIKE_MODELS template
+    class BIKE_AGENT,AGENT_FLOW agent
 ```
 
 ### 🔍 Core Library Workflows (Azure Search Required)

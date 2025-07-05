@@ -74,10 +74,10 @@ curl -X POST http://localhost:80/api/v1/chat \
 ```
 
 **Agents Involved**:
-- 📊 **fiscal_analysis_agent**: Analyzes sales data and trends
-- 💭 **customer_sentiment_agent**: Processes customer reviews and ratings
-- 🔍 **bike_lookup_agent**: Retrieves bike prices and specifications
-- 📝 **summary**: Aggregates insights from all agents
+- � **classification_agent**: Classifies and routes user queries
+- 🎓 **education_expert**: Handles educational content queries
+- � **knowledge_base_agent**: Searches knowledge bases
+- �️ **sql_manipulation_agent**: Processes database queries
 
 **Response Format**:
 ```json
@@ -97,7 +97,7 @@ curl -X POST http://localhost:80/api/v1/chat \
 
 ### 2. ✅ classification-agent - Simple Text Processing
 
-**Purpose**: Basic text classification and routing (simpler alternative to bike-insights)
+**Purpose**: Basic text classification and routing
 
 **Availability**: Core library workflow
 

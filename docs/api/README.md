@@ -28,7 +28,10 @@ graph TB
         FASTAPI[⚡ FastAPI Application]
         CHAT_API[💬 Chat API<br/>/api/v1/chat]
         DIAGNOSTIC_API[🔄 Diagnostic API<br/>/api/v1/workflow-status]
+        WORKFLOWS_API[📋 Workflows API<br/>/api/v1/workflows]
         HEALTH_API[❤️ Health API<br/>/api/v1/health]
+        PROMPTS_API[📝 Prompts API<br/>/api/v1/prompts]
+        FEEDBACK_API[💬 Feedback API<br/>/api/v1/message-feedback]
     end
 
     subgraph "🤖 Backend Services"
@@ -51,11 +54,17 @@ graph TB
 
     FASTAPI --> CHAT_API
     FASTAPI --> DIAGNOSTIC_API
+    FASTAPI --> WORKFLOWS_API
     FASTAPI --> HEALTH_API
+    FASTAPI --> PROMPTS_API
+    FASTAPI --> FEEDBACK_API
 
     CHAT_API --> CHAT_SERVICE
     DIAGNOSTIC_API --> CONFIG_SERVICE
+    WORKFLOWS_API --> CONFIG_SERVICE
     HEALTH_API --> CONFIG_SERVICE
+    PROMPTS_API --> FILE_STORAGE
+    FEEDBACK_API --> CHAT_SERVICE
 
     CHAT_SERVICE --> MULTI_AGENT_SERVICE
     MULTI_AGENT_SERVICE --> FILE_STORAGE
@@ -70,7 +79,7 @@ graph TB
     classDef external fill:#fce4ec
 
     class WEB_CLIENT,MOBILE_CLIENT,API_CLIENT,CLI_CLIENT client
-    class FASTAPI,CHAT_API,DIAGNOSTIC_API,HEALTH_API api
+    class FASTAPI,CHAT_API,DIAGNOSTIC_API,WORKFLOWS_API,HEALTH_API,PROMPTS_API,FEEDBACK_API api
     class CHAT_SERVICE,MULTI_AGENT_SERVICE,CONFIG_SERVICE,FILE_STORAGE service
     class AZURE_OPENAI,AZURE_SEARCH,AZURE_SQL external
 ```
@@ -129,21 +138,22 @@ graph LR
         HEALTH[GET /api/v1/health<br/>Health Check]
     end
 
-    subgraph "� Additional Endpoints"
-        PROMPTS[POST /api/v1/prompts<br/>Prompt Management]
-        FEEDBACK[POST /api/v1/message-feedback<br/>Message Feedback]
-        EVENTS[POST /api/v1/events<br/>Event Processing]
+    subgraph "📝 Management Endpoints"
+        PROMPTS_VIEW[GET /api/v1/prompts/view/{revision_id}/{filename}<br/>View Prompt]
+        PROMPTS_LIST[GET /api/v1/prompts/list/{revision_id}<br/>List Prompts]
+        PROMPTS_UPDATE[POST /api/v1/prompts/update/{revision_id}/{filename}<br/>Update Prompt]
+        FEEDBACK[PUT /api/v1/message-feedback<br/>Message Feedback]
     end
 
     classDef chat fill:#e8f5e8
     classDef workflow fill:#fff3e0
     classDef system fill:#e3f2fd
-    classDef additional fill:#f3e5f5
+    classDef management fill:#f3e5f5
 
     class CHAT_POST chat
     class WORKFLOW_STATUS,WORKFLOWS_LIST,DIAGNOSTIC workflow
     class HEALTH system
-    class PROMPTS,FEEDBACK,EVENTS additional
+    class PROMPTS_VIEW,PROMPTS_LIST,PROMPTS_UPDATE,FEEDBACK management
 ```
 
 ### 💬 Chat API Flow
@@ -210,29 +220,29 @@ sequenceDiagram
     participant LLM as 🧠 Azure OpenAI
 
     Client->>API: POST /api/v1/chat
-    Note over Client,API: {"user_prompt": "data",<br/>"conversation_flow": "bike-insights"}
+    Note over Client,API: {"user_prompt": "Help with SQL queries",<br/>"conversation_flow": "sql-manipulation-agent"}
 
     API->>ChatService: Process chat request
     ChatService->>WorkflowEngine: Load conversation flow
 
-    WorkflowEngine->>Agent1: Start parallel execution
-    WorkflowEngine->>Agent2: Start parallel execution
+    WorkflowEngine->>Agent1: Start SQL agent processing
+    WorkflowEngine->>Agent2: Start classification if needed
 
     par Agent 1 Processing
-        Agent1->>LLM: Process sentiment data
-        LLM-->>Agent1: Sentiment analysis
-    and Agent 2 Processing
-        Agent2->>LLM: Process fiscal data
-        LLM-->>Agent2: Financial analysis
+        Agent1->>LLM: Parse natural language query
+        LLM-->>Agent1: SQL generation
+    and Agent 2 Processing (if needed)
+        Agent2->>LLM: Classify query complexity
+        LLM-->>Agent2: Query type classification
     end
 
-    Agent1-->>WorkflowEngine: Report completion
-    Agent2-->>WorkflowEngine: Report completion
+    Agent1-->>WorkflowEngine: Report SQL results
+    Agent2-->>WorkflowEngine: Report classification
 
-    WorkflowEngine->>WorkflowEngine: Combine results via Summary Agent
+    WorkflowEngine->>WorkflowEngine: Format results
     WorkflowEngine-->>ChatService: Final response
     ChatService-->>API: Formatted response
-    API-->>Client: 200 Success with results
+    API-->>Client: 200 Success with SQL solution
 ```
 
 ## 🔐 Authentication & Security
@@ -289,10 +299,10 @@ The Insight Ingenious API provides powerful endpoints for creating and managing 
 
 ### [🔄 Workflow API](/api/workflows/)
 Complete documentation for all available workflow endpoints, including:
-- Bike insights and analysis
-- Customer sentiment analysis
-- Financial data processing
-- Document analysis workflows
+- Classification and routing workflows
+- Educational content generation
+- Knowledge base search and retrieval
+- SQL query generation and execution
 
 ### 🛠️ Core API Endpoints
 
