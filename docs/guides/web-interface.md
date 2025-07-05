@@ -1,3 +1,16 @@
+---
+title: "Web Interface Guide"
+layout: single
+permalink: /guides/web-interface/
+sidebar:
+  nav: "docs"
+toc: true
+toc_label: "Web Interface"
+toc_icon: "globe"
+---
+
+# 🎨 Web Interface Guide
+
 ## API Integration
 
 ### Using the REST API

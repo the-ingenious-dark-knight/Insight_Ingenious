@@ -1,3 +1,14 @@
+---
+title: "Components Reference"
+layout: single
+permalink: /components/
+sidebar:
+  nav: "docs"
+toc: true
+toc_label: "Components"
+toc_icon: "cogs"
+---
+
 # Components Reference
 
 This document provides detailed information about the key components of the Insight Ingenious library - an enterprise-grade Python library for building AI agent APIs with Microsoft Azure integrations and comprehensive debugging utilities.

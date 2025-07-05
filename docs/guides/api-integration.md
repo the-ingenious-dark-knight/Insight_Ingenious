@@ -1,3 +1,14 @@
+---
+title: "API Integration Guide"
+layout: single
+permalink: /guides/api-integration/
+sidebar:
+  nav: "docs"
+toc: true
+toc_label: "API Integration"
+toc_icon: "plug"
+---
+
 # 🌐 API Integration Guide
 
 Complete guide to using the Insight Ingenious REST API for integrating conversation workflows into your applications.

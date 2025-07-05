@@ -1,3 +1,14 @@
+---
+title: "Quick Onboarding"
+layout: single
+permalink: /quick_onboarding/
+sidebar:
+  nav: "docs"
+toc: true
+toc_label: "Onboarding Steps"
+toc_icon: "rocket"
+---
+
 # Basic Onboarding
 
 > This is a very simple guide just to get you started playing with the Ingenious playground.

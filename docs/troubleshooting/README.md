@@ -1,3 +1,14 @@
+---
+title: "Troubleshooting Guide"
+layout: single
+permalink: /troubleshooting/
+sidebar:
+  nav: "docs"
+toc: true
+toc_label: "Troubleshooting"
+toc_icon: "wrench"
+---
+
 # 🔧 Troubleshooting Guide
 
 This guide helps you resolve common issues when setting up and using Insight Ingenious - an enterprise-grade Python library for AI agent APIs with Microsoft Azure integrations. The library includes comprehensive debugging utilities to help diagnose and resolve deployment issues.

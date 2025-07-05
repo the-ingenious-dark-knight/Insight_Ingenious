@@ -1,3 +1,14 @@
+---
+title: "Usage Examples"
+layout: single
+permalink: /usage/
+sidebar:
+  nav: "docs"
+toc: true
+toc_label: "Usage Examples"
+toc_icon: "play"
+---
+
 # Usage Guide
 
 This guide shows how to use Insight Ingenious for various tasks.
