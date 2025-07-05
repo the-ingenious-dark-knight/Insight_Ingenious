@@ -1,9 +1,9 @@
 # Insight Ingenious
 
-A powerful framework for building, managing, and deploying multi-agent AI conversations.
+An enterprise-grade Python library for quickly setting up APIs to interact with AI Agents, featuring tight integrations with Microsoft Azure services and comprehensive utilities for debugging and customization.
 
 ## Overview
-Insight Ingenious lets you orchestrate multiple AI agents and deploy them as an API for seamless integration into your applications.
+Insight Ingenious is a production-ready library that enables developers to rapidly deploy sophisticated AI agent APIs with minimal configuration. Built specifically for enterprise environments, it provides seamless Microsoft Azure integrations, robust debugging tools, and extensive customization capabilities for building scalable AI-powered applications.
 
 ## ⚡ Quick Start
 

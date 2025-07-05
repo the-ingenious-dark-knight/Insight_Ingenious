@@ -11,7 +11,7 @@ toc_icon: "rocket"
 
 # Quick Start Guide
 
-Get up and running with Insight Ingenious in minutes! This guide will walk you through the essential steps to start using conversation workflows.
+Get up and running with Insight Ingenious in minutes! This enterprise-grade Python library enables rapid deployment of AI agent APIs with seamless Microsoft Azure integrations. This guide will walk you through the essential steps to start building production-ready AI agent endpoints.
 
 ## Prerequisites
 
@@ -30,10 +30,10 @@ For complete installation instructions, including optional dependencies for adva
 git clone https://github.com/Insight-Services-APAC/Insight_Ingenious.git
 cd Insight_Ingenious
 
-# Install the framework
+# Install the library
 uv pip install -e .
 
-# Initialize project structure
+# Initialize project structure for API deployment
 uv run ingen init
 ```
 

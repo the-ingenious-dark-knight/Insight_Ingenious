@@ -11,7 +11,7 @@ toc_icon: "plug"
 
 # API Reference
 
-Complete API documentation for Insight Ingenious, including REST endpoints, workflow examples, and integration guides.
+Complete API documentation for Insight Ingenious - an enterprise-grade Python library for building AI agent APIs with Microsoft Azure integrations. This reference covers REST endpoints, workflow examples, debugging utilities, and integration guides.
 
 ## 🚀 API Architecture Overview
 

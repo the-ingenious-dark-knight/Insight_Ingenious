@@ -11,7 +11,7 @@ toc_icon: "bolt"
 
 # ⚡ Quick Start Guide
 
-Get Insight Ingenious up and running in 5 minutes!
+Get Insight Ingenious up and running in 5 minutes! This enterprise-grade Python library enables rapid deployment of AI agent APIs with seamless Microsoft Azure integrations.
 
 ## 🚀 Prerequisites
 
@@ -26,7 +26,7 @@ Get Insight Ingenious up and running in 5 minutes!
 # Navigate to your project directory
 cd /path/to/your/project
 
-# Install Ingenious library
+# Install Ingenious library for enterprise AI agent APIs
 uv pip install -e ./Insight_Ingenious
 
 # Initialize project structure

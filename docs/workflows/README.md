@@ -11,7 +11,7 @@ toc_icon: "project-diagram"
 
 # Workflow Configuration Requirements
 
-This guide outlines the configuration requirements for each conversation workflow in Insight Ingenious. Understanding these requirements will help you determine what external services and configurations are needed for each workflow.
+This guide outlines the configuration requirements for each conversation workflow in Insight Ingenious - an enterprise-grade Python library for AI agent APIs. Understanding these requirements will help you determine what Microsoft Azure services and configurations are needed for each workflow, along with available debugging and customization options.
 
 ## Workflow Architecture Overview
 

@@ -11,7 +11,7 @@ toc_icon: "cogs"
 
 # Configuration Guide
 
-This guide explains how to configure Insight Ingenious for your project.
+This guide explains how to configure Insight Ingenious - an enterprise-grade Python library for AI agent APIs - for your specific deployment and Microsoft Azure service integrations. The library provides comprehensive configuration options for enterprise environments, debugging tools, and customization requirements.
 
 ## Configuration Overview
 

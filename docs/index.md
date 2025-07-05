@@ -9,9 +9,9 @@ header:
       url: "/getting-started/"
     - label: "View on GitHub"
       url: "https://github.com/Insight-Services-APAC/Insight_Ingenious"
-excerpt: "A powerful conversation workflow framework for building AI-powered applications with Azure OpenAI."
+excerpt: "An enterprise-grade Python library for quickly setting up APIs to interact with AI Agents, featuring tight integrations with Microsoft Azure services and comprehensive utilities for debugging and customization."
 intro:
-  - excerpt: 'Insight Ingenious provides a comprehensive framework for creating sophisticated AI-powered conversation workflows with enterprise-grade features.'
+  - excerpt: 'Insight Ingenious provides an enterprise-grade Python library that enables rapid deployment of AI agent APIs with seamless Microsoft Azure integrations, robust debugging capabilities, and extensive customization options for building scalable AI-powered applications.'
 feature_row:
   - alt: "Quick Start"
     title: "Quick Start"
@@ -56,14 +56,16 @@ feature_row2:
 
 ## Key Features
 
-Insight Ingenious offers powerful features for building sophisticated AI applications:
+Insight Ingenious offers enterprise-grade capabilities for building sophisticated AI agent APIs:
 
-- **Multi-Agent Workflows**: Create complex conversation flows with specialized AI agents
-- **Dynamic State Management**: Maintain context and state across conversation turns
-- **Data Integration**: Connect with various data sources and APIs
-- **Flexible UI**: Multiple interface options including web UI and API endpoints
-- **Enterprise Ready**: Built for production with monitoring, logging, and scalability
-- **Extensible**: Plugin architecture for custom functionality
+- **Enterprise-Ready API Library**: Quick deployment of production-ready AI agent APIs with minimal configuration
+- **Microsoft Azure Integration**: Seamless integration with Azure OpenAI, Azure Search, Azure SQL, and other Azure services
+- **Multi-Agent Orchestration**: Create complex conversation flows with specialized AI agents working in coordination
+- **Advanced Debugging Tools**: Comprehensive utilities for monitoring, testing, and debugging AI agent interactions
+- **Extensive Customization**: Flexible plugin architecture for custom agents, workflows, and integrations
+- **Production Monitoring**: Built-in logging, error handling, and performance monitoring for enterprise environments
+- **Dynamic State Management**: Maintain context and state across conversation turns with robust session handling
+- **Scalable Architecture**: Designed for high-availability enterprise deployments with load balancing support
 
 {% include feature_row %}
 

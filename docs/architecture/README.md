@@ -11,11 +11,11 @@ toc_icon: "sitemap"
 
 # Architecture Overview
 
-This document describes the high-level architecture of Insight Ingenious, explaining its key components and how they interact.
+This document describes the high-level architecture of Insight Ingenious, an enterprise-grade Python library designed for rapid deployment of AI agent APIs with tight Microsoft Azure integrations and comprehensive debugging capabilities.
 
 ## System Architecture
 
-Insight Ingenious is designed with a modular architecture that allows for extensibility and customization. The system consists of the following main components:
+Insight Ingenious is architected as a production-ready library with enterprise-grade features including seamless Azure service integrations, robust debugging tools, and extensive customization capabilities. The system consists of the following main components:
 
 ```mermaid
 graph TB
