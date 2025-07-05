@@ -22,6 +22,7 @@ graph TB
         KNOWLEDGE[Knowledge Base Agent<br/>Information retrieval]
         SQL[SQL Manipulation Agent<br/>Database queries]
         EDUCATION[Education Expert<br/>Educational content]
+        BIKE_INSIGHTS[Bike Insights<br/>Template example]
     end
 
     subgraph "Configuration Levels"
@@ -38,6 +39,7 @@ graph TB
 
     CLASSIFICATION --> MINIMAL
     EDUCATION --> MINIMAL
+    BIKE_INSIGHTS --> MINIMAL
 
     KNOWLEDGE --> SEARCH
 
@@ -53,7 +55,7 @@ graph TB
     classDef config fill:#f1f8e9
     classDef external fill:#fff3e0
 
-    class CLASSIFICATION,EDUCATION,KNOWLEDGE,SQL workflow
+    class CLASSIFICATION,EDUCATION,KNOWLEDGE,SQL,BIKE_INSIGHTS workflow
     class MINIMAL,SEARCH,DATABASE config
     class AZURE_OPENAI,AZURE_SEARCH,AZURE_SQL external
 ```

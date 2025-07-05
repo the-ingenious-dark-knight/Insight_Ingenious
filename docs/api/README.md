@@ -27,11 +27,10 @@ graph TB
     subgraph "🎯 API Layer"
         FASTAPI[⚡ FastAPI Application]
         CHAT_API[💬 Chat API<br/>/api/v1/chat]
-        DIAGNOSTIC_API[🔄 Diagnostic API<br/>/api/v1/workflow-status]
-        WORKFLOWS_API[📋 Workflows API<br/>/api/v1/workflows]
-        HEALTH_API[❤️ Health API<br/>/api/v1/health]
+        DIAGNOSTIC_API[🔄 Diagnostic API<br/>/api/v1/workflow-status<br/>/api/v1/workflows<br/>/api/v1/diagnostic<br/>/api/v1/health]
         PROMPTS_API[📝 Prompts API<br/>/api/v1/prompts]
         FEEDBACK_API[💬 Feedback API<br/>/api/v1/message-feedback]
+        CONVERSATION_API[🗣️ Conversation API<br/>/api/v1/conversations]
     end
 
     subgraph "🤖 Backend Services"
@@ -54,17 +53,15 @@ graph TB
 
     FASTAPI --> CHAT_API
     FASTAPI --> DIAGNOSTIC_API
-    FASTAPI --> WORKFLOWS_API
-    FASTAPI --> HEALTH_API
     FASTAPI --> PROMPTS_API
     FASTAPI --> FEEDBACK_API
+    FASTAPI --> CONVERSATION_API
 
     CHAT_API --> CHAT_SERVICE
     DIAGNOSTIC_API --> CONFIG_SERVICE
-    WORKFLOWS_API --> CONFIG_SERVICE
-    HEALTH_API --> CONFIG_SERVICE
     PROMPTS_API --> FILE_STORAGE
     FEEDBACK_API --> CHAT_SERVICE
+    CONVERSATION_API --> CHAT_SERVICE
 
     CHAT_SERVICE --> MULTI_AGENT_SERVICE
     MULTI_AGENT_SERVICE --> FILE_STORAGE
@@ -79,7 +76,7 @@ graph TB
     classDef external fill:#fce4ec
 
     class WEB_CLIENT,MOBILE_CLIENT,API_CLIENT,CLI_CLIENT client
-    class FASTAPI,CHAT_API,DIAGNOSTIC_API,WORKFLOWS_API,HEALTH_API,PROMPTS_API,FEEDBACK_API api
+    class FASTAPI,CHAT_API,DIAGNOSTIC_API,PROMPTS_API,FEEDBACK_API,CONVERSATION_API api
     class CHAT_SERVICE,MULTI_AGENT_SERVICE,CONFIG_SERVICE,FILE_STORAGE service
     class AZURE_OPENAI,AZURE_SEARCH,AZURE_SQL external
 ```
@@ -213,8 +210,8 @@ flowchart TD
 sequenceDiagram
     participant Client
     participant API as 📡 Chat API
-    participant ChatService as � Chat Service
-    participant WorkflowEngine as ⚡ Workflow Engine
+    participant ChatService as 💬 Chat Service
+    participant MultiAgentService as 🤖 Multi-Agent Service
     participant Agent1 as 🤖 Agent 1
     participant Agent2 as 🤖 Agent 2
     participant LLM as 🧠 Azure OpenAI
@@ -223,10 +220,10 @@ sequenceDiagram
     Note over Client,API: {"user_prompt": "Help with SQL queries",<br/>"conversation_flow": "sql-manipulation-agent"}
 
     API->>ChatService: Process chat request
-    ChatService->>WorkflowEngine: Load conversation flow
+    ChatService->>MultiAgentService: Load conversation flow
 
-    WorkflowEngine->>Agent1: Start SQL agent processing
-    WorkflowEngine->>Agent2: Start classification if needed
+    MultiAgentService->>Agent1: Start SQL agent processing
+    MultiAgentService->>Agent2: Start classification if needed
 
     par Agent 1 Processing
         Agent1->>LLM: Parse natural language query
@@ -236,11 +233,11 @@ sequenceDiagram
         LLM-->>Agent2: Query type classification
     end
 
-    Agent1-->>WorkflowEngine: Report SQL results
-    Agent2-->>WorkflowEngine: Report classification
+    Agent1-->>MultiAgentService: Report SQL results
+    Agent2-->>MultiAgentService: Report classification
 
-    WorkflowEngine->>WorkflowEngine: Format results
-    WorkflowEngine-->>ChatService: Final response
+    MultiAgentService->>MultiAgentService: Format results
+    MultiAgentService-->>ChatService: Final response
     ChatService-->>API: Formatted response
     API-->>Client: 200 Success with SQL solution
 ```

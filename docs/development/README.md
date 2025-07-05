@@ -389,53 +389,53 @@ Create focused pull requests:
 ```mermaid
 graph TB
     subgraph "🤖 Agent Development"
-        AGENT_INTERFACE[🎯 IAgent Interface]
-        BASE_AGENT[👤 BaseAgent Class]
+        AGENT_MARKDOWN[📄 Agent Markdown Definition]
+        AGENT_FLOW[� IConversationFlow]
         CUSTOM_AGENT[🔧 Custom Agent<br/>Implementation]
     end
 
     subgraph "📋 Pattern Development"
         PATTERN_INTERFACE[🔄 IConversationPattern]
-        BASE_PATTERN[📝 BasePattern Class]
+        PATTERN_IMPL[📝 ConversationPattern]
         CUSTOM_PATTERN[🎭 Custom Pattern<br/>Implementation]
     end
 
     subgraph "🔧 Service Integration"
         CHAT_SERVICE[💬 MultiAgentChatService]
-        WORKFLOW_SERVICE[⚡ WorkflowService]
+        CHAT_INTERFACE[📞 IChatService]
         CUSTOM_SERVICE[🛠️ Custom Service<br/>Implementation]
     end
 
     subgraph "📦 Registration System"
-        AGENT_REGISTRY[📋 Agent Registry]
-        PATTERN_REGISTRY[📋 Pattern Registry]
-        SERVICE_REGISTRY[📋 Service Registry]
+        NAMESPACE_UTILS[📋 Namespace Utils]
+        DYNAMIC_LOADER[⚡ Dynamic Loader]
+        CONFIG_VALIDATION[✅ Config Validation]
     end
 
-    AGENT_INTERFACE --> BASE_AGENT
-    BASE_AGENT --> CUSTOM_AGENT
-    CUSTOM_AGENT --> AGENT_REGISTRY
+    AGENT_MARKDOWN --> AGENT_FLOW
+    AGENT_FLOW --> CUSTOM_AGENT
+    CUSTOM_AGENT --> NAMESPACE_UTILS
 
-    PATTERN_INTERFACE --> BASE_PATTERN
-    BASE_PATTERN --> CUSTOM_PATTERN
-    CUSTOM_PATTERN --> PATTERN_REGISTRY
+    PATTERN_INTERFACE --> PATTERN_IMPL
+    PATTERN_IMPL --> CUSTOM_PATTERN
+    CUSTOM_PATTERN --> NAMESPACE_UTILS
 
-    CHAT_SERVICE --> WORKFLOW_SERVICE
-    WORKFLOW_SERVICE --> CUSTOM_SERVICE
-    CUSTOM_SERVICE --> SERVICE_REGISTRY
+    CHAT_INTERFACE --> CHAT_SERVICE
+    CHAT_SERVICE --> CUSTOM_SERVICE
+    CUSTOM_SERVICE --> NAMESPACE_UTILS
 
-    AGENT_REGISTRY --> CHAT_SERVICE
-    PATTERN_REGISTRY --> CHAT_SERVICE
+    NAMESPACE_UTILS --> DYNAMIC_LOADER
+    NAMESPACE_UTILS --> CONFIG_VALIDATION
 
     classDef interface fill:#e3f2fd
     classDef base fill:#f1f8e9
     classDef custom fill:#fff3e0
     classDef registry fill:#fce4ec
 
-    class AGENT_INTERFACE,PATTERN_INTERFACE interface
-    class BASE_AGENT,BASE_PATTERN,CHAT_SERVICE,WORKFLOW_SERVICE base
+    class AGENT_FLOW,PATTERN_INTERFACE,CHAT_INTERFACE interface
+    class AGENT_MARKDOWN,PATTERN_IMPL,CHAT_SERVICE base
     class CUSTOM_AGENT,CUSTOM_PATTERN,CUSTOM_SERVICE custom
-    class AGENT_REGISTRY,PATTERN_REGISTRY,SERVICE_REGISTRY registry
+    class NAMESPACE_UTILS,DYNAMIC_LOADER,CONFIG_VALIDATION registry
 ```
 
 #### 🆕 Creating a New Agent
@@ -444,17 +444,17 @@ graph TB
 sequenceDiagram
     participant Dev as 👨‍💻 Developer
     participant Template as 📋 Agent Template
-    participant Base as 👤 BaseAgent
+    participant AgentMD as � Agent Markdown
     participant Registry as 📋 Agent Registry
     participant Service as 💬 Chat Service
     participant Test as 🧪 Test Suite
 
     Dev->>Template: 1. Copy agent template
-    Template->>Base: 2. Inherit from BaseAgent
-    Dev->>Base: 3. Implement required methods
-    Note over Dev,Base: - process_message()<br/>- get_system_prompt()<br/>- configure_tools()
+    Template->>AgentMD: 2. Create agent.md file
+    Dev->>AgentMD: 3. Define agent properties
+    Note over Dev,AgentMD: - Title & Description<br/>- System Prompt<br/>- Tasks & Instructions
 
-    Dev->>Registry: 4. Register agent
+    Dev->>Registry: 4. Register agent flow
     Registry->>Service: 5. Make available to service
     Dev->>Test: 6. Write unit tests
     Test->>Dev: 7. Validate implementation

@@ -31,7 +31,7 @@ graph TB
 
     subgraph "Core Engine"
         AGENT_SERVICE[Agent Service<br/>Conversation Manager]
-        FLOW_ENGINE[Flow Engine<br/>Pattern Orchestrator]
+        PATTERN_SERVICE[Pattern Service<br/>Conversation Orchestrator]
         LLM_SERVICE[LLM Service<br/>Azure OpenAI Integration]
     end
 
@@ -43,7 +43,7 @@ graph TB
 
     subgraph "Storage Layer"
         CONFIG[Configuration<br/>YAML Files]
-        HISTORY[Chat History<br/>Session Management]
+        HISTORY[Chat History<br/>SQLite Database]
         FILES[File Storage<br/>Documents & Assets]
     end
 
@@ -56,15 +56,15 @@ graph TB
     API_CLIENT --> API
     API --> AUTH
     AUTH --> AGENT_SERVICE
-    AGENT_SERVICE --> FLOW_ENGINE
+    AGENT_SERVICE --> PATTERN_SERVICE
     AGENT_SERVICE --> LLM_SERVICE
-    FLOW_ENGINE --> PATTERNS
+    PATTERN_SERVICE --> PATTERNS
     AGENT_SERVICE --> CUSTOM_AGENTS
     CUSTOM_AGENTS --> TOOLS
     LLM_SERVICE --> AZURE
     TOOLS --> EXTERNAL_API
     AGENT_SERVICE --> HISTORY
-    FLOW_ENGINE --> CONFIG
+    PATTERN_SERVICE --> CONFIG
     AGENT_SERVICE --> FILES
 
     classDef clientLayer fill:#e1f5fe
@@ -76,7 +76,7 @@ graph TB
 
     class UI,API_CLIENT clientLayer
     class API,AUTH apiLayer
-    class AGENT_SERVICE,FLOW_ENGINE,LLM_SERVICE coreLayer
+    class AGENT_SERVICE,PATTERN_SERVICE,LLM_SERVICE coreLayer
     class CUSTOM_AGENTS,PATTERNS,TOOLS extensionLayer
     class CONFIG,HISTORY,FILES storageLayer
     class AZURE,EXTERNAL_API externalLayer
@@ -210,7 +210,7 @@ graph TB
 
     subgraph "📚 Chat Storage"
         HISTORY[💬 Chat History<br/>SQLite/Database]
-        SESSIONS[👤 User Sessions<br/>Memory/Redis]
+        SESSIONS[👤 User Sessions<br/>In-Memory Storage]
     end
 
     subgraph "📁 File Storage"
@@ -338,52 +338,52 @@ sequenceDiagram
 graph TB
     subgraph "🏭 Core Framework"
         CORE_API[🔧 Core API]
-        CORE_AGENTS[👤 Base Agents]
+        CORE_FLOWS[👤 Base Conversation Flows]
         CORE_PATTERNS[📋 Base Patterns]
     end
 
     subgraph "🎯 Extension Interface"
-        AGENT_INTERFACE[🤖 IAgent Interface]
-        PATTERN_INTERFACE[🔄 IPattern Interface]
-        TOOL_INTERFACE[🛠️ ITool Interface]
+        FLOW_INTERFACE[🤖 IConversationFlow Interface]
+        PATTERN_INTERFACE[🔄 IConversationPattern Interface]
+        CHAT_INTERFACE[� IChatService Interface]
     end
 
     subgraph "🔌 Custom Extensions"
-        CUSTOM_AGENT[👥 Custom Agent<br/>Domain Expert]
+        CUSTOM_FLOW[👥 Custom Flow<br/>Domain Expert]
         CUSTOM_PATTERN[🎭 Custom Pattern<br/>Workflow Logic]
-        CUSTOM_TOOL[⚙️ Custom Tool<br/>External Integration]
+        CUSTOM_TOOLS[⚙️ Custom Tools<br/>External Integration]
     end
 
     subgraph "📦 Extension Registry"
-        REGISTRY[📋 Extension Registry]
-        LOADER[⚡ Dynamic Loader]
-        VALIDATOR[✅ Validation Engine]
+        NAMESPACE_LOADER[📋 Namespace Utils]
+        DYNAMIC_LOADER[⚡ Dynamic Loader]
+        CONFIG_VALIDATOR[✅ Config Validation]
     end
 
-    CORE_API --> AGENT_INTERFACE
-    CORE_AGENTS --> AGENT_INTERFACE
+    CORE_API --> FLOW_INTERFACE
+    CORE_FLOWS --> FLOW_INTERFACE
     CORE_PATTERNS --> PATTERN_INTERFACE
 
-    AGENT_INTERFACE --> CUSTOM_AGENT
+    FLOW_INTERFACE --> CUSTOM_FLOW
     PATTERN_INTERFACE --> CUSTOM_PATTERN
-    TOOL_INTERFACE --> CUSTOM_TOOL
+    CHAT_INTERFACE --> CUSTOM_TOOLS
 
-    CUSTOM_AGENT --> REGISTRY
-    CUSTOM_PATTERN --> REGISTRY
-    CUSTOM_TOOL --> REGISTRY
+    CUSTOM_FLOW --> NAMESPACE_LOADER
+    CUSTOM_PATTERN --> NAMESPACE_LOADER
+    CUSTOM_TOOLS --> NAMESPACE_LOADER
 
-    REGISTRY --> LOADER
-    REGISTRY --> VALIDATOR
+    NAMESPACE_LOADER --> DYNAMIC_LOADER
+    NAMESPACE_LOADER --> CONFIG_VALIDATOR
 
     classDef core fill:#e3f2fd
     classDef interface fill:#f1f8e9
     classDef custom fill:#fff3e0
     classDef registry fill:#fce4ec
 
-    class CORE_API,CORE_AGENTS,CORE_PATTERNS core
-    class AGENT_INTERFACE,PATTERN_INTERFACE,TOOL_INTERFACE interface
-    class CUSTOM_AGENT,CUSTOM_PATTERN,CUSTOM_TOOL custom
-    class REGISTRY,LOADER,VALIDATOR registry
+    class CORE_API,CORE_FLOWS,CORE_PATTERNS core
+    class FLOW_INTERFACE,PATTERN_INTERFACE,CHAT_INTERFACE interface
+    class CUSTOM_FLOW,CUSTOM_PATTERN,CUSTOM_TOOLS custom
+    class NAMESPACE_LOADER,DYNAMIC_LOADER,CONFIG_VALIDATOR registry
 ```
 
 ## Key Classes and Interfaces
@@ -406,40 +406,44 @@ classDiagram
         +finalize_conversation()
     }
 
-    class BaseAgent {
-        <<abstract>>
-        +name: str
-        +description: str
-        +tools: List[Tool]
+    class IChatService {
+        <<interface>>
+        +get_chat_response(request: ChatRequest)
         +process_message(message: str)
-        +get_system_prompt()
     }
 
-    class EducationExpert {
+    class AgentMarkdownDefinition {
+        +title: str
+        +description: str
+        +system_prompt: str
+        +tasks: List[str]
+    }
+
+    class EducationExpertFlow {
         +create_curriculum()
         +plan_lessons()
         +assess_progress()
     }
 
-    class CurriculumExpert {
+    class CurriculumExpertFlow {
         +design_curriculum()
         +structure_content()
         +define_objectives()
     }
 
-    class LessonPlanner {
+    class LessonPlannerFlow {
         +plan_lessons()
         +create_activities()
         +set_assessments()
     }
 
-    class KnowledgeBaseAgent {
+    class KnowledgeBaseAgentFlow {
         +search_knowledge()
         +retrieve_information()
         +format_results()
     }
 
-    class SqlManipulationAgent {
+    class SqlManipulationAgentFlow {
         +parse_nl_query()
         +generate_sql()
         +execute_query()
@@ -447,13 +451,13 @@ classDiagram
     }
 
     class MultiAgentChatService {
-        +agents: Dict[str, BaseAgent]
+        +conversation_flows: Dict[str, IConversationFlow]
         +patterns: Dict[str, IConversationPattern]
         +orchestrate_conversation()
         +manage_state()
     }
 
-    class SequentialPattern {
+    class ConversationPattern {
         +execute_in_sequence()
         +handle_dependencies()
     }
@@ -464,13 +468,16 @@ classDiagram
         +handle_routing()
     }
     IConversationFlow <|.. ClassificationAgentFlow
-    BaseAgent <|-- EducationExpert
-    BaseAgent <|-- CurriculumExpert
-    BaseAgent <|-- LessonPlanner
-    BaseAgent <|-- KnowledgeBaseAgent
-    BaseAgent <|-- SqlManipulationAgent
-    MultiAgentChatService --> BaseAgent
+    IConversationFlow <|.. EducationExpertFlow
+    IConversationFlow <|.. CurriculumExpertFlow
+    IConversationFlow <|.. LessonPlannerFlow
+    IConversationFlow <|.. KnowledgeBaseAgentFlow
+    IConversationFlow <|.. SqlManipulationAgentFlow
+    IConversationPattern <|.. ConversationPattern
+    IChatService <|.. MultiAgentChatService
+    MultiAgentChatService --> IConversationFlow
     MultiAgentChatService --> IConversationPattern
+    MultiAgentChatService --> AgentMarkdownDefinition
 ```
 
 ## Configuration Architecture
@@ -637,8 +644,8 @@ graph TB
 ```mermaid
 graph TB
     subgraph "⚡ Caching Strategy"
-        REDIS[🔴 Redis Cache]
-        MEMORY[💾 In-Memory Cache]
+        MEMORY[� In-Memory Cache]
+        FILE_CACHE[� File-based Cache]
         CDN[🌐 CDN Cache]
     end
 
@@ -649,9 +656,9 @@ graph TB
     end
 
     subgraph "🔄 Async Processing"
-        TASK_QUEUE[📋 Task Queue]
-        WORKERS[👷 Background Workers]
-        SCHEDULER[⏰ Job Scheduler]
+        ASYNC_HANDLERS[📋 Async Request Handlers]
+        BACKGROUND_TASKS[👷 Background Tasks]
+        SCHEDULER[⏰ Task Scheduler]
     end
 
     subgraph "📈 Monitoring"
@@ -660,20 +667,20 @@ graph TB
         DASHBOARDS[📈 Monitoring Dashboard]
     end
 
-    REDIS --> MEMORY
-    MEMORY --> CDN
+    MEMORY --> FILE_CACHE
+    FILE_CACHE --> CDN
 
     LOAD_BALANCER --> API_INSTANCES
     LOAD_BALANCER --> HEALTH_CHECK
 
-    TASK_QUEUE --> WORKERS
-    WORKERS --> SCHEDULER
+    ASYNC_HANDLERS --> BACKGROUND_TASKS
+    BACKGROUND_TASKS --> SCHEDULER
 
     METRICS --> ALERTS
     ALERTS --> DASHBOARDS
 
-    API_INSTANCES --> REDIS
-    API_INSTANCES --> TASK_QUEUE
+    API_INSTANCES --> MEMORY
+    API_INSTANCES --> ASYNC_HANDLERS
     API_INSTANCES --> METRICS
 
     classDef cache fill:#e8f5e8
@@ -681,9 +688,9 @@ graph TB
     classDef async fill:#e3f2fd
     classDef monitor fill:#fce4ec
 
-    class REDIS,MEMORY,CDN cache
+    class MEMORY,FILE_CACHE,CDN cache
     class LOAD_BALANCER,API_INSTANCES,HEALTH_CHECK balance
-    class TASK_QUEUE,WORKERS,SCHEDULER async
+    class ASYNC_HANDLERS,BACKGROUND_TASKS,SCHEDULER async
     class METRICS,ALERTS,DASHBOARDS monitor
 ```
 
