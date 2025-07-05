@@ -176,7 +176,7 @@ Conversation patterns define how agents interact:
   - `classification_agent/`: Pattern for classifying inputs and routing to specialized agents (API: `classification-agent`)
   - `knowledge_base_agent/`: Pattern for knowledge retrieval and question answering (API: `knowledge-base-agent`)
   - `sql_manipulation_agent/`: Pattern for SQL query generation and execution (API: `sql-manipulation-agent`)
-  - `education_expert/`: Pattern for educational content generation (pattern only, no flow)
+  - `education_expert/`: Pattern for educational content generation (pattern only, no direct API)
 
 #### Flows
 
@@ -390,7 +390,7 @@ Create focused pull requests:
 graph TB
     subgraph "🤖 Agent Development"
         AGENT_MARKDOWN[📄 Agent Markdown Definition]
-        AGENT_FLOW[� IConversationFlow]
+        AGENT_FLOW[🔄 IConversationFlow]
         CUSTOM_AGENT[🔧 Custom Agent<br/>Implementation]
     end
 
@@ -444,7 +444,7 @@ graph TB
 sequenceDiagram
     participant Dev as 👨‍💻 Developer
     participant Template as 📋 Agent Template
-    participant AgentMD as � Agent Markdown
+    participant AgentMD as 📄 Agent Markdown
     participant Registry as 📋 Agent Registry
     participant Service as 💬 Chat Service
     participant Test as 🧪 Test Suite

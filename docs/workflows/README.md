@@ -22,7 +22,6 @@ graph TB
         KNOWLEDGE[Knowledge Base Agent<br/>Information retrieval]
         SQL[SQL Manipulation Agent<br/>Database queries]
         EDUCATION[Education Expert<br/>Educational content]
-        BIKE_INSIGHTS[Bike Insights<br/>Template example]
     end
 
     subgraph "Configuration Levels"
@@ -39,7 +38,6 @@ graph TB
 
     CLASSIFICATION --> MINIMAL
     EDUCATION --> MINIMAL
-    BIKE_INSIGHTS --> MINIMAL
 
     KNOWLEDGE --> SEARCH
 
@@ -55,24 +53,24 @@ graph TB
     classDef config fill:#f1f8e9
     classDef external fill:#fff3e0
 
-    class CLASSIFICATION,EDUCATION,KNOWLEDGE,SQL,BIKE_INSIGHTS workflow
+    class CLASSIFICATION,EDUCATION,KNOWLEDGE,SQL workflow
     class MINIMAL,SEARCH,DATABASE config
     class AZURE_OPENAI,AZURE_SEARCH,AZURE_SQL external
 ```
 
 ## Detailed Workflow Flows
 
-### � Classification Agent Workflow
+### 🔍 Classification Agent Workflow
 
 ```mermaid
 sequenceDiagram
     participant User
     participant API
     participant Coordinator
-    participant ClassificationAgent as � Classification Agent
+    participant ClassificationAgent as 🔍 Classification Agent
     participant EducationAgent as 🎓 Education Expert
-    participant KnowledgeAgent as � Knowledge Base Agent
-    participant SQLAgent as �️ SQL Agent
+    participant KnowledgeAgent as 🔍 Knowledge Base Agent
+    participant SQLAgent as 🗄️ SQL Agent
     participant AzureOpenAI as 🧠 Azure OpenAI
 
     User->>API: "Help me with database queries"
@@ -101,12 +99,12 @@ flowchart TD
     CLASSIFY -->|Educational Query| EDUCATION_FLOW[🎓 Education Expert Flow]
     CLASSIFY -->|Technical Question| KNOWLEDGE_FLOW[📚 Knowledge Base Flow]
     CLASSIFY -->|Data Query| SQL_FLOW[🗄️ SQL Query Flow]
-    CLASSIFY -->|General Classification| CLASSIFICATION_FLOW[� Classification Flow]
+    CLASSIFY -->|General Classification| CLASSIFICATION_FLOW[🔍 Classification Flow]
 
     EDUCATION_FLOW --> EDUCATION_AGENT[🎓 Education Expert]
     KNOWLEDGE_FLOW --> KNOWLEDGE_AGENT[📚 Knowledge Agent]
     SQL_FLOW --> SQL_AGENT[🗄️ SQL Agent]
-    CLASSIFICATION_FLOW --> CLASSIFICATION_AGENT[� Classification Agent]
+    CLASSIFICATION_FLOW --> CLASSIFICATION_AGENT[🔍 Classification Agent]
 
     EDUCATION_AGENT --> RESPONSE[📤 Formatted Response]
     KNOWLEDGE_AGENT --> RESPONSE
@@ -128,7 +126,7 @@ flowchart TD
     class RESPONSE,FINISH finish
 ```
 
-### � Knowledge Base Workflow
+### 🔍 Knowledge Base Workflow
 
 ```mermaid
 graph TB
@@ -187,7 +185,7 @@ graph TB
     class AZURE_OPENAI,CONTEXT_SYNTHESIS,RESPONSE_GENERATION ai
 ```
 
-### �️ SQL Manipulation Workflow
+### 🗄️ SQL Manipulation Workflow
 
 ```mermaid
 sequenceDiagram
@@ -278,7 +276,7 @@ graph TB
 
     subgraph "Template Agents"
         BIKE_AGENT[🚴 Bike Analysis Agent<br/>(Template Example)]
-        AGENT_FLOW[� Conversation Flow<br/>(Template Pattern)]
+        AGENT_FLOW[🔄 Conversation Flow<br/>(Template Pattern)]
     end
 
     AZURE_OPENAI --> BIKE_AGENT

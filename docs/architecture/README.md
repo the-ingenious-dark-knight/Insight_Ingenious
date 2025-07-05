@@ -11,7 +11,7 @@ toc_icon: "sitemap"
 
 # Architecture Overview
 
-This document describes the high-level architecture of Insight Ingenious, an enterprise-grade Python library designed for rapid deployment of AI agent APIs with tight Microsoft Azure integrations and comprehensive debugging capabilities.
+This document describes the high-level architecture of Insight Ingenious, an enterprise-grade Python library designed for rapid deployment of AI agent         CHAT_INTERFACE[💬 IChatService Interface]PIs with tight Microsoft Azure integrations and comprehensive debugging capabilities.
 
 ## System Architecture
 
@@ -261,10 +261,10 @@ flowchart TD
     INPUT_VALIDATION -->|❌ Invalid| ERROR_RESPONSE[❌ Error Response]
 
     LOAD_CONTEXT --> SELECT_WORKFLOW{🎯 Select Workflow}
-    SELECT_WORKFLOW --> CLASSIFICATION_WORKFLOW[� Classification Agent]
+    SELECT_WORKFLOW --> CLASSIFICATION_WORKFLOW[🔍 Classification Agent]
     SELECT_WORKFLOW --> EDUCATION_WORKFLOW[🎓 Education Expert]
-    SELECT_WORKFLOW --> KNOWLEDGE_WORKFLOW[� Knowledge Base Agent]
-    SELECT_WORKFLOW --> SQL_WORKFLOW[�️ SQL Manipulation Agent]
+    SELECT_WORKFLOW --> KNOWLEDGE_WORKFLOW[🔍 Knowledge Base Agent]
+    SELECT_WORKFLOW --> SQL_WORKFLOW[🗄️ SQL Manipulation Agent]
 
     CLASSIFICATION_WORKFLOW --> AGENT_COORDINATION[👥 Agent Coordination]
     EDUCATION_WORKFLOW --> AGENT_COORDINATION
@@ -299,10 +299,10 @@ sequenceDiagram
     participant User
     participant API
     participant Manager
-    participant Agent1 as � Classification Agent
+    participant Agent1 as 🔍 Classification Agent
     participant Agent2 as 🎓 Education Expert
-    participant Agent3 as � Knowledge Agent
-    participant Agent4 as �️ SQL Agent
+    participant Agent3 as 🔍 Knowledge Agent
+    participant Agent4 as 🗄️ SQL Agent
     participant LLM as 🧠 Azure OpenAI
 
     User->>API: "Help me understand database design"

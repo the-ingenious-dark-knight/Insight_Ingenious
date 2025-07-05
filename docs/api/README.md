@@ -29,8 +29,7 @@ graph TB
         CHAT_API[💬 Chat API<br/>/api/v1/chat]
         DIAGNOSTIC_API[🔄 Diagnostic API<br/>/api/v1/workflow-status<br/>/api/v1/workflows<br/>/api/v1/diagnostic<br/>/api/v1/health]
         PROMPTS_API[📝 Prompts API<br/>/api/v1/prompts]
-        FEEDBACK_API[💬 Feedback API<br/>/api/v1/message-feedback]
-        CONVERSATION_API[🗣️ Conversation API<br/>/api/v1/conversations]
+        FEEDBACK_API[💬 Feedback API<br/>/api/v1/messages/{message_id}/feedback]
     end
 
     subgraph "🤖 Backend Services"
@@ -55,13 +54,11 @@ graph TB
     FASTAPI --> DIAGNOSTIC_API
     FASTAPI --> PROMPTS_API
     FASTAPI --> FEEDBACK_API
-    FASTAPI --> CONVERSATION_API
 
     CHAT_API --> CHAT_SERVICE
     DIAGNOSTIC_API --> CONFIG_SERVICE
     PROMPTS_API --> FILE_STORAGE
     FEEDBACK_API --> CHAT_SERVICE
-    CONVERSATION_API --> CHAT_SERVICE
 
     CHAT_SERVICE --> MULTI_AGENT_SERVICE
     MULTI_AGENT_SERVICE --> FILE_STORAGE
@@ -76,7 +73,7 @@ graph TB
     classDef external fill:#fce4ec
 
     class WEB_CLIENT,MOBILE_CLIENT,API_CLIENT,CLI_CLIENT client
-    class FASTAPI,CHAT_API,DIAGNOSTIC_API,PROMPTS_API,FEEDBACK_API,CONVERSATION_API api
+    class FASTAPI,CHAT_API,DIAGNOSTIC_API,PROMPTS_API,FEEDBACK_API api
     class CHAT_SERVICE,MULTI_AGENT_SERVICE,CONFIG_SERVICE,FILE_STORAGE service
     class AZURE_OPENAI,AZURE_SEARCH,AZURE_SQL external
 ```
@@ -139,7 +136,7 @@ graph LR
         PROMPTS_VIEW[GET /api/v1/prompts/view/{revision_id}/{filename}<br/>View Prompt]
         PROMPTS_LIST[GET /api/v1/prompts/list/{revision_id}<br/>List Prompts]
         PROMPTS_UPDATE[POST /api/v1/prompts/update/{revision_id}/{filename}<br/>Update Prompt]
-        FEEDBACK[PUT /api/v1/message-feedback<br/>Message Feedback]
+        FEEDBACK[PUT /api/v1/messages/{message_id}/feedback<br/>Message Feedback]
     end
 
     classDef chat fill:#e8f5e8
@@ -165,13 +162,11 @@ flowchart TD
     AUTH -->|Unauthorized| ERROR_401[❌ 401 Unauthorized]
 
     LOAD_CONTEXT --> SELECT_WORKFLOW{🔄 Select Workflow}
-    SELECT_WORKFLOW --> BIKE_INSIGHTS[🚴 bike-insights]
     SELECT_WORKFLOW --> CLASSIFICATION[🔍 classification-agent]
     SELECT_WORKFLOW --> KNOWLEDGE_BASE[🔍 knowledge-base-agent]
     SELECT_WORKFLOW --> SQL_AGENT[🗄️ sql-manipulation-agent]
 
-    BIKE_INSIGHTS --> PROCESS_MESSAGE[⚡ Process Multi-Agent Workflow]
-    CLASSIFICATION --> PROCESS_MESSAGE
+    CLASSIFICATION --> PROCESS_MESSAGE[⚡ Process Multi-Agent Workflow]
     KNOWLEDGE_BASE --> PROCESS_MESSAGE
     SQL_AGENT --> PROCESS_MESSAGE
 
