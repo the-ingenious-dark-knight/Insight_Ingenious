@@ -72,8 +72,10 @@ Get up and running in 5 minutes with Azure OpenAI!
 
 Insight Ingenious provides multiple conversation workflows with different configuration requirements:
 
-### ✅ **Core Workflows** (Azure OpenAI only)
+### ✅ **Core Workflows (Azure OpenAI only)**
 - `classification-agent` - Route input to specialized agents based on content
+
+### 🔍 **Core Workflows (Require Additional Services)**
 - `knowledge-base-agent` - Search knowledge bases (requires Azure Search Service)
 - `sql-manipulation-agent` - Execute SQL queries (requires database connection)
 

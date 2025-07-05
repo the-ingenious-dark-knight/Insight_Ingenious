@@ -222,7 +222,7 @@ sequenceDiagram
 
 ## Configuration Requirements by Workflow
 
-### ✅ Core Library Workflows (Minimal Configuration)
+### ✅ Core Library Workflows (Azure OpenAI only)
 
 These workflows are included in the core library and only require basic Azure OpenAI configuration:
 
@@ -266,7 +266,7 @@ dev:
     api_key: "your-api-key"
 ```
 
-### ⭐ Template-Based Workflows (Available via `ingen init`)
+### ⭐ Template-Based Workflows (Azure OpenAI only)
 
 #### 🚴 Bike Insights ("Hello World")
 Sample domain-specific workflow for bike sales analysis. Created when you run `ingen init`.
@@ -304,7 +304,7 @@ graph TB
     class BIKE_AGENT,SENTIMENT_AGENT,FISCAL_AGENT,SUMMARY_AGENT agent
 ```
 
-### 🔍 Azure Search Required Workflows
+### 🔍 Core Library Workflows (Azure Search Required)
 
 #### 📚 Knowledge Base Agent
 Search and retrieve information from knowledge bases.
@@ -363,7 +363,7 @@ dev:
     api_key: "your-search-api-key"
 ```
 
-### 📊 Database Required Workflows
+### 📊 Core Library Workflows (Database Required)
 
 #### 🗄️ SQL Manipulation Agent
 Execute SQL queries on Azure SQL or local databases.
@@ -583,20 +583,20 @@ azure_sql_services:
 
 ## Quick Start Guide
 
-### 1. Minimal Setup (classification-agent, bike-insights)
+### 1. Azure OpenAI Only Setup (classification-agent, bike-insights)
 1. Configure Azure OpenAI in `config.yml` and `profiles.yml`
 2. Run: `uv run ingen serve`
-3. Test with classification-agent or bike-insights workflows
+3. Test with classification-agent workflow or bike-insights workflow (if created via `ingen init`)
 
 ### 2. Knowledge Base Setup (knowledge-base-agent)
-1. Complete minimal setup above
+1. Complete Azure OpenAI setup above
 2. Set up Azure Cognitive Search service
 3. Create and populate search indexes
 4. Add Azure Search configuration to config files
 5. Test with knowledge-base-agent workflow
 
 ### 3. Database Setup (sql-manipulation-agent)
-1. Complete minimal setup above
+1. Complete Azure OpenAI setup above
 2. Choose local SQLite or Azure SQL
 3. Configure database connection
 4. Prepare data (CSV for local, tables for Azure SQL)
