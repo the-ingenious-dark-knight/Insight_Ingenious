@@ -22,21 +22,18 @@ graph TB
         BIKE[Bike Insights<br/>Sales analysis]
         KNOWLEDGE[Knowledge Base<br/>Information retrieval]
         SQL[SQL Manipulation<br/>Database queries]
-        DOCUMENT[Document Processing<br/>Text extraction]
     end
 
     subgraph "Configuration Levels"
         MINIMAL[Minimal Config<br/>Azure OpenAI only]
         SEARCH[+ Azure Search]
         DATABASE[+ Database]
-        SERVICES[+ Document Services]
     end
 
     subgraph "External Dependencies"
         AZURE_OPENAI[Azure OpenAI]
         AZURE_SEARCH[Azure Cognitive Search]
         AZURE_SQL[Azure SQL Database]
-        AZURE_DOC[Azure Document Intelligence]
     end
 
     CLASSIFICATION --> MINIMAL
@@ -46,23 +43,19 @@ graph TB
 
     SQL --> DATABASE
 
-    DOCUMENT --> SERVICES
-
     MINIMAL --> AZURE_OPENAI
     SEARCH --> AZURE_OPENAI
     SEARCH --> AZURE_SEARCH
     DATABASE --> AZURE_OPENAI
     DATABASE --> AZURE_SQL
-    SERVICES --> AZURE_OPENAI
-    SERVICES --> AZURE_DOC
 
     classDef workflow fill:#e3f2fd
     classDef config fill:#f1f8e9
     classDef external fill:#fff3e0
 
-    class CLASSIFICATION,BIKE,KNOWLEDGE,SQL,DOCUMENT workflow
-    class MINIMAL,SEARCH,DATABASE,SERVICES config
-    class AZURE_OPENAI,AZURE_SEARCH,AZURE_SQL,AZURE_DOC external
+    class CLASSIFICATION,BIKE,KNOWLEDGE,SQL workflow
+    class MINIMAL,SEARCH,DATABASE config
+    class AZURE_OPENAI,AZURE_SEARCH,AZURE_SQL external
 ```
 
 ## Detailed Workflow Flows
@@ -116,19 +109,16 @@ flowchart TD
     CLASSIFY -->|Sales Query| BIKE_FLOW[🚴 Bike Insights Flow]
     CLASSIFY -->|Technical Question| KNOWLEDGE_FLOW[📚 Knowledge Base Flow]
     CLASSIFY -->|Data Query| SQL_FLOW[🗄️ SQL Query Flow]
-    CLASSIFY -->|Document Task| DOC_FLOW[📄 Document Processing Flow]
     CLASSIFY -->|General Chat| CHAT_FLOW[💬 General Chat Flow]
 
     BIKE_FLOW --> BIKE_AGENT[🚴 Bike Analysis Agent]
     KNOWLEDGE_FLOW --> KNOWLEDGE_AGENT[📚 Knowledge Agent]
     SQL_FLOW --> SQL_AGENT[🗄️ SQL Agent]
-    DOC_FLOW --> DOC_AGENT[📄 Document Agent]
     CHAT_FLOW --> CHAT_AGENT[💬 Chat Agent]
 
     BIKE_AGENT --> RESPONSE[📤 Formatted Response]
     KNOWLEDGE_AGENT --> RESPONSE
     SQL_AGENT --> RESPONSE
-    DOC_AGENT --> RESPONSE
     CHAT_AGENT --> RESPONSE
 
     RESPONSE --> FINISH([🏁 End])
@@ -141,8 +131,8 @@ flowchart TD
 
     class START start
     class CLASSIFY decision
-    class BIKE_FLOW,KNOWLEDGE_FLOW,SQL_FLOW,DOC_FLOW,CHAT_FLOW workflow
-    class BIKE_AGENT,KNOWLEDGE_AGENT,SQL_AGENT,DOC_AGENT,CHAT_AGENT agent
+    class BIKE_FLOW,KNOWLEDGE_FLOW,SQL_FLOW,CHAT_FLOW workflow
+    class BIKE_AGENT,KNOWLEDGE_AGENT,SQL_AGENT,CHAT_AGENT agent
     class RESPONSE,FINISH finish
 ```
 
@@ -229,70 +219,6 @@ sequenceDiagram
 
     Note over SQLAgent,Database: Configuration determines:<br/>- Azure SQL vs SQLite<br/>- Database connection details<br/>- Query timeout settings
 ```
-
-### 📄 Document Processing Workflow
-
-```mermaid
-graph TB
-    subgraph "📁 Document Input"
-        UPLOAD[📤 File Upload]
-        VALIDATION[✅ File Validation]
-        FORMAT_CHECK[📋 Format Check]
-    end
-
-    subgraph "🔍 Document Analysis"
-        AZURE_DOC_INTEL[📄 Azure Document Intelligence]
-        OCR[👁️ OCR Processing]
-        LAYOUT_ANALYSIS[📐 Layout Analysis]
-        TEXT_EXTRACTION[📝 Text Extraction]
-    end
-
-    subgraph "🧠 Content Processing"
-        AZURE_OPENAI[🧠 Azure OpenAI]
-        CONTENT_ANALYSIS[📊 Content Analysis]
-        ENTITY_EXTRACTION[🏷️ Entity Extraction]
-        SUMMARIZATION[📋 Summarization]
-    end
-
-    subgraph "💾 Output Generation"
-        STRUCTURED_DATA[📊 Structured Data]
-        INSIGHTS[💡 Key Insights]
-        FORMATTED_RESPONSE[📝 Formatted Response]
-    end
-
-    UPLOAD --> VALIDATION
-    VALIDATION --> FORMAT_CHECK
-    FORMAT_CHECK --> AZURE_DOC_INTEL
-
-    AZURE_DOC_INTEL --> OCR
-    AZURE_DOC_INTEL --> LAYOUT_ANALYSIS
-    AZURE_DOC_INTEL --> TEXT_EXTRACTION
-
-    TEXT_EXTRACTION --> AZURE_OPENAI
-    AZURE_OPENAI --> CONTENT_ANALYSIS
-    AZURE_OPENAI --> ENTITY_EXTRACTION
-    AZURE_OPENAI --> SUMMARIZATION
-
-    CONTENT_ANALYSIS --> STRUCTURED_DATA
-    ENTITY_EXTRACTION --> INSIGHTS
-    SUMMARIZATION --> FORMATTED_RESPONSE
-
-    classDef input fill:#e8f5e8
-    classDef analysis fill:#fff3e0
-    classDef processing fill:#e3f2fd
-    classDef output fill:#fce4ec
-
-    class UPLOAD,VALIDATION,FORMAT_CHECK input
-    class AZURE_DOC_INTEL,OCR,LAYOUT_ANALYSIS,TEXT_EXTRACTION analysis
-    class AZURE_OPENAI,CONTENT_ANALYSIS,ENTITY_EXTRACTION,SUMMARIZATION processing
-    class STRUCTURED_DATA,INSIGHTS,FORMATTED_RESPONSE output
-```
-
-## Configuration Requirements by Workflow
-
-### ✅ Minimal Configuration Workflows
-
-These workflows only require basic Azure OpenAI configuration:
 
 ## Configuration Requirements by Workflow
 
@@ -496,69 +422,6 @@ dev:
     # connection_string: "your-full-connection-string"
 ```
 
-### 📄 Document Processing Workflows
-
-#### 📄 Document Processing Agent
-Extract text from PDFs, DOCX, images using OCR.
-
-```mermaid
-graph TB
-    subgraph "Required Services"
-        AZURE_OPENAI[🧠 Azure OpenAI<br/>Content Analysis]
-        AZURE_DOC_INTEL[📄 Azure Document Intelligence<br/>OCR & Text Extraction]
-    end
-
-    subgraph "Supported Formats"
-        PDF[📕 PDF Files<br/>Text & Scanned]
-        DOCX[📄 Word Documents<br/>DOCX Format]
-        IMAGES[🖼️ Images<br/>PNG, JPG, TIFF]
-        FORMS[📋 Forms<br/>Structured Documents]
-    end
-
-    subgraph "Processing Pipeline"
-        UPLOAD[📤 File Upload]
-        FORMAT_DETECTION[🔍 Format Detection]
-        OCR_PROCESSING[👁️ OCR Processing]
-        LAYOUT_ANALYSIS[📐 Layout Analysis]
-        TEXT_EXTRACTION[📝 Text Extraction]
-        CONTENT_ANALYSIS[📊 Content Analysis]
-    end
-
-    PDF --> UPLOAD
-    DOCX --> UPLOAD
-    IMAGES --> UPLOAD
-    FORMS --> UPLOAD
-
-    UPLOAD --> FORMAT_DETECTION
-    FORMAT_DETECTION --> AZURE_DOC_INTEL
-    AZURE_DOC_INTEL --> OCR_PROCESSING
-    AZURE_DOC_INTEL --> LAYOUT_ANALYSIS
-    AZURE_DOC_INTEL --> TEXT_EXTRACTION
-    TEXT_EXTRACTION --> AZURE_OPENAI
-    AZURE_OPENAI --> CONTENT_ANALYSIS
-
-    classDef service fill:#e3f2fd
-    classDef format fill:#f1f8e9
-    classDef processing fill:#fff3e0
-
-    class AZURE_OPENAI,AZURE_DOC_INTEL service
-    class PDF,DOCX,IMAGES,FORMS format
-    class UPLOAD,FORMAT_DETECTION,OCR_PROCESSING,LAYOUT_ANALYSIS,TEXT_EXTRACTION,CONTENT_ANALYSIS processing
-```
-
-**Additional Configuration Required:**
-```yaml
-# config.yml (additional)
-document_intelligence:
-  endpoint: "https://your-doc-intel.cognitiveservices.azure.com/"
-  api_version: "2023-07-31"
-
-# profiles.yml (additional)
-dev:
-  document_intelligence:
-    api_key: "your-document-intelligence-api-key"
-```
-
 ## Workflow Selection Guide
 
 ### 🎯 Choosing the Right Workflow
@@ -571,7 +434,6 @@ flowchart TD
     DECISION -->|Analyze business data<br/>with multiple perspectives| BIKE_INSIGHTS[🚴 Bike Insights]
     DECISION -->|Search through<br/>documents and knowledge| KNOWLEDGE[📚 Knowledge Base Agent]
     DECISION -->|Query databases<br/>with natural language| SQL[🗄️ SQL Manipulation]
-    DECISION -->|Extract text from<br/>documents and images| DOCUMENT[📄 Document Processing]
 
     CLASSIFICATION --> SETUP_MINIMAL[⚙️ Minimal Setup<br/>Azure OpenAI only]
     BIKE_INSIGHTS --> SETUP_MINIMAL
@@ -580,12 +442,9 @@ flowchart TD
 
     SQL --> SETUP_DATABASE[🗄️ Database Setup<br/>+ Database Connection]
 
-    DOCUMENT --> SETUP_SERVICES[📄 Full Services Setup<br/>+ Document Intelligence]
-
     SETUP_MINIMAL --> READY[✅ Ready to Use]
     SETUP_SEARCH --> READY
     SETUP_DATABASE --> READY
-    SETUP_SERVICES --> READY
 
     classDef start fill:#c8e6c9
     classDef decision fill:#fff9c4
@@ -595,8 +454,8 @@ flowchart TD
 
     class START start
     class DECISION decision
-    class CLASSIFICATION,BIKE_INSIGHTS,KNOWLEDGE,SQL,DOCUMENT workflow
-    class SETUP_MINIMAL,SETUP_SEARCH,SETUP_DATABASE,SETUP_SERVICES setup
+    class CLASSIFICATION,BIKE_INSIGHTS,KNOWLEDGE,SQL workflow
+    class SETUP_MINIMAL,SETUP_SEARCH,SETUP_DATABASE setup
     class READY ready
 ```
 
@@ -721,30 +580,6 @@ azure_sql_services:
 **Without this configuration**: Will not work - requires Azure OpenAI for analysis.
 
 ---
-
-### document-processing (Optional Azure Services)
-
-**Purpose**: Extract text from PDFs, DOCX, images using various engines
-
-**Configuration Options**:
-
-#### Basic (No external services)
-Works with local engines: pymupdf, pdfminer, unstructured
-
-#### Advanced OCR (Azure Document Intelligence)
-For better OCR and semantic extraction:
-
-**Environment Variables Required**:
-```bash
-export AZURE_DOC_INTEL_ENDPOINT="https://your-resource.cognitiveservices.azure.com"
-export AZURE_DOC_INTEL_KEY="your-api-key"
-```
-
-**What you need to provide**:
-- Azure Document Intelligence service endpoint
-- Azure Document Intelligence API key
-
-**Without this configuration**: Falls back to local extraction engines (limited OCR capabilities).
 
 ## Quick Start Guide
 
