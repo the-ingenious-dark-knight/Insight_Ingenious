@@ -55,7 +55,7 @@ Get up and running in 5 minutes with Azure OpenAI!
       -H "Content-Type: application/json" \
       -d '{
         "user_prompt": "{\"stores\": [{\"name\": \"QuickStart Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"QS-001\", \"quantity_sold\": 1, \"sale_date\": \"2023-04-15\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 5.0, \"comment\": \"Perfect bike for getting started!\"}}], \"bike_stock\": []}], \"revision_id\": \"quickstart-1\", \"identifier\": \"hello-world\"}",
-        "conversation_flow": "bike_insights"
+        "conversation_flow": "bike-insights"
       }'
     ```
 
@@ -71,16 +71,16 @@ Get up and running in 5 minutes with Azure OpenAI!
 Insight Ingenious provides multiple conversation workflows with different configuration requirements:
 
 ### ⭐ **"Hello World" Workflow** (Azure OpenAI only)
-- `bike_insights` - **The recommended starting point** - Comprehensive bike sales analysis showcasing multi-agent coordination
+- `bike-insights` - **The recommended starting point** - Comprehensive bike sales analysis showcasing multi-agent coordination
 
 ### ✅ **Simple Text Processing** (Azure OpenAI only)
-- `classification_agent` - Route input to specialized agents based on content
+- `classification-agent` - Route input to specialized agents based on content
 
 ### 🔍 **Azure Search Required**
-- `knowledge_base_agent` - Search knowledge bases
+- `knowledge-base-agent` - Search knowledge bases
 
 ### 📊 **Database Required**
-- `sql_manipulation_agent` - Execute SQL queries
+- `sql-manipulation-agent` - Execute SQL queries
 
 **📋 See [Workflow Configuration Requirements](docs/workflows/README.md) for detailed setup instructions.**
 

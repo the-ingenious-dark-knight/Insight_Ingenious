@@ -74,7 +74,7 @@ curl -X POST http://localhost:80/api/v1/chat \
 
 ## 📊 Data Format Examples
 
-### Simple bike_insights Request (Basic)
+### Simple bike-insights Request (Basic)
 ```json
 {
   "user_prompt": "{\"stores\": [{\"name\": \"Test Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"B-001\", \"quantity_sold\": 1, \"sale_date\": \"2024-01-15\", \"year\": 2024, \"month\": \"January\", \"customer_review\": {\"rating\": 5.0, \"comment\": \"Great bike!\"}}], \"bike_stock\": []}], \"revision_id\": \"test-1\", \"identifier\": \"example\"}",
@@ -82,7 +82,7 @@ curl -X POST http://localhost:80/api/v1/chat \
 }
 ```
 
-### Advanced bike_insights Request (With Stock Data)
+### Advanced bike-insights Request (With Stock Data)
 ```json
 {
   "user_prompt": "{\"stores\": [{\"name\": \"Premium Bikes\", \"location\": \"Sydney\", \"bike_sales\": [{\"product_code\": \"PB-2024-001\", \"quantity_sold\": 3, \"sale_date\": \"2024-01-15\", \"year\": 2024, \"month\": \"January\", \"customer_review\": {\"rating\": 4.8, \"comment\": \"Excellent quality!\"}}], \"bike_stock\": [{\"bike\": {\"brand\": \"Specialized\", \"model\": \"Turbo Vado\", \"year\": 2024, \"price\": 2899.99, \"battery_capacity\": 0.75, \"motor_power\": 500}, \"quantity\": 5}]}], \"revision_id\": \"advanced-1\", \"identifier\": \"example\"}",
@@ -160,7 +160,7 @@ uv run ingen status
 uv run ingen workflows
 
 # Test specific workflow requirements
-uv run ingen workflows bike_insights
+uv run ingen workflows bike-insights
 
 # Quick server test
 curl -s http://localhost:80/health || echo "Server not running"
@@ -181,14 +181,14 @@ curl -s http://localhost:80/health || echo "Server not running"
 
 ## Available Workflows
 
-### bike_insights (Hello World - **START HERE!**)
+### bike-insights (Hello World - **START HERE!**)
 **Purpose**: The "Hello World" of Ingenious - comprehensive bike sales analysis showcasing multi-agent coordination
 **Requirements**: Azure OpenAI only
 **Input**: JSON with bike sales data
 **Why start here?**: Demonstrates the full power of multi-agent workflows
 
-### classification_agent (Simple Alternative)
-**Purpose**: Text classification and routing (try this if bike_insights seems complex)
+### classification-agent (Simple Alternative)
+**Purpose**: Text classification and routing (try this if bike-insights seems complex)
 **Requirements**: Azure OpenAI only
 **Input**: Plain text
 
@@ -238,8 +238,8 @@ uv run ingen workflows
 ### API returning errors?
 ```bash
 # Check server logs in terminal
-# Verify JSON format for bike_insights
-# Try with classification_agent first if bike_insights seems complex
+# Verify JSON format for bike-insights
+# Try with classification-agent first if bike-insights seems complex
 ```
 
 ---
@@ -269,8 +269,8 @@ Once you have the basic setup working:
 
 ## 💡 Pro Tips
 
-- **Start with `bike_insights`** - it's the "Hello World" that shows off Ingenious's power
-- Use `classification_agent` only if you want something simpler
+- **Start with `bike-insights`** - it's the "Hello World" that shows off Ingenious's power
+- Use `classification-agent` only if you want something simpler
 - Check `uv run ingen status` when things break
 - The minimal templates work better than full templates
 - Environment variables override config file values

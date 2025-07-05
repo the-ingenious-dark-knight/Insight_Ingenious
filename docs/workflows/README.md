@@ -81,7 +81,7 @@ sequenceDiagram
     participant AzureOpenAI as 🧠 Azure OpenAI
 
     User->>API: "Analyze bike sales for Q2"
-    API->>Coordinator: Initialize bike_insights workflow
+    API->>Coordinator: Initialize bike-insights workflow
 
     Note over Coordinator: Load bike sales data
     Coordinator->>BikeAgent: Analyze sales performance
@@ -627,7 +627,7 @@ For detailed setup instructions, see:
 
 ---
 
-### knowledge_base_agent (Azure Search Required)
+### knowledge-base-agent (Azure Search Required)
 
 **Purpose**: Search and retrieve information from Azure Cognitive Search indexes
 
@@ -656,7 +656,7 @@ azure_search_services:
 
 ---
 
-### sql_manipulation_agent (Database Required)
+### sql-manipulation-agent (Database Required)
 
 **Purpose**: Execute SQL queries based on natural language input
 
@@ -696,7 +696,7 @@ azure_sql_services:
 
 ---
 
-### classification_agent (Minimal Configuration)
+### classification-agent (Minimal Configuration)
 
 **Purpose**: Classify user input and route to appropriate topic agents
 
@@ -708,7 +708,7 @@ azure_sql_services:
 
 ---
 
-### bike_insights (Minimal Configuration)
+### bike-insights (Minimal Configuration)
 
 **Purpose**: Sample domain-specific workflow for bike sales analysis
 
@@ -746,24 +746,24 @@ export AZURE_DOC_INTEL_KEY="your-api-key"
 
 ## Quick Start Guide
 
-### 1. Minimal Setup (classification_agent, bike_insights)
+### 1. Minimal Setup (classification-agent, bike-insights)
 1. Configure Azure OpenAI in `config.yml` and `profiles.yml`
 2. Run: `uv run ingen run-rest-api-server`
-3. Test with classification_agent or bike_insights workflows
+3. Test with classification-agent or bike-insights workflows
 
-### 2. Knowledge Base Setup (knowledge_base_agent)
+### 2. Knowledge Base Setup (knowledge-base-agent)
 1. Complete minimal setup above
 2. Set up Azure Cognitive Search service
 3. Create and populate search indexes
 4. Add Azure Search configuration to config files
-5. Test with knowledge_base_agent workflow
+5. Test with knowledge-base-agent workflow
 
-### 3. Database Setup (sql_manipulation_agent)
+### 3. Database Setup (sql-manipulation-agent)
 1. Complete minimal setup above
 2. Choose local SQLite or Azure SQL
 3. Configure database connection
 4. Prepare data (CSV for local, tables for Azure SQL)
-5. Test with sql_manipulation_agent workflow
+5. Test with sql-manipulation-agent workflow
 
 ### 4. Full Setup (All workflows)
 1. Complete all setup steps above

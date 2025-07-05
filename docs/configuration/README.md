@@ -358,8 +358,8 @@ Insight Ingenious supports several built-in conversation flows for different use
 
 | Workflow | Description | External Services Required | Configuration Complexity |
 |----------|-------------|----------------------------|--------------------------|
-| `classification_agent` | Routes input to specialized agents | Azure OpenAI only | ✅ Minimal |
-| `bike_insights` | Sample domain-specific analysis | Azure OpenAI only | ✅ Minimal |
+| `classification-agent` | Routes input to specialized agents | Azure OpenAI only | ✅ Minimal |
+| `bike-insights` | Sample domain-specific analysis | Azure OpenAI only | ✅ Minimal |
 | `knowledge_base_agent` | Search knowledge bases | Azure OpenAI + Azure Search | 🔍 Moderate |
 | `sql_manipulation_agent` | Execute SQL queries | Azure OpenAI + Database | 📊 Moderate |
 
@@ -367,7 +367,7 @@ Insight Ingenious supports several built-in conversation flows for different use
 
 #### 🚀 Quick Start: Minimal Configuration Workflows
 
-For `classification_agent` and `bike_insights`, you only need basic Azure OpenAI setup:
+For `classification-agent` and `bike-insights`, you only need basic Azure OpenAI setup:
 
 ```yaml
 # config.yml
