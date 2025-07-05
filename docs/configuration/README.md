@@ -446,7 +446,7 @@ uv run ingen workflows knowledge-base-agent
 # Test a workflow
 curl -X POST http://localhost:8081/api/v1/chat \
   -H "Content-Type: application/json" \
-  -d '{"user_prompt": "Hello", "conversation_flow": "classification_agent"}'
+  -d '{"user_prompt": "Hello", "conversation_flow": "classification-agent"}'
 ```
 
 ### Configuring Conversation Flows

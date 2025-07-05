@@ -15,14 +15,14 @@ curl -X POST http://localhost:80/api/v1/chat \
    }'
 ```
 
-### Simple Alternative Test (classification_agent)
+### Simple Alternative Test (classification-agent)
 ```bash
 # If bike-insights seems too complex, try this simpler workflow
 curl -X POST http://localhost:80/api/v1/chat \
    -H "Content-Type: application/json" \
    -d '{
    "user_prompt": "Analyze this feedback: Great product!",
-   "conversation_flow": "classification_agent"
+   "conversation_flow": "classification-agent"
    }'
 ```
 
@@ -134,10 +134,10 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
 
 1. **Use correct workflow names**:
    ```bash
-   # ✅ Correct
+   # ✅ Correct (preferred)
    "conversation_flow": "bike-insights"
 
-   # ❌ Wrong (legacy)
+   # ✅ Also supported (legacy)
    "conversation_flow": "bike_insights"
    ```
 

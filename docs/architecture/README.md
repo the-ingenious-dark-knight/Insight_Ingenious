@@ -308,7 +308,7 @@ sequenceDiagram
     participant LLM as 🧠 Azure OpenAI
 
     User->>API: "Analyze bike sales performance"
-    API->>Manager: Route to bike_insights workflow
+    API->>Manager: Route to bike-insights workflow
 
     Note over Manager: Initialize conversation pattern
     Manager->>Agent1: Analyze bike sales data

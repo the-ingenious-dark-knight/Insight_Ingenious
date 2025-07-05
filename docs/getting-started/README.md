@@ -52,11 +52,11 @@ uv run ingen workflows classification-agent
 **Output Example:**
 ```
 ✅ Minimal Configuration
-  • classification_agent: Route input to specialized agents
-  • bike_insights: Sample domain-specific workflow
+  • classification-agent: Route input to specialized agents
+  • bike-insights: Sample domain-specific workflow
 
 🔍 Requires Azure Search
-  • knowledge_base_agent: Search knowledge bases
+  • knowledge-base-agent: Search knowledge bases
 
 📊 Requires Database
   • sql_manipulation_agent: Execute SQL queries
@@ -115,7 +115,7 @@ curl -X POST http://localhost:8081/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Hello, please classify this message",
-    "conversation_flow": "classification_agent"
+    "conversation_flow": "classification-agent"
   }'
 ```
 
@@ -136,7 +136,7 @@ Verify your workflows are properly configured:
 curl http://localhost:8081/api/v1/workflows
 
 # Check specific workflow
-curl http://localhost:8081/api/v1/workflow-status/classification_agent
+curl http://localhost:8081/api/v1/workflow-status/classification-agent
 ```
 
 ## Next Steps
@@ -148,7 +148,7 @@ curl http://localhost:8081/api/v1/workflow-status/classification_agent
    # Try bike insights workflow
    curl -X POST http://localhost:8081/api/v1/chat \
      -H "Content-Type: application/json" \
-     -d '{"user_prompt": "Analyze bike sales trends", "conversation_flow": "bike_insights"}'
+     -d '{"user_prompt": "Analyze bike sales trends", "conversation_flow": "bike-insights"}'
    ```
 
 2. **Explore the web interface** at http://localhost:8081/chainlit
@@ -179,8 +179,8 @@ curl http://localhost:8081/api/v1/workflow-status/classification_agent
 - Use `ingen workflows` to see available workflows
 
 **❌ "Search service not configured"**
-- You're trying to use `knowledge_base_agent` without Azure Search
-- Either configure Azure Search or use minimal workflows like `classification_agent`
+- You're trying to use `knowledge-base-agent` without Azure Search
+- Either configure Azure Search or use minimal workflows like `classification-agent`
 
 **❌ Server won't start**
 - Check if port 8081 is already in use

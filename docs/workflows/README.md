@@ -778,17 +778,17 @@ Use these commands to test specific workflows:
 # Test basic configuration
 curl -X POST http://localhost:8081/api/v1/chat \
   -H "Content-Type: application/json" \
-  -d '{"user_prompt": "Hello", "conversation_flow": "classification_agent"}'
+  -d '{"user_prompt": "Hello", "conversation_flow": "classification-agent"}'
 
 # Test knowledge base (requires Azure Search)
 curl -X POST http://localhost:8081/api/v1/chat \
   -H "Content-Type: application/json" \
-  -d '{"user_prompt": "Search for health information", "conversation_flow": "knowledge_base_agent"}'
+  -d '{"user_prompt": "Search for health information", "conversation_flow": "knowledge-base-agent"}'
 
 # Test SQL queries (requires database)
 curl -X POST http://localhost:8081/api/v1/chat \
   -H "Content-Type: application/json" \
-  -d '{"user_prompt": "Show me student performance data", "conversation_flow": "sql_manipulation_agent"}'
+  -d '{"user_prompt": "Show me student performance data", "conversation_flow": "sql-manipulation-agent"}'
 ```
 
 ## Troubleshooting

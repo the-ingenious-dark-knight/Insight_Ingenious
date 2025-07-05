@@ -12,7 +12,7 @@ The `ConversationPattern` class is the foundation for defining how agents intera
 
 | Pattern | Description | Use Case |
 |---------|-------------|----------|
-| `classification_agent` | Classifies input and routes to topic-specific agents | Content classification, intent detection |
+| `classification-agent` | Classifies input and routes to topic-specific agents | Content classification, intent detection |
 | `knowledge_base_agent` | Searches and retrieves information from knowledge bases | Question answering, information retrieval |
 | `sql_manipulation_agent` | Generates and executes SQL queries | Database interactions, data querying |
 | `education_expert` | Generates educational content and lesson plans | Educational material creation (pattern only) |
@@ -30,7 +30,7 @@ The `ConversationFlow` class implements specific use cases using conversation pa
 
 | Flow | Description | Pattern Used |
 |------|-------------|--------------|
-| `classification_agent` | Routes inputs to specialized agents | `classification_agent` |
+| `classification-agent` | Routes inputs to specialized agents | `classification-agent` |
 | `knowledge_base_agent` | Answers questions using knowledge bases | `knowledge_base_agent` |
 | `sql_manipulation_agent` | Executes SQL queries based on natural language | `sql_manipulation_agent` |
 

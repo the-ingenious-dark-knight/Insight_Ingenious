@@ -316,7 +316,7 @@ All API requests should include appropriate headers:
 ```bash
 curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
-  -d '{"user_prompt": "Hello", "conversation_flow": "classification_agent"}'
+  -d '{"user_prompt": "Hello", "conversation_flow": "classification-agent"}'
 ```
 
 With authentication enabled:
@@ -324,7 +324,7 @@ With authentication enabled:
 curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -u "username:password" \
-  -d '{"user_prompt": "Hello", "conversation_flow": "classification_agent"}'
+  -d '{"user_prompt": "Hello", "conversation_flow": "classification-agent"}'
 ```
 
 #### Response Format
@@ -364,7 +364,7 @@ def call_chat_api(user_prompt, conversation_flow, username=None, password=None):
     return response.json()
 
 # Example usage
-result = call_chat_api("Hello", "classification_agent", "username", "password")
+result = call_chat_api("Hello", "classification-agent", "username", "password")
 ```
 
 ### JavaScript Integration
@@ -389,7 +389,7 @@ async function callChatAPI(userPrompt, conversationFlow, username, password) {
 }
 
 // Example usage
-const result = await callChatAPI('Hello', 'classification_agent', 'username', 'password');
+const result = await callChatAPI('Hello', 'classification-agent', 'username', 'password');
 ```
 
 ## 🔍 Error Handling

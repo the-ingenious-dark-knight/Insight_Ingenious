@@ -101,7 +101,7 @@ curl -X POST http://localhost:80/api/v1/chat \
 ```json
 {
   "user_prompt": "Your question or input text here",
-  "conversation_flow": "classification_agent"
+  "conversation_flow": "classification-agent"
 }
 ```
 
@@ -111,7 +111,7 @@ curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Analyze this customer feedback: The bike was excellent!",
-    "conversation_flow": "classification_agent"
+    "conversation_flow": "classification-agent"
   }'
 ```
 
@@ -137,7 +137,7 @@ curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Find information about bike maintenance",
-    "conversation_flow": "knowledge_base_agent"
+    "conversation_flow": "knowledge-base-agent"
   }'
 ```
 
@@ -157,7 +157,7 @@ curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Show me the top selling bikes in the last month",
-    "conversation_flow": "sql_manipulation_agent"
+    "conversation_flow": "sql-manipulation-agent"
   }'
 ```
 
@@ -180,7 +180,7 @@ curl -s -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "{\"stores\": [{\"name\": \"Hello Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"HELLO-001\", \"quantity_sold\": 1, \"sale_date\": \"2023-04-01\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 5.0, \"comment\": \"Perfect introduction to Ingenious!\"}}], \"bike_stock\": []}], \"revision_id\": \"hello-1\", \"identifier\": \"world\"}",
-    "conversation_flow": "bike_insights"
+    "conversation_flow": "bike-insights"
   }' | jq '.message_id, .token_count'
 
 # Test 2: classification-agent (Simple Alternative)
@@ -189,7 +189,7 @@ curl -s -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "This is a test message for classification",
-    "conversation_flow": "classification_agent"
+    "conversation_flow": "classification-agent"
   }' | jq '.message_id, .token_count'
 
 echo "✅ Tests completed!"
@@ -207,7 +207,7 @@ Make it executable: `chmod +x test_workflows.sh`
 
 ### 2. "Class ConversationFlow not found"
 **Problem**: Workflow name incorrect or workflow not available
-**Solution**: Use correct workflow names (underscores, not hyphens)
+**Solution**: Use correct workflow names (prefer hyphens: `bike-insights`, `classification-agent`)
 
 ### 3. "Validation error in field"
 **Problem**: Missing or invalid configuration

@@ -91,15 +91,15 @@ Test with workflows that only need Azure OpenAI:
 1. Navigate to http://localhost:80/chainlit
 2. Start a new conversation
 3. Try these workflows:
-   - "Hello" with `classification_agent`
-   - "Analyze bike sales" with `bike_insights`
+   - "Hello" with `classification-agent`
+   - "Analyze bike sales" with `bike-insights`
 
 #### API Testing
 ```bash
 # Test classification agent (minimal config needed)
 curl -X POST http://localhost:8081/api/v1/chat \
   -H "Content-Type: application/json" \
-  -d '{"user_prompt": "Hello world", "conversation_flow": "classification_agent"}'
+  -d '{"user_prompt": "Hello world", "conversation_flow": "classification-agent"}'
 ```
 
 #### Advanced Workflows

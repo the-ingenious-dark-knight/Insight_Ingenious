@@ -75,7 +75,7 @@ chmod 600 ~/.ingenious/profiles.yml
    ```bash
    # ✅ Correct
    curl -X POST http://localhost:8081/api/v1/chat \
-     -d '{"user_prompt": "Hello", "conversation_flow": "classification_agent"}'
+     -d '{"user_prompt": "Hello", "conversation_flow": "classification-agent"}'
 
    # ❌ Wrong
    curl -X POST http://localhost:8081/api/v1/chat \
@@ -178,7 +178,7 @@ azure_sql_services:
    ```bash
    curl -X POST http://localhost:8081/api/v1/chat \
      -H "Authorization: Basic $(echo -n username:password | base64)" \
-     -d '{"user_prompt": "Hello", "conversation_flow": "classification_agent"}'
+     -d '{"user_prompt": "Hello", "conversation_flow": "classification-agent"}'
    ```
 
 3. Or disable authentication for testing:
@@ -201,7 +201,7 @@ curl -X POST http://localhost:8081/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Your message here",
-    "conversation_flow": "classification_agent",
+    "conversation_flow": "classification-agent",
     "thread_id": "optional-thread-id"
   }'
 ```
@@ -223,7 +223,7 @@ Optional fields:
 curl http://localhost:8081/api/v1/workflows
 
 # 2. Check specific workflow
-curl http://localhost:8081/api/v1/workflow-status/classification_agent
+curl http://localhost:8081/api/v1/workflow-status/classification-agent
 
 # 3. Check system diagnostics
 curl http://localhost:8081/api/v1/diagnostic
@@ -292,13 +292,13 @@ uv run ingen workflows
 uv run ingen serve
 curl -X POST http://localhost:8081/api/v1/chat \
   -H "Content-Type: application/json" \
-  -d '{"user_prompt": "Hello", "conversation_flow": "classification_agent"}'
+  -d '{"user_prompt": "Hello", "conversation_flow": "classification-agent"}'
 ```
 
 ### Progressive Setup
 
-1. **Start simple**: Get `classification_agent` working first
-2. **Add complexity**: Then try `knowledge_base_agent`
+1. **Start simple**: Get `classification-agent` working first
+2. **Add complexity**: Then try `knowledge-base-agent`
 3. **Debug incrementally**: Don't configure everything at once
 
 ## 🆘 Getting Help

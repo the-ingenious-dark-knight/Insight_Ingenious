@@ -11,7 +11,7 @@ curl -X POST http://localhost:8081/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Hello, how are you?",
-    "conversation_flow": "classification_agent"
+    "conversation_flow": "classification-agent"
   }'
 ```
 
@@ -41,7 +41,7 @@ curl -X POST http://localhost:8081/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Analyze this customer feedback: Great product, fast delivery!",
-    "conversation_flow": "classification_agent"
+    "conversation_flow": "classification-agent"
   }'
 ```
 
@@ -53,7 +53,7 @@ curl -X POST http://localhost:8081/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Show me bike sales trends for April 2023",
-    "conversation_flow": "bike_insights"
+    "conversation_flow": "bike-insights"
   }'
 ```
 
@@ -67,7 +67,7 @@ curl -X POST http://localhost:8081/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Find health and safety information about workplace hazards",
-    "conversation_flow": "knowledge_base_agent"
+    "conversation_flow": "knowledge-base-agent"
   }'
 ```
 
@@ -86,7 +86,7 @@ curl -X POST http://localhost:8081/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Show me the average student performance by subject",
-    "conversation_flow": "sql_manipulation_agent"
+    "conversation_flow": "sql-manipulation-agent"
   }'
 ```
 
@@ -137,7 +137,7 @@ curl -X POST http://localhost:8081/api/v1/chat \
   -H "Authorization: Basic $(echo -n username:password | base64)" \
   -d '{
     "user_prompt": "Hello",
-    "conversation_flow": "classification_agent"
+    "conversation_flow": "classification-agent"
   }'
 ```
 
@@ -163,7 +163,7 @@ curl -X POST http://localhost:8081/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Hello, my name is John",
-    "conversation_flow": "classification_agent",
+    "conversation_flow": "classification-agent",
     "thread_id": "user-john-session-1"
   }'
 
@@ -172,7 +172,7 @@ curl -X POST http://localhost:8081/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "What did I just tell you my name was?",
-    "conversation_flow": "classification_agent",
+    "conversation_flow": "classification-agent",
     "thread_id": "user-john-session-1"
   }'
 ```
@@ -225,7 +225,7 @@ curl http://localhost:8081/api/v1/conversations/user-john-session-1
 {
   "detail": "conversation_flow not set",
   "workflow": null,
-  "available_workflows": ["classification_agent", "bike_insights", "..."]
+  "available_workflows": ["classification-agent", "bike-insights", "..."]
 }
 ```
 
@@ -233,7 +233,7 @@ curl http://localhost:8081/api/v1/conversations/user-john-session-1
 ```json
 {
   "detail": "Unknown workflow: invalid_workflow",
-  "available_workflows": ["classification_agent", "bike_insights", "..."]
+  "available_workflows": ["classification-agent", "bike-insights", "..."]
 }
 ```
 
@@ -313,7 +313,7 @@ def call_ingenious_api(prompt, workflow, thread_id=None):
         print(f"Unexpected error: {e}")
 
 # Usage examples
-call_ingenious_api("Hello", "classification_agent")
+call_ingenious_api("Hello", "classification-agent")
 call_ingenious_api("Search for safety info", "knowledge_base_agent")
 ```
 
@@ -342,7 +342,7 @@ def handle_webhook():
     elif 'sql' in user_message.lower() or 'database' in user_message.lower():
         workflow = 'sql_manipulation_agent'
     else:
-        workflow = 'classification_agent'
+        workflow = 'classification-agent'
 
     # Call Insight Ingenious API
     response = requests.post(
@@ -376,7 +376,7 @@ For processing multiple requests:
 import asyncio
 import aiohttp
 
-async def process_batch(messages, workflow="classification_agent"):
+async def process_batch(messages, workflow="classification-agent"):
     """Process multiple messages in parallel"""
 
     async def process_single(session, message, index):
@@ -416,10 +416,10 @@ results = asyncio.run(process_batch(messages))
 
 ### 1. Choose the Right Workflow
 
-- **Simple classification/routing**: `classification_agent`
-- **Domain-specific analysis**: `bike_insights` (or create custom)
-- **Knowledge retrieval**: `knowledge_base_agent`
-- **Database queries**: `sql_manipulation_agent`
+- **Simple classification/routing**: `classification-agent`
+- **Domain-specific analysis**: `bike-insights` (or create custom)
+- **Knowledge retrieval**: `knowledge-base-agent`
+- **Database queries**: `sql-manipulation-agent`
 
 ### 2. Handle Configuration Gracefully
 

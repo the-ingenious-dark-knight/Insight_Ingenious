@@ -230,9 +230,9 @@ env | grep AZURE_OPENAI
 # Check available workflows
 uv run ingen workflows
 
-# Use correct name (hyphens, not underscores)
-"conversation_flow": "bike-insights"  # ✅
-"conversation_flow": "bike_insights"  # ❌ (legacy)
+# Use correct name (hyphens preferred, underscores legacy)
+"conversation_flow": "bike-insights"  # ✅ Preferred
+"conversation_flow": "bike_insights"  # ✅ Legacy (still works)
 ```
 
 ### API returning errors?
