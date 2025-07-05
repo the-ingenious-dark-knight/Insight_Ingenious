@@ -84,6 +84,8 @@ Insight Ingenious provides multiple conversation workflows with different config
 
 **📋 See [Workflow Configuration Requirements](docs/workflows/README.md) for detailed setup instructions.**
 
+**🔄 Naming Formats**: Workflows support both hyphenated (`bike-insights`) and underscored (`bike_insights`) naming formats for backward compatibility. New projects should use hyphenated names.
+
 ## Project Structure
 
 - `ingenious/`: Core framework code

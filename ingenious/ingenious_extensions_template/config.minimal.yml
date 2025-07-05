@@ -1,10 +1,10 @@
 # =============================================================================
 # Insight Ingenious Configuration - Hello World Template
 # =============================================================================
-# This template provides configuration for the "Hello World" workflow (bike_insights)
-# and simple text processing (classification_agent).
+# This template provides configuration for the "Hello World" workflow (bike-insights)
+# and simple text processing (classification-agent).
 #
-# bike_insights is the recommended starting point - it showcases multi-agent
+# bike-insights is the recommended starting point - it showcases multi-agent
 # coordination and demonstrates what Ingenious can do.
 #
 # Copy this file to config.yml and set your Azure OpenAI credentials in .env
