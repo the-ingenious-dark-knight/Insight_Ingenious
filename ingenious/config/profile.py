@@ -21,13 +21,29 @@ def substitute_environment_variables(yaml_content: str) -> str:
         var_expr = match.group(1)
         if ":" in var_expr:
             var_name, default_value = var_expr.split(":", 1)
-            return os.getenv(var_name, default_value)
+            env_value = os.getenv(var_name)
+            if env_value is None:
+                # Provide more helpful guidance for missing environment variables
+                if var_name in ["AZURE_OPENAI_API_KEY", "AZURE_OPENAI_BASE_URL"]:
+                    print(
+                        f"⚠️  Required environment variable {var_name} not found. "
+                        f"Using default value '{default_value}'. "
+                        f"Please set {var_name} in your .env file for proper operation."
+                    )
+                elif "placeholder" in default_value.lower():
+                    print(
+                        f"ℹ️  Optional service variable {var_name} not configured. "
+                        f"Using placeholder '{default_value}'. This is normal for minimal setups."
+                    )
+                return default_value
+            return env_value
         else:
             var_name = var_expr
             env_value = os.getenv(var_name)
             if env_value is None:
                 print(
-                    f"Warning: Environment variable {var_name} not found and no default provided"
+                    f"❌ Critical: Environment variable {var_name} not found and no default provided. "
+                    f"Please set {var_name} in your .env file or provide a default value in profiles.yml"
                 )
                 return match.group(0)  # Return original if no env var found
             return env_value
@@ -50,45 +66,107 @@ class Profiles:
         try:
             profiles = profile_models.Profiles.model_validate_json(json_data).root
         except ValidationError as e:
-            print("❌ Profile validation failed! Common issues and solutions:")
-            for error in e.errors():
+            print("\n" + "=" * 80)
+            print("❌ PROFILE VALIDATION FAILED")
+            print("=" * 80)
+            print("🔧 Configuration issues found. Here's how to fix them:\n")
+
+            error_count = len(e.errors())
+            for i, error in enumerate(e.errors(), 1):
                 field_path = " -> ".join(str(x) for x in error["loc"])
                 error_msg = error["msg"]
 
-                print(f"   🔸 Field: {field_path}")
-                print(f"      Error: {error_msg}")
+                print(f"� Error {i}/{error_count}: {field_path}")
+                print(f"   Issue: {error_msg}")
 
-                # Provide helpful suggestions based on common errors
+                # Provide specific, actionable solutions based on common errors
                 if "string_type" in error_msg and field_path.endswith("api_key"):
+                    print("   💡 Solution:")
                     print(
-                        "      💡 Tip: Make sure AZURE_OPENAI_API_KEY is set in your .env file"
+                        "      1. Make sure AZURE_OPENAI_API_KEY is set in your .env file"
+                    )
+                    print(
+                        "      2. Example: AZURE_OPENAI_API_KEY=your-actual-api-key-here"
+                    )
+                    print(
+                        "      3. Check your Azure OpenAI resource for the correct key"
                     )
                 elif "string_type" in error_msg and field_path.endswith("base_url"):
+                    print("   💡 Solution:")
                     print(
-                        "      💡 Tip: Make sure AZURE_OPENAI_BASE_URL is set in your .env file"
+                        "      1. Make sure AZURE_OPENAI_BASE_URL is set in your .env file"
+                    )
+                    print(
+                        "      2. Example: AZURE_OPENAI_BASE_URL=https://your-resource.cognitiveservices.azure.com/"
+                    )
+                    print(
+                        "      3. Find this URL in your Azure OpenAI resource overview"
                     )
                 elif "string_type" in error_msg and "password" in field_path:
+                    print("   💡 Solution:")
                     print(
-                        "      💡 Tip: Set WEB_AUTH_PASSWORD='' in .env or disable web auth"
+                        "      1. Set WEB_AUTH_PASSWORD='' in .env to disable authentication"
+                    )
+                    print(
+                        "      2. Or set a strong password: WEB_AUTH_PASSWORD=your-secure-password"
+                    )
+                    print(
+                        "      3. Authentication can be disabled by setting enable: false"
                     )
                 elif "string_type" in error_msg and any(
                     x in field_path for x in ["azure_search", "azure_sql", "storage"]
                 ):
+                    print("   💡 Solution:")
                     print(
-                        "      💡 Tip: For minimal setup, these can be empty strings ('')"
+                        "      1. For minimal setup, these can remain as placeholder values"
+                    )
+                    print(
+                        "      2. These services are optional for basic bike-insights workflow"
+                    )
+                    print(
+                        "      3. Copy the minimal template: cp ingenious_extensions/profiles.minimal.yml ./profiles.yml"
+                    )
+                elif "required" in error_msg.lower():
+                    print("   💡 Solution:")
+                    print("      1. This field is required and cannot be empty")
+                    print(
+                        "      2. Check your .env file for the corresponding environment variable"
+                    )
+                    print(
+                        "      3. Refer to .env.example for the complete list of variables"
                     )
                 else:
+                    print("   💡 Solution:")
+                    print("      1. Check your profiles.yml syntax and .env variables")
                     print(
-                        "      💡 Tip: Check your profiles.yml file and .env variables"
+                        "      2. Compare with working examples in ingenious_extensions/"
+                    )
+                    print(
+                        "      3. Run 'ingen validate' for detailed configuration checks"
                     )
                 print()
 
-            print(
-                "📖 For help: see PLAN.md or run 'ingen workflows bike_insights' (Hello World)"
-            )
+            print("📋 QUICK FIX COMMANDS:")
+            print("   # Use minimal working template:")
+            print("   cp ingenious_extensions/profiles.minimal.yml ./profiles.yml")
+            print()
+            print("   # Check your environment variables:")
+            print("   cat .env | grep AZURE_OPENAI")
+            print()
+            print("   # Validate configuration:")
+            print("   uv run ingen validate")
+            print()
+            print("📖 HELPFUL RESOURCES:")
+            print("   • Documentation: see docs/troubleshooting/README.md")
+            print("   • Quick Start: uv run ingen workflows bike-insights")
+            print("   • Examples: check ingenious_extensions/ directory")
+            print("=" * 80)
             raise e
         except Exception as e:
-            print(f"Unexpected error during validation: {e}")
+            print(f"\n❌ Unexpected error during profile validation: {e}")
+            print(
+                "💡 This might be a YAML syntax error. Check your profiles.yml file formatting."
+            )
             raise e
         return profiles
 

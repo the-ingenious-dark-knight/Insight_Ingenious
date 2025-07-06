@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -134,10 +134,14 @@ class Config(BaseModel):
     chat_service: ChatServiceConfig
     chainlit_configuration: ChainlitConfig
     prompt_tuner: PromptTunerConfig
-    azure_search_services: List[AzureSearchConfig]
+    azure_search_services: Optional[List[AzureSearchConfig]] = Field(
+        default=None, description="Azure Search services configuration (optional)"
+    )
     web_configuration: WebConfig
     local_sql_db: LocaldbConfig
-    azure_sql_services: AzureSqlConfig
+    azure_sql_services: Optional[AzureSqlConfig] = Field(
+        default=None, description="Azure SQL services configuration (optional)"
+    )
     file_storage: FileStorage = Field(
         default_factory=lambda: FileStorage(
             enable=True, storage_type="local", container_name="", path="./"

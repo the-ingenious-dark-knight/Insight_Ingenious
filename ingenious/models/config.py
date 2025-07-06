@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -228,11 +228,15 @@ class Config(BaseModel):
     chat_service: ChatServiceConfig
     chainlit_configuration: ChainlitConfig
     prompt_tuner: PromptTunerConfig
-    azure_search_services: List[AzureSearchConfig]
+    azure_search_services: Optional[List[AzureSearchConfig]] = Field(
+        default=None, description="Azure Search services configuration (optional)"
+    )
     web_configuration: WebConfig
     receiver_configuration: ReceiverConfig
     local_sql_db: LocaldbConfig
-    azure_sql_services: AzureSqlConfig
+    azure_sql_services: Optional[AzureSqlConfig] = Field(
+        default=None, description="Azure SQL services configuration (optional)"
+    )
     file_storage: FileStorage
 
     def __init__(
@@ -256,7 +260,9 @@ class Config(BaseModel):
             local_sql_db=LocaldbConfig(config.local_sql_db),
             azure_sql_services=AzureSqlConfig(
                 config.azure_sql_services, profile.azure_sql_services
-            ),
+            )
+            if config.azure_sql_services and profile.azure_sql_services
+            else None,
             file_storage=FileStorage(config.file_storage, profile.file_storage),
         )
 
@@ -270,9 +276,12 @@ class Config(BaseModel):
         self.models = models
 
         self.azure_search_services = []
-        for as_config in config.azure_search_services:
-            for profile_as_config in profile.azure_search_services:
-                if as_config.service == profile_as_config.service:
-                    self.azure_search_services.append(
-                        config_models.AzureSearchConfig(as_config, profile_as_config)
-                    )
+        if config.azure_search_services and profile.azure_search_services:
+            for as_config in config.azure_search_services:
+                for profile_as_config in profile.azure_search_services:
+                    if as_config.service == profile_as_config.service:
+                        self.azure_search_services.append(
+                            config_models.AzureSearchConfig(
+                                as_config, profile_as_config
+                            )
+                        )
