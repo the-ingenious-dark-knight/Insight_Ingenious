@@ -41,8 +41,8 @@ flowchart TD
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/Insight-Services-APAC/Insight_Ingenious.git
-   cd Insight_Ingenious
+   git clone https://github.com/Insight-Services-APAC/ingenious.git
+   cd ingenious
    ```
 
 2. **Install dependencies and set up development environment:**

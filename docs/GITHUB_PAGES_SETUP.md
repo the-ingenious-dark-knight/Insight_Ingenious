@@ -40,7 +40,7 @@ To enable GitHub Pages for this repository:
 
 3. **Access Your Documentation**
    - Your site will be available at: `https://[username].github.io/[repository-name]/`
-   - For this repo: `https://insight-services-apac.github.io/Insight_Ingenious/`
+   - For this repo: `https://insight-services-apac.github.io/ingenious/`
 
 ## 🛠️ Local Development
 

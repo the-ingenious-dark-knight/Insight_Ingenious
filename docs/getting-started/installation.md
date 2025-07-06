@@ -32,8 +32,8 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/Insight-Services-APAC/Insight_Ingenious.git
-cd Insight_Ingenious
+git clone https://github.com/Insight-Services-APAC/ingenious.git
+cd ingenious
 ```
 
 ### 2. Install Core Framework
