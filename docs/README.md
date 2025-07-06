@@ -25,9 +25,10 @@ Welcome to the Insight Ingenious documentation. This enterprise-grade Python lib
 
 **For using Insight Ingenious:**
 
-- [� **All Guides**](guides/README.md): Complete guide index and overview
+- [📋 **All Guides**](guides/README.md): Complete guide index and overview
 - [🌐 **API Integration**](guides/api-integration.md): REST API usage and examples
 - [🎨 **Web Interface**](guides/web-interface.md): Using the Chainlit UI and prompt tuner
+- [🗄️ **SQL Agent Setup**](guides/sql-agent-setup.md): Complete setup guide for SQL manipulation with SQLite and Azure SQL
 - [📊 **Data Preparation**](guides/data-preparation/): Data processing and preparation workflows
 - [📄 **Document Processing**](guides/document-processing/): Document analysis and extraction
 

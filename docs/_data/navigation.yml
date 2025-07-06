@@ -17,6 +17,8 @@ docs:
         url: /guides/api-integration/
       - title: "Web Interface"
         url: /guides/web-interface/
+      - title: "SQL Agent Setup"
+        url: /guides/sql-agent-setup/
       - title: "Data Preparation"
         url: /guides/data-preparation/
       - title: "Document Processing"
