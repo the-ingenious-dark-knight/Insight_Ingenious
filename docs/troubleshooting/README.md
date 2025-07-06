@@ -71,7 +71,7 @@ ValidationError: 9 validation errors for Profiles
 2. **Use minimal profiles.yml**:
    ```bash
    # Copy the minimal template
-   cp Insight_Ingenious/ingenious/ingenious_extensions_template/profiles.minimal.yml ./profiles.yml
+   cp ingenious/ingenious/ingenious_extensions_template/profiles.minimal.yml ./profiles.yml
    ```
 
 3. **Set environment variables**:
@@ -125,7 +125,7 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
 
 2. **Reinstall the library**:
    ```bash
-   uv pip install -e ./Insight_Ingenious
+   uv pip install -e ./ingenious
    ```
 
 3. **Check Python path**:
@@ -302,7 +302,7 @@ Before running Ingenious, ensure:
 
 - [ ] Python 3.13+ installed
 - [ ] uv package manager available
-- [ ] Ingenious library installed: `uv pip install -e ./Insight_Ingenious`
+- [ ] Ingenious library installed: `uv pip install -e ./ingenious`
 - [ ] Project initialized: `uv run ingen init`
 - [ ] .env file created with Azure OpenAI credentials
 - [ ] Environment variables set:
@@ -337,7 +337,7 @@ uv run ingen workflows
 
 | Issue | Quick Fix |
 |-------|-----------|
-| Import errors | `uv pip install -e ./Insight_Ingenious` |
+| Import errors | `uv pip install -e ./ingenious` |
 | Profile validation | Use `profiles.minimal.yml` template |
 | Port not working | Set `WEB_PORT` environment variable |
 | Workflow not found | Use `bike-insights` (preferred) or `bike_insights` (legacy) |
@@ -363,7 +363,7 @@ If everything is broken, start fresh:
 rm -rf ingenious_extensions/ tmp/ config.yml profiles.yml .env
 
 # 2. Reinstall
-uv pip install -e ./Insight_Ingenious
+uv pip install -e ./ingenious
 
 # 3. Initialize
 uv run ingen init

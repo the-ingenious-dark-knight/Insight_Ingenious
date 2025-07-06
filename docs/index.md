@@ -8,7 +8,7 @@ header:
     - label: "Get Started"
       url: "/getting-started/"
     - label: "View on GitHub"
-      url: "https://github.com/Insight-Services-APAC/Insight_Ingenious"
+      url: "https://github.com/Insight-Services-APAC/ingenious"
 excerpt: "An enterprise-grade Python library for quickly setting up APIs to interact with AI Agents, featuring tight integrations with Microsoft Azure services and comprehensive utilities for debugging and customization."
 intro:
   - excerpt: 'Insight Ingenious provides an enterprise-grade Python library that enables rapid deployment of AI agent APIs with seamless Microsoft Azure integrations, robust debugging capabilities, and extensive customization options for building scalable AI-powered applications.'
@@ -102,7 +102,7 @@ Detailed API documentation, configuration options, and technical specifications.
 
 - Check our [comprehensive guides](/guides/)
 - Search the [troubleshooting section](/troubleshooting/)
-- Open an issue on [GitHub](https://github.com/Insight-Services-APAC/Insight_Ingenious/issues)
+- Open an issue on [GitHub](https://github.com/Insight-Services-APAC/ingenious/issues)
 - Contact the development team
 
 ---

@@ -425,4 +425,4 @@ Example error response:
 
 - Check the [troubleshooting guide](/troubleshooting/)
 - Review the [workflow examples](/api/workflows/)
-- Open an issue on [GitHub](https://github.com/Insight-Services-APAC/Insight_Ingenious/issues)
+- Open an issue on [GitHub](https://github.com/Insight-Services-APAC/ingenious/issues)

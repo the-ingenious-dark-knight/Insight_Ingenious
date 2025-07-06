@@ -19,8 +19,8 @@ By participating in this project, you agree to abide by our code of conduct, whi
 1. Fork the repository on GitHub
 2. Clone your fork locally:
    ```bash
-   git clone https://github.com/YOUR-USERNAME/Insight_Ingenious.git
-   cd Insight_Ingenious
+   git clone https://github.com/YOUR-USERNAME/ingenious.git
+   cd ingenious
    ```
 
 3. Set up a development environment:

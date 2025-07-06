@@ -168,7 +168,7 @@ Access your workflows through the web interface:
 - **📋 Workflow Requirements:** Check `uv run ingen workflow-requirements all`
 - **🔧 Configuration Issues:** See [Troubleshooting Guide](../docs/getting-started/troubleshooting.md)
 - **💻 Development:** Review [Development Guide](../docs/development/README.md)
-- **🐛 Issues:** Check the [GitHub Issues](https://github.com/Insight-Services-APAC/Insight_Ingenious/issues)
+- **🐛 Issues:** Check the [GitHub Issues](https://github.com/Insight-Services-APAC/ingenious/issues)
 
 ---
 

@@ -62,7 +62,7 @@ Welcome to the Insight Ingenious documentation. This enterprise-grade Python lib
 
 ## Quick Links
 
-- [GitHub Repository](https://github.com/Insight-Services-APAC/Insight_Ingenious)
+- [GitHub Repository](https://github.com/Insight-Services-APAC/ingenious)
 - [Main README](../README.md)
 - [Contributing Guidelines](../CONTRIBUTING.md)
 

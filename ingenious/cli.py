@@ -1070,9 +1070,7 @@ def help_command(
         console.print("")
 
         console.print("[bold yellow]📖 Documentation:[/bold yellow]")
-        console.print(
-            "   GitHub: https://github.com/Insight-Services-APAC/Insight_Ingenious"
-        )
+        console.print("   GitHub: https://github.com/Insight-Services-APAC/ingenious")
 
     elif topic == "setup":
         console.print("[bold blue]🛠️  Project Setup Guide[/bold blue]\n")
@@ -1286,7 +1284,7 @@ def version():
 
     console.print("🚀 GenAI Accelerator Framework")
     console.print(
-        "📖 Documentation: https://github.com/Insight-Services-APAC/Insight_Ingenious"
+        "📖 Documentation: https://github.com/Insight-Services-APAC/ingenious"
     )
 
 

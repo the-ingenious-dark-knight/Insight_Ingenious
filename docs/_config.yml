@@ -3,8 +3,8 @@ title: "Insight Ingenious Documentation"
 description: >-
   Comprehensive documentation for Insight Ingenious - A powerful conversation workflow framework for building AI-powered applications with Azure OpenAI.
 # Repository information
-repository: "Insight-Services-APAC/Insight_Ingenious"
-baseurl: "/Insight_Ingenious"
+repository: "Insight-Services-APAC/ingenious"
+baseurl: "/ingenious"
 url: "https://insight-services-apac.github.io"
 # Theme
 remote_theme: "mmistakes/minimal-mistakes@4.27.1"
@@ -49,7 +49,7 @@ footer:
   links:
     - label: "GitHub"
       icon: "fab fa-fw fa-github"
-      url: "https://github.com/Insight-Services-APAC/Insight_Ingenious"
+      url: "https://github.com/Insight-Services-APAC/ingenious"
 # Defaults
 defaults:
   # _posts

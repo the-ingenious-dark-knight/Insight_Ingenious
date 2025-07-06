@@ -27,8 +27,8 @@ For complete installation instructions, including optional dependencies for adva
 
 ```bash
 # Clone the repository
-git clone https://github.com/Insight-Services-APAC/Insight_Ingenious.git
-cd Insight_Ingenious
+git clone https://github.com/Insight-Services-APAC/ingenious.git
+cd ingenious
 
 # Install the library
 uv pip install -e .

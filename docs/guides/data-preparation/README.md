@@ -61,7 +61,7 @@ Run `ingen dataprep crawl --help` to see the full Typer‑generated help screen.
 
 > *Goal:* go from a **fresh clone** to running **unit tests, e2e tests, and the new CLI** in one continuous shell session.
 >
-> *Prerequisites:* [uv](https://github.com/astral-sh/uv) is installed • You are in the repo root (`Insight_Ingenious/`).
+> *Prerequisites:* [uv](https://github.com/astral-sh/uv) is installed • You are in the repo root (`ingenious/`).
 
 ```bash
 # 1️⃣  Build an isolated virtual‑env and install extras

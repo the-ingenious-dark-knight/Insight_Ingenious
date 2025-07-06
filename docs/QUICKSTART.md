@@ -24,7 +24,7 @@ Get Insight Ingenious up and running in 5 minutes! This enterprise-grade Python 
 1. **Install and Initialize**:
     ```bash
     # From your project directory
-    uv pip install -e ./Insight_Ingenious
+    uv pip install -e ./ingenious
     uv run ingen init
     ```
 
@@ -130,7 +130,7 @@ set -e
 echo "🚀 Setting up Insight Ingenious..."
 
 # Install and initialize
-uv pip install -e ./Insight_Ingenious
+uv pip install -e ./ingenious
 uv run ingen init
 
 # Set environment variables
@@ -217,7 +217,7 @@ uv run ingen serve 2>&1 | grep -i error
 ### Profile validation errors?
 ```bash
 # Use minimal template
-cp Insight_Ingenious/ingenious/ingenious_extensions_template/profiles.minimal.yml ./profiles.yml
+cp ingenious/ingenious/ingenious_extensions_template/profiles.minimal.yml ./profiles.yml
 
 # Check environment variables
 env | grep AZURE_OPENAI
