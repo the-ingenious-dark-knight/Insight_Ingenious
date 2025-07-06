@@ -21,56 +21,52 @@ Get Insight Ingenious up and running in 5 minutes! This enterprise-grade Python 
 
 ## 📦 5-Minute Setup
 
-### Step 1: Install & Initialize
-```bash
-# Navigate to your project directory
-cd /path/to/your/project
+1. **Install and Initialize**:
+    ```bash
+    # From your project directory
+    uv pip install -e ./Insight_Ingenious
+    uv run ingen init
+    ```
 
-# Install Ingenious library for enterprise AI agent APIs
-uv pip install -e ./Insight_Ingenious
+2. **Configure Credentials**:
+    ```bash
+    # Edit .env with your Azure OpenAI credentials
+    cp .env.example .env
+    nano .env  # Add AZURE_OPENAI_API_KEY and AZURE_OPENAI_BASE_URL
+    ```
 
-# Initialize project structure
-uv run ingen init
-```
+3. **Validate Setup** (Recommended):
+    ```bash
+    export INGENIOUS_PROJECT_PATH=$(pwd)/config.yml
+    export INGENIOUS_PROFILE_PATH=$(pwd)/profiles.yml
+    uv run ingen validate  # Check configuration before starting
+    ```
 
-### Step 2: Configure Credentials
-```bash
-# Copy the example environment file
-cp .env.example .env
+4. **Start the Server**:
+    ```bash
+    uv run ingen serve
+    ```
 
-# Edit .env with your Azure OpenAI credentials
-nano .env
-```
+5. **Verify Health**:
+    ```bash
+    # Check server health
+    curl http://localhost:80/api/v1/health
+    ```
 
-Add these required values to `.env`:
-```env
-AZURE_OPENAI_API_KEY=your-azure-openai-api-key-here
-AZURE_OPENAI_BASE_URL=https://your-endpoint.cognitiveservices.azure.com/
-```
+6. **Test the API**:
+    ```bash
+    # Test bike insights workflow (the "Hello World" of Ingenious)
+    curl -X POST http://localhost:80/api/v1/chat \
+      -H "Content-Type: application/json" \
+      -d '{
+        "user_prompt": "{\"stores\": [{\"name\": \"QuickStart Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"QS-001\", \"quantity_sold\": 1, \"sale_date\": \"2023-04-15\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 5.0, \"comment\": \"Perfect bike for getting started!\"}}], \"bike_stock\": []}], \"revision_id\": \"quickstart-1\", \"identifier\": \"hello-world\"}",
+        "conversation_flow": "bike-insights"
+      }'
+    ```
 
-### Step 3: Set Environment Variables
-```bash
-export INGENIOUS_PROJECT_PATH=$(pwd)/config.yml
-export INGENIOUS_PROFILE_PATH=$(pwd)/profiles.yml
-```
+🎉 **That's it!** You should see a comprehensive JSON response with insights from multiple AI agents analyzing the bike sales data.
 
-### Step 4: Start the Server
-```bash
-uv run ingen serve
-```
-
-### Step 5: Test the API
-```bash
-# Test bike insights workflow (the "Hello World" of Ingenious!)
-curl -X POST http://localhost:80/api/v1/chat \
-  -H "Content-Type: application/json" \
-  -d '{
-    "user_prompt": "{\"stores\": [{\"name\": \"QuickStart Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"QS-001\", \"quantity_sold\": 1, \"sale_date\": \"2023-04-15\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 5.0, \"comment\": \"Perfect bike for getting started!\"}}], \"bike_stock\": []}], \"revision_id\": \"quickstart-1\", \"identifier\": \"hello-world\"}",
-    "conversation_flow": "bike-insights"
-  }'
-```
-
-🎉 **That's it!** You should see a comprehensive JSON response with analysis from multiple AI agents - this showcases the multi-agent coordination that makes Ingenious powerful!
+**Note**: The `bike-insights` workflow is created when you run `ingen init` - it's part of the project template setup, not included in the core library.
 
 ## 📊 Data Format Examples
 
