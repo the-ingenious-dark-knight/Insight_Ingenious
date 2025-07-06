@@ -270,9 +270,31 @@ uv run ingen init
 Once you have the basic setup working:
 
 1. **📖 Read the full documentation**: `/docs/`
-2. **🔧 Customize workflows**: Edit templates in `ingenious_extensions/`
-3. **🧪 Create your own agents**: Follow patterns in existing workflows
-4. **🚀 Deploy to production**: See deployment guides
+2. **�️ Try the SQL Agent**: Follow the [SQL Agent Setup Guide](guides/sql-agent-setup.md) for database queries
+3. **�🔧 Customize workflows**: Edit templates in `ingenious_extensions/`
+4. **🧪 Create your own agents**: Follow patterns in existing workflows
+5. **🚀 Deploy to production**: See deployment guides
+
+### Quick SQL Agent Setup
+
+If you want to try database queries with natural language:
+
+```bash
+# Set up SQLite database
+uv run python -c "
+from ingenious.utils.load_sample_data import sqlite_sample_db
+sqlite_sample_db()
+print('✅ Sample database created')
+"
+
+# Test SQL queries
+curl -X POST http://localhost:80/api/v1/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_prompt": "Show me all tables in the database",
+    "conversation_flow": "sql-manipulation-agent"
+  }'
+```
 
 ---
 

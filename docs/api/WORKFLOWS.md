@@ -151,24 +151,125 @@ curl -X POST http://localhost:80/api/v1/chat \
 
 ---
 
-### 4. 📊 sql-manipulation-agent - Database Queries
+### 4. 📊 sql-manipulation-agent - SQL Database Queries
 
-**Purpose**: Execute SQL queries based on natural language input
+**Purpose**: Execute SQL queries based on natural language input, supporting both SQLite (local) and Azure SQL databases
 
 **Availability**: Core library (always available)
 
-**Requirements**:
-- Database connection configured
-- SQL database accessible
+**Database Options**:
+- **SQLite**: Local development and testing (recommended for getting started)
+- **Azure SQL**: Production deployments with cloud database
 
-**Example Request**:
+#### Quick Setup for SQLite (Recommended)
+
+1. **Configure profiles.yml** for SQLite mode:
+```yaml
+azure_sql_services:
+  database_name: "skip"  # This enables SQLite mode
+local_sql_db:
+  database_path: "/tmp/sample_sql.db"
+```
+
+2. **Test with sample data**:
+```bash
+# Create sample SQLite database with test data
+uv run python -c "
+from ingenious.utils.load_sample_data import sqlite_sample_db
+sqlite_sample_db()
+print('✅ Sample SQLite database created at /tmp/sample_sql.db')
+"
+```
+
+3. **Start the server**:
+```bash
+ingen serve
+```
+
+4. **Test SQL queries**:
 ```bash
 curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
-    "user_prompt": "Show me the top selling bikes in the last month",
+    "user_prompt": "Show me all tables in the database",
     "conversation_flow": "sql-manipulation-agent"
   }'
+```
+
+#### Advanced Setup for Azure SQL
+
+1. **Configure profiles.yml** for Azure SQL:
+```yaml
+azure_sql_services:
+  database_name: "your-database-name"
+  server_name: "your-server.database.windows.net"
+  driver: "ODBC Driver 18 for SQL Server"
+  connection_string: "Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+```
+
+2. **Set environment variables**:
+```bash
+export AZURE_SQL_USERNAME="your-username"
+export AZURE_SQL_PASSWORD="your-password"
+```
+
+#### Example SQL Queries
+
+**Basic table exploration**:
+```bash
+curl -X POST http://localhost:80/api/v1/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_prompt": "What tables are available?",
+    "conversation_flow": "sql-manipulation-agent"
+  }'
+```
+
+**Data analysis queries**:
+```bash
+curl -X POST http://localhost:80/api/v1/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_prompt": "Show me the top 5 customers by total sales",
+    "conversation_flow": "sql-manipulation-agent"
+  }'
+```
+
+**Schema inspection**:
+```bash
+curl -X POST http://localhost:80/api/v1/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_prompt": "Describe the structure of the sales table",
+    "conversation_flow": "sql-manipulation-agent"
+  }'
+```
+
+#### Troubleshooting SQL Agent
+
+**Common Issues**:
+
+1. **"Database connection failed"**
+   - For SQLite: Ensure `database_name: "skip"` is set in profiles.yml
+   - For Azure SQL: Verify connection string and credentials
+
+2. **"No tables found"**
+   - Run the sample data creation script for SQLite
+   - Verify database has tables for Azure SQL
+
+3. **"SQL query execution failed"**
+   - Check the AI-generated SQL syntax
+   - Verify table and column names exist
+
+**Debug Mode**:
+```bash
+# Check configuration
+uv run python -c "
+from ingenious.config.config import load_app_config
+config = load_app_config()
+print('SQL Config:', config.azure_sql_services)
+print('Local DB Config:', config.local_sql_db)
+"
 ```
 
 ---

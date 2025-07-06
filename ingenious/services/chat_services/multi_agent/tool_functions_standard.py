@@ -106,6 +106,7 @@ def get_conn(_config):
 if _config.azure_sql_services.database_name == "skip":
     test_db = sqlite_sample_db()  # this is for local sql initialisation
 else:
+    test_db = None  # Placeholder for Azure SQL mode
     if pyodbc is not None:
         conn, cursor = get_conn(_config)
     else:
@@ -113,40 +114,14 @@ else:
 
 
 class SQL_ToolFunctions:
-    if _config.azure_sql_services.database_name == "skip":
-
-        @staticmethod
-        def get_db_attr(_config):
+    @staticmethod
+    def get_db_attr(_config):
+        if _config.azure_sql_services.database_name == "skip":
             table_name = _config.local_sql_db.sample_database_name
             result = test_db.execute_sql(f"""SELECT * FROM {table_name} LIMIT 1""")
             column_names = [key for key in result[0]]
             return table_name, column_names
-
-        @staticmethod
-        def execute_sql_local(
-            sql: str,
-            timeout: int = 10,  # Timeout in seconds
-        ) -> str:
-            def run_query(sql: str):
-                return test_db.execute_sql(sql)
-
-            with ThreadPoolExecutor() as executor:
-                future = executor.submit(run_query, sql)  # Pass 'sql' as an argument
-                try:
-                    # Wait for the query to complete within the specified timeout
-                    result = future.result(timeout=timeout)
-                    return result
-                except TimeoutError:
-                    # Handle case where the query execution exceeded the timeout
-                    return ""
-                except Exception as e:
-                    # Handle any other exceptions that may arise during query execution
-                    return str(e)
-
-    else:
-
-        @staticmethod
-        def get_azure_db_attr(_config):
+        else:
             database_name = _config.azure_sql_services.database_name
             table_name = _config.azure_sql_services.table_name
             cursor.execute(f"""
@@ -155,38 +130,66 @@ class SQL_ToolFunctions:
                 WHERE TABLE_NAME = '{table_name}'
             """)
             column_names = [row[0] for row in cursor.fetchall()]
-            # cursor.close()
-            # conn.close()
             return database_name, table_name, column_names
 
-        @staticmethod
-        def execute_sql_azure(
-            sql: str,
-            timeout: int = 15,  # Timeout in seconds
-        ) -> str:
-            def run_query(sql_query):
-                try:
-                    cursor.execute(sql_query)
-                    r = [
-                        dict(
-                            (cursor.description[i][0], value)
-                            for i, value in enumerate(row)
-                        )
-                        for row in cursor.fetchall()
-                    ]
-                    # cursor.close()
-                    # conn.close()
-                    return json.dumps(r)
-                except Exception as query_err:
-                    return f"Query Error: {query_err}"
+    @staticmethod
+    def get_azure_db_attr(_config):
+        database_name = _config.azure_sql_services.database_name
+        table_name = _config.azure_sql_services.table_name
+        cursor.execute(f"""
+            SELECT COLUMN_NAME
+            FROM INFORMATION_SCHEMA.COLUMNS
+            WHERE TABLE_NAME = '{table_name}'
+        """)
+        column_names = [row[0] for row in cursor.fetchall()]
+        return database_name, table_name, column_names
 
-            # Run query in a separate thread with a timeout
-            with ThreadPoolExecutor() as executor:
-                future = executor.submit(run_query, sql)
-                try:
-                    result = future.result(timeout=timeout)
-                    return result
-                except TimeoutError:
-                    return "Query timed out."
-                except Exception as e:
-                    return f"Execution Error: {e}"
+    @staticmethod
+    def execute_sql_local(
+        sql: str,
+        timeout: int = 10,  # Timeout in seconds
+    ) -> str:
+        def run_query(sql: str):
+            return test_db.execute_sql(sql)
+
+        with ThreadPoolExecutor() as executor:
+            future = executor.submit(run_query, sql)  # Pass 'sql' as an argument
+            try:
+                # Wait for the query to complete within the specified timeout
+                result = future.result(timeout=timeout)
+                return json.dumps(result)
+            except TimeoutError:
+                # Handle case where the query execution exceeded the timeout
+                return json.dumps({"error": "Query timed out", "results": []})
+            except Exception as e:
+                # Handle any other exceptions that may arise during query execution
+                return json.dumps({"error": str(e), "results": []})
+
+    @staticmethod
+    def execute_sql_azure(
+        sql: str,
+        timeout: int = 15,  # Timeout in seconds
+    ) -> str:
+        def run_query(sql_query):
+            try:
+                cursor.execute(sql_query)
+                r = [
+                    dict(
+                        (cursor.description[i][0], value) for i, value in enumerate(row)
+                    )
+                    for row in cursor.fetchall()
+                ]
+                return json.dumps(r)
+            except Exception as query_err:
+                return json.dumps({"error": f"Query Error: {query_err}", "results": []})
+
+        # Run query in a separate thread with a timeout
+        with ThreadPoolExecutor() as executor:
+            future = executor.submit(run_query, sql)
+            try:
+                result = future.result(timeout=timeout)
+                return result
+            except TimeoutError:
+                return json.dumps({"error": "Query timed out", "results": []})
+            except Exception as e:
+                return json.dumps({"error": f"Execution Error: {e}", "results": []})

@@ -408,33 +408,54 @@ azure_search_services:
     key: "your-search-key"
 ```
 
-#### 📊 Database Workflows
+#### 📊 Database Workflows (SQL Manipulation Agent)
 
-For `sql-manipulation-agent`:
+For `sql-manipulation-agent` workflow, you have two database options:
 
-**Local SQLite option:**
+**Option 1: SQLite (Recommended for Development)**
 ```yaml
 # config.yml
 local_sql_db:
   database_path: "/tmp/sample_sql.db"
   sample_csv_path: "./data/your_data.csv"
+
+# profiles.yml
 azure_sql_services:
-  database_name: "skip"  # Use "skip" for local mode
+  database_name: "skip"  # This enables SQLite mode
 ```
 
-**Azure SQL option:**
+**Option 2: Azure SQL (Production)**
 ```yaml
 # config.yml
 azure_sql_services:
   database_name: "your_database"
-  table_name: "your_table"
-```
+  server_name: "your-server.database.windows.net"
+  driver: "ODBC Driver 18 for SQL Server"
 
-```yaml
 # profiles.yml
 azure_sql_services:
-  database_connection_string: "Server=tcp:yourserver.database.windows.net,..."
+  connection_string: "Driver={ODBC Driver 18 for SQL Server};Server=tcp:yourserver.database.windows.net,1433;Database=your_database;Uid=your_username;Pwd=your_password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
 ```
+
+**Quick SQLite Setup:**
+```bash
+# Create sample database
+uv run python -c "
+from ingenious.utils.load_sample_data import sqlite_sample_db
+sqlite_sample_db()
+print('✅ Sample SQLite database created')
+"
+
+# Test SQL agent
+curl -X POST http://localhost:80/api/v1/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_prompt": "Show me all tables",
+    "conversation_flow": "sql-manipulation-agent"
+  }'
+```
+
+> 📖 **For complete SQL agent setup instructions**, see the [SQL Agent Setup Guide](../guides/sql-agent-setup.md)
 
 ### Testing Workflows
 
