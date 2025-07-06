@@ -27,13 +27,29 @@ def substitute_environment_variables(yaml_content: str) -> str:
         var_expr = match.group(1)
         if ":" in var_expr:
             var_name, default_value = var_expr.split(":", 1)
-            return os.getenv(var_name, default_value)
+            env_value = os.getenv(var_name)
+            if env_value is None:
+                # Provide more helpful guidance for missing environment variables
+                if var_name in ["AZURE_OPENAI_API_KEY", "AZURE_OPENAI_BASE_URL"]:
+                    logger.warning(
+                        f"Required environment variable {var_name} not found. "
+                        f"Using default value '{default_value}'. "
+                        f"Please set {var_name} in your .env file for proper operation."
+                    )
+                elif "placeholder" in default_value.lower():
+                    logger.info(
+                        f"Optional service variable {var_name} not configured. "
+                        f"Using placeholder '{default_value}'. This is normal for minimal setups."
+                    )
+                return default_value
+            return env_value
         else:
             var_name = var_expr
             env_value = os.getenv(var_name)
             if env_value is None:
-                logger.warning(
-                    f"Environment variable {var_name} not found and no default provided"
+                logger.error(
+                    f"Critical: Environment variable {var_name} not found and no default provided. "
+                    f"Please set {var_name} in your .env file or provide a default value in config."
                 )
                 return match.group(0)  # Return original if no env var found
             return env_value

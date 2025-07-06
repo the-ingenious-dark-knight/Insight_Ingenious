@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel, Field, RootModel
 
@@ -103,8 +103,12 @@ class Profile(BaseModel):
     chat_service: ChatServiceConfig = Field(
         default_factory=ChatServiceConfig, description="Chat service configuration"
     )
-    azure_search_services: List[AzureSearchConfig]
-    azure_sql_services: AzureSqlConfig
+    azure_search_services: Optional[List[AzureSearchConfig]] = Field(
+        default=None, description="Azure Search services configuration (optional)"
+    )
+    azure_sql_services: Optional[AzureSqlConfig] = Field(
+        default=None, description="Azure SQL services configuration (optional)"
+    )
     web_configuration: WebConfig
     receiver_configuration: ReceiverConfig
     chainlit_configuration: ChainlitConfig

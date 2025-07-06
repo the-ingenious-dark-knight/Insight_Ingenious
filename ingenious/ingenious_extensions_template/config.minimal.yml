@@ -53,17 +53,20 @@ web_configuration:
     enable: false
     type: basic
 # =============================================================================
-# AZURE SEARCH SERVICES (Optional - can be empty for basic workflows)
+# AZURE SEARCH SERVICES (Optional - only needed for knowledge-base workflows)
 # =============================================================================
-azure_search_services:
-  - service: default
-    endpoint: ${AZURE_SEARCH_ENDPOINT:https://placeholder.search.windows.net}
+# Comment out or remove this section if not using Azure Search
+# azure_search_services:
+#   - service: default
+#     endpoint: ${AZURE_SEARCH_ENDPOINT:https://placeholder.search.windows.net}
+
 # =============================================================================
-# AZURE SQL SERVICES (Optional - can be empty for basic workflows)
+# AZURE SQL SERVICES (Optional - only needed for sql-manipulation workflows)
 # =============================================================================
-azure_sql_services:
-  database_name: ${AZURE_SQL_DATABASE_NAME:placeholder_db}
-  table_name: ${AZURE_SQL_TABLE_NAME:placeholder_table}
+# Comment out or remove this section if not using Azure SQL
+# azure_sql_services:
+#   database_name: ${AZURE_SQL_DATABASE_NAME:placeholder_db}
+#   table_name: ${AZURE_SQL_TABLE_NAME:placeholder_table}
 # =============================================================================
 # CHAINLIT CONFIGURATION (Web UI - Optional)
 # =============================================================================
@@ -83,10 +86,18 @@ local_sql_db:
   sample_csv_path: ${LOCAL_SQL_CSV_PATH:./sample_data.csv}
   sample_database_name: ${LOCAL_SQL_DB_NAME:sample_data}
 # =============================================================================
-# FILE STORAGE (Optional - using local storage by default)
+# FILE STORAGE (Using local storage - safe for all environments)
 # =============================================================================
 file_storage:
-  enable: true
-  storage_type: local
-  container_name: ""
-  path: "./"
+  revisions:
+    enable: true
+    storage_type: local
+    container_name: revisions
+    path: .files
+    add_sub_folders: true
+  data:
+    enable: true
+    storage_type: local
+    container_name: data
+    path: .files
+    add_sub_folders: true

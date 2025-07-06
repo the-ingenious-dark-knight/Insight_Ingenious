@@ -3,6 +3,15 @@
 # =============================================================================
 # This template provides minimal profile configuration that works out of the box
 # Set your Azure OpenAI credentials in .env file
+#
+# REQUIRED ENVIRONMENT VARIABLES:
+# AZURE_OPENAI_API_KEY=your-api-key-here
+# AZURE_OPENAI_BASE_URL=https://your-resource.openai.azure.com/
+#
+# OPTIONAL ENVIRONMENT VARIABLES:
+# AZURE_OPENAI_MODEL_NAME=gpt-4.1-nano
+# AZURE_OPENAI_DEPLOYMENT=gpt-4.1-nano
+# AZURE_OPENAI_API_VERSION=2024-12-01-preview
 
 # =============================================================================
 # DEVELOPMENT PROFILE - Minimal Configuration
@@ -13,32 +22,32 @@
   # =============================================================================
   models:
     - model: ${AZURE_OPENAI_MODEL_NAME:gpt-4.1-nano}
-      api_key: ${AZURE_OPENAI_API_KEY}
-      base_url: ${AZURE_OPENAI_BASE_URL}
+      api_key: ${AZURE_OPENAI_API_KEY:REQUIRED_SET_IN_ENV}
+      base_url: ${AZURE_OPENAI_BASE_URL:REQUIRED_SET_IN_ENV}
       deployment: ${AZURE_OPENAI_DEPLOYMENT:gpt-4.1-nano}
       api_version: ${AZURE_OPENAI_API_VERSION:2024-12-01-preview}
   # =============================================================================
   # CHAT HISTORY CONFIGURATION - Using local SQLite (no external DB needed)
   # =============================================================================
   chat_history:
-    database_connection_string: "placeholder_connection_string"
+    database_connection_string: ""
   # =============================================================================
-  # AZURE SEARCH SERVICES - Optional (empty for minimal setup)
+  # AZURE SEARCH SERVICES - Optional (commented out for minimal setup)
   # =============================================================================
-  azure_search_services:
-    - service: default
-      key: "placeholder_key"
+  # azure_search_services:
+  #   - service: default
+  #     key: ${AZURE_SEARCH_API_KEY:}
   # =============================================================================
-  # AZURE SQL SERVICES - Optional (empty for minimal setup)
+  # AZURE SQL SERVICES - Optional (commented out for minimal setup)
   # =============================================================================
-  azure_sql_services:
-    database_connection_string: "placeholder_connection_string"
+  # azure_sql_services:
+  #   database_connection_string: ${AZURE_SQL_CONNECTION_STRING:}
   # =============================================================================
   # RECEIVER CONFIGURATION - Disabled by default
   # =============================================================================
   receiver_configuration:
     enable: false
-    api_url: "placeholder_url"
+    api_url: ""
     api_key: "DevApiKey"
   # =============================================================================
   # CHAINLIT CONFIGURATION - Disabled by default
@@ -47,8 +56,8 @@
     enable: false
     authentication:
       enable: false
-      github_secret: "placeholder_secret"
-      github_client_id: "placeholder_client_id"
+      github_secret: ""
+      github_client_id: ""
   # =============================================================================
   # WEB CONFIGURATION - No authentication by default
   # =============================================================================
@@ -56,15 +65,15 @@
     authentication:
       enable: false
       username: "admin"
-      password: "placeholder_password"
+      password: "admin123"
       type: "basic"
   # =============================================================================
   # FILE STORAGE - Using local storage (no cloud storage needed)
   # =============================================================================
-  file_storage:
-    revisions:
-      url: "placeholder_url"
-      authentication_method: "default_credential"
-    data:
-      url: "placeholder_url"
-      authentication_method: "default_credential"
+  # file_storage:
+  #   revisions:
+  #     url: ${AZURE_STORAGE_REVISIONS_URL:}
+  #     authentication_method: "default_credential"
+  #   data:
+  #     url: ${AZURE_STORAGE_DATA_URL:}
+  #     authentication_method: "default_credential"

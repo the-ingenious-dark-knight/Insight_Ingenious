@@ -1315,18 +1315,26 @@ def validate():
 
     if not project_path:
         console.print("  ❌ INGENIOUS_PROJECT_PATH not set")
+        console.print(
+            "     [dim]Fix: export INGENIOUS_PROJECT_PATH=$(pwd)/config.yml[/dim]"
+        )
         validation_passed = False
     elif not Path(project_path).exists():
         console.print(f"  ❌ Config file not found: {project_path}")
+        console.print("     [dim]Fix: Run 'ingen init' to create config.yml[/dim]")
         validation_passed = False
     else:
         console.print(f"  ✅ INGENIOUS_PROJECT_PATH: {project_path}")
 
     if not profile_path:
         console.print("  ❌ INGENIOUS_PROFILE_PATH not set")
+        console.print(
+            "     [dim]Fix: export INGENIOUS_PROFILE_PATH=$(pwd)/profiles.yml[/dim]"
+        )
         validation_passed = False
     elif not Path(profile_path).exists():
         console.print(f"  ❌ Profile file not found: {profile_path}")
+        console.print("     [dim]Fix: Run 'ingen init' to create profiles.yml[/dim]")
         validation_passed = False
     else:
         console.print(f"  ✅ INGENIOUS_PROFILE_PATH: {profile_path}")
@@ -1344,6 +1352,14 @@ def validate():
             validation_passed = False
     except Exception as e:
         console.print(f"  ❌ config.yml validation failed: {str(e)}")
+        console.print("     [dim]Common fixes:[/dim]")
+        console.print("     [dim]• Check YAML syntax (indentation, quotes)[/dim]")
+        console.print(
+            "     [dim]• Ensure required sections exist (models, profile)[/dim]"
+        )
+        console.print(
+            "     [dim]• Comment out optional services if not using them[/dim]"
+        )
         validation_passed = False
 
     try:
@@ -1357,6 +1373,13 @@ def validate():
             validation_passed = False
     except Exception as e:
         console.print(f"  ❌ profiles.yml validation failed: {str(e)}")
+        console.print("     [dim]Common fixes:[/dim]")
+        console.print("     [dim]• Set AZURE_OPENAI_API_KEY in .env file[/dim]")
+        console.print("     [dim]• Set AZURE_OPENAI_BASE_URL in .env file[/dim]")
+        console.print("     [dim]• Check YAML syntax and structure[/dim]")
+        console.print(
+            "     [dim]• Comment out optional services if not configured[/dim]"
+        )
         validation_passed = False
 
     # 3. Check Azure OpenAI connectivity
@@ -1366,12 +1389,18 @@ def validate():
 
     if not azure_key:
         console.print("  ❌ AZURE_OPENAI_API_KEY not set in environment")
+        console.print(
+            "     [dim]Fix: Add AZURE_OPENAI_API_KEY=your-key to .env file[/dim]"
+        )
         validation_passed = False
     else:
         console.print("  ✅ AZURE_OPENAI_API_KEY found")
 
     if not azure_endpoint:
         console.print("  ❌ AZURE_OPENAI_BASE_URL not set in environment")
+        console.print(
+            "     [dim]Fix: Add AZURE_OPENAI_BASE_URL=https://your-resource.openai.azure.com/ to .env[/dim]"
+        )
         validation_passed = False
     else:
         console.print("  ✅ AZURE_OPENAI_BASE_URL found")
@@ -1415,8 +1444,17 @@ def validate():
         )
         console.print("\n[bold]🔧 Quick Fix Commands:[/bold]")
         console.print("  • Missing files: [bold]ingen init[/bold]")
+        console.print("  • Set environment variables:")
         console.print(
-            "  • Set environment: [bold]export INGENIOUS_PROJECT_PATH=$(pwd)/config.yml[/bold]"
+            "    [bold]export INGENIOUS_PROJECT_PATH=$(pwd)/config.yml[/bold]"
+        )
+        console.print(
+            "    [bold]export INGENIOUS_PROFILE_PATH=$(pwd)/profiles.yml[/bold]"
+        )
+        console.print("  • Create .env file with Azure OpenAI credentials:")
+        console.print("    [bold]echo 'AZURE_OPENAI_API_KEY=your-key' > .env[/bold]")
+        console.print(
+            "    [bold]echo 'AZURE_OPENAI_BASE_URL=https://your-resource.openai.azure.com/' >> .env[/bold]"
         )
         console.print(
             "  • Set environment: [bold]export INGENIOUS_PROFILE_PATH=$(pwd)/profiles.yml[/bold]"

@@ -38,17 +38,19 @@ chat_service:
 tool_service:
   enable: false
 # =============================================================================
-# AZURE SEARCH SERVICES
+# AZURE SEARCH SERVICES (Optional - only required for knowledge-base workflows)
 # =============================================================================
-azure_search_services:
-  - service: default
-    endpoint: ${AZURE_SEARCH_ENDPOINT:https://your-search-service.search.windows.net}
+# azure_search_services:
+#   - service: default
+#     endpoint: ${AZURE_SEARCH_ENDPOINT:https://your-search-service.search.windows.net}
+
 # =============================================================================
-# AZURE SQL SERVICES
+# AZURE SQL SERVICES (Optional - only required for sql-manipulation workflows)
 # =============================================================================
-azure_sql_services:
-  database_name: ${AZURE_SQL_DATABASE_NAME:dbo}
-  table_name: ${AZURE_SQL_TABLE_NAME:sample_table}
+# azure_sql_services:
+#   database_name: ${AZURE_SQL_DATABASE_NAME:dbo}
+#   table_name: ${AZURE_SQL_TABLE_NAME:sample_table}
+
 # =============================================================================
 # WEB CONFIGURATION
 # =============================================================================
@@ -57,7 +59,7 @@ web_configuration:
   ip_address: ${WEB_IP_ADDRESS:0.0.0.0}
   port: ${WEB_PORT:80}
   authentication:
-    enable: ${WEB_AUTH_ENABLE:true}
+    enable: ${WEB_AUTH_ENABLE:false}
     type: basic
 # =============================================================================
 # CHAINLIT CONFIGURATION
