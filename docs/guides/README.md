@@ -18,6 +18,7 @@ This section provides detailed guides for using specific features and capabiliti
 ### Integration and Interfaces
 - **[API Integration](./api-integration.md)** - Using the REST API programmatically
 - **[Web Interface](./web-interface.md)** - Using the web-based interface
+- **[Azure SQL Database Setup](./azure-sql-setup.md)** - Complete guide for Azure SQL chat history storage setup
 - **[SQL Agent Setup](./sql-agent-setup.md)** - Complete setup guide for SQL manipulation agent with SQLite and Azure SQL
 - **[Data Preparation](./data-preparation/)** - Preparing and processing data for analysis
 - **[Document Processing](./document-processing/)** - Working with document analysis workflows

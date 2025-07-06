@@ -98,6 +98,47 @@ uv pip install -e ".[document-processing,pdfminer,unstructured,tests]"
 
 **Documentation:** [Document Processing Guide](../guides/document-processing/)
 
+### Azure SQL Database Support
+
+For production deployments using Azure SQL Database for chat history storage:
+
+```bash
+# Core Azure SQL support (pyodbc is included in base installation)
+uv pip install -e .
+```
+
+**System Dependencies Required:**
+
+On **macOS**:
+```bash
+# Install Microsoft ODBC Driver 18 for SQL Server
+brew tap microsoft/mssql-release
+brew install msodbcsql18 mssql-tools18
+
+# Verify installation
+odbcinst -q -d
+```
+
+On **Ubuntu/Debian**:
+```bash
+# Install Microsoft ODBC Driver 18 for SQL Server
+curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
+curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list > /etc/apt/sources.list.d/mssql-release.list
+apt-get update
+ACCEPT_EULA=Y apt-get install msodbcsql18
+```
+
+On **Windows**:
+Download and install the ODBC Driver 18 for SQL Server from the [Microsoft website](https://docs.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server).
+
+**Use cases:**
+- Production chat history storage
+- Enterprise-grade conversation persistence
+- Multi-user conversation management
+- Scalable message storage
+
+**Documentation:** [Azure SQL Configuration Guide](../configuration/#chat-history)
+
 ### Complete Installation
 
 To install all optional dependencies:

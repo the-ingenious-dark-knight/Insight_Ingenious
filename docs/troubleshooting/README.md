@@ -165,6 +165,112 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
 
 ---
 
+### 5. Azure SQL Database Issues
+
+**Symptoms**:
+- "pyodbc.InterfaceError: ('IM002', '[IM002] [Microsoft][ODBC Driver Manager] Data source name not found..."
+- "Module pyodbc not found"
+- Chat history not persisting between sessions
+- Connection timeout errors
+
+**Prerequisites Check**:
+
+1. **Verify ODBC Driver is installed**:
+   ```bash
+   odbcinst -q -d
+   # Should show: [ODBC Driver 18 for SQL Server]
+   ```
+
+2. **Install ODBC Driver (if missing)**:
+   
+   **On macOS**:
+   ```bash
+   brew tap microsoft/mssql-release
+   brew install msodbcsql18 mssql-tools18
+   ```
+   
+   **On Ubuntu/Debian**:
+   ```bash
+   curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
+   curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list > /etc/apt/sources.list.d/mssql-release.list
+   apt-get update
+   ACCEPT_EULA=Y apt-get install msodbcsql18
+   ```
+
+**Configuration Solutions**:
+
+1. **Check environment variable is set**:
+   ```bash
+   echo $AZURE_SQL_CONNECTION_STRING
+   # Should show your connection string
+   ```
+
+2. **Verify configuration files**:
+   ```yaml
+   # config.yml
+   chat_history:
+     database_type: "azuresql"
+     database_name: "your_database_name"
+   
+   # profiles.yml  
+   chat_history:
+     database_connection_string: ${AZURE_SQL_CONNECTION_STRING:REQUIRED_SET_IN_ENV}
+   ```
+
+3. **Test connection directly**:
+   ```bash
+   uv run python -c "
+   import pyodbc
+   import os
+   conn_str = os.getenv('AZURE_SQL_CONNECTION_STRING')
+   if not conn_str:
+       print('❌ AZURE_SQL_CONNECTION_STRING not set')
+   else:
+       try:
+           conn = pyodbc.connect(conn_str)
+           print('✅ Azure SQL connection successful')
+           conn.close()
+       except Exception as e:
+           print(f'❌ Connection failed: {e}')
+   "
+   ```
+
+4. **Test through Ingenious repository**:
+   ```bash
+   uv run python -c "
+   import asyncio
+   from ingenious.ingenious.dependencies import get_config
+   from ingenious.ingenious.db.chat_history_repository import ChatHistoryRepository
+   from ingenious.models.database_client import DatabaseClientType
+   
+   async def test():
+       config = get_config()
+       db_type = DatabaseClientType(config.chat_history.database_type)
+       repo = ChatHistoryRepository(db_type=db_type, config=config)
+       try:
+           messages = await repo.get_thread_messages('test-thread')
+           print(f'✅ Azure SQL repository working! (Found {len(messages)} messages)')
+       except Exception as e:
+           print(f'❌ Repository error: {e}')
+   
+   asyncio.run(test())
+   "
+   ```
+
+**Common Connection String Issues**:
+
+- **Missing driver**: Ensure `Driver={ODBC Driver 18 for SQL Server}` is in the connection string
+- **Port issues**: Use `Server=tcp:your-server.database.windows.net,1433`
+- **Encryption**: Include `Encrypt=yes;TrustServerCertificate=no`
+- **Timeout**: Add `Connection Timeout=30` for slow networks
+
+**Security Notes**:
+- Never commit connection strings to version control
+- Always use environment variables for database credentials
+- Rotate passwords regularly for production deployments
+
+---
+
 ## 🐛 Debugging Commands
 
 ### Check System Status

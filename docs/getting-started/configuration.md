@@ -159,7 +159,7 @@ file_storage:
 
 ### Chat History
 
-Controls how conversation history is stored:
+Controls how conversation history is stored. Ingenious supports both SQLite (development) and Azure SQL (production) for chat history storage.
 
 ```yaml
 chat_history:
@@ -168,6 +168,87 @@ chat_history:
   database_name: "chat_history"  # Database name (used for Azure SQL)
   memory_path: "./.tmp"  # Path for context memory files (used by ChromaDB)
 ```
+
+#### SQLite Setup (Development)
+
+For development environments, use SQLite (default):
+
+```yaml
+# config.yml
+chat_history:
+  database_type: "sqlite"
+  database_path: "./.tmp/high_level_logs.db"
+  database_name: "chat_history"
+```
+
+No additional configuration required in `profiles.yml`.
+
+#### Azure SQL Setup (Production)
+
+For production environments, use Azure SQL Database:
+
+**Step 1: Install Prerequisites**
+
+On macOS:
+```bash
+# Install Microsoft ODBC Driver 18 for SQL Server
+brew tap microsoft/mssql-release
+brew install msodbcsql18 mssql-tools18
+
+# Verify installation
+odbcinst -q -d
+```
+
+On Ubuntu/Debian:
+```bash
+# Install Microsoft ODBC Driver 18 for SQL Server
+curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
+curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list > /etc/apt/sources.list.d/mssql-release.list
+apt-get update
+ACCEPT_EULA=Y apt-get install msodbcsql18
+```
+
+On Windows:
+Download and install the ODBC Driver 18 for SQL Server from the Microsoft website.
+
+**Step 2: Configure Environment Variables**
+
+Add the Azure SQL connection string to your `.env` file:
+
+```bash
+# .env
+AZURE_SQL_CONNECTION_STRING=Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;
+```
+
+**Step 3: Update Configuration Files**
+
+```yaml
+# config.yml
+chat_history:
+  database_type: "azuresql"
+  database_name: "your_database_name"
+```
+
+```yaml
+# profiles.yml
+chat_history:
+  database_connection_string: ${AZURE_SQL_CONNECTION_STRING:REQUIRED_SET_IN_ENV}
+```
+
+**Step 4: Validate Configuration**
+
+```bash
+uv run ingen validate
+```
+
+The Azure SQL database tables will be automatically created by Ingenious when first accessed. The following tables are created:
+- `chat_history` - Main conversation messages
+- `chat_history_summary` - Memory/summary storage  
+- `users` - User management
+- `threads` - Thread/conversation management
+- `steps`, `elements`, `feedbacks` - Chainlit UI integration
+
+**Security Note**: Always use environment variables for sensitive connection strings. Never commit database credentials to version control.
 
 ### Models
 
