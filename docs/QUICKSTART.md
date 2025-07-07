@@ -25,13 +25,13 @@ Get Insight Ingenious up and running in 5 minutes! This enterprise-grade Python 
     ```bash
     # For local development (if you have the ingenious source code)
     uv pip install -e ./ingenious
-    
+
     # Or for production install from package
     uv add ingenious
-    
+
     # Initialize project template
     uv run ingen init
-    
+
     # Install additional dependencies for environment variable loading
     uv add python-dotenv
     ```
@@ -47,7 +47,7 @@ Get Insight Ingenious up and running in 5 minutes! This enterprise-grade Python 
     AZURE_OPENAI_API_VERSION=2024-12-01-preview
     LOCAL_SQL_CSV_PATH=./sample_data.csv
     EOF
-    
+
     # Edit with your actual credentials
     nano .env
     ```
@@ -63,7 +63,7 @@ Get Insight Ingenious up and running in 5 minutes! This enterprise-grade Python 
     ```bash
     # Default port (may require admin privileges on some systems)
     uv run ingen serve
-    
+
     # Alternative port if 80 is not available
     uv run ingen serve --port 8080
     ```
@@ -107,7 +107,7 @@ For production deployments with persistent chat history storage in Azure SQL Dat
     # macOS
     brew tap microsoft/mssql-release
     brew install msodbcsql18
-    
+
     # Verify installation
     odbcinst -q -d | grep "ODBC Driver 18"
     ```
@@ -144,7 +144,7 @@ For production deployments with persistent chat history storage in Azure SQL Dat
 
 **Benefits of Azure SQL:**
 - ✅ Production-grade chat history persistence
-- ✅ Multi-user conversation management  
+- ✅ Multi-user conversation management
 - ✅ Enterprise security and compliance
 - ✅ Automatic table creation and management
 

@@ -25,12 +25,18 @@ class ConversationPattern:
         self.thread_memory = thread_memory
 
         # Initialize memory manager for cloud storage support
-        from ingenious.services.memory_manager import get_memory_manager, run_async_memory_operation
+        from ingenious.services.memory_manager import (
+            get_memory_manager,
+            run_async_memory_operation,
+        )
+
         self.memory_manager = get_memory_manager(_config, memory_path)
 
         if not self.thread_memory:
             run_async_memory_operation(
-                self.memory_manager.write_memory("New conversation. Continue based on user question.")
+                self.memory_manager.write_memory(
+                    "New conversation. Continue based on user question."
+                )
             )
 
         if self.memory_record_switch and self.thread_memory:
@@ -44,7 +50,9 @@ class ConversationPattern:
 
         # Read current context
         self.context = run_async_memory_operation(
-            self.memory_manager.read_memory(default_content="New conversation. Continue based on user question.")
+            self.memory_manager.read_memory(
+                default_content="New conversation. Continue based on user question."
+            )
         )
 
         self.termination_msg = lambda x: "TERMINATE" in x.get("content", "").upper()

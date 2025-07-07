@@ -152,11 +152,53 @@ The `FileStorage` class manages file operations:
 - `read_file(file_name: str, file_path: str) -> str`: Reads a file
 - `write_file(content: str, file_name: str, file_path: str) -> bool`: Writes content to a file
 - `get_prompt_template_path(revision_id: str) -> str`: Gets the path to a prompt template
+- `delete_file(file_name: str, file_path: str) -> bool`: Deletes a file
+- `list_files(file_path: str) -> List[str]`: Lists files in a directory
+- `check_if_file_exists(file_path: str, file_name: str) -> bool`: Checks if a file exists
 
 #### Implementations
 
 - `LocalFileStorage`: Stores files on the local filesystem
 - `AzureFileStorage`: Stores files in Azure Blob Storage
+
+### MemoryManager
+
+The `MemoryManager` class provides cloud-aware conversation memory management:
+
+- `write_memory(content: str, thread_id: str = None) -> bool`: Writes memory content
+- `read_memory(thread_id: str = None, default_content: str = "") -> str`: Reads memory content
+- `maintain_memory(new_content: str, max_words: int = 150, thread_id: str = None) -> bool`: Maintains memory with word limits
+- `delete_memory(thread_id: str = None) -> bool`: Deletes memory content
+
+#### Features
+
+- **Cloud Storage Support**: Works with both local and Azure Blob Storage backends
+- **Thread-Specific Memory**: Support for conversation-specific memory isolation
+- **Automatic Truncation**: Maintains memory within specified word limits
+- **Async Operations**: Fully asynchronous for better performance
+- **Fallback Support**: Graceful degradation to local storage when needed
+
+#### Usage
+
+```python
+from ingenious.services.memory_manager import MemoryManager
+from ingenious.dependencies import get_config
+
+# Initialize memory manager
+config = get_config()
+memory_manager = MemoryManager(config)
+
+# Basic memory operations
+await memory_manager.write_memory("Conversation context")
+context = await memory_manager.read_memory()
+
+# Thread-specific memory
+await memory_manager.write_memory("User-specific context", thread_id="user-123")
+user_context = await memory_manager.read_memory(thread_id="user-123")
+
+# Memory maintenance with limits
+await memory_manager.maintain_memory("New interaction data", max_words=150)
+```
 
 ## Web Interface
 

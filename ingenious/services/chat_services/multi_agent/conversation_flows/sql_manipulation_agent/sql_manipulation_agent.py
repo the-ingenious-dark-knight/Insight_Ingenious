@@ -8,7 +8,10 @@ from ingenious.models.chat import ChatResponse
 from ingenious.services.chat_services.multi_agent.tool_functions_standard import (
     SQL_ToolFunctions,
 )
-from ingenious.services.memory_manager import get_memory_manager, run_async_memory_operation
+from ingenious.services.memory_manager import (
+    get_memory_manager,
+    run_async_memory_operation,
+)
 
 
 class ConversationFlow:
@@ -42,20 +45,25 @@ class ConversationFlow:
         # Set up context handling
         if not thread_memory:
             run_async_memory_operation(
-                memory_manager.write_memory("New conversation. Continue based on user question.")
+                memory_manager.write_memory(
+                    "New conversation. Continue based on user question."
+                )
             )
         else:
-            run_async_memory_operation(
-                memory_manager.write_memory(thread_memory)
-            )
+            run_async_memory_operation(memory_manager.write_memory(thread_memory))
 
         # Read current context
         context = run_async_memory_operation(
-            memory_manager.read_memory(default_content="New conversation. Continue based on user question.")
+            memory_manager.read_memory(
+                default_content="New conversation. Continue based on user question."
+            )
         )
 
         # Create SQL tool functions
-        if not _config.azure_sql_services or _config.azure_sql_services.database_name == "skip":
+        if (
+            not _config.azure_sql_services
+            or _config.azure_sql_services.database_name == "skip"
+        ):
             table_name, column_names = SQL_ToolFunctions.get_db_attr(_config)
 
             # Create SQL tool as function
@@ -148,9 +156,7 @@ When the user asks what columns are available, just list them without running a 
         )
 
         # Update context for future conversations
-        run_async_memory_operation(
-            memory_manager.write_memory(final_message)
-        )
+        run_async_memory_operation(memory_manager.write_memory(final_message))
 
         # Make sure to close the model client connection when done
         await model_client.close()

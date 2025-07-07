@@ -1,5 +1,4 @@
 import logging
-import os
 import uuid as uuid_module
 from abc import ABC, abstractmethod
 from typing import List, Optional
@@ -276,9 +275,10 @@ class IConversationPattern(ABC):
         self._config = ig_config.get_config()
         self._memory_path = self.GetConfig().chat_history.memory_path
         self._memory_file_path = f"{self._memory_path}/context.md"
-        
+
         # Initialize memory manager for cloud storage support
         from ingenious.services.memory_manager import get_memory_manager
+
         self._memory_manager = get_memory_manager(self._config, self._memory_path)
 
     def GetConfig(self):
@@ -298,6 +298,7 @@ class IConversationPattern(ABC):
         Maintain memory using the MemoryManager for cloud storage support.
         """
         from ingenious.services.memory_manager import run_async_memory_operation
+
         return run_async_memory_operation(
             self._memory_manager.maintain_memory(new_content, max_words)
         )
@@ -341,9 +342,10 @@ class IConversationFlow(ABC):
         self._memory_file_path = f"{self._memory_path}/context.md"
         self._logger = logging.getLogger(__name__)
         self._chat_service = parent_multi_agent_chat_service
-        
+
         # Initialize memory manager for cloud storage support
         from ingenious.services.memory_manager import get_memory_manager
+
         self._memory_manager = get_memory_manager(self._config, self._memory_path)
 
     def GetConfig(self):
@@ -376,6 +378,7 @@ class IConversationFlow(ABC):
         Maintain memory using the MemoryManager for cloud storage support.
         """
         from ingenious.services.memory_manager import run_async_memory_operation
+
         return run_async_memory_operation(
             self._memory_manager.maintain_memory(new_content, max_words)
         )

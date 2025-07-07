@@ -394,7 +394,221 @@ async function callChatAPI(userPrompt, conversationFlow, username, password) {
 const result = await callChatAPI('Hello', 'classification-agent', 'username', 'password');
 ```
 
-## 🔍 Error Handling
+## � Prompts API
+
+The Prompts API provides endpoints for managing prompt templates used by conversation workflows. These templates are stored in the configured file storage backend (local or Azure Blob Storage).
+
+### Key Features
+
+- **Template Management**: Create, read, update, and delete prompt templates
+- **Version Control**: Organize prompts by revision IDs for version management
+- **Cloud Storage**: Seamlessly works with both local and Azure Blob Storage backends
+- **Real-time Updates**: Changes take effect immediately in active workflows
+
+### Base Endpoints
+
+#### List Prompt Files
+```bash
+GET /api/v1/prompts/list/{revision_id}
+```
+
+Lists all prompt template files for a specific revision.
+
+**Parameters:**
+- `revision_id` (path): The revision identifier (e.g., "v1.0", "main", "development")
+
+**Response:**
+```json
+[
+  "user_prompt.md",
+  "system_prompt.md",
+  "classification_prompt.jinja",
+  "sql_generation_prompt.md"
+]
+```
+
+**Example:**
+```bash
+curl "http://localhost:8080/api/v1/prompts/list/v1.0"
+```
+
+#### View Prompt Content
+```bash
+GET /api/v1/prompts/view/{revision_id}/{filename}
+```
+
+Retrieves the content of a specific prompt template file.
+
+**Parameters:**
+- `revision_id` (path): The revision identifier
+- `filename` (path): The name of the prompt file
+
+**Response:** Raw text content of the prompt file
+
+**Example:**
+```bash
+curl "http://localhost:8080/api/v1/prompts/view/v1.0/user_prompt.md"
+```
+
+#### Update Prompt Content
+```bash
+POST /api/v1/prompts/update/{revision_id}/{filename}
+```
+
+Updates or creates a prompt template file with new content.
+
+**Parameters:**
+- `revision_id` (path): The revision identifier
+- `filename` (path): The name of the prompt file
+
+**Request Body:**
+```json
+{
+  "content": "# Updated Prompt Template\n\nYour prompt content here..."
+}
+```
+
+**Response:**
+```json
+{
+  "message": "Prompt file updated successfully"
+}
+```
+
+**Example:**
+```bash
+curl -X POST "http://localhost:8080/api/v1/prompts/update/v1.0/user_prompt.md" \
+  -H "Content-Type: application/json" \
+  -d '{"content": "# My Updated Prompt\n\nContext: {{ context }}\nQuestion: {{ question }}"}'
+```
+
+### Integration with Storage Backends
+
+The Prompts API automatically uses the configured file storage backend:
+
+#### Local Storage
+- Files stored in `.files/prompts/{revision_id}/` directory
+- Direct filesystem access for development and testing
+
+#### Azure Blob Storage
+- Files stored in Azure Blob Storage containers
+- Scalable, distributed storage for production environments
+- Automatic authentication using configured credentials
+
+### Workflow Integration
+
+Prompt templates are automatically loaded by conversation workflows:
+
+```python
+# Workflows automatically use updated prompts
+from ingenious.utils.conversation_builder import Sync_Prompt_Templates
+
+# Sync templates from storage (local or cloud)
+await Sync_Prompt_Templates(config, revision_id="v1.0")
+```
+
+### Template Format Support
+
+The API supports various template formats:
+
+- **Markdown (.md)**: For human-readable prompts
+- **Jinja2 (.jinja)**: For templated prompts with variables
+- **Text (.txt)**: For simple text prompts
+
+### Example Workflow
+
+1. **Create a new prompt revision:**
+   ```bash
+   # Create user prompt
+   curl -X POST "http://localhost:8080/api/v1/prompts/update/v2.0/user_prompt.md" \
+     -H "Content-Type: application/json" \
+     -d '{"content": "# Enhanced User Prompt\n\nContext: {{ context }}\nUser Input: {{ user_question }}\n\nProvide a comprehensive response."}'
+   ```
+
+2. **List available prompts:**
+   ```bash
+   curl "http://localhost:8080/api/v1/prompts/list/v2.0"
+   ```
+
+3. **View the prompt content:**
+   ```bash
+   curl "http://localhost:8080/api/v1/prompts/view/v2.0/user_prompt.md"
+   ```
+
+4. **Update configuration to use new revision:**
+   ```yaml
+   # In your workflow configuration
+   prompt_revision: "v2.0"
+   ```
+
+### Python Integration Example
+
+```python
+import requests
+
+class PromptsAPIClient:
+    def __init__(self, base_url="http://localhost:8080"):
+        self.base_url = base_url
+
+    def list_prompts(self, revision_id):
+        """List all prompt files for a revision"""
+        response = requests.get(f"{self.base_url}/api/v1/prompts/list/{revision_id}")
+        return response.json()
+
+    def get_prompt(self, revision_id, filename):
+        """Get content of a specific prompt file"""
+        response = requests.get(f"{self.base_url}/api/v1/prompts/view/{revision_id}/{filename}")
+        return response.text
+
+    def update_prompt(self, revision_id, filename, content):
+        """Update or create a prompt file"""
+        response = requests.post(
+            f"{self.base_url}/api/v1/prompts/update/{revision_id}/{filename}",
+            json={"content": content}
+        )
+        return response.json()
+
+# Usage
+client = PromptsAPIClient()
+
+# List prompts
+prompts = client.list_prompts("v1.0")
+print(f"Available prompts: {prompts}")
+
+# Get prompt content
+content = client.get_prompt("v1.0", "user_prompt.md")
+print(f"Prompt content: {content}")
+
+# Update prompt
+result = client.update_prompt("v1.0", "user_prompt.md", "# New Prompt Content")
+print(f"Update result: {result}")
+```
+
+### Best Practices
+
+1. **Use semantic versioning** for revision IDs (e.g., "v1.0", "v1.1", "v2.0")
+2. **Test prompts** in development revisions before promoting to production
+3. **Include templates variables** for dynamic content (e.g., `{{ context }}`, `{{ user_question }}`)
+4. **Document prompt changes** in commit messages or change logs
+5. **Backup important prompts** before making major changes
+
+### Error Handling
+
+The Prompts API returns standard HTTP status codes:
+
+- `200 OK` - Successful request
+- `404 Not Found` - Prompt file or revision not found
+- `400 Bad Request` - Invalid request body or parameters
+- `500 Internal Server Error` - Storage backend error
+
+Example error response:
+```json
+{
+  "detail": "Prompt file not found: user_prompt.md in revision v1.0"
+}
+```
+
+## �🔍 Error Handling
 
 The API uses standard HTTP status codes and provides detailed error messages:
 

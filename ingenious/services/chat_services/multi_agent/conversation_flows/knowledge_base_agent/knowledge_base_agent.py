@@ -8,7 +8,10 @@ from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
 import ingenious.config.config as config
 from ingenious.models.chat import ChatResponse
 from ingenious.services.chat_services.multi_agent.tool_factory import ToolFunctions
-from ingenious.services.memory_manager import get_memory_manager, run_async_memory_operation
+from ingenious.services.memory_manager import (
+    get_memory_manager,
+    run_async_memory_operation,
+)
 
 
 class ConversationFlow:
@@ -43,16 +46,18 @@ class ConversationFlow:
         # Set up context handling
         if not thread_memory:
             run_async_memory_operation(
-                memory_manager.write_memory("New conversation. Continue based on user question.")
+                memory_manager.write_memory(
+                    "New conversation. Continue based on user question."
+                )
             )
         else:
-            run_async_memory_operation(
-                memory_manager.write_memory(thread_memory)
-            )
+            run_async_memory_operation(memory_manager.write_memory(thread_memory))
 
         # Read current context
         context = run_async_memory_operation(
-            memory_manager.read_memory(default_content="New conversation. Continue based on user question.")
+            memory_manager.read_memory(
+                default_content="New conversation. Continue based on user question."
+            )
         )
 
         # Create search tool function
@@ -134,9 +139,7 @@ TERMINATE your response when the task is complete.
 
         # Update context for future conversations if memory recording is enabled
         if memory_record_switch:
-            run_async_memory_operation(
-                memory_manager.write_memory(final_message)
-            )
+            run_async_memory_operation(memory_manager.write_memory(final_message))
 
         # Make sure to close the model client connection when done
         await model_client.close()

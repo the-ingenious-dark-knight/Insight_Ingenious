@@ -59,8 +59,11 @@ class ToolFunctions:
         Update memory using the MemoryManager for cloud storage support.
         """
         try:
-            from ingenious.services.memory_manager import get_memory_manager, run_async_memory_operation
-            
+            from ingenious.services.memory_manager import (
+                get_memory_manager,
+                run_async_memory_operation,
+            )
+
             memory_manager = get_memory_manager(_config)
             run_async_memory_operation(memory_manager.write_memory(context))
         except Exception as e:
@@ -112,7 +115,7 @@ def get_conn(_config):
     # token_bytes = credential.get_token("https://database.windows.net/.default").token.encode("UTF-16-LE")
     # token_struct = struct.pack(f'<I{len(token_bytes)}s', len(token_bytes), token_bytes)
     # SQL_COPT_SS_ACCESS_TOKEN = 1256  # This connection option is defined by microsoft in msodbcsql.h
-    if not hasattr(pyodbc, 'connect'):
+    if not hasattr(pyodbc, "connect"):
         raise ImportError("pyodbc module is not properly imported")
     conn = pyodbc.connect(connection_string)
     cursor = conn.cursor()
@@ -146,7 +149,10 @@ else:
 class SQL_ToolFunctions:
     @staticmethod
     def get_db_attr(_config):
-        if not _config.azure_sql_services or _config.azure_sql_services.database_name == "skip":
+        if (
+            not _config.azure_sql_services
+            or _config.azure_sql_services.database_name == "skip"
+        ):
             table_name = _config.local_sql_db.sample_database_name
             result = test_db.execute_sql(f"""SELECT * FROM {table_name} LIMIT 1""")
             column_names = [key for key in result[0]]
@@ -179,7 +185,7 @@ class SQL_ToolFunctions:
             raise ValueError("Azure SQL services not configured")
         database_name = _config.azure_sql_services.database_name
         table_name = _config.azure_sql_services.table_name
-        
+
         # Get connection if needed
         if cursor is not None:
             cursor.execute(f"""
@@ -216,7 +222,7 @@ class SQL_ToolFunctions:
                 error_msg = f"Failed to initialize SQLite database: {e}"
                 print(error_msg)
                 return json.dumps({"error": error_msg, "results": []})
-        
+
         def run_query(sql: str):
             return test_db.execute_sql(sql)
 
@@ -245,7 +251,8 @@ class SQL_ToolFunctions:
                     cursor.execute(sql_query)
                     r = [
                         dict(
-                            (cursor.description[i][0], value) for i, value in enumerate(row)
+                            (cursor.description[i][0], value)
+                            for i, value in enumerate(row)
                         )
                         for row in cursor.fetchall()
                     ]
@@ -255,7 +262,8 @@ class SQL_ToolFunctions:
                     cursor_temp.execute(sql_query)
                     r = [
                         dict(
-                            (cursor_temp.description[i][0], value) for i, value in enumerate(row)
+                            (cursor_temp.description[i][0], value)
+                            for i, value in enumerate(row)
                         )
                         for row in cursor_temp.fetchall()
                     ]
