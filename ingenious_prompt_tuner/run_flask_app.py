@@ -1,25 +1,20 @@
 import asyncio
 import io
-import json
 import os
-import subprocess
 import sys
 import uuid as guid
 from functools import wraps
 from pathlib import Path
 
-import markdown
 import yaml
 from flask import (
     Flask,
-    Response,
     jsonify,
     redirect,
     render_template,
     request,
     send_file,
     session,
-    stream_with_context,
     url_for,
 )
 
@@ -34,6 +29,8 @@ import rich.progress as rp
 import ingenious.dependencies as ig_deps
 from ingenious.files.files_repository import FileStorage
 from ingenious.utils.stage_executor import ProgressConsoleWrapper
+from ingenious_prompt_tuner.templates.responses.responses import bp as responses_bp
+from ingenious_prompt_tuner.utilities import utils_class
 
 app = Flask(
     __name__,
@@ -57,6 +54,7 @@ PORT = ig_deps.config.web_configuration.port
 HOST = ig_deps.config.web_configuration.ip_address
 
 fs = FileStorage(config=ig_deps.config)
+fs_data = FileStorage(config=ig_deps.config, Category="data")
 REVISIONS_FOLDER = Path("revisions")
 
 
@@ -65,27 +63,32 @@ pcw = ProgressConsoleWrapper(progress=progress, log_level="INFO")
 # run_tests = rt.RunBatches(progress=pcw, task_id=1)
 
 
-# Stub class for missing functionality
-class MockRunTests:
-    def __init__(self, progress, task_id):
-        pass
+# Initialize utils class for full functionality
+utils = utils_class(config=ig_deps.config)
 
-    async def get_output_path(self, session_id):
-        return f"./functional_test_outputs/{session_id}"
+# Configure app with utils and other required components
+app.config['utils'] = utils
+app.config['test_output_path'] = functional_test_dir
+app.config['agents'] = ig_deps.config.agents
+app.config['response_agent_name'] = 'summary'  # Default response agent
 
-    async def rerun_single_event(
-        self, ball_identifier, event_type, file_name, session_id
-    ):
-        return "mock_result"
+# Register the responses blueprint for full functionality
+app.register_blueprint(responses_bp)
+
+# Make utils available to templates
+app.utils = utils
+
+# Add a context processor to make utils available in templates
+@app.context_processor
+def inject_utils():
+    return dict(utils=utils)
 
 
-run_tests = MockRunTests(progress=pcw, task_id=1)
-
-
-def mock_render_dashboard(ball_identifier, fs, output_dir, event_type):
-    return (
-        f"<h1>Mock Dashboard</h1><p>Ball ID: {ball_identifier}, Event: {event_type}</p>"
-    )
+# Remove unused mock function
+# def mock_render_dashboard(ball_identifier, fs, output_dir, event_type):
+#     return (
+#         f"<h1>Mock Dashboard</h1><p>Ball ID: {ball_identifier}, Event: {event_type}</p>"
+#     )
 
 
 # Authentication Helpers
@@ -340,196 +343,75 @@ def edit_markdown():
 @requires_auth
 @requires_selected_revision
 def view_responses():
-    return render_template("responses/view_responses_simple.html")
-
-
-@app.route("/get_test_data_files", methods=["GET"])
-@requires_auth
-@requires_selected_revision
-def get_test_data_files():
-    output_path = str(
-        Path(
-            asyncio.run(
-                run_tests.get_output_path(
-                    session_id=get_selected_revision_direct_call()
-                )
-            )
-        ).parent
-    )
-    files_all = asyncio.run(fs.list_files(file_path=output_path))
-    if files_all:
-        files = [f for f in files_all if f.endswith(".json") and f.startswith("data_")]
-        files.sort(
-            key=lambda x: json.loads(
-                asyncio.run(fs.read_file(file_name=x, file_path=output_path))
-            )["ball_identifier"]
-        )
-    else:
-        files = []
-
-    if files_all:
-        files = [f for f in files_all if f.endswith(".json") and f.startswith("data_")]
-    else:
-        files = []
-
-    return jsonify({"files": files})
-
-
-@app.route("/get_payload", methods=["GET"])
-@requires_auth
-@requires_selected_revision
-def get_payload():
-    ball_identifier = request.args.get("ball_identifier", type=str)
-    event_type = request.args.get("event_type", type=str)
-    output_dir = str(
-        Path(
-            asyncio.run(
-                run_tests.get_output_path(
-                    session_id=get_selected_revision_direct_call()
-                )
-            )
-        ).parent
-    )
-    return asyncio.run(
-        mock_render_dashboard(ball_identifier, fs, output_dir, event_type)
+    # Use the full template with real functionality
+    prompt_template_folder = asyncio.run(utils.get_prompt_template_folder())
+    base_path = asyncio.run(utils.fs.get_base_path()) / Path(prompt_template_folder)
+    data_folder = asyncio.run(utils.get_data_folder())
+    data_base_path = asyncio.run(utils.fs_data.get_base_path()) / Path(data_folder)
+    return render_template(
+        "responses/view_responses.html",
+        data_template_folder=data_base_path,
+        prompt_template_folder=base_path,
     )
 
 
-@app.route("/rerun_event", methods=["GET"])
-@requires_auth
-@requires_selected_revision
-def rerun_event():
-    try:
-        ball_identifier = request.args.get("ball_identifier", type=str)
-        event_type = request.args.get("event_type", type=str)
-        file_name = request.args.get("file_name", type=str)
-        asyncio.run(
-            run_tests.rerun_single_event(
-                ball_identifier=ball_identifier,
-                event_type=event_type,
-                file_name=file_name,
-                session_id=get_selected_revision_direct_call(),
-            )
-        )
-
-    except ValueError:
-        return "Failed"
-
-    # return success
-    return "Succeeded"
+# Remove this route as it's now handled by the responses blueprint
+# @app.route("/get_test_data_files", methods=["GET"])
+# @requires_auth
+# @requires_selected_revision
+# def get_test_data_files():
+#     # This functionality is now handled by the responses blueprint
 
 
-@app.route("/get_agent_response", methods=["GET"])
-@requires_auth
-@requires_selected_revision
-def get_agent_response():
-    ball_identifier = request.args.get("ball_identifier", type=str)
-    event_type = request.args.get("event_type", type=str)
-    agent_name = request.args.get("agent_name", type=str)
-    # Return mock html page
-    file_name = f"agent_response_{event_type}_{agent_name}_{ball_identifier.strip()}.md"
-    output_path = str(
-        Path(
-            asyncio.run(
-                run_tests.get_output_path(
-                    session_id=get_selected_revision_direct_call()
-                )
-            )
-        ).parent
-    )
-    agent_response_md = asyncio.run(
-        fs.read_file(file_name=file_name, file_path=output_path)
-    )
-    agent_response_md1 = render_template(
-        "agent_response.html", agent_response=agent_response_md
-    )
-    html_content = markdown.markdown(
-        agent_response_md1,
-        extensions=["extra", "md_in_html", "toc", "fenced_code", "codehilite"],
-    )
-    return html_content
+# Remove this route as it's now handled by the responses blueprint
+# @app.route("/get_payload", methods=["GET"])
+# @requires_auth
+# @requires_selected_revision
+# def get_payload():
+#     # This functionality is now handled by the responses blueprint
 
 
-@app.route("/get_responses", methods=["GET"])
-@requires_auth
-@requires_selected_revision
-def get_responses():
-    try:
-        output_path = str(
-            Path(
-                asyncio.run(
-                    run_tests.get_output_path(
-                        session_id=get_selected_revision_direct_call()
-                    )
-                )
-            ).parent
-        )
-        if asyncio.run(
-            fs.check_if_file_exists(file_name="events.yml", file_path=output_path)
-        ):
-            files = yaml.safe_load(
-                asyncio.run(fs.read_file(file_name="events.yml", file_path=output_path))
-            )
-        else:
-            return "<p>No responses folder found.</p>"
-
-    except ValueError:
-        return "<p>No responses folder found.</p>"
-
-    # render the responses2.html file
-    return render_template("responses2.html", files=files)
+# Remove this route as it's now handled by the responses blueprint
+# @app.route("/rerun_event", methods=["GET"])
+# @requires_auth
+# @requires_selected_revision
+# def rerun_event():
+#     # This functionality is now handled by the responses blueprint
 
 
-@app.route("/get_agent_response_from_file", methods=["post"])
-@requires_auth
-@requires_selected_revision
-def get_agent_response_from_file():
-    ball_identifier = request.form.get("ball_identifier", type=str).replace("#", "")
-    event_type = request.form.get("event_type", type=str)
-
-    file_name = f"agent_response_{event_type}_summary_{ball_identifier.strip()}.md"
-    output_path = str(
-        Path(
-            asyncio.run(
-                run_tests.get_output_path(
-                    session_id=get_selected_revision_direct_call()
-                )
-            )
-        ).parent
-    )
-    file_contents = asyncio.run(
-        fs.read_file(file_name=file_name, file_path=output_path)
-    )
-    html_content = markdown.markdown(
-        file_contents,
-        extensions=["extra", "md_in_html", "toc", "fenced_code", "codehilite"],
-    )
-    return html_content
+# Remove this route as it's now handled by the responses blueprint
+# @app.route("/get_agent_response", methods=["GET"])
+# @requires_auth
+# @requires_selected_revision
+# def get_agent_response():
+#     # This functionality is now handled by the responses blueprint
 
 
-@app.route("/get_responses1", methods=["GET"])
-@requires_auth
-@requires_selected_revision
-def get_responses1():
-    try:
-        latest_folder = max(
-            [
-                os.path.join(functional_test_dir, d)
-                for d in os.listdir(functional_test_dir)
-            ],
-            key=os.path.getmtime,
-        )
-    except ValueError:
-        return "<p>No responses folder found.</p>"
-
-    RESPONSES_FILE = os.path.join(latest_folder, "responses.html")
-
-    if os.path.exists(RESPONSES_FILE):
-        with open(RESPONSES_FILE, "r", encoding="utf-8") as rf:
-            return rf.read()
-    return "<p>No responses found or file does not exist.</p>"
+# Remove this route as it's now handled by the responses blueprint
+# @app.route("/get_responses", methods=["GET"])
+# @requires_auth
+# @requires_selected_revision
+# def get_responses():
+#     # This functionality is now handled by the responses blueprint
 
 
+# Remove this route as it's now handled by the responses blueprint
+# @app.route("/get_agent_response_from_file", methods=["post"])
+# @requires_auth
+# @requires_selected_revision
+# def get_agent_response_from_file():
+#     # This functionality is now handled by the responses blueprint
+
+
+# Remove this route as it's now handled by the responses blueprint
+# @app.route("/get_responses1", methods=["GET"])
+# @requires_auth
+# @requires_selected_revision
+# def get_responses1():
+#     # This functionality is now handled by the responses blueprint
+
+
+# Keep this route for backward compatibility
 @app.route("/download_responses", methods=["GET"])
 @requires_auth
 @requires_selected_revision
@@ -558,54 +440,21 @@ def download_responses():
     return jsonify({"status": "error", "output": "Responses file not found"}), 404
 
 
-@app.route("/run_live_progress", methods=["GET"])
-@requires_auth
-@requires_selected_revision
-def run_live_progress():
-    max_processed_events = request.args.get("max_processed_events", default=1, type=int)
-
-    def generate():
-        process = subprocess.Popen(
-            args=[
-                "ingen",
-                "run-test-batch",
-                "--run-args",
-                f"--max_processed_events={max_processed_events} --test_run_session_id={get_selected_revision_direct_call()}",
-            ],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            bufsize=1,  # Line-buffered
-        )
-        try:
-            for line in iter(process.stdout.readline, ""):
-                if line:
-                    # from ansi2html import Ansi2HTMLConverter
-                    # conv = Ansi2HTMLConverter()
-                    # ansi = line
-                    # html = conv.convert(ansi, full=False)
-                    html = line
-                    yield f"data: {html}\n\n"
-            process.stdout.close()
-            process.wait()
-
-            if process.returncode == 0:
-                yield "event: complete\ndata: Tests completed successfully.\n\n"
-            else:
-                yield f"data: Error occurred: MPE{max_processed_events} --- {process.stderr.read().strip()}\n\n"
-        except Exception as e:
-            yield f"data: Error occurred: MPE{max_processed_events} --- {str(e)}\n\n"
-        finally:
-            process.terminate()
-
-    return Response(stream_with_context(generate()), content_type="text/event-stream")
+# Remove this route as it's now handled by the responses blueprint
+# @app.route("/run_live_progress", methods=["GET"])
+# @requires_auth
+# @requires_selected_revision
+# def run_live_progress():
+#     # This functionality is now handled by the responses blueprint
 
 
+# Keep this route for backward compatibility
 @app.route("/run_simple_tests", methods=["POST"])
 @requires_auth
 @requires_selected_revision
 def run_simple_tests():
     try:
+        import subprocess
         result = subprocess.run(
             ["ingen", "run-test-batch"], capture_output=True, text=True, check=False
         )
