@@ -1,6 +1,7 @@
 import asyncio
 import json
 import subprocess
+import logging
 from datetime import datetime
 from pathlib import Path
 from typing import List
@@ -28,6 +29,9 @@ from ingenious_prompt_tuner.utilities import (
     requires_selected_revision,
     utils_class,
 )
+
+# Set up logging
+logger = logging.getLogger(__name__)
 
 # Authentication Helpers
 
@@ -160,13 +164,32 @@ def get_agent_response():
         current_app.config["test_output_path"]
         + f"/{get_selected_revision_direct_call()}"
     )
-    agent_response_md = asyncio.run(
-        utils.fs.read_file(file_name=file_name, file_path=output_path)
-    )
+    
+    try:
+        agent_response_md = asyncio.run(
+            utils.fs.read_file(file_name=file_name, file_path=output_path)
+        )
+    except Exception as e:
+        print(f"Error reading agent response file {file_name}: {e}")
+        return f"""
+            <div class="markdown-content">
+                <div class="alert alert-warning" role="alert">
+                    <h6>File Not Found</h6>
+                    <p>Could not read agent response file: <code>{file_name}</code></p>
+                    <p>This agent may not be used for this event type or the response hasn't been generated yet.</p>
+                    <p>Error: {str(e)}</p>
+                </div>
+            </div>
+        """
 
     if agent_response_md == "" or agent_response_md is None:
-        agent_response_md1 = """
-            <div class="markdown-content" markdown='1'><p>No response found - this agent may not be used for this event type</p></div>
+        return """
+            <div class="markdown-content">
+                <div class="alert alert-info" role="alert">
+                    <h6>No Response Available</h6>
+                    <p>No response found - this agent may not be used for this event type</p>
+                </div>
+            </div>
         """
     else:
         try:
@@ -204,20 +227,46 @@ def get_agent_response():
                 identifier=identifier,
                 event_type=event_type,
                 agent_name=agent_chat_wrapper.target_agent_name,
-                execution_time=f"{int((agent_chat_wrapper.end_time - agent_chat_wrapper.start_time) // 60)}:{int((agent_chat_wrapper.end_time - agent_chat_wrapper.start_time) % 60):02d}",
+                execution_time=f"{int((agent_chat_wrapper.end_time - agent_chat_wrapper.start_time) // 60)}:{int((agent_chat_wrapper.end_time - agent_chat_wrapper.start_time) % 60):02d}" if agent_chat_wrapper.end_time and agent_chat_wrapper.start_time else "N/A",
                 start_time=datetime.fromtimestamp(
                     agent_chat_wrapper.start_time
                 ).strftime("%H:%M:%S")
                 if agent_chat_wrapper.start_time
-                else "",
+                else "N/A",
                 identifier_group=identifier_group,
             )
+        except json.JSONDecodeError as e:
+            print(f"JSON decode error for agent response file {file_name}: {e}")
+            # If there's a JSON error, display it in the response with better formatting
+            return f"""
+                <div class="markdown-content">
+                    <div class="alert alert-danger" role="alert">
+                        <h6>Invalid JSON Response</h6>
+                        <p>The agent response file contains invalid JSON data.</p>
+                        <p>Agent: <strong>{agent_name}</strong></p>
+                        <p>Error: {str(e)}</p>
+                        <details>
+                            <summary>Raw file contents:</summary>
+                            <pre style="max-height: 300px; overflow-y: auto; white-space: pre-wrap;">{agent_response_md[:1000]}{'...' if len(agent_response_md) > 1000 else ''}</pre>
+                        </details>
+                    </div>
+                </div>
+            """
         except Exception as e:
-            # If there's an error, display it in the response
-            agent_response_md1 = f"""
-                <div class="markdown-content" markdown='1'>
-                <p>Error loading agent response: {str(e)}</p>
-                <pre>{agent_response_md}</pre>
+            print(f"Error processing agent response for {agent_name}: {e}")
+            # If there's an error, display it in the response with more details
+            return f"""
+                <div class="markdown-content">
+                    <div class="alert alert-danger" role="alert">
+                        <h6>Error Processing Response</h6>
+                        <p>An error occurred while processing the agent response.</p>
+                        <p>Agent: <strong>{agent_name}</strong></p>
+                        <p>Error: {str(e)}</p>
+                        <details>
+                            <summary>Raw file contents:</summary>
+                            <pre style="max-height: 300px; overflow-y: auto; white-space: pre-wrap;">{agent_response_md[:1000]}{'...' if len(agent_response_md) > 1000 else ''}</pre>
+                        </details>
+                    </div>
                 </div>
             """
     return agent_response_md1
@@ -249,9 +298,23 @@ def get_agent_inputs():
         current_app.config["test_output_path"]
         + f"/{get_selected_revision_direct_call()}"
     )
-    agent_response_md = asyncio.run(
-        utils.fs.read_file(file_name=file_name, file_path=output_path)
-    )
+    
+    try:
+        agent_response_md = asyncio.run(
+            utils.fs.read_file(file_name=file_name, file_path=output_path)
+        )
+    except Exception as e:
+        print(f"Error reading agent input file {file_name}: {e}")
+        return f"""
+            <div class="markdown-content">
+                <div class="alert alert-warning" role="alert">
+                    <h6>File Not Found</h6>
+                    <p>Could not read agent input file: <code>{file_name}</code></p>
+                    <p>This agent may not be used for this event type.</p>
+                    <p>Error: {str(e)}</p>
+                </div>
+            </div>
+        """
 
     try:
         # Load the agent chat data with our wrapper to handle the Response object
@@ -262,6 +325,16 @@ def get_agent_inputs():
             content = agent_chat_wrapper.user_message
         else:
             content = agent_chat_wrapper.system_prompt
+
+        if not content:
+            return f"""
+                <div class="markdown-content">
+                    <div class="alert alert-info" role="alert">
+                        <h6>No {input_type.replace('_', ' ').title()} Available</h6>
+                        <p>No {input_type.replace('_', ' ')} found for this agent.</p>
+                    </div>
+                </div>
+            """
 
         # Convert any csv data to a table
         content_csvs_converted = rp1.convert_csv_to_md_tables(content)
@@ -278,11 +351,39 @@ def get_agent_inputs():
             event_type=event_type,
             agent_name=agent_chat_wrapper.target_agent_name,
         )
-    except Exception as e:
-        # If there's an error, display it in the response
-        agent_response_md1 = f"""
+    except json.JSONDecodeError as e:
+        print(f"JSON decode error for agent input file {file_name}: {e}")
+        return f"""
             <div class="markdown-content">
-            <p>Error loading agent input: {str(e)}</p>
+                <div class="alert alert-danger" role="alert">
+                    <h6>Invalid JSON Data</h6>
+                    <p>The agent data file contains invalid JSON.</p>
+                    <p>Agent: <strong>{agent_name}</strong></p>
+                    <p>Input Type: <strong>{input_type}</strong></p>
+                    <p>Error: {str(e)}</p>
+                    <details>
+                        <summary>Raw file contents:</summary>
+                        <pre style="max-height: 300px; overflow-y: auto; white-space: pre-wrap;">{agent_response_md[:1000]}{'...' if len(agent_response_md) > 1000 else ''}</pre>
+                    </details>
+                </div>
+            </div>
+        """
+    except Exception as e:
+        print(f"Error processing agent input for {agent_name}: {e}")
+        # If there's an error, display it in the response
+        return f"""
+            <div class="markdown-content">
+                <div class="alert alert-danger" role="alert">
+                    <h6>Error Loading Agent Input</h6>
+                    <p>An error occurred while loading the agent input.</p>
+                    <p>Agent: <strong>{agent_name}</strong></p>
+                    <p>Input Type: <strong>{input_type}</strong></p>
+                    <p>Error: {str(e)}</p>
+                    <details>
+                        <summary>Raw file contents:</summary>
+                        <pre style="max-height: 300px; overflow-y: auto; white-space: pre-wrap;">{agent_response_md[:1000]}{'...' if len(agent_response_md) > 1000 else ''}</pre>
+                    </details>
+                </div>
             </div>
         """
     return agent_response_md1
@@ -352,42 +453,120 @@ def get_agent_response_from_file():
         current_app.config["response_agent_name"],
         identifier.strip(),
     ]
-    print(file_name_parts)
+    print(f"Loading agent response file: {file_name_parts}")
     file_name = f"{'_'.join(file_name_parts)}.md"
     output_path = (
         current_app.config["test_output_path"]
         + f"/{get_selected_revision_direct_call()}"
     )
-    file_contents = asyncio.run(
-        utils.fs.read_file(file_name=file_name, file_path=output_path)
-    )
+    
+    try:
+        file_contents = asyncio.run(
+            utils.fs.read_file(file_name=file_name, file_path=output_path)
+        )
+        logger.info(f"Successfully read file {file_name}, content length: {len(file_contents) if file_contents else 0}")
+    except Exception as e:
+        logger.error(f"Error reading file {file_name}: {e}")
+        print(f"Error reading file {file_name}: {e}")
+        return f"""
+            <div class="markdown-content">
+                <div class="alert alert-warning" role="alert">
+                    <h6>File Not Found</h6>
+                    <p>Could not read agent response file: <code>{file_name}</code></p>
+                    <p>Error: {str(e)}</p>
+                </div>
+            </div>
+        """
 
-    file_content_placeholder = """
-            <div class="markdown-content" markdown='1'><p>No response found</p></div>
-    """
+    if not file_contents or file_contents.strip() == "":
+        return """
+            <div class="markdown-content">
+                <div class="alert alert-info" role="alert">
+                    <h6>No Response Available</h6>
+                    <p>No response found for this agent and event combination.</p>
+                </div>
+            </div>
+        """
 
     try:
-        agent_chat: AgentChat = AgentChat(**json.loads(file_contents))
+        # Load the agent chat data with our wrapper to handle the Response object
+        logger.debug(f"Parsing JSON content for file {file_name}")
+        agent_chat_data = json.loads(file_contents)
+        logger.debug(f"JSON parsed successfully, creating AgentChatWrapper")
+        agent_chat_wrapper = AgentChatWrapper.from_dict(agent_chat_data)
+        logger.debug(f"AgentChatWrapper created successfully for agent: {agent_chat_wrapper.target_agent_name}")
+
+        # Access the chat message content via our wrapper
+        if agent_chat_wrapper.chat_response_wrapper:
+            message_content = (
+                agent_chat_wrapper.chat_response_wrapper.chat_message_content
+            )
+            inner_messages = agent_chat_wrapper.chat_response_wrapper.inner_messages
+
+            if inner_messages:
+                message_content += "\n\n### Inner Messages \n\n"
+                message_content += (
+                    "```json\n"
+                    + json.dumps({"inner_messages": inner_messages}, indent=4)
+                    + "\n\n```"
+                )
+        else:
+            logger.warning(f"No chat_response_wrapper found for {file_name}")
+            message_content = "No message content available"
+
         html_content = markdown.markdown(
-            agent_chat.chat_response.chat_message.content,
+            message_content,
             extensions=["extra", "md_in_html", "toc", "fenced_code", "codehilite"],
         )
+
         agent_response_md1 = render_template(
             "responses/agent_response.html",
             agent_response=html_content,
-            prompt_tokens=agent_chat.prompt_tokens,
-            completion_tokens=agent_chat.completion_tokens,
-            agent_name=agent_chat.target_agent_name,
+            prompt_tokens=agent_chat_wrapper.prompt_tokens,
+            completion_tokens=agent_chat_wrapper.completion_tokens,
             identifier=identifier,
             event_type=event_type,
-            execution_time=agent_chat.get_execution_time_formatted(),
-            start_time=agent_chat.get_start_time_formatted(),
+            agent_name=agent_chat_wrapper.target_agent_name,
+            execution_time=f"{int((agent_chat_wrapper.end_time - agent_chat_wrapper.start_time) // 60)}:{int((agent_chat_wrapper.end_time - agent_chat_wrapper.start_time) % 60):02d}" if agent_chat_wrapper.end_time and agent_chat_wrapper.start_time else "N/A",
+            start_time=datetime.fromtimestamp(
+                agent_chat_wrapper.start_time
+            ).strftime("%H:%M:%S")
+            if agent_chat_wrapper.start_time
+            else "N/A",
             identifier_group=identifier_group,
         )
-    # Add exception handling that will print the error message to the console
+    except json.JSONDecodeError as e:
+        logger.error(f"JSON decode error for file {file_name}: {e}")
+        print(f"JSON decode error for file {file_name}: {e}")
+        return f"""
+            <div class="markdown-content">
+                <div class="alert alert-danger" role="alert">
+                    <h6>Invalid JSON Response</h6>
+                    <p>The agent response file contains invalid JSON data.</p>
+                    <p>Error: {str(e)}</p>
+                    <details>
+                        <summary>Raw file contents:</summary>
+                        <pre style="max-height: 300px; overflow-y: auto;">{file_contents[:1000]}{'...' if len(file_contents) > 1000 else ''}</pre>
+                    </details>
+                </div>
+            </div>
+        """
     except Exception as e:
-        print(f"Error: {e}")
-        agent_response_md1 = file_content_placeholder
+        logger.error(f"Error processing agent response for file {file_name}: {e}")
+        print(f"Error processing agent response for file {file_name}: {e}")
+        return f"""
+            <div class="markdown-content">
+                <div class="alert alert-danger" role="alert">
+                    <h6>Error Processing Response</h6>
+                    <p>An error occurred while processing the agent response.</p>
+                    <p>Error: {str(e)}</p>
+                    <details>
+                        <summary>Raw file contents:</summary>
+                        <pre style="max-height: 300px; overflow-y: auto;">{file_contents[:1000]}{'...' if len(file_contents) > 1000 else ''}</pre>
+                    </details>
+                </div>
+            </div>
+        """
 
     return agent_response_md1
 
@@ -434,3 +613,101 @@ def run_live_progress():
             process.terminate()
 
     return Response(stream_with_context(generate()), content_type="text/event-stream")
+
+@bp.route("/test_response_parsing", methods=["GET"])
+@requires_auth
+def test_response_parsing():
+    """Test endpoint to verify response parsing functionality"""
+    utils: utils_class = current_app.utils
+    
+    test_data = {
+        "chat_name": "test_chat",
+        "target_agent_name": "test_agent",
+        "source_agent_name": "user",
+        "user_message": "Test user message",
+        "system_prompt": "Test system prompt",
+        "identifier": "test_001",
+        "chat_response": {
+            "chat_message": {
+                "content": "This is a test response from the agent.",
+                "source": "test_agent"
+            },
+            "inner_messages": [
+                {"role": "system", "content": "System message"},
+                {"role": "user", "content": "User query"},
+                {"role": "assistant", "content": "Agent response"}
+            ]
+        },
+        "completion_tokens": 50,
+        "prompt_tokens": 25,
+        "start_time": datetime.now().timestamp(),
+        "end_time": (datetime.now().timestamp() + 5)
+    }
+    
+    try:
+        # Test the wrapper functionality
+        agent_chat_wrapper = AgentChatWrapper.from_dict(test_data)
+        
+        if agent_chat_wrapper.chat_response_wrapper:
+            message_content = agent_chat_wrapper.chat_response_wrapper.chat_message_content
+            inner_messages = agent_chat_wrapper.chat_response_wrapper.inner_messages
+            
+            if inner_messages:
+                message_content += "\n\n### Inner Messages \n\n"
+                message_content += (
+                    "```json\n"
+                    + json.dumps({"inner_messages": inner_messages}, indent=4)
+                    + "\n\n```"
+                )
+        else:
+            message_content = "No message content available"
+        
+        html_content = markdown.markdown(
+            message_content,
+            extensions=["extra", "md_in_html", "toc", "fenced_code", "codehilite"],
+        )
+        
+        test_response = render_template(
+            "responses/agent_response.html",
+            agent_response=html_content,
+            prompt_tokens=agent_chat_wrapper.prompt_tokens,
+            completion_tokens=agent_chat_wrapper.completion_tokens,
+            identifier="test_001",
+            event_type="test_event",
+            agent_name=agent_chat_wrapper.target_agent_name,
+            execution_time="0:05",
+            start_time="12:00:00",
+            identifier_group="test"
+        )
+        
+        return f"""
+        <div class="container mt-3">
+            <div class="alert alert-success" role="alert">
+                <h4>Response Parsing Test - SUCCESS</h4>
+                <p>The response parsing functionality is working correctly.</p>
+            </div>
+            <h5>Test Response Preview:</h5>
+            {test_response}
+        </div>
+        """
+        
+    except Exception as e:
+        logger.error(f"Test response parsing failed: {e}")
+        return f"""
+        <div class="container mt-3">
+            <div class="alert alert-danger" role="alert">
+                <h4>Response Parsing Test - FAILED</h4>
+                <p>Error: {str(e)}</p>
+                <details>
+                    <summary>Test data used:</summary>
+                    <pre>{json.dumps(test_data, indent=2)}</pre>
+                </details>
+            </div>
+        </div>
+        """
+        
+@bp.route("/test")
+@requires_auth
+def test_page():
+    """Test page for API response functionality"""
+    return render_template("responses/test_responses.html")

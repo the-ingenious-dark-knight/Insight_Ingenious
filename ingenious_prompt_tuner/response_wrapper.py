@@ -81,5 +81,15 @@ class AgentChatWrapper(BaseModel):
                 # If anything goes wrong, set to None
                 data_copy["chat_response_wrapper"] = None
                 print(f"Error wrapping chat_response: {e}")
+                print(f"Chat response data: {chat_response}")
+
+        # Handle missing required fields with defaults
+        data_copy.setdefault("chat_name", "Unknown")
+        data_copy.setdefault("target_agent_name", "Unknown")
+        data_copy.setdefault("source_agent_name", "Unknown")
+        data_copy.setdefault("user_message", "")
+        data_copy.setdefault("system_prompt", "")
+        data_copy.setdefault("completion_tokens", 0)
+        data_copy.setdefault("prompt_tokens", 0)
 
         return cls(**data_copy)

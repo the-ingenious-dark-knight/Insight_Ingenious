@@ -33,7 +33,6 @@ def convert_csv_to_md_tables(content):
         return csv_data
 
     # Use regex to find and replace only ``` csv ... ``` blocks
-    # Use regex to find and replace only ``` csv ... ``` blocks
     pattern = r"``` csv\s*(.*?)\s*```"
     print(f"Regex pattern: {pattern}")
     if content is None:
