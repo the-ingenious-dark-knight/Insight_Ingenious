@@ -47,7 +47,7 @@ class ConversationFlow:
             context = memory_file.read()
 
         # Create SQL tool functions
-        if _config.azure_sql_services.database_name == "skip":
+        if not _config.azure_sql_services or _config.azure_sql_services.database_name == "skip":
             table_name, column_names = SQL_ToolFunctions.get_db_attr(_config)
 
             # Create SQL tool as function

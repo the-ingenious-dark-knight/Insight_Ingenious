@@ -18,7 +18,8 @@ This guide helps you resolve common issues when setting up and using Insight Ing
 ### Hello World Test (bike-insights)
 ```bash
 # The "Hello World" of Ingenious - try this first!
-curl -X POST http://localhost:80/api/v1/chat \
+# Note: Adjust port (80 or 8080) based on your server configuration
+curl -X POST http://localhost:8080/api/v1/chat \
    -H "Content-Type: application/json" \
    -d '{
    "user_prompt": "{\"stores\": [{\"name\": \"Hello Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"HELLO-001\", \"quantity_sold\": 1, \"sale_date\": \"2023-04-01\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 5.0, \"comment\": \"Perfect introduction!\"}}], \"bike_stock\": []}], \"revision_id\": \"hello-1\", \"identifier\": \"world\"}",
@@ -29,7 +30,7 @@ curl -X POST http://localhost:80/api/v1/chat \
 ### Simple Alternative Test (classification-agent)
 ```bash
 # If bike-insights seems too complex, try this simpler workflow
-curl -X POST http://localhost:80/api/v1/chat \
+curl -X POST http://localhost:8080/api/v1/chat \
    -H "Content-Type: application/json" \
    -d '{
    "user_prompt": "Analyze this feedback: Great product!",
@@ -85,26 +86,55 @@ ValidationError: 9 validation errors for Profiles
 ### 2. Server Port Issues
 
 **Symptoms**:
-- Server ignores `--port` parameter
-- Server starts on port 80 instead of specified port
+- "Permission denied" when starting server on port 80
+- Server ignores `--port` parameter  
+- "Address already in use" errors
+- Connection refused when testing API
 
 **Solutions**:
 
-1. **Set port in environment**:
+1. **Use alternative port (Recommended for development)**:
    ```bash
-   export WEB_PORT=8081
+   # Use port 8080 instead of 80 (no admin privileges required)
+   uv run ingen serve --port 8080
+   
+   # Update your test commands to use the new port
+   curl http://localhost:8080/api/v1/health
    ```
 
-2. **Or set in config.yml**:
+2. **Set port in environment variables**:
+   ```bash
+   export WEB_PORT=8080
+   uv run ingen serve
+   ```
+
+3. **Or set in config.yml**:
    ```yaml
    web_configuration:
-     port: 8081
+     port: 8080
    ```
 
-3. **Check if port is available**:
+4. **Check if port is available**:
    ```bash
-   lsof -i :80  # Check what's using port 80
+   # Check what's using port 80
+   lsof -i :80
+   
+   # Check what's using your target port
+   lsof -i :8080
+   
+   # Kill processes if needed (be careful!)
+   sudo kill -9 $(lsof -t -i:80)
    ```
+
+5. **For production deployments on port 80**:
+   ```bash
+   # Run with elevated privileges (Linux/macOS)
+   sudo uv run ingen serve
+   
+   # Or use a reverse proxy (nginx, apache)
+   ```
+
+**Note**: Port 80 requires administrative privileges on most systems. For development, use ports 8080, 8000, or 3000.
 
 ---
 
@@ -182,13 +212,13 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
    ```
 
 2. **Install ODBC Driver (if missing)**:
-   
+
    **On macOS**:
    ```bash
    brew tap microsoft/mssql-release
    brew install msodbcsql18 mssql-tools18
    ```
-   
+
    **On Ubuntu/Debian**:
    ```bash
    curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
@@ -199,25 +229,58 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
 
 **Configuration Solutions**:
 
-1. **Check environment variable is set**:
+1. **Install required dependencies**:
+   ```bash
+   # Required for environment variable loading
+   uv add python-dotenv
+   ```
+
+2. **Check environment variable is set**:
    ```bash
    echo $AZURE_SQL_CONNECTION_STRING
    # Should show your connection string
+   
+   # Or check if .env file is properly formatted
+   cat .env | grep AZURE_SQL
    ```
 
-2. **Verify configuration files**:
+3. **Verify .env file format** (critical):
+   ```bash
+   # .env file should have NO SPACES around = and quotes for complex values
+   AZURE_SQL_CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+   LOCAL_SQL_CSV_PATH=./sample_data.csv
+   ```
+
+4. **Verify configuration files**:
    ```yaml
    # config.yml
    chat_history:
      database_type: "azuresql"
      database_name: "your_database_name"
-   
-   # profiles.yml  
+
+   # profiles.yml
    chat_history:
-     database_connection_string: ${AZURE_SQL_CONNECTION_STRING:REQUIRED_SET_IN_ENV}
+     database_connection_string: ${AZURE_SQL_CONNECTION_STRING}
    ```
 
-3. **Test connection directly**:
+   **Note**: Remove `:REQUIRED_SET_IN_ENV` suffix - it can cause issues with environment variable substitution.
+
+5. **Test environment variable loading**:
+   ```bash
+   uv run python -c "
+   from dotenv import load_dotenv
+   import os
+   load_dotenv()
+   conn_str = os.getenv('AZURE_SQL_CONNECTION_STRING')
+   if not conn_str:
+       print('❌ AZURE_SQL_CONNECTION_STRING not set')
+   else:
+       print('✅ Environment variable loaded successfully')
+       print(f'Connection string length: {len(conn_str)} characters')
+   "
+   ```
+
+6. **Test connection directly**:
    ```bash
    uv run python -c "
    import pyodbc
@@ -242,7 +305,7 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
    from ingenious.ingenious.dependencies import get_config
    from ingenious.ingenious.db.chat_history_repository import ChatHistoryRepository
    from ingenious.models.database_client import DatabaseClientType
-   
+
    async def test():
        config = get_config()
        db_type = DatabaseClientType(config.chat_history.database_type)
@@ -252,7 +315,7 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
            print(f'✅ Azure SQL repository working! (Found {len(messages)} messages)')
        except Exception as e:
            print(f'❌ Repository error: {e}')
-   
+
    asyncio.run(test())
    "
    ```

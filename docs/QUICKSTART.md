@@ -23,16 +23,33 @@ Get Insight Ingenious up and running in 5 minutes! This enterprise-grade Python 
 
 1. **Install and Initialize**:
     ```bash
-    # From your project directory
+    # For local development (if you have the ingenious source code)
+    uv pip install -e ./ingenious
+    
+    # Or for production install from package
     uv add ingenious
+    
+    # Initialize project template
     uv run ingen init
+    
+    # Install additional dependencies for environment variable loading
+    uv add python-dotenv
     ```
 
 2. **Configure Credentials**:
     ```bash
-    # Edit .env with your Azure OpenAI credentials
-    cp .env.example .env
-    nano .env  # Add AZURE_OPENAI_API_KEY and AZURE_OPENAI_BASE_URL
+    # Create .env file with your Azure OpenAI credentials
+    cat > .env << 'EOF'
+    AZURE_OPENAI_API_KEY=your_api_key_here
+    AZURE_OPENAI_BASE_URL=https://your-endpoint.openai.azure.com/
+    AZURE_OPENAI_MODEL_NAME=gpt-4.1-nano
+    AZURE_OPENAI_DEPLOYMENT=gpt-4.1-nano
+    AZURE_OPENAI_API_VERSION=2024-12-01-preview
+    LOCAL_SQL_CSV_PATH=./sample_data.csv
+    EOF
+    
+    # Edit with your actual credentials
+    nano .env
     ```
 
 3. **Validate Setup** (Recommended):
@@ -44,19 +61,26 @@ Get Insight Ingenious up and running in 5 minutes! This enterprise-grade Python 
 
 4. **Start the Server**:
     ```bash
+    # Default port (may require admin privileges on some systems)
     uv run ingen serve
+    
+    # Alternative port if 80 is not available
+    uv run ingen serve --port 8080
     ```
 
 5. **Verify Health**:
     ```bash
-    # Check server health
+    # Check server health (adjust port if using alternative)
     curl http://localhost:80/api/v1/health
+    # or
+    curl http://localhost:8080/api/v1/health
     ```
 
 6. **Test the API**:
     ```bash
     # Test bike insights workflow (the "Hello World" of Ingenious)
-    curl -X POST http://localhost:80/api/v1/chat \
+    # Adjust port to match your server (80 or 8080)
+    curl -X POST http://localhost:8080/api/v1/chat \
       -H "Content-Type: application/json" \
       -d '{
         "user_prompt": "{\"stores\": [{\"name\": \"QuickStart Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"QS-001\", \"quantity_sold\": 1, \"sale_date\": \"2023-04-15\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 5.0, \"comment\": \"Perfect bike for getting started!\"}}], \"bike_stock\": []}], \"revision_id\": \"quickstart-1\", \"identifier\": \"hello-world\"}",
@@ -67,6 +91,62 @@ Get Insight Ingenious up and running in 5 minutes! This enterprise-grade Python 
 🎉 **That's it!** You should see a comprehensive JSON response with insights from multiple AI agents analyzing the bike sales data.
 
 **Note**: The `bike-insights` workflow is created when you run `ingen init` - it's part of the project template setup, not included in the core library.
+
+## 🗄️ Azure SQL Database Setup (Optional)
+
+For production deployments with persistent chat history storage in Azure SQL Database:
+
+### Prerequisites
+- ✅ Azure SQL Database instance with credentials
+- ✅ ODBC Driver 18 for SQL Server installed
+
+### Setup Steps
+
+1. **Install ODBC Driver** (if not already installed):
+    ```bash
+    # macOS
+    brew tap microsoft/mssql-release
+    brew install msodbcsql18
+    
+    # Verify installation
+    odbcinst -q -d | grep "ODBC Driver 18"
+    ```
+
+2. **Add Azure SQL credentials to .env**:
+    ```bash
+    # Add to your existing .env file
+    echo 'AZURE_SQL_CONNECTION_STRING=Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;' >> .env
+    ```
+
+3. **Update config.yml for Azure SQL**:
+    ```bash
+    # Update chat_history section in config.yml
+    sed -i.bak 's/database_type: "sqlite"/database_type: "azuresql"/' config.yml
+    ```
+
+4. **Update profiles.yml for environment variable**:
+    ```yaml
+    # Edit profiles.yml - update the chat_history section
+    chat_history:
+      database_connection_string: ${AZURE_SQL_CONNECTION_STRING}
+    ```
+
+5. **Validate Azure SQL setup**:
+    ```bash
+    uv run ingen validate
+    ```
+
+6. **Test with Azure SQL**:
+    ```bash
+    # Start server and test - chat history will now be stored in Azure SQL
+    uv run ingen serve --port 8080
+    ```
+
+**Benefits of Azure SQL:**
+- ✅ Production-grade chat history persistence
+- ✅ Multi-user conversation management  
+- ✅ Enterprise security and compliance
+- ✅ Automatic table creation and management
 
 ## 📊 Data Format Examples
 
@@ -109,7 +189,7 @@ The `bike_stock` array requires objects with this structure:
 
 ### Multiple Stores Example
 ```bash
-curl -X POST http://localhost:80/api/v1/chat \
+curl -X POST http://localhost:8080/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "{\"stores\": [{\"name\": \"Store A\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"A-001\", \"quantity_sold\": 2, \"sale_date\": \"2024-01-10\", \"year\": 2024, \"month\": \"January\", \"customer_review\": {\"rating\": 4.5, \"comment\": \"Good value\"}}], \"bike_stock\": []}, {\"name\": \"Store B\", \"location\": \"VIC\", \"bike_sales\": [{\"product_code\": \"B-001\", \"quantity_sold\": 1, \"sale_date\": \"2024-01-12\", \"year\": 2024, \"month\": \"January\", \"customer_review\": {\"rating\": 5.0, \"comment\": \"Perfect!\"}}], \"bike_stock\": []}], \"revision_id\": \"multi-store-1\", \"identifier\": \"comparison\"}",
@@ -139,7 +219,7 @@ export INGENIOUS_PROFILE_PATH=$(pwd)/profiles.yml
 
 echo "✅ Setup complete!"
 echo "📝 Next: Edit .env with your Azure OpenAI credentials"
-echo "🚀 Then run: uv run ingen serve"
+echo "🚀 Then run: uv run ingen serve --port 8080"
 ```
 
 Run with: `chmod +x setup.sh && ./setup.sh`
@@ -159,7 +239,7 @@ uv run ingen workflows
 uv run ingen workflows bike-insights
 
 # Quick server test
-curl -s http://localhost:80/api/v1/health || echo "Server not running"
+curl -s http://localhost:8080/api/v1/health || echo "Server not running"
 ```
 
 ---
@@ -172,6 +252,8 @@ curl -s http://localhost:80/api/v1/health || echo "Server not running"
 | `/api/v1/workflow-status/{name}` | GET | Check workflow status |
 | `/api/v1/health` | GET | Server health check |
 | `/docs` | GET | API documentation |
+
+**Note:** Adjust `localhost:8080` to match your server port (default is 80, but 8080 is common for development).
 
 ---
 
@@ -207,11 +289,36 @@ curl -s http://localhost:80/api/v1/health || echo "Server not running"
 # Check configuration
 uv run ingen status
 
-# Try different port
-uv run ingen serve --port 8081
+# Try different port (common solution for port 80 permission issues)
+uv run ingen serve --port 8080
 
 # Check logs for errors
 uv run ingen serve 2>&1 | grep -i error
+```
+
+### Port 80 permission denied?
+```bash
+# Use alternative port (recommended for development)
+uv run ingen serve --port 8080
+
+# Update all curl commands to use :8080 instead of :80
+```
+
+### Environment variables not loading?
+```bash
+# Ensure python-dotenv is installed
+uv add python-dotenv
+
+# Check .env file format (no spaces around =)
+cat .env
+
+# Test environment variable loading
+python -c "
+from dotenv import load_dotenv
+import os
+load_dotenv()
+print('AZURE_OPENAI_API_KEY:', os.getenv('AZURE_OPENAI_API_KEY', 'NOT_FOUND'))
+"
 ```
 
 ### Profile validation errors?
@@ -288,7 +395,7 @@ print('✅ Sample database created')
 "
 
 # Test SQL queries
-curl -X POST http://localhost:80/api/v1/chat \
+curl -X POST http://localhost:8080/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Show me all tables in the database",

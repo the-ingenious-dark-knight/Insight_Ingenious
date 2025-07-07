@@ -13,8 +13,11 @@ from ingenious.utils.load_sample_data import sqlite_sample_db
 
 _config = ingen_config.get_config()
 
+# Initialize pyodbc as None first
+pyodbc = None
+
 # Only import pyodbc if we're using Azure SQL
-if _config.azure_sql_services.database_name != "skip":
+if _config.azure_sql_services and _config.azure_sql_services.database_name != "skip":
     try:
         import pyodbc
     except ImportError:
@@ -98,17 +101,33 @@ def get_conn(_config):
     # token_bytes = credential.get_token("https://database.windows.net/.default").token.encode("UTF-16-LE")
     # token_struct = struct.pack(f'<I{len(token_bytes)}s', len(token_bytes), token_bytes)
     # SQL_COPT_SS_ACCESS_TOKEN = 1256  # This connection option is defined by microsoft in msodbcsql.h
+    if not hasattr(pyodbc, 'connect'):
+        raise ImportError("pyodbc module is not properly imported")
     conn = pyodbc.connect(connection_string)
     cursor = conn.cursor()
     return conn, cursor
 
 
-if _config.azure_sql_services.database_name == "skip":
+# Initialize database connections based on configuration
+test_db = None
+conn = None
+cursor = None
+
+# Check if we should use SQLite (when Azure SQL is disabled)
+if not _config.azure_sql_services or _config.azure_sql_services.database_name == "skip":
+    print("Initializing SQLite database for local SQL operations...")
     test_db = sqlite_sample_db()  # this is for local sql initialisation
+    print("SQLite database initialized successfully")
 else:
-    test_db = None  # Placeholder for Azure SQL mode
-    if pyodbc is not None:
-        conn, cursor = get_conn(_config)
+    # Azure SQL mode
+    if pyodbc is not None and _config.azure_sql_services:
+        try:
+            conn, cursor = get_conn(_config)
+            print("Azure SQL connection established")
+        except Exception as e:
+            print(f"Warning: Failed to connect to Azure SQL: {e}")
+            conn = None
+            cursor = None
     else:
         print("Warning: Azure SQL configured but pyodbc not available")
 
@@ -116,7 +135,7 @@ else:
 class SQL_ToolFunctions:
     @staticmethod
     def get_db_attr(_config):
-        if _config.azure_sql_services.database_name == "skip":
+        if not _config.azure_sql_services or _config.azure_sql_services.database_name == "skip":
             table_name = _config.local_sql_db.sample_database_name
             result = test_db.execute_sql(f"""SELECT * FROM {table_name} LIMIT 1""")
             column_names = [key for key in result[0]]
@@ -124,24 +143,50 @@ class SQL_ToolFunctions:
         else:
             database_name = _config.azure_sql_services.database_name
             table_name = _config.azure_sql_services.table_name
+            if cursor is not None:
+                cursor.execute(f"""
+                    SELECT COLUMN_NAME
+                    FROM INFORMATION_SCHEMA.COLUMNS
+                    WHERE TABLE_NAME = '{table_name}'
+                """)
+                column_names = [row[0] for row in cursor.fetchall()]
+            else:
+                # Fallback - create temporary connection
+                conn_temp, cursor_temp = get_conn(_config)
+                cursor_temp.execute(f"""
+                    SELECT COLUMN_NAME
+                    FROM INFORMATION_SCHEMA.COLUMNS
+                    WHERE TABLE_NAME = '{table_name}'
+                """)
+                column_names = [row[0] for row in cursor_temp.fetchall()]
+                conn_temp.close()
+            return database_name, table_name, column_names
+
+    @staticmethod
+    def get_azure_db_attr(_config):
+        if not _config.azure_sql_services:
+            raise ValueError("Azure SQL services not configured")
+        database_name = _config.azure_sql_services.database_name
+        table_name = _config.azure_sql_services.table_name
+        
+        # Get connection if needed
+        if cursor is not None:
             cursor.execute(f"""
                 SELECT COLUMN_NAME
                 FROM INFORMATION_SCHEMA.COLUMNS
                 WHERE TABLE_NAME = '{table_name}'
             """)
             column_names = [row[0] for row in cursor.fetchall()]
-            return database_name, table_name, column_names
-
-    @staticmethod
-    def get_azure_db_attr(_config):
-        database_name = _config.azure_sql_services.database_name
-        table_name = _config.azure_sql_services.table_name
-        cursor.execute(f"""
-            SELECT COLUMN_NAME
-            FROM INFORMATION_SCHEMA.COLUMNS
-            WHERE TABLE_NAME = '{table_name}'
-        """)
-        column_names = [row[0] for row in cursor.fetchall()]
+        else:
+            # Fallback - create temporary connection
+            conn_temp, cursor_temp = get_conn(_config)
+            cursor_temp.execute(f"""
+                SELECT COLUMN_NAME
+                FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_NAME = '{table_name}'
+            """)
+            column_names = [row[0] for row in cursor_temp.fetchall()]
+            conn_temp.close()
         return database_name, table_name, column_names
 
     @staticmethod
@@ -149,6 +194,18 @@ class SQL_ToolFunctions:
         sql: str,
         timeout: int = 10,  # Timeout in seconds
     ) -> str:
+        global test_db
+        # Ensure test_db is initialized
+        if test_db is None:
+            print("Error: test_db is None, attempting to re-initialize...")
+            try:
+                test_db = sqlite_sample_db()
+                print("Successfully re-initialized test_db")
+            except Exception as e:
+                error_msg = f"Failed to initialize SQLite database: {e}"
+                print(error_msg)
+                return json.dumps({"error": error_msg, "results": []})
+        
         def run_query(sql: str):
             return test_db.execute_sql(sql)
 
@@ -172,13 +229,26 @@ class SQL_ToolFunctions:
     ) -> str:
         def run_query(sql_query):
             try:
-                cursor.execute(sql_query)
-                r = [
-                    dict(
-                        (cursor.description[i][0], value) for i, value in enumerate(row)
-                    )
-                    for row in cursor.fetchall()
-                ]
+                # Use global cursor if available, otherwise create new connection
+                if cursor is not None:
+                    cursor.execute(sql_query)
+                    r = [
+                        dict(
+                            (cursor.description[i][0], value) for i, value in enumerate(row)
+                        )
+                        for row in cursor.fetchall()
+                    ]
+                else:
+                    # Create temporary connection
+                    conn_temp, cursor_temp = get_conn(_config)
+                    cursor_temp.execute(sql_query)
+                    r = [
+                        dict(
+                            (cursor_temp.description[i][0], value) for i, value in enumerate(row)
+                        )
+                        for row in cursor_temp.fetchall()
+                    ]
+                    conn_temp.close()
                 return json.dumps(r)
             except Exception as query_err:
                 return json.dumps({"error": f"Query Error: {query_err}", "results": []})
