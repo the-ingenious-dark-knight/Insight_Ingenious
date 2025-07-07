@@ -105,6 +105,9 @@ For production deployments using Azure SQL Database for chat history storage:
 ```bash
 # Core Azure SQL support (pyodbc is included in base installation)
 uv pip install -e .
+
+# Required dependency for environment variable loading
+uv add python-dotenv
 ```
 
 **System Dependencies Required:**
@@ -136,6 +139,10 @@ Download and install the ODBC Driver 18 for SQL Server from the [Microsoft websi
 - Enterprise-grade conversation persistence
 - Multi-user conversation management
 - Scalable message storage
+
+**Additional Requirements:**
+- Environment variable support via python-dotenv
+- LOCAL_SQL_CSV_PATH configuration for sample data
 
 **Documentation:** [Azure SQL Configuration Guide](../configuration/#chat-history)
 

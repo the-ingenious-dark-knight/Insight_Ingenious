@@ -217,8 +217,23 @@ Add the Azure SQL connection string to your `.env` file:
 
 ```bash
 # .env
-AZURE_SQL_CONNECTION_STRING=Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;
+AZURE_SQL_CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+
+# Also required for sample data functionality
+LOCAL_SQL_CSV_PATH=./sample_data.csv
+
+# Azure OpenAI credentials (if not already set)
+AZURE_OPENAI_API_KEY=your_api_key_here
+AZURE_OPENAI_BASE_URL=https://your-endpoint.openai.azure.com/
+AZURE_OPENAI_MODEL_NAME=gpt-4.1-nano
+AZURE_OPENAI_DEPLOYMENT=gpt-4.1-nano
+AZURE_OPENAI_API_VERSION=2024-12-01-preview
 ```
+
+**Important Notes:**
+- Use double quotes around the connection string to handle special characters
+- Install `python-dotenv` dependency: `uv add python-dotenv`
+- The connection string format is critical - ensure all parameters are correct
 
 **Step 3: Update Configuration Files**
 
@@ -232,8 +247,11 @@ chat_history:
 ```yaml
 # profiles.yml
 chat_history:
-  database_connection_string: ${AZURE_SQL_CONNECTION_STRING:REQUIRED_SET_IN_ENV}
+  database_connection_string: ${AZURE_SQL_CONNECTION_STRING}
 ```
+
+**Environment Variable Substitution:**
+The `${VARIABLE_NAME}` syntax enables environment variable substitution in configuration files. This allows you to keep sensitive credentials in environment variables while referencing them in configuration.
 
 **Step 4: Validate Configuration**
 
