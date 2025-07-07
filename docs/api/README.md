@@ -13,36 +13,36 @@ toc_icon: "plug"
 
 Complete API documentation for Insight Ingenious - an enterprise-grade Python library for building AI agent APIs with Microsoft Azure integrations. This reference covers REST endpoints, workflow examples, debugging utilities, and integration guides.
 
-## 🚀 API Architecture Overview
+## API Architecture Overview
 
 ```mermaid
 graph TB
-    subgraph "🌐 Client Applications"
-        WEB_CLIENT[🖥️ Web Applications]
-        MOBILE_CLIENT[📱 Mobile Apps]
-        API_CLIENT[🔌 API Integrations]
-        CLI_CLIENT[⌨️ CLI Tools]
+    subgraph "Client Applications"
+        WEB_CLIENT[Web Applications]
+        MOBILE_CLIENT[Mobile Apps]
+        API_CLIENT[API Integrations]
+        CLI_CLIENT[CLI Tools]
     end
 
-    subgraph "🎯 API Layer"
-        FASTAPI[⚡ FastAPI Application]
-        CHAT_API[💬 Chat API\n/api/v1/chat]
-        DIAGNOSTIC_API[🔄 Diagnostic API\n/api/v1/workflow-status\n/api/v1/workflows\n/api/v1/diagnostic\n/api/v1/health]
-        PROMPTS_API[📝 Prompts API\n/api/v1/prompts]
-        FEEDBACK_API[💬 Feedback API\n/api/v1/messages/_message_id_/feedback]
+    subgraph "API Layer"
+        FASTAPI[FastAPI Application]
+        CHAT_API[Chat API\n/api/v1/chat]
+        DIAGNOSTIC_API[Diagnostic API\n/api/v1/workflow-status\n/api/v1/workflows\n/api/v1/diagnostic\n/api/v1/health]
+        PROMPTS_API[Prompts API\n/api/v1/prompts]
+        FEEDBACK_API[Feedback API\n/api/v1/messages/_message_id_/feedback]
     end
 
-    subgraph "🤖 Backend Services"
-        CHAT_SERVICE[💬 Chat Service]
-        MULTI_AGENT_SERVICE[🤖 Multi-Agent Service]
-        CONFIG_SERVICE[⚙️ Config Service]
-        FILE_STORAGE[💾 File Storage]
+    subgraph "Backend Services"
+        CHAT_SERVICE[Chat Service]
+        MULTI_AGENT_SERVICE[Multi-Agent Service]
+        CONFIG_SERVICE[Config Service]
+        FILE_STORAGE[File Storage]
     end
 
-    subgraph "🧠 External Services"
-        AZURE_OPENAI[🧠 Azure OpenAI]
-        AZURE_SEARCH[🔍 Azure Search]
-        AZURE_SQL[🗄️ Azure SQL]
+    subgraph "External Services"
+        AZURE_OPENAI[Azure OpenAI]
+        AZURE_SEARCH[Azure Search]
+        AZURE_SQL[Azure SQL]
     end
 
     WEB_CLIENT --> FASTAPI
@@ -78,21 +78,21 @@ graph TB
     class AZURE_OPENAI,AZURE_SEARCH,AZURE_SQL external
 ```
 
-## 🔄 API Request Flow
+## API Request Flow
 
 ```mermaid
 sequenceDiagram
     participant Client
-    participant Gateway as 🔗 API Gateway
-    participant Auth as 🔐 Auth Service
-    participant API as 📡 API Endpoint
-    participant Service as 🤖 Backend Service
-    participant LLM as 🧠 Azure OpenAI
-    participant Storage as 💾 Storage
+    participant Gateway as API Gateway
+    participant Auth as Auth Service
+    participant API as API Endpoint
+    participant Service as Backend Service
+    participant LLM as Azure OpenAI
+    participant Storage as Storage
 
     Client->>Gateway: HTTP Request
     Gateway->>Auth: Validate API Key
-    Auth-->>Gateway: ✅ Authentication Success
+    Auth-->>Gateway: Authentication Success
 
     Gateway->>API: Route Request
     API->>Service: Process Request
@@ -109,30 +109,30 @@ sequenceDiagram
     API-->>Gateway: HTTP Response
     Gateway-->>Client: JSON Response
 
-    Note over Client,Storage: Error handling at each step\nwith appropriate HTTP status codes
+    Note over Client,Storage: Error handling at each step with appropriate HTTP status codes
 ```
 
-## 📡 Core API Endpoints
+## Core API Endpoints
 
-### 🔍 Endpoint Overview
+### Endpoint Overview
 
 ```mermaid
 graph LR
-    subgraph "💬 Chat Endpoints"
+    subgraph "Chat Endpoints"
         CHAT_POST[POST /api/v1/chat\nSend Message]
     end
 
-    subgraph "🔄 Diagnostic Endpoints"
+    subgraph "Diagnostic Endpoints"
         WORKFLOW_STATUS[GET /api/v1/workflow-status/_name_\nCheck Workflow Status]
         WORKFLOWS_LIST[GET /api/v1/workflows\nList All Workflows]
         DIAGNOSTIC[GET /api/v1/diagnostic\nSystem Diagnostic]
     end
 
-    subgraph "❤️ System Endpoints"
+    subgraph "System Endpoints"
         HEALTH[GET /api/v1/health\nHealth Check]
     end
 
-    subgraph "📝 Management Endpoints"
+    subgraph "Management Endpoints"
         PROMPTS_VIEW[GET /api/v1/prompts/view/_revision_id_/_filename_\nView Prompt]
         PROMPTS_LIST[GET /api/v1/prompts/list/_revision_id_\nList Prompts]
         PROMPTS_UPDATE[POST /api/v1/prompts/update/_revision_id_/_filename_\nUpdate Prompt]
@@ -150,36 +150,36 @@ graph LR
     class PROMPTS_VIEW,PROMPTS_LIST,PROMPTS_UPDATE,FEEDBACK management
 ```
 
-### 💬 Chat API Flow
+### Chat API Flow
 
 ```mermaid
 flowchart TD
-    START([📱 Client Request]) --> VALIDATE{✅ Validate Input}
-    VALIDATE -->|Valid| AUTH{🔐 Check Auth}
-    VALIDATE -->|Invalid| ERROR_400[❌ 400 Bad Request]
+    START([Client Request]) --> VALIDATE{Validate Input}
+    VALIDATE -->|Valid| AUTH{Check Auth}
+    VALIDATE -->|Invalid| ERROR_400[400 Bad Request]
 
-    AUTH -->|Authorized| LOAD_CONTEXT[📚 Load Chat Context]
-    AUTH -->|Unauthorized| ERROR_401[❌ 401 Unauthorized]
+    AUTH -->|Authorized| LOAD_CONTEXT[Load Chat Context]
+    AUTH -->|Unauthorized| ERROR_401[401 Unauthorized]
 
-    LOAD_CONTEXT --> SELECT_WORKFLOW{🔄 Select Workflow}
-    SELECT_WORKFLOW --> CLASSIFICATION[🔍 classification-agent]
-    SELECT_WORKFLOW --> KNOWLEDGE_BASE[🔍 knowledge-base-agent]
-    SELECT_WORKFLOW --> SQL_AGENT[🗄️ sql-manipulation-agent]
+    LOAD_CONTEXT --> SELECT_WORKFLOW{Select Workflow}
+    SELECT_WORKFLOW --> CLASSIFICATION[classification-agent]
+    SELECT_WORKFLOW --> KNOWLEDGE_BASE[knowledge-base-agent]
+    SELECT_WORKFLOW --> SQL_AGENT[sql-manipulation-agent]
 
-    CLASSIFICATION --> PROCESS_MESSAGE[⚡ Process Multi-Agent Workflow]
+    CLASSIFICATION --> PROCESS_MESSAGE[Process Multi-Agent Workflow]
     KNOWLEDGE_BASE --> PROCESS_MESSAGE
     SQL_AGENT --> PROCESS_MESSAGE
 
-    PROCESS_MESSAGE --> LLM_CALL[🧠 Call Azure OpenAI]
-    LLM_CALL --> SUCCESS{✅ Success?}
+    PROCESS_MESSAGE --> LLM_CALL[Call Azure OpenAI]
+    LLM_CALL --> SUCCESS{Success?}
 
-    SUCCESS -->|Yes| SAVE_RESPONSE[💾 Save Response]
-    SUCCESS -->|No| ERROR_500[❌ 500 Server Error]
+    SUCCESS -->|Yes| SAVE_RESPONSE[Save Response]
+    SUCCESS -->|No| ERROR_500[500 Server Error]
 
-    SAVE_RESPONSE --> FORMAT_RESPONSE[📝 Format Response]
-    FORMAT_RESPONSE --> RETURN_200[✅ 200 Success]
+    SAVE_RESPONSE --> FORMAT_RESPONSE[Format Response]
+    FORMAT_RESPONSE --> RETURN_200[200 Success]
 
-    ERROR_400 --> END([🏁 End])
+    ERROR_400 --> END([End])
     ERROR_401 --> END
     ERROR_500 --> END
     RETURN_200 --> END
@@ -199,17 +199,17 @@ flowchart TD
     class ERROR_400,ERROR_401,ERROR_500 error
 ```
 
-### 🔄 Workflow API Flow
+### Workflow API Flow
 
 ```mermaid
 sequenceDiagram
     participant Client
-    participant API as 📡 Chat API
-    participant ChatService as 💬 Chat Service
-    participant MultiAgentService as 🤖 Multi-Agent Service
-    participant Agent1 as 🤖 Agent 1
-    participant Agent2 as 🤖 Agent 2
-    participant LLM as 🧠 Azure OpenAI
+    participant API as Chat API
+    participant ChatService as Chat Service
+    participant MultiAgentService as Multi-Agent Service
+    participant Agent1 as Agent 1
+    participant Agent2 as Agent 2
+    participant LLM as Azure OpenAI
 
     Client->>API: POST /api/v1/chat
     Note over Client,API: {"user_prompt": "Help with SQL queries",\n"conversation_flow": "sql-manipulation-agent"}
@@ -237,27 +237,27 @@ sequenceDiagram
     API-->>Client: 200 Success with SQL solution
 ```
 
-## 🔐 Authentication & Security
+## Authentication & Security
 
 ### Authentication Flow
 
 ```mermaid
 graph TB
-    subgraph "🔑 Authentication Methods"
-        BASIC_AUTH[🔐 HTTP Basic Authentication\nUsername/Password]
-        NO_AUTH[🚪 Authentication Disabled\nAnonymous Access]
+    subgraph "Authentication Methods"
+        BASIC_AUTH[HTTP Basic Authentication\nUsername/Password]
+        NO_AUTH[Authentication Disabled\nAnonymous Access]
     end
 
-    subgraph "🛡️ Security Features"
-        HTTPS_TLS[🔐 HTTPS/TLS\nTransport Encryption]
-        CONFIG_AUTH[⚙️ Configurable Authentication\nEnable/Disable via Config]
+    subgraph "Security Features"
+        HTTPS_TLS[HTTPS/TLS\nTransport Encryption]
+        CONFIG_AUTH[Configurable Authentication\nEnable/Disable via Config]
     end
 
-    subgraph "✅ Validation Steps"
-        HEADER_CHECK[📋 Authorization Header Check]
-        CREDENTIALS_VERIFY[🔍 Credential Verification]
-        CONFIG_CHECK[⚙️ Check Auth Config]
-        ACCESS_GRANTED[✅ Access Granted]
+    subgraph "Validation Steps"
+        HEADER_CHECK[Authorization Header Check]
+        CREDENTIALS_VERIFY[Credential Verification]
+        CONFIG_CHECK[Check Auth Config]
+        ACCESS_GRANTED[Access Granted]
     end
 
     BASIC_AUTH --> HEADER_CHECK
@@ -280,7 +280,7 @@ graph TB
     class HEADER_CHECK,CREDENTIALS_VERIFY,CONFIG_CHECK,ACCESS_GRANTED validation
 ```
 
-### 🚀 Getting Started with the API
+### Getting Started with the API
 
 The Insight Ingenious API provides powerful endpoints for creating and managing AI-powered conversation workflows programmatically.
 
@@ -310,7 +310,7 @@ GET /api/v1/workflows
 ```
 Returns a list of all available workflow types and their configurations.
 
-### 📋 Common API Patterns
+### Common API Patterns
 
 #### Making API Requests
 All API requests should include appropriate headers:
@@ -343,7 +343,7 @@ All API responses follow a consistent format:
 }
 ```
 
-## 🔧 Integration Examples
+## Integration Examples
 
 ### Python Integration
 ```python
@@ -635,7 +635,7 @@ Example error response:
 - [🛠️ Development Setup](/development/)
 - [📝 CLI Reference](/CLI_REFERENCE/)
 
-## 💡 Need Help?
+## Need Help?
 
 - Check the [troubleshooting guide](/troubleshooting/)
 - Review the [workflow examples](/api/workflows/)

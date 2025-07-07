@@ -21,11 +21,11 @@ This document provides detailed API usage examples for all available workflows i
 
 ## Available Workflows
 
-### 1. bike-insights - **"Hello World" Workflow (START HERE!)**
+### 1. bike-insights - Hello World Workflow
 
-**Purpose**: The recommended first workflow - showcases multi-agent coordination through comprehensive bike sales analysis. This is the "Hello World" of Ingenious!
+**Purpose**: The recommended first workflow showcasing multi-agent coordination through bike sales analysis.
 
-**Availability**: Created when you run `ingen init` (part of project template)
+**Availability**: Created when you run `ingen init` (part of project template, NOT included in core library)
 
 **Required Input Format**:
 ```json
@@ -74,10 +74,10 @@ curl -X POST http://localhost:80/api/v1/chat \
 ```
 
 **Agents Involved**:
-- � **classification_agent**: Classifies and routes user queries
-- 🎓 **education_expert**: Handles educational content queries
-- � **knowledge_base_agent**: Searches knowledge bases
-- �️ **sql_manipulation_agent**: Processes database queries
+- **classification_agent**: Classifies and routes user queries
+- **education_expert**: Handles educational content queries
+- **knowledge_base_agent**: Searches knowledge bases
+- **sql_manipulation_agent**: Processes database queries
 
 **Response Format**:
 ```json
@@ -95,7 +95,7 @@ curl -X POST http://localhost:80/api/v1/chat \
 
 ---
 
-### 2. ✅ classification-agent - Simple Text Processing
+### 2. classification-agent - Simple Text Processing
 
 **Purpose**: Basic text classification and routing
 
@@ -129,11 +129,11 @@ curl -X POST http://localhost:80/api/v1/chat \
 
 ---
 
-### 3. 🔍 knowledge-base-agent - Knowledge Search
+### 3. knowledge-base-agent - Knowledge Search
 
 **Purpose**: Search and retrieve information from configured knowledge bases
 
-**Availability**: Core library (always available)
+**Availability**: Core library (available when Azure Search is configured)
 
 **Requirements**:
 - Azure Search Service configured
@@ -151,11 +151,11 @@ curl -X POST http://localhost:80/api/v1/chat \
 
 ---
 
-### 4. 📊 sql-manipulation-agent - SQL Database Queries
+### 4. sql-manipulation-agent - SQL Database Queries
 
 **Purpose**: Execute SQL queries based on natural language input, supporting both SQLite (local) and Azure SQL databases
 
-**Availability**: Core library (always available)
+**Availability**: Core library (available when database is configured)
 
 **Database Options**:
 - **SQLite**: Local development and testing (recommended for getting started)
@@ -274,7 +274,7 @@ print('Local DB Config:', config.local_sql_db)
 
 ---
 
-## 🛠️ Testing Your Workflows
+## Testing Your Workflows
 
 ### Quick Test Script
 
@@ -283,10 +283,10 @@ Save this as `test_workflows.sh`:
 ```bash
 #!/bin/bash
 
-echo "🧪 Testing Ingenious Workflows..."
+echo "Testing Ingenious Workflows..."
 
 # Test 1: bike-insights (Hello World)
-echo "⭐ Testing bike-insights workflow (Hello World)..."
+echo "Testing bike-insights workflow (Hello World)..."
 curl -s -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
@@ -295,7 +295,7 @@ curl -s -X POST http://localhost:80/api/v1/chat \
   }' | jq '.message_id, .token_count'
 
 # Test 2: classification-agent (Simple Alternative)
-echo "✅ Testing classification-agent workflow (Simple Alternative)..."
+echo "Testing classification-agent workflow (Simple Alternative)..."
 curl -s -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
@@ -303,14 +303,14 @@ curl -s -X POST http://localhost:80/api/v1/chat \
     "conversation_flow": "classification-agent"
   }' | jq '.message_id, .token_count'
 
-echo "✅ Tests completed!"
+echo "Tests completed!"
 ```
 
 Make it executable: `chmod +x test_workflows.sh`
 
 ---
 
-## 🚨 Common Issues & Solutions
+## Common Issues & Solutions
 
 ### 1. "Expecting value: line 1 column 1 (char 0)"
 **Problem**: bike-insights workflow expects JSON data in user_prompt
@@ -330,7 +330,7 @@ Make it executable: `chmod +x test_workflows.sh`
 
 ---
 
-## 🔧 Configuration Requirements
+## Configuration Requirements
 
 ### Hello World Setup (bike-insights + classification-agent)
 ```env
@@ -347,11 +347,11 @@ INGENIOUS_PROFILE_PATH=./profiles.yml
 
 ---
 
-## 📚 Additional Resources
+## Additional Resources
 
-- 📖 **Configuration Guide**: `/docs/configuration/README.md`
-- 🏗️ **Custom Workflows**: `/docs/extensions/README.md`
-- 🐛 **Troubleshooting**: `/docs/troubleshooting/README.md`
-- 🧪 **Testing Guide**: `/docs/testing/README.md`
+- **Configuration Guide**: `/docs/configuration/README.md`
+- **Custom Workflows**: `/docs/extensions/README.md`
+- **Troubleshooting**: `/docs/troubleshooting/README.md`
+- **Testing Guide**: `/docs/testing/README.md`
 
 For more help: `ingen workflows <workflow-name>` or `ingen --help`

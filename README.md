@@ -7,9 +7,9 @@ An enterprise-grade Python library for quickly setting up APIs to interact with 
 Get up and running in 5 minutes with Azure OpenAI!
 
 ### Prerequisites
-- ✅ Python 3.13+
-- ✅ Azure OpenAI API credentials
-- ✅ [uv package manager](https://docs.astral.sh/uv/)
+- Python 3.13+
+- Azure OpenAI API credentials
+- [uv package manager](https://docs.astral.sh/uv/)
 
 ### 5-Minute Setup
 
@@ -56,7 +56,7 @@ Get up and running in 5 minutes with Azure OpenAI!
       }'
     ```
 
-🎉 **That's it!** You should see a comprehensive JSON response with insights from multiple AI agents analyzing the bike sales data.
+That's it! You should see a comprehensive JSON response with insights from multiple AI agents analyzing the bike sales data.
 
 **Note**: The `bike-insights` workflow is created when you run `ingen init` - it's part of the project template setup, not included in the core library. You can now build on `bike-insights` as a template for your specific use case.
 
@@ -64,15 +64,13 @@ Get up and running in 5 minutes with Azure OpenAI!
 
 Insight Ingenious provides multiple conversation workflows with different configuration requirements:
 
-### **"Hello World" Workflow** (Available via project template)
-- `bike-insights` - **The recommended starting point** - Comprehensive bike sales analysis showcasing multi-agent coordination (created when you run `ingen init`)
-
-### **Core Workflows (Azure OpenAI only)**
-- `classification-agent` - Route input to specialized agents based on content
-
-### **EXPERIMENTAL/MAY CONTAIN BUGS: Other Core Workflows (Require Additional Services)**
+### Core Workflows (Available in library)
+- `classification-agent` - Route input to specialized agents based on content (Azure OpenAI only)
 - `knowledge-base-agent` - Search knowledge bases (requires Azure Search Service)
 - `sql-manipulation-agent` - Execute SQL queries (requires database connection)
+
+### Extension Template Workflows (Available via project template)
+- `bike-insights` - Comprehensive bike sales analysis showcasing multi-agent coordination (created when you run `ingen init`)
 
 
 ## Project Structure
