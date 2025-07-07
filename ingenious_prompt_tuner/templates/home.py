@@ -1,4 +1,6 @@
 import asyncio
+import io
+import os
 import uuid as guid
 from pathlib import Path
 
@@ -10,12 +12,14 @@ from flask import (
     redirect,
     render_template,
     request,
+    send_file,
     url_for,
 )
 
 from ingenious_prompt_tuner.utilities import (
     get_selected_revision_direct_call,
     requires_auth,
+    requires_selected_revision,
     set_selected_revision_direct_call,
     utils_class,
 )
@@ -193,3 +197,54 @@ def sync_sample_data():
     asyncio.run(utils.get_data_folder(revision_id, force_copy_from_source=True))
     # Return ok
     return "OK"
+
+
+@bp.route("/edit_markdown")
+@requires_auth
+@requires_selected_revision
+def edit_markdown():
+    utils: utils_class = current_app.utils
+    try:
+        prompt_template_folder = asyncio.run(utils.get_prompt_template_folder())
+        files_raw = asyncio.run(utils.fs.list_files(file_path=prompt_template_folder))
+        files = sorted(
+            [Path(f).name for f in files_raw if f.endswith((".md", ".jinja"))]
+        )
+    except FileNotFoundError:
+        files = []
+    return render_template("edit_markdown.html", files=files)
+
+
+@bp.route("/view_responses")
+@requires_auth
+def view_responses():
+    # Simplified version - in real implementation would get more data
+    return render_template("responses/view_responses.html")
+
+
+@bp.route("/download_responses", methods=["GET"])
+@requires_auth
+def download_responses():
+    functional_test_dir = str(current_app.config["test_output_path"])
+    try:
+        latest_folder = max(
+            [
+                os.path.join(functional_test_dir, d)
+                for d in os.listdir(functional_test_dir)
+            ],
+            key=os.path.getmtime,
+        )
+        RESPONSES_FILE = os.path.join(latest_folder, "responses.html")
+
+        if os.path.exists(RESPONSES_FILE):
+            with open(RESPONSES_FILE, "r", encoding="utf-8") as rf:
+                file_contents = rf.read()
+            return send_file(
+                io.BytesIO(file_contents.encode("utf-8")),
+                as_attachment=True,
+                download_name="responses.html",
+                mimetype="text/html",
+            )
+    except ValueError:
+        pass
+    return jsonify({"status": "error", "output": "Responses file not found"}), 404

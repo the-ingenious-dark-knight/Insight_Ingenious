@@ -1,9 +1,9 @@
 document.getElementById('runDownload').addEventListener('click', function() {
-    window.location.href = "{{ url_for('download_responses') }}";
+    window.location.href = "{{ url_for('index.download_responses') }}";
 });
 
 function get_agent_response(ball_identifier, agent_name) {
-    fetch(`{{ url_for('get_agent_response') }}?ball_identifier=${ball_identifier}&agent_name=${agent_name}`)
+    fetch(`{{ url_for('responses.get_agent_response') }}?ball_identifier=${ball_identifier}&agent_name=${agent_name}`)
     .then(response => response.text())
     .then(html => {
     const modal = document.createElement('div');
@@ -92,7 +92,7 @@ function toggleStatusSpan() {
 
 function renderPayload(ball_identifier)
 {
-    window.open(`{{ url_for('get_payload') }}?ball_identifier=${ball_identifier}`, '_blank');
+    window.open(`{{ url_for('responses.get_payload') }}?ball_identifier=${ball_identifier}`, '_blank');
 
 }
 
@@ -107,7 +107,7 @@ function runLocalTest() {
     statusSpan.innerText = 'Running tests...';
     progressContainer.innerHTML = '';
 
-    const eventSource = new EventSource(`{{ url_for('run_live_progress') }}?max_processed_events=${maxProcessedEvents}`);
+    const eventSource = new EventSource(`{{ url_for('responses.run_live_progress') }}?max_processed_events=${maxProcessedEvents}`);
 
     eventSource.onmessage = function(event) {
         const newLog = document.createElement('pre');

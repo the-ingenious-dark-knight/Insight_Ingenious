@@ -16,6 +16,7 @@ This section provides detailed guides for using specific features and capabiliti
 ## Available Guides
 
 ### Integration and Interfaces
+- **[Complete Azure Deployment](./full-azure-deployment.md)** - Complete enterprise deployment instructions
 - **[API Integration](./api-integration.md)** - Using the REST API programmatically
 - **[Web Interface](./web-interface.md)** - Using the web-based interface
 - **[Azure Blob Storage Setup](./azure-blob-storage-setup.md)** - Complete guide for Azure Blob Storage integration for file storage and memory management
