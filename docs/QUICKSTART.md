@@ -24,7 +24,7 @@ Get Insight Ingenious up and running in 5 minutes! This enterprise-grade Python 
 1. **Install and Initialize**:
     ```bash
     # From your project directory
-    uv pip install -e ./ingenious
+    uv add ingenious
     uv run ingen init
     ```
 
@@ -130,7 +130,7 @@ set -e
 echo "🚀 Setting up Insight Ingenious..."
 
 # Install and initialize
-uv pip install -e ./ingenious
+uv add ingenious
 uv run ingen init
 
 # Set environment variables

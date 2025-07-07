@@ -24,7 +24,7 @@ This guide shows how to use Insight Ingenious for various tasks.
 
 ```bash
 # Install from your existing ingenious directory
-uv pip install -e ./ingenious
+uv add ingenious
 
 # Initialize project (creates config templates and folder structure)
 uv run ingen init
