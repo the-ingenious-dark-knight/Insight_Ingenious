@@ -87,7 +87,7 @@ ValidationError: 9 validation errors for Profiles
 
 **Symptoms**:
 - "Permission denied" when starting server on port 80
-- Server ignores `--port` parameter  
+- Server ignores `--port` parameter
 - "Address already in use" errors
 - Connection refused when testing API
 
@@ -97,7 +97,7 @@ ValidationError: 9 validation errors for Profiles
    ```bash
    # Use port 8080 instead of 80 (no admin privileges required)
    uv run ingen serve --port 8080
-   
+
    # Update your test commands to use the new port
    curl http://localhost:8080/api/v1/health
    ```
@@ -118,10 +118,10 @@ ValidationError: 9 validation errors for Profiles
    ```bash
    # Check what's using port 80
    lsof -i :80
-   
+
    # Check what's using your target port
    lsof -i :8080
-   
+
    # Kill processes if needed (be careful!)
    sudo kill -9 $(lsof -t -i:80)
    ```
@@ -130,7 +130,7 @@ ValidationError: 9 validation errors for Profiles
    ```bash
    # Run with elevated privileges (Linux/macOS)
    sudo uv run ingen serve
-   
+
    # Or use a reverse proxy (nginx, apache)
    ```
 
@@ -239,7 +239,7 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
    ```bash
    echo $AZURE_SQL_CONNECTION_STRING
    # Should show your connection string
-   
+
    # Or check if .env file is properly formatted
    cat .env | grep AZURE_SQL
    ```
@@ -331,6 +331,200 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
 - Never commit connection strings to version control
 - Always use environment variables for database credentials
 - Rotate passwords regularly for production deployments
+
+---
+
+### 6. Azure Blob Storage Issues
+
+**Symptoms**:
+- "BlobServiceClient cannot be constructed from connection string"
+- "Storage account not found" or authentication errors
+- Memory/prompts not persisting between sessions
+- File operations failing silently
+- "Container does not exist" errors
+
+**Prerequisites Check**:
+
+1. **Verify Azure Storage SDK is installed**:
+   ```bash
+   uv tree | grep azure-storage-blob
+   # Should show: azure-storage-blob==12.24.0
+   ```
+
+2. **Install Azure Storage SDK (if missing)**:
+   ```bash
+   uv add azure-storage-blob
+   ```
+
+**Configuration Steps**:
+
+1. **Set up Azure Storage Account** (via Azure Portal):
+   - Create a Storage Account (General Purpose v2)
+   - Note the Account Name and Account Key
+   - Get the Connection String from "Access keys" section
+
+2. **Configure environment variables**:
+   ```bash
+   # Add to .env file
+   AZURE_STORAGE_CONNECTION_STRING="DefaultEndpointsProtocol=https;AccountName=yourstorageaccount;AccountKey=your_key;EndpointSuffix=core.windows.net"
+   AZURE_STORAGE_ACCOUNT_NAME="yourstorageaccount"
+   AZURE_STORAGE_ACCOUNT_KEY="your_account_key"
+   ```
+
+3. **Update configuration files**:
+   ```yaml
+   # config.yml
+   storage:
+     type: "azure_blob"
+     container_data: "ingenious-data"
+     container_revisions: "ingenious-revisions"
+
+   # profiles.yml
+   storage:
+     type: "azure_blob"
+     container_data: "ingenious-data-dev"  # Environment-specific
+     container_revisions: "ingenious-revisions-dev"
+   ```
+
+4. **Test environment variable loading**:
+   ```bash
+   uv run python -c "
+   from dotenv import load_dotenv
+   import os
+   load_dotenv()
+   conn_str = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
+   if not conn_str:
+       print('❌ AZURE_STORAGE_CONNECTION_STRING not set')
+   else:
+       print('✅ Environment variable loaded successfully')
+       print(f'Connection string length: {len(conn_str)} characters')
+   "
+   ```
+
+5. **Test Azure Blob Storage connectivity**:
+   ```bash
+   uv run python -c "
+   from azure.storage.blob import BlobServiceClient
+   import os
+   conn_str = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
+   if not conn_str:
+       print('❌ AZURE_STORAGE_CONNECTION_STRING not set')
+   else:
+       try:
+           client = BlobServiceClient.from_connection_string(conn_str)
+           account_info = client.get_account_information()
+           print('✅ Azure Blob Storage connection successful')
+           print(f'Account kind: {account_info[\"account_kind\"]}')
+       except Exception as e:
+           print(f'❌ Connection failed: {e}')
+   "
+   ```
+
+6. **Test through Ingenious FileStorage**:
+   ```bash
+   uv run python -c "
+   from ingenious.ingenious.files import get_file_storage
+   from ingenious.ingenious.dependencies import get_config
+
+   try:
+       config = get_config()
+       file_storage = get_file_storage()
+       print(f'✅ FileStorage initialized: {type(file_storage).__name__}')
+
+       # Test basic operations
+       test_path = 'test/hello.txt'
+       file_storage.save_text(test_path, 'Hello Azure!')
+       content = file_storage.load_text(test_path)
+       print(f'✅ File operations working: {content}')
+
+       # Cleanup
+       if file_storage.exists(test_path):
+           file_storage.delete(test_path)
+           print('✅ Cleanup successful')
+   except Exception as e:
+       print(f'❌ FileStorage error: {e}')
+   "
+   ```
+
+7. **Test Memory and Prompts Integration**:
+   ```bash
+   uv run python -c "
+   from ingenious.ingenious.services.memory_manager import MemoryManager
+   import json
+
+   try:
+       memory_manager = MemoryManager()
+       test_data = {'test': 'memory_data', 'timestamp': '2024-01-01'}
+
+       # Test memory operations
+       memory_manager.save_memory('test_conversation', test_data)
+       loaded_data = memory_manager.load_memory('test_conversation')
+       print(f'✅ Memory operations working: {loaded_data == test_data}')
+
+       # Test prompts API
+       import requests
+       response = requests.get('http://localhost:8000/api/v1/prompts')
+       if response.status_code == 200:
+           print('✅ Prompts API accessible')
+       else:
+           print(f'⚠️  Prompts API returned: {response.status_code}')
+
+   except Exception as e:
+       print(f'❌ Memory/Prompts error: {e}')
+   "
+   ```
+
+**Common Connection String Issues**:
+
+- **Malformed connection string**: Ensure all required fields are present:
+  ```
+  DefaultEndpointsProtocol=https;AccountName=name;AccountKey=key;EndpointSuffix=core.windows.net
+  ```
+- **Missing EndpointSuffix**: Required for proper endpoint resolution
+- **Wrong account name/key**: Verify credentials in Azure Portal
+- **Network access**: Ensure storage account allows access from your IP/network
+
+**Container Management**:
+
+- **Auto-creation**: Ingenious automatically creates containers if they don't exist
+- **Naming conventions**: Use lowercase, hyphens only (e.g., `ingenious-data-dev`)
+- **Environment separation**: Use different containers for dev/staging/prod
+
+**Performance Considerations**:
+
+- **Connection reuse**: BlobServiceClient instances are reused automatically
+- **Batch operations**: For high-volume scenarios, consider batching operations
+- **Timeout settings**: Adjust timeout in configuration for slow networks
+
+**Security Best Practices**:
+
+- **Connection strings**: Never commit to version control
+- **Access keys**: Rotate regularly
+- **Network access**: Configure firewall rules in Azure Portal
+- **Shared Access Signatures**: Consider using SAS tokens for limited access
+
+**Troubleshooting Storage Type Conflicts**:
+
+If you're switching from local to Azure Blob Storage:
+
+1. **Clear local data** (if safe to do so):
+   ```bash
+   rm -rf ./data/conversations
+   rm -rf ./data/prompts
+   ```
+
+2. **Verify configuration precedence**:
+   - `profiles.yml` overrides `config.yml`
+   - Environment variables override both
+
+3. **Test with minimal configuration**:
+   ```yaml
+   # Minimal profiles.yml for testing
+   storage:
+     type: "azure_blob"
+     container_data: "test-data"
+     container_revisions: "test-revisions"
+   ```
 
 ---
 

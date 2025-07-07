@@ -199,56 +199,120 @@ graph TD
 
 ### Storage Architecture
 
-The storage layer handles persistence and configuration:
+The storage layer provides flexible, cloud-aware persistence and configuration management:
 
 ```mermaid
 graph TB
     subgraph "⚙️ Configuration"
         CONFIG_YML[📄 config.yml<br/>Project Settings]
         PROFILES_YML[🔐 profiles.yml<br/>API Keys & Secrets]
+        ENV_VARS[🌐 Environment Variables<br/>Runtime Configuration]
     end
 
     subgraph "📚 Chat Storage"
-        HISTORY[💬 Chat History<br/>SQLite/Database]
+        HISTORY_SQLITE[💬 Chat History<br/>SQLite Database]
+        HISTORY_AZURE[💬 Chat History<br/>Azure SQL Database]
         SESSIONS[👤 User Sessions<br/>In-Memory Storage]
+        MEMORY_MGR[🧠 Memory Manager<br/>Conversation Context]
     end
 
-    subgraph "📁 File Storage"
-        UPLOADS[⬆️ File Uploads<br/>Local/Cloud Storage]
-        TEMPLATES[📋 Templates<br/>YAML Files]
-        LOGS[📊 System Logs<br/>Structured Logging]
+    subgraph "📁 File Storage Abstraction"
+        STORAGE_INTERFACE[🔌 IFileStorage Interface]
+        LOCAL_STORAGE[💾 Local Storage<br/>Development & Testing]
+        AZURE_BLOB[☁️ Azure Blob Storage<br/>Production & Scale]
     end
 
-    subgraph "🔄 Data Flow"
-        READ[📖 Read Operations]
-        WRITE[✍️ Write Operations]
-        CACHE[⚡ Caching Layer]
+    subgraph "📋 Storage Categories"
+        PROMPTS[� Prompt Templates<br/>Revision Management]
+        DATA_FILES[📊 Data Files<br/>Analysis Results]
+        UPLOADS[⬆️ File Uploads<br/>User Content]
+        MEMORY_FILES[🧠 Memory Context<br/>Thread-Specific Data]
     end
 
-    CONFIG_YML --> READ
-    PROFILES_YML --> READ
-    HISTORY --> READ
-    HISTORY --> WRITE
+    subgraph "🔄 Data Operations"
+        READ[📖 Read Operations<br/>Async/Sync Support]
+        WRITE[✍️ Write Operations<br/>Cloud Persistence]
+        DELETE[🗑️ Delete Operations<br/>Cleanup Management]
+        LIST[📋 List Operations<br/>Directory Browsing]
+        CACHE[⚡ Caching Layer<br/>Performance Optimization]
+    end
+
+    CONFIG_YML --> STORAGE_INTERFACE
+    PROFILES_YML --> STORAGE_INTERFACE
+    ENV_VARS --> STORAGE_INTERFACE
+
+    STORAGE_INTERFACE --> LOCAL_STORAGE
+    STORAGE_INTERFACE --> AZURE_BLOB
+
+    LOCAL_STORAGE --> PROMPTS
+    LOCAL_STORAGE --> DATA_FILES
+    LOCAL_STORAGE --> UPLOADS
+    LOCAL_STORAGE --> MEMORY_FILES
+
+    AZURE_BLOB --> PROMPTS
+    AZURE_BLOB --> DATA_FILES
+    AZURE_BLOB --> UPLOADS
+    AZURE_BLOB --> MEMORY_FILES
+
+    MEMORY_MGR --> STORAGE_INTERFACE
+    HISTORY_SQLITE --> READ
+    HISTORY_AZURE --> READ
     SESSIONS --> READ
-    SESSIONS --> WRITE
+    PROMPTS --> READ
+    DATA_FILES --> READ
     UPLOADS --> READ
+    MEMORY_FILES --> READ
+
+    HISTORY_SQLITE --> WRITE
+    HISTORY_AZURE --> WRITE
+    SESSIONS --> WRITE
+    PROMPTS --> WRITE
+    DATA_FILES --> WRITE
     UPLOADS --> WRITE
-    TEMPLATES --> READ
-    LOGS --> WRITE
+    MEMORY_FILES --> WRITE
 
     READ --> CACHE
     WRITE --> CACHE
+    DELETE --> CACHE
+    LIST --> CACHE
 
     classDef config fill:#fff3e0
     classDef chat fill:#e8f5e8
-    classDef files fill:#f3e5f5
-    classDef flow fill:#e1f5fe
+    classDef storage fill:#e3f2fd
+    classDef categories fill:#f3e5f5
+    classDef operations fill:#e1f5fe
 
-    class CONFIG_YML,PROFILES_YML config
-    class HISTORY,SESSIONS chat
-    class UPLOADS,TEMPLATES,LOGS files
-    class READ,WRITE,CACHE flow
+    class CONFIG_YML,PROFILES_YML,ENV_VARS config
+    class HISTORY_SQLITE,HISTORY_AZURE,SESSIONS,MEMORY_MGR chat
+    class STORAGE_INTERFACE,LOCAL_STORAGE,AZURE_BLOB storage
+    class PROMPTS,DATA_FILES,UPLOADS,MEMORY_FILES categories
+    class READ,WRITE,DELETE,LIST,CACHE operations
 ```
+
+#### Storage Features
+
+**Multi-Backend Support:**
+- **Local Storage**: Fast development and testing with filesystem access
+- **Azure Blob Storage**: Production-ready cloud storage with enterprise features
+- **Transparent Switching**: Change backends via configuration without code changes
+
+**Memory Management:**
+- **Thread-Specific Memory**: Isolated conversation context per user/thread
+- **Automatic Truncation**: Maintain memory within configurable word limits
+- **Cloud Persistence**: Memory survives application restarts and scales across instances
+- **Async Operations**: Non-blocking memory operations for better performance
+
+**File Storage Categories:**
+- **Prompts** (`revisions` container): Template versioning and prompt management
+- **Data Files** (`data` container): Analysis results, functional test outputs
+- **Memory Context**: Conversation state and context files
+- **Uploads**: User-submitted files and documents
+
+**Authentication Methods:**
+- **Connection String**: Simple development setup with full connection details
+- **Managed Identity**: Production Azure authentication without credential management
+- **Service Principal**: Application-specific authentication with client secrets
+- **Default Credential**: Automatic Azure credential discovery
 
 ## Data Flow Architecture
 

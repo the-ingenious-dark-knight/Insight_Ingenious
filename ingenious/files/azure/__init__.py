@@ -24,7 +24,13 @@ class azure_FileStorageRepository(IFileStorage):
         self.container_name = fs_config.container_name
         self.authentication_method = fs_config.authentication_method
 
-        if self.authentication_method == file_storage_AuthenticationMethod.TOKEN:
+        # Check if token is actually a connection string
+        if self.token and "DefaultEndpointsProtocol" in self.token:
+            # Use connection string authentication
+            self.blob_service_client = BlobServiceClient.from_connection_string(
+                self.token
+            )
+        elif self.authentication_method == file_storage_AuthenticationMethod.TOKEN:
             self.blob_service_client = BlobServiceClient(
                 account_url=self.url, credential=self.token
             )

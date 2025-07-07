@@ -5,6 +5,8 @@ import autogen.retrieve_utils
 import autogen.runtime_logging
 from autogen.agentchat.contrib.retrieve_user_proxy_agent import RetrieveUserProxyAgent
 
+from ingenious.models import config as _config
+
 logger = logging.getLogger(__name__)
 
 
@@ -24,17 +26,29 @@ class ConversationPattern:
         self.thread_memory = thread_memory
         self.search_agent = None
 
+        # Initialize memory manager for cloud storage support
+        from ingenious.services.memory_manager import (
+            get_memory_manager,
+            run_async_memory_operation,
+        )
+
+        self.memory_manager = get_memory_manager(_config.get_config(), memory_path)
+
         if not self.thread_memory:
-            with open(f"{self.memory_path}/context.md", "w") as memory_file:
-                memory_file.write("New conversation. Continue based on user question.")
+            run_async_memory_operation(
+                self.memory_manager.write_memory(
+                    "New conversation. Continue based on user question."
+                )
+            )
 
         if self.memory_record_switch and self.thread_memory:
             logger.log(
                 level=logging.DEBUG,
                 msg="Memory recording enabled. Requires `ChatHistorySummariser` for optional dependency.",
             )
-            with open(f"{self.memory_path}/context.md", "w") as memory_file:
-                memory_file.write(self.thread_memory)
+            run_async_memory_operation(
+                self.memory_manager.write_memory(self.thread_memory)
+            )
 
         self.termination_msg = lambda x: "TERMINATE" in x.get("content", "").upper()
 
@@ -96,7 +110,7 @@ class ConversationPattern:
             is_termination_msg=self.termination_msg,
         )
 
-    async def get_conversation_response(self, input_message: str) -> [str, str]:
+    async def get_conversation_response(self, input_message: str) -> list[str]:
         """
         This function is the main entry point for the conversation pattern. It takes a message as input and returns a
         response. Make sure that you have added the necessary topic agents and agent topic chats before
@@ -154,9 +168,11 @@ class ConversationPattern:
                 manager, message=input_message, summary_method="last_msg"
             )
 
-        with open(f"{self.memory_path}/context.md", "w") as memory_file:
-            memory_file.write(res.summary)
-            context = res.summary
+        # Write memory using MemoryManager
+        from ingenious.services.memory_manager import run_async_memory_operation
+
+        run_async_memory_operation(self.memory_manager.write_memory(res.summary))
+        context = res.summary
 
         # Send a response back to the user
         return res.summary, context

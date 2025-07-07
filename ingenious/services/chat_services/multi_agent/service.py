@@ -1,5 +1,4 @@
 import logging
-import os
 import uuid as uuid_module
 from abc import ABC, abstractmethod
 from typing import List, Optional
@@ -269,12 +268,18 @@ class IConversationPattern(ABC):
     _config: ig_config.Config
     _memory_path: str
     _memory_file_path: str
+    _memory_manager: any
 
     def __init__(self):
         super().__init__()
         self._config = ig_config.get_config()
         self._memory_path = self.GetConfig().chat_history.memory_path
         self._memory_file_path = f"{self._memory_path}/context.md"
+
+        # Initialize memory manager for cloud storage support
+        from ingenious.services.memory_manager import get_memory_manager
+
+        self._memory_manager = get_memory_manager(self._config, self._memory_path)
 
     def GetConfig(self):
         return self._config
@@ -289,23 +294,14 @@ class IConversationPattern(ABC):
         return self._memory_file_path
 
     def Maintain_Memory(self, new_content, max_words=150):
-        file_path = self._memory_file_path()
-        if os.path.exists(file_path):
-            with open(file_path, "r") as memory_file:
-                current_content = memory_file.read()
-        else:
-            current_content = ""
+        """
+        Maintain memory using the MemoryManager for cloud storage support.
+        """
+        from ingenious.services.memory_manager import run_async_memory_operation
 
-        # Combine the current content and the new content
-        combined_content = current_content + " " + new_content
-        words = combined_content.split()
-
-        # Keep only the last `max_words` words
-        truncated_content = " ".join(words[-max_words:])
-
-        # Write the truncated content back to the file
-        with open(file_path, "w") as memory_file:
-            memory_file.write(truncated_content)
+        return run_async_memory_operation(
+            self._memory_manager.maintain_memory(new_content, max_words)
+        )
 
     async def write_llm_responses_to_file(
         self, response_array: List[dict], event_type: str, output_path: str
@@ -337,6 +333,7 @@ class IConversationFlow(ABC):
     _memory_file_path: str
     _logger: logging.Logger
     _chat_service: multi_agent_chat_service
+    _memory_manager: any
 
     def __init__(self, parent_multi_agent_chat_service: multi_agent_chat_service):
         super().__init__()
@@ -345,6 +342,11 @@ class IConversationFlow(ABC):
         self._memory_file_path = f"{self._memory_path}/context.md"
         self._logger = logging.getLogger(__name__)
         self._chat_service = parent_multi_agent_chat_service
+
+        # Initialize memory manager for cloud storage support
+        from ingenious.services.memory_manager import get_memory_manager
+
+        self._memory_manager = get_memory_manager(self._config, self._memory_path)
 
     def GetConfig(self):
         return self._config
@@ -372,23 +374,14 @@ class IConversationFlow(ABC):
         return self._memory_file_path
 
     def Maintain_Memory(self, new_content, max_words=150):
-        file_path = self._memory_file_path()
-        if os.path.exists(file_path):
-            with open(file_path, "r") as memory_file:
-                current_content = memory_file.read()
-        else:
-            current_content = ""
+        """
+        Maintain memory using the MemoryManager for cloud storage support.
+        """
+        from ingenious.services.memory_manager import run_async_memory_operation
 
-        # Combine the current content and the new content
-        combined_content = current_content + " " + new_content
-        words = combined_content.split()
-
-        # Keep only the last `max_words` words
-        truncated_content = " ".join(words[-max_words:])
-
-        # Write the truncated content back to the file
-        with open(file_path, "w") as memory_file:
-            memory_file.write(truncated_content)
+        return run_async_memory_operation(
+            self._memory_manager.maintain_memory(new_content, max_words)
+        )
 
     @abstractmethod
     async def get_conversation_response(

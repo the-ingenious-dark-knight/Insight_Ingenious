@@ -2,10 +2,7 @@
 
 An enterprise-grade Python library for quickly setting up APIs to interact with AI Agents, featuring tight integrations with Microsoft Azure services and comprehensive utilities for debugging and customization.
 
-## Overview
-Insight Ingenious is a production-ready library that enables developers to rapidly deploy sophisticated AI agent APIs with minimal configuration. Built specifically for enterprise environments, it provides seamless Microsoft Azure integrations, robust debugging tools, and extensive customization capabilities for building scalable AI-powered applications.
-
-## ⚡ Quick Start
+## Quick Start
 
 Get up and running in 5 minutes with Azure OpenAI!
 
@@ -61,30 +58,22 @@ Get up and running in 5 minutes with Azure OpenAI!
 
 🎉 **That's it!** You should see a comprehensive JSON response with insights from multiple AI agents analyzing the bike sales data.
 
-**Note**: The `bike-insights` workflow is created when you run `ingen init` - it's part of the project template setup, not included in the core library.
+**Note**: The `bike-insights` workflow is created when you run `ingen init` - it's part of the project template setup, not included in the core library. You can now build on `bike-insights` as a template for your specific use case.
 
-### 📚 Detailed Setup
-- **📖 Complete guide**: [docs/QUICKSTART.md](docs/QUICKSTART.md) - Full walkthrough with examples
-- **🔧 Troubleshooting**: [docs/troubleshooting/README.md](docs/troubleshooting/README.md) - Common issues & fixes
-- **📡 API Reference**: [docs/api/WORKFLOWS.md](docs/api/WORKFLOWS.md) - All endpoints & workflows
-
-## 🎯 Workflow Categories
+## Workflow Categories
 
 Insight Ingenious provides multiple conversation workflows with different configuration requirements:
 
-### ✅ **Core Workflows (Azure OpenAI only)**
+### **"Hello World" Workflow** (Available via project template)
+- `bike-insights` - **The recommended starting point** - Comprehensive bike sales analysis showcasing multi-agent coordination (created when you run `ingen init`)
+
+### **Core Workflows (Azure OpenAI only)**
 - `classification-agent` - Route input to specialized agents based on content
 
-### 🔍 **Core Workflows (Require Additional Services)**
+### **EXPERIMENTAL/MAY CONTAIN BUGS: Other Core Workflows (Require Additional Services)**
 - `knowledge-base-agent` - Search knowledge bases (requires Azure Search Service)
 - `sql-manipulation-agent` - Execute SQL queries (requires database connection)
 
-### ⭐ **"Hello World" Workflow** (Available via project template)
-- `bike-insights` - **The recommended starting point** - Comprehensive bike sales analysis showcasing multi-agent coordination (created when you run `ingen init`)
-
-**📋 See [Workflow Configuration Requirements](docs/workflows/README.md) for detailed setup instructions.**
-
-**🔄 Naming Formats**: Workflows support both hyphenated (`bike-insights`) and underscored (`bike_insights`) naming formats for backward compatibility. New projects should use hyphenated names.
 
 ## Project Structure
 
@@ -115,24 +104,12 @@ Insight Ingenious provides multiple conversation workflows with different config
 
 ## Documentation
 
-For detailed documentation, see the [docs/](docs/) directory:
-
-- **[⚡ Quick Start Guide](docs/QUICKSTART.md)** - **Complete 5-minute setup with examples**
-- **[🛠️ Troubleshooting](docs/troubleshooting/README.md)** - **Common issues and solutions**
-- **[📡 API Reference](docs/api/WORKFLOWS.md)** - **All endpoints and workflows**
-- [Getting Started](docs/getting-started/README.md) - Installation and setup details
-- [Workflow Configuration Requirements](docs/workflows/README.md) - Service setup for different workflows
-- [User Guides](docs/guides/README.md) - Feature-specific usage guides
-- [Extensions & Customization](docs/extensions/README.md) - Creating custom components
-- [Configuration Guide](docs/configuration/README.md) - Detailed configuration reference
-- [Architecture Overview](docs/architecture/README.md) - System design and architecture
-- [Development Guide](docs/development/README.md) - Contributing and development setup
-- [Components Reference](docs/components/README.md) - Technical component documentation
+For detailed documentation, see the [docs](https://blog.insight-services-apac.dev/ingenious/):
 
 ## Contributing
 
-Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+Contributions are welcome! Please see [CONTRIBUTING.md](https://github.com/Insight-Services-APAC/ingenious/blob/main/CONTRIBUTING.md) for guidelines.
 
 ## License
 
-This project is licensed under the terms specified in the [LICENSE](LICENSE) file.
+This project is licensed under the terms specified in the [LICENSE](https://github.com/Insight-Services-APAC/ingenious/blob/main/LICENSE) file.

@@ -5,6 +5,8 @@ from autogen_agentchat.agents import AssistantAgent, UserProxyAgent
 from autogen_agentchat.teams import RoundRobinGroupChat
 from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
 
+from ingenious.models import config as _config
+
 logger = logging.getLogger(__name__)
 
 
@@ -36,24 +38,35 @@ class ConversationPattern:
             api_version=default_llm_config.get("api_version", "2024-08-01-preview"),
         )
 
+        # Initialize memory manager for cloud storage support
+        from ingenious.services.memory_manager import (
+            get_memory_manager,
+            run_async_memory_operation,
+        )
+
+        self.memory_manager = get_memory_manager(_config.get_config(), memory_path)
+
         # Initialize context file
         if not self.thread_memory:
-            with open(f"{self.memory_path}/context.md", "w") as memory_file:
-                memory_file.write("New conversation. Continue based on user question.")
+            run_async_memory_operation(
+                self.memory_manager.write_memory(
+                    "New conversation. Continue based on user question."
+                )
+            )
 
         if self.memory_record_switch and self.thread_memory:
             logger.log(
                 level=logging.DEBUG,
                 msg="Memory recording enabled. Requires `ChatHistorySummariser` for optional dependency.",
             )
-            with open(f"{self.memory_path}/context.md", "w") as memory_file:
-                memory_file.write(self.thread_memory)
+            run_async_memory_operation(
+                self.memory_manager.write_memory(self.thread_memory)
+            )
 
-        try:
-            with open(f"{self.memory_path}/context.md", "r") as memory_file:
-                self.context = memory_file.read()
-        except FileNotFoundError:
-            self.context = ""
+        # Read current context
+        self.context = run_async_memory_operation(
+            self.memory_manager.read_memory(default_content="")
+        )
 
         # Simplified: Just one classifier agent that does both classification and response
         self.classifier = AssistantAgent(
@@ -102,10 +115,11 @@ class ConversationPattern:
                 result.messages[-1].content if result.messages else "No response"
             )
 
-            # Update context
-            with open(f"{self.memory_path}/context.md", "w") as memory_file:
-                memory_file.write(final_message)
-                self.context = final_message
+            # Update context using MemoryManager
+            from ingenious.services.memory_manager import run_async_memory_operation
+
+            run_async_memory_operation(self.memory_manager.write_memory(final_message))
+            self.context = final_message
 
             return final_message, self.context
 

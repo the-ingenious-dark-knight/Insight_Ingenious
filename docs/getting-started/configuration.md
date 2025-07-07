@@ -370,35 +370,109 @@ web_configuration:
 
 ### File Storage
 
-Configures file storage with support for revisions and data storage:
+Configures file storage with support for both local and Azure Blob Storage backends. This affects prompt template storage, memory management, and data persistence.
+
+#### Local Storage Configuration
 
 ```yaml
 file_storage:
   revisions:
     enable: true
-    storage_type: "local"  # Options: "local", "azure"
-    container_name: "jrsrevisions"  # Azure container name
-    path: ".files"  # Local storage path
-    add_sub_folders: true  # Whether to create sub-folders
+    storage_type: "local"
+    container_name: "revisions"  # Not used for local storage
+    path: ".files"  # Local directory path
+    add_sub_folders: true
   data:
     enable: true
-    storage_type: "local"  # Options: "local", "azure"
-    container_name: "jrsdata"  # Azure container name
-    path: ".files"  # Local storage path
-    add_sub_folders: true  # Whether to create sub-folders
+    storage_type: "local"
+    container_name: "data"  # Not used for local storage
+    path: ".files"  # Local directory path
+    add_sub_folders: true
 ```
 
-For Azure Blob Storage in `profiles.yml`:
+#### Azure Blob Storage Configuration
+
+```yaml
+file_storage:
+  revisions:
+    enable: true
+    storage_type: "azure"  # Use Azure Blob Storage
+    container_name: "revisions"  # Azure container name
+    path: "ingenious-files"  # Base path within container
+    add_sub_folders: true
+  data:
+    enable: true
+    storage_type: "azure"  # Use Azure Blob Storage
+    container_name: "data"  # Azure container name
+    path: "ingenious-files"  # Base path within container
+    add_sub_folders: true
+```
+
+#### Azure Blob Storage profiles.yml Configuration
+
+Configure authentication and connection details in `profiles.yml`:
 
 ```yaml
 file_storage:
   revisions:
     url: "https://your-storage.blob.core.windows.net/"
-    authentication_method: "default_credential"  # or "msi"
+    token: "${AZURE_STORAGE_CONNECTION_STRING:}"  # Connection string
+    authentication_method: "token"  # Use connection string auth
   data:
     url: "https://your-storage.blob.core.windows.net/"
-    authentication_method: "default_credential"  # or "msi"
+    token: "${AZURE_STORAGE_CONNECTION_STRING:}"  # Connection string
+    authentication_method: "token"  # Use connection string auth
 ```
+
+#### Authentication Methods
+
+Azure Blob Storage supports multiple authentication methods:
+
+1. **Connection String (Development)**:
+   ```yaml
+   authentication_method: "token"
+   token: "DefaultEndpointsProtocol=https;AccountName=..."
+   ```
+
+2. **Managed Identity (Production)**:
+   ```yaml
+   authentication_method: "msi"
+   client_id: "your-managed-identity-client-id"
+   ```
+
+3. **Service Principal**:
+   ```yaml
+   authentication_method: "client_id_and_secret"
+   client_id: "your-app-registration-client-id"
+   token: "your-client-secret"
+   ```
+
+4. **Default Azure Credential**:
+   ```yaml
+   authentication_method: "default_credential"
+   ```
+
+#### Environment Variables for Azure Blob Storage
+
+Set these in your `.env` file:
+
+```bash
+AZURE_STORAGE_CONNECTION_STRING="DefaultEndpointsProtocol=https;AccountName=ingendev;AccountKey=YOUR_KEY;EndpointSuffix=core.windows.net"
+AZURE_STORAGE_ACCOUNT_NAME="ingendev"
+AZURE_STORAGE_ACCOUNT_KEY="YOUR_ACCOUNT_KEY"
+AZURE_STORAGE_REVISIONS_URL="https://ingendev.blob.core.windows.net"
+AZURE_STORAGE_DATA_URL="https://ingendev.blob.core.windows.net"
+```
+
+#### Features Enabled by File Storage
+
+- **Prompt Template Management**: Store and version prompt templates
+- **Memory Management**: Persist conversation context across sessions
+- **Data Persistence**: Store functional test outputs and analysis results
+- **API Integration**: `/api/v1/prompts` routes for prompt management
+- **Multi-Environment Support**: Same codebase works with local or cloud storage
+
+For detailed setup instructions, see the [Azure Blob Storage Setup Guide](../guides/azure-blob-storage-setup.md).
 
 ### Local SQL Database
 

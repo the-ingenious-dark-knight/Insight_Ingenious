@@ -9,47 +9,29 @@ toc_label: "Quick Start Steps"
 toc_icon: "bolt"
 ---
 
-# ⚡ Quick Start Guide
+## Quick Start
 
-Get Insight Ingenious up and running in 5 minutes! This enterprise-grade Python library enables rapid deployment of AI agent APIs with seamless Microsoft Azure integrations.
+Get up and running in 5 minutes with Azure OpenAI!
 
-## 🚀 Prerequisites
+### Prerequisites
+- Python 3.13+
+- Azure OpenAI API credentials
+- [uv package manager](https://docs.astral.sh/uv/)
 
-- ✅ Python 3.13+
-- ✅ uv package manager
-- ✅ Azure OpenAI API credentials
-
-## 📦 5-Minute Setup
+### 5-Minute Setup
 
 1. **Install and Initialize**:
     ```bash
-    # For local development (if you have the ingenious source code)
-    uv pip install -e ./ingenious
-    
-    # Or for production install from package
+    # From your project directory
     uv add ingenious
-    
-    # Initialize project template
     uv run ingen init
-    
-    # Install additional dependencies for environment variable loading
-    uv add python-dotenv
     ```
 
 2. **Configure Credentials**:
     ```bash
-    # Create .env file with your Azure OpenAI credentials
-    cat > .env << 'EOF'
-    AZURE_OPENAI_API_KEY=your_api_key_here
-    AZURE_OPENAI_BASE_URL=https://your-endpoint.openai.azure.com/
-    AZURE_OPENAI_MODEL_NAME=gpt-4.1-nano
-    AZURE_OPENAI_DEPLOYMENT=gpt-4.1-nano
-    AZURE_OPENAI_API_VERSION=2024-12-01-preview
-    LOCAL_SQL_CSV_PATH=./sample_data.csv
-    EOF
-    
-    # Edit with your actual credentials
-    nano .env
+    # Edit .env with your Azure OpenAI credentials
+    cp .env.example .env
+    nano .env  # Add AZURE_OPENAI_API_KEY and AZURE_OPENAI_BASE_URL
     ```
 
 3. **Validate Setup** (Recommended):
@@ -61,26 +43,19 @@ Get Insight Ingenious up and running in 5 minutes! This enterprise-grade Python 
 
 4. **Start the Server**:
     ```bash
-    # Default port (may require admin privileges on some systems)
     uv run ingen serve
-    
-    # Alternative port if 80 is not available
-    uv run ingen serve --port 8080
     ```
 
 5. **Verify Health**:
     ```bash
-    # Check server health (adjust port if using alternative)
+    # Check server health
     curl http://localhost:80/api/v1/health
-    # or
-    curl http://localhost:8080/api/v1/health
     ```
 
 6. **Test the API**:
     ```bash
     # Test bike insights workflow (the "Hello World" of Ingenious)
-    # Adjust port to match your server (80 or 8080)
-    curl -X POST http://localhost:8080/api/v1/chat \
+    curl -X POST http://localhost:80/api/v1/chat \
       -H "Content-Type: application/json" \
       -d '{
         "user_prompt": "{\"stores\": [{\"name\": \"QuickStart Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"QS-001\", \"quantity_sold\": 1, \"sale_date\": \"2023-04-15\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 5.0, \"comment\": \"Perfect bike for getting started!\"}}], \"bike_stock\": []}], \"revision_id\": \"quickstart-1\", \"identifier\": \"hello-world\"}",
@@ -90,9 +65,23 @@ Get Insight Ingenious up and running in 5 minutes! This enterprise-grade Python 
 
 🎉 **That's it!** You should see a comprehensive JSON response with insights from multiple AI agents analyzing the bike sales data.
 
-**Note**: The `bike-insights` workflow is created when you run `ingen init` - it's part of the project template setup, not included in the core library.
+**Note**: The `bike-insights` workflow is created when you run `ingen init` - it's part of the project template setup, not included in the core library. You can now build on `bike-insights` as a template for your specific use case.
 
-## 🗄️ Azure SQL Database Setup (Optional)
+## Workflow Categories
+
+Insight Ingenious provides multiple conversation workflows with different configuration requirements:
+
+### **"Hello World" Workflow** (Available via project template)
+- `bike-insights` - **The recommended starting point** - Comprehensive bike sales analysis showcasing multi-agent coordination (created when you run `ingen init`)
+
+### **Core Workflows (Azure OpenAI only)**
+- `classification-agent` - Route input to specialized agents based on content
+
+### **EXPERIMENTAL/MAY CONTAIN BUGS: Other Core Workflows (Require Additional Services)**
+- `knowledge-base-agent` - Search knowledge bases (requires Azure Search Service)
+- `sql-manipulation-agent` - Execute SQL queries (requires database connection)
+
+## Azure SQL Database Setup (Optional)
 
 For production deployments with persistent chat history storage in Azure SQL Database:
 
@@ -107,7 +96,7 @@ For production deployments with persistent chat history storage in Azure SQL Dat
     # macOS
     brew tap microsoft/mssql-release
     brew install msodbcsql18
-    
+
     # Verify installation
     odbcinst -q -d | grep "ODBC Driver 18"
     ```
@@ -144,7 +133,7 @@ For production deployments with persistent chat history storage in Azure SQL Dat
 
 **Benefits of Azure SQL:**
 - ✅ Production-grade chat history persistence
-- ✅ Multi-user conversation management  
+- ✅ Multi-user conversation management
 - ✅ Enterprise security and compliance
 - ✅ Automatic table creation and management
 
@@ -197,192 +186,7 @@ curl -X POST http://localhost:8080/api/v1/chat \
   }'
 ```
 
----
-
-## 🛠️ One-Line Setup Script
-
-Save this as `setup.sh`:
-
-```bash
-#!/bin/bash
-set -e
-
-echo "🚀 Setting up Insight Ingenious..."
-
-# Install and initialize
-uv add ingenious
-uv run ingen init
-
-# Set environment variables
-export INGENIOUS_PROJECT_PATH=$(pwd)/config.yml
-export INGENIOUS_PROFILE_PATH=$(pwd)/profiles.yml
-
-echo "✅ Setup complete!"
-echo "📝 Next: Edit .env with your Azure OpenAI credentials"
-echo "🚀 Then run: uv run ingen serve --port 8080"
-```
-
-Run with: `chmod +x setup.sh && ./setup.sh`
-
----
-
-## 🧪 Verification Commands
-
-```bash
-# Check system status
-uv run ingen status
-
-# List available workflows
-uv run ingen workflows
-
-# Test specific workflow requirements
-uv run ingen workflows bike-insights
-
-# Quick server test
-curl -s http://localhost:8080/api/v1/health || echo "Server not running"
-```
-
----
-
-## 📡 API Endpoints Quick Reference
-
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/api/v1/chat` | POST | Main chat/workflow endpoint |
-| `/api/v1/workflow-status/{name}` | GET | Check workflow status |
-| `/api/v1/health` | GET | Server health check |
-| `/docs` | GET | API documentation |
-
-**Note:** Adjust `localhost:8080` to match your server port (default is 80, but 8080 is common for development).
-
----
-
-## Available Workflows
-
-### bike-insights (Hello World - **START HERE!**)
-**Purpose**: The "Hello World" of Ingenious - comprehensive bike sales analysis showcasing multi-agent coordination
-**Requirements**: Azure OpenAI only
-**Availability**: Created when you run `ingen init` (part of project template)
-**Input**: JSON with bike sales data
-**Why start here?**: Demonstrates the full power of multi-agent workflows
-
-### classification-agent (Simple Alternative)
-**Purpose**: Text classification and routing (try this if bike-insights seems complex)
-**Requirements**: Azure OpenAI only
-**Availability**: Core library (always available)
-**Input**: Plain text
-
-### knowledge-base-agent (Advanced)
-**Purpose**: Knowledge base search
-**Requirements**: Azure OpenAI + Azure Search
-
-### 📊 sql-manipulation-agent (Advanced)
-**Purpose**: Natural language to SQL
-**Requirements**: Azure OpenAI + Database connection
-
----
-
-## 🚨 Quick Troubleshooting
-
-### Server won't start?
-```bash
-# Check configuration
-uv run ingen status
-
-# Try different port (common solution for port 80 permission issues)
-uv run ingen serve --port 8080
-
-# Check logs for errors
-uv run ingen serve 2>&1 | grep -i error
-```
-
-### Port 80 permission denied?
-```bash
-# Use alternative port (recommended for development)
-uv run ingen serve --port 8080
-
-# Update all curl commands to use :8080 instead of :80
-```
-
-### Environment variables not loading?
-```bash
-# Ensure python-dotenv is installed
-uv add python-dotenv
-
-# Check .env file format (no spaces around =)
-cat .env
-
-# Test environment variable loading
-python -c "
-from dotenv import load_dotenv
-import os
-load_dotenv()
-print('AZURE_OPENAI_API_KEY:', os.getenv('AZURE_OPENAI_API_KEY', 'NOT_FOUND'))
-"
-```
-
-### Profile validation errors?
-```bash
-# Use minimal template
-cp ingenious/ingenious/ingenious_extensions_template/profiles.minimal.yml ./profiles.yml
-
-# Check environment variables
-env | grep AZURE_OPENAI
-```
-
-### Workflow not found?
-```bash
-# Check available workflows
-uv run ingen workflows
-
-# Use correct name (hyphens preferred, underscores legacy)
-```
-```json
-{
-  "user_prompt": "Your bike sales data here...",
-  "conversation_flow": "bike-insights"  // ✅ Preferred (hyphenated)
-}
-
-// Legacy format (still supported):
-{
-  "user_prompt": "Your bike sales data here...",
-  "conversation_flow": "bike_insights"  // ✅ Legacy (still works)
-}
-```
-```
-
-### API returning errors?
-```bash
-# Check server logs in terminal
-# Verify JSON format for bike-insights
-# Try with classification-agent first if bike-insights seems complex
-```
-
----
-
-## 🔄 Reset If Needed
-
-```bash
-# Clean slate
-rm -rf ingenious_extensions/ tmp/ config.yml profiles.yml .env
-
-# Start over
-uv run ingen init
-```
-
----
-
-## 📚 Next Steps
-
-Once you have the basic setup working:
-
-1. **📖 Read the full documentation**: `/docs/`
-2. **�️ Try the SQL Agent**: Follow the [SQL Agent Setup Guide](guides/sql-agent-setup.md) for database queries
-3. **�🔧 Customize workflows**: Edit templates in `ingenious_extensions/`
-4. **🧪 Create your own agents**: Follow patterns in existing workflows
-5. **🚀 Deploy to production**: See deployment guides
-
-### Quick SQL Agent Setup
+### Quick SQL Agent Setup (EXPERIMENTAL/MAY CONTAIN BUGS)
 
 If you want to try database queries with natural language:
 
@@ -402,16 +206,3 @@ curl -X POST http://localhost:8080/api/v1/chat \
     "conversation_flow": "sql-manipulation-agent"
   }'
 ```
-
----
-
-## 💡 Pro Tips
-
-- **Start with `bike-insights`** - it's the "Hello World" that shows off Ingenious's power
-- Use `classification-agent` only if you want something simpler
-- Check `uv run ingen status` when things break
-- The minimal templates work better than full templates
-- Environment variables override config file values
-- Logs show detailed error messages
-
-**Happy coding! 🎉**

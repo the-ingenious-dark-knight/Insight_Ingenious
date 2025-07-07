@@ -42,7 +42,7 @@ Initialize a new Insight Ingenious project in the current directory.
 - `profiles.yml` - Environment profiles (API keys, secrets)
 - `.env.example` - Example environment variables
 - `ingenious_extensions/` - Custom agents and workflows
-- `docker/` - Docker deployment templates
+- `Dockerfile and .dockerignore` - Docker deployment templates
 - `tmp/` - Temporary files and memory
 
 **Next Steps:**
