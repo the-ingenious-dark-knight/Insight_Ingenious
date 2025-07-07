@@ -19,7 +19,7 @@ Get up and running in 5 minutes with Azure OpenAI!
 1. **Install and Initialize**:
     ```bash
     # From your project directory
-    uv pip install -e ./ingenious
+    uv add ingenious
     uv run ingen init
     ```
 

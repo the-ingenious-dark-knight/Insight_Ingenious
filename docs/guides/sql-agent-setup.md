@@ -27,7 +27,7 @@ This is the fastest way to get started with the SQL agent for development and te
 
 ```bash
 # From your project root
-uv pip install -e ./ingenious
+uv add ingenious
 ```
 
 ### Step 2: Initialize Project
