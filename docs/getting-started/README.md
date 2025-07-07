@@ -9,190 +9,200 @@ toc_label: "Quick Start Steps"
 toc_icon: "rocket"
 ---
 
-# Quick Start Guide
+## Quick Start
 
-Get up and running with Insight Ingenious in minutes! This enterprise-grade Python library enables rapid deployment of AI agent APIs with seamless Microsoft Azure integrations. This guide will walk you through the essential steps to start building production-ready AI agent endpoints.
+Get up and running in 5 minutes with Azure OpenAI!
 
-## Prerequisites
+### Prerequisites
+- Python 3.13+
+- Azure OpenAI API credentials
+- [uv package manager](https://docs.astral.sh/uv/)
 
-- **Python 3.13+**
-- **[uv](https://docs.astral.sh/uv/)** for package management
-- **Azure OpenAI** account with API access
+### 5-Minute Setup
 
-## Installation
+1. **Install and Initialize**:
+    ```bash
+    # From your project directory
+    uv add ingenious
+    uv run ingen init
+    ```
 
-For complete installation instructions, including optional dependencies for advanced features, see the [Installation Guide](./installation.md).
+2. **Configure Credentials**:
+    ```bash
+    # Edit .env with your Azure OpenAI credentials
+    cp .env.example .env
+    nano .env  # Add AZURE_OPENAI_API_KEY and AZURE_OPENAI_BASE_URL
+    ```
 
-**Quick install for basic functionality:**
+3. **Validate Setup** (Recommended):
+    ```bash
+    export INGENIOUS_PROJECT_PATH=$(pwd)/config.yml
+    export INGENIOUS_PROFILE_PATH=$(pwd)/profiles.yml
+    uv run ingen validate  # Check configuration before starting
+    ```
 
+4. **Start the Server**:
+    ```bash
+    uv run ingen serve
+    ```
+
+5. **Verify Health**:
+    ```bash
+    # Check server health
+    curl http://localhost:80/api/v1/health
+    ```
+
+6. **Test the API**:
+    ```bash
+    # Test bike insights workflow (the "Hello World" of Ingenious)
+    curl -X POST http://localhost:80/api/v1/chat \
+      -H "Content-Type: application/json" \
+      -d '{
+        "user_prompt": "{\"stores\": [{\"name\": \"QuickStart Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"QS-001\", \"quantity_sold\": 1, \"sale_date\": \"2023-04-15\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 5.0, \"comment\": \"Perfect bike for getting started!\"}}], \"bike_stock\": []}], \"revision_id\": \"quickstart-1\", \"identifier\": \"hello-world\"}",
+        "conversation_flow": "bike-insights"
+      }'
+    ```
+
+🎉 **That's it!** You should see a comprehensive JSON response with insights from multiple AI agents analyzing the bike sales data.
+
+**Note**: The `bike-insights` workflow is created when you run `ingen init` - it's part of the project template setup, not included in the core library. You can now build on `bike-insights` as a template for your specific use case.
+
+## Workflow Categories
+
+Insight Ingenious provides multiple conversation workflows with different configuration requirements:
+
+### **"Hello World" Workflow** (Available via project template)
+- `bike-insights` - **The recommended starting point** - Comprehensive bike sales analysis showcasing multi-agent coordination (created when you run `ingen init`)
+
+### **Core Workflows (Azure OpenAI only)**
+- `classification-agent` - Route input to specialized agents based on content
+
+### **EXPERIMENTAL/MAY CONTAIN BUGS: Other Core Workflows (Require Additional Services)**
+- `knowledge-base-agent` - Search knowledge bases (requires Azure Search Service)
+- `sql-manipulation-agent` - Execute SQL queries (requires database connection)
+
+## Azure SQL Database Setup (Optional)
+
+For production deployments with persistent chat history storage in Azure SQL Database:
+
+### Prerequisites
+- ✅ Azure SQL Database instance with credentials
+- ✅ ODBC Driver 18 for SQL Server installed
+
+### Setup Steps
+
+1. **Install ODBC Driver** (if not already installed):
+    ```bash
+    # macOS
+    brew tap microsoft/mssql-release
+    brew install msodbcsql18
+
+    # Verify installation
+    odbcinst -q -d | grep "ODBC Driver 18"
+    ```
+
+2. **Add Azure SQL credentials to .env**:
+    ```bash
+    # Add to your existing .env file
+    echo 'AZURE_SQL_CONNECTION_STRING=Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;' >> .env
+    ```
+
+3. **Update config.yml for Azure SQL**:
+    ```bash
+    # Update chat_history section in config.yml
+    sed -i.bak 's/database_type: "sqlite"/database_type: "azuresql"/' config.yml
+    ```
+
+4. **Update profiles.yml for environment variable**:
+    ```yaml
+    # Edit profiles.yml - update the chat_history section
+    chat_history:
+      database_connection_string: ${AZURE_SQL_CONNECTION_STRING}
+    ```
+
+5. **Validate Azure SQL setup**:
+    ```bash
+    uv run ingen validate
+    ```
+
+6. **Test with Azure SQL**:
+    ```bash
+    # Start server and test - chat history will now be stored in Azure SQL
+    uv run ingen serve --port 8080
+    ```
+
+**Benefits of Azure SQL:**
+- ✅ Production-grade chat history persistence
+- ✅ Multi-user conversation management
+- ✅ Enterprise security and compliance
+- ✅ Automatic table creation and management
+
+## 📊 Data Format Examples
+
+### Simple bike-insights Request (Basic)
+```json
+{
+  "user_prompt": "{\"stores\": [{\"name\": \"Test Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"B-001\", \"quantity_sold\": 1, \"sale_date\": \"2024-01-15\", \"year\": 2024, \"month\": \"January\", \"customer_review\": {\"rating\": 5.0, \"comment\": \"Great bike!\"}}], \"bike_stock\": []}], \"revision_id\": \"test-1\", \"identifier\": \"example\"}",
+  "conversation_flow": "bike-insights"
+}
+```
+
+### Advanced bike-insights Request (With Stock Data)
+```json
+{
+  "user_prompt": "{\"stores\": [{\"name\": \"Premium Bikes\", \"location\": \"Sydney\", \"bike_sales\": [{\"product_code\": \"PB-2024-001\", \"quantity_sold\": 3, \"sale_date\": \"2024-01-15\", \"year\": 2024, \"month\": \"January\", \"customer_review\": {\"rating\": 4.8, \"comment\": \"Excellent quality!\"}}], \"bike_stock\": [{\"bike\": {\"brand\": \"Specialized\", \"model\": \"Turbo Vado\", \"year\": 2024, \"price\": 2899.99, \"battery_capacity\": 0.75, \"motor_power\": 500}, \"quantity\": 5}]}], \"revision_id\": \"advanced-1\", \"identifier\": \"example\"}",
+  "conversation_flow": "bike-insights"
+}
+```
+
+### bike_stock Object Format
+The `bike_stock` array requires objects with this structure:
+```json
+{
+  "bike": {
+    "brand": "string",      // Required: Bike manufacturer
+    "model": "string",      // Required: Bike model name
+    "year": 2024,          // Required: Manufacturing year
+    "price": 2899.99,      // Required: Price in dollars
+    // Optional fields for electric bikes:
+    "battery_capacity": 0.75,  // kWh
+    "motor_power": 500,        // Watts
+    // Optional fields for mountain bikes:
+    "suspension": "full",      // Type of suspension
+    // Optional fields for road bikes:
+    "frame_material": "carbon" // Frame material
+  },
+  "quantity": 5             // Required: Stock quantity
+}
+```
+
+### Multiple Stores Example
 ```bash
-# Clone the repository
-git clone https://github.com/Insight-Services-APAC/ingenious.git
-cd ingenious
-
-# Install the library
-uv pip install -e .
-
-# Initialize project structure for API deployment
-uv run ingen init
-```
-
-### 1. Check Available Workflows
-
-Before configuring anything, see what workflows are available:
-
-```bash
-# See all workflows and their requirements
-uv run ingen workflows
-
-# Check specific workflow requirements
-uv run ingen workflows classification-agent
-```
-
-**Output Example:**
-```
-✅ Minimal Configuration
-  • classification-agent: Route input to specialized agents (core library)
-  • bike-insights: Sample domain-specific workflow (project template)
-
-🔍 Requires Azure Search
-  • knowledge-base-agent: Search knowledge bases (core library)
-
-📊 Requires Database
-  • sql-manipulation-agent: Execute SQL queries (core library)
-```
-
-## Basic Configuration
-
-### 2. Configure Azure OpenAI
-
-**Edit `config.yml`:**
-```yaml
-profile: dev
-models:
-  - model: "gpt-4.1-nano"  # Your deployment name
-    api_type: azure
-    api_version: "2024-08-01-preview"
-
-chat_service:
-  type: multi_agent
-
-chat_history:
-  database_type: sqlite
-  database_path: "./.tmp/high_level_logs.db"
-  memory_path: "./.tmp"
-```
-
-**Edit `profiles.yml`:**
-```yaml
-- name: "dev"
-  models:
-    - model: "gpt-4.1-nano"  # Must match config.yml
-      api_key: "your-azure-openai-api-key"
-      base_url: "https://your-endpoint.openai.azure.com/openai/deployments/gpt-4.1-nano/chat/completions?api-version=2024-08-01-preview"
-      deployment: "gpt-4.1-nano"
-```
-
-### 3. Set Environment Variables
-
-```bash
-export INGENIOUS_PROJECT_PATH="$(pwd)/config.yml"
-export INGENIOUS_PROFILE_PATH="$(pwd)/profiles.yml"
-```
-
-## Test Your Setup
-
-### 4. Start with Minimal Configuration
-
-Test workflows that only need Azure OpenAI:
-
-```bash
-# Start the server
-uv run ingen serve
-
-# In another terminal, test the API
-curl -X POST http://localhost:80/api/v1/chat \
+curl -X POST http://localhost:8080/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
-    "user_prompt": "Hello, please classify this message",
-    "conversation_flow": "classification-agent"
+    "user_prompt": "{\"stores\": [{\"name\": \"Store A\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"A-001\", \"quantity_sold\": 2, \"sale_date\": \"2024-01-10\", \"year\": 2024, \"month\": \"January\", \"customer_review\": {\"rating\": 4.5, \"comment\": \"Good value\"}}], \"bike_stock\": []}, {\"name\": \"Store B\", \"location\": \"VIC\", \"bike_sales\": [{\"product_code\": \"B-001\", \"quantity_sold\": 1, \"sale_date\": \"2024-01-12\", \"year\": 2024, \"month\": \"January\", \"customer_review\": {\"rating\": 5.0, \"comment\": \"Perfect!\"}}], \"bike_stock\": []}], \"revision_id\": \"multi-store-1\", \"identifier\": \"comparison\"}",
+    "conversation_flow": "bike-insights"
   }'
 ```
 
-### 5. Use the Web Interface
+### Quick SQL Agent Setup (EXPERIMENTAL/MAY CONTAIN BUGS)
 
-Once the server is running:
-
-- **Main API**: http://localhost:80/docs
-- **Chat Interface**: http://localhost:80/chainlit
-- **Prompt Tuner**: http://localhost:80/prompt-tuner
-
-### 6. Check Configuration Status
-
-Verify your workflows are properly configured:
+If you want to try database queries with natural language:
 
 ```bash
-# Check all workflows
-curl http://localhost:80/api/v1/workflows
+# Set up SQLite database
+uv run python -c "
+from ingenious.utils.load_sample_data import sqlite_sample_db
+sqlite_sample_db()
+print('✅ Sample database created')
+"
 
-# Check specific workflow
-curl http://localhost:80/api/v1/workflow-status/classification-agent
+# Test SQL queries
+curl -X POST http://localhost:8080/api/v1/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_prompt": "Show me all tables in the database",
+    "conversation_flow": "sql-manipulation-agent"
+  }'
 ```
-
-## Next Steps
-
-### Working? Great! Try These:
-
-1. **Test different workflows**:
-   ```bash
-   # Try bike insights workflow
-   curl -X POST http://localhost:80/api/v1/chat \
-     -H "Content-Type: application/json" \
-     -d '{"user_prompt": "Analyze bike sales trends", "conversation_flow": "bike-insights"}'
-   ```
-
-2. **Explore the web interface** at http://localhost:80/chainlit
-
-### Want More? Add Advanced Workflows:
-
-- **🔍 Knowledge Base Search**: [Setup Azure Search](../configuration/README.md#azure-search-services)
-- **📊 Database Queries**: [Setup Database Integration](../configuration/README.md#database-configuration)
-- **📄 Document Processing**: [Setup Document Processing](../guides/document-processing/)
-
-### Learn More:
-
-- [**Workflow Requirements**](../workflows/README.md) - Understand what each workflow needs
-- [**Configuration Guide**](../configuration/README.md) - Detailed configuration options
-- [**API Integration**](../guides/api-integration.md) - Advanced API usage
-- [**Creating Custom Extensions**](../extensions/README.md) - Build your own workflows and agents
-
-## Troubleshooting
-
-### Common Issues:
-
-**❌ "Azure OpenAI API key not found"**
-- Check `profiles.yml` has correct API key
-- Verify `INGENIOUS_PROFILE_PATH` environment variable
-
-**❌ "conversation_flow not set"**
-- Ensure you specify `conversation_flow` in your API request
-- Use `ingen workflows` to see available workflows
-
-**❌ "Search service not configured"**
-- You're trying to use `knowledge-base-agent` without Azure Search
-- Either configure Azure Search or use minimal workflows like `classification-agent`
-
-**❌ Server won't start**
-- Check if port 80 is already in use
-- Verify your `config.yml` file is valid YAML
-
-### Get Help:
-
-1. Check [Troubleshooting Guide](troubleshooting.md)
-2. Review [Configuration Guide](../configuration/README.md)
-3. Check logs for specific error messages
-4. Open an issue on GitHub
-
----
-
-**🎉 Congratulations!** You now have Insight Ingenious running. Start with the minimal configuration workflows and gradually add more advanced features as needed.
