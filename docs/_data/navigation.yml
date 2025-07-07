@@ -13,6 +13,8 @@ docs:
     children:
       - title: "All Guides"
         url: /guides/
+      - title: "Complete Azure Deployment"
+        url: /guides/complete-azure-deployment/
       - title: "API Integration"
         url: /guides/api-integration/
       - title: "Web Interface"
