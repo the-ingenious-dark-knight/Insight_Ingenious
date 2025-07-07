@@ -243,7 +243,7 @@ uv run ingen validate
 
 The Azure SQL database tables will be automatically created by Ingenious when first accessed. The following tables are created:
 - `chat_history` - Main conversation messages
-- `chat_history_summary` - Memory/summary storage  
+- `chat_history_summary` - Memory/summary storage
 - `users` - User management
 - `threads` - Thread/conversation management
 - `steps`, `elements`, `feedbacks` - Chainlit UI integration

@@ -243,7 +243,7 @@ async def test_repo():
     config = get_config()
     db_type = DatabaseClientType(config.chat_history.database_type)
     repo = ChatHistoryRepository(db_type=db_type, config=config)
-    
+
     try:
         messages = await repo.get_thread_messages('test-thread')
         print(f'✅ Azure SQL repository working! (Found {len(messages)} messages)')

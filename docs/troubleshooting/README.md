@@ -182,13 +182,13 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
    ```
 
 2. **Install ODBC Driver (if missing)**:
-   
+
    **On macOS**:
    ```bash
    brew tap microsoft/mssql-release
    brew install msodbcsql18 mssql-tools18
    ```
-   
+
    **On Ubuntu/Debian**:
    ```bash
    curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
@@ -211,8 +211,8 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
    chat_history:
      database_type: "azuresql"
      database_name: "your_database_name"
-   
-   # profiles.yml  
+
+   # profiles.yml
    chat_history:
      database_connection_string: ${AZURE_SQL_CONNECTION_STRING:REQUIRED_SET_IN_ENV}
    ```
@@ -242,7 +242,7 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
    from ingenious.ingenious.dependencies import get_config
    from ingenious.ingenious.db.chat_history_repository import ChatHistoryRepository
    from ingenious.models.database_client import DatabaseClientType
-   
+
    async def test():
        config = get_config()
        db_type = DatabaseClientType(config.chat_history.database_type)
@@ -252,7 +252,7 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
            print(f'✅ Azure SQL repository working! (Found {len(messages)} messages)')
        except Exception as e:
            print(f'❌ Repository error: {e}')
-   
+
    asyncio.run(test())
    "
    ```
