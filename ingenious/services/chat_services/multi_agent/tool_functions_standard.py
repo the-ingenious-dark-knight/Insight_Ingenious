@@ -194,10 +194,10 @@ class SQL_ToolFunctions:
         sql: str,
         timeout: int = 10,  # Timeout in seconds
     ) -> str:
+        global test_db
         # Ensure test_db is initialized
         if test_db is None:
             print("Error: test_db is None, attempting to re-initialize...")
-            global test_db
             try:
                 test_db = sqlite_sample_db()
                 print("Successfully re-initialized test_db")
