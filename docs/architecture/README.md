@@ -97,38 +97,38 @@ graph LR
     end
 
     subgraph "Agent Types"
-        CURRICULUM[Curriculum Expert]
-        EDUCATION[Education Expert]
-        LESSON[Lesson Planner]
-        CUSTOM[Custom Agents]
+        CLASSIFICATION_AGENT[Classification Agent]
+        KNOWLEDGE_AGENT[Knowledge Base Agent]
+        SQL_AGENT[SQL Manipulation Agent]
+        CUSTOM[Custom Extension Agents]
     end
 
     subgraph "Conversation Flows"
-        CLASSIFICATION[Classification Agent]
-        KNOWLEDGE[Knowledge Base Agent]
-        SQL[SQL Manipulation Agent]
-        EDUCATION_FLOW[Education Expert Flow]
+        CLASSIFICATION[Classification Flow]
+        KNOWLEDGE[Knowledge Base Flow]
+        SQL[SQL Manipulation Flow]
+        CUSTOM_FLOW[Custom Extension Flows]
     end
 
     MANAGER --> COORDINATOR
     COORDINATOR --> STATE
-    COORDINATOR --> CURRICULUM
-    COORDINATOR --> EDUCATION
-    COORDINATOR --> LESSON
+    COORDINATOR --> CLASSIFICATION_AGENT
+    COORDINATOR --> KNOWLEDGE_AGENT
+    COORDINATOR --> SQL_AGENT
     COORDINATOR --> CUSTOM
 
     MANAGER --> CLASSIFICATION
     MANAGER --> KNOWLEDGE
     MANAGER --> SQL
-    MANAGER --> EDUCATION_FLOW
+    MANAGER --> CUSTOM_FLOW
 
     classDef service fill:#e3f2fd
     classDef agents fill:#f1f8e9
     classDef patterns fill:#fff8e1
 
     class MANAGER,COORDINATOR,STATE service
-    class CURRICULUM,EDUCATION,LESSON,CUSTOM agents
-    class CLASSIFICATION,KNOWLEDGE,SQL,EDUCATION_FLOW patterns
+    class CLASSIFICATION_AGENT,KNOWLEDGE_AGENT,SQL_AGENT,CUSTOM agents
+    class CLASSIFICATION,KNOWLEDGE,SQL,CUSTOM_FLOW patterns
 ```
 
 ### API Layer Architecture
@@ -364,9 +364,8 @@ sequenceDiagram
     participant API
     participant Manager
     participant Agent1 as 🔍 Classification Agent
-    participant Agent2 as 🎓 Education Expert
-    participant Agent3 as 🔍 Knowledge Agent
-    participant Agent4 as 🗄️ SQL Agent
+    participant Agent2 as 🔍 Knowledge Agent
+    participant Agent3 as 🗄️ SQL Agent
     participant LLM as 🧠 Azure OpenAI
 
     User->>API: "Help me understand database design"
@@ -375,19 +374,21 @@ sequenceDiagram
     Note over Manager: Initialize conversation pattern
     Manager->>Agent1: Classify user intent
     Agent1->>LLM: Request intent analysis
-    LLM-->>Agent1: Intent: Educational query
-    Agent1-->>Manager: Route to Education Expert
+    LLM-->>Agent1: Intent: Database query
+    Agent1-->>Manager: Route to appropriate agent
 
-    Manager->>Agent2: Handle educational query
-    Agent2->>LLM: Educational content request
-    LLM-->>Agent2: Database design concepts
-    Agent2-->>Manager: Educational content ready
+    opt If knowledge search needed
+        Manager->>Agent2: Search knowledge base
+        Agent2->>LLM: Knowledge retrieval request
+        LLM-->>Agent2: Additional resources
+        Agent2-->>Manager: Supporting materials
+    end
 
-    opt If further clarification needed
-        Manager->>Agent3: Search knowledge base
-        Agent3->>LLM: Knowledge retrieval request
-        LLM-->>Agent3: Additional resources
-        Agent3-->>Manager: Supporting materials
+    opt If SQL processing needed
+        Manager->>Agent3: Execute SQL query
+        Agent3->>LLM: Generate SQL statement
+        LLM-->>Agent3: Query results
+        Agent3-->>Manager: Processed data
     end
 
     Manager-->>API: Complete response
@@ -483,22 +484,10 @@ classDiagram
         +tasks: List[str]
     }
 
-    class EducationExpertFlow {
-        +create_curriculum()
-        +plan_lessons()
-        +assess_progress()
-    }
-
-    class CurriculumExpertFlow {
-        +design_curriculum()
-        +structure_content()
-        +define_objectives()
-    }
-
-    class LessonPlannerFlow {
-        +plan_lessons()
-        +create_activities()
-        +set_assessments()
+    class CustomExtensionFlow {
+        +custom_domain_logic()
+        +extend_functionality()
+        +implement_patterns()
     }
 
     class KnowledgeBaseAgentFlow {
@@ -532,9 +521,7 @@ classDiagram
         +handle_routing()
     }
     IConversationFlow <|.. ClassificationAgentFlow
-    IConversationFlow <|.. EducationExpertFlow
-    IConversationFlow <|.. CurriculumExpertFlow
-    IConversationFlow <|.. LessonPlannerFlow
+    IConversationFlow <|.. CustomExtensionFlow
     IConversationFlow <|.. KnowledgeBaseAgentFlow
     IConversationFlow <|.. SqlManipulationAgentFlow
     IConversationPattern <|.. ConversationPattern

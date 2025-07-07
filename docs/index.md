@@ -62,4 +62,4 @@ Insight Ingenious offers enterprise-grade capabilities for building sophisticate
 
 {% include feature_row id="feature_row2" %}
 
-*Built with care by the Insight Services APAC team*
+Built with care by the Insight Services APAC team
