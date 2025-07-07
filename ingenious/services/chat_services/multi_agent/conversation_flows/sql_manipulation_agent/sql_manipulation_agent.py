@@ -8,6 +8,7 @@ from ingenious.models.chat import ChatResponse
 from ingenious.services.chat_services.multi_agent.tool_functions_standard import (
     SQL_ToolFunctions,
 )
+from ingenious.services.memory_manager import get_memory_manager, run_async_memory_operation
 
 
 class ConversationFlow:
@@ -35,16 +36,23 @@ class ConversationFlow:
         model_client = AzureOpenAIChatCompletionClient(**azure_config)
         memory_path = _config.chat_history.memory_path
 
+        # Initialize memory manager for cloud storage support
+        memory_manager = get_memory_manager(_config, memory_path)
+
         # Set up context handling
         if not thread_memory:
-            with open(f"{memory_path}/context.md", "w") as memory_file:
-                memory_file.write("New conversation. Continue based on user question.")
+            run_async_memory_operation(
+                memory_manager.write_memory("New conversation. Continue based on user question.")
+            )
         else:
-            with open(f"{memory_path}/context.md", "w") as memory_file:
-                memory_file.write(thread_memory)
+            run_async_memory_operation(
+                memory_manager.write_memory(thread_memory)
+            )
 
-        with open(f"{memory_path}/context.md", "r") as memory_file:
-            context = memory_file.read()
+        # Read current context
+        context = run_async_memory_operation(
+            memory_manager.read_memory(default_content="New conversation. Continue based on user question.")
+        )
 
         # Create SQL tool functions
         if not _config.azure_sql_services or _config.azure_sql_services.database_name == "skip":
@@ -140,8 +148,9 @@ When the user asks what columns are available, just list them without running a 
         )
 
         # Update context for future conversations
-        with open(f"{memory_path}/context.md", "w") as memory_file:
-            memory_file.write(final_message)
+        run_async_memory_operation(
+            memory_manager.write_memory(final_message)
+        )
 
         # Make sure to close the model client connection when done
         await model_client.close()

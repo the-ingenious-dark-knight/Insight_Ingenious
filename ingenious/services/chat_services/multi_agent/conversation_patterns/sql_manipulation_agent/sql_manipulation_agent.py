@@ -4,6 +4,8 @@ import autogen
 import autogen.retrieve_utils
 import autogen.runtime_logging
 
+from ingenious.models import config as _config
+
 logger = logging.getLogger(__name__)
 
 
@@ -22,20 +24,28 @@ class ConversationPattern:
         self.memory_path = memory_path
         self.thread_memory = thread_memory
 
+        # Initialize memory manager for cloud storage support
+        from ingenious.services.memory_manager import get_memory_manager, run_async_memory_operation
+        self.memory_manager = get_memory_manager(_config, memory_path)
+
         if not self.thread_memory:
-            with open(f"{self.memory_path}/context.md", "w") as memory_file:
-                memory_file.write("New conversation. Continue based on user question.")
+            run_async_memory_operation(
+                self.memory_manager.write_memory("New conversation. Continue based on user question.")
+            )
 
         if self.memory_record_switch and self.thread_memory:
             logger.log(
                 level=logging.DEBUG,
                 msg="Memory recording enabled. Requires `ChatHistorySummariser` for optional dependency.",
             )
-            with open(f"{self.memory_path}/context.md", "w") as memory_file:
-                memory_file.write(self.thread_memory)
+            run_async_memory_operation(
+                self.memory_manager.write_memory(self.thread_memory)
+            )
 
-        with open(f"{self.memory_path}/context.md", "r") as memory_file:
-            self.context = memory_file.read()
+        # Read current context
+        self.context = run_async_memory_operation(
+            self.memory_manager.read_memory(default_content="New conversation. Continue based on user question.")
+        )
 
         self.termination_msg = lambda x: "TERMINATE" in x.get("content", "").upper()
 
@@ -103,7 +113,7 @@ class ConversationPattern:
             is_termination_msg=self.termination_msg,
         )
 
-    async def get_conversation_response(self, input_message: str) -> [str, str]:
+    async def get_conversation_response(self, input_message: str) -> list[str]:
         """
         This function is the main entry point for the conversation pattern. It takes a message as input and returns a
         response. Make sure that you have added the necessary topic agents and agent topic chats before

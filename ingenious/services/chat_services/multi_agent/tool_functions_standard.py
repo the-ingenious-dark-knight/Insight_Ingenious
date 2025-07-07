@@ -55,9 +55,20 @@ class ToolFunctions:
 
     @staticmethod
     def update_memory(context: str) -> None:
-        memory_path = _config.chat_history.memory_path
-        with open(f"{memory_path}/context.md", "w") as memory_file:
-            memory_file.write(context)
+        """
+        Update memory using the MemoryManager for cloud storage support.
+        """
+        try:
+            from ingenious.services.memory_manager import get_memory_manager, run_async_memory_operation
+            
+            memory_manager = get_memory_manager(_config)
+            run_async_memory_operation(memory_manager.write_memory(context))
+        except Exception as e:
+            # Fallback to legacy file I/O
+            print(f"Failed to use MemoryManager, falling back to local file I/O: {e}")
+            memory_path = _config.chat_history.memory_path
+            with open(f"{memory_path}/context.md", "w") as memory_file:
+                memory_file.write(context)
 
 
 class PandasExecutor:
