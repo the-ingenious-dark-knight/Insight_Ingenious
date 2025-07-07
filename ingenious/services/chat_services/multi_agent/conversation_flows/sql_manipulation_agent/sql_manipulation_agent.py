@@ -4,6 +4,7 @@ from autogen_core.tools import FunctionTool
 from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
 
 import ingenious.config.config as config
+from ingenious.config.profile import Profiles
 from ingenious.models.chat import ChatResponse
 from ingenious.services.chat_services.multi_agent.tool_functions_standard import (
     SQL_ToolFunctions,
@@ -46,8 +47,28 @@ class ConversationFlow:
         with open(f"{memory_path}/context.md", "r") as memory_file:
             context = memory_file.read()
 
+        # Get profile configuration for SQL services
+        _profiles_obj = Profiles._get_profiles()
+        _profile = None
+        if _profiles_obj:
+            if hasattr(_profiles_obj, 'get_profile'):
+                _profile = _profiles_obj.get_profile("dev")  # Use default profile
+            elif isinstance(_profiles_obj, list):
+                # If profiles is a list, find the profile manually
+                for p in _profiles_obj:
+                    if hasattr(p, 'name') and p.name == "dev":
+                        _profile = p
+                        break
+
+        # Determine if we're using Azure SQL or SQLite
+        use_azure_sql = False
+        if _config.azure_sql_services and hasattr(_config.azure_sql_services, 'database_name'):
+            use_azure_sql = _config.azure_sql_services.database_name != "skip"
+        elif _profile and hasattr(_profile, 'azure_sql_services') and _profile.azure_sql_services and hasattr(_profile.azure_sql_services, 'database_name'):
+            use_azure_sql = _profile.azure_sql_services.database_name != "skip"
+
         # Create SQL tool functions
-        if _config.azure_sql_services.database_name == "skip":
+        if not use_azure_sql:
             table_name, column_names = SQL_ToolFunctions.get_db_attr(_config)
 
             # Create SQL tool as function

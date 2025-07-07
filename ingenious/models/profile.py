@@ -18,6 +18,8 @@ class ChatHistoryConfig(BaseModel):
 
 class AzureSqlConfig(BaseModel):
     database_connection_string: str = ""
+    database_name: str = ""
+    table_name: str = ""
 
 
 class AzureSearchConfig(BaseModel):

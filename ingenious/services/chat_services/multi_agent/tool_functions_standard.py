@@ -9,12 +9,35 @@ from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
 
 import ingenious.config.config as ingen_config
+from ingenious.config.profile import Profiles
 from ingenious.utils.load_sample_data import sqlite_sample_db
 
 _config = ingen_config.get_config()
 
+# Get profile configuration for SQL services
+_profiles_obj = Profiles._get_profiles()
+_profile = None
+if _profiles_obj:
+    if hasattr(_profiles_obj, 'get_profile'):
+        _profile = _profiles_obj.get_profile("dev")  # Use default profile
+    elif isinstance(_profiles_obj, list):
+        # If profiles is a list, find the profile manually
+        for p in _profiles_obj:
+            if hasattr(p, 'name') and p.name == "dev":
+                _profile = p
+                break
+
+# Handle azure_sql_services configuration
+if _config.azure_sql_services is not None:
+    use_azure_sql = _config.azure_sql_services.database_name != "skip"
+elif _profile and hasattr(_profile, 'azure_sql_services') and _profile.azure_sql_services:
+    use_azure_sql = _profile.azure_sql_services.database_name != "skip"
+else:
+    # Default to SQLite mode
+    use_azure_sql = False
+
 # Only import pyodbc if we're using Azure SQL
-if _config.azure_sql_services.database_name != "skip":
+if use_azure_sql:
     try:
         import pyodbc
     except ImportError:
@@ -88,42 +111,93 @@ class PandasExecutor:
 
 
 # SQL Tools TODO: need a better way to wrap these functions
-def get_conn(_config):
+def get_conn(_config, _profile):
     if pyodbc is None:
         raise ImportError(
             "pyodbc is required for Azure SQL connections but is not available"
         )
-    connection_string = _config.azure_sql_services.database_connection_string
-    # credential = identity.DefaultAzureCredential(exclude_interactive_browser_credential=False)
-    # token_bytes = credential.get_token("https://database.windows.net/.default").token.encode("UTF-16-LE")
-    # token_struct = struct.pack(f'<I{len(token_bytes)}s', len(token_bytes), token_bytes)
-    # SQL_COPT_SS_ACCESS_TOKEN = 1256  # This connection option is defined by microsoft in msodbcsql.h
+    
+    # Get connection string from config or profile
+    connection_string = None
+    if _config.azure_sql_services and _config.azure_sql_services.database_connection_string:
+        connection_string = _config.azure_sql_services.database_connection_string
+    elif _profile and hasattr(_profile, 'azure_sql_services') and _profile.azure_sql_services and _profile.azure_sql_services.database_connection_string:
+        connection_string = _profile.azure_sql_services.database_connection_string
+    
+    if not connection_string:
+        raise ValueError("No Azure SQL connection string found in config or profile")
+    
     conn = pyodbc.connect(connection_string)
     cursor = conn.cursor()
     return conn, cursor
 
 
-if _config.azure_sql_services.database_name == "skip":
+# Initialize database connections based on configuration
+if not use_azure_sql:
     test_db = sqlite_sample_db()  # this is for local sql initialisation
+    conn = cursor = None
 else:
     test_db = None  # Placeholder for Azure SQL mode
     if pyodbc is not None:
-        conn, cursor = get_conn(_config)
+        try:
+            conn, cursor = get_conn(_config, _profile)
+        except Exception as e:
+            print(f"Warning: Azure SQL configured but connection failed: {e}")
+            conn = cursor = None
     else:
         print("Warning: Azure SQL configured but pyodbc not available")
+        conn = cursor = None
 
 
 class SQL_ToolFunctions:
     @staticmethod
     def get_db_attr(_config):
-        if _config.azure_sql_services.database_name == "skip":
+        # Check if we're in SQLite mode
+        if not use_azure_sql:
             table_name = _config.local_sql_db.sample_database_name
             result = test_db.execute_sql(f"""SELECT * FROM {table_name} LIMIT 1""")
-            column_names = [key for key in result[0]]
-            return table_name, column_names
+            if result:
+                column_names = [key for key in result[0]]
+                return table_name, column_names
+            else:
+                return table_name, []
         else:
+            # Azure SQL mode - get from config or profile
+            database_name = None
+            table_name = None
+            
+            if _config.azure_sql_services:
+                database_name = _config.azure_sql_services.database_name
+                table_name = _config.azure_sql_services.table_name
+            elif _profile and hasattr(_profile, 'azure_sql_services') and _profile.azure_sql_services:
+                database_name = _profile.azure_sql_services.database_name
+                table_name = _profile.azure_sql_services.table_name
+            
+            if cursor and table_name:
+                cursor.execute(f"""
+                    SELECT COLUMN_NAME
+                    FROM INFORMATION_SCHEMA.COLUMNS
+                    WHERE TABLE_NAME = '{table_name}'
+                """)
+                column_names = [row[0] for row in cursor.fetchall()]
+                return database_name, table_name, column_names
+            else:
+                return database_name or "unknown", table_name or "unknown", []
+
+    @staticmethod
+    def get_azure_db_attr(_config):
+        # Get database attributes from config or profile
+        database_name = None
+        table_name = None
+        
+        if _config.azure_sql_services:
             database_name = _config.azure_sql_services.database_name
             table_name = _config.azure_sql_services.table_name
+        elif _profile and hasattr(_profile, 'azure_sql_services') and _profile.azure_sql_services:
+            database_name = _profile.azure_sql_services.database_name
+            table_name = _profile.azure_sql_services.table_name
+        
+        if cursor and table_name:
             cursor.execute(f"""
                 SELECT COLUMN_NAME
                 FROM INFORMATION_SCHEMA.COLUMNS
@@ -131,18 +205,8 @@ class SQL_ToolFunctions:
             """)
             column_names = [row[0] for row in cursor.fetchall()]
             return database_name, table_name, column_names
-
-    @staticmethod
-    def get_azure_db_attr(_config):
-        database_name = _config.azure_sql_services.database_name
-        table_name = _config.azure_sql_services.table_name
-        cursor.execute(f"""
-            SELECT COLUMN_NAME
-            FROM INFORMATION_SCHEMA.COLUMNS
-            WHERE TABLE_NAME = '{table_name}'
-        """)
-        column_names = [row[0] for row in cursor.fetchall()]
-        return database_name, table_name, column_names
+        else:
+            return database_name or "unknown", table_name or "unknown", []
 
     @staticmethod
     def execute_sql_local(
