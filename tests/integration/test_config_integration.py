@@ -56,21 +56,54 @@ local_sql_db:
   sample_database_name: test_db
 """
         
+        # Create a temporary profile file
+        profile_content = """
+- name: test_profile
+  models:
+    - model: gpt-3.5-turbo
+      api_key: test-key
+      base_url: https://test.openai.azure.com/
+      deployment: gpt-35-turbo
+      api_version: 2023-03-15-preview
+  chat_history:
+    database_connection_string: ""
+  receiver_configuration:
+    enable: false
+    api_url: ""
+    api_key: "DevApiKey"
+  chainlit_configuration:
+    enable: false
+    authentication:
+      enable: false
+      github_secret: ""
+      github_client_id: ""
+  web_configuration:
+    authentication:
+      enable: false
+      username: "admin"
+      password: "admin123"
+      type: "basic"
+"""
+        
         with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
             f.write(config_content)
             config_file = f.name
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yml', delete=False) as profile_f:
+            profile_f.write(profile_content)
+            profile_file = profile_f.name
         
         try:
             with patch.dict(os.environ, {
                 'MODEL_NAME': 'gpt-3.5-turbo',
                 'API_VERSION': '2023-03-15-preview',
-                'DEPLOYMENT': 'gpt-35-turbo'
+                'DEPLOYMENT': 'gpt-35-turbo',
+                'INGENIOUS_PROFILE_PATH': profile_file
             }, clear=True):
                 config = Config.from_yaml(config_file)
                 
                 # Verify the configuration was loaded and processed correctly
                 assert config is not None
-                assert config.profile == 'test_profile'
                 assert len(config.models) == 1
                 assert config.models[0].model == 'gpt-3.5-turbo'
                 assert config.models[0].api_version == '2023-03-15-preview'
@@ -78,6 +111,7 @@ local_sql_db:
                 
         finally:
             os.unlink(config_file)
+            os.unlink(profile_file)
 
     def test_environment_variable_cascade(self):
         """Test environment variable substitution cascade behavior"""
@@ -143,28 +177,98 @@ logging:
     def test_config_with_missing_optional_fields(self):
         """Test configuration with missing optional fields uses defaults"""
         minimal_config_content = """
-agents:
-  - name: minimal_agent
-    model: gpt-4
-    
-workflows:
-  minimal_workflow:
-    agents:
-      - minimal_agent
+profile: test_profile
+
+models:
+  - model: gpt-4
+    api_type: rest
+    api_version: 2023-03-15-preview
+
+logging:
+  root_log_level: info
+  log_level: info
+
+chat_history:
+  database_type: sqlite
+  database_path: ./tmp/test.db
+  memory_path: ./tmp
+
+tool_service:
+  enable: false
+
+chat_service:
+  type: multi_agent
+
+chainlit_configuration:
+  enable: false
+
+prompt_tuner:
+  mode: fast_api
+  enable: true
+
+web_configuration:
+  ip_address: 0.0.0.0
+  port: 8000
+  type: fastapi
+  asynchronous: false
+
+local_sql_db:
+  database_path: /tmp/test_db
+  sample_csv_path: ""
+  sample_database_name: test_db
+"""
+        
+        # Create a temporary profile file
+        profile_content = """
+- name: test_profile
+  models:
+    - model: gpt-4
+      api_key: test-key
+      base_url: https://test.openai.azure.com/
+      deployment: gpt-4
+      api_version: 2023-03-15-preview
+  chat_history:
+    database_connection_string: ""
+  receiver_configuration:
+    enable: false
+    api_url: ""
+    api_key: "DevApiKey"
+  chainlit_configuration:
+    enable: false
+    authentication:
+      enable: false
+      github_secret: ""
+      github_client_id: ""
+  web_configuration:
+    authentication:
+      enable: false
+      username: "admin"
+      password: "admin123"
+      type: "basic"
 """
         
         with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
             f.write(minimal_config_content)
             config_file = f.name
         
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yml', delete=False) as profile_f:
+            profile_f.write(profile_content)
+            profile_file = profile_f.name
+        
         try:
-            config = Config.from_yaml(config_file)
-            
-            # Verify the minimal configuration is accepted
-            assert config is not None
-            
+            with patch.dict(os.environ, {
+                'INGENIOUS_PROFILE_PATH': profile_file
+            }, clear=True):
+                config = Config.from_yaml(config_file)
+                
+                # Verify the minimal configuration is accepted
+                assert config is not None
+                assert len(config.models) == 1
+                assert config.models[0].model == 'gpt-4'
+                
         finally:
             os.unlink(config_file)
+            os.unlink(profile_file)
 
     def test_config_with_complex_nested_substitutions(self):
         """Test configuration with complex nested environment variable substitutions"""

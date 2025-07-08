@@ -109,13 +109,13 @@ class TestNamespaceUtilsIntegration:
         original_sys_path = sys.path.copy()
         
         try:
-            with patch('ingenious.utils.namespace_utils.Path.cwd') as mock_cwd, \
+            with patch('ingenious.utils.namespace_utils.os.getcwd') as mock_getcwd, \
                  patch('ingenious.utils.namespace_utils.get_namespaces') as mock_get_namespaces, \
                  patch('ingenious.utils.namespace_utils.importlib.util.find_spec') as mock_find_spec, \
                  patch('builtins.print'):  # Mock print to avoid output
                 
                 test_cwd = Path("/test/working/directory")
-                mock_cwd.return_value = test_cwd
+                mock_getcwd.return_value = str(test_cwd)
                 mock_get_namespaces.return_value = ["test_namespace"]
                 mock_find_spec.return_value = None  # No modules found
                 
@@ -260,8 +260,8 @@ agents:
             (
                 "nested: ${OUTER:prefix-${INNER:default}-suffix}",
                 {'INNER': 'middle'},
-                ['prefix-${INNER:default}-suffix'],  # Only outer substitution
-                []
+                ['prefix-middle-suffix'],  # Full nested substitution
+                ['${INNER', '${OUTER']
             ),
             (
                 "multiple: ${VAR1:default1} ${VAR2:default2} ${VAR3:default3}",
