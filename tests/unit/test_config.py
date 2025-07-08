@@ -312,27 +312,100 @@ local_sql_db:
     def test_config_from_yaml_file_with_env_vars(self):
         """Test creating Config from YAML file with environment variables"""
         yaml_content = """
-        agents:
-          - name: ${AGENT_NAME:default_agent}
-            endpoint: ${ENDPOINT:https://default.endpoint.com}
-        """
+profile: ${TEST_PROFILE:test_profile}
+
+models:
+  - model: ${TEST_MODEL:gpt-4}
+    api_type: rest
+    api_version: 2023-03-15-preview
+
+logging:
+  root_log_level: info
+  log_level: info
+
+chat_history:
+  database_type: sqlite
+  database_path: ./tmp/test.db
+  memory_path: ./tmp
+
+tool_service:
+  enable: false
+
+chat_service:
+  type: multi_agent
+
+chainlit_configuration:
+  enable: false
+
+prompt_tuner:
+  mode: fast_api
+  enable: true
+
+web_configuration:
+  ip_address: 0.0.0.0
+  port: 8000
+  type: fastapi
+  asynchronous: false
+
+local_sql_db:
+  database_path: /tmp/test_db
+  sample_csv_path: ""
+  sample_database_name: test_db
+"""
         
-        with patch('builtins.open', mock_open(read_data=yaml_content)), \
-             patch.dict(os.environ, {'AGENT_NAME': 'env_agent'}, clear=True), \
-             patch('ingenious.config.config.config_ns_models.Config.model_validate_json') as mock_validate, \
-             patch('ingenious.config.config.Profiles') as mock_profiles:
-            mock_config = Mock()
-            mock_config.profile = "test_profile"
-            mock_validate.return_value = mock_config
-            mock_profiles.return_value.get_profile_by_name.return_value = Mock()
-            
-            Config.from_yaml('test_config.yaml')
-            
-            # Verify substitution occurred twice (once in from_yaml, once in from_yaml_str)
-            call_args = mock_validate.call_args[0][0]
-            parsed_data = json.loads(call_args)
-            assert parsed_data['agents'][0]['name'] == 'env_agent'
-            assert parsed_data['agents'][0]['endpoint'] == 'https://default.endpoint.com'
+        # Create a temporary profile file
+        profile_content = """
+- name: test_profile
+  models:
+    - model: gpt-3.5-turbo
+      api_key: test-key
+      base_url: https://test.openai.azure.com/
+      deployment: gpt-35-turbo
+      api_version: 2023-03-15-preview
+  chat_history:
+    database_connection_string: ""
+  receiver_configuration:
+    enable: false
+    api_url: ""
+    api_key: "DevApiKey"
+  chainlit_configuration:
+    enable: false
+    authentication:
+      enable: false
+      github_secret: ""
+      github_client_id: ""
+  web_configuration:
+    authentication:
+      enable: false
+      username: "admin"
+      password: "admin123"
+      type: "basic"
+"""
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yml', delete=False) as profile_f:
+            profile_f.write(profile_content)
+            profile_file = profile_f.name
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as config_f:
+            config_f.write(yaml_content)
+            config_file = config_f.name
+        
+        try:
+            with patch.dict(os.environ, {
+                'TEST_PROFILE': 'test_profile',
+                'TEST_MODEL': 'gpt-3.5-turbo',
+                'INGENIOUS_PROFILE_PATH': profile_file
+            }, clear=True):
+                config = Config.from_yaml(config_file)
+                
+                # Verify environment variable substitution occurred
+                assert config is not None
+                assert len(config.models) == 1
+                assert config.models[0].model == 'gpt-3.5-turbo'  # Environment variable was substituted
+                
+        finally:
+            os.unlink(profile_file)
+            os.unlink(config_file)
 
     def test_config_double_substitution(self):
         """Test that environment variables are substituted correctly when called multiple times"""
