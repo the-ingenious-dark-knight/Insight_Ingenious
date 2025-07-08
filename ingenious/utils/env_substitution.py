@@ -7,7 +7,6 @@ ${VAR_NAME:default_value} or ${VAR_NAME}
 """
 
 import os
-import re
 
 
 def substitute_env_vars(content: str) -> str:
@@ -34,20 +33,20 @@ def substitute_env_vars(content: str) -> str:
         expressions = []
         i = 0
         while i < len(text):
-            if text[i:i+2] == '${':
+            if text[i : i + 2] == "${":
                 # Found start of expression
                 start = i
                 i += 2
                 brace_count = 1
                 while i < len(text) and brace_count > 0:
-                    if text[i] == '{':
+                    if text[i] == "{":
                         brace_count += 1
-                    elif text[i] == '}':
+                    elif text[i] == "}":
                         brace_count -= 1
                     i += 1
                 if brace_count == 0:
                     # Found complete expression
-                    var_expr = text[start+2:i-1]
+                    var_expr = text[start + 2 : i - 1]
                     expressions.append((start, i, var_expr))
             else:
                 i += 1
@@ -68,17 +67,17 @@ def substitute_env_vars(content: str) -> str:
         expressions = find_variable_expressions(content)
         if not expressions:
             break  # No more expressions to substitute
-        
+
         # Replace expressions from right to left to avoid index issues
         new_content = content
         for start, end, var_expr in reversed(expressions):
             replacement = replace_expression(var_expr)
             new_content = new_content[:start] + replacement + new_content[end:]
-        
+
         if new_content == content:
             break  # No more changes
         content = new_content
-    
+
     return content
 
 

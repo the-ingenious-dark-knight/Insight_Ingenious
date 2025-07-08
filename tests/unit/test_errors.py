@@ -11,7 +11,7 @@ class TestContentFilterError:
     def test_content_filter_error_default_message(self):
         """Test ContentFilterError with default message"""
         error = ContentFilterError()
-        
+
         assert str(error) == ContentFilterError.DEFAULT_MESSAGE
         assert error.message == ContentFilterError.DEFAULT_MESSAGE
         assert error.content_filter_results == {}
@@ -20,7 +20,7 @@ class TestContentFilterError:
         """Test ContentFilterError with custom message"""
         custom_message = "Custom content filter violation"
         error = ContentFilterError(message=custom_message)
-        
+
         assert str(error) == custom_message
         assert error.message == custom_message
         assert error.content_filter_results == {}
@@ -30,10 +30,12 @@ class TestContentFilterError:
         custom_message = "Custom violation"
         filter_results = {
             "hate": {"filtered": True, "severity": "high"},
-            "violence": {"filtered": False, "severity": "safe"}
+            "violence": {"filtered": False, "severity": "safe"},
         }
-        error = ContentFilterError(message=custom_message, content_filter_results=filter_results)
-        
+        error = ContentFilterError(
+            message=custom_message, content_filter_results=filter_results
+        )
+
         assert str(error) == custom_message
         assert error.message == custom_message
         assert error.content_filter_results == filter_results
@@ -47,13 +49,13 @@ class TestContentFilterError:
         """Test that ContentFilterError can be raised and caught"""
         with pytest.raises(ContentFilterError) as exc_info:
             raise ContentFilterError("Test message")
-        
+
         assert str(exc_info.value) == "Test message"
 
     def test_content_filter_error_empty_results_dict(self):
         """Test ContentFilterError with explicitly empty results dict"""
         error = ContentFilterError(content_filter_results={})
-        
+
         assert error.content_filter_results == {}
 
 
@@ -64,7 +66,7 @@ class TestTokenLimitExceededError:
     def test_token_limit_exceeded_error_default_values(self):
         """Test TokenLimitExceededError with default values"""
         error = TokenLimitExceededError()
-        
+
         assert str(error) == TokenLimitExceededError.DEFAULT_MESSAGE
         assert error.message == TokenLimitExceededError.DEFAULT_MESSAGE
         assert error.max_context_length == 0
@@ -76,7 +78,7 @@ class TestTokenLimitExceededError:
         """Test TokenLimitExceededError with custom message"""
         custom_message = "Custom token limit exceeded"
         error = TokenLimitExceededError(message=custom_message)
-        
+
         assert str(error) == custom_message
         assert error.message == custom_message
 
@@ -87,9 +89,9 @@ class TestTokenLimitExceededError:
             max_context_length=4096,
             requested_tokens=5000,
             prompt_tokens=4500,
-            completion_tokens=500
+            completion_tokens=500,
         )
-        
+
         assert str(error) == "Token limit exceeded"
         assert error.message == "Token limit exceeded"
         assert error.max_context_length == 4096
@@ -106,16 +108,13 @@ class TestTokenLimitExceededError:
         """Test that TokenLimitExceededError can be raised and caught"""
         with pytest.raises(TokenLimitExceededError) as exc_info:
             raise TokenLimitExceededError("Test message")
-        
+
         assert str(exc_info.value) == "Test message"
 
     def test_token_limit_exceeded_error_partial_token_info(self):
         """Test TokenLimitExceededError with partial token information"""
-        error = TokenLimitExceededError(
-            max_context_length=4096,
-            requested_tokens=5000
-        )
-        
+        error = TokenLimitExceededError(max_context_length=4096, requested_tokens=5000)
+
         assert error.max_context_length == 4096
         assert error.requested_tokens == 5000
         assert error.prompt_tokens == 0  # Default value
@@ -128,9 +127,9 @@ class TestTokenLimitExceededError:
             max_context_length=4096,
             requested_tokens=4500,
             prompt_tokens=4000,
-            completion_tokens=500
+            completion_tokens=500,
         )
-        
+
         assert error.max_context_length == 4096
         assert error.requested_tokens == 4500
         assert error.prompt_tokens == 4000

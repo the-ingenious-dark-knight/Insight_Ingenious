@@ -1,7 +1,6 @@
 import json
 import logging
 import os
-import re
 from pathlib import Path
 
 import yaml
@@ -29,20 +28,20 @@ def substitute_environment_variables(yaml_content: str) -> str:
         expressions = []
         i = 0
         while i < len(content):
-            if content[i:i+2] == '${':
+            if content[i : i + 2] == "${":
                 # Found start of expression
                 start = i
                 i += 2
                 brace_count = 1
                 while i < len(content) and brace_count > 0:
-                    if content[i] == '{':
+                    if content[i] == "{":
                         brace_count += 1
-                    elif content[i] == '}':
+                    elif content[i] == "}":
                         brace_count -= 1
                     i += 1
                 if brace_count == 0:
                     # Found complete expression
-                    expressions.append((start, i, content[start+2:i-1]))
+                    expressions.append((start, i, content[start + 2 : i - 1]))
             else:
                 i += 1
         return expressions
@@ -84,17 +83,17 @@ def substitute_environment_variables(yaml_content: str) -> str:
         expressions = find_variable_expressions(yaml_content)
         if not expressions:
             break  # No more expressions to substitute
-        
+
         # Replace expressions from right to left to avoid index issues
         new_content = yaml_content
         for start, end, var_expr in reversed(expressions):
             replacement = replace_expression(new_content, var_expr)
             new_content = new_content[:start] + replacement + new_content[end:]
-        
+
         if new_content == yaml_content:
             break  # No more changes
         yaml_content = new_content
-    
+
     return yaml_content
 
 

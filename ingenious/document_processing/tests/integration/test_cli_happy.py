@@ -112,24 +112,25 @@ def test_cli_remote_pdf_ok(
 
     Success criteria mirror
     :pyfunc:`test_cli_local_pdf_ok`.
-    
+
     NOTE: This test mocks the HTTP request to avoid external dependencies.
     """
-    import requests
     from unittest.mock import Mock
-    
+
+    import requests
+
     # Mock the requests.get call to return local PDF content
     mock_response = Mock()
-    with open(pdf_path, 'rb') as f:
+    with open(pdf_path, "rb") as f:
         mock_response.content = f.read()
     mock_response.raise_for_status = Mock()
-    mock_response.headers = {'content-type': 'application/pdf'}
-    
+    mock_response.headers = {"content-type": "application/pdf"}
+
     def mock_get(*args, **kwargs):
         return mock_response
-    
-    monkeypatch.setattr(requests, 'get', mock_get)
-    
+
+    monkeypatch.setattr(requests, "get", mock_get)
+
     out_file = tmp_path / f"remote_{engine}.jsonl"
     result = _cli(PDF_URL, engine, out_file, cli_kind)
 
