@@ -55,7 +55,7 @@ profile: "dev"  # Name of the profile to use from profiles.yml
 models:
   - model: "gpt-4.1-nano"
     api_type: "azure"
-    api_version: "2024-08-01-preview"
+    api_version: "2024-12-01-preview"
 
 logging:
   root_log_level: "debug"
@@ -116,7 +116,7 @@ file_storage:
   models:
     - model: "gpt-4.1-nano"
       api_key: "your-api-key"
-      base_url: "https://your-endpoint.openai.azure.com/openai/deployments/gpt-4.1-nano/chat/completions?api-version=2024-08-01-preview"
+      base_url: "https://your-endpoint.openai.azure.com/openai/deployments/gpt-4.1-nano/chat/completions?api-version=2024-12-01-preview"
 
   chat_history:
     database_connection_string: "AccountEndpoint=..."
@@ -276,7 +276,7 @@ Configures LLM models:
 models:
   - model: "gpt-4.1-nano"  # Model identifier
     api_type: "azure"  # API type (azure, openai)
-    api_version: "2024-08-01-preview"  # API version
+    api_version: "2024-12-01-preview"  # API version
 ```
 
 In `profiles.yml`:
@@ -285,7 +285,7 @@ In `profiles.yml`:
 models:
   - model: "gpt-4.1-nano"
     api_key: "your-api-key"  # OpenAI or Azure OpenAI API key
-    base_url: "https://your-endpoint.openai.azure.com/openai/deployments/gpt-4.1-nano/chat/completions?api-version=2024-08-01-preview"  # API endpoint
+    base_url: "https://your-endpoint.openai.azure.com/openai/deployments/gpt-4.1-nano/chat/completions?api-version=2024-12-01-preview"  # API endpoint
 ```
 
 ### Logging
@@ -547,9 +547,10 @@ For `classification-agent` and `bike-insights` (if created via `ingen init`), yo
 # config.yml
 profile: dev
 models:
-  - model: "gpt-4.1-nano"
+  - model: ${AZURE_OPENAI_MODEL_NAME:gpt-4.1-nano}  # Environment variable substitution
     api_type: azure
-    api_version: "2024-08-01-preview"
+    api_version: ${AZURE_OPENAI_API_VERSION:2024-12-01-preview}
+    deployment: ${AZURE_OPENAI_DEPLOYMENT:gpt-4.1-nano}
 chat_service:
   type: multi_agent
 ```
