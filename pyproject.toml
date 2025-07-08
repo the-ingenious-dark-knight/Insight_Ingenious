@@ -115,14 +115,33 @@ extend-select = ["I"]
 ignore = ["E402"]
 
 [tool.pytest.ini_options]
-addopts = "-p no:doctest"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+  "-v",
+  "--tb=short",
+  "--strict-markers",
+  "--strict-config",
+  "--cov=ingenious",
+  "--cov-report=term-missing",
+  "--cov-report=html",
+  "--cov-fail-under=20",
+  "-p", "no:doctest"
+]
 asyncio_mode = "strict"
 asyncio_default_fixture_loop_scope = "function"
 markers = [
-  "integration: mark test as integration test",
-  "e2e: live network integration test (requires SCRAPFLY_API_KEY)",
+  "unit: Unit tests (no external dependencies)",
+  "integration: Integration tests (internal components only)",
+  "slow: Slow-running tests",
+  "requires_env: Tests that require specific environment variables",
+  "e2e: live network integration test (requires external APIs)",
   "docs: tests that parse large documents or require extra dependencies",
 ]
 filterwarnings = [
+  "ignore::DeprecationWarning",
+  "ignore::PendingDeprecationWarning",
   "ignore:.*(SwigPy|swigvarlink).* has no __module__ attribute:DeprecationWarning",
 ]
