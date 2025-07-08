@@ -273,7 +273,7 @@ class TestNamespaceUtils:
             print_namespace_modules("test.namespace")
             
             # Verify the mocks were called appropriately
-            mock_import_module.assert_any_call("test.namespace")
+            mock_import_module.assert_called_once_with("test.namespace")
             mock_iter_modules.assert_called_once_with(["/path/to/package"])
 
     def test_print_namespace_modules_without_package(self):
