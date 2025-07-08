@@ -29,25 +29,31 @@ graph TB
 
     subgraph "Configuration Levels"
         MINIMAL[Minimal Config<br/>Azure OpenAI only]
-        SEARCH[+ Azure Search]
-        DATABASE[+ Database]
+        LOCAL_IMPL[Local Implementations<br/>ChromaDB + SQLite]
+        AZURE_EXPERIMENTAL[Azure Services<br/>Experimental/Unstable]
     end
 
     subgraph "External Dependencies"
         AZURE_OPENAI[Azure OpenAI]
-        AZURE_SEARCH[Azure Cognitive Search]
-        AZURE_SQL[Azure SQL Database]
+        CHROMADB[ChromaDB<br/>Local Vector DB]
+        SQLITE[SQLite<br/>Local Database]
+        AZURE_SEARCH[Azure Cognitive Search<br/>Experimental]
+        AZURE_SQL[Azure SQL Database<br/>Experimental]
     end
 
     CLASSIFICATION --> MINIMAL
     BIKE_INSIGHTS --> MINIMAL
 
-    KNOWLEDGE --> SEARCH
-
-    SQL --> DATABASE
+    KNOWLEDGE --> LOCAL_IMPL
+    SQL --> LOCAL_IMPL
 
     MINIMAL --> AZURE_OPENAI
-    SEARCH --> AZURE_OPENAI
+    LOCAL_IMPL --> AZURE_OPENAI
+    LOCAL_IMPL --> CHROMADB
+    LOCAL_IMPL --> SQLITE
+
+    AZURE_EXPERIMENTAL --> AZURE_SEARCH
+    AZURE_EXPERIMENTAL --> AZURE_SQL
     SEARCH --> AZURE_SEARCH
     DATABASE --> AZURE_OPENAI
     DATABASE --> AZURE_SQL
