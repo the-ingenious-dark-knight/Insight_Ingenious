@@ -258,24 +258,27 @@ class TestNamespaceUtils:
 
     def test_print_namespace_modules_with_package(self):
         """Test printing namespace modules for a package"""
-        with patch('ingenious.utils.namespace_utils.importlib.import_module') as mock_import_module, \
-             patch('ingenious.utils.namespace_utils.pkgutil.iter_modules') as mock_iter_modules:
-            
-            mock_package = Mock()
-            mock_package.__path__ = ["/path/to/package"]
-            mock_import_module.return_value = mock_package
-            
-            mock_module_info = Mock()
-            mock_module_info.name = "test_module"
-            mock_iter_modules.return_value = [mock_module_info]
-            
-            # Just verify the function runs without error
-            print_namespace_modules("test.namespace")
-            
-            # Verify the mocks were called appropriately
-            # Check that import_module was called with our test namespace
-            mock_import_module.assert_any_call("test.namespace")
-            mock_iter_modules.assert_called_once_with(["/path/to/package"])
+        # Test with a real package that we know exists
+        import io
+        import contextlib
+        
+        # Capture stdout to verify the function works
+        captured_output = io.StringIO()
+        
+        # Use a real package for testing
+        with contextlib.redirect_stdout(captured_output):
+            print_namespace_modules("unittest")  # unittest is a real package with modules
+        
+        output = captured_output.getvalue()
+        
+        # Verify that the function found and printed some modules
+        # unittest package has several modules like case, loader, mock, etc.
+        assert "Found module:" in output
+        
+        # Check for some known unittest modules
+        known_modules = ["case", "mock", "loader", "result"]
+        found_any = any(module in output for module in known_modules)
+        assert found_any, f"Expected to find at least one of {known_modules} in output: {output}"
 
     def test_print_namespace_modules_without_package(self):
         """Test printing namespace modules for a non-package"""
