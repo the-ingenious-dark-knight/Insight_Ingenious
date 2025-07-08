@@ -154,7 +154,7 @@ class TestMemoryManager:
 
             manager = MemoryManager(mock_config)
             result = await manager.write_memory(test_content, "test_thread")
-            assert result == True
+            assert result
 
     @pytest.mark.asyncio
     async def test_maintain_memory_within_limit(self):
@@ -216,7 +216,7 @@ class TestMemoryManager:
 
             manager = MemoryManager(mock_config)
             result = await manager.delete_memory("test_thread")
-            assert result == True
+            assert result
 
     @pytest.mark.asyncio
     async def test_delete_memory_file_not_exists(self):
@@ -233,7 +233,7 @@ class TestMemoryManager:
 
             manager = MemoryManager(mock_config)
             result = await manager.delete_memory("test_thread")
-            assert result == True
+            assert result
 
 
 class TestLegacyMemoryManager:
@@ -276,7 +276,7 @@ class TestLegacyMemoryManager:
             patch("builtins.open", mock_open()) as mock_file,
         ):
             result = manager.write_memory("Test content", "test_thread")
-            assert result == True
+            assert result
             mock_makedirs.assert_called_once()
             mock_file.assert_called_once()
 

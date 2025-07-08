@@ -627,7 +627,6 @@ def run_live_progress():
 @requires_auth
 def test_response_parsing():
     """Test endpoint to verify response parsing functionality"""
-    utils: utils_class = current_app.utils
 
     test_data = {
         "chat_name": "test_chat",

@@ -206,7 +206,7 @@ class TestNamespaceUtils:
 
         with (
             patch("ingenious.utils.namespace_utils.os.path.exists") as mock_exists,
-            patch("builtins.open", mock_open(read_data=file_content)) as mock_file,
+            patch("builtins.open", mock_open(read_data=file_content)),
         ):
             mock_exists.return_value = True
 
@@ -314,7 +314,6 @@ class TestNamespaceUtils:
         with patch(
             "ingenious.utils.namespace_utils.importlib.import_module"
         ) as mock_import_module:
-            mock_module = Mock()
             # Mock module without __path__ attribute by using spec
             mock_module_spec = Mock(spec=[])
             mock_import_module.return_value = mock_module_spec

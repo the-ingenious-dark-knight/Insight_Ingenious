@@ -146,7 +146,7 @@ class TestConfig:
             mock_profiles.return_value.get_profile_by_name.return_value = Mock()
             mock_config_model.return_value = Mock()
 
-            result = Config.from_yaml_str(yaml_content)
+            _result = Config.from_yaml_str(yaml_content)
 
             # Verify that validation was called
             mock_validate.assert_called_once()

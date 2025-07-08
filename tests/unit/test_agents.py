@@ -137,14 +137,14 @@ class TestAgentChats:
 
     def test_init_with_chats(self):
         """Test AgentChats initialization with existing chats."""
-        chat1 = AgentChat(
+        _chat1 = AgentChat(
             chat_name="chat1",
             target_agent_name="agent1",
             source_agent_name="source1",
             user_message="Hello 1",
             system_prompt="Prompt 1",
         )
-        chat2 = AgentChat(
+        _chat2 = AgentChat(
             chat_name="chat2",
             target_agent_name="agent2",
             source_agent_name="source2",
