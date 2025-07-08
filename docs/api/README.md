@@ -315,7 +315,7 @@ Returns a list of all available workflow types and their configurations.
 ### Workflow Naming Conventions
 
 Insight Ingenious supports both hyphenated and underscored workflow names for backward compatibility:
-- `classification-agent` or `classification_agent` 
+- `classification-agent` or `classification_agent`
 - `bike-insights` or `bike_insights` (template only)
 - `knowledge-base-agent` or `knowledge_base_agent`
 - `sql-manipulation-agent` or `sql_manipulation_agent`

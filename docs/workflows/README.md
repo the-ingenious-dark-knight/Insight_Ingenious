@@ -66,10 +66,10 @@ graph TB
 ### Core Library Workflows
 These workflows are built into the Insight Ingenious core library and are always available:
 - **classification-agent** - Routes user queries to appropriate specialized agents
-- **knowledge-base-agent** - Searches and retrieves information from knowledge bases  
+- **knowledge-base-agent** - Searches and retrieves information from knowledge bases
 - **sql-manipulation-agent** - Executes SQL queries based on natural language
 
-### Template Workflows  
+### Template Workflows
 These workflows are provided as examples in the `ingenious_extensions_template` when you run `ingen init`:
 - **bike-insights** - Multi-agent bike sales analysis (the "Hello World" example)
 
