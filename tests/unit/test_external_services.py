@@ -58,7 +58,10 @@ class TestOpenAIService:
     def test_init_missing_config(self):
         """Test OpenAI service initialization with missing configuration."""
         # Test with None parameters - should raise ValueError due to missing api_version
-        with pytest.raises(ValueError, match="Must provide either the `api_version` argument or the `OPENAI_API_VERSION` environment variable"):
+        with pytest.raises(
+            ValueError,
+            match="Must provide either the `api_version` argument or the `OPENAI_API_VERSION` environment variable",
+        ):
             OpenAIService(None, None, None, None)
 
     @pytest.mark.asyncio

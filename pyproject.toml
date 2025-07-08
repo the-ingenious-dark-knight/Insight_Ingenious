@@ -1,6 +1,6 @@
 [project]
 name = "ingenious"
-version = "0.1.1"
+version = "0.1.2"
 description = "An enterprise-grade Python library for quickly setting up APIs to interact with AI Agents"
 readme = "README.md"
 license = { text = "MIT" }
@@ -56,6 +56,7 @@ dependencies = [
   "pyodbc==5.2.0",
   "pypdf==5.5.0",
   "seaborn==0.13.2",
+  "sentence-transformers>=5.0.0",
   "typer>=0.15.4",
 ]
 
@@ -84,6 +85,7 @@ document-processing = [
   "pymupdf==1.26.1",
   "azure-ai-documentintelligence==1.0.2",
 ]
+local-implementations = ["sentence-transformers>=2.0.0"]
 pdfminer = ["pdfminer.six==20250506"]
 unstructured = ["unstructured[all-docs]==0.17.2"]
 tests = [
@@ -128,7 +130,8 @@ addopts = [
   "--cov-report=term-missing",
   "--cov-report=html",
   "--cov-fail-under=20",
-  "-p", "no:doctest"
+  "-p",
+  "no:doctest",
 ]
 asyncio_mode = "strict"
 asyncio_default_fixture_loop_scope = "function"
