@@ -88,26 +88,42 @@ def list_workflows_for_prompts(
         workflows_with_prompts = []
         
         for workflow in workflows:
-            # Check if this workflow has prompts
-            workflow_path = asyncio.run(fs.get_prompt_template_path(workflow))
-            try:
-                workflow_files = asyncio.run(fs.list_files(file_path=workflow_path))
-                if workflow_files:
-                    prompt_files = [f for f in workflow_files if f.endswith((".md", ".jinja"))]
-                    if prompt_files:
-                        workflows_with_prompts.append({
-                            "workflow": workflow,
-                            "revision_id": workflow,
-                            "prompt_count": len(prompt_files),
-                            "prompt_files": prompt_files
-                        })
-            except:
-                # If we can't access the workflow path, still include it
+            # Try both underscore and hyphenated formats
+            workflow_variants = [workflow]
+            if "_" in workflow:
+                workflow_variants.append(workflow.replace("_", "-"))
+            elif "-" in workflow:
+                workflow_variants.append(workflow.replace("-", "_"))
+            
+            found_prompts = False
+            for variant in workflow_variants:
+                try:
+                    # Check if this workflow has prompts
+                    workflow_path = asyncio.run(fs.get_prompt_template_path(variant))
+                    workflow_files = asyncio.run(fs.list_files(file_path=workflow_path))
+                    if workflow_files:
+                        prompt_files = [f for f in workflow_files if f.endswith((".md", ".jinja"))]
+                        if prompt_files:
+                            workflows_with_prompts.append({
+                                "workflow": workflow,
+                                "revision_id": variant,
+                                "prompt_count": len(prompt_files),
+                                "prompt_files": prompt_files
+                            })
+                            found_prompts = True
+                            break
+                except Exception as e:
+                    logger.debug(f"Error checking workflow {variant}: {e}")
+                    continue
+            
+            # If we couldn't find prompts, still include the workflow
+            if not found_prompts:
                 workflows_with_prompts.append({
                     "workflow": workflow,
                     "revision_id": workflow,
                     "prompt_count": 0,
-                    "prompt_files": []
+                    "prompt_files": [],
+                    "note": "No prompts found or path not accessible"
                 })
         
         return {
