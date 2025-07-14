@@ -4,6 +4,7 @@ import secrets
 
 from dotenv import load_dotenv
 from fastapi import Depends, HTTPException, Request, status
+from fastapi.security import HTTPBearer
 
 # Load environment variables from .env file
 load_dotenv()
@@ -15,6 +16,7 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from typing_extensions import Annotated
 
 import ingenious.config.config as Config
+from ingenious.auth.jwt import get_username_from_token
 from ingenious.db.chat_history_repository import (
     ChatHistoryRepository,
     DatabaseClientType,
@@ -28,6 +30,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "../../../.."))
 
 logger = logging.getLogger(__name__)
 security = HTTPBasic()
+bearer_security = HTTPBearer()
 
 
 def get_config():
@@ -68,6 +71,7 @@ def get_chat_history_repository():
 
 
 def get_security_service(
+    token: Annotated[str, Depends(bearer_security)] = None,
     credentials: Annotated[HTTPBasicCredentials, Depends(security)] = None,
 ):
     config = get_config()
@@ -78,12 +82,21 @@ def get_security_service(
         )
         return "anonymous"  # Return something that indicates no auth
 
-    # Authentication is enabled, validate credentials
+    # Try JWT token first (preferred method)
+    if token and token.credentials:
+        try:
+            username = get_username_from_token(token.credentials)
+            return username
+        except HTTPException:
+            # JWT token validation failed, fall back to basic auth if available
+            pass
+
+    # Fall back to basic auth for backward compatibility
     if credentials is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Authentication required",
-            headers={"WWW-Authenticate": "Basic"},
+            headers={"WWW-Authenticate": "Bearer"},
         )
 
     current_username_bytes = credentials.username.encode("utf8")
@@ -104,7 +117,7 @@ def get_security_service(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Basic"},
+            headers={"WWW-Authenticate": "Bearer"},
         )
     return credentials.username
 
@@ -208,7 +221,7 @@ def get_project_config():
 
 
 def get_auth_user(request: Request) -> str:
-    """Get authenticated user - bypasses credentials check when auth is disabled"""
+    """Get authenticated user - supports both JWT and Basic Auth"""
     config = get_config()
 
     if not config.web_configuration.authentication.enable:
@@ -218,52 +231,65 @@ def get_auth_user(request: Request) -> str:
         )
         return "anonymous"
 
-    # Authentication is enabled, extract and validate Basic Auth
+    # Authentication is enabled, check for JWT token first
     auth_header = request.headers.get("Authorization", "")
-    if not auth_header.startswith("Basic "):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Authentication required",
-            headers={"WWW-Authenticate": "Basic"},
+
+    # Try JWT Bearer token first
+    if auth_header.startswith("Bearer "):
+        token = auth_header[7:]  # Remove "Bearer " prefix
+        try:
+            username = get_username_from_token(token)
+            return username
+        except HTTPException:
+            # JWT validation failed, continue to basic auth fallback
+            pass
+
+    # Fall back to Basic Auth
+    if auth_header.startswith("Basic "):
+        import base64
+
+        try:
+            credentials_str = base64.b64decode(auth_header[6:]).decode("utf-8")
+            username, password = credentials_str.split(":", 1)
+        except (ValueError, UnicodeDecodeError):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid authentication format",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        # Validate credentials
+        current_username_bytes = username.encode("utf8")
+        correct_username_bytes = (
+            config.web_configuration.authentication.username.encode("utf-8")
+        )
+        is_correct_username = secrets.compare_digest(
+            current_username_bytes, correct_username_bytes
         )
 
-    import base64
-
-    try:
-        credentials_str = base64.b64decode(auth_header[6:]).decode("utf-8")
-        username, password = credentials_str.split(":", 1)
-    except (ValueError, UnicodeDecodeError):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication format",
-            headers={"WWW-Authenticate": "Basic"},
+        current_password_bytes = password.encode("utf8")
+        correct_password_bytes = (
+            config.web_configuration.authentication.password.encode("utf-8")
+        )
+        is_correct_password = secrets.compare_digest(
+            current_password_bytes, correct_password_bytes
         )
 
-    # Validate credentials
-    current_username_bytes = username.encode("utf8")
-    correct_username_bytes = config.web_configuration.authentication.username.encode(
-        "utf-8"
-    )
-    is_correct_username = secrets.compare_digest(
-        current_username_bytes, correct_username_bytes
-    )
+        if not (is_correct_username and is_correct_password):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Incorrect username or password",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
 
-    current_password_bytes = password.encode("utf8")
-    correct_password_bytes = config.web_configuration.authentication.password.encode(
-        "utf-8"
-    )
-    is_correct_password = secrets.compare_digest(
-        current_password_bytes, correct_password_bytes
-    )
+        return username
 
-    if not (is_correct_username and is_correct_password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Basic"},
-        )
-
-    return username
+    # No valid authentication method provided
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Authentication required",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
 
 
 def get_conditional_security(request: Request) -> str:

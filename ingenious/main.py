@@ -9,6 +9,7 @@ from fastapi.middleware.wsgi import WSGIMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 
 import ingenious.config.config as ingen_config
+from ingenious.api.routes import auth as auth_route
 from ingenious.api.routes import chat as chat_route
 from ingenious.api.routes import diagnostic as diagnostic_route
 from ingenious.api.routes import message_feedback as message_feedback_route
@@ -64,6 +65,9 @@ class FastAgentAPI:
         )
 
         # Add in-built routes
+        self.app.include_router(
+            auth_route.router, prefix="/api/v1/auth", tags=["Authentication"]
+        )
         self.app.include_router(chat_route.router, prefix="/api/v1", tags=["Chat"])
         self.app.include_router(
             diagnostic_route.router, prefix="/api/v1", tags=["Diagnostic"]

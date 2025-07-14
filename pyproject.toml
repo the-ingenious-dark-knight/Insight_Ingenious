@@ -30,6 +30,7 @@ dependencies = [
   "azure-keyvault>=4.2.0",
   "azure-search-documents==11.5.2",
   "azure-storage-blob>=12.25.1",
+  "bcrypt>=4.3.0",
   "chainlit==2.5.5",
   "fastapi==0.115.9",
   "fastapi-cli==0.0.7",
@@ -37,8 +38,10 @@ dependencies = [
   "jinja2==3.1.6",
   "jsonpickle>=4.1.1",
   "openai==1.82.0",
+  "passlib>=1.7.4",
   "pydantic==2.11.5",
   "pyodbc==5.2.0",
+  "python-jose[cryptography]>=3.5.0",
   "typer>=0.15.4",
 ]
 
