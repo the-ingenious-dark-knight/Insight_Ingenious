@@ -9,8 +9,7 @@ from ingenious.core.structured_logging import get_logger
 logger = get_logger(__name__)
 
 
-@staticmethod
-def get_kv_secret(secretName):
+def get_kv_secret(secretName: str) -> str:
     # check if the key vault name is set in the environment variables
     if "KEY_VAULT_NAME" in os.environ:
         keyVaultName = os.environ["KEY_VAULT_NAME"]

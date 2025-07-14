@@ -148,7 +148,7 @@ def _load(name: str) -> DocumentExtractor:
     try:
         module_path, class_name = _ENGINES[name].split(":", 1)
         extractor_cls = getattr(import_module(module_path), class_name)
-        extractor: DocumentExtractor = extractor_cls()  # type: ignore[call‑arg]
+        extractor: DocumentExtractor = extractor_cls()
         logger.debug(
             "Loaded document extractor",
             engine_name=name,
@@ -213,7 +213,7 @@ def extract(src: Src, *, engine: str = "pymupdf") -> Iterable[Element]:
     >>> len(elements)
     42
     """
-    return _load(engine).extract(src)  # type: ignore[arg‑type]
+    return _load(engine).extract(src)
 
 
 __all__ = [

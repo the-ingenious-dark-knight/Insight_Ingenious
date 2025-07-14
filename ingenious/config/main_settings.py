@@ -54,7 +54,7 @@ class IngeniousSettings(BaseSettings):
     )
 
     chat_history: ChatHistorySettings = Field(
-        default_factory=ChatHistorySettings,
+        default_factory=lambda: ChatHistorySettings(),
         description="Chat history storage configuration",
     )
 
@@ -63,45 +63,45 @@ class IngeniousSettings(BaseSettings):
     )
 
     logging: LoggingSettings = Field(
-        default_factory=LoggingSettings, description="Application logging configuration"
+        default_factory=lambda: LoggingSettings(), description="Application logging configuration"
     )
 
     tool_service: ToolServiceSettings = Field(
-        default_factory=ToolServiceSettings,
+        default_factory=lambda: ToolServiceSettings(),
         description="External tool service configuration",
     )
 
     chat_service: ChatServiceSettings = Field(
-        default_factory=ChatServiceSettings,
+        default_factory=lambda: ChatServiceSettings(),
         description="Chat service backend configuration",
     )
 
     chainlit_configuration: ChainlitSettings = Field(
-        default_factory=ChainlitSettings,
+        default_factory=lambda: ChainlitSettings(),
         description="Chainlit chat interface configuration",
     )
 
     prompt_tuner: PromptTunerSettings = Field(
-        default_factory=PromptTunerSettings,
+        default_factory=lambda: PromptTunerSettings(),
         description="Prompt tuning interface configuration",
     )
 
     web_configuration: WebSettings = Field(
-        default_factory=WebSettings, description="Web server and API configuration"
+        default_factory=lambda: WebSettings(), description="Web server and API configuration"
     )
 
     receiver_configuration: ReceiverSettings = Field(
-        default_factory=ReceiverSettings,
+        default_factory=lambda: ReceiverSettings(),
         description="External event receiver configuration",
     )
 
     local_sql_db: LocalSqlSettings = Field(
-        default_factory=LocalSqlSettings,
+        default_factory=lambda: LocalSqlSettings(),
         description="Local SQLite database configuration",
     )
 
     file_storage: FileStorageSettings = Field(
-        default_factory=FileStorageSettings,
+        default_factory=lambda: FileStorageSettings(),
         description="File storage system configuration",
     )
 

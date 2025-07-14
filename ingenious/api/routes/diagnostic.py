@@ -1,6 +1,7 @@
 import time
 from datetime import datetime
 from pathlib import Path
+from typing import Any, Dict, List
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from typing_extensions import Annotated
@@ -30,7 +31,7 @@ async def workflow_status(
     workflow_name: str,
     request: Request,
     auth_user: Annotated[str, Depends(igen_deps.get_auth_user)],
-):
+) -> Dict[str, Any]:
     """
     Check the configuration status of a specific workflow.
 
@@ -38,7 +39,7 @@ async def workflow_status(
     and what external services or configuration might be missing.
     """
     try:
-        config = igen_deps.get_config()
+        config = igen_deps.get_config()  # type: ignore
 
         # Normalize workflow name to handle both hyphenated and underscored formats
         normalized_workflow_name = normalize_workflow_name(workflow_name)
@@ -160,7 +161,7 @@ async def workflow_status(
 async def list_workflows(
     request: Request,
     auth_user: Annotated[str, Depends(igen_deps.get_auth_user)],
-):
+) -> Dict[str, Any]:
     """
     List all available workflows and their configuration status.
     Supports both hyphenated (bike-insights) and underscored (bike_insights) naming formats.
@@ -186,7 +187,7 @@ async def list_workflows(
             workflow_statuses.append(status)
 
         # Group by category
-        by_category = {}
+        by_category: Dict[str, List[Dict[str, Any]]] = {}
         for status in workflow_statuses:
             category = status["category"]
             if category not in by_category:
@@ -224,7 +225,7 @@ async def list_workflows(
 async def diagnostic(
     request: Request,
     auth_user: Annotated[str, Depends(igen_deps.get_auth_user)],
-):
+) -> Dict[str, Any]:
     if request.method == "OPTIONS":
         return {"Allow": "GET, OPTIONS"}
 
@@ -232,22 +233,28 @@ async def diagnostic(
         diagnostic = {}
 
         prompt_dir = Path(
-            await igen_deps.get_file_storage_revisions().get_base_path()
+            await igen_deps.get_file_storage_revisions().get_base_path()  # type: ignore
         ) / Path(
-            await igen_deps.get_file_storage_revisions().get_prompt_template_path()
+            await igen_deps.get_file_storage_revisions().get_prompt_template_path()  # type: ignore
         )
 
-        data_dir = Path(await igen_deps.get_file_storage_data().get_base_path()) / Path(
-            await igen_deps.get_file_storage_data().get_data_path()
+        data_dir = Path(
+            await igen_deps.get_file_storage_data().get_base_path()  # type: ignore
+        ) / Path(
+            await igen_deps.get_file_storage_data().get_data_path()  # type: ignore
         )
 
         output_dir = Path(
-            await igen_deps.get_file_storage_revisions().get_base_path()
-        ) / Path(await igen_deps.get_file_storage_revisions().get_output_path())
+            await igen_deps.get_file_storage_revisions().get_base_path()  # type: ignore
+        ) / Path(
+            await igen_deps.get_file_storage_revisions().get_output_path()  # type: ignore
+        )
 
         events_dir = Path(
-            await igen_deps.get_file_storage_revisions().get_base_path()
-        ) / Path(await igen_deps.get_file_storage_revisions().get_events_path())
+            await igen_deps.get_file_storage_revisions().get_base_path()  # type: ignore
+        ) / Path(
+            await igen_deps.get_file_storage_revisions().get_events_path()  # type: ignore
+        )
 
         diagnostic["Prompt Directory"] = prompt_dir
         diagnostic["Data Directory"] = data_dir
@@ -268,7 +275,7 @@ async def diagnostic(
         503: {"model": HTTPError, "description": "Service Unavailable"},
     },
 )
-async def health_check():
+async def health_check() -> Dict[str, Any]:
     """
     Health check endpoint for monitoring system status.
 
@@ -280,7 +287,7 @@ async def health_check():
 
         # Check basic configuration availability
         try:
-            _ = igen_deps.get_config()
+            _ = igen_deps.get_config()  # type: ignore
             config_status = "ok"
         except Exception as e:
             logger.warning("Configuration check failed", error=str(e))
@@ -288,7 +295,7 @@ async def health_check():
 
         # Check profile availability
         try:
-            _ = igen_deps.get_profile()
+            _ = igen_deps.get_profile()  # type: ignore
             profile_status = "ok"
         except Exception as e:
             logger.warning("Profile check failed", error=str(e))

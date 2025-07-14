@@ -30,6 +30,8 @@ def validate_models_not_empty(models: List[ModelSettings]) -> List[ModelSettings
         return [
             ModelSettings(
                 model=os.getenv("AZURE_OPENAI_MODEL", "gpt-4"),
+                api_type="rest",
+                api_version="2023-03-15-preview",
                 api_key=api_key,
                 base_url=base_url,
                 deployment=os.getenv("AZURE_OPENAI_DEPLOYMENT", ""),

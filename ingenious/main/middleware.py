@@ -6,10 +6,11 @@ request context, logging, and other cross-cutting concerns.
 """
 
 import time
-from typing import Optional
+from typing import Awaitable, Callable, Optional
 
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import Response
 
 from ingenious.core.structured_logging import (
     clear_request_context,
@@ -23,7 +24,7 @@ logger = get_logger(__name__)
 class RequestContextMiddleware(BaseHTTPMiddleware):
     """Middleware to set request context for structured logging and tracing."""
 
-    async def dispatch(self, request: Request, call_next):
+    async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
         start_time = time.time()
 
         # Extract user info from request if available
@@ -49,8 +50,6 @@ class RequestContextMiddleware(BaseHTTPMiddleware):
         request_id = set_request_context(
             user_id=user_id,
             session_id=session_id,
-            client_ip=client_ip,
-            user_agent=user_agent,
         )
 
         # Log request start
@@ -114,7 +113,7 @@ class RequestContextMiddleware(BaseHTTPMiddleware):
             # Clear context after request
             clear_request_context()
 
-    def _extract_user_from_auth_header(self, auth_header: Optional[str]) -> str:
+    def _extract_user_from_auth_header(self, auth_header: Optional[str]) -> Optional[str]:
         """Extract user ID from Authorization header."""
         if auth_header and auth_header.startswith("Bearer "):
             try:

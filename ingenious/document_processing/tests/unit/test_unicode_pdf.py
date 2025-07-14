@@ -48,6 +48,7 @@ Dependencies
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 import fitz
 
@@ -55,7 +56,7 @@ __all__: list[str] = ["test_pymupdf_unicode"]
 
 
 # ───────────────────── tests ─────────────────────
-def test_pymupdf_unicode(pymupdf, tmp_path: Path) -> None:
+def test_pymupdf_unicode(pymupdf: Any, tmp_path: Path) -> None:
     """Validate that :pyfunc:`pymupdf.extract` retains mixed-script text.
 
     Steps

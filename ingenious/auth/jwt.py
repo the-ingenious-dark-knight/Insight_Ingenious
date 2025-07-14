@@ -1,6 +1,6 @@
 import os
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Any, Dict, Optional
 
 from fastapi import HTTPException, status
 from jose import JWTError, jwt
@@ -22,7 +22,7 @@ REFRESH_TOKEN_EXPIRE_DAYS = int(
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
     """Create a JWT access token"""
     to_encode = data.copy()
     if expires_delta:
@@ -35,7 +35,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     return encoded_jwt
 
 
-def create_refresh_token(data: dict):
+def create_refresh_token(data: Dict[str, Any]) -> str:
     """Create a JWT refresh token"""
     to_encode = data.copy()
     expire = datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
@@ -44,7 +44,7 @@ def create_refresh_token(data: dict):
     return encoded_jwt
 
 
-def verify_token(token: str, token_type: str = "access") -> dict:
+def verify_token(token: str, token_type: str = "access") -> Dict[str, Any]:
     """Verify and decode a JWT token"""
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
