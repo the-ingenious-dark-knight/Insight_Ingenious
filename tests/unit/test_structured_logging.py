@@ -1,12 +1,7 @@
-import json
-import logging
-import sys
 import time
-from io import StringIO
 from unittest.mock import patch
 
 import pytest
-import structlog
 
 from ingenious.core.structured_logging import (
     PerformanceLogger,
@@ -32,27 +27,27 @@ class TestStructuredLoggingSetup:
         setup_structured_logging(log_level="INFO", json_output=True)
         logger = get_logger("test")
         # Check that we can call logging methods
-        assert hasattr(logger, 'info')
-        assert hasattr(logger, 'error')
-        assert hasattr(logger, 'debug')
+        assert hasattr(logger, "info")
+        assert hasattr(logger, "error")
+        assert hasattr(logger, "debug")
 
     def test_setup_structured_logging_console_mode(self):
         """Test that structured logging can be configured in console mode."""
         setup_structured_logging(log_level="DEBUG", json_output=False)
         logger = get_logger("test")
         # Check that we can call logging methods
-        assert hasattr(logger, 'info')
-        assert hasattr(logger, 'error')
-        assert hasattr(logger, 'debug')
+        assert hasattr(logger, "info")
+        assert hasattr(logger, "error")
+        assert hasattr(logger, "debug")
 
     def test_get_logger_returns_structlog_instance(self):
         """Test that get_logger returns a structlog instance."""
         setup_structured_logging()
         logger = get_logger("test.module")
         # Check that we can call logging methods
-        assert hasattr(logger, 'info')
-        assert hasattr(logger, 'error')
-        assert hasattr(logger, 'debug')
+        assert hasattr(logger, "info")
+        assert hasattr(logger, "error")
+        assert hasattr(logger, "debug")
 
 
 class TestRequestContext:
@@ -60,11 +55,8 @@ class TestRequestContext:
 
     def test_set_and_get_request_context(self):
         """Test setting and getting request context."""
-        request_id = set_request_context(
-            user_id="user123", 
-            session_id="session456"
-        )
-        
+        request_id = set_request_context(user_id="user123", session_id="session456")
+
         assert request_id is not None
         assert len(request_id) > 0
         assert get_request_id() == request_id
@@ -73,7 +65,7 @@ class TestRequestContext:
         """Test setting request context with custom request ID."""
         custom_id = "custom-request-123"
         request_id = set_request_context(request_id=custom_id)
-        
+
         assert request_id == custom_id
         assert get_request_id() == custom_id
 
@@ -81,25 +73,23 @@ class TestRequestContext:
         """Test clearing request context."""
         set_request_context(user_id="user123")
         assert get_request_id() is not None
-        
+
         clear_request_context()
         assert get_request_id() is None
 
     def test_correlation_id_processor(self):
         """Test that correlation IDs are added to log entries."""
         set_request_context(
-            request_id="req123",
-            user_id="user456", 
-            session_id="sess789"
+            request_id="req123", user_id="user456", session_id="sess789"
         )
-        
+
         event_dict = {}
         result = add_correlation_id(None, "info", event_dict)
-        
+
         assert result["request_id"] == "req123"
         assert result["user_id"] == "user456"
         assert result["session_id"] == "sess789"
-        
+
         clear_request_context()
 
 
@@ -110,24 +100,24 @@ class TestLogProcessors:
         """Test that timestamp processor adds timestamp."""
         event_dict = {}
         result = add_timestamp(None, "info", event_dict)
-        
+
         assert "timestamp" in result
         # Verify timestamp format (ISO format)
         timestamp = result["timestamp"]
         assert "T" in timestamp
         assert timestamp.endswith("Z")
 
-    @patch('psutil.Process')
+    @patch("psutil.Process")
     def test_add_performance_metrics_processor(self, mock_process):
         """Test that performance metrics are added when psutil is available."""
         # Mock psutil process
         mock_process_instance = mock_process.return_value
         mock_process_instance.memory_info.return_value.rss = 1024 * 1024 * 100  # 100 MB
         mock_process_instance.cpu_percent.return_value = 15.5
-        
+
         event_dict = {}
         result = add_performance_metrics(None, "info", event_dict)
-        
+
         assert "memory_mb" in result
         assert "cpu_percent" in result
         assert result["memory_mb"] == 100.0
@@ -135,10 +125,10 @@ class TestLogProcessors:
 
     def test_add_performance_metrics_processor_no_psutil(self):
         """Test that performance metrics processor works when psutil is not available."""
-        with patch.dict('sys.modules', {'psutil': None}):
+        with patch.dict("sys.modules", {"psutil": None}):
             event_dict = {}
             result = add_performance_metrics(None, "info", event_dict)
-            
+
             # Should not add metrics if psutil is not available
             assert "memory_mb" not in result
             assert "cpu_percent" not in result
@@ -151,7 +141,7 @@ class TestPerformanceLogger:
         """Test performance logger for successful operations."""
         setup_structured_logging(json_output=False, include_stdlib=True)
         logger = get_logger("test")
-        
+
         # Just test that performance logger can be used without errors
         try:
             with PerformanceLogger(logger, "test_operation", extra_param="value"):
@@ -165,7 +155,7 @@ class TestPerformanceLogger:
         """Test performance logger when operation fails."""
         setup_structured_logging(json_output=False, include_stdlib=True)
         logger = get_logger("test")
-        
+
         # Test that performance logger handles exceptions properly
         try:
             with PerformanceLogger(logger, "failing_operation"):
@@ -175,7 +165,7 @@ class TestPerformanceLogger:
             pass
         except Exception as e:
             pytest.fail(f"Performance logging with exception failed: {e}")
-        
+
         # If we reach here, exception handling in performance logger worked
         assert True
 
@@ -187,7 +177,7 @@ class TestHelperFunctions:
         """Test logging successful API calls."""
         setup_structured_logging(json_output=False, include_stdlib=True)
         logger = get_logger("test")
-        
+
         try:
             log_api_call(
                 logger=logger,
@@ -195,7 +185,7 @@ class TestHelperFunctions:
                 url="/api/test",
                 status_code=200,
                 duration=0.123,
-                extra_data="test"
+                extra_data="test",
             )
             assert True
         except Exception as e:
@@ -205,14 +195,14 @@ class TestHelperFunctions:
         """Test logging failed API calls."""
         setup_structured_logging(json_output=False, include_stdlib=True)
         logger = get_logger("test")
-        
+
         try:
             log_api_call(
                 logger=logger,
                 method="POST",
                 url="/api/error",
                 status_code=500,
-                duration=0.456
+                duration=0.456,
             )
             assert True
         except Exception as e:
@@ -222,14 +212,14 @@ class TestHelperFunctions:
         """Test logging database operations."""
         setup_structured_logging(json_output=False, include_stdlib=True)
         logger = get_logger("test")
-        
+
         try:
             log_database_operation(
                 logger=logger,
                 operation="SELECT",
                 table="users",
                 duration=0.05,
-                affected_rows=10
+                affected_rows=10,
             )
             assert True
         except Exception as e:
@@ -239,14 +229,14 @@ class TestHelperFunctions:
         """Test logging successful agent actions."""
         setup_structured_logging(json_output=False, include_stdlib=True)
         logger = get_logger("test")
-        
+
         try:
             log_agent_action(
                 logger=logger,
                 agent_name="test_agent",
                 action="process_message",
                 success=True,
-                duration=0.2
+                duration=0.2,
             )
             assert True
         except Exception as e:
@@ -256,14 +246,14 @@ class TestHelperFunctions:
         """Test logging failed agent actions."""
         setup_structured_logging(json_output=False, include_stdlib=True)
         logger = get_logger("test")
-        
+
         try:
             log_agent_action(
                 logger=logger,
                 agent_name="test_agent",
                 action="process_message",
                 success=False,
-                error="Processing failed"
+                error="Processing failed",
             )
             assert True
         except Exception as e:
@@ -277,34 +267,33 @@ class TestStructuredLoggingIntegration:
         """Test that structured logging works with request context."""
         setup_structured_logging(json_output=False, include_stdlib=True)
         logger = get_logger("test.integration")
-        
+
         # Set request context
-        request_id = set_request_context(
-            user_id="integration_user",
-            session_id="integration_session"
+        set_request_context(
+            user_id="integration_user", session_id="integration_session"
         )
-        
+
         try:
             # Log with structured data
             logger.info(
                 "Integration test message",
                 operation="test",
                 data_size=1024,
-                success=True
+                success=True,
             )
             assert True
         except Exception as e:
             pytest.fail(f"Structured logging with context failed: {e}")
-        
+
         clear_request_context()
 
     def test_json_log_format(self):
         """Test that JSON logging format is properly configured."""
         setup_structured_logging(json_output=True)
         logger = get_logger("test.json")
-        
+
         set_request_context(request_id="json_test_123")
-        
+
         # Just test that we can log with JSON format enabled
         # The actual JSON validation would require capturing the output
         # which is complex with the current structlog setup
@@ -314,7 +303,7 @@ class TestStructuredLoggingIntegration:
             assert True
         except Exception as e:
             pytest.fail(f"JSON logging failed: {e}")
-        
+
         clear_request_context()
 
 

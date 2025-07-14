@@ -8,6 +8,7 @@ from azure.keyvault.secrets import SecretClient
 from pydantic import ValidationError
 
 from ingenious.config.profile import Profiles
+from ingenious.config.settings import IngeniousSettings
 from ingenious.core.structured_logging import get_logger
 from ingenious.models import config as config_models
 from ingenious.models import config_ns as config_ns_models
@@ -195,6 +196,28 @@ def get_kv_secret(secretName):
         raise ValueError("KEY_VAULT_NAME environment variable not set")
 
 
+def get_config_new() -> IngeniousSettings:
+    """
+    Get configuration using the new pydantic-settings system.
+
+    This function provides the new configuration system that:
+    - Automatically loads environment variables
+    - Supports .env files
+    - Provides validation with helpful error messages
+    - Uses nested configuration models
+
+    Returns:
+        IngeniousSettings: The loaded and validated configuration
+    """
+    try:
+        settings = IngeniousSettings()
+        settings.validate_configuration()
+        return settings
+    except Exception as e:
+        logger.error(f"Failed to load configuration with new settings system: {e}")
+        raise
+
+
 @staticmethod
 def get_config(config_path=None) -> config_models.Config:
     # Check if os.getenv('INGENIOUS_CONFIG') is set
@@ -239,4 +262,180 @@ def get_config(config_path=None) -> config_models.Config:
 
     else:
         logger.debug(f"No config file found at {config_path}")
-        exit(1)
+        # Try the new settings system as fallback
+        try:
+            logger.info(
+                "Attempting to load configuration using new pydantic-settings system"
+            )
+            new_settings = get_config_new()
+            logger.info("Successfully loaded configuration using new settings system")
+            # Convert new settings to old config format for backward compatibility
+            return _convert_new_settings_to_old_config(new_settings)
+        except Exception as e:
+            logger.error(f"Failed to load configuration with new settings system: {e}")
+            exit(1)
+
+
+def _convert_new_settings_to_old_config(
+    settings: IngeniousSettings,
+) -> config_models.Config:
+    """
+    Convert new IngeniousSettings to old Config format for backward compatibility.
+
+    This is a temporary bridge function to maintain compatibility while transitioning
+    to the new configuration system.
+    """
+    # Create a mock profile for the conversion
+    profile_data = {
+        "name": settings.profile,
+        "models": [
+            {
+                "model": model.model,
+                "api_key": model.api_key,
+                "base_url": model.base_url,
+                "deployment": model.deployment,
+                "api_version": model.api_version,
+            }
+            for model in settings.models
+        ],
+        "chat_history": {
+            "database_connection_string": settings.chat_history.database_connection_string,
+        },
+        "receiver_configuration": {
+            "enable": settings.receiver_configuration.enable,
+            "api_url": settings.receiver_configuration.api_url,
+            "api_key": settings.receiver_configuration.api_key,
+        },
+        "chainlit_configuration": {
+            "enable": settings.chainlit_configuration.enable,
+            "authentication": {
+                "enable": settings.chainlit_configuration.authentication.enable,
+                "github_secret": settings.chainlit_configuration.authentication.github_secret,
+                "github_client_id": settings.chainlit_configuration.authentication.github_client_id,
+            },
+        },
+        "web_configuration": {
+            "authentication": {
+                "enable": settings.web_configuration.authentication.enable,
+                "username": settings.web_configuration.authentication.username,
+                "password": settings.web_configuration.authentication.password,
+                "type": settings.web_configuration.authentication.type,
+            },
+        },
+        "azure_search_services": [
+            {
+                "service": service.service,
+                "key": service.key,
+            }
+            for service in (settings.azure_search_services or [])
+        ],
+        "azure_sql_services": {
+            "database_connection_string": settings.azure_sql_services.database_connection_string
+            if settings.azure_sql_services
+            else "",
+        },
+        "file_storage": {
+            "revisions": {
+                "url": settings.file_storage.revisions.url,
+                "client_id": settings.file_storage.revisions.client_id,
+                "token": settings.file_storage.revisions.token,
+                "authentication_method": settings.file_storage.revisions.authentication_method,
+            },
+            "data": {
+                "url": settings.file_storage.data.url,
+                "client_id": settings.file_storage.data.client_id,
+                "token": settings.file_storage.data.token,
+                "authentication_method": settings.file_storage.data.authentication_method,
+            },
+        },
+    }
+
+    # Create config data
+    config_data = {
+        "profile": settings.profile,
+        "models": [
+            {
+                "model": model.model,
+                "api_type": model.api_type,
+                "api_version": model.api_version,
+                "deployment": model.deployment,
+            }
+            for model in settings.models
+        ],
+        "chat_history": {
+            "database_type": settings.chat_history.database_type,
+            "database_path": settings.chat_history.database_path,
+            "database_name": settings.chat_history.database_name,
+            "memory_path": settings.chat_history.memory_path,
+        },
+        "logging": {
+            "root_log_level": settings.logging.root_log_level,
+            "log_level": settings.logging.log_level,
+        },
+        "tool_service": {
+            "enable": settings.tool_service.enable,
+        },
+        "chat_service": {
+            "type": settings.chat_service.type,
+        },
+        "chainlit_configuration": {
+            "enable": settings.chainlit_configuration.enable,
+        },
+        "prompt_tuner": {
+            "mode": settings.prompt_tuner.mode,
+            "enable": settings.prompt_tuner.enable,
+        },
+        "web_configuration": {
+            "ip_address": settings.web_configuration.ip_address,
+            "port": settings.web_configuration.port,
+            "type": settings.web_configuration.type,
+            "asynchronous": settings.web_configuration.asynchronous,
+        },
+        "local_sql_db": {
+            "database_path": settings.local_sql_db.database_path,
+            "sample_csv_path": settings.local_sql_db.sample_csv_path,
+            "sample_database_name": settings.local_sql_db.sample_database_name,
+        },
+        "azure_search_services": [
+            {
+                "service": service.service,
+                "endpoint": service.endpoint,
+            }
+            for service in (settings.azure_search_services or [])
+        ],
+        "azure_sql_services": {
+            "database_name": settings.azure_sql_services.database_name,
+            "table_name": settings.azure_sql_services.table_name,
+        }
+        if settings.azure_sql_services
+        else None,
+        "file_storage": {
+            "revisions": {
+                "enable": settings.file_storage.revisions.enable,
+                "storage_type": settings.file_storage.revisions.storage_type,
+                "container_name": settings.file_storage.revisions.container_name,
+                "path": settings.file_storage.revisions.path,
+                "add_sub_folders": settings.file_storage.revisions.add_sub_folders,
+            },
+            "data": {
+                "enable": settings.file_storage.data.enable,
+                "storage_type": settings.file_storage.data.storage_type,
+                "container_name": settings.file_storage.data.container_name,
+                "path": settings.file_storage.data.path,
+                "add_sub_folders": settings.file_storage.data.add_sub_folders,
+            },
+        },
+    }
+
+    # Convert to JSON and back to create proper config objects
+    config_json = json.dumps(config_data)
+    profile_json = json.dumps(profile_data)
+
+    # Create the config namespace object
+    config_ns = config_ns_models.Config.model_validate_json(config_json)
+
+    # Create a profile object
+    profile_obj = profile_models.Profile.model_validate_json(profile_json)
+
+    # Create the final config object
+    return config_models.Config(config_ns, profile_obj)
