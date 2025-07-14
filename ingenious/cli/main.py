@@ -53,6 +53,12 @@ custom_theme = Theme(
 
 console = Console(theme=custom_theme)
 
+# Import the new command registry
+from .registry import get_registry
+
+# Initialize command registry with the console
+registry = get_registry(console)
+
 # Import command modules to register them with the app
 from . import (
     help_commands,
@@ -68,6 +74,20 @@ project_commands.register_commands(app, console)
 test_commands.register_commands(app, console)
 workflow_commands.register_commands(app, console)
 help_commands.register_commands(app, console)
+
+# Discover additional commands
+registry.discover_commands(
+    [
+        "ingenious.cli.help_commands",
+        "ingenious.cli.project_commands",
+        "ingenious.cli.server_commands",
+        "ingenious.cli.test_commands",
+        "ingenious.cli.workflow_commands",
+    ]
+)
+
+# Register commands with typer app
+registry.register_typer_commands(app)
 
 if __name__ == "__main__":
     app()
