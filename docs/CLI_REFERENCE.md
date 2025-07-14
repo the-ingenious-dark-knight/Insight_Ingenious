@@ -151,8 +151,14 @@ Show detailed help and guides.
 
 ## Data Processing Commands
 
+> **Note**: Data processing commands require additional dependencies. Install with:
+> - For document processing: `uv add ingenious[document-processing]`
+> - For dataprep: `uv add ingenious[dataprep]`
+
 ### `ingen document-processing <path>`
 Extract text from documents (PDF, DOCX, images).
+
+**Requirements:** `ingenious[document-processing]` optional dependency group
 
 **Arguments:**
 - `path` - File path, directory, or HTTP/S URL
@@ -169,6 +175,8 @@ ingen document-processing https://example.com/doc.pdf --out results.jsonl
 
 ### `ingen dataprep`
 Web scraping utilities using Scrapfly.
+
+**Requirements:** `ingenious[dataprep]` optional dependency group
 
 **Subcommands:**
 - `crawl <url>` - Scrape single page

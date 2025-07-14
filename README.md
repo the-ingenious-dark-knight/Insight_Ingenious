@@ -42,7 +42,7 @@ Get up and running in 5 minutes with Azure OpenAI!
 5. **Verify Health**:
     ```bash
     # Check server health
-    curl http://localhost:80/api/v1/health
+    curl http://localhost:80/health
     ```
 
 6. **Test the API**:
@@ -59,6 +59,40 @@ Get up and running in 5 minutes with Azure OpenAI!
 That's it! You should see a comprehensive JSON response with insights from multiple AI agents analyzing the bike sales data.
 
 **Note**: The `bike-insights` workflow is created when you run `ingen init` - it's part of the project template setup, not included in the core library. You can now build on `bike-insights` as a template for your specific use case.
+
+## CLI Commands
+
+Core commands:
+- `ingen init` - Initialize a new project
+- `ingen serve` - Start the API server
+- `ingen workflows` - List available workflows and requirements
+- `ingen test` - Run workflow tests
+- `ingen status` - Check system configuration
+- `ingen validate` - Validate setup and configuration
+- `ingen help` - Show comprehensive help
+
+Data processing commands:
+- `ingen document-processing <path>` - Extract text from documents (PDF, DOCX, images)
+- `ingen dataprep crawl <url>` - Web scraping utilities using Scrapfly
+
+For complete CLI reference, see [docs/CLI_REFERENCE.md](docs/CLI_REFERENCE.md).
+
+## API Endpoints
+
+When the server is running, the following endpoints are available:
+
+**Core API:**
+- `POST /api/v1/chat` - Chat with AI workflows
+- `GET /health` - Health check endpoint
+
+**Diagnostics:**
+- `GET /workflows` - List all workflows and their status
+- `GET /workflow-status/{workflow_name}` - Check specific workflow configuration
+- `GET /diagnostic` - System diagnostic information
+
+**Web Interfaces:**
+- `/chainlit` - Interactive chat interface
+- `/prompt-tuner` - Prompt tuning interface (if enabled)
 
 ## Workflow Categories
 
@@ -104,7 +138,7 @@ Insight Ingenious provides multiple conversation workflows with different config
 
 ## Documentation
 
-For detailed documentation, see the [docs](https://blog.insight-services-apac.dev/ingenious/):
+For detailed documentation, see the [docs](https://insight-services-apac.github.io/ingenious/) or view locally in the `docs/` directory.
 
 ## Contributing
 
