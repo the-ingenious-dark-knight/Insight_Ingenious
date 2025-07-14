@@ -1,325 +1,126 @@
 import json
 import os
 import sqlite3
-import uuid
-from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
-import ingenious.config.config as Config
+from ingenious.config.settings import IngeniousSettings
+
+# Future import placeholders for advanced error handling
+# from ingenious.core.error_handling import (
+#     database_operation,
+#     operation_context,
+#     with_correlation_id,
+# )
+from ingenious.core.structured_logging import get_logger
+from ingenious.db.base_sql import BaseSQLRepository
 from ingenious.db.chat_history_repository import IChatHistoryRepository
-from ingenious.models.message import Message
+from ingenious.db.connection_pool import ConnectionPool, SQLiteConnectionFactory
+from ingenious.db.query_builder import QueryBuilder, SQLiteDialect
+from ingenious.errors import (
+    DatabaseQueryError,
+)
+
+logger = get_logger(__name__)
 
 
-class sqlite_ChatHistoryRepository(IChatHistoryRepository):
-    def __init__(self, config: Config.Config):
+class sqlite_ChatHistoryRepository(BaseSQLRepository):
+    def __init__(self, config: IngeniousSettings) -> None:
         self.db_path = config.chat_history.database_path
         # Check if the directory exists, if not, create it
         db_dir_check = os.path.dirname(self.db_path)
         if not os.path.exists(db_dir_check):
             os.makedirs(db_dir_check)
-        self.connection = sqlite3.connect(self.db_path, check_same_thread=False)
-        self._create_table()
 
-    def execute_sql(self, sql, params=[], expect_results=True):
-        connection = None
+        # Initialize connection pool
+        pool_size = getattr(config.chat_history, "connection_pool_size", 8)
+        connection_factory = SQLiteConnectionFactory(self.db_path)
+        self.pool = ConnectionPool(connection_factory, pool_size=pool_size)
+
+        # Initialize query builder with SQLite dialect
+        query_builder = QueryBuilder(SQLiteDialect())
+
+        # Call parent constructor which will call _init_connection and _create_tables
+        super().__init__(config, query_builder)
+
+    def __del__(self) -> None:
+        """Destructor to ensure connections are properly closed."""
         try:
-            connection = sqlite3.connect(self.db_path)
-            connection.row_factory = sqlite3.Row  # Set row factory to sqlite3.Row
-            cursor = connection.cursor()
-            # print("Executing SQL: ", sql)
-            # print("Params: ", params)
+            self.close()
+        except Exception:
+            pass
 
-            if expect_results:
-                res = cursor.execute(sql, params)
-                rows = res.fetchall()
-                result = [dict(row) for row in rows]
-                return result
-            else:
-                connection.execute(sql, params)
-                connection.commit()
+    def close(self) -> None:
+        """Close all connections in the pool."""
+        if hasattr(self, "pool"):
+            self.pool.close_all()
+
+    def _init_connection(self) -> None:
+        """Connection already initialized in __init__ via connection pool."""
+        pass
+
+    def _execute_sql(
+        self, sql: str, params: List[Any] = None, expect_results: bool = True
+    ) -> Any:
+        if params is None:
+            params = []
+        try:
+            with self.pool.get_connection() as connection:
+                cursor = connection.cursor()
+                logger.debug(
+                    "Executing SQL query",
+                    sql_preview=sql[:100] + "..." if len(sql) > 100 else sql,
+                    param_count=len(params) if params else 0,
+                    operation="sql_execute",
+                )
+
+                if expect_results:
+                    res = cursor.execute(sql, params)
+                    rows = res.fetchall()
+                    result = [dict(row) for row in rows]
+                    return result
+                else:
+                    connection.execute(sql, params)
+                    connection.commit()
 
         except sqlite3.Error as e:
-            # Display the exception
-            print(e)
+            logger.error(
+                "SQLite error during query execution",
+                error=str(e),
+                sql_preview=sql[:100] + "..." if len(sql) > 100 else sql,
+                param_count=len(params) if params else 0,
+                operation="sql_execute",
+            )
+            raise DatabaseQueryError(
+                "SQLite query execution failed",
+                context={
+                    "query_preview": sql[:100] + "..." if len(sql) > 100 else sql,
+                    "param_count": len(params) if params else 0,
+                    "expect_results": expect_results,
+                },
+                cause=e,
+            ) from e
 
-        finally:
-            if connection:
-                connection.close()
+    def execute_sql(self, sql, params=[], expect_results=True):
+        """Legacy method for backward compatibility."""
+        return self._execute_sql(sql, params, expect_results)
 
     def _create_table(self):
-        with self.connection:
-            self.connection.execute("""
-                CREATE TABLE IF NOT EXISTS chat_history (
-                    user_id TEXT,
-                    thread_id TEXT,
-                    message_id TEXT,
-                    positive_feedback BOOLEAN,
-                    timestamp TEXT,
-                    role TEXT,
-                    content TEXT,
-                    content_filter_results TEXT,
-                    tool_calls TEXT,
-                    tool_call_id TEXT,
-                    tool_call_function TEXT
-                );
-            """)
-
-            self.connection.execute("""
-                            CREATE TABLE IF NOT EXISTS chat_history_summary (
-                                user_id TEXT,
-                                thread_id TEXT,
-                                message_id TEXT,
-                                positive_feedback BOOLEAN,
-                                timestamp TEXT,
-                                role TEXT,
-                                content TEXT,
-                                content_filter_results TEXT,
-                                tool_calls TEXT,
-                                tool_call_id TEXT,
-                                tool_call_function TEXT
-                            );
-                        """)
-
-            self.connection.execute("""
-                CREATE TABLE IF NOT EXISTS users (
-                    "id" UUID PRIMARY KEY,
-                    "identifier" TEXT NOT NULL UNIQUE,
-                    "metadata" JSONB NOT NULL,
-                    "createdAt" TEXT
-                );
-            """)
-
-            self.connection.execute("""
-                CREATE TABLE IF NOT EXISTS threads (
-                    "id" UUID PRIMARY KEY,
-                    "createdAt" TEXT,
-                    "name" TEXT,
-                    "userId" UUID,
-                    "userIdentifier" TEXT,
-                    "tags" TEXT[],
-                    "metadata" JSONB,
-                    FOREIGN KEY ("userId") REFERENCES users("id") ON DELETE CASCADE
-                );
-            """)
-
-            self.connection.execute("""
-                CREATE TABLE IF NOT EXISTS steps (
-                    "id" UUID PRIMARY KEY,
-                    "name" TEXT NOT NULL,
-                    "type" TEXT NOT NULL,
-                    "threadId" UUID NOT NULL,
-                    "parentId" UUID,
-                    "disableFeedback" BOOLEAN NOT NULL,
-                    "streaming" BOOLEAN NOT NULL,
-                    "waitForAnswer" BOOLEAN,
-                    "isError" BOOLEAN,
-                    "metadata" JSONB,
-                    "tags" TEXT[],
-                    "input" TEXT,
-                    "output" TEXT,
-                    "createdAt" TEXT,
-                    "start" TEXT,
-                    "end" TEXT,
-                    "generation" JSONB,
-                    "showInput" TEXT,
-                    "language" TEXT,
-                    "indent" INT
-                );
-            """)
-
-            self.connection.execute("""
-                CREATE TABLE IF NOT EXISTS elements (
-                    "id" UUID PRIMARY KEY,
-                    "threadId" UUID,
-                    "type" TEXT,
-                    "url" TEXT,
-                    "chainlitKey" TEXT,
-                    "name" TEXT NOT NULL,
-                    "display" TEXT,
-                    "objectKey" TEXT,
-                    "size" TEXT,
-                    "page" INT,
-                    "language" TEXT,
-                    "forId" UUID,
-                    "mime" TEXT
-                );
-
-            """)
-
-            self.connection.execute("""
-                CREATE TABLE IF NOT EXISTS feedbacks (
-                    "id" UUID PRIMARY KEY,
-                    "forId" UUID NOT NULL,
-                    "threadId" UUID NOT NULL,
-                    "value" INT NOT NULL,
-                    "comment" TEXT
-                );
-            """)
+        """Legacy method for backward compatibility. Tables are now created via base class."""
+        pass
 
     async def _get_user_by_id(self, user_id: str) -> IChatHistoryRepository.User | None:
-        cursor = self.connection.cursor()
-        cursor.execute(
-            """SELECT id, identifier, metadata, createdAt FROM users WHERE id = ?""",
-            (user_id,),
-        )
-        row = cursor.fetchone()
-        if row:
-            return IChatHistoryRepository.User(
-                id=row[0], identifier=row[1], metadata=row[2], createdAt=row[3]
+        with self.pool.get_connection() as connection:
+            cursor = connection.cursor()
+            cursor.execute(
+                """SELECT id, identifier, metadata, createdAt FROM users WHERE id = ?""",
+                (user_id,),
             )
-        return None
-
-    async def add_memory(self, message: Message) -> str:
-        message.message_id = str(uuid.uuid4())
-        message.timestamp = datetime.now()
-
-        with self.connection:
-            self.connection.execute(
-                """
-                INSERT INTO chat_history_summary (
-                                    user_id,
-                                    thread_id,
-                                    message_id,
-                                    positive_feedback,
-                                    timestamp,
-                                    role,
-                                    content,
-                                    content_filter_results,
-                                    tool_calls,
-                                    tool_call_id,
-                                    tool_call_function)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-                (
-                    message.user_id,
-                    message.thread_id,
-                    message.message_id,
-                    message.positive_feedback,
-                    message.timestamp,
-                    message.role,
-                    message.content,
-                    message.content_filter_results,
-                    message.tool_calls,
-                    message.tool_call_id,
-                    message.tool_call_function,
-                ),
-            )
-
-        return message.message_id
-
-    async def add_message(self, message: Message) -> str:
-        message.message_id = str(uuid.uuid4())
-        message.timestamp = datetime.now()
-
-        with self.connection:
-            self.connection.execute(
-                """
-                INSERT INTO chat_history (
-                                    user_id,
-                                    thread_id,
-                                    message_id,
-                                    positive_feedback,
-                                    timestamp,
-                                    role,
-                                    content,
-                                    content_filter_results,
-                                    tool_calls,
-                                    tool_call_id,
-                                    tool_call_function)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-                (
-                    message.user_id,
-                    message.thread_id,
-                    message.message_id,
-                    message.positive_feedback,
-                    message.timestamp,
-                    message.role,
-                    message.content,
-                    message.content_filter_results,
-                    message.tool_calls,
-                    message.tool_call_id,
-                    message.tool_call_function,
-                ),
-            )
-
-        return message.message_id
-
-    async def add_user(
-        self, identifier, metadata: dict = {}
-    ) -> IChatHistoryRepository.User:
-        now = self.get_now()
-        new_id = str(uuid.uuid4())
-        with self.connection:
-            self.connection.execute(
-                """
-                INSERT INTO users (
-                                    id,
-                                    identifier,
-                                    metadata,
-                                    createdAt
-                                    )
-                VALUES (?, ?, ?, ?)
-            """,
-                (new_id, identifier, json.dumps(metadata), now),
-            )
-        return IChatHistoryRepository.User(
-            id=uuid.UUID(new_id),
-            identifier=identifier,
-            metadata=metadata,
-            createdAt=self.get_now_as_string(),
-        )
-
-    async def get_user(self, identifier) -> IChatHistoryRepository.User | None:
-        cursor = self.connection.cursor()
-        cursor.execute(
-            """
-            SELECT
-                id,
-                identifier,
-                metadata,
-                createdAt
-            FROM users
-            WHERE identifier = ?
-        """,
-            (identifier,),
-        )
-        row = cursor.fetchone()
-        if row:
-            # Convert the dictionary to an object
-            return IChatHistoryRepository.User(
-                id=row[0], identifier=row[1], metadata=row[2], createdAt=row[3]
-            )
-        else:
-            usr = await self.add_user(identifier)
-            return usr
-
-    async def get_message(self, message_id: str, thread_id: str) -> Message | None:
-        cursor = self.connection.cursor()
-        cursor.execute(
-            """
-            SELECT user_id, thread_id, message_id, positive_feedback, timestamp, role, content, content_filter_results, tool_calls, tool_call_id, tool_call_function
-            FROM chat_history
-            WHERE message_id = ? AND thread_id = ?
-        """,
-            (message_id, thread_id),
-        )
-        row = cursor.fetchone()
-        if row:
-            return Message(
-                user_id=row[0],
-                thread_id=row[1],
-                message_id=row[2],
-                positive_feedback=row[3],
-                timestamp=row[4],
-                role=row[5],
-                content=row[6],
-                content_filter_results=row[7],
-                tool_calls=row[8],
-                tool_call_id=row[9],
-                tool_call_function=row[10],
-            )
-        return None
+            row = cursor.fetchone()
+            if row:
+                return IChatHistoryRepository.User(
+                    id=row[0], identifier=row[1], metadata=row[2], createdAt=row[3]
+                )
+            return None
 
     async def get_threads_for_user(
         self, identifier: str, thread_id: Optional[str]
@@ -371,7 +172,8 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
             for thread in user_threads:
                 thread_ids_list.append(str(thread["thread_id"]))
 
-            thread_ids = "('" + "','".join(thread_ids_list) + "')"
+            # Create parameterized placeholders for IN clause
+            thread_ids_placeholders = ",".join("?" * len(thread_ids_list))
 
         steps_feedbacks_query = f"""
             SELECT
@@ -398,10 +200,10 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
                 f."comment" AS feedback_comment,
                 f."id" AS feedback_id
             FROM steps s LEFT JOIN feedbacks f ON s."id" = f."forId"
-            WHERE s."threadId" IN {thread_ids}
+            WHERE s."threadId" IN ({thread_ids_placeholders})
             ORDER BY s."createdAt" ASC
         """
-        steps_feedbacks = self.execute_sql(steps_feedbacks_query)
+        steps_feedbacks = self.execute_sql(steps_feedbacks_query, thread_ids_list)
 
         elements_query = f"""
             SELECT
@@ -419,9 +221,9 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
                 e."forId" AS element_forid,
                 e."mime" AS element_mime
             FROM elements e
-            WHERE e."threadId" IN {thread_ids}
+            WHERE e."threadId" IN ({thread_ids_placeholders})
         """
-        elements = self.execute_sql(elements_query)
+        elements = self.execute_sql(elements_query, thread_ids_list)
 
         thread_dicts = {}
         for thread in user_threads:
@@ -509,105 +311,46 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
                         mime=element.get("element_mime"),
                     )
                     thread_dicts[thread_id]["elements"].append(element_dict)  # type: ignore
-        # print("Thread Dicts: ", thread_dicts)
+        logger.debug(
+            "Retrieved thread dictionaries",
+            thread_count=len(thread_dicts),
+            operation="get_threads_for_user",
+        )
         return list(thread_dicts.values())
 
-    async def get_thread_messages(self, thread_id: str) -> list[Message]:
-        cursor = self.connection.cursor()
-        cursor.execute(
-            """
-            SELECT *
-            FROM (
-                SELECT user_id, thread_id, message_id, positive_feedback, timestamp, role, content, content_filter_results, tool_calls, tool_call_id, tool_call_function
-                FROM chat_history
-                WHERE thread_id = ?
-                ORDER BY timestamp DESC
-                LIMIT 5
-            ) AS last_five
-            ORDER BY timestamp ASC;
-        """,
-            (thread_id,),
-        )
-        rows = cursor.fetchall()
-        return [
-            Message(
-                user_id=row[0],
-                thread_id=row[1],
-                message_id=row[2],
-                positive_feedback=row[3],
-                timestamp=row[4],
-                role=row[5],
-                content=row[6],
-                content_filter_results=row[7],
-                tool_calls=row[8],
-                tool_call_id=row[9],
-                tool_call_function=row[10],
-            )
-            for row in rows
-        ]
-
     async def get_thread(self, thread_id: str) -> list[IChatHistoryRepository.Thread]:
-        cursor = self.connection.cursor()
-        cursor.execute(
-            """
-            SELECT id, createdAt, name, userId, userIdentifier, tags, metadata
-            FROM threads
-            WHERE id = ?
-        """,
-            (thread_id,),
-        )
-        rows = cursor.fetchall()
-        return [
-            IChatHistoryRepository.Thread(
-                id=row[0],
-                createdAt=row[1],
-                name=row[2],
-                userId=row[3],
-                userIdentifier=row[4],
-                tags=row[5],
-                metadata=row[6],
-            )
-            for row in rows
-        ]
-
-    async def update_message_feedback(
-        self, message_id: str, thread_id: str, positive_feedback: bool | None
-    ) -> None:
-        with self.connection:
-            self.connection.execute(
+        with self.pool.get_connection() as connection:
+            cursor = connection.cursor()
+            cursor.execute(
                 """
-                UPDATE chat_history
-                SET positive_feedback = ?
-                WHERE id = ? AND thread_id = ?
-            """,
-                (positive_feedback, message_id, thread_id),
-            )
-
-    async def update_message_content_filter_results(
-        self, message_id: str, thread_id: str, content_filter_results: dict[str, object]
-    ) -> None:
-        with self.connection:
-            self.connection.execute(
-                """
-                UPDATE chat_history
-                SET content_filter_results = ?
-                WHERE id = ? AND thread_id = ?
-            """,
-                (str(content_filter_results), message_id, thread_id),
-            )
-
-    async def delete_thread(self, thread_id: str) -> None:
-        with self.connection:
-            self.connection.execute(
-                """
-                DELETE FROM chat_history
-                WHERE thread_id = ?
+                SELECT id, createdAt, name, userId, userIdentifier, tags, metadata
+                FROM threads
+                WHERE id = ?
             """,
                 (thread_id,),
             )
+            rows = cursor.fetchall()
+            return [
+                IChatHistoryRepository.Thread(
+                    id=row[0],
+                    createdAt=row[1],
+                    name=row[2],
+                    userId=row[3],
+                    userIdentifier=row[4],
+                    tags=row[5],
+                    metadata=row[6],
+                )
+                for row in rows
+            ]
 
     async def add_step(self, step_dict: IChatHistoryRepository.StepDict):
-        print("Creating step: ", step_dict)
+        logger.info(
+            "Creating step in SQLite database",
+            step_id=step_dict.get("id"),
+            step_type=step_dict.get("type"),
+            thread_id=step_dict.get("threadId"),
+            operation="create_step",
+        )
 
         # If disableFeedback is not provided, default to False
         step_dict["disableFeedback"] = step_dict.get("disableFeedback", False)
@@ -642,10 +385,21 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
         metadata: Optional[Dict] = None,
         tags: Optional[List[str]] = None,
     ) -> str:
-        print("Updating thread: ", thread_id)
+        logger.info(
+            "Updating thread in SQLite",
+            thread_id=thread_id,
+            user_id=user_id,
+            has_name=name is not None,
+            has_metadata=metadata is not None,
+            operation="update_thread",
+        )
         user_identifier = None
         if user_id:
-            print("Getting user identifier for user_id: ", user_id)
+            logger.debug(
+                "Retrieving user identifier for thread update",
+                user_id=user_id,
+                operation="get_user_identifier",
+            )
             user = await self._get_user_by_id(user_id)
             if user:
                 user_identifier = user.identifier
@@ -684,142 +438,36 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
         return ""
 
     async def update_memory(self) -> None:
-        cursor = self.connection.cursor()
+        with self.pool.get_connection() as connection:
+            cursor = connection.cursor()
 
-        # Create a temporary table for the latest records
-        cursor.execute("""
-            CREATE TEMP TABLE latest_chat_history AS
-            SELECT user_id, thread_id, message_id, positive_feedback, timestamp, role, content,
-                   content_filter_results, tool_calls, tool_call_id, tool_call_function
-            FROM (
+            # Create a temporary table for the latest records
+            cursor.execute("""
+                CREATE TEMP TABLE latest_chat_history AS
                 SELECT user_id, thread_id, message_id, positive_feedback, timestamp, role, content,
-                       content_filter_results, tool_calls, tool_call_id, tool_call_function,
-                       ROW_NUMBER() OVER (PARTITION BY thread_id ORDER BY timestamp DESC) AS row_num
-                FROM chat_history_summary
-            ) AS LatestRecords
-            WHERE row_num = 1
-        """)
+                       content_filter_results, tool_calls, tool_call_id, tool_call_function
+                FROM (
+                    SELECT user_id, thread_id, message_id, positive_feedback, timestamp, role, content,
+                           content_filter_results, tool_calls, tool_call_id, tool_call_function,
+                           ROW_NUMBER() OVER (PARTITION BY thread_id ORDER BY timestamp DESC) AS row_num
+                    FROM chat_history_summary
+                ) AS LatestRecords
+                WHERE row_num = 1
+            """)
 
-        # Clear the original table
-        cursor.execute("DELETE FROM chat_history_summary")
+            # Clear the original table
+            cursor.execute("DELETE FROM chat_history_summary")
 
-        # Insert the latest records back into the original table
-        cursor.execute("""
-            INSERT INTO chat_history_summary (user_id, thread_id, message_id, positive_feedback, timestamp, role, content,
-                                              content_filter_results, tool_calls, tool_call_id, tool_call_function)
-            SELECT user_id, thread_id, message_id, positive_feedback, timestamp, role, content,
-                   content_filter_results, tool_calls, tool_call_id, tool_call_function
-            FROM latest_chat_history
-        """)
+            # Insert the latest records back into the original table
+            cursor.execute("""
+                INSERT INTO chat_history_summary (user_id, thread_id, message_id, positive_feedback, timestamp, role, content,
+                                                  content_filter_results, tool_calls, tool_call_id, tool_call_function)
+                SELECT user_id, thread_id, message_id, positive_feedback, timestamp, role, content,
+                       content_filter_results, tool_calls, tool_call_id, tool_call_function
+                FROM latest_chat_history
+            """)
 
-        # Drop the temporary table
-        cursor.execute("DROP TABLE latest_chat_history")
+            # Drop the temporary table
+            cursor.execute("DROP TABLE latest_chat_history")
 
-        cursor.close()
-
-    async def get_memory(self, message_id: str, thread_id: str) -> Message | None:
-        cursor = self.connection.cursor()
-        cursor.execute(
-            """
-            SELECT user_id, thread_id, message_id, positive_feedback, timestamp, role, content,
-                   content_filter_results, tool_calls, tool_call_id, tool_call_function
-            FROM chat_history_summary
-            WHERE thread_id = ?
-            ORDER BY timestamp DESC
-            LIMIT 1
-        """,
-            (thread_id,),
-        )
-        row = cursor.fetchone()
-        if row:
-            return Message(
-                user_id=row[0],
-                thread_id=row[1],
-                message_id=row[2],
-                positive_feedback=row[3],
-                timestamp=row[4],
-                role=row[5],
-                content=row[6],
-                content_filter_results=row[7],
-                tool_calls=row[8],
-                tool_call_id=row[9],
-                tool_call_function=row[10],
-            )
-        return None
-
-    async def get_thread_memory(self, thread_id: str) -> list[Message]:
-        cursor = self.connection.cursor()
-        cursor.execute(
-            """
-            SELECT user_id, thread_id, message_id, positive_feedback, timestamp, role, content,
-                   content_filter_results, tool_calls, tool_call_id, tool_call_function
-            FROM chat_history_summary
-            WHERE thread_id = ?
-            ORDER BY timestamp DESC
-            LIMIT 1
-        """,
-            (thread_id,),
-        )
-        rows = cursor.fetchall()
-        return [
-            Message(
-                user_id=row[0],
-                thread_id=row[1],
-                message_id=row[2],
-                positive_feedback=row[3],
-                timestamp=row[4],
-                role=row[5],
-                content=row[6],
-                content_filter_results=row[7],
-                tool_calls=row[8],
-                tool_call_id=row[9],
-                tool_call_function=row[10],
-            )
-            for row in rows
-        ]
-
-    async def update_memory_feedback(
-        self, message_id: str, thread_id: str, positive_feedback: bool | None
-    ) -> None:
-        with self.connection:
-            self.connection.execute(
-                """
-                UPDATE chat_history_summary
-                SET positive_feedback = ?
-                WHERE id = ? AND thread_id = ?
-            """,
-                (positive_feedback, message_id, thread_id),
-            )
-
-    async def update_memory_content_filter_results(
-        self, message_id: str, thread_id: str, content_filter_results: dict[str, object]
-    ) -> None:
-        with self.connection:
-            self.connection.execute(
-                """
-                UPDATE chat_history_summary
-                SET content_filter_results = ?
-                WHERE id = ? AND thread_id = ?
-            """,
-                (str(content_filter_results), message_id, thread_id),
-            )
-
-    async def delete_thread_memory(self, thread_id: str) -> None:
-        with self.connection:
-            self.connection.execute(
-                """
-                DELETE FROM chat_history_summary
-                WHERE thread_id = ?
-            """,
-                (thread_id,),
-            )
-
-    async def delete_user_memory(self, user_id: str) -> None:
-        with self.connection:
-            self.connection.execute(
-                """
-                DELETE FROM chat_history_summary
-                WHERE user_id = ?
-            """,
-                (user_id,),
-            )
+            cursor.close()

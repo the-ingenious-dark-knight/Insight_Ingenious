@@ -1,28 +1,29 @@
-import logging
-
+from typing import Dict, List, Tuple, Any, Callable
 import autogen
 import autogen.retrieve_utils
 import autogen.runtime_logging
 
-logger = logging.getLogger(__name__)
+from ingenious.core.structured_logging import get_logger
+
+logger = get_logger(__name__)
 
 
 class ConversationPattern:
     def __init__(
         self,
-        default_llm_config: dict,
-        topics: list,
+        default_llm_config: Dict[str, Any],
+        topics: List[str],
         memory_record_switch: bool,
         memory_path: str,
         thread_memory: str,
-    ):
+    ) -> None:
         self.default_llm_config = default_llm_config
         self.topics = topics
         self.memory_record_switch = memory_record_switch
         self.memory_path = memory_path
         self.thread_memory = thread_memory
-        self.topic_agents: list[autogen.AssistantAgent] = []
-        self.termination_msg = lambda x: "TERMINATE" in x.get("content", "").upper()
+        self.topic_agents: List[autogen.AssistantAgent] = []
+        self.termination_msg: Callable[[Dict[str, Any]], bool] = lambda x: "TERMINATE" in x.get("content", "").upper()
         self.context = ""
 
         self.user_proxy = autogen.UserProxyAgent(
@@ -67,10 +68,10 @@ class ConversationPattern:
             is_termination_msg=self.termination_msg,
         )
 
-    def add_topic_agent(self, agent: autogen.AssistantAgent):
+    def add_topic_agent(self, agent: autogen.AssistantAgent) -> None:
         self.topic_agents.append(agent)
 
-    async def get_conversation_response(self, input_message: str) -> [str, str]:
+    async def get_conversation_response(self, input_message: str) -> Tuple[str, str]:
         """
         This function is the main entry point for the conversation pattern. It takes a message as input and returns a
         response. Make sure that you have added the necessary topic agents and agent topic chats before

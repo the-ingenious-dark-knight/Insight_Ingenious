@@ -73,23 +73,24 @@ Get up and running in 5 minutes with Azure OpenAI!
 
 🎉 **That's it!** You should see a comprehensive JSON response with insights from multiple AI agents analyzing the bike sales data.
 
-**Note**: The `bike-insights` workflow is created when you run `ingen init` - it's part of the project template setup, not included in the core library. You can now build on `bike-insights` as a template for your specific use case.
+**Note**: The `bike-insights` workflow is created when you run `ingen init` - it's part of the project template setup, not included in the core library. This makes it the perfect "Hello World" example to understand how Ingenious works. You can now build on `bike-insights` as a template for your specific use case.
 
 ## Workflow Categories
 
-Insight Ingenious provides multiple conversation workflows with different configuration requirements:
+Insight Ingenious provides multiple conversation workflows with different availability and configuration requirements:
 
-### **"Hello World" Workflow** (Available via project template)
-- `bike-insights` - **The recommended starting point** - Comprehensive bike sales analysis showcasing multi-agent coordination (created when you run `ingen init`)
+### **Core Library Workflows (Always Available)**
+- `classification-agent` - Route input to specialized agents based on content (Azure OpenAI only)
+- `knowledge-base-agent` - Search knowledge bases (stable with local ChromaDB, experimental with Azure Search)
+- `sql-manipulation-agent` - Execute SQL queries (stable with local SQLite, experimental with Azure SQL)
 
-### **Core Workflows (Azure OpenAI only)**
-- `classification-agent` - Route input to specialized agents based on content
+### **Project Template Workflows (Created with `ingen init`)**
+- `bike-insights` - **The recommended starting point** - Comprehensive bike sales analysis showcasing multi-agent coordination
 
-### **Local Stable Implementations**
-- `knowledge-base-agent` - Search knowledge bases using local ChromaDB (stable local implementation)
-- `sql-manipulation-agent` - Execute SQL queries using local SQLite (stable local implementation)
-
-> **Note**: Only local implementations (ChromaDB for knowledge-base-agent, SQLite for sql-manipulation-agent) are currently stable. Azure Search and Azure SQL integrations are experimental and may contain bugs.
+> **Note**:
+> - `bike-insights` is created when you run `ingen init` as part of the project template setup, not included in the core library
+> - Local implementations (ChromaDB, SQLite) are stable; Azure integrations are experimental and may contain bugs
+> - You can build on `bike-insights` as a template for your specific use case
 
 ## Azure SQL Database Setup (Optional)
 
@@ -147,6 +148,8 @@ For production deployments with persistent chat history storage in Azure SQL Dat
 - ✅ Enterprise security and compliance
 - ✅ Automatic table creation and management
 
+**Note:** Azure SQL integration is experimental and may contain bugs. For stable database functionality, use the default SQLite configuration.
+
 ## 📊 Data Format Examples
 
 ### Simple bike-insights Request (Basic)
@@ -196,9 +199,9 @@ curl -X POST http://localhost:8080/api/v1/chat \
   }'
 ```
 
-### Quick SQL Agent Setup (EXPERIMENTAL/MAY CONTAIN BUGS)
+### Quick SQL Agent Setup (Local SQLite - Stable)
 
-If you want to try database queries with natural language:
+If you want to try database queries with natural language using the stable local implementation:
 
 ```bash
 # Set up SQLite database

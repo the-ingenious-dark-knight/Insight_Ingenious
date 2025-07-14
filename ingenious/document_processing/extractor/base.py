@@ -58,10 +58,11 @@ shared resources internally.
 from __future__ import annotations
 
 import io
-import logging
 import os
 from abc import ABC, abstractmethod
 from typing import Generator, TypeAlias, TypedDict
+
+from ingenious.core.structured_logging import get_logger
 
 # ────────────────────────────────────────────────────────────────────────────
 # Public type aliases
@@ -96,7 +97,7 @@ class Element(TypedDict, total=False):
 # ────────────────────────────────────────────────────────────────────────────
 # Logger
 # ────────────────────────────────────────────────────────────────────────────
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 # ────────────────────────────────────────────────────────────────────────────

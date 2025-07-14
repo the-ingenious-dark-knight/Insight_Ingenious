@@ -3,6 +3,7 @@ Match data parser utility module - Stub implementation for testing
 """
 
 from datetime import datetime
+from typing import Any, Optional, Tuple
 
 
 class MatchDataParser:
@@ -11,11 +12,11 @@ class MatchDataParser:
     This handles sports/match data parsing but provides fallback for general testing.
     """
 
-    def __init__(self, payload=None, event_type=None):
-        self.payload = payload
-        self.event_type = event_type
+    def __init__(self, payload: Optional[Any] = None, event_type: Optional[str] = None) -> None:
+        self.payload: Optional[Any] = payload
+        self.event_type: Optional[str] = event_type
 
-    def create_detailed_summary(self):
+    def create_detailed_summary(self) -> Tuple[str, str, str, str, str]:
         """
         Create a detailed summary from match data.
         For testing purposes, this returns default values.
@@ -24,10 +25,10 @@ class MatchDataParser:
             tuple: (message, overBall, timestamp, match_id, feed_id)
         """
         # For testing, just return the payload as the message with default values
-        message = str(self.payload) if self.payload else "test payload"
-        overBall = "test_over"
-        timestamp = str(datetime.now())
-        match_id = "test_match_123"
-        feed_id = "test_feed_456"
+        message: str = str(self.payload) if self.payload else "test payload"
+        overBall: str = "test_over"
+        timestamp: str = str(datetime.now())
+        match_id: str = "test_match_123"
+        feed_id: str = "test_feed_456"
 
         return message, overBall, timestamp, match_id, feed_id

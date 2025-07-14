@@ -1,8 +1,8 @@
-import logging
 from abc import ABC, abstractmethod
 
 from fastapi import APIRouter, FastAPI
 
+from ingenious.core.structured_logging import get_logger
 from ingenious.dependencies import get_chat_history_repository
 from ingenious.models.config import Config
 
@@ -10,7 +10,7 @@ from ingenious.models.config import Config
 class IApiRoutes(ABC):
     def __init__(self, config: Config, app: FastAPI):
         self.config = config
-        self.logger = logging.getLogger(__name__)
+        self.logger = get_logger(__name__)
         self.app = app
         # Note: security_service should be obtained via dependency injection in route handlers
         # self.security_service = get_security_service(HTTPBasicCredentials)

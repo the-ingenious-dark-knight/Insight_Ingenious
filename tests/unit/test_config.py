@@ -7,7 +7,17 @@ import pytest
 import yaml
 from pydantic import ValidationError
 
-from ingenious.config.config import Config, substitute_environment_variables
+from ingenious.config.config import (
+    Config,
+    get_config_new,
+    substitute_environment_variables,
+)
+from ingenious.config.settings import (
+    AzureSearchSettings,
+    IngeniousSettings,
+    ModelSettings,
+    WebSettings,
+)
 
 
 @pytest.mark.unit
@@ -482,3 +492,266 @@ local_sql_db:
 
         with pytest.raises(yaml.YAMLError):
             Config.from_yaml_str(yaml_content)
+
+
+@pytest.mark.unit
+class TestIngeniousSettings:
+    """Test new Pydantic settings-based configuration"""
+
+    def test_settings_default_creation(self):
+        """Test creating settings with default values"""
+        with patch.dict(
+            os.environ,
+            {
+                "AZURE_OPENAI_API_KEY": "test-key",
+                "AZURE_OPENAI_BASE_URL": "https://test.openai.azure.com/",
+            },
+            clear=True,
+        ):
+            settings = IngeniousSettings()
+
+            assert settings.profile == "default"
+            assert settings.chat_history.database_type == "sqlite"
+            assert settings.logging.root_log_level == "info"
+            assert settings.web_configuration.port == 8000
+            assert len(settings.models) == 1
+            assert settings.models[0].api_key == "test-key"
+
+    def test_settings_env_var_loading(self):
+        """Test loading settings from environment variables"""
+        with patch.dict(
+            os.environ,
+            {
+                "INGENIOUS_PROFILE": "production",
+                "INGENIOUS_WEB_CONFIGURATION__PORT": "9000",
+                "INGENIOUS_LOGGING__ROOT_LOG_LEVEL": "warning",
+                "AZURE_OPENAI_API_KEY": "prod-key",
+                "AZURE_OPENAI_BASE_URL": "https://prod.openai.azure.com/",
+            },
+            clear=True,
+        ):
+            settings = IngeniousSettings()
+
+            assert settings.profile == "production"
+            assert settings.web_configuration.port == 9000
+            assert settings.logging.root_log_level == "warning"
+            assert settings.models[0].api_key == "prod-key"
+
+    def test_settings_validation_errors(self):
+        """Test validation errors provide helpful messages"""
+        with patch.dict(os.environ, {}, clear=True):
+            with pytest.raises(ValueError) as exc_info:
+                IngeniousSettings()
+
+            error_message = str(exc_info.value)
+            assert "At least one model must be configured" in error_message
+            assert "AZURE_OPENAI_API_KEY" in error_message
+
+    def test_settings_model_validation(self):
+        """Test model-specific validation"""
+        with pytest.raises(ValueError) as exc_info:
+            ModelSettings(
+                model="gpt-4",
+                api_key="placeholder_key",
+                base_url="https://api.openai.com/",
+            )
+
+        assert "API key is required" in str(exc_info.value)
+
+    def test_settings_web_port_validation(self):
+        """Test web port validation"""
+        with pytest.raises(ValueError) as exc_info:
+            WebSettings(port=70000)
+
+        assert "Port must be between 1 and 65535" in str(exc_info.value)
+
+    def test_settings_log_level_validation(self):
+        """Test log level validation"""
+        with patch.dict(
+            os.environ,
+            {
+                "INGENIOUS_LOGGING__ROOT_LOG_LEVEL": "invalid_level",
+                "AZURE_OPENAI_API_KEY": "test-key",
+                "AZURE_OPENAI_BASE_URL": "https://test.openai.azure.com/",
+            },
+            clear=True,
+        ):
+            with pytest.raises(ValueError) as exc_info:
+                IngeniousSettings()
+
+            assert "Log level must be one of" in str(exc_info.value)
+
+    def test_settings_from_env_file(self):
+        """Test loading settings from .env file"""
+        env_content = """
+INGENIOUS_PROFILE=test_env
+INGENIOUS_WEB_CONFIGURATION__PORT=8080
+AZURE_OPENAI_API_KEY=env-file-key
+AZURE_OPENAI_BASE_URL=https://env.openai.azure.com/
+"""
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".env", delete=False) as f:
+            f.write(env_content)
+            env_file = f.name
+
+        try:
+            # Set environment for models since pydantic-settings list parsing is complex
+            with patch.dict(
+                os.environ,
+                {
+                    "AZURE_OPENAI_API_KEY": "env-file-key",
+                    "AZURE_OPENAI_BASE_URL": "https://env.openai.azure.com/",
+                },
+                clear=True,
+            ):
+                settings = IngeniousSettings.load_from_env_file(env_file)
+
+                assert settings.profile == "test_env"
+                assert settings.web_configuration.port == 8080
+                assert settings.models[0].api_key == "env-file-key"
+        finally:
+            os.unlink(env_file)
+
+    def test_settings_minimal_config(self):
+        """Test creating minimal configuration"""
+        with patch.dict(
+            os.environ,
+            {
+                "AZURE_OPENAI_API_KEY": "minimal-key",
+                "AZURE_OPENAI_BASE_URL": "https://minimal.openai.azure.com/",
+            },
+            clear=True,
+        ):
+            settings = IngeniousSettings.create_minimal_config()
+
+            assert len(settings.models) == 1
+            assert settings.models[0].model == "gpt-4"
+            assert settings.logging.root_log_level == "debug"
+            assert not settings.web_configuration.authentication.enable
+
+    def test_settings_configuration_validation(self):
+        """Test complete configuration validation"""
+        with patch.dict(
+            os.environ,
+            {
+                "AZURE_OPENAI_API_KEY": "test-key",
+                "AZURE_OPENAI_BASE_URL": "https://test.openai.azure.com/",
+            },
+            clear=True,
+        ):
+            settings = IngeniousSettings()
+
+            # Should not raise any exceptions
+            settings.validate_configuration()
+
+    def test_settings_configuration_validation_errors(self):
+        """Test configuration validation with errors"""
+        # Create settings without triggering model validation first
+        with patch.dict(
+            os.environ,
+            {
+                "AZURE_OPENAI_API_KEY": "test-key",
+                "AZURE_OPENAI_BASE_URL": "https://test.openai.azure.com/",
+            },
+            clear=True,
+        ):
+            settings = IngeniousSettings()
+            # Use model_construct to bypass validation during creation
+            placeholder_model = ModelSettings.model_construct(
+                model="gpt-4", api_key="placeholder_key", base_url="placeholder_url"
+            )
+            settings.models = [placeholder_model]
+
+        with pytest.raises(ValueError) as exc_info:
+            settings.validate_configuration()
+
+        error_message = str(exc_info.value)
+        assert "Configuration validation failed" in error_message
+        assert "placeholder" in error_message.lower()
+
+    def test_get_config_new_function(self):
+        """Test the new get_config_new function"""
+        with patch.dict(
+            os.environ,
+            {
+                "AZURE_OPENAI_API_KEY": "new-config-key",
+                "AZURE_OPENAI_BASE_URL": "https://new-config.openai.azure.com/",
+            },
+            clear=True,
+        ):
+            settings = get_config_new()
+
+            assert isinstance(settings, IngeniousSettings)
+            assert settings.models[0].api_key == "new-config-key"
+
+    def test_nested_environment_variables(self):
+        """Test nested environment variable configuration"""
+        with patch.dict(
+            os.environ,
+            {
+                "INGENIOUS_CHAT_HISTORY__DATABASE_TYPE": "azuresql",
+                "INGENIOUS_CHAT_HISTORY__DATABASE_NAME": "prod_db",
+                "INGENIOUS_WEB_CONFIGURATION__AUTHENTICATION__ENABLE": "true",
+                "INGENIOUS_WEB_CONFIGURATION__AUTHENTICATION__PASSWORD": "secure_pass",
+                "AZURE_OPENAI_API_KEY": "test-key",
+                "AZURE_OPENAI_BASE_URL": "https://test.openai.azure.com/",
+            },
+            clear=True,
+        ):
+            settings = IngeniousSettings()
+
+            assert settings.chat_history.database_type == "azuresql"
+            assert settings.chat_history.database_name == "prod_db"
+            assert settings.web_configuration.authentication.enable is True
+            assert settings.web_configuration.authentication.password == "secure_pass"
+
+    def test_optional_services_configuration(self):
+        """Test configuration of optional services"""
+        # Create settings with explicit azure search services
+        with patch.dict(
+            os.environ,
+            {
+                "AZURE_OPENAI_API_KEY": "test-key",
+                "AZURE_OPENAI_BASE_URL": "https://test.openai.azure.com/",
+            },
+            clear=True,
+        ):
+            settings = IngeniousSettings(
+                azure_search_services=[
+                    AzureSearchSettings(
+                        service="test-search",
+                        endpoint="https://test-search.search.windows.net",
+                        key="search-key",
+                    )
+                ]
+            )
+
+            assert settings.azure_search_services is not None
+            assert len(settings.azure_search_services) == 1
+            assert settings.azure_search_services[0].service == "test-search"
+            assert (
+                settings.azure_search_services[0].endpoint
+                == "https://test-search.search.windows.net"
+            )
+
+    def test_file_storage_configuration(self):
+        """Test file storage configuration options"""
+        with patch.dict(
+            os.environ,
+            {
+                "INGENIOUS_FILE_STORAGE__REVISIONS__STORAGE_TYPE": "azure",
+                "INGENIOUS_FILE_STORAGE__REVISIONS__CONTAINER_NAME": "revisions",
+                "INGENIOUS_FILE_STORAGE__REVISIONS__URL": "https://storage.blob.core.windows.net",
+                "AZURE_OPENAI_API_KEY": "test-key",
+                "AZURE_OPENAI_BASE_URL": "https://test.openai.azure.com/",
+            },
+            clear=True,
+        ):
+            settings = IngeniousSettings()
+
+            assert settings.file_storage.revisions.storage_type == "azure"
+            assert settings.file_storage.revisions.container_name == "revisions"
+            assert (
+                settings.file_storage.revisions.url
+                == "https://storage.blob.core.windows.net"
+            )

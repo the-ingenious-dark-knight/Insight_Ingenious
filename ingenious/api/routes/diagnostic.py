@@ -1,4 +1,3 @@
-import logging
 import time
 from datetime import datetime
 from pathlib import Path
@@ -7,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from typing_extensions import Annotated
 
 import ingenious.dependencies as igen_deps
+from ingenious.core.structured_logging import get_logger
 from ingenious.models.http_error import HTTPError
 from ingenious.utils.namespace_utils import (
     discover_workflows,
@@ -14,7 +14,7 @@ from ingenious.utils.namespace_utils import (
     normalize_workflow_name,
 )
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 router = APIRouter()
 
 
@@ -141,7 +141,12 @@ async def workflow_status(
         }
 
     except Exception as e:
-        logger.exception(e)
+        logger.error(
+            "Error in workflow status check",
+            workflow_name=workflow_name,
+            error=str(e),
+            exc_info=True,
+        )
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -202,7 +207,7 @@ async def list_workflows(
         }
 
     except Exception as e:
-        logger.exception(e)
+        logger.error("Error listing workflows", error=str(e), exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -252,7 +257,7 @@ async def diagnostic(
         return diagnostic
 
     except Exception as e:
-        logger.exception(e)
+        logger.error("Error in diagnostic check", error=str(e), exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -278,7 +283,7 @@ async def health_check():
             _ = igen_deps.get_config()
             config_status = "ok"
         except Exception as e:
-            logger.warning(f"Configuration check failed: {e}")
+            logger.warning("Configuration check failed", error=str(e))
             config_status = "error"
 
         # Check profile availability
@@ -286,7 +291,7 @@ async def health_check():
             _ = igen_deps.get_profile()
             profile_status = "ok"
         except Exception as e:
-            logger.warning(f"Profile check failed: {e}")
+            logger.warning("Profile check failed", error=str(e))
             profile_status = "error"
 
         response_time = round((time.time() - start_time) * 1000, 2)  # ms
@@ -316,7 +321,7 @@ async def health_check():
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Health check failed: {e}")
+        logger.error("Health check failed", error=str(e), exc_info=True)
         raise HTTPException(
             status_code=503,
             detail={

@@ -1,12 +1,15 @@
+from typing import Dict, Optional
+
+
 class LogLevel:
-    DEBUG = 0
-    INFO = 1
-    WARNING = 2
-    ERROR = 3
+    DEBUG: int = 0
+    INFO: int = 1
+    WARNING: int = 2
+    ERROR: int = 3
 
     @staticmethod
-    def from_string(level_str: str):
-        level_mapping = {
+    def from_string(level_str: str) -> Optional[int]:
+        level_mapping: Dict[str, int] = {
             "DEBUG": LogLevel.DEBUG,
             "INFO": LogLevel.INFO,
             "WARNING": LogLevel.WARNING,
@@ -15,8 +18,8 @@ class LogLevel:
         return level_mapping.get(str(level_str).upper(), None)
 
     @staticmethod
-    def to_string(level):
-        level_mapping = {
+    def to_string(level: int) -> str:
+        level_mapping: Dict[int, str] = {
             LogLevel.DEBUG: "DEBUG",
             LogLevel.INFO: "INFO",
             LogLevel.WARNING: "WARNING",

@@ -37,16 +37,22 @@ if is_url(url):
 from __future__ import annotations
 
 import contextlib
-import logging
 import os
 import re
 from typing import Final, Union
 
 import requests
 
+from ingenious.core.structured_logging import get_logger
+from ingenious.errors.processing import (
+    ErrorCode,
+    ErrorContext,
+    NetworkError,
+)
+
 __all__ = ["is_url", "fetch"]
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # --------------------------------------------------------------------------- #
 # Configuration                                                               #
@@ -83,24 +89,32 @@ def is_url(src: Union[str, os.PathLike[str]]) -> bool:
     return bool(_URL_RE.match(str(src)))
 
 
-def fetch(url: str) -> bytes | None:
+def fetch(url: str, raise_on_error: bool = False) -> bytes | None:
     """
     Download *url* defensively and return its raw bytes.
 
     Fail-soft contract
     ------------------
-    * Never raises – any network/size error is logged and **None** is returned.
+    * By default, never raises – any network/size error is logged and **None** is returned.
+    * When raise_on_error=True, raises structured NetworkError exceptions.
     * Aborts early if the payload exceeds ``_MAX_MB`` MiB.
 
     Parameters
     ----------
     url : str
         Fully-qualified HTTP/S URL.
+    raise_on_error : bool, default=False
+        Whether to raise NetworkError exceptions instead of returning None.
 
     Returns
     -------
     bytes | None
-        Raw response body on success, otherwise *None*.
+        Raw response body on success, otherwise *None* (unless raise_on_error=True).
+
+    Raises
+    ------
+    NetworkError
+        When raise_on_error=True and a network operation fails.
     """
     resp: requests.Response | None = None  # pre-declare for finally
     try:
@@ -114,7 +128,27 @@ def fetch(url: str) -> bytes | None:
             content_length = 0
 
         if content_length and content_length > (_MAX_MB << 20):
-            logger.warning("%s exceeds %d MiB – skipped", url, _MAX_MB)
+            if raise_on_error:
+                context = ErrorContext(
+                    url=url,
+                    operation="size_check",
+                    component="document_processing.network",
+                )
+                context.metadata["content_length_mb"] = content_length >> 20
+                context.metadata["max_mb"] = _MAX_MB
+
+                raise NetworkError(
+                    f"Content size ({content_length >> 20} MB) exceeds limit ({_MAX_MB} MB) for {url}",
+                    error_code=ErrorCode.DOWNLOAD_SIZE_EXCEEDED,
+                    context=context,
+                )
+
+            logger.warning(
+                "Content size exceeds limit, skipping download",
+                url=url,
+                max_mb=_MAX_MB,
+                content_length_mb=content_length >> 20,
+            )
             return None
 
         # ── Stream with incremental size check ────────────────────────────
@@ -122,14 +156,119 @@ def fetch(url: str) -> bytes | None:
         for chunk in resp.iter_content(chunk_size=1 << 14):  # 16 KiB
             buffer.extend(chunk)
             if len(buffer) > (_MAX_MB << 20):
-                logger.warning("%s exceeds %d MiB – skipped", url, _MAX_MB)
+                if raise_on_error:
+                    context = ErrorContext(
+                        url=url,
+                        operation="download",
+                        component="document_processing.network",
+                    )
+                    context.metadata["current_size_mb"] = len(buffer) >> 20
+                    context.metadata["max_mb"] = _MAX_MB
+
+                    raise NetworkError(
+                        f"Download size ({len(buffer) >> 20} MB) exceeds limit ({_MAX_MB} MB) for {url}",
+                        error_code=ErrorCode.DOWNLOAD_SIZE_EXCEEDED,
+                        context=context,
+                    )
+
+                logger.warning(
+                    "Download size exceeds limit, aborting",
+                    url=url,
+                    max_mb=_MAX_MB,
+                    current_size_mb=len(buffer) >> 20,
+                )
                 return None
 
         return bytes(buffer)
 
-    except requests.RequestException as exc:
+    except requests.Timeout as exc:
+        if raise_on_error:
+            context = ErrorContext(
+                url=url, operation="download", component="document_processing.network"
+            )
+            context.metadata["timeout_seconds"] = _TIMEOUT
+
+            raise NetworkError(
+                f"Download timeout for {url}",
+                error_code=ErrorCode.NETWORK_TIMEOUT,
+                context=context,
+                cause=exc,
+            )
+
         logger.warning(
-            "Download failed for %s – %s: %s", url, exc.__class__.__name__, exc
+            "Download timeout",
+            url=url,
+            timeout_seconds=_TIMEOUT,
+            error=str(exc),
+        )
+        return None
+
+    except requests.ConnectionError as exc:
+        if raise_on_error:
+            raise NetworkError(
+                f"Connection failed for {url}",
+                error_code=ErrorCode.NETWORK_CONNECTION_FAILED,
+                context=ErrorContext(
+                    url=url,
+                    operation="download",
+                    component="document_processing.network",
+                ),
+                cause=exc,
+            )
+
+        logger.warning(
+            "Connection failed",
+            url=url,
+            error=str(exc),
+        )
+        return None
+
+    except requests.HTTPError as exc:
+        status_code = exc.response.status_code if exc.response else None
+        response_headers = dict(exc.response.headers) if exc.response else {}
+
+        if raise_on_error:
+            context = ErrorContext(
+                url=url,
+                operation="download",
+                component="document_processing.network",
+                status_code=status_code,
+            )
+            context.metadata["response_headers"] = response_headers
+
+            raise NetworkError(
+                f"HTTP error {status_code} for {url}",
+                error_code=ErrorCode.HTTP_ERROR,
+                context=context,
+                cause=exc,
+            )
+
+        logger.warning(
+            "HTTP error during download",
+            url=url,
+            status_code=status_code,
+            error=str(exc),
+        )
+        return None
+
+    except requests.RequestException as exc:
+        if raise_on_error:
+            raise NetworkError(
+                f"Request failed for {url}",
+                error_code=ErrorCode.NETWORK_CONNECTION_FAILED,
+                context=ErrorContext(
+                    url=url,
+                    operation="download",
+                    component="document_processing.network",
+                ),
+                cause=exc,
+            )
+
+        logger.warning(
+            "Download failed",
+            url=url,
+            exception_type=exc.__class__.__name__,
+            error=str(exc),
         )
         return None
 

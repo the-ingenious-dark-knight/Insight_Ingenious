@@ -18,12 +18,13 @@ Raises early if:
 
 from __future__ import annotations
 
-import logging
 import os
 from functools import lru_cache
 from typing import List, Optional, Sequence, TypedDict
 
 from dotenv import find_dotenv, load_dotenv
+
+from ingenious.core.structured_logging import get_logger
 
 try:
     from scrapfly import ScrapeConfig, ScrapflyClient
@@ -37,7 +38,7 @@ except ImportError:
     ScrapflyException = Exception
     SCRAPFLY_AVAILABLE = False
 
-log = logging.getLogger(__name__)
+log = get_logger(__name__)
 
 # =========================================================================== #
 # 1. Resolve environment variables from an optional .env file (dev-only).
@@ -47,7 +48,7 @@ log = logging.getLogger(__name__)
 
 _ENV_LOADED = load_dotenv(find_dotenv(usecwd=True), override=False)
 if _ENV_LOADED:
-    log.debug(".env file loaded for Scrapfly key")
+    log.debug("Environment file loaded for Scrapfly key", env_loaded=True)
 
 # =========================================================================== #
 # 2. Default per-request Scrapfly options – safe, broadly useful defaults.
@@ -172,7 +173,7 @@ def fetch_pages(
             )
         except ScrapflyException as exc:
             # Log and re-raise so callers can decide whether to retry at a higher level
-            log.debug("Scrapfly exception for %s: %s", url, exc)
+            log.debug("Scrapfly exception", url=url, error=str(exc), exc_info=True)
             raise
 
         # ── 6.4 Post-flight sanity checks – catch edge cases early ──────────

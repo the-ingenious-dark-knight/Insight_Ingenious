@@ -19,17 +19,14 @@ The `ingen` command-line interface provides intuitive commands for managing your
 # Initialize a new project
 ingen init
 
-# Check your configuration
-ingen status
-
-# Validate setup (recommended)
-ingen validate
-
 # Start the server
 ingen serve
 
 # List available workflows
 ingen workflows
+
+# Run tests
+ingen test
 ```
 
 ## Core Commands
@@ -62,6 +59,7 @@ Start the API server with web interfaces.
 
 **Interfaces:**
 - API: `http://localhost:80/api/v1/`
+- Health Check: `http://localhost:80/api/v1/health`
 - Chat: `http://localhost:80/chainlit`
 - Prompt Tuner: `http://localhost:80/prompt-tuner`
 
@@ -76,15 +74,18 @@ ingen workflows bike-insights            # Show bike insights workflow (recommen
 ```
 
 **Available Workflows:**
-- `classification-agent` - Route input to specialized agents (core library, minimal config)
-- `bike-insights` - Sample domain-specific analysis (project template, minimal config) ⭐ **RECOMMENDED**
-- `knowledge-base-agent` - Search knowledge bases using local ChromaDB (core library, stable local implementation)
-- `sql-manipulation-agent` - Execute SQL queries using local SQLite (core library, stable local implementation)
 
-**Note:**
-- Core library workflows are always available
-- Template workflows like `bike-insights` are created with `ingen init`
-- Only local implementations (ChromaDB, SQLite) are stable; Azure integrations are experimental
+**Core Library Workflows (Always Available):**
+- `classification-agent` - Route input to specialized agents (minimal config - Azure OpenAI only)
+- `knowledge-base-agent` - Search knowledge bases (supports both local ChromaDB and Azure Search)
+- `sql-manipulation-agent` - Execute SQL queries (supports both local SQLite and Azure SQL)
+
+**Project Template Workflows (Created with `ingen init`):**
+- `bike-insights` - Sample domain-specific multi-agent analysis ⭐ **RECOMMENDED START HERE**
+
+**Implementation Notes:**
+- **Local implementations are stable**: ChromaDB (knowledge-base-agent), SQLite (sql-manipulation-agent)
+- **Azure integrations are experimental**: Azure Search, Azure SQL may contain bugs
 - Legacy underscore names (`classification_agent`, `bike_insights`, etc.) are still supported for backward compatibility
 
 ### `ingen test`
@@ -101,35 +102,6 @@ ingen test --log-level DEBUG --args="--test-name=MyTest"
 
 ## Utility Commands
 
-### `ingen status`
-Check system configuration and status.
-
-Validates:
-- Environment variables
-- Configuration files
-- Dependencies
-- Available workflows
-
-### `ingen validate`
-Comprehensive validation of your Insight Ingenious setup.
-
-**What it validates:**
-- Configuration file syntax and required fields
-- Profile file syntax and credentials
-- Azure OpenAI connectivity
-- Workflow requirements
-- Dependencies
-
-**Usage:**
-```bash
-ingen validate  # Recommended before starting server
-```
-
-This command helps identify issues before starting the server and provides specific fix recommendations.
-
-### `ingen version`
-Show version information.
-
 ### `ingen prompt-tuner`
 Start standalone prompt tuning interface.
 
@@ -137,32 +109,34 @@ Start standalone prompt tuning interface.
 - `--port, -p` - Port (default: 5000)
 - `--host, -h` - Host (default: 127.0.0.1)
 
-### `ingen help [topic]`
-Show detailed help and guides.
+**Example:**
+```bash
+ingen prompt-tuner --port 5000 --host 127.0.0.1
+```
 
-**Topics:**
-- `setup` - Initial project setup
-- `workflows` - Understanding workflows
-- `config` - Configuration details
-- `deployment` - Deployment options
+### `ingen --help`
+Show comprehensive help for all commands.
+
+### `ingen <command> --help`
+Get detailed help for specific commands.
+
+**Examples:**
+```bash
+ingen serve --help     # Get help for serve command
+ingen test --help      # Get help for test command
+ingen workflows --help # Get help for workflows command
+```
 
 ## Data Processing Commands
 
-### `ingen dataprep`
-Web scraping utilities using Scrapfly.
+> **Note**: Data processing commands require additional dependencies. Install with:
+> - For document processing: `uv add ingenious[document-processing]`
+> - For dataprep: `uv add ingenious[dataprep]`
 
-**Subcommands:**
-- `crawl <url>` - Scrape single page
-- `batch <urls...>` - Scrape multiple pages
-
-**Example:**
-```bash
-ingen dataprep crawl https://example.com --pretty
-ingen dataprep batch https://a.com https://b.com --out results.ndjson
-```
-
-### `ingen document-processing <path>`
+### `ingen document-processing extract <path>`
 Extract text from documents (PDF, DOCX, images).
+
+**Requirements:** `ingenious[document-processing]` optional dependency group
 
 **Arguments:**
 - `path` - File path, directory, or HTTP/S URL
@@ -173,8 +147,29 @@ Extract text from documents (PDF, DOCX, images).
 
 **Example:**
 ```bash
-ingen document-processing document.pdf --engine pymupdf --out extracted.jsonl
-ingen document-processing https://example.com/doc.pdf --out results.jsonl
+ingen document-processing extract document.pdf --engine pymupdf --out extracted.jsonl
+ingen document-processing extract https://example.com/doc.pdf --out results.jsonl
+```
+
+### `ingen dataprep`
+Web scraping utilities using Scrapfly.
+
+**Requirements:** `ingenious[dataprep]` optional dependency group
+
+**Subcommands:**
+- `crawl <url>` - Scrape single page
+- `batch <urls...>` - Scrape multiple pages
+
+**Common Options:**
+- `--api-key` - Override Scrapfly API key (or use SCRAPFLY_API_KEY env var)
+- `--max-attempts` - Total tries per URL (default: 5)
+- `--delay` - Initial back-off delay in seconds (default: 1)
+- `--js / --no-js` - Enable/disable JavaScript rendering
+
+**Example:**
+```bash
+ingen dataprep crawl https://example.com --pretty
+ingen dataprep batch https://a.com https://b.com --max-attempts 3
 ```
 
 ## Environment Setup
@@ -224,11 +219,11 @@ The CLI provides helpful error messages and suggestions:
 - Missing dependencies
 - Environment variable issues
 
-Use `ingen status` to diagnose configuration problems.
+Use `ingen workflows` to check workflow availability and requirements.
 
 ## Getting Help
 
-- `ingen --help` - General help
-- `ingen <command> --help` - Command-specific help
-- `ingen help` - Comprehensive getting started guide
-- `ingen help <topic>` - Topic-specific guidance
+- `ingen --help` - General help and list of all commands
+- `ingen <command> --help` - Command-specific help and options
+- `ingen workflows` - Show all available workflows and their requirements
+- Documentation available in `docs/` directory

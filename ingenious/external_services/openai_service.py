@@ -1,4 +1,3 @@
-import logging
 import re
 
 from openai import NOT_GIVEN, AzureOpenAI, BadRequestError
@@ -8,10 +7,11 @@ from openai.types.chat import (
     ChatCompletionToolParam,
 )
 
+from ingenious.core.structured_logging import get_logger
 from ingenious.errors.content_filter_error import ContentFilterError
 from ingenious.errors.token_limit_exceeded_error import TokenLimitExceededError
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class OpenAIService:
@@ -30,7 +30,13 @@ class OpenAIService:
         tool_choice: str | dict | None = None,
         json_mode=False,
     ) -> ChatCompletionMessage:
-        logger.debug(f"Generating OpenAI response for messages: {messages}")
+        logger.debug(
+            "Generating OpenAI response",
+            model=self.model,
+            message_count=len(messages),
+            has_tools=tools is not None,
+            json_mode=json_mode,
+        )
         try:
             response = self.client.chat.completions.create(
                 model=self.model,
@@ -42,8 +48,15 @@ class OpenAIService:
             )
             return response.choices[0].message
         except BadRequestError as error:
-            # Log the error
-            logger.exception(error)
+            # Log the error with structured context
+            logger.error(
+                "OpenAI API request failed",
+                error_type="BadRequestError",
+                error_code=error.code,
+                error_message=error.message,
+                model=self.model,
+                exc_info=True,
+            )
 
             # Default to the general message from the exception
             message = error.message

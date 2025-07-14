@@ -1,14 +1,13 @@
-import logging
-
 from fastapi import APIRouter, Depends, HTTPException
 from typing_extensions import Annotated
 
+from ingenious.core.structured_logging import get_logger
 from ingenious.db.chat_history_repository import ChatHistoryRepository
-from ingenious.dependencies import get_chat_history_repository
 from ingenious.models.http_error import HTTPError
 from ingenious.models.message import Message
+from ingenious.services.dependencies import get_chat_history_repository
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 router = APIRouter()
 
 
@@ -26,5 +25,10 @@ async def get_conversation(
         messages = await chat_history_repository.get_thread_messages(thread_id)
         return messages
     except Exception as e:
-        logger.exception(e)
+        logger.error(
+            "Failed to get conversation",
+            thread_id=thread_id,
+            error=str(e),
+            exc_info=True,
+        )
         raise HTTPException(status_code=400, detail=str(e))

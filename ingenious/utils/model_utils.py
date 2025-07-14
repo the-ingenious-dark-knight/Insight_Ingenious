@@ -1,11 +1,12 @@
 import csv
 import io
 from enum import Enum
-from typing import List
+from typing import Any, Dict, List, Optional, Union
 
-import markpickle
+import jsonpickle
 import yaml
 from pydantic import BaseModel
+from typing_extensions import TypedDict
 
 
 class Output_Format(Enum):
@@ -16,12 +17,12 @@ class Output_Format(Enum):
 
 
 # Checks if a field is a non-complex field using the value
-def Is_Non_Complex_Field_Check_By_Value(value):
+def Is_Non_Complex_Field_Check_By_Value(value: Any) -> bool:
     return isinstance(value, (str, int, float, bool, type(None)))
 
 
 # Checks if a field is a non-complex field using the type.. note this is not a foolproof method and is based on the assumption that the field is a complex type with RootModel in the name
-def Is_Non_Complex_Field_Check_By_Type(field_type, root_model_name="RootModel"):
+def Is_Non_Complex_Field_Check_By_Type(field_type: Any, root_model_name: str = "RootModel") -> bool:
     if root_model_name in str(field_type):
         return False
     else:
@@ -33,17 +34,17 @@ class FieldData(BaseModel):
     FieldType: str
 
 
-def Get_Model_Properties(model) -> List[FieldData]:
-    properties: list[FieldData] = list()
+def Get_Model_Properties(model: Any) -> List[FieldData]:
+    properties: List[FieldData] = list()
     for field_name, field in model.model_fields.items():
         f: FieldData = FieldData(FieldName=field_name, FieldType=str(field.annotation))
         properties.append(f)
     return properties
 
 
-def Dict_To_Csv(obj: dict, row_header_columns, name):
-    output = "``` csv\n"
-    csv_output = io.StringIO()
+def Dict_To_Csv(obj: Dict[str, Any], row_header_columns: List[str], name: str) -> str:
+    output: str = "``` csv\n"
+    csv_output: io.StringIO = io.StringIO()
     writer = csv.writer(csv_output)
     writer.writerow(row_header_columns)
     for row in obj.values():
@@ -52,9 +53,9 @@ def Dict_To_Csv(obj: dict, row_header_columns, name):
     return output
 
 
-def List_To_Csv(obj: List, row_header_columns, name):
-    output = "``` csv\n"
-    csv_output = io.StringIO()
+def List_To_Csv(obj: List[Any], row_header_columns: List[str], name: str) -> str:
+    output: str = "``` csv\n"
+    csv_output: io.StringIO = io.StringIO()
     writer = csv.writer(csv_output)
     writer.writerow(row_header_columns)
     for row in obj:
@@ -68,11 +69,11 @@ def List_To_Csv(obj: List, row_header_columns, name):
     return output
 
 
-def Listable_Object_To_Csv(obj, row_type):
-    output = "``` csv\n"
-    csv_output = io.StringIO()
+def Listable_Object_To_Csv(obj: List[Any], row_type: Any) -> str:
+    output: str = "``` csv\n"
+    csv_output: io.StringIO = io.StringIO()
     writer = csv.writer(csv_output)
-    headers = [
+    headers: List[str] = [
         prop.FieldName
         for prop in Get_Model_Properties(row_type)
         if Is_Non_Complex_Field_Check_By_Type(prop.FieldType)
@@ -84,19 +85,19 @@ def Listable_Object_To_Csv(obj, row_type):
     return output
 
 
-def Object_To_Yaml(obj, strip_complex_fields=False):
-    obj_dict = obj.__dict__
-    output = "``` yaml\n"
+def Object_To_Yaml(obj: Any, strip_complex_fields: bool = False) -> str:
+    obj_dict: Dict[str, Any] = obj.__dict__
+    output: str = "``` yaml\n"
     if strip_complex_fields:
         obj_dict = {
             k: v
             for k, v in obj.__dict__.items()
             if Is_Non_Complex_Field_Check_By_Value(v)
         }
-    yaml_output = yaml.dump(obj_dict, default_flow_style=False)
+    yaml_output: str = yaml.dump(obj_dict, default_flow_style=False)
     return output + yaml_output + "\n```"
 
 
-def Object_To_Markdown(obj, name):
-    val = markpickle.dumps(obj)
+def Object_To_Markdown(obj: Any, name: str) -> str:
+    val: str = jsonpickle.dumps(obj)
     return val

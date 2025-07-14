@@ -1,7 +1,12 @@
-# N.B.
-# This will add to the package’s __path__ all subdirectories of directories on sys.path named after the package which effectively combines both modules into a single namespace (dbt.adapters)
-# The matching statement is in plugins/postgres/dbt/__init__.py
+# services/__init__.py
+"""
+Ingenious Services Package.
 
-from pkgutil import extend_path
+This package contains all service implementations including chat services,
+dependency injection, and various business logic components.
+"""
 
-__path__ = extend_path(__path__, __name__)
+# Explicit imports for better IDE support - avoid dependencies to prevent circular imports
+from . import chat_service
+
+__all__ = ["chat_service"]

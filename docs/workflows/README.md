@@ -54,9 +54,6 @@ graph TB
 
     AZURE_EXPERIMENTAL --> AZURE_SEARCH
     AZURE_EXPERIMENTAL --> AZURE_SQL
-    SEARCH --> AZURE_SEARCH
-    DATABASE --> AZURE_OPENAI
-    DATABASE --> AZURE_SQL
 
     classDef workflow fill:#e3f2fd
     classDef config fill:#f1f8e9
@@ -80,6 +77,19 @@ These workflows are provided as examples in the `ingenious_extensions_template` 
 - **bike-insights** - Multi-agent bike sales analysis (the "Hello World" example)
 
 **Important**: Template workflows like `bike-insights` are only available in projects created with `ingen init`, not in the core library.
+
+## Implementation Stability Guide
+
+### ✅ Stable & Recommended
+- **Local ChromaDB** (knowledge-base-agent): Stable vector database for knowledge search
+- **Local SQLite** (sql-manipulation-agent): Stable database for SQL queries
+- **Azure OpenAI**: Stable across all workflows
+
+### ⚠️ Experimental (May contain bugs)
+- **Azure Cognitive Search** (knowledge-base-agent): Experimental alternative to ChromaDB
+- **Azure SQL Database** (sql-manipulation-agent): Experimental alternative to SQLite
+
+**Recommendation**: Use local implementations (ChromaDB + SQLite) for stable production deployments.
 
 ## Detailed Workflow Flows
 

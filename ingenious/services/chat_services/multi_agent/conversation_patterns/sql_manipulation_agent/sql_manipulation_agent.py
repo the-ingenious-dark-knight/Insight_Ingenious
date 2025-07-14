@@ -1,12 +1,11 @@
-import logging
-
 import autogen
 import autogen.retrieve_utils
 import autogen.runtime_logging
 
+from ingenious.core.structured_logging import get_logger
 from ingenious.models import config as _config
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class ConversationPattern:
@@ -40,9 +39,10 @@ class ConversationPattern:
             )
 
         if self.memory_record_switch and self.thread_memory:
-            logger.log(
-                level=logging.DEBUG,
-                msg="Memory recording enabled. Requires `ChatHistorySummariser` for optional dependency.",
+            logger.debug(
+                "Memory recording enabled",
+                thread_memory_length=len(self.thread_memory),
+                note="Requires ChatHistorySummariser for optional dependency",
             )
             run_async_memory_operation(
                 self.memory_manager.write_memory(self.thread_memory)
