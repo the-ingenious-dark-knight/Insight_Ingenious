@@ -14,8 +14,8 @@ from typing import Optional
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from typing_extensions import Annotated
 
-import ingenious.config.config as Config
 from ingenious.auth.jwt import get_username_from_token
+from ingenious.config.config import get_config as _get_config
 from ingenious.db.chat_history_repository import (
     ChatHistoryRepository,
     DatabaseClientType,
@@ -39,7 +39,7 @@ bearer_security = HTTPBearer()
 
 def get_config():
     """Get config dynamically to ensure environment variables are loaded"""
-    return Config.get_config()
+    return _get_config()
 
 
 def get_profile():

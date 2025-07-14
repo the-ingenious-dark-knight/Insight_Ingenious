@@ -4,407 +4,192 @@ from unittest.mock import patch
 
 import pytest
 
-from ingenious.config.config import Config, substitute_environment_variables
+from ingenious.config.config import get_config
+from ingenious.config.settings import IngeniousSettings
 
 
 @pytest.mark.integration
 class TestConfigIntegration:
     """Integration tests for configuration loading and processing"""
 
-    def test_complete_config_workflow(self):
-        """Test complete configuration workflow from file to object"""
-        config_content = """
-chat_history:
-  database_type: sqlite
-  database_path: ./tmp/test.db
-  memory_path: ./tmp
+    def test_get_config_integration(self):
+        """Test complete get_config() workflow"""
+        with patch.dict(os.environ, {
+            'AZURE_OPENAI_API_KEY': 'integration-test-key',
+            'AZURE_OPENAI_BASE_URL': 'https://integration.openai.azure.com/',
+            'AZURE_OPENAI_MODEL': 'gpt-4',
+            'INGENIOUS_PROFILE': 'integration',
+            'INGENIOUS_WEB_CONFIGURATION__PORT': '9000',
+            'INGENIOUS_LOGGING__LOG_LEVEL': 'debug',
+        }):
+            config = get_config()
+            
+            # Verify the configuration was loaded correctly
+            assert config is not None
+            assert isinstance(config, IngeniousSettings)
+            assert len(config.models) >= 1
+            assert config.models[0].model == "gpt-4"
+            assert config.models[0].api_key == "integration-test-key"
+            assert config.models[0].base_url == "https://integration.openai.azure.com/"
+            assert config.profile == "integration"
+            assert config.web_configuration.port == 9000
+            assert config.logging.log_level == "debug"
 
-profile: test_profile
+    def test_env_file_integration(self):
+        """Test loading configuration from .env file in integration context"""
+        env_content = """
+# Integration test environment file
+AZURE_OPENAI_API_KEY=env-file-test-key
+AZURE_OPENAI_BASE_URL=https://envfile.openai.azure.com/
+AZURE_OPENAI_MODEL=gpt-3.5-turbo
+INGENIOUS_PROFILE=envfile_profile
+INGENIOUS_CHAT_HISTORY__DATABASE_TYPE=sqlite
+INGENIOUS_CHAT_HISTORY__DATABASE_PATH=./tmp/integration_test.db
+INGENIOUS_WEB_CONFIGURATION__PORT=8080
+INGENIOUS_WEB_CONFIGURATION__AUTHENTICATION__ENABLE=true
+INGENIOUS_WEB_CONFIGURATION__AUTHENTICATION__USERNAME=testuser
+INGENIOUS_WEB_CONFIGURATION__AUTHENTICATION__PASSWORD=testpass
+INGENIOUS_LOGGING__ROOT_LOG_LEVEL=warning
+INGENIOUS_LOGGING__LOG_LEVEL=warning
+        """.strip()
 
-models:
-  - model: ${MODEL_NAME:gpt-4}
-    api_type: rest
-    api_version: ${API_VERSION:2023-03-15-preview}
-    deployment: ${DEPLOYMENT:gpt-4}
-
-logging:
-  root_log_level: info
-  log_level: info
-
-tool_service:
-  enable: false
-
-chat_service:
-  type: multi_agent
-
-chainlit_configuration:
-  enable: false
-
-prompt_tuner:
-  mode: fast_api
-  enable: true
-
-web_configuration:
-  ip_address: 0.0.0.0
-  port: 8000
-  type: fastapi
-  asynchronous: false
-
-local_sql_db:
-  database_path: /tmp/test_db
-  sample_csv_path: ""
-  sample_database_name: test_db
-"""
-
-        # Create a temporary profile file
-        profile_content = """
-- name: test_profile
-  models:
-    - model: gpt-3.5-turbo
-      api_key: test-key
-      base_url: https://test.openai.azure.com/
-      deployment: gpt-35-turbo
-      api_version: 2023-03-15-preview
-  chat_history:
-    database_connection_string: ""
-  receiver_configuration:
-    enable: false
-    api_url: ""
-    api_key: "DevApiKey"
-  chainlit_configuration:
-    enable: false
-    authentication:
-      enable: false
-      github_secret: ""
-      github_client_id: ""
-  web_configuration:
-    authentication:
-      enable: false
-      username: "admin"
-      password: "admin123"
-      type: "basic"
-"""
-
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
-            f.write(config_content)
-            config_file = f.name
-
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".yml", delete=False
-        ) as profile_f:
-            profile_f.write(profile_content)
-            profile_file = profile_f.name
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.env', delete=False) as f:
+            f.write(env_content)
+            env_file = f.name
 
         try:
-            with patch.dict(
-                os.environ,
-                {
-                    "MODEL_NAME": "gpt-3.5-turbo",
-                    "API_VERSION": "2023-03-15-preview",
-                    "DEPLOYMENT": "gpt-35-turbo",
-                    "INGENIOUS_PROFILE_PATH": profile_file,
-                },
-                clear=True,
-            ):
-                config = Config.from_yaml(config_file)
-
-                # Verify the configuration was loaded and processed correctly
-                assert config is not None
-                assert len(config.models) == 1
-                assert config.models[0].model == "gpt-3.5-turbo"
-                assert config.models[0].api_version == "2023-03-15-preview"
-                assert config.models[0].deployment == "gpt-35-turbo"
-
+            # Set minimal environment and load from file
+            with patch.dict(os.environ, {
+                'AZURE_OPENAI_API_KEY': 'env-file-test-key',
+                'AZURE_OPENAI_BASE_URL': 'https://envfile.openai.azure.com/',
+                'AZURE_OPENAI_MODEL': 'gpt-3.5-turbo',
+            }):
+                settings = IngeniousSettings(_env_file=env_file)
+                
+                # Verify file-based configuration
+                assert settings.profile == "envfile_profile"
+                assert settings.models[0].model == "gpt-3.5-turbo"
+                assert settings.models[0].api_key == "env-file-test-key"
+                assert settings.chat_history.database_type == "sqlite"
+                assert settings.chat_history.database_path == "./tmp/integration_test.db"
+                assert settings.web_configuration.port == 8080
+                assert settings.web_configuration.authentication.enable is True
+                assert settings.web_configuration.authentication.username == "testuser"
+                assert settings.logging.root_log_level == "warning"
         finally:
-            os.unlink(config_file)
-            os.unlink(profile_file)
+            os.unlink(env_file)
 
-    def test_environment_variable_cascade(self):
-        """Test environment variable substitution cascade behavior"""
-        config_content = """
-database:
-  host: ${DB_HOST:${FALLBACK_HOST:localhost}}
-  port: ${DB_PORT:5432}
-  name: ${DB_NAME:testdb}
+    def test_config_validation_integration(self):
+        """Test configuration validation in integration context"""
+        # Test with invalid configuration
+        with patch.dict(os.environ, {}, clear=True):
+            with pytest.raises(ValueError, match="At least one model must be configured"):
+                get_config()
 
-services:
-  api_endpoint: ${API_ENDPOINT:https://api.${DOMAIN:example.com}/v1}
-  timeout: ${TIMEOUT:30}
-"""
+    def test_config_backward_compatibility_integration(self):
+        """Test that new config system provides backward compatibility"""
+        with patch.dict(os.environ, {
+            'AZURE_OPENAI_API_KEY': 'compat-test-key',
+            'AZURE_OPENAI_BASE_URL': 'https://compat.openai.azure.com/',
+        }):
+            config = get_config()
+            
+            # Test backward compatibility - ensure common attributes exist
+            assert hasattr(config, 'models')
+            assert hasattr(config, 'chat_history')
+            assert hasattr(config, 'web_configuration')
+            assert hasattr(config, 'logging')
+            assert hasattr(config, 'profile')
+            
+            # Test nested attribute access patterns that existed in old system
+            assert hasattr(config.models[0], 'model')
+            assert hasattr(config.models[0], 'api_key')
+            assert hasattr(config.models[0], 'base_url')
+            assert hasattr(config.chat_history, 'database_type')
+            assert hasattr(config.web_configuration, 'port')
+            assert hasattr(config.web_configuration, 'authentication')
 
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
-            f.write(config_content)
-            config_file = f.name
+    def test_multiple_environment_scenarios(self):
+        """Test configuration in different environment scenarios"""
+        
+        # Scenario 1: Development environment
+        dev_env = {
+            'AZURE_OPENAI_API_KEY': 'dev-key',
+            'AZURE_OPENAI_BASE_URL': 'https://dev.openai.azure.com/',
+            'INGENIOUS_PROFILE': 'development',
+            'INGENIOUS_LOGGING__LOG_LEVEL': 'debug',
+            'INGENIOUS_WEB_CONFIGURATION__AUTHENTICATION__ENABLE': 'false',
+        }
+        
+        with patch.dict(os.environ, dev_env, clear=True):
+            dev_config = get_config()
+            assert dev_config.profile == "development"
+            assert dev_config.logging.log_level == "debug"
+            assert dev_config.web_configuration.authentication.enable is False
+        
+        # Scenario 2: Production environment
+        prod_env = {
+            'AZURE_OPENAI_API_KEY': 'prod-key',
+            'AZURE_OPENAI_BASE_URL': 'https://prod.openai.azure.com/',
+            'INGENIOUS_PROFILE': 'production',
+            'INGENIOUS_LOGGING__LOG_LEVEL': 'warning',
+            'INGENIOUS_WEB_CONFIGURATION__AUTHENTICATION__ENABLE': 'true',
+            'INGENIOUS_WEB_CONFIGURATION__AUTHENTICATION__USERNAME': 'admin',
+            'INGENIOUS_WEB_CONFIGURATION__AUTHENTICATION__PASSWORD': 'secure-password',
+        }
+        
+        with patch.dict(os.environ, prod_env, clear=True):
+            prod_config = get_config()
+            assert prod_config.profile == "production"
+            assert prod_config.logging.log_level == "warning"
+            assert prod_config.web_configuration.authentication.enable is True
+            assert prod_config.web_configuration.authentication.username == "admin"
 
-        try:
-            # Test with partial environment variables
-            with patch.dict(
-                os.environ, {"DOMAIN": "test.com", "TIMEOUT": "60"}, clear=True
-            ):
-                # Read and substitute variables
-                with open(config_file, "r") as file:
-                    content = file.read()
+    def test_config_error_handling_integration(self):
+        """Test error handling in integration scenarios"""
+        
+        # Test with missing required configuration
+        with patch.dict(os.environ, {
+            'AZURE_OPENAI_MODEL': 'gpt-4',
+            # Missing API_KEY and BASE_URL
+        }, clear=True):
+            with pytest.raises(ValueError):
+                get_config()
+        
+        # Test with invalid log level
+        with patch.dict(os.environ, {
+            'AZURE_OPENAI_API_KEY': 'test-key',
+            'AZURE_OPENAI_BASE_URL': 'https://test.openai.azure.com/',
+            'INGENIOUS_LOGGING__LOG_LEVEL': 'invalid_level',
+        }):
+            with pytest.raises(Exception):  # ValidationError from pydantic
+                get_config()
 
-                result = substitute_environment_variables(content)
-
-                # Verify substitutions
-                assert "localhost" in result  # DB_HOST fallback
-                assert "5432" in result  # DB_PORT default
-                assert "testdb" in result  # DB_NAME default
-                assert "https://api.test.com/v1" in result  # API_ENDPOINT with DOMAIN
-                assert "60" in result  # TIMEOUT from env
-
-        finally:
-            os.unlink(config_file)
-
-    def test_config_validation_errors_with_context(self):
-        """Test configuration validation provides helpful error context"""
-        invalid_config_content = """
-profile: test_profile
-models: []  # Empty models list - this should cause validation error
-logging:
-  root_log_level: info
-  log_level: info
-"""
-
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
-            f.write(invalid_config_content)
-            config_file = f.name
-
-        try:
-            # This should raise a validation error with helpful context
-            with pytest.raises(
-                Exception
-            ):  # Could be ValidationError or other config-specific error
-                Config.from_yaml(config_file)
-
-        finally:
-            os.unlink(config_file)
-
-    def test_config_with_missing_optional_fields(self):
-        """Test configuration with missing optional fields uses defaults"""
-        minimal_config_content = """
-profile: test_profile
-
-models:
-  - model: gpt-4
-    api_type: rest
-    api_version: 2023-03-15-preview
-
-logging:
-  root_log_level: info
-  log_level: info
-
-chat_history:
-  database_type: sqlite
-  database_path: ./tmp/test.db
-  memory_path: ./tmp
-
-tool_service:
-  enable: false
-
-chat_service:
-  type: multi_agent
-
-chainlit_configuration:
-  enable: false
-
-prompt_tuner:
-  mode: fast_api
-  enable: true
-
-web_configuration:
-  ip_address: 0.0.0.0
-  port: 8000
-  type: fastapi
-  asynchronous: false
-
-local_sql_db:
-  database_path: /tmp/test_db
-  sample_csv_path: ""
-  sample_database_name: test_db
-"""
-
-        # Create a temporary profile file
-        profile_content = """
-- name: test_profile
-  models:
-    - model: gpt-4
-      api_key: test-key
-      base_url: https://test.openai.azure.com/
-      deployment: gpt-4
-      api_version: 2023-03-15-preview
-  chat_history:
-    database_connection_string: ""
-  receiver_configuration:
-    enable: false
-    api_url: ""
-    api_key: "DevApiKey"
-  chainlit_configuration:
-    enable: false
-    authentication:
-      enable: false
-      github_secret: ""
-      github_client_id: ""
-  web_configuration:
-    authentication:
-      enable: false
-      username: "admin"
-      password: "admin123"
-      type: "basic"
-"""
-
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
-            f.write(minimal_config_content)
-            config_file = f.name
-
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".yml", delete=False
-        ) as profile_f:
-            profile_f.write(profile_content)
-            profile_file = profile_f.name
-
-        try:
-            with patch.dict(
-                os.environ, {"INGENIOUS_PROFILE_PATH": profile_file}, clear=True
-            ):
-                config = Config.from_yaml(config_file)
-
-                # Verify the minimal configuration is accepted
-                assert config is not None
-                assert len(config.models) == 1
-                assert config.models[0].model == "gpt-4"
-
-        finally:
-            os.unlink(config_file)
-            os.unlink(profile_file)
-
-    def test_config_with_complex_nested_substitutions(self):
-        """Test configuration with complex nested environment variable substitutions"""
-        complex_config_content = """
-environments:
-  development:
-    database:
-      host: ${DEV_DB_HOST:dev.${BASE_DOMAIN:example.com}}
-      credentials:
-        username: ${DEV_DB_USER:dev_user}
-        password: ${DEV_DB_PASS:dev_pass}
-
-  production:
-    database:
-      host: ${PROD_DB_HOST:prod.${BASE_DOMAIN:example.com}}
-      credentials:
-        username: ${PROD_DB_USER:prod_user}
-        password: ${PROD_DB_PASS:prod_pass}
-
-agents:
-  - name: env_agent
-    description: "Agent configured via environment"
-    model: ${AGENT_MODEL:gpt-4}
-
-workflows:
-  env_workflow:
-    agents:
-      - env_agent
-    environment: ${DEPLOY_ENV:development}
-"""
-
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
-            f.write(complex_config_content)
-            config_file = f.name
-
-        try:
-            with patch.dict(
-                os.environ,
-                {
-                    "BASE_DOMAIN": "test-company.com",
-                    "DEV_DB_USER": "test_dev_user",
-                    "AGENT_MODEL": "gpt-3.5-turbo",
-                    "DEPLOY_ENV": "development",
-                },
-                clear=True,
-            ):
-                # Read and process the configuration
-                with open(config_file, "r") as file:
-                    content = file.read()
-
-                result = substitute_environment_variables(content)
-
-                # Verify complex substitutions
-                assert "dev.test-company.com" in result
-                assert "prod.test-company.com" in result
-                assert "test_dev_user" in result
-                assert "prod_user" in result  # Default value
-                assert "gpt-3.5-turbo" in result
-                assert "development" in result
-
-        finally:
-            os.unlink(config_file)
-
-    def test_config_file_not_found_handling(self):
-        """Test graceful handling of missing configuration files"""
-        non_existent_file = "non_existent_config.yaml"
-
-        with pytest.raises(FileNotFoundError):
-            Config.from_yaml(non_existent_file)
-
-    def test_config_with_yaml_syntax_errors(self):
-        """Test handling of YAML syntax errors"""
-        invalid_yaml_content = """
-agents:
-  - name: test_agent
-    model: gpt-4
-    invalid_yaml: [unclosed bracket
-workflows:
-  test: {unclosed brace
-"""
-
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
-            f.write(invalid_yaml_content)
-            config_file = f.name
-
-        try:
-            with pytest.raises(Exception):  # YAML parsing error
-                Config.from_yaml(config_file)
-
-        finally:
-            os.unlink(config_file)
-
-    def test_config_with_special_characters_in_env_vars(self):
-        """Test configuration with special characters in environment variables"""
-        config_content = """
-database:
-  connection_string: "${DB_CONNECTION:postgresql://user:pass@localhost:5432/db?sslmode=require}"
-
-api:
-  key: "${API_KEY:sk-1234567890abcdef!@#$%^&*()}"
-  url: "${API_URL:https://api.example.com/v1?param=value&other=123}"
-"""
-
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
-            f.write(config_content)
-            config_file = f.name
-
-        try:
-            with patch.dict(
-                os.environ,
-                {
-                    "DB_CONNECTION": "postgresql://test:secret@testhost:5432/testdb",
-                    "API_KEY": "sk-test-key-with-special-chars!@#",
-                },
-                clear=True,
-            ):
-                with open(config_file, "r") as file:
-                    content = file.read()
-
-                result = substitute_environment_variables(content)
-
-                # Verify special characters are preserved
-                assert "postgresql://test:secret@testhost:5432/testdb" in result
-                assert "sk-test-key-with-special-chars!@#" in result
-                assert (
-                    "https://api.example.com/v1?param=value&other=123" in result
-                )  # Default with special chars
-
-        finally:
-            os.unlink(config_file)
+    def test_config_environment_override_integration(self):
+        """Test that environment variables properly override defaults"""
+        custom_env = {
+            'AZURE_OPENAI_API_KEY': 'override-key',
+            'AZURE_OPENAI_BASE_URL': 'https://override.openai.azure.com/',
+            'AZURE_OPENAI_MODEL': 'gpt-3.5-turbo',
+            'INGENIOUS_PROFILE': 'custom',
+            'INGENIOUS_WEB_CONFIGURATION__PORT': '7777',
+            'INGENIOUS_WEB_CONFIGURATION__IP_ADDRESS': '127.0.0.1',
+            'INGENIOUS_CHAT_HISTORY__DATABASE_TYPE': 'azuresql',
+            'INGENIOUS_CHAT_HISTORY__MEMORY_PATH': '/custom/memory/path',
+            'INGENIOUS_TOOL_SERVICE__ENABLE': 'true',
+            'INGENIOUS_CHAINLIT_CONFIGURATION__ENABLE': 'true',
+        }
+        
+        with patch.dict(os.environ, custom_env, clear=True):
+            config = get_config()
+            
+            # Verify all overrides work
+            assert config.profile == "custom"
+            assert config.models[0].model == "gpt-3.5-turbo"
+            assert config.models[0].api_key == "override-key"
+            assert config.web_configuration.port == 7777
+            assert config.web_configuration.ip_address == "127.0.0.1"
+            assert config.chat_history.database_type == "azuresql"
+            assert config.chat_history.memory_path == "/custom/memory/path"
+            assert config.tool_service.enable is True
+            assert config.chainlit_configuration.enable is True

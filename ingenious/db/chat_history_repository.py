@@ -12,7 +12,7 @@ from typing import (
 )
 from uuid import UUID
 
-import ingenious.config.config as Config
+from ingenious.config.settings import IngeniousSettings
 from ingenious.core.structured_logging import get_logger
 from ingenious.models.database_client import DatabaseClientType
 from ingenious.models.message import Message
@@ -253,7 +253,7 @@ class IChatHistoryRepository(ABC):
 
 
 class ChatHistoryRepository:
-    def __init__(self, db_type: DatabaseClientType, config: Config.Config):
+    def __init__(self, db_type: DatabaseClientType, config: IngeniousSettings):
         module_name = f"ingenious.db.{db_type.value.lower()}"
         class_name = f"{db_type.value.lower()}_ChatHistoryRepository"
 

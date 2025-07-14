@@ -3,12 +3,12 @@ import sqlite3
 
 import pandas as pd  # Import pandas for CSV handling
 
-import ingenious.config.config as Config
+from ingenious.config.config import get_config
 
 
 class sqlite_sample_db:
     def __init__(self):
-        self._config = Config.get_config()
+        self._config = get_config()
 
         self.db_path = self._config.local_sql_db.database_path
         db_dir_check = os.path.dirname(self.db_path)

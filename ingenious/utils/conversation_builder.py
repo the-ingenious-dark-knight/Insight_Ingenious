@@ -7,7 +7,7 @@ from openai.types.chat import (
     ChatCompletionUserMessageParam,
 )
 
-from ingenious.config.config import Config
+from ingenious.config.settings import IngeniousSettings
 from ingenious.core.structured_logging import get_logger
 from ingenious.files.files_repository import FileStorage
 
@@ -65,7 +65,7 @@ def build_message(
         raise ValueError("Invalid message role.")
 
 
-async def Sync_Prompt_Templates(_config: Config, revision: str):
+async def Sync_Prompt_Templates(_config: IngeniousSettings, revision: str):
     fs = FileStorage(_config, Category="revisions")
     # Check the storage type and handle Jinja files accordingly
     azure_template_dir = "prompts/" + revision
