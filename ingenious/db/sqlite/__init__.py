@@ -24,7 +24,7 @@ logger = get_logger(__name__)
 
 
 class sqlite_ChatHistoryRepository(BaseSQLRepository):
-    def __init__(self, config: IngeniousSettings):
+    def __init__(self, config: IngeniousSettings) -> None:
         self.db_path = config.chat_history.database_path
         # Check if the directory exists, if not, create it
         db_dir_check = os.path.dirname(self.db_path)
@@ -42,14 +42,14 @@ class sqlite_ChatHistoryRepository(BaseSQLRepository):
         # Call parent constructor which will call _init_connection and _create_tables
         super().__init__(config, query_builder)
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Destructor to ensure connections are properly closed."""
         try:
             self.close()
         except Exception:
             pass
 
-    def close(self):
+    def close(self) -> None:
         """Close all connections in the pool."""
         if hasattr(self, "pool"):
             self.pool.close_all()

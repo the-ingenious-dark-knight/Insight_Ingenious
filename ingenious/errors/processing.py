@@ -37,7 +37,7 @@ import random
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, Optional, Type, TypeVar, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union
 
 from ingenious.core.structured_logging import get_logger
 
@@ -373,7 +373,7 @@ def retry_with_backoff(
     max_delay: float = 60.0,
     exponential_base: float = 2.0,
     jitter: bool = True,
-    exceptions: tuple[Type[Exception], ...] = (ProcessingError,),
+    exceptions: Tuple[Type[Exception], ...] = (ProcessingError,),
     only_recoverable: bool = True,
 ) -> Callable[[F], F]:
     """Decorator that retries function execution with exponential backoff.
@@ -498,7 +498,7 @@ class RecoveryStrategy:
 class FallbackEngineStrategy(RecoveryStrategy):
     """Recovery strategy that tries alternative extraction engines."""
 
-    def __init__(self, fallback_engines: list[str]):
+    def __init__(self, fallback_engines: List[str]) -> None:
         self.fallback_engines = fallback_engines
 
     def can_recover(self, error: ProcessingError) -> bool:
@@ -510,7 +510,7 @@ class FallbackEngineStrategy(RecoveryStrategy):
         }
 
     def recover(
-        self, error: ProcessingError, extract_func: Callable, src: Any, **kwargs: Any
+        self, error: ProcessingError, extract_func: Callable[..., Any], src: Any, **kwargs: Any
     ) -> Any:
         """Try extraction with fallback engines."""
         for engine in self.fallback_engines:
@@ -538,7 +538,7 @@ class FallbackEngineStrategy(RecoveryStrategy):
 class RetryWithDelayStrategy(RecoveryStrategy):
     """Recovery strategy that retries after a delay."""
 
-    def __init__(self, max_retries: int = 3, base_delay: float = 1.0):
+    def __init__(self, max_retries: int = 3, base_delay: float = 1.0) -> None:
         self.max_retries = max_retries
         self.base_delay = base_delay
 
@@ -556,7 +556,7 @@ class RetryWithDelayStrategy(RecoveryStrategy):
         )
 
     def recover(
-        self, error: ProcessingError, operation: Callable, *args: Any, **kwargs: Any
+        self, error: ProcessingError, operation: Callable[..., Any], *args: Any, **kwargs: Any
     ) -> Any:
         """Retry the operation with delay."""
         delay = self.base_delay * (2**error.context.retry_count)
@@ -584,8 +584,8 @@ class RetryWithDelayStrategy(RecoveryStrategy):
 class ErrorReporter:
     """Utility for collecting and reporting processing errors."""
 
-    def __init__(self):
-        self.errors: list[ProcessingError] = []
+    def __init__(self) -> None:
+        self.errors: List[ProcessingError] = []
         self.error_counts: Dict[str, int] = {}
 
     def add_error(self, error: ProcessingError) -> None:

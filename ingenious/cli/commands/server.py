@@ -21,7 +21,7 @@ class ServeCommand(BaseCommand):
         config: Optional[str] = None,
         profile: Optional[str] = None,
         host: str = "0.0.0.0",
-        port: int = None,
+        port: Optional[int] = None,
         no_prompt_tuner: bool = False
     ) -> None:
         """
@@ -58,7 +58,7 @@ class ServeCommand(BaseCommand):
             import uvicorn
             from ingenious.main import create_app
             
-            app = create_app()
+            app = create_app(config_paths["config"])
             
             self.stop_progress()
             self.print_success(f"Starting server on {host}:{port}")
@@ -85,10 +85,11 @@ class ServeCommand(BaseCommand):
 
 
 # Backward compatibility
-def register_commands(app, console) -> None:
+def register_commands(app: typer.Typer, console: Console) -> None:
     """Register server-related commands with the typer app."""
     import typer
     from typing_extensions import Annotated
+    from rich.console import Console
     
     @app.command(name="serve", help="Start the API server with web interface")
     def serve(

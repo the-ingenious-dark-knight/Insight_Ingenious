@@ -4,7 +4,27 @@ Contains utility functions for AI search, SQL operations, and other tools.
 """
 
 import json
-from typing import List, Tuple
+from typing import List, Tuple, Any, Protocol
+
+
+class SearchToolProtocol(Protocol):
+    """Protocol for search tool functions."""
+    
+    async def aisearch(self, search_query: str, index_name: str = "default") -> str:
+        """Perform AI search."""
+        ...
+
+
+class SQLToolProtocol(Protocol):
+    """Protocol for SQL tool functions."""
+    
+    def get_db_attr(self, config_obj: Any) -> Tuple[str, List[str]]:
+        """Get database attributes."""
+        ...
+    
+    async def execute_sql_local(self, sql_query: str) -> str:
+        """Execute SQL query locally."""
+        ...
 
 
 class ToolFunctions:
@@ -44,7 +64,7 @@ class SQL_ToolFunctions:
     """Tool functions for SQL database operations."""
 
     @staticmethod
-    def get_db_attr(config_obj) -> Tuple[str, List[str]]:
+    def get_db_attr(config_obj: Any) -> Tuple[str, List[str]]:
         """
         Get database table attributes for local SQLite database.
 
@@ -63,7 +83,7 @@ class SQL_ToolFunctions:
             return "unknown_table", ["id", "data"]
 
     @staticmethod
-    def get_azure_db_attr(config_obj) -> Tuple[str, str, List[str]]:
+    def get_azure_db_attr(config_obj: Any) -> Tuple[str, str, List[str]]:
         """
         Get database attributes for Azure SQL database.
 

@@ -23,7 +23,7 @@ logger = get_logger(__name__)
 
 
 class azuresql_ChatHistoryRepository(BaseSQLRepository):
-    def __init__(self, config: IngeniousSettings):
+    def __init__(self, config: IngeniousSettings) -> None:
         self.connection_string = config.chat_history.database_connection_string
         if not self.connection_string:
             raise ValueError(
@@ -84,8 +84,10 @@ class azuresql_ChatHistoryRepository(BaseSQLRepository):
             if cursor:
                 cursor.close()
 
-    def execute_sql(self, sql, params=[], expect_results=True):
+    def execute_sql(self, sql: str, params: List[Any] = None, expect_results: bool = True) -> Any:
         """Legacy method for backward compatibility."""
+        if params is None:
+            params = []
         return self._execute_sql(sql, params, expect_results)
 
     def _create_tables(self):
@@ -114,7 +116,7 @@ class azuresql_ChatHistoryRepository(BaseSQLRepository):
         # In a full implementation, you'd join with threads table and return proper thread data
         return []
 
-    async def get_thread(self, thread_id: str) -> list[IChatHistoryRepository.Thread]:
+    async def get_thread(self, thread_id: str) -> List[IChatHistoryRepository.Thread]:
         cursor = self.connection.cursor()
         cursor.execute(
             """
@@ -140,7 +142,7 @@ class azuresql_ChatHistoryRepository(BaseSQLRepository):
             for row in rows
         ]
 
-    async def add_step(self, step_dict: IChatHistoryRepository.StepDict):
+    async def add_step(self, step_dict: IChatHistoryRepository.StepDict) -> None:
         logger.info(
             "Creating step in database",
             step_id=step_dict.get("id"),

@@ -49,7 +49,6 @@ class IChatHistoryRepository(ABC):
     ElementDisplay = Literal["inline", "side", "page"]
     ElementSize = Literal["small", "medium", "large"]
 
-    @dataclass
     class ElementDict(TypedDict):
         id: str
         threadId: Optional[str]
@@ -145,14 +144,12 @@ class IChatHistoryRepository(ABC):
         value: int
         comment: Optional[str]
 
-    @dataclass
     class FeedbackDict(TypedDict):
         forId: str
         id: Optional[str]
         value: Literal[0, 1]
         comment: Optional[str]
 
-    @dataclass
     class StepDict(TypedDict, total=False):
         name: str
         type: "IChatHistoryRepository.StepType"
@@ -176,7 +173,6 @@ class IChatHistoryRepository(ABC):
         indent: Optional[int]
         feedback: Optional["IChatHistoryRepository.FeedbackDict"]
 
-    @dataclass
     class ThreadDict(TypedDict):
         id: str
         createdAt: str
@@ -188,10 +184,10 @@ class IChatHistoryRepository(ABC):
         steps: List["IChatHistoryRepository.StepDict"]
         elements: Optional[List["IChatHistoryRepository.ElementDict"]]
 
-    def get_now(self):
+    def get_now(self) -> datetime:
         return datetime.now(timezone.utc)
 
-    def get_now_as_string(self):
+    def get_now_as_string(self) -> str:
         return self.get_now().strftime("%Y-%m-%d %H:%M:%S.%f%z")
 
     @abstractmethod
@@ -253,7 +249,7 @@ class IChatHistoryRepository(ABC):
 
 
 class ChatHistoryRepository:
-    def __init__(self, db_type: DatabaseClientType, config: IngeniousSettings):
+    def __init__(self, db_type: DatabaseClientType, config: IngeniousSettings) -> None:
         module_name = f"ingenious.db.{db_type.value.lower()}"
         class_name = f"{db_type.value.lower()}_ChatHistoryRepository"
 
@@ -303,17 +299,17 @@ class ChatHistoryRepository:
     async def get_memory(self, message_id: str, thread_id: str) -> Message | None:
         return await self.repository.get_memory(message_id, thread_id)
 
-    async def update_memory(self) -> Message | None:
+    async def update_memory(self) -> None:
         return await self.repository.update_memory()
 
     async def get_thread_messages(
         self, thread_id: str
-    ) -> Optional[list[IChatHistoryRepository.ThreadDict]]:
+    ) -> Optional[List[Message]]:
         return await self.repository.get_thread_messages(thread_id)
 
     async def get_thread_memory(
         self, thread_id: str
-    ) -> Optional[list[IChatHistoryRepository.ThreadDict]]:
+    ) -> Optional[List[Message]]:
         return await self.repository.get_thread_memory(thread_id)
 
     async def get_threads_for_user(

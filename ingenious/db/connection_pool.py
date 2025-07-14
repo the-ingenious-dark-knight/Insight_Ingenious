@@ -4,7 +4,7 @@ import time
 from abc import ABC, abstractmethod
 from contextlib import contextmanager
 from queue import Empty, Queue
-from typing import Any, Protocol
+from typing import Any, Iterator, Protocol
 
 import pyodbc
 
@@ -46,7 +46,7 @@ class ConnectionFactory(ABC):
 class SQLiteConnectionFactory(ConnectionFactory):
     """Factory for creating SQLite connections."""
 
-    def __init__(self, db_path: str):
+    def __init__(self, db_path: str) -> None:
         self.db_path = db_path
 
     def create_connection(self) -> sqlite3.Connection:
@@ -77,7 +77,7 @@ class SQLiteConnectionFactory(ConnectionFactory):
 class AzureSQLConnectionFactory(ConnectionFactory):
     """Factory for creating Azure SQL connections."""
 
-    def __init__(self, connection_string: str):
+    def __init__(self, connection_string: str) -> None:
         self.connection_string = connection_string
 
     def create_connection(self) -> pyodbc.Connection:
@@ -107,19 +107,19 @@ class ConnectionPool:
         pool_size: int = 8,
         max_retries: int = 3,
         retry_delay: float = 0.1,
-    ):
+    ) -> None:
         self.connection_factory = connection_factory
         self.pool_size = pool_size
         self.max_retries = max_retries
         self.retry_delay = retry_delay
-        self._pool = Queue(maxsize=pool_size)
+        self._pool: Queue = Queue(maxsize=pool_size)
         self._lock = threading.Lock()
         self._created_connections = 0
 
         # Pre-populate the pool
         self._initialize_pool()
 
-    def _initialize_pool(self):
+    def _initialize_pool(self) -> None:
         """Initialize the connection pool with healthy connections."""
         for _ in range(self.pool_size):
             try:
@@ -134,7 +134,7 @@ class ConnectionPool:
                 break
 
     @contextmanager
-    def get_connection(self):
+    def get_connection(self) -> Iterator[DatabaseConnection]:
         """Context manager to get a connection from the pool."""
         conn = None
         retry_count = 0
@@ -217,7 +217,7 @@ class ConnectionPool:
             f"Failed to get database connection after {self.max_retries} retries"
         )
 
-    def close_all(self):
+    def close_all(self) -> None:
         """Close all connections in the pool."""
         while not self._pool.empty():
             try:

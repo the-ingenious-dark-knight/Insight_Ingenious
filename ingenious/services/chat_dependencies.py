@@ -5,6 +5,7 @@ This module provides FastAPI dependency injection functions
 for chat services and related repositories.
 """
 
+from typing import Any
 from dependency_injector.wiring import Provide, inject
 
 from ingenious.db.chat_history_repository import ChatHistoryRepository
@@ -18,7 +19,7 @@ def get_chat_history_repository(
     chat_history_repository=Provide[Container.chat_history_repository],
 ) -> ChatHistoryRepository:
     """Get chat history repository from container."""
-    return chat_history_repository
+    return chat_history_repository  # type: ignore
 
 
 @inject
@@ -42,4 +43,4 @@ def get_message_feedback_service(
     feedback_service=Provide[Container.message_feedback_service],
 ) -> MessageFeedbackService:
     """Get message feedback service from container."""
-    return feedback_service
+    return feedback_service  # type: ignore

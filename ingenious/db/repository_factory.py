@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from ingenious.config.settings import IngeniousSettings
 from ingenious.db.base_sql import BaseSQLRepository

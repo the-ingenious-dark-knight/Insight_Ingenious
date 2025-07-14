@@ -5,6 +5,7 @@ This ensures that memory operations work with both local and Azure Blob Storage.
 
 import asyncio
 import os
+from typing import Optional, Any
 
 from ingenious.core.structured_logging import get_logger
 from ingenious.files.files_repository import FileStorage
@@ -19,7 +20,7 @@ class MemoryManager:
     This allows memory operations to work with both local storage and Azure Blob Storage.
     """
 
-    def __init__(self, config: Config, memory_path: str = None):
+    def __init__(self, config: Config, memory_path: Optional[str] = None):
         """
         Initialize MemoryManager with configuration.
 
@@ -31,7 +32,7 @@ class MemoryManager:
         self.memory_path = memory_path or config.chat_history.memory_path
         self.file_storage = FileStorage(config, Category="data")
 
-    def _get_memory_file_path(self, thread_id: str = None) -> tuple[str, str]:
+    def _get_memory_file_path(self, thread_id: Optional[str] = None) -> tuple[str, str]:
         """
         Get the file path and name for a memory file.
 
@@ -51,7 +52,7 @@ class MemoryManager:
         return file_path, file_name
 
     async def read_memory(
-        self, thread_id: str = None, default_content: str = ""
+        self, thread_id: Optional[str] = None, default_content: str = ""
     ) -> str:
         """
         Read memory content from storage.
@@ -88,7 +89,7 @@ class MemoryManager:
             # Return default content as fallback
             return default_content
 
-    async def write_memory(self, content: str, thread_id: str = None) -> bool:
+    async def write_memory(self, content: str, thread_id: Optional[str] = None) -> bool:
         """
         Write memory content to storage.
 
@@ -117,7 +118,7 @@ class MemoryManager:
             return False
 
     async def maintain_memory(
-        self, new_content: str, max_words: int = 150, thread_id: str = None
+        self, new_content: str, max_words: int = 150, thread_id: Optional[str] = None
     ) -> bool:
         """
         Maintain memory by appending new content and keeping only recent words.
@@ -155,7 +156,7 @@ class MemoryManager:
             )
             return False
 
-    async def delete_memory(self, thread_id: str = None) -> bool:
+    async def delete_memory(self, thread_id: Optional[str] = None) -> bool:
         """
         Delete memory content from storage.
 
@@ -197,7 +198,7 @@ class LegacyMemoryManager:
         """
         self.memory_path = memory_path
 
-    def _get_memory_file_path(self, thread_id: str = None) -> str:
+    def _get_memory_file_path(self, thread_id: Optional[str] = None) -> str:
         """
         Get the full file path for a memory file.
 
@@ -212,7 +213,7 @@ class LegacyMemoryManager:
         else:
             return os.path.join(self.memory_path, "context.md")
 
-    def read_memory(self, thread_id: str = None, default_content: str = "") -> str:
+    def read_memory(self, thread_id: Optional[str] = None, default_content: str = "") -> str:
         """
         Read memory content from local file.
 
@@ -242,7 +243,7 @@ class LegacyMemoryManager:
             )
             return default_content
 
-    def write_memory(self, content: str, thread_id: str = None) -> bool:
+    def write_memory(self, content: str, thread_id: Optional[str] = None) -> bool:
         """
         Write memory content to local file.
 
@@ -274,7 +275,7 @@ class LegacyMemoryManager:
             return False
 
     def maintain_memory(
-        self, new_content: str, max_words: int = 150, thread_id: str = None
+        self, new_content: str, max_words: int = 150, thread_id: Optional[str] = None
     ) -> bool:
         """
         Maintain memory by appending new content and keeping only recent words.
@@ -319,7 +320,7 @@ class LegacyMemoryManager:
             return False
 
 
-def get_memory_manager(config: Config, memory_path: str = None) -> MemoryManager:
+def get_memory_manager(config: Config, memory_path: Optional[str] = None) -> MemoryManager:
     """
     Get appropriate memory manager based on configuration.
 
@@ -333,7 +334,7 @@ def get_memory_manager(config: Config, memory_path: str = None) -> MemoryManager
     return MemoryManager(config, memory_path)
 
 
-def run_async_memory_operation(coro):
+def run_async_memory_operation(coro: Any) -> Any:
     """
     Helper function to run async memory operations in sync contexts.
 

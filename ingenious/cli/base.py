@@ -59,7 +59,7 @@ class BaseCommand(ABC):
         self._progress: Optional[Progress] = None
     
     @abstractmethod
-    def execute(self, **kwargs) -> Any:
+    def execute(self, **kwargs: Any) -> Any:
         """
         Execute the command logic.
         
@@ -77,7 +77,7 @@ class BaseCommand(ABC):
         """
         pass
     
-    def run(self, **kwargs) -> Any:
+    def run(self, **kwargs: Any) -> Any:
         """
         Run the command with error handling and progress tracking.
         
@@ -102,7 +102,7 @@ class BaseCommand(ABC):
         except Exception as e:
             self.handle_error(f"Unexpected error: {str(e)}", ExitCode.GENERAL_ERROR)
     
-    def handle_error(self, message: str, exit_code: ExitCode = ExitCode.GENERAL_ERROR):
+    def handle_error(self, message: str, exit_code: ExitCode = ExitCode.GENERAL_ERROR) -> None:
         """
         Handle errors with consistent formatting and logging.
         
@@ -116,23 +116,23 @@ class BaseCommand(ABC):
         if exit_code != ExitCode.SUCCESS:
             raise typer.Exit(exit_code.value)
     
-    def print_success(self, message: str):
+    def print_success(self, message: str) -> None:
         """Print a success message with consistent formatting."""
         self.console.print(f"✅ {message}", style="green")
     
-    def print_info(self, message: str):
+    def print_info(self, message: str) -> None:
         """Print an info message with consistent formatting."""
         self.console.print(f"ℹ️  {message}", style="info")
     
-    def print_warning(self, message: str):
+    def print_warning(self, message: str) -> None:
         """Print a warning message with consistent formatting."""
         self.console.print(f"⚠️  {message}", style="warning")
     
-    def print_error(self, message: str):
+    def print_error(self, message: str) -> None:
         """Print an error message with consistent formatting."""
         self.console.print(f"❌ {message}", style="error")
     
-    def print_debug(self, message: str):
+    def print_debug(self, message: str) -> None:
         """Print a debug message with consistent formatting."""
         self.console.print(f"🐛 {message}", style="debug")
     
@@ -156,7 +156,7 @@ class BaseCommand(ABC):
         self._progress.add_task(description=description)
         return self._progress
     
-    def stop_progress(self):
+    def stop_progress(self) -> None:
         """Stop the current progress indicator."""
         if self._progress:
             self._progress.stop()
@@ -252,7 +252,7 @@ class BaseCommand(ABC):
         
         return env_values
     
-    def validate_file_exists(self, file_path: str, description: str = "File"):
+    def validate_file_exists(self, file_path: str, description: str = "File") -> None:
         """
         Validate that a file exists.
         
@@ -271,7 +271,7 @@ class BaseCommand(ABC):
                 ExitCode.VALIDATION_ERROR
             )
     
-    def validate_directory_exists(self, dir_path: str, description: str = "Directory"):
+    def validate_directory_exists(self, dir_path: str, description: str = "Directory") -> None:
         """
         Validate that a directory exists.
         

@@ -17,7 +17,7 @@ class BaseSQLRepository(IChatHistoryRepository, ABC):
     while allowing database-specific connection handling and execution.
     """
 
-    def __init__(self, config: IngeniousSettings, query_builder: QueryBuilder):
+    def __init__(self, config: IngeniousSettings, query_builder: QueryBuilder) -> None:
         self.config = config
         self.query_builder = query_builder
         self._init_connection()
@@ -151,9 +151,11 @@ class BaseSQLRepository(IChatHistoryRepository, ABC):
         self._execute_sql(query, params, expect_results=False)
 
     async def add_user(
-        self, identifier: str, metadata: dict = {}
+        self, identifier: str, metadata: dict = None
     ) -> IChatHistoryRepository.User:
         """Add a new user."""
+        if metadata is None:
+            metadata = {}
         now = self.get_now()
         new_id = str(uuid.uuid4())
 
@@ -218,7 +220,7 @@ class BaseSQLRepository(IChatHistoryRepository, ABC):
         params = [user_id]
         self._execute_sql(query, params, expect_results=False)
 
-    def _row_to_message(self, row) -> Message:
+    def _row_to_message(self, row: Any) -> Message:
         """Convert database row to Message object."""
         if isinstance(row, dict):
             return Message(
@@ -250,7 +252,7 @@ class BaseSQLRepository(IChatHistoryRepository, ABC):
                 tool_call_function=row[10],
             )
 
-    def _row_to_user(self, row) -> IChatHistoryRepository.User:
+    def _row_to_user(self, row: Any) -> IChatHistoryRepository.User:
         """Convert database row to User object."""
         if isinstance(row, dict):
             return IChatHistoryRepository.User(

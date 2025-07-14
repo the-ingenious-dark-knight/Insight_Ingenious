@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from ingenious.config.settings import IngeniousSettings
+from ingenious.models.config import Config
 from ingenious.core.error_handling import operation_context
 from ingenious.core.structured_logging import get_logger
 from ingenious.db.chat_history_repository import ChatHistoryRepository
@@ -27,7 +27,7 @@ class ChatService(IChatService):
         chat_service_type: str,
         chat_history_repository: ChatHistoryRepository,
         conversation_flow: str,
-        config: IngeniousSettings,
+        config: Config,
         revision: str = "dfe19b62-07f1-4cb5-ae9a-561a253e4b04",
     ):
         class_name = f"{chat_service_type.lower()}_chat_service"
@@ -110,4 +110,4 @@ class ChatService(IChatService):
     async def get_chat_response(self, chat_request: ChatRequest) -> ChatResponse:
         if not chat_request.conversation_flow:
             raise ValueError(f"conversation_flow not set {chat_request}")
-        return await self.service_class.get_chat_response(chat_request)
+        return await self.service_class.get_chat_response(chat_request)  # type: ignore

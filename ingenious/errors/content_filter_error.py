@@ -1,3 +1,6 @@
+from typing import Dict, Any, Optional
+
+
 class ContentFilterError(Exception):
     """Exception raised when the user message violates the OpenAI content filter."""
 
@@ -6,8 +9,10 @@ class ContentFilterError(Exception):
     )
 
     def __init__(
-        self, message=DEFAULT_MESSAGE, content_filter_results: dict[str, object] = {}
-    ):
+        self, 
+        message: str = DEFAULT_MESSAGE, 
+        content_filter_results: Optional[Dict[str, Any]] = None
+    ) -> None:
         self.message = message
-        self.content_filter_results = content_filter_results
+        self.content_filter_results = content_filter_results or {}
         super().__init__(self.message)

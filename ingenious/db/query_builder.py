@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Dict, List
+from typing import Any, Dict, List
 
 
 class Dialect(ABC):
@@ -138,7 +138,7 @@ class AzureSQLDialect(Dialect):
 class QueryBuilder:
     """Centralized query builder that generates database-specific SQL queries."""
 
-    def __init__(self, dialect: Dialect):
+    def __init__(self, dialect: Dialect) -> None:
         self.dialect = dialect
         self._data_types = dialect.get_data_types()
 
@@ -484,7 +484,7 @@ class QueryBuilder:
             WHERE user_id = ?
         """
 
-    def get_query(self, query_type: str, **kwargs) -> str:
+    def get_query(self, query_type: str, **kwargs: Any) -> str:
         """Get a query by type with optional parameters."""
         method_name = query_type
         if hasattr(self, method_name):

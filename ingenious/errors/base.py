@@ -304,7 +304,7 @@ class IngeniousError(Exception):
 class ConfigurationError(IngeniousError):
     """Base class for configuration-related errors."""
 
-    def __init__(self, message: str, **kwargs):
+    def __init__(self, message: str, **kwargs: Any) -> None:
         kwargs.setdefault("category", ErrorCategory.CONFIGURATION)
         kwargs.setdefault("severity", ErrorSeverity.HIGH)
         kwargs.setdefault("recoverable", False)
@@ -317,7 +317,7 @@ class ConfigurationError(IngeniousError):
 class ConfigFileError(ConfigurationError):
     """Raised when configuration file operations fail."""
 
-    def __init__(self, message: str, config_path: Optional[str] = None, **kwargs):
+    def __init__(self, message: str, config_path: Optional[str] = None, **kwargs: Any) -> None:
         if config_path:
             kwargs.setdefault("context", {}).update({"config_path": config_path})
         super().__init__(message, **kwargs)
@@ -326,7 +326,7 @@ class ConfigFileError(ConfigurationError):
 class EnvironmentError(ConfigurationError):
     """Raised when environment variable operations fail."""
 
-    def __init__(self, message: str, env_var: Optional[str] = None, **kwargs):
+    def __init__(self, message: str, env_var: Optional[str] = None, **kwargs: Any) -> None:
         if env_var:
             kwargs.setdefault("context", {}).update({"env_var": env_var})
         super().__init__(message, **kwargs)
@@ -336,8 +336,8 @@ class ValidationError(ConfigurationError):
     """Raised when data validation fails."""
 
     def __init__(
-        self, message: str, field: Optional[str] = None, value: Any = None, **kwargs
-    ):
+        self, message: str, field: Optional[str] = None, value: Any = None, **kwargs: Any
+    ) -> None:
         if field:
             kwargs.setdefault("context", {}).update(
                 {"field": field, "value": str(value)}
@@ -353,7 +353,7 @@ class ValidationError(ConfigurationError):
 class DatabaseError(IngeniousError):
     """Base class for database-related errors."""
 
-    def __init__(self, message: str, **kwargs):
+    def __init__(self, message: str, **kwargs: Any) -> None:
         kwargs.setdefault("category", ErrorCategory.DATABASE)
         kwargs.setdefault("severity", ErrorSeverity.HIGH)
         kwargs.setdefault("recoverable", True)
@@ -366,7 +366,7 @@ class DatabaseError(IngeniousError):
 class DatabaseConnectionError(DatabaseError):
     """Raised when database connection fails."""
 
-    def __init__(self, message: str, connection_string: Optional[str] = None, **kwargs):
+    def __init__(self, message: str, connection_string: Optional[str] = None, **kwargs: Any) -> None:
         kwargs.setdefault("severity", ErrorSeverity.CRITICAL)
         if connection_string:
             # Sanitize connection string (remove sensitive info)
@@ -389,7 +389,7 @@ class DatabaseConnectionError(DatabaseError):
 class DatabaseQueryError(DatabaseError):
     """Raised when database query execution fails."""
 
-    def __init__(self, message: str, query: Optional[str] = None, **kwargs):
+    def __init__(self, message: str, query: Optional[str] = None, **kwargs: Any) -> None:
         if query:
             # Truncate long queries
             truncated_query = query[:500] + "..." if len(query) > 500 else query
@@ -400,7 +400,7 @@ class DatabaseQueryError(DatabaseError):
 class DatabaseTransactionError(DatabaseError):
     """Raised when database transaction fails."""
 
-    def __init__(self, message: str, transaction_id: Optional[str] = None, **kwargs):
+    def __init__(self, message: str, transaction_id: Optional[str] = None, **kwargs: Any) -> None:
         if transaction_id:
             kwargs.setdefault("context", {}).update({"transaction_id": transaction_id})
         super().__init__(message, **kwargs)
@@ -409,7 +409,7 @@ class DatabaseTransactionError(DatabaseError):
 class DatabaseMigrationError(DatabaseError):
     """Raised when database migration fails."""
 
-    def __init__(self, message: str, migration_version: Optional[str] = None, **kwargs):
+    def __init__(self, message: str, migration_version: Optional[str] = None, **kwargs: Any) -> None:
         kwargs.setdefault("severity", ErrorSeverity.CRITICAL)
         kwargs.setdefault("recoverable", False)
         if migration_version:
@@ -427,7 +427,7 @@ class DatabaseMigrationError(DatabaseError):
 class WorkflowError(IngeniousError):
     """Base class for workflow-related errors."""
 
-    def __init__(self, message: str, **kwargs):
+    def __init__(self, message: str, **kwargs: Any) -> None:
         kwargs.setdefault("category", ErrorCategory.WORKFLOW)
         kwargs.setdefault("severity", ErrorSeverity.MEDIUM)
         super().__init__(message, **kwargs)
@@ -439,7 +439,7 @@ class WorkflowError(IngeniousError):
 class WorkflowNotFoundError(WorkflowError):
     """Raised when a workflow cannot be found."""
 
-    def __init__(self, message: str, workflow_name: Optional[str] = None, **kwargs):
+    def __init__(self, message: str, workflow_name: Optional[str] = None, **kwargs: Any) -> None:
         kwargs.setdefault("recoverable", False)
         if workflow_name:
             kwargs.setdefault("context", {}).update({"workflow_name": workflow_name})
@@ -454,8 +454,8 @@ class WorkflowExecutionError(WorkflowError):
         message: str,
         workflow_name: Optional[str] = None,
         step: Optional[str] = None,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         if workflow_name:
             kwargs.setdefault("context", {}).update({"workflow_name": workflow_name})
         if step:
@@ -471,8 +471,8 @@ class WorkflowConfigurationError(WorkflowError):
         message: str,
         workflow_name: Optional[str] = None,
         config_error: Optional[str] = None,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         kwargs.setdefault("recoverable", False)
         if workflow_name:
             kwargs.setdefault("context", {}).update({"workflow_name": workflow_name})
@@ -489,7 +489,7 @@ class WorkflowConfigurationError(WorkflowError):
 class ServiceError(IngeniousError):
     """Base class for service-related errors."""
 
-    def __init__(self, message: str, **kwargs):
+    def __init__(self, message: str, **kwargs: Any) -> None:
         kwargs.setdefault("category", ErrorCategory.SERVICE)
         kwargs.setdefault("severity", ErrorSeverity.MEDIUM)
         super().__init__(message, **kwargs)
@@ -501,7 +501,7 @@ class ServiceError(IngeniousError):
 class ChatServiceError(ServiceError):
     """Raised when chat service operations fail."""
 
-    def __init__(self, message: str, service_type: Optional[str] = None, **kwargs):
+    def __init__(self, message: str, service_type: Optional[str] = None, **kwargs: Any) -> None:
         if service_type:
             kwargs.setdefault("context", {}).update({"service_type": service_type})
         super().__init__(message, **kwargs)
@@ -510,7 +510,7 @@ class ChatServiceError(ServiceError):
 class AuthenticationError(ServiceError):
     """Raised when authentication fails."""
 
-    def __init__(self, message: str, **kwargs):
+    def __init__(self, message: str, **kwargs: Any) -> None:
         kwargs.setdefault("category", ErrorCategory.AUTHENTICATION)
         kwargs.setdefault("severity", ErrorSeverity.HIGH)
         kwargs.setdefault("recoverable", False)
@@ -524,8 +524,8 @@ class AuthorizationError(ServiceError):
     """Raised when authorization fails."""
 
     def __init__(
-        self, message: str, required_permission: Optional[str] = None, **kwargs
-    ):
+        self, message: str, required_permission: Optional[str] = None, **kwargs: Any
+    ) -> None:
         kwargs.setdefault("category", ErrorCategory.AUTHENTICATION)
         kwargs.setdefault("severity", ErrorSeverity.HIGH)
         kwargs.setdefault("recoverable", False)
@@ -547,8 +547,8 @@ class ExternalServiceError(ServiceError):
         message: str,
         service_name: Optional[str] = None,
         status_code: Optional[int] = None,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         kwargs.setdefault("severity", ErrorSeverity.HIGH)
         if service_name:
             kwargs.setdefault("context", {}).update({"service_name": service_name})
@@ -565,7 +565,7 @@ class ExternalServiceError(ServiceError):
 class APIError(IngeniousError):
     """Base class for API-related errors."""
 
-    def __init__(self, message: str, **kwargs):
+    def __init__(self, message: str, **kwargs: Any) -> None:
         kwargs.setdefault("category", ErrorCategory.API)
         kwargs.setdefault("severity", ErrorSeverity.MEDIUM)
         super().__init__(message, **kwargs)
@@ -578,8 +578,8 @@ class RequestValidationError(APIError):
     """Raised when API request validation fails."""
 
     def __init__(
-        self, message: str, field: Optional[str] = None, value: Any = None, **kwargs
-    ):
+        self, message: str, field: Optional[str] = None, value: Any = None, **kwargs: Any
+    ) -> None:
         kwargs.setdefault("severity", ErrorSeverity.LOW)
         kwargs.setdefault("recoverable", False)
         if field:
@@ -592,7 +592,7 @@ class RequestValidationError(APIError):
 class ResponseError(APIError):
     """Raised when API response generation fails."""
 
-    def __init__(self, message: str, response_type: Optional[str] = None, **kwargs):
+    def __init__(self, message: str, response_type: Optional[str] = None, **kwargs: Any) -> None:
         if response_type:
             kwargs.setdefault("context", {}).update({"response_type": response_type})
         super().__init__(message, **kwargs)
@@ -606,8 +606,8 @@ class RateLimitError(APIError):
         message: str,
         limit: Optional[int] = None,
         window: Optional[str] = None,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         kwargs.setdefault("severity", ErrorSeverity.LOW)
         if limit:
             kwargs.setdefault("context", {}).update({"rate_limit": limit})
@@ -627,7 +627,7 @@ class RateLimitError(APIError):
 class ResourceError(IngeniousError):
     """Base class for resource-related errors."""
 
-    def __init__(self, message: str, **kwargs):
+    def __init__(self, message: str, **kwargs: Any) -> None:
         kwargs.setdefault("category", ErrorCategory.RESOURCE)
         kwargs.setdefault("severity", ErrorSeverity.MEDIUM)
         super().__init__(message, **kwargs)
@@ -639,7 +639,7 @@ class ResourceError(IngeniousError):
 class FileNotFoundError(ResourceError):
     """Raised when a file cannot be found."""
 
-    def __init__(self, message: str, file_path: Optional[str] = None, **kwargs):
+    def __init__(self, message: str, file_path: Optional[str] = None, **kwargs: Any) -> None:
         kwargs.setdefault("recoverable", False)
         if file_path:
             kwargs.setdefault("context", {}).update({"file_path": file_path})
@@ -649,7 +649,7 @@ class FileNotFoundError(ResourceError):
 class PermissionError(ResourceError):
     """Raised when permission to access a resource is denied."""
 
-    def __init__(self, message: str, resource_path: Optional[str] = None, **kwargs):
+    def __init__(self, message: str, resource_path: Optional[str] = None, **kwargs: Any) -> None:
         kwargs.setdefault("severity", ErrorSeverity.HIGH)
         kwargs.setdefault("recoverable", False)
         if resource_path:
@@ -660,7 +660,7 @@ class PermissionError(ResourceError):
 class StorageError(ResourceError):
     """Raised when storage operations fail."""
 
-    def __init__(self, message: str, storage_type: Optional[str] = None, **kwargs):
+    def __init__(self, message: str, storage_type: Optional[str] = None, **kwargs: Any) -> None:
         if storage_type:
             kwargs.setdefault("context", {}).update({"storage_type": storage_type})
         super().__init__(message, **kwargs)
@@ -674,7 +674,7 @@ class StorageError(ResourceError):
 class ErrorCollector:
     """Collects and manages errors for batch processing and reporting."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.errors: List[IngeniousError] = []
         self.error_counts: Dict[str, int] = {}
 
@@ -730,7 +730,7 @@ class ErrorCollector:
 
 
 def create_error(
-    error_class: Type[IngeniousError], message: str, **kwargs
+    error_class: Type[IngeniousError], message: str, **kwargs: Any
 ) -> IngeniousError:
     """Create an error instance with automatic context capture."""
     context = kwargs.get("context", ErrorContext())
@@ -741,7 +741,7 @@ def create_error(
 
 
 def handle_exception(
-    exc: Exception, operation: str = "", component: str = "", **context_kwargs
+    exc: Exception, operation: str = "", component: str = "", **context_kwargs: Any
 ) -> IngeniousError:
     """Convert a generic exception to an IngeniousError with context."""
 
@@ -761,7 +761,7 @@ def handle_exception(
         operation=operation, component=component, **context_kwargs
     ).with_stack_trace()
 
-    return error_class(message=str(exc), cause=exc, context=context)
+    return error_class(message=str(exc), cause=exc, context=context)  # type: ignore
 
 
 # ─────────────────────────────────────────────────────────────────────────────

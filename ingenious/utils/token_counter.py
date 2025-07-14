@@ -1,3 +1,5 @@
+from typing import Any, Dict, List, Set
+
 import tiktoken
 from openai.types.chat import ChatCompletionMessageParam
 
@@ -9,7 +11,7 @@ logger = get_logger(__name__)
 def get_max_tokens(model: str = "gpt-3.5-turbo-0125") -> int:
     # Return the maximum number of tokens for a given model
     ## TODO: Move this to a configuration file
-    max_tokens = {
+    max_tokens: Dict[str, int] = {
         "gpt-3.5-turbo": 4096,
         "gpt-3.5-turbo-0613": 4096,
         "gpt-3.5-turbo-16k": 16384,
@@ -25,11 +27,11 @@ def get_max_tokens(model: str = "gpt-3.5-turbo-0125") -> int:
 
 
 def num_tokens_from_messages(
-    messages: list[ChatCompletionMessageParam], model: str = "gpt-3.5-turbo-0613"
+    messages: List[ChatCompletionMessageParam], model: str = "gpt-3.5-turbo-0613"
 ) -> int:
     # Return the number of tokens used by a list of messages
     try:
-        encoding = tiktoken.encoding_for_model(model)
+        encoding: tiktoken.Encoding = tiktoken.encoding_for_model(model)
     except KeyError:
         logger.warning(
             "Model not found, using fallback encoding",
@@ -39,16 +41,18 @@ def num_tokens_from_messages(
         encoding = tiktoken.get_encoding("cl100k_base")
 
     ## TODO: Move this to a configuration file
-    if model in {
+    supported_models: Set[str] = {
         "gpt-3.5-turbo-0613",
         "gpt-3.5-turbo-16k-0125",
         "gpt-4-0314",
         "gpt-4-32k-0314",
         "gpt-4-0613",
         "gpt-4-32k-0613",
-    }:
-        tokens_per_message = 3
-        tokens_per_name = 1
+    }
+    
+    if model in supported_models:
+        tokens_per_message: int = 3
+        tokens_per_name: int = 1
     elif model == "gpt-3.5-turbo-0301":
         tokens_per_message = 4
         tokens_per_name = -1
@@ -71,7 +75,8 @@ def num_tokens_from_messages(
             model
         }. See https://github.com/openai/openai-python/blob/main/chatml.md for information
             on how messages are converted to tokens.""")
-    num_tokens = 0
+    
+    num_tokens: int = 0
     for message in messages:
         num_tokens += tokens_per_message
         for key, value in message.items():

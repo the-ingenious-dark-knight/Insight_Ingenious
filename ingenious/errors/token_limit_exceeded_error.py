@@ -7,12 +7,12 @@ class TokenLimitExceededError(Exception):
 
     def __init__(
         self,
-        message=DEFAULT_MESSAGE,
+        message: str = DEFAULT_MESSAGE,
         max_context_length: int = 0,
         requested_tokens: int = 0,
         prompt_tokens: int = 0,
         completion_tokens: int = 0,
-    ):
+    ) -> None:
         self.message = message
         self.max_context_length = max_context_length
         self.requested_tokens = requested_tokens

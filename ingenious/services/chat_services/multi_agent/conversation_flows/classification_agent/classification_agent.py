@@ -1,3 +1,4 @@
+from typing import Tuple, Optional, List, Union
 from autogen_agentchat.agents import AssistantAgent
 from autogen_agentchat.messages import TextMessage
 from autogen_core import CancellationToken
@@ -9,9 +10,9 @@ from ingenious.models.chat import ChatRequest
 
 class ConversationFlow:
     @staticmethod
-    async def get_conversation_response(chatrequest: ChatRequest):
+    async def get_conversation_response(chatrequest: ChatRequest) -> Tuple[str, str]:
         message = chatrequest.user_prompt
-        topics = chatrequest.topic
+        topics: Optional[Union[str, List[str]]] = chatrequest.topic
 
         # Ensure topics is always a list
         if topics is None:

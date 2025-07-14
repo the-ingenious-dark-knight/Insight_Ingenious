@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import List, Optional, Union
 
 from openai.types.chat import (
     ChatCompletionAssistantMessageParam,
@@ -15,7 +16,7 @@ logger = get_logger(__name__)
 
 
 def build_system_prompt(
-    system_prompt: str, user_name: str | None = None
+    system_prompt: str, user_name: Optional[str] = None
 ) -> ChatCompletionSystemMessageParam:
     system_prompt_message: ChatCompletionSystemMessageParam = {
         "role": "system",
@@ -27,7 +28,7 @@ def build_system_prompt(
 
 
 def build_user_message(
-    user_prompt: str, user_name: str | None
+    user_prompt: str, user_name: Optional[str]
 ) -> ChatCompletionUserMessageParam:
     user_message: ChatCompletionUserMessageParam = {
         "role": "user",
@@ -39,7 +40,7 @@ def build_user_message(
 
 
 def build_assistant_message(
-    content: str | None, tool_calls: list[dict[str, object]] | None = None
+    content: Optional[str], tool_calls: Optional[List[dict[str, object]]] = None
 ) -> ChatCompletionAssistantMessageParam:
     assistant_message: ChatCompletionAssistantMessageParam = {"role": "assistant"}
 
@@ -47,13 +48,13 @@ def build_assistant_message(
         assistant_message["content"] = content
 
     if tool_calls:
-        assistant_message["tool_calls"] = tool_calls  # type: ignore
+        assistant_message["tool_calls"] = tool_calls
 
     return assistant_message
 
 
 def build_message(
-    role: str, content: str | None, user_name: str | None = None
+    role: str, content: Optional[str], user_name: Optional[str] = None
 ) -> ChatCompletionMessageParam:
     if role == "system":
         return build_system_prompt(system_prompt=str(content))
@@ -65,13 +66,13 @@ def build_message(
         raise ValueError("Invalid message role.")
 
 
-async def Sync_Prompt_Templates(_config: IngeniousSettings, revision: str):
+async def Sync_Prompt_Templates(_config: IngeniousSettings, revision: str) -> None:
     fs = FileStorage(_config, Category="revisions")
     # Check the storage type and handle Jinja files accordingly
     azure_template_dir = "prompts/" + revision
     if _config.file_storage.revisions.storage_type != "local":
         # Define the file path in Azure storage
-        jinja_files = sorted(
+        jinja_files: List[str] = sorted(
             [
                 f
                 for f in await fs.list_files(file_path=azure_template_dir)
@@ -84,16 +85,16 @@ async def Sync_Prompt_Templates(_config: IngeniousSettings, revision: str):
         local_template_dir.mkdir(parents=True, exist_ok=True)
 
         for file in jinja_files:
-            file_name = file.split("/")[-1]  # Extract the actual file name
+            file_name: str = file.split("/")[-1]  # Extract the actual file name
             logger.debug(
                 "Downloading template",
                 file_name=file_name,
                 source_path=azure_template_dir,
             )
-            temp_file_content = await fs.read_file(
+            temp_file_content: str = await fs.read_file(
                 file_name=file_name, file_path=azure_template_dir
             )
-            local_file_path = local_template_dir / file_name
+            local_file_path: Path = local_template_dir / file_name
             with open(local_file_path, "w", encoding="utf-8") as f:
                 f.write(temp_file_content)
             logger.debug(

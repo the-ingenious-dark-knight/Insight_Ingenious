@@ -1,12 +1,15 @@
 import logging
 import uuid as uuid_module
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import List, Optional, Dict, Any, Union, TYPE_CHECKING
 
 from jinja2 import Environment
 from openai.types.chat import ChatCompletionMessageParam
 
 import ingenious.config.config as ig_config
+
+if TYPE_CHECKING:
+    from ingenious.models.config import Config
 from ingenious.core.structured_logging import get_logger
 from ingenious.db.chat_history_repository import ChatHistoryRepository
 from ingenious.errors.content_filter_error import ContentFilterError
@@ -22,21 +25,21 @@ logger = get_logger(__name__)
 
 
 class multi_agent_chat_service:
-    config: ig_config.Config
+    config: "Config"
     chat_history_repository: ChatHistoryRepository
     conversation_flow: str
     openai_service: Optional[ChatCompletionMessageParam]
 
     def __init__(
         self,
-        config: ig_config.Config,
+        config: "Config",
         chat_history_repository: ChatHistoryRepository,
         conversation_flow: str,
     ):
         self.config = config
         self.chat_history_repository = chat_history_repository
         self.conversation_flow = conversation_flow
-        self.openai_service = get_openai_service()
+        self.openai_service = get_openai_service()  # type: ignore
 
     async def get_chat_response(self, chat_request: IChatRequest) -> IChatResponse:
         if not chat_request.conversation_flow:
@@ -45,10 +48,10 @@ class multi_agent_chat_service:
         if isinstance(chat_request.topic, str):
             chat_request.topic = [
                 topic.strip() for topic in chat_request.topic.split(",")
-            ]
+            ]  # type: ignore
 
         # Initialize additional response fields - to be populated later
-        chat_request.thread_chat_history = [{"role": "user", "content": ""}]
+        chat_request.thread_chat_history = [{"role": "user", "content": ""}]  # type: ignore
         # thread_memory = ""
 
         # Check if thread exists
@@ -64,15 +67,15 @@ class multi_agent_chat_service:
         logger.info(
             "Current memory state",
             thread_id=chat_request.thread_id,
-            memory_length=len(chat_request.thread_memory),
+            memory_length=len(chat_request.thread_memory or ""),
         )
         logger.debug(
             "Thread messages and memory processed",
-            message_count=len(thread_messages),
+            message_count=len(thread_messages or []),
             operation="process_thread_context",
         )
 
-        for thread_message in thread_messages:
+        for thread_message in thread_messages or []:
             # Validate user_id
             # if thread_message.user_id != chat_request.user_id:
             #     raise ValueError("User ID does not match thread messages.")
@@ -83,9 +86,10 @@ class multi_agent_chat_service:
                     content_filter_results=thread_message.content_filter_results
                 )
 
-            chat_request.thread_chat_history.append(
-                {"role": thread_message.role, "content": thread_message.content}
-            )
+            if hasattr(chat_request, 'thread_chat_history') and chat_request.thread_chat_history:
+                chat_request.thread_chat_history.append(  # type: ignore
+                    {"role": thread_message.role, "content": thread_message.content}
+                )
 
         try:
             # call specific agent flow here and get final response
@@ -181,12 +185,7 @@ class multi_agent_chat_service:
                     response_task = (
                         conversation_flow_service_class.get_conversation_response(
                             message=chat_request.user_prompt,
-                            topics=chat_request.topic
-                            if isinstance(chat_request.topic, list)
-                            and chat_request.topic
-                            else [chat_request.topic]
-                            if chat_request.topic
-                            else [],
+                            topics=chat_request.topic if isinstance(chat_request.topic, list) else ([chat_request.topic] if chat_request.topic else []),
                             thread_memory=getattr(chat_request, "thread_memory", ""),
                             memory_record_switch=getattr(
                                 chat_request, "memory_record", True
@@ -328,16 +327,16 @@ class multi_agent_chat_service:
                     error=str(e),
                 )
 
-        return agent_response
+        return agent_response  # type: ignore
 
 
 class IConversationPattern(ABC):
-    _config: ig_config.Config
+    _config: "Config"
     _memory_path: str
     _memory_file_path: str
-    _memory_manager: any
+    _memory_manager: Any
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self._config = ig_config.get_config()
         self._memory_path = self.GetConfig().chat_history.memory_path
@@ -348,32 +347,32 @@ class IConversationPattern(ABC):
 
         self._memory_manager = get_memory_manager(self._config, self._memory_path)
 
-    def GetConfig(self):
+    def GetConfig(self) -> "Config":
         return self._config
 
-    def Get_Models(self):
+    def Get_Models(self) -> Dict[str, Any]:
         return self._config.models.__dict__
 
-    def Get_Memory_Path(self):
+    def Get_Memory_Path(self) -> str:
         return self._memory_path
 
-    def Get_Memory_File(self):
+    def Get_Memory_File(self) -> str:
         return self._memory_file_path
 
-    def Maintain_Memory(self, new_content, max_words=150):
+    def Maintain_Memory(self, new_content: str, max_words: int = 150) -> Any:
         """
         Maintain memory using the MemoryManager for cloud storage support.
         """
         from ingenious.services.memory_manager import run_async_memory_operation
 
-        return run_async_memory_operation(
+        return run_async_memory_operation(  # type: ignore
             self._memory_manager.maintain_memory(new_content, max_words)
         )
 
     async def write_llm_responses_to_file(
-        self, response_array: List[dict], event_type: str, output_path: str
-    ):
-        fs = FileStorage(self.config)
+        self, response_array: List[Dict[str, Any]], event_type: str, output_path: str
+    ) -> None:
+        fs = FileStorage(self._config)
         for res in response_array:
             make_llm_calls = True
             if make_llm_calls:
@@ -395,19 +394,19 @@ class IConversationPattern(ABC):
 
 
 class IConversationFlow(ABC):
-    _config: ig_config.Config
+    _config: "Config"
     _memory_path: str
     _memory_file_path: str
     _logger: logging.Logger
     _chat_service: multi_agent_chat_service
-    _memory_manager: any
+    _memory_manager: Any
 
-    def __init__(self, parent_multi_agent_chat_service: multi_agent_chat_service):
+    def __init__(self, parent_multi_agent_chat_service: multi_agent_chat_service) -> None:
         super().__init__()
         self._config = ig_config.get_config()
         self._memory_path = self.GetConfig().chat_history.memory_path
         self._memory_file_path = f"{self._memory_path}/context.md"
-        self._logger = get_logger(__name__)
+        self._logger = get_logger(__name__)  # type: ignore
         self._chat_service = parent_multi_agent_chat_service
 
         # Initialize memory manager for cloud storage support
@@ -415,14 +414,14 @@ class IConversationFlow(ABC):
 
         self._memory_manager = get_memory_manager(self._config, self._memory_path)
 
-    def GetConfig(self):
+    def GetConfig(self) -> "Config":
         return self._config
 
     async def Get_Template(
-        self, revision_id: str = None, file_name: str = "user_prompt.md"
-    ):
+        self, revision_id: Optional[str] = None, file_name: str = "user_prompt.md"
+    ) -> str:
         fs = FileStorage(self._config)
-        template_path = await fs.get_prompt_template_path(revision_id)
+        template_path = await fs.get_prompt_template_path(revision_id or "")
         content = await fs.read_file(file_name=file_name, file_path=template_path)
         if content is None:
             logger.warning(
@@ -434,24 +433,24 @@ class IConversationFlow(ABC):
             return ""
         env = Environment()
         template = env.from_string(content)
-        return template.render()
+        return template.render()  # type: ignore
 
-    def Get_Models(self):
+    def Get_Models(self) -> Any:
         return self._config.models
 
-    def Get_Memory_Path(self):
+    def Get_Memory_Path(self) -> str:
         return self._memory_path
 
-    def Get_Memory_File(self):
+    def Get_Memory_File(self) -> str:
         return self._memory_file_path
 
-    def Maintain_Memory(self, new_content, max_words=150):
+    def Maintain_Memory(self, new_content: str, max_words: int = 150) -> Any:
         """
         Maintain memory using the MemoryManager for cloud storage support.
         """
         from ingenious.services.memory_manager import run_async_memory_operation
 
-        return run_async_memory_operation(
+        return run_async_memory_operation(  # type: ignore
             self._memory_manager.maintain_memory(new_content, max_words)
         )
 

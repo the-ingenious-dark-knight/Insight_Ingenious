@@ -112,11 +112,11 @@ def register_commands(app: typer.Typer, console: Console) -> None:
     @app.command(hidden=True)
     def run_rest_api_server(
         project_dir: Annotated[
-            str,
+            Optional[str],
             typer.Argument(help="The path to the config file. "),
         ] = None,
         profile_dir: Annotated[
-            str,
+            Optional[str],
             typer.Argument(
                 help="The path to the profile file. If left blank it will use './profiles.yml' if it exists, otherwise '$HOME/.ingenious/profiles.yml'"
             ),
@@ -210,7 +210,7 @@ def register_commands(app: typer.Typer, console: Console) -> None:
             else:
                 profile_dir = Path(os.getenv("INGENIOUS_PROFILE_PATH"))
         else:
-            profile_dir = Path(profile_dir)
+            profile_dir = str(Path(profile_dir))
 
         logger.info(
             "Profile configuration loaded",
@@ -251,7 +251,7 @@ def register_commands(app: typer.Typer, console: Console) -> None:
             operation="environment_setup",
         )
 
-        def log_namespace_modules(namespace):
+        def log_namespace_modules(namespace: str) -> None:
             try:
                 package = importlib.import_module(namespace)
                 if hasattr(package, "__path__"):
