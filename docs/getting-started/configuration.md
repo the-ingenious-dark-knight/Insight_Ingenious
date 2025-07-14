@@ -81,15 +81,15 @@ azure_sql_services:
 web_configuration:
   type: "fastapi"
   ip_address: "0.0.0.0"
-  port: 80
+  port: 8000  # Default port (CLI overrides to 80 when using `ingen serve`)
   authentication:
     type: "basic"
     enable: true
 
 local_sql_db:
-  database_path: "/tmp/sample_sql.db"
-  sample_csv_path: "./ingenious/sample_dataset/cleaned_students_performance.csv"
-  sample_database_name: "sample_data"
+  database_path: "/tmp/sample_sql_db"
+  sample_csv_path: ""
+  sample_database_name: "sample_sql_db"
 
 prompt_tuner:
   mode: "fast_api"  # Mount in fast_api or standalone flask
@@ -352,11 +352,13 @@ Controls API authentication and server settings:
 web_configuration:
   type: "fastapi"  # Web framework type
   ip_address: "0.0.0.0"  # IP address to bind to
-  port: 80  # Port number
+  port: 8000  # Default port (CLI overrides to 80 when using `ingen serve`)
   authentication:
     type: "basic"  # Authentication type
     enable: true  # Whether authentication is required
 ```
+
+> **Note**: The default port in configuration is 8000, but the CLI command `ingen serve` defaults to port 80 unless specified otherwise. To use a different port, use `ingen serve --port 8000` or set the `WEB_PORT` environment variable.
 
 In `profiles.yml`:
 
@@ -480,9 +482,9 @@ Configures local SQL database for testing and development:
 
 ```yaml
 local_sql_db:
-  database_path: "/tmp/sample_sql.db"  # Path to SQLite database
-  sample_csv_path: "./ingenious/sample_dataset/cleaned_students_performance.csv"
-  sample_database_name: "sample_data"
+  database_path: "/tmp/sample_sql_db"  # Path to SQLite database
+  sample_csv_path: ""  # Path to sample CSV files for data loading
+  sample_database_name: "sample_sql_db"
 ```
 
 ### Azure SQL Services
@@ -600,7 +602,7 @@ For `sql-manipulation-agent` workflow, you have two database options:
 ```yaml
 # config.yml
 local_sql_db:
-  database_path: "/tmp/sample_sql.db"
+  database_path: "/tmp/sample_sql_db"
   sample_csv_path: "./data/your_data.csv"
 
 # profiles.yml
@@ -631,7 +633,7 @@ print('✅ Sample SQLite database created')
 "
 
 # Test SQL agent
-curl -X POST http://localhost:80/api/v1/chat \
+curl -X POST http://localhost:8000/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Show me all tables",
@@ -652,7 +654,7 @@ Use the CLI to check requirements and test workflows:
 uv run ingen workflows knowledge-base-agent
 
 # Test a workflow
-curl -X POST http://localhost:80/api/v1/chat \
+curl -X POST http://localhost:8000/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{"user_prompt": "Hello", "conversation_flow": "classification-agent"}'
 ```

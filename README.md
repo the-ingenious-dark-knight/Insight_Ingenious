@@ -56,7 +56,7 @@ Get up and running in 5 minutes with Azure OpenAI!
 
 5. **Verify Health**:
     ```bash
-    # Check server health (default port is 80, but configurable)
+    # Check server health (default port is 80 for CLI, 8000 for config)
     curl http://localhost:80/api/v1/health
     ```
 
@@ -82,6 +82,7 @@ That's it! You should see a JSON response with AI analysis of the input.
 - `ingen serve` - Start the API server with web interface
 - `ingen workflows [workflow_name]` - List available workflows and their requirements
 - `ingen test` - Run agent workflow tests
+- `ingen validate` - Validate system configuration and requirements
 - `ingen prompt-tuner` - Start standalone prompt tuning interface
 
 **Data processing commands:**
@@ -146,15 +147,18 @@ Insight Ingenious provides multiple conversation workflows with different config
 
 - `ingenious/`: Core framework code
   - `api/`: API endpoints and routes
+  - `auth/`: Authentication and JWT handling
   - `chainlit/`: Web UI components
-  - `config/`: Configuration management
-  - `core/`: Core logging and utilities
+  - `cli/`: Command-line interface modules
+  - `config/`: Configuration management (pydantic-based)
+  - `core/`: Core logging and error handling
   - `dataprep/`: Data preparation utilities
-  - `db/`: Database integration
+  - `db/`: Database integration (SQLite and Azure SQL)
   - `document_processing/`: Document analysis and processing
   - `errors/`: Error handling and custom exceptions
   - `external_services/`: External service integrations
   - `files/`: File storage utilities
+  - `main/`: FastAPI application factory and routing
   - `models/`: Data models and schemas
   - `services/`: Core services including chat and agent services
   - `templates/`: Prompt templates and HTML templates

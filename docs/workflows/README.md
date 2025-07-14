@@ -279,14 +279,15 @@ graph LR
 profile: dev
 models:
   - model: "gpt-4.1-nano"
-    api_type: azure
+    api_type: "rest"
     api_version: "2024-12-01-preview"
 
 # profiles.yml
-dev:
-  azure_openai:
-    endpoint: "https://your-resource.cognitiveservices.azure.com/"
-    api_key: "your-api-key"
+- name: "dev"
+  models:
+    - model: "gpt-4.1-nano"
+      api_key: "your-api-key"
+      base_url: "https://your-resource.openai.azure.com/openai/deployments/gpt-4.1-nano/chat/completions?api-version=2024-12-01-preview"
 ```
 
 ### ⭐ Template-Based Workflows (Azure OpenAI only)
@@ -374,15 +375,15 @@ graph TB
 **Additional Configuration Required:**
 ```yaml
 # config.yml (additional)
-azure_search:
-  service_name: "your-search-service"
-  index_name: "your-knowledge-index"
-  api_version: "2023-11-01"
+azure_search_services:
+  - service: "default"
+    endpoint: "https://your-search-service.search.windows.net"
 
 # profiles.yml (additional)
-dev:
-  azure_search:
-    api_key: "your-search-api-key"
+- name: "dev"
+  azure_search_services:
+    - service: "default"
+      key: "your-search-api-key"
 ```
 
 ### 📊 Core Library Workflows (Database Required)
@@ -429,19 +430,20 @@ graph TB
 **Additional Configuration Required:**
 ```yaml
 # config.yml (additional)
-database:
-  type: "azure_sql"  # or "postgresql", "mysql", "sqlite"
-  server: "your-server.database.windows.net"
-  database: "your-database-name"
-  driver: "ODBC Driver 18 for SQL Server"
+azure_sql_services:
+  database_name: "your-database-name"
+  table_name: "your-table-name"
+
+# OR for local SQLite:
+local_sql_db:
+  database_path: "/tmp/sample_sql_db"
+  sample_csv_path: "./data/your_data.csv"
+  sample_database_name: "sample_sql_db"
 
 # profiles.yml (additional)
-dev:
-  database:
-    username: "your-username"
-    password: "your-password"
-    # Or use connection string:
-    # connection_string: "your-full-connection-string"
+- name: "dev"
+  azure_sql_services:
+    database_connection_string: "Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
 ```
 
 ## Workflow Selection Guide

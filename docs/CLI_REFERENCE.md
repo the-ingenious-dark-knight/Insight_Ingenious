@@ -19,6 +19,9 @@ The `ingen` command-line interface provides intuitive commands for managing your
 # Initialize a new project
 ingen init
 
+# Validate configuration
+ingen validate
+
 # Start the server
 ingen serve
 
@@ -97,6 +100,21 @@ Run agent workflow tests.
 ingen test --log-level DEBUG --args="--test-name=MyTest"
 ```
 
+### `ingen validate`
+Validate system configuration and requirements.
+
+**Purpose:**
+Comprehensive validation of your Insight Ingenious setup including:
+- Configuration file syntax
+- Required dependencies
+- Environment variables
+- Service connectivity
+
+**Example:**
+```bash
+ingen validate
+```
+
 ## Utility Commands
 
 ### `ingen prompt-tuner`
@@ -139,7 +157,7 @@ ingen dataprep crawl https://example.com --pretty
 ingen dataprep batch https://a.com https://b.com --out results.ndjson
 ```
 
-### `ingen document-processing <path>`
+### `ingen document-processing extract <path>`
 Extract text from documents (PDF, DOCX, images).
 
 **Arguments:**
@@ -151,8 +169,8 @@ Extract text from documents (PDF, DOCX, images).
 
 **Example:**
 ```bash
-ingen document-processing document.pdf --engine pymupdf --out extracted.jsonl
-ingen document-processing https://example.com/doc.pdf --out results.jsonl
+ingen document-processing extract document.pdf --engine pymupdf --out extracted.jsonl
+ingen document-processing extract https://example.com/doc.pdf --out results.jsonl
 ```
 
 ## Environment Setup

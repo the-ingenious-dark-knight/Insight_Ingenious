@@ -11,6 +11,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from ingenious.config.config import IngeniousSettings
 from ingenious.db.sqlite import ConnectionPool, sqlite_ChatHistoryRepository
 from ingenious.models.message import Message
 
