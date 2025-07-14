@@ -20,9 +20,13 @@ from rich.console import Console
 from typing_extensions import Annotated
 
 from ingenious.cli.utilities import CliFunctions
+from ingenious.core.structured_logging import get_logger
 
 # Load environment variables from .env file
 load_dotenv()
+
+# Initialize logger
+logger = get_logger(__name__)
 
 
 def register_commands(app: typer.Typer, console: Console) -> None:
@@ -174,7 +178,11 @@ def register_commands(app: typer.Typer, console: Console) -> None:
             default_config_path = Path.cwd() / "config.yml"
             if default_config_path.exists():
                 os.environ["INGENIOUS_PROJECT_PATH"] = str(default_config_path)
-                print(f"Using default config path: {default_config_path}")
+                logger.info(
+                    "Using default config path",
+                    config_path=str(default_config_path),
+                    operation="config_discovery",
+                )
 
         if profile_dir is None:
             # Check if environment variable is set
@@ -183,20 +191,32 @@ def register_commands(app: typer.Typer, console: Console) -> None:
                 project_profile_path = Path.cwd() / "profiles.yml"
                 if project_profile_path.exists():
                     profile_dir = project_profile_path
-                    print(f"Using profiles.yml from project directory: {profile_dir}")
+                    logger.info(
+                        "Using profiles.yml from project directory",
+                        profile_path=str(profile_dir),
+                        operation="profile_discovery",
+                    )
                 else:
                     # Fall back to home directory
                     home_dir = os.path.expanduser("~")
                     profile_dir = (
                         Path(home_dir) / Path(".ingenious") / Path("profiles.yml")
                     )
-                    print(f"Using profiles.yml from home directory: {profile_dir}")
+                    logger.info(
+                        "Using profiles.yml from home directory",
+                        profile_path=str(profile_dir),
+                        operation="profile_discovery",
+                    )
             else:
                 profile_dir = Path(os.getenv("INGENIOUS_PROFILE_PATH"))
         else:
             profile_dir = Path(profile_dir)
 
-        print(f"Profile path: {profile_dir}")
+        logger.info(
+            "Profile configuration loaded",
+            profile_path=str(profile_dir),
+            operation="profile_setup",
+        )
         os.environ["INGENIOUS_PROFILE_PATH"] = str(profile_dir).replace("\\", "/")
         import ingenious.config.config as ingen_config
 
@@ -225,19 +245,36 @@ def register_commands(app: typer.Typer, console: Console) -> None:
                     src, Path(get_paths()["purelib"]) / Path("ingenious/")
                 )
 
-        print(f"Current working directory: {os.getcwd()}")
+        logger.info(
+            "Working directory set",
+            working_directory=os.getcwd(),
+            operation="environment_setup",
+        )
 
-        def print_namespace_modules(namespace):
-            package = importlib.import_module(namespace)
-            if hasattr(package, "__path__"):
-                for module_info in pkgutil.iter_modules(package.__path__):
-                    print(f"Found module: {module_info.name}")
-            else:
-                print(f"{namespace} is not a package")
+        def log_namespace_modules(namespace):
+            try:
+                package = importlib.import_module(namespace)
+                if hasattr(package, "__path__"):
+                    modules = [
+                        module_info.name
+                        for module_info in pkgutil.iter_modules(package.__path__)
+                    ]
+                    logger.debug(
+                        "Namespace modules discovered",
+                        namespace=namespace,
+                        modules=modules,
+                        module_count=len(modules),
+                    )
+                else:
+                    logger.debug("Namespace is not a package", namespace=namespace)
+            except ImportError as e:
+                logger.warning(
+                    "Failed to import namespace", namespace=namespace, error=str(e)
+                )
 
         os.environ["INGENIOUS_WORKING_DIR"] = str(Path(os.getcwd()))
         os.chdir(str(Path(os.getcwd())))
-        print_namespace_modules(
+        log_namespace_modules(
             "ingenious.services.chat_services.multi_agent.conversation_flows"
         )
 
@@ -284,6 +321,13 @@ def register_commands(app: typer.Typer, console: Console) -> None:
         Note: This starts only the prompt tuner, not the full API server.
         For the complete server with all interfaces, use: ingen serve
         """
+        logger.info(
+            "Starting prompt tuner server",
+            host=host,
+            port=port,
+            url=f"http://{host}:{port}",
+            operation="prompt_tuner_startup",
+        )
         console.print(f"🎯 Starting prompt tuner at http://{host}:{port}")
         console.print(
             "💡 Tip: Use 'ingen serve' to start the full server with all interfaces"

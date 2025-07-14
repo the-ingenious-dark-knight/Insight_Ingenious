@@ -13,8 +13,11 @@ from typing import (
 from uuid import UUID
 
 import ingenious.config.config as Config
+from ingenious.core.structured_logging import get_logger
 from ingenious.models.database_client import DatabaseClientType
 from ingenious.models.message import Message
+
+logger = get_logger(__name__)
 
 
 class IChatHistoryRepository(ABC):

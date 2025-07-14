@@ -8,8 +8,21 @@ from queue import Empty, Queue
 from typing import Any, Dict, List, Optional
 
 import ingenious.config.config as Config
+
+# Future import placeholders for advanced error handling
+# from ingenious.core.error_handling import (
+#     database_operation,
+#     operation_context,
+#     with_correlation_id,
+# )
+from ingenious.core.structured_logging import get_logger
 from ingenious.db.base_sql import BaseSQLRepository
 from ingenious.db.chat_history_repository import IChatHistoryRepository
+from ingenious.errors import (
+    DatabaseQueryError,
+)
+
+logger = get_logger(__name__)
 
 
 class ConnectionPool:
@@ -207,8 +220,12 @@ class sqlite_ChatHistoryRepository(BaseSQLRepository):
         try:
             with self.pool.get_connection() as connection:
                 cursor = connection.cursor()
-                # print("Executing SQL: ", sql)
-                # print("Params: ", params)
+                logger.debug(
+                    "Executing SQL query",
+                    sql_preview=sql[:100] + "..." if len(sql) > 100 else sql,
+                    param_count=len(params) if params else 0,
+                    operation="sql_execute",
+                )
 
                 if expect_results:
                     res = cursor.execute(sql, params)
@@ -220,8 +237,22 @@ class sqlite_ChatHistoryRepository(BaseSQLRepository):
                     connection.commit()
 
         except sqlite3.Error as e:
-            # Display the exception
-            print(e)
+            logger.error(
+                "SQLite error during query execution",
+                error=str(e),
+                sql_preview=sql[:100] + "..." if len(sql) > 100 else sql,
+                param_count=len(params) if params else 0,
+                operation="sql_execute",
+            )
+            raise DatabaseQueryError(
+                "SQLite query execution failed",
+                context={
+                    "query_preview": sql[:100] + "..." if len(sql) > 100 else sql,
+                    "param_count": len(params) if params else 0,
+                    "expect_results": expect_results,
+                },
+                cause=e,
+            ) from e
 
     def execute_sql(self, sql, params=[], expect_results=True):
         """Legacy method for backward compatibility."""
@@ -629,7 +660,11 @@ class sqlite_ChatHistoryRepository(BaseSQLRepository):
                         mime=element.get("element_mime"),
                     )
                     thread_dicts[thread_id]["elements"].append(element_dict)  # type: ignore
-        # print("Thread Dicts: ", thread_dicts)
+        logger.debug(
+            "Retrieved thread dictionaries",
+            thread_count=len(thread_dicts),
+            operation="get_threads_for_user",
+        )
         return list(thread_dicts.values())
 
     async def get_thread(self, thread_id: str) -> list[IChatHistoryRepository.Thread]:
@@ -658,7 +693,13 @@ class sqlite_ChatHistoryRepository(BaseSQLRepository):
             ]
 
     async def add_step(self, step_dict: IChatHistoryRepository.StepDict):
-        print("Creating step: ", step_dict)
+        logger.info(
+            "Creating step in SQLite database",
+            step_id=step_dict.get("id"),
+            step_type=step_dict.get("type"),
+            thread_id=step_dict.get("threadId"),
+            operation="create_step",
+        )
 
         # If disableFeedback is not provided, default to False
         step_dict["disableFeedback"] = step_dict.get("disableFeedback", False)
@@ -693,10 +734,21 @@ class sqlite_ChatHistoryRepository(BaseSQLRepository):
         metadata: Optional[Dict] = None,
         tags: Optional[List[str]] = None,
     ) -> str:
-        print("Updating thread: ", thread_id)
+        logger.info(
+            "Updating thread in SQLite",
+            thread_id=thread_id,
+            user_id=user_id,
+            has_name=name is not None,
+            has_metadata=metadata is not None,
+            operation="update_thread",
+        )
         user_identifier = None
         if user_id:
-            print("Getting user identifier for user_id: ", user_id)
+            logger.debug(
+                "Retrieving user identifier for thread update",
+                user_id=user_id,
+                operation="get_user_identifier",
+            )
             user = await self._get_user_by_id(user_id)
             if user:
                 user_identifier = user.identifier

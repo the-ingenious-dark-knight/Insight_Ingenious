@@ -66,7 +66,11 @@ class multi_agent_chat_service:
             thread_id=chat_request.thread_id,
             memory_length=len(chat_request.thread_memory),
         )
-        # print(msg)
+        logger.debug(
+            "Thread messages and memory processed",
+            message_count=len(thread_messages),
+            operation="process_thread_context",
+        )
 
         for thread_message in thread_messages:
             # Validate user_id
@@ -85,8 +89,10 @@ class multi_agent_chat_service:
 
         try:
             # call specific agent flow here and get final response
-            print(
-                f"DEBUG: Starting conversation flow execution for: {self.conversation_flow}"
+            logger.info(
+                "Starting conversation flow execution",
+                conversation_flow=self.conversation_flow,
+                operation="conversation_flow_start",
             )
             if not self.conversation_flow:
                 self.conversation_flow = chat_request.conversation_flow
@@ -97,16 +103,23 @@ class multi_agent_chat_service:
             normalized_flow = normalize_workflow_name(self.conversation_flow)
             module_name = f"services.chat_services.multi_agent.conversation_flows.{normalized_flow}.{normalized_flow}"
             class_name = "ConversationFlow"
-            print(f"DEBUG: Loading module: {module_name}, class: {class_name}")
-            print(
-                f"DEBUG: Original workflow name: {self.conversation_flow}, normalized: {normalized_flow}"
+            logger.debug(
+                "Loading conversation flow module",
+                module_name=module_name,
+                class_name=class_name,
+                original_workflow=self.conversation_flow,
+                normalized_workflow=normalized_flow,
+                operation="module_loading",
             )
 
             conversation_flow_service_class = import_class_with_fallback(
                 module_name, class_name
             )
-            print(
-                f"DEBUG: Successfully loaded conversation flow class: {conversation_flow_service_class}"
+            logger.info(
+                "Successfully loaded conversation flow class",
+                class_type=str(type(conversation_flow_service_class)),
+                conversation_flow=self.conversation_flow,
+                operation="class_loading_success",
             )
 
             # Try to instantiate with new pattern first (IConversationFlow)
@@ -128,10 +141,12 @@ class multi_agent_chat_service:
 
             except TypeError as te:
                 # Fall back to old pattern (static methods)
-                print(
-                    f"DEBUG: Using static method pattern for conversation flow: {self.conversation_flow}"
+                logger.info(
+                    "Using static method pattern for conversation flow",
+                    conversation_flow=self.conversation_flow,
+                    type_error=str(te),
+                    operation="fallback_static_method",
                 )
-                print(f"DEBUG: TypeError: {te}")
 
                 # Try different static method signatures
                 import inspect
@@ -140,11 +155,19 @@ class multi_agent_chat_service:
                     conversation_flow_service_class.get_conversation_response
                 )
                 params = list(sig.parameters.keys())
-                print(f"DEBUG: Method signature parameters: {params}")
+                logger.debug(
+                    "Analyzing method signature",
+                    parameters=params,
+                    param_count=len(params),
+                    operation="method_signature_analysis",
+                )
 
                 if len(params) == 1 and params[0] not in ["self", "cls"]:
                     # Single parameter - likely ChatRequest
-                    print("DEBUG: Using single ChatRequest parameter")
+                    logger.debug(
+                        "Using single ChatRequest parameter",
+                        operation="single_param_call",
+                    )
                     response_task = (
                         conversation_flow_service_class.get_conversation_response(
                             chat_request
@@ -152,7 +175,9 @@ class multi_agent_chat_service:
                     )
                 else:
                     # Multiple parameters - individual arguments
-                    print("DEBUG: Using individual parameters")
+                    logger.debug(
+                        "Using individual parameters", operation="multi_param_call"
+                    )
                     response_task = (
                         conversation_flow_service_class.get_conversation_response(
                             message=chat_request.user_prompt,
@@ -172,28 +197,42 @@ class multi_agent_chat_service:
                         )
                     )
 
-                print("DEBUG: About to await response_task")
+                logger.debug(
+                    "Awaiting conversation flow response", operation="response_await"
+                )
                 agent_response_tuple = await response_task
-                print(f"DEBUG: Got agent_response_tuple: {type(agent_response_tuple)}")
+                logger.debug(
+                    "Received conversation flow response",
+                    response_type=str(type(agent_response_tuple)),
+                    operation="response_received",
+                )
 
                 # Convert old response format to new format
                 from ingenious.models.chat import ChatResponse
 
-                print(
-                    f"DEBUG: About to create ChatResponse, uuid_module available: {uuid_module}"
+                logger.debug(
+                    "Creating ChatResponse object",
+                    uuid_module_available=uuid_module is not None,
+                    operation="chat_response_creation",
                 )
 
                 # Handle different response types
                 if isinstance(agent_response_tuple, ChatResponse):
                     # Already a ChatResponse object
-                    print("DEBUG: Response is already ChatResponse")
+                    logger.debug(
+                        "Response is already ChatResponse format",
+                        operation="response_format_check",
+                    )
                     agent_response = agent_response_tuple
                 elif (
                     isinstance(agent_response_tuple, tuple)
                     and len(agent_response_tuple) == 2
                 ):
                     # Tuple response (response_text, memory_summary)
-                    print("DEBUG: Converting tuple response to ChatResponse")
+                    logger.debug(
+                        "Converting tuple response to ChatResponse",
+                        operation="tuple_conversion",
+                    )
                     response_text, memory_summary = agent_response_tuple
                     agent_response = ChatResponse(
                         thread_id=chat_request.thread_id,
@@ -205,7 +244,10 @@ class multi_agent_chat_service:
                     )
                 else:
                     # Handle single response case
-                    print("DEBUG: Converting single response to ChatResponse")
+                    logger.debug(
+                        "Converting single response to ChatResponse",
+                        operation="single_response_conversion",
+                    )
                     agent_response = ChatResponse(
                         thread_id=chat_request.thread_id,
                         message_id=str(uuid_module.uuid4()),
@@ -383,7 +425,12 @@ class IConversationFlow(ABC):
         template_path = await fs.get_prompt_template_path(revision_id)
         content = await fs.read_file(file_name=file_name, file_path=template_path)
         if content is None:
-            print(f"Prompt file {file_name} not found in {template_path}")
+            logger.warning(
+                "Prompt template file not found",
+                file_name=file_name,
+                template_path=template_path,
+                operation="template_file_lookup",
+            )
             return ""
         env = Environment()
         template = env.from_string(content)
@@ -424,7 +471,7 @@ class IConversationFlow(ABC):
 #         content=agent_response[0])
 # )
 
-# # print("the response:", agent_response)
+# logger.debug("Agent response received", response_preview=str(agent_response)[:100])
 # _ = await self.chat_history_repository.add_memory(
 #     Message(
 #         user_id=chat_request.user_id,

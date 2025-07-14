@@ -72,6 +72,10 @@ from importlib import import_module
 from typing import Iterable
 
 from ingenious.core.structured_logging import get_logger
+from ingenious.errors.processing import (
+    ErrorCode,
+    handle_extraction_error,
+)
 
 from .base import DocumentExtractor, Element  # re‑export for typing
 
@@ -134,17 +138,33 @@ def _load(name: str) -> DocumentExtractor:
     []
     """
     if name not in _ENGINES:
-        raise ValueError(f"Unknown engine {name!r}. Choose from {list(_ENGINES)}")
+        raise handle_extraction_error(
+            operation="load_engine",
+            src=name,
+            engine_name=name,
+            available_engines=list(_ENGINES.keys()),
+        ).with_context(error_code=ErrorCode.ENGINE_NOT_FOUND)
 
-    module_path, class_name = _ENGINES[name].split(":", 1)
-    extractor_cls = getattr(import_module(module_path), class_name)
-    extractor: DocumentExtractor = extractor_cls()  # type: ignore[call‑arg]
-    logger.debug(
-        "Loaded document extractor",
-        engine_name=name,
-        extractor_class=extractor_cls.__name__,
-    )
-    return extractor
+    try:
+        module_path, class_name = _ENGINES[name].split(":", 1)
+        extractor_cls = getattr(import_module(module_path), class_name)
+        extractor: DocumentExtractor = extractor_cls()  # type: ignore[call‑arg]
+        logger.debug(
+            "Loaded document extractor",
+            engine_name=name,
+            extractor_class=extractor_cls.__name__,
+        )
+        return extractor
+
+    except (ImportError, AttributeError, TypeError) as exc:
+        raise handle_extraction_error(
+            operation="load_engine",
+            src=name,
+            engine_name=name,
+            cause=exc,
+            module_path=module_path if "module_path" in locals() else None,
+            class_name=class_name if "class_name" in locals() else None,
+        ).with_context(error_code=ErrorCode.ENGINE_INITIALIZATION_FAILED)
 
 
 # Accepts str, bytes, or a Path‑like object

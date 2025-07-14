@@ -1,6 +1,7 @@
 import importlib.resources as pkg_resources
 import logging
 import os
+import time
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
@@ -19,6 +20,12 @@ from ingenious.core.structured_logging import (
     clear_request_context,
     get_logger,
     set_request_context,
+)
+from ingenious.errors import (
+    APIError,
+    IngeniousError,
+    ServiceError,
+    handle_exception,
 )
 
 # Import your routers
@@ -40,28 +47,115 @@ logger = get_logger(__name__)
 
 
 class RequestContextMiddleware(BaseHTTPMiddleware):
-    """Middleware to set request context for structured logging."""
+    """Middleware to set request context for structured logging and tracing."""
 
     async def dispatch(self, request: Request, call_next):
+        start_time = time.time()
+
         # Extract user info from request if available
         user_id = None
         session_id = None
+        client_ip = None
+        user_agent = None
 
-        # Try to get user info from Authorization header or other sources
+        # Get client information
+        client_ip = request.client.host if request.client else None
+        user_agent = request.headers.get("User-Agent")
+
+        # Extract session ID from custom header or cookies
+        session_id = request.headers.get("X-Session-ID") or request.cookies.get(
+            "session_id"
+        )
+
+        # Try to get user info from Authorization header
         auth_header = request.headers.get("Authorization")
-        if auth_header:
-            # You might want to decode JWT here to get user_id
-            # For now, just use a placeholder
-            user_id = "authenticated_user"
+        if auth_header and auth_header.startswith("Bearer "):
+            try:
+                from ingenious.auth.jwt import get_username_from_token
 
-        # Set request context
-        request_id = set_request_context(user_id=user_id, session_id=session_id)
+                token = auth_header[7:]  # Remove "Bearer " prefix
+                user_id = get_username_from_token(token)
+            except Exception:
+                # Token validation failed, use fallback
+                user_id = "unauthenticated"
+        elif auth_header and auth_header.startswith("Basic "):
+            # For basic auth, extract username without validating
+            try:
+                import base64
 
-        # Add request ID to response headers
+                credentials_str = base64.b64decode(auth_header[6:]).decode("utf-8")
+                username, _ = credentials_str.split(":", 1)
+                user_id = username
+            except Exception:
+                user_id = "unauthenticated"
+        else:
+            user_id = "anonymous"
+
+        # Set request context with correlation ID
+        request_id = set_request_context(
+            user_id=user_id,
+            session_id=session_id,
+            client_ip=client_ip,
+            user_agent=user_agent,
+        )
+
+        # Log request start
+        logger.info(
+            "Request started",
+            request_id=request_id,
+            method=request.method,
+            url=str(request.url),
+            path=request.url.path,
+            query_params=str(request.query_params),
+            user_id=user_id,
+            session_id=session_id,
+            client_ip=client_ip,
+            user_agent=user_agent,
+            operation="request_start",
+        )
+
+        # Process request and add timing
         try:
             response = await call_next(request)
+            processing_time = time.time() - start_time
+
+            # Log request completion
+            logger.info(
+                "Request completed",
+                request_id=request_id,
+                method=request.method,
+                url=str(request.url),
+                status_code=response.status_code,
+                processing_time_seconds=processing_time,
+                user_id=user_id,
+                operation="request_complete",
+            )
+
+            # Add tracing headers to response
             response.headers["X-Request-ID"] = request_id
+            response.headers["X-Processing-Time"] = f"{processing_time:.3f}s"
+
             return response
+
+        except Exception as exc:
+            processing_time = time.time() - start_time
+
+            # Log request failure
+            logger.error(
+                "Request failed",
+                request_id=request_id,
+                method=request.method,
+                url=str(request.url),
+                processing_time_seconds=processing_time,
+                error_type=type(exc).__name__,
+                error_message=str(exc),
+                user_id=user_id,
+                operation="request_error",
+                exc_info=True,
+            )
+
+            raise exc
+
         finally:
             # Clear context after request
             clear_request_context()
@@ -127,8 +221,15 @@ class FastAgentAPI:
             )
             custom_api_routes_class_instance.add_custom_routes()
 
-        # Add exception handler
+        # Add exception handlers
         self.app.add_exception_handler(Exception, self.generic_exception_handler)
+
+        # Add specific handlers for FastAPI validation errors
+        from fastapi.exceptions import RequestValidationError as FastAPIValidationError
+
+        self.app.add_exception_handler(
+            FastAPIValidationError, self.validation_exception_handler
+        )
 
         # Mount ChainLit
         if config.chainlit_configuration.enable:
@@ -148,19 +249,162 @@ class FastAgentAPI:
         if os.environ.get("LOADENV") == "True":
             load_dotenv()
 
-        # Log the exception with structured context
-        logger.error(
-            "Unhandled exception in API",
-            error_type=type(exc).__name__,
-            error_message=str(exc),
+        # Handle Ingenious errors with proper status codes and user messages
+        if isinstance(exc, IngeniousError):
+            status_code = self._get_status_code_for_error(exc)
+
+            logger.error(
+                "Ingenious error in API",
+                error_type=exc.__class__.__name__,
+                error_code=exc.error_code,
+                category=exc.category.value,
+                severity=exc.severity.value,
+                correlation_id=exc.context.correlation_id,
+                request_path=str(request.url.path),
+                request_method=request.method,
+                user_id=exc.context.user_id,
+                recoverable=exc.recoverable,
+                exc_info=True,
+            )
+
+            response_content = {
+                "error": {
+                    "code": exc.error_code,
+                    "message": exc.user_message,
+                    "correlation_id": exc.context.correlation_id,
+                    "recoverable": exc.recoverable,
+                    "recovery_suggestion": exc.recovery_suggestion,
+                }
+            }
+
+            response = JSONResponse(status_code=status_code, content=response_content)
+
+            # Add rate limiting headers if applicable
+            if hasattr(exc, "retry_after") and exc.retry_after:
+                response.headers["Retry-After"] = str(exc.retry_after)
+                response.headers["X-RateLimit-Reset"] = str(
+                    int(time.time()) + exc.retry_after
+                )
+
+            return response
+
+        # Convert generic exceptions to Ingenious errors
+        else:
+            ingenious_error = handle_exception(
+                exc,
+                operation="api_request",
+                component="fastapi",
+                request_path=str(request.url.path),
+                request_method=request.method,
+            )
+
+            logger.error(
+                "Unhandled exception converted to IngeniousError",
+                error_type=type(exc).__name__,
+                error_message=str(exc),
+                correlation_id=ingenious_error.context.correlation_id,
+                request_path=str(request.url.path),
+                request_method=request.method,
+                exc_info=True,
+            )
+
+            return JSONResponse(
+                status_code=500,
+                content={
+                    "error": {
+                        "code": ingenious_error.error_code,
+                        "message": ingenious_error.user_message,
+                        "correlation_id": ingenious_error.context.correlation_id,
+                        "recoverable": ingenious_error.recoverable,
+                    }
+                },
+            )
+
+    async def validation_exception_handler(self, request: Request, exc):
+        """Handle FastAPI validation errors with structured format."""
+        from ingenious.errors import RequestValidationError
+
+        # Create structured validation error
+        validation_error = RequestValidationError(
+            "Request validation failed",
+            context={
+                "request_path": str(request.url.path),
+                "request_method": request.method,
+                "validation_errors": exc.errors() if hasattr(exc, "errors") else [],
+                "request_body": getattr(exc, "body", None),
+            },
+            user_message="Invalid request format. Please check your input data.",
+        )
+
+        logger.warning(
+            "Request validation error",
+            error_type="RequestValidationError",
+            error_code=validation_error.error_code,
             request_path=str(request.url.path),
             request_method=request.method,
-            exc_info=True,
+            validation_errors=exc.errors() if hasattr(exc, "errors") else [],
+            correlation_id=validation_error.context.correlation_id,
         )
 
         return JSONResponse(
-            status_code=500, content={"detail": f"An error occurred: {str(exc)}"}
+            status_code=422,
+            content={
+                "error": {
+                    "code": validation_error.error_code,
+                    "message": validation_error.user_message,
+                    "correlation_id": validation_error.context.correlation_id,
+                    "details": exc.errors() if hasattr(exc, "errors") else [],
+                    "recoverable": validation_error.recoverable,
+                }
+            },
         )
+
+    def _get_status_code_for_error(self, error: IngeniousError) -> int:
+        """Map Ingenious errors to appropriate HTTP status codes."""
+        from ingenious.errors import (
+            AuthenticationError,
+            AuthorizationError,
+            ConfigurationError,
+            DatabaseError,
+            RateLimitError,
+            RequestValidationError,
+            ResourceError,
+            WorkflowNotFoundError,
+        )
+
+        # Authentication and authorization errors
+        if isinstance(error, AuthenticationError):
+            return 401
+        elif isinstance(error, AuthorizationError):
+            return 403
+
+        # Client errors (4xx)
+        elif isinstance(error, RequestValidationError):
+            return 422  # Unprocessable Entity for validation errors
+        elif isinstance(error, ConfigurationError):
+            return 400  # Bad Request for configuration issues
+        elif isinstance(error, (WorkflowNotFoundError, ResourceError)):
+            return 404
+        elif isinstance(error, RateLimitError):
+            return 429
+
+        # Server errors (5xx)
+        elif isinstance(error, DatabaseError):
+            return 503  # Service Unavailable for database issues
+        elif isinstance(error, ServiceError):
+            return 502  # Bad Gateway for service issues
+        elif isinstance(error, APIError):
+            # Check if it's a client error based on message
+            if "timeout" in error.message.lower():
+                return 504  # Gateway Timeout
+            elif "not found" in error.message.lower():
+                return 404
+            else:
+                return 500
+
+        # Default to internal server error
+        else:
+            return 500
 
     async def root(self):
         # Locate the HTML file in ingenious.api

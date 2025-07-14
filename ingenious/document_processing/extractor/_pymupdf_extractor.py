@@ -79,6 +79,10 @@ import psutil
 
 from ingenious.core.structured_logging import get_logger
 from ingenious.document_processing.utils.fetcher import fetch, is_url
+from ingenious.errors.processing import (
+    ErrorCode,
+    handle_extraction_error,
+)
 
 from .base import DocumentExtractor, Element
 
@@ -223,9 +227,39 @@ class PyMuPDFExtractor(DocumentExtractor):
                 if stream_bytes is not None
                 else fitz.open(src_for_open)
             )
-        except (fitz.FileDataError, RuntimeError) as exc:
+        except fitz.FileDataError as exc:
+            # Document is corrupted or invalid format
+            error = handle_extraction_error(
+                operation="open_document",
+                src=src,
+                engine="pymupdf",
+                cause=exc,
+                file_size=len(stream_bytes) if stream_bytes else None,
+            ).with_context(error_code=ErrorCode.DOCUMENT_CORRUPTED)
+
             logger.warning(
-                "PyMuPDF failed to open document", src=repr(src), error=str(exc)
+                "PyMuPDF failed to open document - corrupted or invalid format",
+                src=repr(src),
+                error=str(exc),
+                error_code=error.error_code.value,
+            )
+            return
+
+        except RuntimeError as exc:
+            # Engine execution failure
+            error = handle_extraction_error(
+                operation="open_document",
+                src=src,
+                engine="pymupdf",
+                cause=exc,
+                file_size=len(stream_bytes) if stream_bytes else None,
+            ).with_context(error_code=ErrorCode.ENGINE_EXECUTION_FAILED)
+
+            logger.warning(
+                "PyMuPDF runtime error during document open",
+                src=repr(src),
+                error=str(exc),
+                error_code=error.error_code.value,
             )
             return
         finally:
@@ -261,6 +295,25 @@ class PyMuPDFExtractor(DocumentExtractor):
                             "text": blk[4].rstrip(),
                             "coords": (blk[0], blk[1], blk[2], blk[3]),
                         }
+
+                except Exception as exc:
+                    # Log structured error for page processing failure
+                    error = handle_extraction_error(
+                        operation="extract_page_blocks",
+                        src=src,
+                        engine="pymupdf",
+                        cause=exc,
+                        page_number=current_page_num,
+                    ).with_context(error_code=ErrorCode.EXTRACTION_FAILED)
+
+                    logger.warning(
+                        "Error processing page - continuing with next page",
+                        page_number=current_page_num,
+                        error=str(exc),
+                        error_code=error.error_code.value,
+                        recoverable=error.recoverable,
+                    )
+                    # Continue to next page instead of aborting
 
                 finally:
                     # Clean up page resources immediately

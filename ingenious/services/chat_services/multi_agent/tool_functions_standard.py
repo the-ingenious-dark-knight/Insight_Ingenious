@@ -9,7 +9,10 @@ from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
 
 import ingenious.config.config as ingen_config
+from ingenious.core.structured_logging import get_logger
 from ingenious.utils.load_sample_data import sqlite_sample_db
+
+logger = get_logger(__name__)
 
 _config = ingen_config.get_config()
 
@@ -20,8 +23,12 @@ pyodbc = None
 if _config.azure_sql_services and _config.azure_sql_services.database_name != "skip":
     try:
         import pyodbc
-    except ImportError:
-        print("Warning: pyodbc not available for Azure SQL connections")
+    except ImportError as e:
+        logger.warning(
+            "pyodbc not available for Azure SQL connections",
+            error=str(e),
+            operation="pyodbc_import",
+        )
         pyodbc = None
 
 
@@ -68,7 +75,12 @@ class ToolFunctions:
             run_async_memory_operation(memory_manager.write_memory(context))
         except Exception as e:
             # Fallback to legacy file I/O
-            print(f"Failed to use MemoryManager, falling back to local file I/O: {e}")
+            logger.warning(
+                "Failed to use MemoryManager, falling back to local file I/O",
+                error=str(e),
+                memory_path=_config.chat_history.memory_path,
+                operation="memory_manager_fallback",
+            )
             memory_path = _config.chat_history.memory_path
             with open(f"{memory_path}/context.md", "w") as memory_file:
                 memory_file.write(context)
@@ -137,13 +149,23 @@ else:
     if pyodbc is not None and _config.azure_sql_services:
         try:
             conn, cursor = get_conn(_config)
-            print("Azure SQL connection established")
+            logger.info(
+                "Azure SQL connection established",
+                operation="azure_sql_connection_success",
+            )
         except Exception as e:
-            print(f"Warning: Failed to connect to Azure SQL: {e}")
+            logger.warning(
+                "Failed to connect to Azure SQL",
+                error=str(e),
+                operation="azure_sql_connection",
+            )
             conn = None
             cursor = None
     else:
-        print("Warning: Azure SQL configured but pyodbc not available")
+        logger.warning(
+            "Azure SQL configured but pyodbc not available",
+            operation="azure_sql_missing_pyodbc",
+        )
 
 
 class SQL_ToolFunctions:
@@ -235,13 +257,23 @@ class SQL_ToolFunctions:
         global test_db
         # Ensure test_db is initialized
         if test_db is None:
-            print("Error: test_db is None, attempting to re-initialize...")
+            logger.error(
+                "test_db is None, attempting to re-initialize",
+                operation="sqlite_db_reinit",
+            )
             try:
                 test_db = sqlite_sample_db()
-                print("Successfully re-initialized test_db")
+                logger.info(
+                    "Successfully re-initialized test_db",
+                    operation="sqlite_db_reinit_success",
+                )
             except Exception as e:
                 error_msg = f"Failed to initialize SQLite database: {e}"
-                print(error_msg)
+                logger.error(
+                    "Failed to initialize SQLite database",
+                    error=str(e),
+                    operation="sqlite_db_init",
+                )
                 return json.dumps({"error": error_msg, "results": []})
 
         def run_query(sql: str):
@@ -254,10 +286,20 @@ class SQL_ToolFunctions:
                 result = future.result(timeout=timeout)
                 return json.dumps(result)
             except TimeoutError:
-                # Handle case where the query execution exceeded the timeout
+                logger.warning(
+                    "SQL query execution timeout",
+                    sql_preview=sql[:100] + "..." if len(sql) > 100 else sql,
+                    timeout=timeout,
+                    operation="sql_query_timeout",
+                )
                 return json.dumps({"error": "Query timed out", "results": []})
             except Exception as e:
-                # Handle any other exceptions that may arise during query execution
+                logger.error(
+                    "SQL query execution error",
+                    error=str(e),
+                    sql_preview=sql[:100] + "..." if len(sql) > 100 else sql,
+                    operation="sql_query_error",
+                )
                 return json.dumps({"error": str(e), "results": []})
 
     @staticmethod
@@ -291,6 +333,12 @@ class SQL_ToolFunctions:
                     conn_temp.close()
                 return json.dumps(r)
             except Exception as query_err:
+                logger.error(
+                    "Azure SQL query execution failed",
+                    error=str(query_err),
+                    sql_preview=sql[:100] + "..." if len(sql) > 100 else sql,
+                    operation="azure_sql_query_error",
+                )
                 return json.dumps({"error": f"Query Error: {query_err}", "results": []})
 
         # Run query in a separate thread with a timeout
@@ -300,6 +348,18 @@ class SQL_ToolFunctions:
                 result = future.result(timeout=timeout)
                 return result
             except TimeoutError:
+                logger.warning(
+                    "Azure SQL query timeout",
+                    sql_preview=sql[:100] + "..." if len(sql) > 100 else sql,
+                    timeout=timeout,
+                    operation="azure_sql_query_timeout",
+                )
                 return json.dumps({"error": "Query timed out", "results": []})
             except Exception as e:
+                logger.error(
+                    "Azure SQL execution error",
+                    error=str(e),
+                    sql_preview=sql[:100] + "..." if len(sql) > 100 else sql,
+                    operation="azure_sql_execution_error",
+                )
                 return json.dumps({"error": f"Execution Error: {e}", "results": []})

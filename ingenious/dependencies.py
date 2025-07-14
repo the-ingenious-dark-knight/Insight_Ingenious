@@ -28,6 +28,9 @@ from ingenious.services.message_feedback_service import MessageFeedbackService
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../../.."))
 
 from ingenious.core.structured_logging import get_logger
+from ingenious.errors import (
+    ConfigurationError,
+)
 
 logger = get_logger(__name__)
 security = HTTPBasic()
@@ -63,8 +66,16 @@ def get_chat_history_repository():
     try:
         db_type = DatabaseClientType(db_type_val)
 
-    except ValueError:
-        raise ValueError(f"Unknown database type: {db_type_val}")
+    except ValueError as e:
+        raise ConfigurationError(
+            f"Unknown database type: {db_type_val}",
+            context={
+                "database_type": db_type_val,
+                "available_types": [t.value for t in DatabaseClientType],
+            },
+            cause=e,
+            recovery_suggestion="Check the database_type configuration in config.yml",
+        ) from e
 
     chr = ChatHistoryRepository(db_type=db_type, config=config)
 

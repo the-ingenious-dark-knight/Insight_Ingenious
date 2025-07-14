@@ -6,8 +6,11 @@ This ensures that memory operations work with both local and Azure Blob Storage.
 import asyncio
 import os
 
+from ingenious.core.structured_logging import get_logger
 from ingenious.files.files_repository import FileStorage
 from ingenious.models.config import Config
+
+logger = get_logger(__name__)
 
 
 class MemoryManager:
@@ -73,7 +76,16 @@ class MemoryManager:
             return content if content else default_content
 
         except Exception as e:
-            print(f"Failed to read memory: {e}")
+            logger.error(
+                "Failed to read memory from storage",
+                error=str(e),
+                thread_id=thread_id,
+                file_path=file_path,
+                file_name=file_name,
+                operation="read_memory",
+            )
+            # Convert to structured error but don't raise to maintain backward compatibility
+            # Return default content as fallback
             return default_content
 
     async def write_memory(self, content: str, thread_id: str = None) -> bool:
@@ -93,7 +105,15 @@ class MemoryManager:
             return True
 
         except Exception as e:
-            print(f"Failed to write memory: {e}")
+            logger.error(
+                "Failed to write memory to storage",
+                error=str(e),
+                thread_id=thread_id,
+                file_path=file_path,
+                file_name=file_name,
+                operation="write_memory",
+            )
+            # Return False to indicate failure
             return False
 
     async def maintain_memory(
@@ -125,7 +145,14 @@ class MemoryManager:
             return await self.write_memory(truncated_content, thread_id)
 
         except Exception as e:
-            print(f"Failed to maintain memory: {e}")
+            logger.error(
+                "Failed to maintain memory",
+                error=str(e),
+                thread_id=thread_id,
+                max_words=max_words,
+                new_content_length=len(new_content),
+                operation="maintain_memory",
+            )
             return False
 
     async def delete_memory(self, thread_id: str = None) -> bool:
@@ -144,7 +171,14 @@ class MemoryManager:
             return True
 
         except Exception as e:
-            print(f"Failed to delete memory: {e}")
+            logger.error(
+                "Failed to delete memory from storage",
+                error=str(e),
+                thread_id=thread_id,
+                file_path=file_path,
+                file_name=file_name,
+                operation="delete_memory",
+            )
             return False
 
 
@@ -199,7 +233,13 @@ class LegacyMemoryManager:
                 return default_content
 
         except Exception as e:
-            print(f"Failed to read memory: {e}")
+            logger.error(
+                "Failed to read legacy memory file",
+                error=str(e),
+                thread_id=thread_id,
+                file_path=file_path,
+                operation="read_legacy_memory",
+            )
             return default_content
 
     def write_memory(self, content: str, thread_id: str = None) -> bool:
@@ -224,7 +264,13 @@ class LegacyMemoryManager:
             return True
 
         except Exception as e:
-            print(f"Failed to write memory: {e}")
+            logger.error(
+                "Failed to write legacy memory file",
+                error=str(e),
+                thread_id=thread_id,
+                file_path=file_path,
+                operation="write_legacy_memory",
+            )
             return False
 
     def maintain_memory(
@@ -262,7 +308,14 @@ class LegacyMemoryManager:
             return self.write_memory(truncated_content, thread_id)
 
         except Exception as e:
-            print(f"Failed to maintain memory: {e}")
+            logger.error(
+                "Failed to maintain legacy memory",
+                error=str(e),
+                thread_id=thread_id,
+                max_words=max_words,
+                new_content_length=len(new_content),
+                operation="maintain_legacy_memory",
+            )
             return False
 
 
@@ -302,6 +355,11 @@ def run_async_memory_operation(coro):
                 return future.result()
         else:
             return loop.run_until_complete(coro)
-    except RuntimeError:
+    except RuntimeError as e:
         # No event loop running, create a new one
+        logger.debug(
+            "No event loop running, creating new one",
+            error=str(e),
+            operation="async_memory_operation",
+        )
         return asyncio.run(coro)
