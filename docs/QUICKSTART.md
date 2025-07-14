@@ -35,9 +35,17 @@ Get up and running in 5 minutes with Azure OpenAI!
     ```
 
 3. **Validate Setup** (Recommended):
+    #### For Linux-based Environments
     ```bash
     export INGENIOUS_PROJECT_PATH=$(pwd)/config.yml
     export INGENIOUS_PROFILE_PATH=$(pwd)/profiles.yml
+    uv run ingen validate  # Check configuration before starting
+    ```
+
+    #### For Windows-based Environments
+    ```bash
+    $env:INGENIOUS_PROJECT_PATH = "{your_project_folder}/config.yml"
+    $env:INGENIOUS_PROFILE_PATH = "{profile_folder_location}/profiles.yml"                        
     uv run ingen validate  # Check configuration before starting
     ```
 
