@@ -5,9 +5,6 @@ This module contains all the BaseModel classes that define
 the structure and validation for different configuration sections.
 """
 
-import os
-from typing import List, Optional
-
 from pydantic import BaseModel, Field, field_validator
 
 

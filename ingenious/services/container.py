@@ -1,12 +1,10 @@
 """Dependency injection container for Ingenious services."""
 
 import os
-from typing import Optional
 
 from dependency_injector import containers, providers
 from dotenv import load_dotenv
 
-from ingenious.auth.jwt import get_username_from_token
 from ingenious.config.config import get_config as _get_config
 from ingenious.config.profile import Profiles
 from ingenious.core.structured_logging import get_logger
@@ -79,35 +77,31 @@ class Container(containers.DeclarativeContainer):
     )
 
     # Core configuration
-    config = providers.Singleton(
-        lambda: _get_config()
-    )
+    config = providers.Singleton(lambda: _get_config())
 
     profile = providers.Singleton(
         lambda: Profiles(os.getenv("INGENIOUS_PROFILE_PATH", ""))
     )
 
-    logger = providers.Singleton(
-        get_logger,
-        __name__
-    )
+    logger = providers.Singleton(get_logger, __name__)
 
     # External services
     openai_service = providers.Factory(
         OpenAIService,
-        azure_endpoint=providers.Callable(lambda cfg: str(cfg.models[0].base_url), config),
+        azure_endpoint=providers.Callable(
+            lambda cfg: str(cfg.models[0].base_url), config
+        ),
         api_key=providers.Callable(lambda cfg: str(cfg.models[0].api_key), config),
-        api_version=providers.Callable(lambda cfg: str(cfg.models[0].api_version), config),
+        api_version=providers.Callable(
+            lambda cfg: str(cfg.models[0].api_version), config
+        ),
         open_ai_model=providers.Callable(lambda cfg: str(cfg.models[0].model), config),
     )
 
     # Database repository
     chat_history_repository = providers.Factory(
         ChatHistoryRepository,
-        db_type=providers.Callable(
-            lambda cfg: _get_database_type(cfg),
-            config
-        ),
+        db_type=providers.Callable(lambda cfg: _get_database_type(cfg), config),
         config=config,
     )
 
@@ -188,17 +182,19 @@ def init_container() -> Container:
     """Initialize the container and return it."""
     # Load environment variables
     load_dotenv()
-    
+
     # Wire the container
-    container.wire(modules=[
-        "ingenious.api.routes.chat",
-        "ingenious.api.routes.message_feedback", 
-        "ingenious.api.routes.auth",
-        "ingenious.api.routes.prompts",
-        "ingenious.api.routes.diagnostic",
-        "ingenious.main",
-    ])
-    
+    container.wire(
+        modules=[
+            "ingenious.api.routes.chat",
+            "ingenious.api.routes.message_feedback",
+            "ingenious.api.routes.auth",
+            "ingenious.api.routes.prompts",
+            "ingenious.api.routes.diagnostic",
+            "ingenious.main",
+        ]
+    )
+
     return container
 
 
@@ -206,16 +202,16 @@ def configure_for_testing():
     """Configure container for testing environment."""
     # Override with test configurations
     from unittest.mock import Mock
-    
+
     # Mock external services for testing
     mock_openai_service = Mock()
     container.openai_service.override(mock_openai_service)
-    
+
     # Use in-memory SQLite for testing
     test_config = container.config()
     test_config.chat_history.database_type = "sqlite"
     container.config.override(test_config)
-    
+
     return container
 
 

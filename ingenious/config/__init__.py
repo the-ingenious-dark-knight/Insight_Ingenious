@@ -15,9 +15,9 @@ from .main_settings import IngeniousSettings
 from .models import (
     AzureSearchSettings,
     AzureSqlSettings,
+    ChainlitSettings,
     ChatHistorySettings,
     ChatServiceSettings,
-    ChainlitSettings,
     FileStorageContainerSettings,
     FileStorageSettings,
     LocalSqlSettings,
@@ -35,11 +35,11 @@ __all__ = [
     "IngeniousSettings",
     # Factory functions
     "get_config",
-    "load_from_env_file", 
+    "load_from_env_file",
     "create_minimal_config",
     # Configuration models
     "ChatHistorySettings",
-    "ModelSettings", 
+    "ModelSettings",
     "ChainlitSettings",
     "PromptTunerSettings",
     "ChatServiceSettings",
@@ -73,9 +73,9 @@ def get_config(project_path: str = "") -> IngeniousSettings:
         IngeniousSettings: The loaded and validated configuration
     """
     from ingenious.core.structured_logging import get_logger
-    
+
     logger = get_logger(__name__)
-    
+
     try:
         settings = IngeniousSettings()
         settings.validate_configuration()

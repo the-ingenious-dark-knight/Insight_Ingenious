@@ -13,6 +13,7 @@ from fastapi import Depends
 from ingenious.files.files_repository import FileStorage
 from ingenious.services.container import Container
 
+
 @inject
 def get_config(config=Provide[Container.config]):
     """Get config from container."""
@@ -21,7 +22,7 @@ def get_config(config=Provide[Container.config]):
 
 @inject
 def get_file_storage_data(
-    file_storage=Provide[Container.file_storage_data]
+    file_storage=Provide[Container.file_storage_data],
 ) -> FileStorage:
     """Get file storage for data from container."""
     return file_storage
@@ -29,7 +30,7 @@ def get_file_storage_data(
 
 @inject
 def get_file_storage_revisions(
-    file_storage=Provide[Container.file_storage_revisions]
+    file_storage=Provide[Container.file_storage_revisions],
 ) -> FileStorage:
     """Get file storage for revisions from container."""
     return file_storage

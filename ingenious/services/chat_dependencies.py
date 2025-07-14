@@ -15,7 +15,7 @@ from ingenious.services.message_feedback_service import MessageFeedbackService
 
 @inject
 def get_chat_history_repository(
-    chat_history_repository=Provide[Container.chat_history_repository]
+    chat_history_repository=Provide[Container.chat_history_repository],
 ) -> ChatHistoryRepository:
     """Get chat history repository from container."""
     return chat_history_repository
@@ -39,7 +39,7 @@ def get_chat_service(
 
 @inject
 def get_message_feedback_service(
-    feedback_service=Provide[Container.message_feedback_service]
+    feedback_service=Provide[Container.message_feedback_service],
 ) -> MessageFeedbackService:
     """Get message feedback service from container."""
     return feedback_service

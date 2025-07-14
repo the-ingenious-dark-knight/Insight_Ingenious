@@ -8,21 +8,21 @@ for authentication and authorization services.
 import secrets
 from typing import Optional
 
+from dependency_injector.wiring import Provide, inject
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPBasic, HTTPBasicCredentials, HTTPBearer
 from typing_extensions import Annotated
 
 from ingenious.auth.jwt import get_username_from_token
 from ingenious.core.structured_logging import get_logger
-
-from dependency_injector.wiring import Provide, inject
 from ingenious.services.container import Container
 
 
-@inject  
+@inject
 def get_config(config=Provide[Container.config]):
     """Get config from container."""
     return config
+
 
 logger = get_logger(__name__)
 security = HTTPBasic()
@@ -158,16 +158,16 @@ def _handle_basic_auth_header(auth_header: str, config) -> str:
 
     # Validate credentials
     current_username_bytes = username.encode("utf8")
-    correct_username_bytes = (
-        config.web_configuration.authentication.username.encode("utf-8")
+    correct_username_bytes = config.web_configuration.authentication.username.encode(
+        "utf-8"
     )
     is_correct_username = secrets.compare_digest(
         current_username_bytes, correct_username_bytes
     )
 
     current_password_bytes = password.encode("utf8")
-    correct_password_bytes = (
-        config.web_configuration.authentication.password.encode("utf-8")
+    correct_password_bytes = config.web_configuration.authentication.password.encode(
+        "utf-8"
     )
     is_correct_password = secrets.compare_digest(
         current_password_bytes, correct_password_bytes

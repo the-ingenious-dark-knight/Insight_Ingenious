@@ -9,7 +9,6 @@ from ingenious.errors import (
 )
 from ingenious.models.chat import ChatRequest, ChatResponse
 from ingenious.utils.imports import import_class_with_fallback
-from ingenious.utils.protocols import ChatServiceProtocol
 
 logger = get_logger(__name__)
 
@@ -47,9 +46,7 @@ class ChatService(IChatService):
                     f"services.chat_services.{chat_service_type.lower()}.service"
                 )
                 service_class = import_class_with_fallback(
-                    module_name, 
-                    class_name,
-                    expected_methods=["get_chat_response"]
+                    module_name, class_name, expected_methods=["get_chat_response"]
                 )
 
                 ctx.add_metadata(

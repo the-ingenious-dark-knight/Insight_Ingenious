@@ -30,15 +30,20 @@ def get_settings_config() -> SettingsConfigDict:
 def load_from_env_file(env_file: str = ".env") -> "IngeniousSettings":
     """Load settings from a specific .env file."""
     from .main_settings import IngeniousSettings
-    
+
     return IngeniousSettings(_env_file=env_file)
 
 
 def create_minimal_config() -> "IngeniousSettings":
     """Create a minimal configuration for development."""
     from .main_settings import IngeniousSettings
-    from .models import LoggingSettings, ModelSettings, WebAuthenticationSettings, WebSettings
-    
+    from .models import (
+        LoggingSettings,
+        ModelSettings,
+        WebAuthenticationSettings,
+        WebSettings,
+    )
+
     return IngeniousSettings(
         models=[
             ModelSettings(

@@ -40,7 +40,9 @@ class ExceptionHandlers:
     """Collection of exception handlers for FastAPI application."""
 
     @staticmethod
-    async def generic_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    async def generic_exception_handler(
+        request: Request, exc: Exception
+    ) -> JSONResponse:
         """Handle generic exceptions with proper error responses."""
         if os.environ.get("LOADENV") == "True":
             load_dotenv()
@@ -117,7 +119,9 @@ class ExceptionHandlers:
             )
 
     @staticmethod
-    async def validation_exception_handler(request: Request, exc: FastAPIValidationError) -> JSONResponse:
+    async def validation_exception_handler(
+        request: Request, exc: FastAPIValidationError
+    ) -> JSONResponse:
         """Handle FastAPI validation errors with structured format."""
         # Create structured validation error
         validation_error = RequestValidationError(
@@ -195,4 +199,6 @@ class ExceptionHandlers:
     def register_handlers(cls, app: "FastAPI") -> None:
         """Register all exception handlers with the FastAPI app."""
         app.add_exception_handler(Exception, cls.generic_exception_handler)
-        app.add_exception_handler(FastAPIValidationError, cls.validation_exception_handler)
+        app.add_exception_handler(
+            FastAPIValidationError, cls.validation_exception_handler
+        )

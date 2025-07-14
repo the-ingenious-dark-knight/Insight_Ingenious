@@ -41,7 +41,7 @@ def get_openai_service(openai_service=Provide[Container.openai_service]):
 
 @inject
 def get_chat_history_repository(
-    chat_history_repository=Provide[Container.chat_history_repository]
+    chat_history_repository=Provide[Container.chat_history_repository],
 ) -> ChatHistoryRepository:
     """Get chat history repository from container."""
     return chat_history_repository
@@ -65,7 +65,7 @@ def get_chat_service(
 
 @inject
 def get_message_feedback_service(
-    feedback_service=Provide[Container.message_feedback_service]
+    feedback_service=Provide[Container.message_feedback_service],
 ) -> MessageFeedbackService:
     """Get message feedback service from container."""
     return feedback_service
@@ -73,7 +73,7 @@ def get_message_feedback_service(
 
 @inject
 def get_file_storage_data(
-    file_storage=Provide[Container.file_storage_data]
+    file_storage=Provide[Container.file_storage_data],
 ) -> FileStorage:
     """Get file storage for data from container."""
     return file_storage
@@ -81,7 +81,7 @@ def get_file_storage_data(
 
 @inject
 def get_file_storage_revisions(
-    file_storage=Provide[Container.file_storage_revisions]
+    file_storage=Provide[Container.file_storage_revisions],
 ) -> FileStorage:
     """Get file storage for revisions from container."""
     return file_storage
@@ -263,7 +263,7 @@ def sync_templates(config=Depends(get_config)):
         return
     else:
         import os
-        
+
         fs = FileStorage(config)
         working_dir = os.getcwd()
         template_path = os.path.join(working_dir, "ingenious", "templates")

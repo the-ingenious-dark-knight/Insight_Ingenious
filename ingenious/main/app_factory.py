@@ -47,6 +47,7 @@ class FastAgentAPI:
     def _setup_dependency_injection(self) -> None:
         """Initialize dependency injection container."""
         from ingenious.services.container import init_container
+
         self.container = init_container()
 
     def _setup_working_directory(self) -> None:
@@ -64,7 +65,7 @@ class FastAgentAPI:
             "http://localhost:5173",
             "http://localhost:4173",
         ]
-        
+
         self.app.add_middleware(
             CORSMiddleware,
             allow_origins=origins,
@@ -90,6 +91,7 @@ class FastAgentAPI:
         """Mount Flask Prompt Tuner App if enabled."""
         if self.config.prompt_tuner.enable:
             import ingenious_prompt_tuner as prompt_tuner
+
             self.flask_app = prompt_tuner.create_app_for_fastapi()
             self.app.mount("/prompt-tuner", WSGIMiddleware(self.flask_app))
 
@@ -97,6 +99,7 @@ class FastAgentAPI:
         """Mount ChainLit if enabled."""
         if self.config.chainlit_configuration.enable:
             from chainlit.utils import mount_chainlit
+
             chainlit_path = pkg_resources.files("ingenious.chainlit") / "app.py"
             mount_chainlit(app=self.app, target=str(chainlit_path), path="/chainlit")
 
@@ -119,10 +122,10 @@ class FastAgentAPI:
 def create_app(config: "IngeniousSettings") -> FastAPI:
     """
     Factory function to create a configured FastAPI application.
-    
+
     Args:
         config: Ingenious configuration settings
-        
+
     Returns:
         Configured FastAPI application instance
     """

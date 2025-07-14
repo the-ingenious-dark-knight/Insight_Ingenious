@@ -12,8 +12,6 @@ This module remains for backward compatibility but will be removed in a future v
 import logging
 import warnings
 
-from dotenv import load_dotenv
-
 import ingenious.config.config as ingen_config
 from ingenious.core.structured_logging import get_logger
 
@@ -35,6 +33,7 @@ logger = get_logger(__name__)
 # Delay config loading until needed
 def get_config():
     import os
+
     return ingen_config.get_config(os.getenv("INGENIOUS_PROJECT_PATH", ""))
 
 

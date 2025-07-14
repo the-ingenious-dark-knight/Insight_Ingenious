@@ -20,6 +20,7 @@ from ingenious.utils.imports import (
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
+
     from ingenious.config import IngeniousSettings
 
 
@@ -36,9 +37,7 @@ class RouteManager:
         app.include_router(
             diagnostic_route.router, prefix="/api/v1", tags=["Diagnostic"]
         )
-        app.include_router(
-            prompts_route.router, prefix="/api/v1", tags=["Prompts"]
-        )
+        app.include_router(prompts_route.router, prefix="/api/v1", tags=["Prompts"])
         app.include_router(
             message_feedback_route.router, prefix="/api/v1", tags=["Message Feedback"]
         )

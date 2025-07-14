@@ -18,12 +18,14 @@ from ingenious.config import (
     load_from_env_file,
 )
 from ingenious.config.models import (
-    ChatHistorySettings,
     LoggingSettings,
     ModelSettings,
     WebSettings,
 )
-from ingenious.config.validators import validate_configuration, validate_models_not_empty
+from ingenious.config.validators import (
+    validate_configuration,
+    validate_models_not_empty,
+)
 
 
 class TestConfigModels:
@@ -87,11 +89,14 @@ class TestConfigValidators:
 
     def test_validate_models_not_empty_with_env_vars(self):
         """Test validate_models_not_empty with environment variables."""
-        with patch.dict(os.environ, {
-            "AZURE_OPENAI_API_KEY": "test-key",
-            "AZURE_OPENAI_BASE_URL": "https://test.openai.azure.com/",
-            "AZURE_OPENAI_MODEL": "gpt-4",
-        }):
+        with patch.dict(
+            os.environ,
+            {
+                "AZURE_OPENAI_API_KEY": "test-key",
+                "AZURE_OPENAI_BASE_URL": "https://test.openai.azure.com/",
+                "AZURE_OPENAI_MODEL": "gpt-4",
+            },
+        ):
             models = validate_models_not_empty([])
             assert len(models) == 1
             assert models[0].model == "gpt-4"
@@ -100,17 +105,21 @@ class TestConfigValidators:
     def test_validate_models_not_empty_without_env_vars(self):
         """Test validate_models_not_empty without environment variables."""
         with patch.dict(os.environ, {}, clear=True):
-            with pytest.raises(ValueError, match="At least one model must be configured"):
+            with pytest.raises(
+                ValueError, match="At least one model must be configured"
+            ):
                 validate_models_not_empty([])
 
     def test_validate_configuration_success(self):
         """Test successful configuration validation."""
         settings = IngeniousSettings(
-            models=[ModelSettings(
-                model="gpt-4",
-                api_key="test-key",
-                base_url="https://test.openai.azure.com/",
-            )]
+            models=[
+                ModelSettings(
+                    model="gpt-4",
+                    api_key="test-key",
+                    base_url="https://test.openai.azure.com/",
+                )
+            ]
         )
         # Should not raise an exception
         validate_configuration(settings)
@@ -118,11 +127,13 @@ class TestConfigValidators:
     def test_validate_configuration_with_placeholders(self):
         """Test configuration validation with placeholder values."""
         settings = IngeniousSettings(
-            models=[ModelSettings(
-                model="gpt-4",
-                api_key="placeholder-key",
-                base_url="https://test.openai.azure.com/",
-            )]
+            models=[
+                ModelSettings(
+                    model="gpt-4",
+                    api_key="placeholder-key",
+                    base_url="https://test.openai.azure.com/",
+                )
+            ]
         )
         with pytest.raises(ValueError, match="Configuration validation failed"):
             validate_configuration(settings)
@@ -133,10 +144,13 @@ class TestIngeniousSettings:
 
     def test_default_settings(self):
         """Test default settings creation."""
-        with patch.dict(os.environ, {
-            "AZURE_OPENAI_API_KEY": "test-key",
-            "AZURE_OPENAI_BASE_URL": "https://test.openai.azure.com/",
-        }):
+        with patch.dict(
+            os.environ,
+            {
+                "AZURE_OPENAI_API_KEY": "test-key",
+                "AZURE_OPENAI_BASE_URL": "https://test.openai.azure.com/",
+            },
+        ):
             settings = IngeniousSettings()
             assert len(settings.models) == 1
             assert settings.models[0].model == "gpt-4"
@@ -145,12 +159,15 @@ class TestIngeniousSettings:
 
     def test_environment_variable_override(self):
         """Test environment variable overrides."""
-        with patch.dict(os.environ, {
-            "INGENIOUS_WEB_CONFIGURATION__PORT": "9000",
-            "INGENIOUS_PROFILE": "test",
-            "AZURE_OPENAI_API_KEY": "test-key",
-            "AZURE_OPENAI_BASE_URL": "https://test.openai.azure.com/",
-        }):
+        with patch.dict(
+            os.environ,
+            {
+                "INGENIOUS_WEB_CONFIGURATION__PORT": "9000",
+                "INGENIOUS_PROFILE": "test",
+                "AZURE_OPENAI_API_KEY": "test-key",
+                "AZURE_OPENAI_BASE_URL": "https://test.openai.azure.com/",
+            },
+        ):
             settings = IngeniousSettings()
             assert settings.web_configuration.port == 9000
             assert settings.profile == "test"
@@ -161,10 +178,13 @@ class TestConfigFactoryFunctions:
 
     def test_get_config(self):
         """Test get_config function."""
-        with patch.dict(os.environ, {
-            "AZURE_OPENAI_API_KEY": "test-key",
-            "AZURE_OPENAI_BASE_URL": "https://test.openai.azure.com/",
-        }):
+        with patch.dict(
+            os.environ,
+            {
+                "AZURE_OPENAI_API_KEY": "test-key",
+                "AZURE_OPENAI_BASE_URL": "https://test.openai.azure.com/",
+            },
+        ):
             config = get_config()
             assert isinstance(config, IngeniousSettings)
             assert len(config.models) >= 1
@@ -181,7 +201,7 @@ class TestConfigFactoryFunctions:
     def test_load_from_env_file(self):
         """Test load_from_env_file function."""
         # Create a temporary .env file
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.env', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".env", delete=False) as f:
             f.write("INGENIOUS_PROFILE=test_profile\n")
             f.write("INGENIOUS_WEB_CONFIGURATION__PORT=7000\n")
             f.write("AZURE_OPENAI_API_KEY=test-key\n")
@@ -204,15 +224,20 @@ class TestBackwardCompatibility:
         # This should work but issue a deprecation warning
         with pytest.warns(DeprecationWarning):
             from ingenious.config.settings import IngeniousSettings as OldSettings
+
             assert OldSettings is IngeniousSettings
 
     def test_config_module_get_config(self):
         """Test that config.config.get_config still works."""
-        with patch.dict(os.environ, {
-            "AZURE_OPENAI_API_KEY": "test-key", 
-            "AZURE_OPENAI_BASE_URL": "https://test.openai.azure.com/",
-        }):
+        with patch.dict(
+            os.environ,
+            {
+                "AZURE_OPENAI_API_KEY": "test-key",
+                "AZURE_OPENAI_BASE_URL": "https://test.openai.azure.com/",
+            },
+        ):
             from ingenious.config.config import get_config as old_get_config
+
             config = old_get_config()
             assert isinstance(config, IngeniousSettings)
 
@@ -222,41 +247,48 @@ class TestConfigIntegration:
 
     def test_full_config_load_and_validate(self):
         """Test complete configuration loading and validation."""
-        with patch.dict(os.environ, {
-            "INGENIOUS_MODELS__0__MODEL": "gpt-4",
-            "INGENIOUS_MODELS__0__API_KEY": "test-key",
-            "INGENIOUS_MODELS__0__BASE_URL": "https://test.openai.azure.com/",
-            "INGENIOUS_LOGGING__ROOT_LOG_LEVEL": "debug",
-            "INGENIOUS_WEB_CONFIGURATION__PORT": "8080",
-            "INGENIOUS_WEB_CONFIGURATION__AUTHENTICATION__ENABLE": "false",
-        }):
+        with patch.dict(
+            os.environ,
+            {
+                "INGENIOUS_MODELS__0__MODEL": "gpt-4",
+                "INGENIOUS_MODELS__0__API_KEY": "test-key",
+                "INGENIOUS_MODELS__0__BASE_URL": "https://test.openai.azure.com/",
+                "INGENIOUS_LOGGING__ROOT_LOG_LEVEL": "debug",
+                "INGENIOUS_WEB_CONFIGURATION__PORT": "8080",
+                "INGENIOUS_WEB_CONFIGURATION__AUTHENTICATION__ENABLE": "false",
+            },
+        ):
             config = get_config()
-            
+
             # Verify configuration is loaded correctly
             assert len(config.models) == 1
             assert config.models[0].model == "gpt-4"
             assert config.logging.root_log_level == "debug"
             assert config.web_configuration.port == 8080
             assert not config.web_configuration.authentication.enable
-            
+
             # Verify validation passes
             config.validate_configuration()
 
     def test_modular_import_structure(self):
         """Test that all components can be imported from their new locations."""
         # Test model imports
-        from ingenious.config.models import ModelSettings, LoggingSettings
+        from ingenious.config.models import LoggingSettings, ModelSettings
+
         assert ModelSettings is not None
         assert LoggingSettings is not None
-        
+
         # Test validator imports
         from ingenious.config.validators import validate_configuration
+
         assert validate_configuration is not None
-        
+
         # Test environment imports
         from ingenious.config.environment import create_minimal_config
+
         assert create_minimal_config is not None
-        
+
         # Test main settings import
         from ingenious.config.main_settings import IngeniousSettings
+
         assert IngeniousSettings is not None

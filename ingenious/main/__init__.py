@@ -12,7 +12,7 @@ from .routing import RouteManager
 
 __all__ = [
     "FastAgentAPI",
-    "create_app", 
+    "create_app",
     "ExceptionHandlers",
     "RequestContextMiddleware",
     "RouteManager",

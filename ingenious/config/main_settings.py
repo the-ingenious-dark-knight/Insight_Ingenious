@@ -14,9 +14,9 @@ from .environment import get_settings_config
 from .models import (
     AzureSearchSettings,
     AzureSqlSettings,
+    ChainlitSettings,
     ChatHistorySettings,
     ChatServiceSettings,
-    ChainlitSettings,
     FileStorageSettings,
     LocalSqlSettings,
     LoggingSettings,
@@ -116,7 +116,9 @@ class IngeniousSettings(BaseSettings):
 
     @field_validator("models")
     @classmethod
-    def validate_models_not_empty_field(cls, v: List[ModelSettings]) -> List[ModelSettings]:
+    def validate_models_not_empty_field(
+        cls, v: List[ModelSettings]
+    ) -> List[ModelSettings]:
         """Ensure at least one model is configured."""
         return validate_models_not_empty(v)
 
