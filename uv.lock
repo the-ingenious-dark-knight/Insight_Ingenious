@@ -1389,7 +1389,7 @@ wheels = [
 
 [[package]]
 name = "ingenious"
-version = "0.1.2"
+version = "0.1.3"
 source = { editable = "." }
 dependencies = [
     { name = "aiosqlite" },
@@ -1405,20 +1405,17 @@ dependencies = [
     { name = "azure-storage-blob" },
     { name = "certifi" },
     { name = "chainlit" },
-    { name = "chromadb" },
     { name = "colorlog" },
     { name = "duckdb" },
     { name = "fastapi" },
     { name = "fastapi-cli" },
     { name = "flask" },
-    { name = "ipython" },
     { name = "jinja2" },
     { name = "jsonpickle" },
     { name = "markdown" },
     { name = "markdown-it-py" },
     { name = "markdownify" },
     { name = "markpickle" },
-    { name = "matplotlib" },
     { name = "numpy" },
     { name = "openai" },
     { name = "pandas" },
@@ -1426,8 +1423,6 @@ dependencies = [
     { name = "pydantic" },
     { name = "pyodbc" },
     { name = "pypdf" },
-    { name = "seaborn" },
-    { name = "sentence-transformers" },
     { name = "typer" },
 ]
 
@@ -1437,11 +1432,18 @@ dataprep = [
     { name = "python-dotenv" },
     { name = "scrapfly-sdk" },
 ]
+development = [
+    { name = "ipython" },
+]
 document-processing = [
     { name = "azure-ai-documentintelligence" },
     { name = "pymupdf" },
 ]
 local-implementations = [
+    { name = "sentence-transformers" },
+]
+ml-embeddings = [
+    { name = "chromadb" },
     { name = "sentence-transformers" },
 ]
 pdfminer = [
@@ -1459,6 +1461,10 @@ tests = [
 ]
 unstructured = [
     { name = "unstructured", extra = ["all-docs"] },
+]
+visualization = [
+    { name = "matplotlib" },
+    { name = "seaborn" },
 ]
 
 [package.dev-dependencies]
@@ -1491,20 +1497,20 @@ requires-dist = [
     { name = "backoff", marker = "extra == 'dataprep'", specifier = "==2.2" },
     { name = "certifi", specifier = "==2025.4.26" },
     { name = "chainlit", specifier = "==2.5.5" },
-    { name = "chromadb", specifier = "==1.0.11" },
+    { name = "chromadb", marker = "extra == 'ml-embeddings'", specifier = "==1.0.11" },
     { name = "colorlog", specifier = ">=6.9.0" },
     { name = "duckdb", specifier = "==1.3.0" },
     { name = "fastapi", specifier = "==0.115.9" },
     { name = "fastapi-cli", specifier = "==0.0.7" },
     { name = "flask", specifier = "==3.1.1" },
-    { name = "ipython", specifier = "==9.2.0" },
+    { name = "ipython", marker = "extra == 'development'", specifier = "==9.2.0" },
     { name = "jinja2", specifier = "==3.1.6" },
     { name = "jsonpickle", specifier = "==4.1.0" },
     { name = "markdown", specifier = "==3.8" },
     { name = "markdown-it-py", specifier = "==3.0.0" },
     { name = "markdownify", specifier = "==1.0.0" },
     { name = "markpickle", specifier = "==1.6.1" },
-    { name = "matplotlib", specifier = "==3.10.3" },
+    { name = "matplotlib", marker = "extra == 'visualization'", specifier = "==3.10.3" },
     { name = "numpy", specifier = "==2.2.6" },
     { name = "openai", specifier = "==1.82.0" },
     { name = "pandas", specifier = "==2.2.3" },
@@ -1523,14 +1529,14 @@ requires-dist = [
     { name = "python-dotenv", marker = "extra == 'dataprep'", specifier = "==1.0.1" },
     { name = "ruff", marker = "extra == 'tests'", specifier = "==0.11.10" },
     { name = "scrapfly-sdk", marker = "extra == 'dataprep'", specifier = "==0.8.23" },
-    { name = "seaborn", specifier = "==0.13.2" },
-    { name = "sentence-transformers", specifier = ">=5.0.0" },
+    { name = "seaborn", marker = "extra == 'visualization'", specifier = "==0.13.2" },
     { name = "sentence-transformers", marker = "extra == 'local-implementations'", specifier = ">=2.0.0" },
+    { name = "sentence-transformers", marker = "extra == 'ml-embeddings'", specifier = ">=5.0.0" },
     { name = "typer", specifier = ">=0.15.4" },
     { name = "unstructured", extras = ["all-docs"], marker = "extra == 'unstructured'", specifier = "==0.17.2" },
     { name = "vulture", marker = "extra == 'tests'", specifier = "==2.14" },
 ]
-provides-extras = ["dataprep", "document-processing", "local-implementations", "pdfminer", "unstructured", "tests"]
+provides-extras = ["dataprep", "document-processing", "local-implementations", "pdfminer", "unstructured", "visualization", "ml-embeddings", "development", "tests"]
 
 [package.metadata.requires-dev]
 dev = [
