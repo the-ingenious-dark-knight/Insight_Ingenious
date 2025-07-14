@@ -1,16 +1,14 @@
 import json
-import uuid
-from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 import pyodbc
 
 import ingenious.config.config as Config
+from ingenious.db.base_sql import BaseSQLRepository
 from ingenious.db.chat_history_repository import IChatHistoryRepository
-from ingenious.models.message import Message
 
 
-class azuresql_ChatHistoryRepository(IChatHistoryRepository):
+class azuresql_ChatHistoryRepository(BaseSQLRepository):
     def __init__(self, config: Config.Config):
         self.connection_string = config.chat_history.database_connection_string
         if not self.connection_string:
@@ -18,137 +16,20 @@ class azuresql_ChatHistoryRepository(IChatHistoryRepository):
                 "Azure SQL connection string is required for azuresql chat history repository"
             )
 
+        # Call parent constructor which will call _init_connection and _create_tables
+        super().__init__(config)
+
+    def _init_connection(self) -> None:
+        """Initialize Azure SQL connection."""
         self.connection = pyodbc.connect(self.connection_string)
         self.connection.autocommit = True
-        self._create_tables()
 
-    def _create_tables(self):
-        cursor = self.connection.cursor()
-
-        # Create chat_history table
-        cursor.execute("""
-            IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='chat_history' AND xtype='U')
-            CREATE TABLE chat_history (
-                user_id NVARCHAR(255),
-                thread_id NVARCHAR(255),
-                message_id NVARCHAR(255),
-                positive_feedback BIT,
-                timestamp DATETIME2,
-                role NVARCHAR(50),
-                content NVARCHAR(MAX),
-                content_filter_results NVARCHAR(MAX),
-                tool_calls NVARCHAR(MAX),
-                tool_call_id NVARCHAR(255),
-                tool_call_function NVARCHAR(255)
-            );
-        """)
-
-        # Create chat_history_summary table
-        cursor.execute("""
-            IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='chat_history_summary' AND xtype='U')
-            CREATE TABLE chat_history_summary (
-                user_id NVARCHAR(255),
-                thread_id NVARCHAR(255),
-                message_id NVARCHAR(255),
-                positive_feedback BIT,
-                timestamp DATETIME2,
-                role NVARCHAR(50),
-                content NVARCHAR(MAX),
-                content_filter_results NVARCHAR(MAX),
-                tool_calls NVARCHAR(MAX),
-                tool_call_id NVARCHAR(255),
-                tool_call_function NVARCHAR(255)
-            );
-        """)
-
-        # Create users table
-        cursor.execute("""
-            IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='users' AND xtype='U')
-            CREATE TABLE users (
-                id UNIQUEIDENTIFIER PRIMARY KEY,
-                identifier NVARCHAR(255) NOT NULL UNIQUE,
-                metadata NVARCHAR(MAX) NOT NULL,
-                createdAt DATETIME2
-            );
-        """)
-
-        # Create threads table
-        cursor.execute("""
-            IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='threads' AND xtype='U')
-            CREATE TABLE threads (
-                id UNIQUEIDENTIFIER PRIMARY KEY,
-                createdAt DATETIME2,
-                name NVARCHAR(255),
-                userId UNIQUEIDENTIFIER,
-                userIdentifier NVARCHAR(255),
-                tags NVARCHAR(MAX),
-                metadata NVARCHAR(MAX),
-                FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
-            );
-        """)
-
-        # Create steps table
-        cursor.execute("""
-            IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='steps' AND xtype='U')
-            CREATE TABLE steps (
-                id UNIQUEIDENTIFIER PRIMARY KEY,
-                name NVARCHAR(255) NOT NULL,
-                type NVARCHAR(50) NOT NULL,
-                threadId UNIQUEIDENTIFIER NOT NULL,
-                parentId UNIQUEIDENTIFIER,
-                disableFeedback BIT NOT NULL,
-                streaming BIT NOT NULL,
-                waitForAnswer BIT,
-                isError BIT,
-                metadata NVARCHAR(MAX),
-                tags NVARCHAR(MAX),
-                input NVARCHAR(MAX),
-                output NVARCHAR(MAX),
-                createdAt DATETIME2,
-                start DATETIME2,
-                [end] DATETIME2,
-                generation NVARCHAR(MAX),
-                showInput NVARCHAR(255),
-                language NVARCHAR(50),
-                indent INT
-            );
-        """)
-
-        # Create elements table
-        cursor.execute("""
-            IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='elements' AND xtype='U')
-            CREATE TABLE elements (
-                id UNIQUEIDENTIFIER PRIMARY KEY,
-                threadId UNIQUEIDENTIFIER,
-                type NVARCHAR(50),
-                url NVARCHAR(MAX),
-                chainlitKey NVARCHAR(255),
-                name NVARCHAR(255) NOT NULL,
-                display NVARCHAR(50),
-                objectKey NVARCHAR(255),
-                size NVARCHAR(50),
-                page INT,
-                language NVARCHAR(50),
-                forId UNIQUEIDENTIFIER,
-                mime NVARCHAR(100)
-            );
-        """)
-
-        # Create feedbacks table
-        cursor.execute("""
-            IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='feedbacks' AND xtype='U')
-            CREATE TABLE feedbacks (
-                id UNIQUEIDENTIFIER PRIMARY KEY,
-                forId UNIQUEIDENTIFIER NOT NULL,
-                threadId UNIQUEIDENTIFIER NOT NULL,
-                value INT NOT NULL,
-                comment NVARCHAR(MAX)
-            );
-        """)
-
-        cursor.close()
-
-    def execute_sql(self, sql, params=[], expect_results=True):
+    def _execute_sql(
+        self, sql: str, params: List[Any] = None, expect_results: bool = True
+    ) -> Any:
+        """Execute SQL with Azure SQL connection handling."""
+        if params is None:
+            params = []
         cursor = None
         try:
             cursor = self.connection.cursor()
@@ -172,6 +53,215 @@ class azuresql_ChatHistoryRepository(IChatHistoryRepository):
             if cursor:
                 cursor.close()
 
+    def _get_db_specific_query(self, query_type: str, **kwargs) -> str:
+        """Get Azure SQL-specific queries."""
+        queries = {
+            "create_chat_history_table": """
+                IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='chat_history' AND xtype='U')
+                CREATE TABLE chat_history (
+                    user_id NVARCHAR(255),
+                    thread_id NVARCHAR(255),
+                    message_id NVARCHAR(255),
+                    positive_feedback BIT,
+                    timestamp DATETIME2,
+                    role NVARCHAR(50),
+                    content NVARCHAR(MAX),
+                    content_filter_results NVARCHAR(MAX),
+                    tool_calls NVARCHAR(MAX),
+                    tool_call_id NVARCHAR(255),
+                    tool_call_function NVARCHAR(255)
+                );
+            """,
+            "create_chat_history_summary_table": """
+                IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='chat_history_summary' AND xtype='U')
+                CREATE TABLE chat_history_summary (
+                    user_id NVARCHAR(255),
+                    thread_id NVARCHAR(255),
+                    message_id NVARCHAR(255),
+                    positive_feedback BIT,
+                    timestamp DATETIME2,
+                    role NVARCHAR(50),
+                    content NVARCHAR(MAX),
+                    content_filter_results NVARCHAR(MAX),
+                    tool_calls NVARCHAR(MAX),
+                    tool_call_id NVARCHAR(255),
+                    tool_call_function NVARCHAR(255)
+                );
+            """,
+            "create_users_table": """
+                IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='users' AND xtype='U')
+                CREATE TABLE users (
+                    id UNIQUEIDENTIFIER PRIMARY KEY,
+                    identifier NVARCHAR(255) NOT NULL UNIQUE,
+                    metadata NVARCHAR(MAX) NOT NULL,
+                    createdAt DATETIME2
+                );
+            """,
+            "create_threads_table": """
+                IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='threads' AND xtype='U')
+                CREATE TABLE threads (
+                    id UNIQUEIDENTIFIER PRIMARY KEY,
+                    createdAt DATETIME2,
+                    name NVARCHAR(255),
+                    userId UNIQUEIDENTIFIER,
+                    userIdentifier NVARCHAR(255),
+                    tags NVARCHAR(MAX),
+                    metadata NVARCHAR(MAX),
+                    FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
+                );
+            """,
+            "create_steps_table": """
+                IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='steps' AND xtype='U')
+                CREATE TABLE steps (
+                    id UNIQUEIDENTIFIER PRIMARY KEY,
+                    name NVARCHAR(255) NOT NULL,
+                    type NVARCHAR(50) NOT NULL,
+                    threadId UNIQUEIDENTIFIER NOT NULL,
+                    parentId UNIQUEIDENTIFIER,
+                    disableFeedback BIT NOT NULL,
+                    streaming BIT NOT NULL,
+                    waitForAnswer BIT,
+                    isError BIT,
+                    metadata NVARCHAR(MAX),
+                    tags NVARCHAR(MAX),
+                    input NVARCHAR(MAX),
+                    output NVARCHAR(MAX),
+                    createdAt DATETIME2,
+                    start DATETIME2,
+                    [end] DATETIME2,
+                    generation NVARCHAR(MAX),
+                    showInput NVARCHAR(255),
+                    language NVARCHAR(50),
+                    indent INT
+                );
+            """,
+            "create_elements_table": """
+                IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='elements' AND xtype='U')
+                CREATE TABLE elements (
+                    id UNIQUEIDENTIFIER PRIMARY KEY,
+                    threadId UNIQUEIDENTIFIER,
+                    type NVARCHAR(50),
+                    url NVARCHAR(MAX),
+                    chainlitKey NVARCHAR(255),
+                    name NVARCHAR(255) NOT NULL,
+                    display NVARCHAR(50),
+                    objectKey NVARCHAR(255),
+                    size NVARCHAR(50),
+                    page INT,
+                    language NVARCHAR(50),
+                    forId UNIQUEIDENTIFIER,
+                    mime NVARCHAR(100)
+                );
+            """,
+            "create_feedbacks_table": """
+                IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='feedbacks' AND xtype='U')
+                CREATE TABLE feedbacks (
+                    id UNIQUEIDENTIFIER PRIMARY KEY,
+                    forId UNIQUEIDENTIFIER NOT NULL,
+                    threadId UNIQUEIDENTIFIER NOT NULL,
+                    value INT NOT NULL,
+                    comment NVARCHAR(MAX)
+                );
+            """,
+            "insert_message": """
+                INSERT INTO chat_history (
+                    user_id, thread_id, message_id, positive_feedback, timestamp,
+                    role, content, content_filter_results, tool_calls,
+                    tool_call_id, tool_call_function)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            "insert_memory": """
+                INSERT INTO chat_history_summary (
+                    user_id, thread_id, message_id, positive_feedback, timestamp,
+                    role, content, content_filter_results, tool_calls,
+                    tool_call_id, tool_call_function)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            "select_message": """
+                SELECT user_id, thread_id, message_id, positive_feedback, timestamp, role, content,
+                       content_filter_results, tool_calls, tool_call_id, tool_call_function
+                FROM chat_history
+                WHERE message_id = ? AND thread_id = ?
+            """,
+            "select_latest_memory": """
+                SELECT TOP 1 user_id, thread_id, message_id, positive_feedback, timestamp, role, content,
+                       content_filter_results, tool_calls, tool_call_id, tool_call_function
+                FROM chat_history_summary
+                WHERE thread_id = ?
+                ORDER BY timestamp DESC
+            """,
+            "update_message_feedback": """
+                UPDATE chat_history
+                SET positive_feedback = ?
+                WHERE message_id = ? AND thread_id = ?
+            """,
+            "update_memory_feedback": """
+                UPDATE chat_history_summary
+                SET positive_feedback = ?
+                WHERE message_id = ? AND thread_id = ?
+            """,
+            "update_message_content_filter": """
+                UPDATE chat_history
+                SET content_filter_results = ?
+                WHERE message_id = ? AND thread_id = ?
+            """,
+            "update_memory_content_filter": """
+                UPDATE chat_history_summary
+                SET content_filter_results = ?
+                WHERE message_id = ? AND thread_id = ?
+            """,
+            "insert_user": """
+                INSERT INTO users (id, identifier, metadata, createdAt)
+                VALUES (?, ?, ?, ?)
+            """,
+            "select_user": """
+                SELECT id, identifier, metadata, createdAt
+                FROM users
+                WHERE identifier = ?
+            """,
+            "select_thread_messages": """
+                SELECT TOP 5 user_id, thread_id, message_id, positive_feedback, timestamp, role, content,
+                       content_filter_results, tool_calls, tool_call_id, tool_call_function
+                FROM (
+                    SELECT user_id, thread_id, message_id, positive_feedback, timestamp, role, content,
+                           content_filter_results, tool_calls, tool_call_id, tool_call_function,
+                           ROW_NUMBER() OVER (ORDER BY timestamp DESC) as rn
+                    FROM chat_history
+                    WHERE thread_id = ?
+                ) AS ranked
+                WHERE rn <= 5
+                ORDER BY timestamp ASC
+            """,
+            "select_thread_memory": """
+                SELECT TOP 1 user_id, thread_id, message_id, positive_feedback, timestamp, role, content,
+                       content_filter_results, tool_calls, tool_call_id, tool_call_function
+                FROM chat_history_summary
+                WHERE thread_id = ?
+                ORDER BY timestamp DESC
+            """,
+            "delete_thread": """
+                DELETE FROM chat_history
+                WHERE thread_id = ?
+            """,
+            "delete_thread_memory": """
+                DELETE FROM chat_history_summary
+                WHERE thread_id = ?
+            """,
+            "delete_user_memory": """
+                DELETE FROM chat_history_summary
+                WHERE user_id = ?
+            """,
+        }
+        return queries.get(query_type, "")
+
+    def execute_sql(self, sql, params=[], expect_results=True):
+        """Legacy method for backward compatibility."""
+        return self._execute_sql(sql, params, expect_results)
+
+    def _create_tables(self):
+        """Legacy method for backward compatibility. Tables are now created via base class."""
+        pass
+
     async def _get_user_by_id(self, user_id: str) -> IChatHistoryRepository.User | None:
         cursor = self.connection.cursor()
         cursor.execute(
@@ -187,184 +277,12 @@ class azuresql_ChatHistoryRepository(IChatHistoryRepository):
             )
         return None
 
-    async def add_memory(self, message: Message) -> str:
-        message.message_id = str(uuid.uuid4())
-        message.timestamp = datetime.now()
-
-        cursor = self.connection.cursor()
-        cursor.execute(
-            """
-            INSERT INTO chat_history_summary (
-                user_id, thread_id, message_id, positive_feedback, timestamp,
-                role, content, content_filter_results, tool_calls,
-                tool_call_id, tool_call_function)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """,
-            (
-                message.user_id,
-                message.thread_id,
-                message.message_id,
-                message.positive_feedback,
-                message.timestamp,
-                message.role,
-                message.content,
-                message.content_filter_results,
-                message.tool_calls,
-                message.tool_call_id,
-                message.tool_call_function,
-            ),
-        )
-        cursor.close()
-        return message.message_id
-
-    async def add_message(self, message: Message) -> str:
-        message.message_id = str(uuid.uuid4())
-        message.timestamp = datetime.now()
-
-        cursor = self.connection.cursor()
-        cursor.execute(
-            """
-            INSERT INTO chat_history (
-                user_id, thread_id, message_id, positive_feedback, timestamp,
-                role, content, content_filter_results, tool_calls,
-                tool_call_id, tool_call_function)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """,
-            (
-                message.user_id,
-                message.thread_id,
-                message.message_id,
-                message.positive_feedback,
-                message.timestamp,
-                message.role,
-                message.content,
-                message.content_filter_results,
-                message.tool_calls,
-                message.tool_call_id,
-                message.tool_call_function,
-            ),
-        )
-        cursor.close()
-        return message.message_id
-
-    async def add_user(
-        self, identifier, metadata: dict = {}
-    ) -> IChatHistoryRepository.User:
-        now = self.get_now()
-        new_id = str(uuid.uuid4())
-
-        cursor = self.connection.cursor()
-        cursor.execute(
-            """
-            INSERT INTO users (id, identifier, metadata, createdAt)
-            VALUES (?, ?, ?, ?)
-        """,
-            (new_id, identifier, json.dumps(metadata), now),
-        )
-        cursor.close()
-
-        return IChatHistoryRepository.User(
-            id=uuid.UUID(new_id),
-            identifier=identifier,
-            metadata=metadata,
-            createdAt=self.get_now_as_string(),
-        )
-
-    async def get_user(self, identifier) -> IChatHistoryRepository.User | None:
-        cursor = self.connection.cursor()
-        cursor.execute(
-            """
-            SELECT id, identifier, metadata, createdAt
-            FROM users
-            WHERE identifier = ?
-        """,
-            (identifier,),
-        )
-        row = cursor.fetchone()
-        cursor.close()
-
-        if row:
-            return IChatHistoryRepository.User(
-                id=row[0], identifier=row[1], metadata=row[2], createdAt=row[3]
-            )
-        else:
-            usr = await self.add_user(identifier)
-            return usr
-
-    async def get_message(self, message_id: str, thread_id: str) -> Message | None:
-        cursor = self.connection.cursor()
-        cursor.execute(
-            """
-            SELECT user_id, thread_id, message_id, positive_feedback, timestamp, role, content,
-                   content_filter_results, tool_calls, tool_call_id, tool_call_function
-            FROM chat_history
-            WHERE message_id = ? AND thread_id = ?
-        """,
-            (message_id, thread_id),
-        )
-        row = cursor.fetchone()
-        cursor.close()
-
-        if row:
-            return Message(
-                user_id=row[0],
-                thread_id=row[1],
-                message_id=row[2],
-                positive_feedback=row[3],
-                timestamp=row[4],
-                role=row[5],
-                content=row[6],
-                content_filter_results=row[7],
-                tool_calls=row[8],
-                tool_call_id=row[9],
-                tool_call_function=row[10],
-            )
-        return None
-
     async def get_threads_for_user(
         self, identifier: str, thread_id: Optional[str]
     ) -> Optional[List[IChatHistoryRepository.ThreadDict]]:
         # This is a simplified implementation
         # In a full implementation, you'd join with threads table and return proper thread data
         return []
-
-    async def get_thread_messages(self, thread_id: str) -> list[Message]:
-        cursor = self.connection.cursor()
-        cursor.execute(
-            """
-            SELECT TOP 5 user_id, thread_id, message_id, positive_feedback, timestamp, role, content,
-                   content_filter_results, tool_calls, tool_call_id, tool_call_function
-            FROM (
-                SELECT user_id, thread_id, message_id, positive_feedback, timestamp, role, content,
-                       content_filter_results, tool_calls, tool_call_id, tool_call_function,
-                       ROW_NUMBER() OVER (ORDER BY timestamp DESC) as rn
-                FROM chat_history
-                WHERE thread_id = ?
-            ) AS ranked
-            WHERE rn <= 5
-            ORDER BY timestamp ASC
-        """,
-            (thread_id,),
-        )
-        rows = cursor.fetchall()
-        cursor.close()
-
-        return [
-            Message(
-                user_id=row[0],
-                thread_id=row[1],
-                message_id=row[2],
-                positive_feedback=row[3],
-                timestamp=row[4],
-                role=row[5],
-                content=row[6],
-                content_filter_results=row[7],
-                tool_calls=row[8],
-                tool_call_id=row[9],
-                tool_call_function=row[10],
-            )
-            for row in rows
-        ]
 
     async def get_thread(self, thread_id: str) -> list[IChatHistoryRepository.Thread]:
         cursor = self.connection.cursor()
@@ -391,45 +309,6 @@ class azuresql_ChatHistoryRepository(IChatHistoryRepository):
             )
             for row in rows
         ]
-
-    async def update_message_feedback(
-        self, message_id: str, thread_id: str, positive_feedback: bool | None
-    ) -> None:
-        cursor = self.connection.cursor()
-        cursor.execute(
-            """
-            UPDATE chat_history
-            SET positive_feedback = ?
-            WHERE message_id = ? AND thread_id = ?
-        """,
-            (positive_feedback, message_id, thread_id),
-        )
-        cursor.close()
-
-    async def update_message_content_filter_results(
-        self, message_id: str, thread_id: str, content_filter_results: dict[str, object]
-    ) -> None:
-        cursor = self.connection.cursor()
-        cursor.execute(
-            """
-            UPDATE chat_history
-            SET content_filter_results = ?
-            WHERE message_id = ? AND thread_id = ?
-        """,
-            (str(content_filter_results), message_id, thread_id),
-        )
-        cursor.close()
-
-    async def delete_thread(self, thread_id: str) -> None:
-        cursor = self.connection.cursor()
-        cursor.execute(
-            """
-            DELETE FROM chat_history
-            WHERE thread_id = ?
-        """,
-            (thread_id,),
-        )
-        cursor.close()
 
     async def add_step(self, step_dict: IChatHistoryRepository.StepDict):
         print("Creating step: ", step_dict)
@@ -547,117 +426,4 @@ class azuresql_ChatHistoryRepository(IChatHistoryRepository):
 
         # Drop the temporary table
         cursor.execute("DROP TABLE #latest_chat_history")
-        cursor.close()
-
-    async def get_memory(self, message_id: str, thread_id: str) -> Message | None:
-        cursor = self.connection.cursor()
-        cursor.execute(
-            """
-            SELECT TOP 1 user_id, thread_id, message_id, positive_feedback, timestamp, role, content,
-                   content_filter_results, tool_calls, tool_call_id, tool_call_function
-            FROM chat_history_summary
-            WHERE thread_id = ?
-            ORDER BY timestamp DESC
-        """,
-            (thread_id,),
-        )
-        row = cursor.fetchone()
-        cursor.close()
-
-        if row:
-            return Message(
-                user_id=row[0],
-                thread_id=row[1],
-                message_id=row[2],
-                positive_feedback=row[3],
-                timestamp=row[4],
-                role=row[5],
-                content=row[6],
-                content_filter_results=row[7],
-                tool_calls=row[8],
-                tool_call_id=row[9],
-                tool_call_function=row[10],
-            )
-        return None
-
-    async def get_thread_memory(self, thread_id: str) -> list[Message]:
-        cursor = self.connection.cursor()
-        cursor.execute(
-            """
-            SELECT TOP 1 user_id, thread_id, message_id, positive_feedback, timestamp, role, content,
-                   content_filter_results, tool_calls, tool_call_id, tool_call_function
-            FROM chat_history_summary
-            WHERE thread_id = ?
-            ORDER BY timestamp DESC
-        """,
-            (thread_id,),
-        )
-        rows = cursor.fetchall()
-        cursor.close()
-
-        return [
-            Message(
-                user_id=row[0],
-                thread_id=row[1],
-                message_id=row[2],
-                positive_feedback=row[3],
-                timestamp=row[4],
-                role=row[5],
-                content=row[6],
-                content_filter_results=row[7],
-                tool_calls=row[8],
-                tool_call_id=row[9],
-                tool_call_function=row[10],
-            )
-            for row in rows
-        ]
-
-    async def update_memory_feedback(
-        self, message_id: str, thread_id: str, positive_feedback: bool | None
-    ) -> None:
-        cursor = self.connection.cursor()
-        cursor.execute(
-            """
-            UPDATE chat_history_summary
-            SET positive_feedback = ?
-            WHERE message_id = ? AND thread_id = ?
-        """,
-            (positive_feedback, message_id, thread_id),
-        )
-        cursor.close()
-
-    async def update_memory_content_filter_results(
-        self, message_id: str, thread_id: str, content_filter_results: dict[str, object]
-    ) -> None:
-        cursor = self.connection.cursor()
-        cursor.execute(
-            """
-            UPDATE chat_history_summary
-            SET content_filter_results = ?
-            WHERE message_id = ? AND thread_id = ?
-        """,
-            (str(content_filter_results), message_id, thread_id),
-        )
-        cursor.close()
-
-    async def delete_thread_memory(self, thread_id: str) -> None:
-        cursor = self.connection.cursor()
-        cursor.execute(
-            """
-            DELETE FROM chat_history_summary
-            WHERE thread_id = ?
-        """,
-            (thread_id,),
-        )
-        cursor.close()
-
-    async def delete_user_memory(self, user_id: str) -> None:
-        cursor = self.connection.cursor()
-        cursor.execute(
-            """
-            DELETE FROM chat_history_summary
-            WHERE user_id = ?
-        """,
-            (user_id,),
-        )
         cursor.close()
