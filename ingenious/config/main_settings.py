@@ -63,7 +63,8 @@ class IngeniousSettings(BaseSettings):
     )
 
     logging: LoggingSettings = Field(
-        default_factory=lambda: LoggingSettings(), description="Application logging configuration"
+        default_factory=lambda: LoggingSettings(),
+        description="Application logging configuration",
     )
 
     tool_service: ToolServiceSettings = Field(
@@ -87,7 +88,8 @@ class IngeniousSettings(BaseSettings):
     )
 
     web_configuration: WebSettings = Field(
-        default_factory=lambda: WebSettings(), description="Web server and API configuration"
+        default_factory=lambda: WebSettings(),
+        description="Web server and API configuration",
     )
 
     receiver_configuration: ReceiverSettings = Field(

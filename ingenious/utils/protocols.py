@@ -31,7 +31,9 @@ class ConversationFlowProtocol(Protocol):
     """Protocol for conversation flow classes in multi-agent systems."""
 
     @abstractmethod
-    def __init__(self, chat_history_repository: Any, config: Any, **kwargs: Any) -> None:
+    def __init__(
+        self, chat_history_repository: Any, config: Any, **kwargs: Any
+    ) -> None:
         """Initialize the conversation flow."""
         ...
 

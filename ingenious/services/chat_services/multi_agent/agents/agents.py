@@ -1,6 +1,6 @@
 import os
 import re
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 
 def decrement_heading_levels(content: str) -> str:

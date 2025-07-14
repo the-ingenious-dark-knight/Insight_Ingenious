@@ -22,7 +22,9 @@ REFRESH_TOKEN_EXPIRE_DAYS = int(
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
+def create_access_token(
+    data: Dict[str, Any], expires_delta: Optional[timedelta] = None
+) -> str:
     """Create a JWT access token"""
     to_encode = data.copy()
     if expires_delta:

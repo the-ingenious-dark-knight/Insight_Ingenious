@@ -40,6 +40,7 @@ Issues = "https://github.com/Insight-Services-APAC/ingenious/issues"
 [dependency-groups]
 dev = [
   "httpx>=0.28.1",
+  "jsonpickle>=4.1.1",
   "mypy>=1.16.1",
   "pip-audit>=2.9.0",
   "pre-commit>=4.2.0",
@@ -57,7 +58,7 @@ dev = [
 ]
 
 [project.optional-dependencies]
-# Minimal installation - basic API functionality only  
+# Minimal installation - basic API functionality only
 minimal = []
 
 # Core features - common production functionality

@@ -74,18 +74,15 @@ ingen workflows bike-insights            # Show bike insights workflow (recommen
 ```
 
 **Available Workflows:**
+- `classification-agent` - Route input to specialized agents (core library, minimal config)
+- `bike-insights` - Sample domain-specific analysis (project template, minimal config) ⭐ **RECOMMENDED**
+- `knowledge-base-agent` - Search knowledge bases using local ChromaDB (core library, stable local implementation)
+- `sql-manipulation-agent` - Execute SQL queries using local SQLite (core library, stable local implementation)
 
-**Core Library Workflows (Always Available):**
-- `classification-agent` - Route input to specialized agents (minimal config - Azure OpenAI only)
-- `knowledge-base-agent` - Search knowledge bases (supports both local ChromaDB and Azure Search)
-- `sql-manipulation-agent` - Execute SQL queries (supports both local SQLite and Azure SQL)
-
-**Project Template Workflows (Created with `ingen init`):**
-- `bike-insights` - Sample domain-specific multi-agent analysis ⭐ **RECOMMENDED START HERE**
-
-**Implementation Notes:**
-- **Local implementations are stable**: ChromaDB (knowledge-base-agent), SQLite (sql-manipulation-agent)
-- **Azure integrations are experimental**: Azure Search, Azure SQL may contain bugs
+**Note:**
+- Core library workflows are always available
+- Template workflows like `bike-insights` are created with `ingen init`
+- Only local implementations (ChromaDB, SQLite) are stable; Azure integrations are experimental
 - Legacy underscore names (`classification_agent`, `bike_insights`, etc.) are still supported for backward compatibility
 
 ### `ingen test`
@@ -129,14 +126,21 @@ ingen workflows --help # Get help for workflows command
 
 ## Data Processing Commands
 
-> **Note**: Data processing commands require additional dependencies. Install with:
-> - For document processing: `uv add ingenious[document-processing]`
-> - For dataprep: `uv add ingenious[dataprep]`
+### `ingen dataprep`
+Web scraping utilities using Scrapfly.
 
-### `ingen document-processing extract <path>`
+**Subcommands:**
+- `crawl <url>` - Scrape single page
+- `batch <urls...>` - Scrape multiple pages
+
+**Example:**
+```bash
+ingen dataprep crawl https://example.com --pretty
+ingen dataprep batch https://a.com https://b.com --out results.ndjson
+```
+
+### `ingen document-processing <path>`
 Extract text from documents (PDF, DOCX, images).
-
-**Requirements:** `ingenious[document-processing]` optional dependency group
 
 **Arguments:**
 - `path` - File path, directory, or HTTP/S URL
@@ -147,29 +151,8 @@ Extract text from documents (PDF, DOCX, images).
 
 **Example:**
 ```bash
-ingen document-processing extract document.pdf --engine pymupdf --out extracted.jsonl
-ingen document-processing extract https://example.com/doc.pdf --out results.jsonl
-```
-
-### `ingen dataprep`
-Web scraping utilities using Scrapfly.
-
-**Requirements:** `ingenious[dataprep]` optional dependency group
-
-**Subcommands:**
-- `crawl <url>` - Scrape single page
-- `batch <urls...>` - Scrape multiple pages
-
-**Common Options:**
-- `--api-key` - Override Scrapfly API key (or use SCRAPFLY_API_KEY env var)
-- `--max-attempts` - Total tries per URL (default: 5)
-- `--delay` - Initial back-off delay in seconds (default: 1)
-- `--js / --no-js` - Enable/disable JavaScript rendering
-
-**Example:**
-```bash
-ingen dataprep crawl https://example.com --pretty
-ingen dataprep batch https://a.com https://b.com --max-attempts 3
+ingen document-processing document.pdf --engine pymupdf --out extracted.jsonl
+ingen document-processing https://example.com/doc.pdf --out results.jsonl
 ```
 
 ## Environment Setup

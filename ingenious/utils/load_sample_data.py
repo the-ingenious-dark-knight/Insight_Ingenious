@@ -1,6 +1,6 @@
 import os
 import sqlite3
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 import pandas as pd  # Import pandas for CSV handling
 
@@ -15,11 +15,15 @@ class sqlite_sample_db:
         db_dir_check: str = os.path.dirname(self.db_path)
         if not os.path.exists(db_dir_check):
             os.makedirs(db_dir_check)
-        self.connection: sqlite3.Connection = sqlite3.connect(self.db_path, check_same_thread=False)
+        self.connection: sqlite3.Connection = sqlite3.connect(
+            self.db_path, check_same_thread=False
+        )
         self._create_table()
         self._load_csv_data()
 
-    def execute_sql(self, sql: str, params: List[Any] = [], expect_results: bool = True) -> Optional[List[Dict[str, Any]]]:
+    def execute_sql(
+        self, sql: str, params: List[Any] = [], expect_results: bool = True
+    ) -> Optional[List[Dict[str, Any]]]:
         connection: Optional[sqlite3.Connection] = None
         try:
             connection = sqlite3.connect(self.db_path)

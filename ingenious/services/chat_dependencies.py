@@ -5,7 +5,6 @@ This module provides FastAPI dependency injection functions
 for chat services and related repositories.
 """
 
-from typing import Any
 from dependency_injector.wiring import Provide, inject
 
 from ingenious.db.chat_history_repository import ChatHistoryRepository

@@ -6,8 +6,9 @@ This module contains commands for managing and viewing workflow requirements.
 
 from __future__ import annotations
 
-import typer
 from typing import Any
+
+import typer
 from rich.console import Console
 from typing_extensions import Annotated
 

@@ -1,5 +1,5 @@
 import asyncio
-from typing import Any, Dict, List, Union
+from typing import Any, Dict
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.security import HTTPBasicCredentials

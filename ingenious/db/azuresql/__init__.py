@@ -84,7 +84,9 @@ class azuresql_ChatHistoryRepository(BaseSQLRepository):
             if cursor:
                 cursor.close()
 
-    def execute_sql(self, sql: str, params: List[Any] = None, expect_results: bool = True) -> Any:
+    def execute_sql(
+        self, sql: str, params: List[Any] = None, expect_results: bool = True
+    ) -> Any:
         """Legacy method for backward compatibility."""
         if params is None:
             params = []

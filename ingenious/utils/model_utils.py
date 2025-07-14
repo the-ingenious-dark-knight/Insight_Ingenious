@@ -1,12 +1,11 @@
 import csv
 import io
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List
 
 import jsonpickle
 import yaml
 from pydantic import BaseModel
-from typing_extensions import TypedDict
 
 
 class Output_Format(Enum):
@@ -22,7 +21,9 @@ def Is_Non_Complex_Field_Check_By_Value(value: Any) -> bool:
 
 
 # Checks if a field is a non-complex field using the type.. note this is not a foolproof method and is based on the assumption that the field is a complex type with RootModel in the name
-def Is_Non_Complex_Field_Check_By_Type(field_type: Any, root_model_name: str = "RootModel") -> bool:
+def Is_Non_Complex_Field_Check_By_Type(
+    field_type: Any, root_model_name: str = "RootModel"
+) -> bool:
     if root_model_name in str(field_type):
         return False
     else:

@@ -1529,6 +1529,7 @@ visualization = [
 [package.dev-dependencies]
 dev = [
     { name = "httpx" },
+    { name = "jsonpickle" },
     { name = "mypy" },
     { name = "pip-audit" },
     { name = "pre-commit" },
@@ -1595,6 +1596,7 @@ provides-extras = ["minimal", "core", "auth", "azure", "ai", "database", "ui", "
 [package.metadata.requires-dev]
 dev = [
     { name = "httpx", specifier = ">=0.28.1" },
+    { name = "jsonpickle", specifier = ">=4.1.1" },
     { name = "mypy", specifier = ">=1.16.1" },
     { name = "pip-audit", specifier = ">=2.9.0" },
     { name = "pre-commit", specifier = ">=4.2.0" },

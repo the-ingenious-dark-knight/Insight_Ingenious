@@ -1,4 +1,4 @@
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 
 class ContentFilterError(Exception):
@@ -9,9 +9,9 @@ class ContentFilterError(Exception):
     )
 
     def __init__(
-        self, 
-        message: str = DEFAULT_MESSAGE, 
-        content_filter_results: Optional[Dict[str, Any]] = None
+        self,
+        message: str = DEFAULT_MESSAGE,
+        content_filter_results: Optional[Dict[str, Any]] = None,
     ) -> None:
         self.message = message
         self.content_filter_results = content_filter_results or {}

@@ -302,14 +302,10 @@ class ChatHistoryRepository:
     async def update_memory(self) -> None:
         return await self.repository.update_memory()
 
-    async def get_thread_messages(
-        self, thread_id: str
-    ) -> Optional[List[Message]]:
+    async def get_thread_messages(self, thread_id: str) -> Optional[List[Message]]:
         return await self.repository.get_thread_messages(thread_id)
 
-    async def get_thread_memory(
-        self, thread_id: str
-    ) -> Optional[List[Message]]:
+    async def get_thread_memory(self, thread_id: str) -> Optional[List[Message]]:
         return await self.repository.get_thread_memory(thread_id)
 
     async def get_threads_for_user(

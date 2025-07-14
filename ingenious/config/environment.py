@@ -64,10 +64,7 @@ def create_minimal_config() -> "IngeniousSettings":
             type="fastapi",
             asynchronous=False,
             authentication=WebAuthenticationSettings(
-                enable=False,
-                username="admin",
-                password="",
-                type="basic"
-            )
+                enable=False, username="admin", password="", type="basic"
+            ),
         ),
     )

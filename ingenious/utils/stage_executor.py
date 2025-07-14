@@ -3,14 +3,16 @@ from abc import ABC, abstractmethod
 from typing import Any, List, Optional
 
 from rich.console import Console
-from rich.progress import Progress, SpinnerColumn, TextColumn, TaskID
+from rich.progress import Progress, SpinnerColumn, TaskID, TextColumn
 
 from ingenious.utils.log_levels import LogLevel
 
 
 class IActionCallable(ABC):
     @abstractmethod
-    async def __call__(self, progress: "ProgressConsoleWrapper", task_id: TaskID, **kwargs: Any) -> None:
+    async def __call__(
+        self, progress: "ProgressConsoleWrapper", task_id: TaskID, **kwargs: Any
+    ) -> None:
         pass
 
 
@@ -21,7 +23,9 @@ class ProgressConsoleWrapper:
         self._completed_items: int = 0
         self._failed_items: int = 0
 
-    def print(self, message: str, level: int = LogLevel.INFO, *args: Any, **kwargs: Any) -> None:
+    def print(
+        self, message: str, level: int = LogLevel.INFO, *args: Any, **kwargs: Any
+    ) -> None:
         if level >= self.log_level:
             # Check if style is in args or kwargs
             style: Optional[str] = kwargs.get("style", None)
@@ -90,7 +94,9 @@ class stage_executor:
                 description=f"[{stage_status}] Stage: {stage_name}"
             )
             # Wrap the Progress object
-            wrapped_progress: ProgressConsoleWrapper = ProgressConsoleWrapper(progress, self.log_level)
+            wrapped_progress: ProgressConsoleWrapper = ProgressConsoleWrapper(
+                progress, self.log_level
+            )
 
             start: float = time.time()
             if option:

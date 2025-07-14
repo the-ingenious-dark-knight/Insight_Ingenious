@@ -1,80 +1,71 @@
 name: Dependency Updates
-
 on:
   schedule:
     # Run every Monday at 09:00 UTC
     - cron: '0 9 * * 1'
   workflow_dispatch: # Allow manual triggering
-
 jobs:
   update-dependencies:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-    
-    - name: Install uv
-      uses: astral-sh/setup-uv@v4
-      with:
-        version: "latest"
-    
-    - name: Set up Python
-      run: uv python install 3.13
-    
-    - name: Check for dependency updates
-      run: |
-        uv sync --upgrade
-        uv lock --upgrade
-        
-    - name: Run security scan on updated dependencies
-      run: |
-        uv run pip-audit --format=json --output=updated-audit.json
-        echo "::group::Security Scan Results"
-        uv run pip-audit --format=table
-        echo "::endgroup::"
-      continue-on-error: true
-    
-    - name: Run tests with updated dependencies
-      run: uv run pytest tests/ -v --tb=short
-      continue-on-error: true
-      id: test-updated
-    
-    - name: Check if updates available
-      id: check-updates
-      run: |
-        if git diff --exit-code uv.lock > /dev/null; then
-          echo "updates_available=false" >> $GITHUB_OUTPUT
-        else
-          echo "updates_available=true" >> $GITHUB_OUTPUT
-        fi
-    
-    - name: Create Pull Request
-      if: steps.check-updates.outputs.updates_available == 'true'
-      uses: peter-evans/create-pull-request@v6
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        commit-message: "deps: update dependency lock file"
-        title: "🔄 Automated dependency updates"
-        body: |
-          ## Automated Dependency Updates
-          
-          This PR contains automated dependency updates.
-          
-          ### Changes
-          - Updated `uv.lock` with latest compatible versions
-          - Updated `requirements.lock` for reproducible deployments
-          
-          ### Testing Status
-          - Security scan: ${{ steps.test-updated.outcome == 'success' && '✅ Passed' || '❌ Failed' }}
-          - Test suite: ${{ steps.test-updated.outcome == 'success' && '✅ Passed' || '❌ Failed' }}
-          
-          ### Review Instructions
-          1. Review the lock file changes
-          2. Verify tests pass in CI
-          3. Check for any breaking changes in the changelog
-          4. Merge if all checks pass
-          
-          > ⚠️ **Note**: If tests fail, please review the dependency changes manually.
-        branch: automated-dependency-updates
-        delete-branch: true
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+      - name: Set up Python
+        run: uv python install 3.13
+      - name: Check for dependency updates
+        run: |
+          uv sync --upgrade
+          uv lock --upgrade
+      - name: Run security scan on updated dependencies
+        run: |
+          uv run pip-audit --format=json --output=updated-audit.json
+          echo "::group::Security Scan Results"
+          uv run pip-audit --format=table
+          echo "::endgroup::"
+        continue-on-error: true
+      - name: Run tests with updated dependencies
+        run: uv run pytest tests/ -v --tb=short
+        continue-on-error: true
+        id: test-updated
+      - name: Check if updates available
+        id: check-updates
+        run: |
+          if git diff --exit-code uv.lock > /dev/null; then
+            echo "updates_available=false" >> $GITHUB_OUTPUT
+          else
+            echo "updates_available=true" >> $GITHUB_OUTPUT
+          fi
+      - name: Create Pull Request
+        if: steps.check-updates.outputs.updates_available == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "deps: update dependency lock file"
+          title: "🔄 Automated dependency updates"
+          body: |
+            ## Automated Dependency Updates
+
+            This PR contains automated dependency updates.
+
+            ### Changes
+            - Updated `uv.lock` with latest compatible versions
+            - Updated `requirements.lock` for reproducible deployments
+
+            ### Testing Status
+            - Security scan: ${{ steps.test-updated.outcome == 'success' && '✅ Passed' || '❌ Failed' }}
+            - Test suite: ${{ steps.test-updated.outcome == 'success' && '✅ Passed' || '❌ Failed' }}
+
+            ### Review Instructions
+            1. Review the lock file changes
+            2. Verify tests pass in CI
+            3. Check for any breaking changes in the changelog
+            4. Merge if all checks pass
+
+            > ⚠️ **Note**: If tests fail, please review the dependency changes manually.
+          branch: automated-dependency-updates
+          delete-branch: true

@@ -2,7 +2,7 @@ import json
 import os
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional
 
 import yaml
 from azure.identity import DefaultAzureCredential
@@ -219,7 +219,7 @@ class Profiles:
 
     def get_profile_by_name(self, name: str) -> Optional[Any]:
         for profile in self.profiles:
-            if hasattr(profile, 'name') and profile.name == name:
+            if hasattr(profile, "name") and profile.name == name:
                 return profile
         return None
 

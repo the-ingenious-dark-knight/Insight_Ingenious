@@ -510,7 +510,11 @@ class FallbackEngineStrategy(RecoveryStrategy):
         }
 
     def recover(
-        self, error: ProcessingError, extract_func: Callable[..., Any], src: Any, **kwargs: Any
+        self,
+        error: ProcessingError,
+        extract_func: Callable[..., Any],
+        src: Any,
+        **kwargs: Any,
     ) -> Any:
         """Try extraction with fallback engines."""
         for engine in self.fallback_engines:
@@ -556,7 +560,11 @@ class RetryWithDelayStrategy(RecoveryStrategy):
         )
 
     def recover(
-        self, error: ProcessingError, operation: Callable[..., Any], *args: Any, **kwargs: Any
+        self,
+        error: ProcessingError,
+        operation: Callable[..., Any],
+        *args: Any,
+        **kwargs: Any,
     ) -> Any:
         """Retry the operation with delay."""
         delay = self.base_delay * (2**error.context.retry_count)

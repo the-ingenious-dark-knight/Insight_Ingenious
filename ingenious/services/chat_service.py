@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 
-from ingenious.models.config import Config
 from ingenious.core.error_handling import operation_context
 from ingenious.core.structured_logging import get_logger
 from ingenious.db.chat_history_repository import ChatHistoryRepository
@@ -8,6 +7,7 @@ from ingenious.errors import (
     ChatServiceError,
 )
 from ingenious.models.chat import ChatRequest, ChatResponse
+from ingenious.models.config import Config
 from ingenious.utils.imports import import_class_with_fallback
 
 logger = get_logger(__name__)

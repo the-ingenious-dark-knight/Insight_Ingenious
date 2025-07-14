@@ -24,7 +24,9 @@ logger = get_logger(__name__)
 class RequestContextMiddleware(BaseHTTPMiddleware):
     """Middleware to set request context for structured logging and tracing."""
 
-    async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
+    async def dispatch(
+        self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
         start_time = time.time()
 
         # Extract user info from request if available
@@ -113,7 +115,9 @@ class RequestContextMiddleware(BaseHTTPMiddleware):
             # Clear context after request
             clear_request_context()
 
-    def _extract_user_from_auth_header(self, auth_header: Optional[str]) -> Optional[str]:
+    def _extract_user_from_auth_header(
+        self, auth_header: Optional[str]
+    ) -> Optional[str]:
         """Extract user ID from Authorization header."""
         if auth_header and auth_header.startswith("Bearer "):
             try:

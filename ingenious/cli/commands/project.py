@@ -6,9 +6,7 @@ This module contains commands for initializing projects and managing project str
 
 from __future__ import annotations
 
-import os
 import shutil
-import stat
 from pathlib import Path
 
 from ingenious.cli.base import BaseCommand, CommandError, ExitCode
@@ -17,7 +15,7 @@ from ingenious.cli.utilities import FileOperations, OutputFormatters
 
 class InitCommand(BaseCommand):
     """Initialize a new Insight Ingenious project."""
-    
+
     def execute(self) -> None:
         """
         Initialize a new Insight Ingenious project in the current directory.
@@ -35,18 +33,20 @@ class InitCommand(BaseCommand):
         🎯 INCLUDES: Pre-configured quickstart-1 templates for immediate bike-insights testing!
         """
         progress = self.start_progress("Initializing project structure...")
-        
+
         try:
             self._create_project_structure()
             self.stop_progress()
-            
+
             self.print_success("Project initialization completed!")
             self._show_next_steps()
-            
+
         except Exception as e:
             self.stop_progress()
-            raise CommandError(f"Project initialization failed: {e}", ExitCode.GENERAL_ERROR)
-    
+            raise CommandError(
+                f"Project initialization failed: {e}", ExitCode.GENERAL_ERROR
+            )
+
     def _create_project_structure(self) -> None:
         """Create the project directory structure."""
         base_path = Path(__file__).parent.parent.parent
@@ -54,21 +54,25 @@ class InitCommand(BaseCommand):
             "ingenious_extensions": base_path / "ingenious_extensions_template",
             "tmp": None,  # No template, just create the folder
         }
-        
+
         # Create directories from templates
         for folder_name, template_path in templates_paths.items():
             destination = Path.cwd() / folder_name
-            
+
             # Skip if the destination folder already exists
             if destination.exists():
-                self.print_warning(f"Folder '{folder_name}' already exists. Skipping...")
+                self.print_warning(
+                    f"Folder '{folder_name}' already exists. Skipping..."
+                )
                 continue
-            
+
             # Check if a template path exists (if applicable)
             if template_path and not template_path.exists():
-                self.print_warning(f"Template directory '{template_path}' not found. Skipping...")
+                self.print_warning(
+                    f"Template directory '{template_path}' not found. Skipping..."
+                )
                 continue
-            
+
             try:
                 if template_path:
                     # Copy from template
@@ -79,16 +83,18 @@ class InitCommand(BaseCommand):
                     # Just create the directory
                     FileOperations.ensure_directory(destination, folder_name)
                     self.print_success(f"Created '{folder_name}/' directory")
-                    
+
             except Exception as e:
-                raise CommandError(f"Failed to create {folder_name}: {e}", ExitCode.GENERAL_ERROR)
-        
+                raise CommandError(
+                    f"Failed to create {folder_name}: {e}", ExitCode.GENERAL_ERROR
+                )
+
         # Create configuration files
         self._create_config_files(base_path)
-        
+
         # Create Docker files
         self._create_docker_files(base_path)
-    
+
     def _create_config_files(self, base_path: Path) -> None:
         """Create configuration files in the project root."""
         config_files = {
@@ -96,14 +102,14 @@ class InitCommand(BaseCommand):
             "profiles.yml": base_path / "config_templates" / "profiles.yml",
             ".env.example": base_path / "config_templates" / ".env.example",
         }
-        
+
         for filename, template_path in config_files.items():
             destination = Path.cwd() / filename
-            
+
             if destination.exists():
                 self.print_warning(f"File '{filename}' already exists. Skipping...")
                 continue
-            
+
             try:
                 if template_path.exists():
                     shutil.copy2(template_path, destination)
@@ -112,25 +118,25 @@ class InitCommand(BaseCommand):
                     # Create a basic file if template doesn't exist
                     self._create_default_config_file(filename, destination)
                     self.print_success(f"Created default '{filename}'")
-                    
+
             except Exception as e:
                 self.logger.error(f"Failed to create {filename}: {e}")
                 # Don't fail the entire operation for config files
-    
+
     def _create_docker_files(self, base_path: Path) -> None:
         """Create Docker-related files."""
         docker_files = {
             "Dockerfile": base_path / "docker_templates" / "Dockerfile",
             ".dockerignore": base_path / "docker_templates" / ".dockerignore",
         }
-        
+
         for filename, template_path in docker_files.items():
             destination = Path.cwd() / filename
-            
+
             if destination.exists():
                 self.print_warning(f"File '{filename}' already exists. Skipping...")
                 continue
-            
+
             try:
                 if template_path.exists():
                     shutil.copy2(template_path, destination)
@@ -139,11 +145,11 @@ class InitCommand(BaseCommand):
                     # Create a basic file if template doesn't exist
                     self._create_default_docker_file(filename, destination)
                     self.print_success(f"Created default '{filename}'")
-                    
+
             except Exception as e:
                 self.logger.error(f"Failed to create {filename}: {e}")
                 # Don't fail the entire operation for Docker files
-    
+
     def _create_default_config_file(self, filename: str, destination: Path) -> None:
         """Create a default configuration file if template is missing."""
         if filename == "config.yml":
@@ -155,7 +161,7 @@ project:
 
 models:
   default: "gpt-4"
-  
+
 profile: "default"
 """
         elif filename == "profiles.yml":
@@ -179,10 +185,10 @@ INGENIOUS_PROFILE_PATH=./profiles.yml
 """
         else:
             content = f"# {filename} - Created by Insight Ingenious\n"
-        
-        with open(destination, 'w') as f:
+
+        with open(destination, "w") as f:
             f.write(content)
-    
+
     def _create_default_docker_file(self, filename: str, destination: Path) -> None:
         """Create a default Docker file if template is missing."""
         if filename == "Dockerfile":
@@ -236,37 +242,36 @@ coverage.xml
 """
         else:
             content = f"# {filename} - Created by Insight Ingenious\n"
-        
-        with open(destination, 'w') as f:
+
+        with open(destination, "w") as f:
             f.write(content)
-    
+
     def _show_next_steps(self) -> None:
         """Show next steps after project initialization."""
         next_steps = [
             "1. Copy .env.example to .env and add your credentials",
-            "2. Update config.yml and profiles.yml for your environment", 
+            "2. Update config.yml and profiles.yml for your environment",
             "3. Set environment variables:",
             "   export INGENIOUS_PROJECT_PATH=$(pwd)/config.yml",
             "   export INGENIOUS_PROFILE_PATH=$(pwd)/profiles.yml",
-            "4. Start the server: ingen serve"
+            "4. Start the server: ingen serve",
         ]
-        
+
         panel = OutputFormatters.create_info_panel(
-            "\n".join(next_steps),
-            "🚀 Next Steps",
-            "green"
+            "\n".join(next_steps), "🚀 Next Steps", "green"
         )
         self.console.print(panel)
-        
-        self.console.print("\n[bold yellow]💡 For detailed configuration help:[/bold yellow]")
+
+        self.console.print(
+            "\n[bold yellow]💡 For detailed configuration help:[/bold yellow]"
+        )
         self.console.print("   ingen workflows --help")
 
 
 # Backward compatibility functions
 def register_commands(app, console) -> None:
     """Register project-related commands with the typer app."""
-    import typer
-    
+
     @app.command(name="init", help="Initialize a new Insight Ingenious project")
     def init():
         """
@@ -296,7 +301,7 @@ def register_commands(app, console) -> None:
         """
         cmd = InitCommand(console)
         cmd.run()
-    
+
     # Keep old command for backward compatibility
     @app.command(hidden=True)
     def initialize_new_project():

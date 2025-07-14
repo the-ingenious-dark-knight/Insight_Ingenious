@@ -56,7 +56,7 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import Iterable, Tuple, Union, TextIO
+from typing import Iterable, TextIO, Tuple, Union
 
 import typer
 from rich import print as rprint

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import importlib
-from typing import Any, Dict, List, Optional, Tuple, TypeAlias
+from typing import Dict, List, Optional, Tuple, TypeAlias
 
 import typer
 from click import Command, Context
@@ -55,14 +55,13 @@ class LazyGroup(TyperGroup):
             sub_app = getattr(module, attr_name)
         except ModuleNotFoundError as exc:
             # Provide a short, actionable installation message instead of a stack-trace.
-            raise typer.Exit(
-                code=1,
-                message=(
-                    f"\n[{extra}] extra not installed.\n"
-                    "Install with:\n\n"
-                    f"    pip install 'insight-ingenious[{extra}]'\n"
-                ),
-            ) from exc
+            message = (
+                f"\n[{extra}] extra not installed.\n"
+                "Install with:\n\n"
+                f"    pip install 'insight-ingenious[{extra}]'\n"
+            )
+            typer.echo(message, err=True)
+            raise typer.Exit(code=1) from exc
 
         # Typer >= 0.15 requires us to return a Click command, not a Typer app.
         if isinstance(sub_app, Command):

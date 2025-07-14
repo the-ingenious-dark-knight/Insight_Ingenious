@@ -98,10 +98,7 @@ class ChainlitSettings(BaseModel):
             "", description="GitHub OAuth client ID (if using GitHub auth)"
         )
 
-    authentication: AuthenticationSettings = Field(
-        default_factory=lambda: AuthenticationSettings(),
-        description="Authentication configuration for Chainlit",
-    )
+    authentication: AuthenticationSettings = AuthenticationSettings()
 
 
 class PromptTunerSettings(BaseModel):
@@ -220,10 +217,7 @@ class WebSettings(BaseModel):
     asynchronous: bool = Field(
         False, description="Enable asynchronous response handling"
     )
-    authentication: WebAuthenticationSettings = Field(
-        default_factory=lambda: WebAuthenticationSettings(),
-        description="Web authentication configuration",
-    )
+    authentication: WebAuthenticationSettings = WebAuthenticationSettings()
 
     @field_validator("port")
     @classmethod
@@ -292,14 +286,8 @@ class FileStorageSettings(BaseModel):
     Supports local and cloud storage options.
     """
 
-    revisions: FileStorageContainerSettings = Field(
-        default_factory=lambda: FileStorageContainerSettings(),
-        description="Storage configuration for revision files",
-    )
-    data: FileStorageContainerSettings = Field(
-        default_factory=lambda: FileStorageContainerSettings(),
-        description="Storage configuration for data files",
-    )
+    revisions: FileStorageContainerSettings = FileStorageContainerSettings()
+    data: FileStorageContainerSettings = FileStorageContainerSettings()
 
 
 class ReceiverSettings(BaseModel):

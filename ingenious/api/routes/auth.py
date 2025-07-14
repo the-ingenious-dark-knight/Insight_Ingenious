@@ -113,7 +113,9 @@ async def refresh_access_token(refresh_data: RefreshRequest) -> TokenResponse:
 
 
 @router.get("/verify")
-async def verify_token_endpoint(token: Annotated[str, Depends(security)]) -> Dict[str, Any]:
+async def verify_token_endpoint(
+    token: Annotated[str, Depends(security)],
+) -> Dict[str, Any]:
     """Verify if a token is valid"""
     try:
         credentials_exception = HTTPException(

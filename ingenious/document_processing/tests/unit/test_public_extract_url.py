@@ -69,12 +69,16 @@ class _FakeResp(Response):
         self.status_code = status
         self._content = body
         # Only *Content‑Length* is inspected upstream, so a single header suffices.
-        self.headers: CaseInsensitiveDict[str] = CaseInsensitiveDict({"Content-Length": str(len(body))})
+        self.headers: CaseInsensitiveDict[str] = CaseInsensitiveDict(
+            {"Content-Length": str(len(body))}
+        )
 
     # --------------------------------------------------------------------- #
     # Public shim API                                                       #
     # --------------------------------------------------------------------- #
-    def iter_content(self, chunk_size: int | None = None, decode_unicode: bool = False) -> Iterator[bytes]:  # noqa: D401 – clear enough without "Returns".
+    def iter_content(
+        self, chunk_size: int | None = None, decode_unicode: bool = False
+    ) -> Iterator[bytes]:  # noqa: D401 – clear enough without "Returns".
         """Yield the entire *body* once to emulate a streamed download."""
 
         if self._content:

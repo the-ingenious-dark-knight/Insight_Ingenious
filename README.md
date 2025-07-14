@@ -45,7 +45,7 @@ Get up and running in 5 minutes with Azure OpenAI!
     #### For Windows-based Environments
     ```bash
     $env:INGENIOUS_PROJECT_PATH = "{your_project_folder}/config.yml"
-    $env:INGENIOUS_PROFILE_PATH = "{profile_folder_location}/profiles.yml"                        
+    $env:INGENIOUS_PROFILE_PATH = "{profile_folder_location}/profiles.yml"
     uv run ingen validate  # Check configuration before starting
     ```
 
@@ -85,7 +85,7 @@ That's it! You should see a JSON response with AI analysis of the input.
 - `ingen prompt-tuner` - Start standalone prompt tuning interface
 
 **Data processing commands:**
-- `ingen document-processing extract <path>` - Extract text from documents (PDF, DOCX, images) 
+- `ingen document-processing extract <path>` - Extract text from documents (PDF, DOCX, images)
 - `ingen dataprep crawl <url>` - Web scraping utilities using Scrapfly
 
 **Help and information:**
@@ -136,7 +136,7 @@ Insight Ingenious provides multiple conversation workflows with different config
 
 ### Configuration Requirements by Workflow
 - **Minimal setup** (Azure OpenAI only): `classification-agent`
-- **Requires Azure Search**: `knowledge-base-agent` 
+- **Requires Azure Search**: `knowledge-base-agent`
 - **Requires database**: `sql-manipulation-agent` (supports both Azure SQL and SQLite)
 
 > **Note**: Azure integrations (Search, SQL) are supported but may require additional configuration. Local implementations (SQLite) are recommended for development and testing.

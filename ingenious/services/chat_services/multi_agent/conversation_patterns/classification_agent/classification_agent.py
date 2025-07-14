@@ -1,4 +1,5 @@
-from typing import Dict, List, Tuple, Any, Callable
+from typing import Any, Callable, Dict, List, Tuple
+
 import autogen
 import autogen.retrieve_utils
 import autogen.runtime_logging
@@ -23,7 +24,9 @@ class ConversationPattern:
         self.memory_path = memory_path
         self.thread_memory = thread_memory
         self.topic_agents: List[autogen.AssistantAgent] = []
-        self.termination_msg: Callable[[Dict[str, Any]], bool] = lambda x: "TERMINATE" in x.get("content", "").upper()
+        self.termination_msg: Callable[[Dict[str, Any]], bool] = (
+            lambda x: "TERMINATE" in x.get("content", "").upper()
+        )
         self.context = ""
 
         self.user_proxy = autogen.UserProxyAgent(

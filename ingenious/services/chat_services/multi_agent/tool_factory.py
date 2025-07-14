@@ -4,12 +4,12 @@ Contains utility functions for AI search, SQL operations, and other tools.
 """
 
 import json
-from typing import List, Tuple, Any, Protocol
+from typing import Any, List, Protocol, Tuple
 
 
 class SearchToolProtocol(Protocol):
     """Protocol for search tool functions."""
-    
+
     async def aisearch(self, search_query: str, index_name: str = "default") -> str:
         """Perform AI search."""
         ...
@@ -17,11 +17,11 @@ class SearchToolProtocol(Protocol):
 
 class SQLToolProtocol(Protocol):
     """Protocol for SQL tool functions."""
-    
+
     def get_db_attr(self, config_obj: Any) -> Tuple[str, List[str]]:
         """Get database attributes."""
         ...
-    
+
     async def execute_sql_local(self, sql_query: str) -> str:
         """Execute SQL query locally."""
         ...
