@@ -205,7 +205,7 @@ class TestAPIDependencyInjection:
         mock_get_config.return_value = mock_config
 
         # Test request that would trigger security check
-        response = client.post(
+        client.post(
             "/api/v1/chat",
             json={
                 "message": "Hello",
@@ -224,8 +224,8 @@ class TestAPIDependencyInjection:
         container = get_container()
 
         # Test that factory providers create new instances
-        service1 = container.chat_service_factory()
-        service2 = container.chat_service_factory()
+        container.chat_service_factory()
+        container.chat_service_factory()
 
         # For Factory providers, these should be different instances
         # (Note: actual behavior depends on the provider type used)
@@ -260,7 +260,7 @@ class TestAPIDependencyInjection:
                     mock_service = Mock()
                     mock_create.return_value = mock_service
 
-                    service = container.chat_service_factory()
+                    container.chat_service_factory()
 
                     # Verify dependencies were resolved
                     mock_create.assert_called_once_with(

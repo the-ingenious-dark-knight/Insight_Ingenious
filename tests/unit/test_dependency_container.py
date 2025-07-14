@@ -72,7 +72,7 @@ class TestDependencyContainer:
                 mock_service = Mock()
                 mock_openai.return_value = mock_service
 
-                service = container.openai_service()
+                container.openai_service()
 
                 mock_openai.assert_called_once_with(
                     azure_endpoint="https://test.openai.azure.com",
@@ -145,7 +145,7 @@ class TestDependencyContainer:
                     mock_service = Mock()
                     mock_create.return_value = mock_service
 
-                    service = container.chat_service_factory()
+                    container.chat_service_factory()
 
                     mock_create.assert_called_once_with(
                         config=mock_config, chat_history_repository=mock_repo
@@ -166,7 +166,7 @@ class TestDependencyContainer:
                 mock_service = Mock()
                 mock_service_class.return_value = mock_service
 
-                service = container.message_feedback_service()
+                container.message_feedback_service()
 
                 mock_service_class.assert_called_once_with(
                     chat_history_repository=mock_repo

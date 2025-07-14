@@ -32,7 +32,7 @@ class InitCommand(BaseCommand):
 
         🎯 INCLUDES: Pre-configured quickstart-1 templates for immediate bike-insights testing!
         """
-        progress = self.start_progress("Initializing project structure...")
+        self.start_progress("Initializing project structure...")
 
         try:
             self._create_project_structure()

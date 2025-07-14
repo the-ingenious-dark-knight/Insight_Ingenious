@@ -7,10 +7,14 @@ This module contains commands for starting and managing the API server.
 from __future__ import annotations
 
 import os
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from ingenious.cli.base import BaseCommand, CommandError, ExitCode
 from ingenious.cli.utilities import ValidationUtils
+
+if TYPE_CHECKING:
+    import typer
+    from rich.console import Console
 
 
 class ServeCommand(BaseCommand):
@@ -51,7 +55,7 @@ class ServeCommand(BaseCommand):
             self._show_config_help()
             raise
 
-        progress = self.start_progress("Starting API server...")
+        self.start_progress("Starting API server...")
 
         try:
             # Import and start the server
@@ -93,7 +97,6 @@ class ServeCommand(BaseCommand):
 # Backward compatibility
 def register_commands(app: typer.Typer, console: Console) -> None:
     """Register server-related commands with the typer app."""
-    import typer
     from typing_extensions import Annotated
 
     @app.command(name="serve", help="Start the API server with web interface")

@@ -1408,13 +1408,22 @@ name = "ingenious"
 version = "0.1.4"
 source = { editable = "." }
 dependencies = [
+    { name = "autogen-agentchat" },
+    { name = "azure-identity" },
+    { name = "azure-keyvault-secrets" },
     { name = "dependency-injector" },
     { name = "fastapi" },
     { name = "jsonpickle" },
+    { name = "openai" },
+    { name = "passlib" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
+    { name = "pyodbc" },
+    { name = "python-jose" },
     { name = "structlog" },
+    { name = "tiktoken" },
     { name = "typer" },
+    { name = "uvicorn" },
 ]
 
 [package.optional-dependencies]
@@ -1549,13 +1558,16 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "aiosqlite", marker = "extra == 'core'", specifier = "==0.21.0" },
+    { name = "autogen-agentchat", specifier = ">=0.5.7" },
     { name = "autogen-agentchat", marker = "extra == 'ai'", specifier = "==0.5.7" },
     { name = "autogen-ext", extras = ["openai"], marker = "extra == 'ai'", specifier = "==0.5.7" },
     { name = "azure-ai-documentintelligence", marker = "extra == 'document-processing'", specifier = "==1.0.2" },
     { name = "azure-core", marker = "extra == 'azure'", specifier = "==1.34.0" },
     { name = "azure-cosmos", marker = "extra == 'azure'", specifier = "==4.9.0" },
+    { name = "azure-identity", specifier = ">=1.17.1" },
     { name = "azure-identity", marker = "extra == 'azure'", specifier = "==1.17.1" },
     { name = "azure-keyvault", marker = "extra == 'azure'", specifier = "==4.2.0" },
+    { name = "azure-keyvault-secrets", specifier = ">=4.10.0" },
     { name = "azure-search-documents", marker = "extra == 'azure'", specifier = "==11.5.2" },
     { name = "azure-storage-blob", marker = "extra == 'azure'", specifier = "==12.25.1" },
     { name = "backoff", marker = "extra == 'dataprep'", specifier = "==2.2.0" },
@@ -1572,7 +1584,9 @@ requires-dist = [
     { name = "jinja2", marker = "extra == 'core'", specifier = "==3.1.6" },
     { name = "jsonpickle", specifier = "==4.1.1" },
     { name = "matplotlib", marker = "extra == 'visualization'", specifier = "==3.10.3" },
+    { name = "openai", specifier = ">=1.82.0" },
     { name = "openai", marker = "extra == 'ai'", specifier = "==1.82.0" },
+    { name = "passlib", specifier = ">=1.7.4" },
     { name = "passlib", marker = "extra == 'auth'", specifier = "==1.7.4" },
     { name = "pdfminer-six", marker = "extra == 'document-advanced'", specifier = "==20250506" },
     { name = "psutil", marker = "extra == 'database'", specifier = "==7.0.0" },
@@ -1580,16 +1594,20 @@ requires-dist = [
     { name = "pydantic", specifier = "==2.11.5" },
     { name = "pydantic-settings", specifier = ">=2.10.1" },
     { name = "pymupdf", marker = "extra == 'document-processing'", specifier = "==1.26.1" },
+    { name = "pyodbc", specifier = ">=5.2.0" },
     { name = "pyodbc", marker = "extra == 'database'", specifier = "==5.2.0" },
     { name = "python-dotenv", marker = "extra == 'core'", specifier = "==1.0.1" },
     { name = "python-dotenv", marker = "extra == 'dataprep'", specifier = "==1.0.1" },
+    { name = "python-jose", specifier = ">=3.5.0" },
     { name = "python-jose", extras = ["cryptography"], marker = "extra == 'auth'", specifier = "==3.5.0" },
     { name = "scrapfly-sdk", marker = "extra == 'dataprep'", specifier = "==0.8.23" },
     { name = "seaborn", marker = "extra == 'visualization'", specifier = "==0.13.2" },
     { name = "sentence-transformers", marker = "extra == 'ml'", specifier = "==5.0.0" },
     { name = "structlog", specifier = "==25.4.0" },
+    { name = "tiktoken", specifier = ">=0.9.0" },
     { name = "typer", specifier = "==0.16.0" },
     { name = "unstructured", extras = ["all-docs"], marker = "extra == 'document-advanced'", specifier = "==0.17.2" },
+    { name = "uvicorn", specifier = ">=0.35.0" },
 ]
 provides-extras = ["minimal", "core", "auth", "azure", "ai", "database", "ui", "document-processing", "document-advanced", "ml", "dataprep", "visualization", "development", "standard", "full"]
 

@@ -11,7 +11,6 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from ingenious.config.config import Config
 from ingenious.db.sqlite import ConnectionPool, sqlite_ChatHistoryRepository
 from ingenious.models.message import Message
 
@@ -253,7 +252,7 @@ class TestSQLiteRepositoryWithPool:
     @pytest.fixture
     def config(self, temp_db_path):
         """Create a test configuration."""
-        config = MagicMock(spec=Config)
+        config = MagicMock(spec=IngeniousSettings)
         config.chat_history = MagicMock()
         config.chat_history.database_path = temp_db_path
         config.chat_history.connection_pool_size = 5

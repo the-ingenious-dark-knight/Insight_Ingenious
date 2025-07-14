@@ -264,7 +264,7 @@ class LLMUsageTracker(logging.Handler):
     def __init__(
         self,
         agents: Agents,
-        config: ig_config.Config,
+        config: ig_config.IngeniousSettings,
         chat_history_repository: ChatHistoryRepository,
         revision_id: str,
         identifier: str,

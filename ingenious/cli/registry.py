@@ -138,8 +138,6 @@ class CommandRegistry:
                 )
 
             # Create a mock app to capture command registrations
-            register_func = module.register_commands
-
             # For now, we'll note that the module is registered
             # The actual command registration still happens through the original pattern
             self._registered_modules.add(module_name)

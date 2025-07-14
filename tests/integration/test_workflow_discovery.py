@@ -83,9 +83,7 @@ class TestWorkflowDiscovery:
         self.discovery.discover_workflows()
 
         # Force refresh should bypass cache
-        with patch.object(
-            self.discovery, "_validate_workflow", return_value=True
-        ) as mock_validate:
+        with patch.object(self.discovery, "_validate_workflow", return_value=True):
             workflows = self.discovery.discover_workflows(force_refresh=True)
             # Should have attempted validation again
             # (May not be called if no workflows found, but cache should be cleared)
@@ -298,7 +296,7 @@ class TestNamespaceIntegration:
         mock_import.return_value = Mock(__path__=["/fake/path"])
 
         discovery = WorkflowDiscovery()
-        workflows = discovery.discover_workflows()
+        discovery.discover_workflows()
 
         # Should have attempted to import from all namespaces
         expected_calls = 3  # Number of namespaces

@@ -15,7 +15,7 @@ from ingenious.models.message import Message
 class MockSQLRepository(BaseSQLRepository):
     """Mock implementation of BaseSQLRepository for testing."""
 
-    def __init__(self, config: Config.Config):
+    def __init__(self, config: Config.IngeniousSettings):
         self.connection_initialized = False
         self.executed_queries = []
         self.mock_results = {}

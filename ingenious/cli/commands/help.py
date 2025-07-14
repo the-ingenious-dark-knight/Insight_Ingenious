@@ -328,7 +328,7 @@ class ValidateCommand(BaseCommand):
     def _validate_environment_variables(self) -> bool:
         """Validate environment variables."""
         try:
-            paths = self.validate_config_paths()
+            self.validate_config_paths()
             self.print_success("Environment variables are properly configured")
             return True
         except CommandError as e:
