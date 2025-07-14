@@ -66,15 +66,16 @@ engine is *not* re‑entrant it must implement its own locking.
 
 from __future__ import annotations
 
-import logging
 import os
 from functools import lru_cache
 from importlib import import_module
 from typing import Iterable
 
+from ingenious.core.structured_logging import get_logger
+
 from .base import DocumentExtractor, Element  # re‑export for typing
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # --------------------------------------------------------------------------- #
 # Registry of extractor back‑ends                                             #
@@ -138,7 +139,11 @@ def _load(name: str) -> DocumentExtractor:
     module_path, class_name = _ENGINES[name].split(":", 1)
     extractor_cls = getattr(import_module(module_path), class_name)
     extractor: DocumentExtractor = extractor_cls()  # type: ignore[call‑arg]
-    logger.debug("Loaded document extractor %s → %s", name, extractor_cls.__name__)
+    logger.debug(
+        "Loaded document extractor",
+        engine_name=name,
+        extractor_class=extractor_cls.__name__,
+    )
     return extractor
 
 

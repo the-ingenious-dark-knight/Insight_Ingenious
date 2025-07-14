@@ -1,5 +1,4 @@
 import json
-import logging
 import os
 from pathlib import Path
 
@@ -9,11 +8,12 @@ from azure.keyvault.secrets import SecretClient
 from pydantic import ValidationError
 
 from ingenious.config.profile import Profiles
+from ingenious.core.structured_logging import get_logger
 from ingenious.models import config as config_models
 from ingenious.models import config_ns as config_ns_models
 from ingenious.models import profile as profile_models
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def substitute_environment_variables(yaml_content: str) -> str:

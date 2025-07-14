@@ -1,10 +1,10 @@
-import logging
-
 import autogen
 import autogen.retrieve_utils
 import autogen.runtime_logging
 
-logger = logging.getLogger(__name__)
+from ingenious.core.structured_logging import get_logger
+
+logger = get_logger(__name__)
 
 
 class ConversationPattern:

@@ -1,4 +1,3 @@
-import logging
 import os
 import secrets
 
@@ -28,7 +27,9 @@ from ingenious.services.message_feedback_service import MessageFeedbackService
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../../.."))
 
-logger = logging.getLogger(__name__)
+from ingenious.core.structured_logging import get_logger
+
+logger = get_logger(__name__)
 security = HTTPBasic()
 bearer_security = HTTPBearer()
 

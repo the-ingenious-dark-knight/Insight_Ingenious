@@ -1,4 +1,3 @@
-import logging
 from pathlib import Path
 
 from openai.types.chat import (
@@ -9,9 +8,10 @@ from openai.types.chat import (
 )
 
 from ingenious.config.config import Config
+from ingenious.core.structured_logging import get_logger
 from ingenious.files.files_repository import FileStorage
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def build_system_prompt(
@@ -85,13 +85,22 @@ async def Sync_Prompt_Templates(_config: Config, revision: str):
 
         for file in jinja_files:
             file_name = file.split("/")[-1]  # Extract the actual file name
-            logger.debug(f"Downloading template: {file_name}")
+            logger.debug(
+                "Downloading template",
+                file_name=file_name,
+                source_path=azure_template_dir,
+            )
             temp_file_content = await fs.read_file(
                 file_name=file_name, file_path=azure_template_dir
             )
             local_file_path = local_template_dir / file_name
             with open(local_file_path, "w", encoding="utf-8") as f:
                 f.write(temp_file_content)
-            logger.debug(f"Template saved (overwritten if existing): {local_file_path}")
+            logger.debug(
+                "Template saved", local_file_path=str(local_file_path), overwritten=True
+            )
     else:
-        logger.debug("Local storage type detected")
+        logger.debug(
+            "Local storage type detected",
+            storage_type=_config.file_storage.revisions.storage_type,
+        )

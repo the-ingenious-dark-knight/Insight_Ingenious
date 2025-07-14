@@ -1,4 +1,3 @@
-import logging
 import os
 from datetime import datetime, timedelta
 from typing import Optional
@@ -7,7 +6,9 @@ from fastapi import HTTPException, status
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 
-logger = logging.getLogger(__name__)
+from ingenious.core.structured_logging import get_logger
+
+logger = get_logger(__name__)
 
 SECRET_KEY = os.getenv("JWT_SECRET_KEY") or "your-secret-key-change-this-in-production"
 ALGORITHM = "HS256"
@@ -75,7 +76,7 @@ def verify_token(token: str, token_type: str = "access") -> dict:
         return payload
 
     except JWTError as e:
-        logger.debug(f"JWT verification failed: {e}")
+        logger.debug("JWT verification failed", error=str(e), token_type=token_type)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",

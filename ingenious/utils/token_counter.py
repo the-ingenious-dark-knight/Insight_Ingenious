@@ -1,9 +1,9 @@
-import logging
-
 import tiktoken
 from openai.types.chat import ChatCompletionMessageParam
 
-logger = logging.getLogger(__name__)
+from ingenious.core.structured_logging import get_logger
+
+logger = get_logger(__name__)
 
 
 def get_max_tokens(model: str = "gpt-3.5-turbo-0125") -> int:
@@ -31,7 +31,11 @@ def num_tokens_from_messages(
     try:
         encoding = tiktoken.encoding_for_model(model)
     except KeyError:
-        logger.warning("Warning: model not found. Using cl100k_base encoding.")
+        logger.warning(
+            "Model not found, using fallback encoding",
+            model=model,
+            encoding="cl100k_base",
+        )
         encoding = tiktoken.get_encoding("cl100k_base")
 
     ## TODO: Move this to a configuration file
@@ -50,12 +54,16 @@ def num_tokens_from_messages(
         tokens_per_name = -1
     elif "gpt-3.5-turbo" in model:
         logger.warning(
-            "Warning: gpt-3.5-turbo may update over time. Returning num tokens assuming gpt-3.5-turbo-0613."
+            "Model may update over time, using fallback",
+            model=model,
+            fallback_model="gpt-3.5-turbo-0613",
         )
         return num_tokens_from_messages(messages, model="gpt-3.5-turbo-0613")
     elif "gpt-4" in model:
         logger.warning(
-            "Warning: gpt-4 may update over time. Returning num tokens assuming gpt-4-0613."
+            "Model may update over time, using fallback",
+            model=model,
+            fallback_model="gpt-4-0613",
         )
         return num_tokens_from_messages(messages, model="gpt-4-0613")
     else:

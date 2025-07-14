@@ -7,6 +7,7 @@ from jinja2 import Environment
 from openai.types.chat import ChatCompletionMessageParam
 
 import ingenious.config.config as ig_config
+from ingenious.core.structured_logging import get_logger
 from ingenious.db.chat_history_repository import ChatHistoryRepository
 from ingenious.dependencies import get_openai_service
 from ingenious.errors.content_filter_error import ContentFilterError
@@ -17,7 +18,7 @@ from ingenious.utils.namespace_utils import (
     normalize_workflow_name,
 )
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class multi_agent_chat_service:
@@ -60,8 +61,11 @@ class multi_agent_chat_service:
         )
         chat_request.thread_memory = "no existing context."
 
-        msg = f"current_memory: {chat_request.thread_memory}"
-        logger.log(level=logging.INFO, msg=msg)
+        logger.info(
+            "Current memory state",
+            thread_id=chat_request.thread_id,
+            memory_length=len(chat_request.thread_memory),
+        )
         # print(msg)
 
         for thread_message in thread_messages:
@@ -212,7 +216,12 @@ class multi_agent_chat_service:
                     )
 
         except Exception as e:
-            logger.error(f"Error occurred while processing conversation flow: {e}")
+            logger.error(
+                "Error occurred while processing conversation flow",
+                conversation_flow=self.conversation_flow,
+                error=str(e),
+                exc_info=True,
+            )
             raise e
 
         # Save chat history if memory_record is enabled
@@ -230,7 +239,11 @@ class multi_agent_chat_service:
                             content=chat_request.user_prompt,
                         )
                     )
-                    logger.info(f"Saved user message: {user_message_id}")
+                    logger.info(
+                        "Saved user message",
+                        message_id=user_message_id,
+                        thread_id=chat_request.thread_id,
+                    )
 
                     # Save agent response
                     agent_message_id = await self.chat_history_repository.add_message(
@@ -241,7 +254,11 @@ class multi_agent_chat_service:
                             content=agent_response.agent_response,
                         )
                     )
-                    logger.info(f"Saved agent message: {agent_message_id}")
+                    logger.info(
+                        "Saved agent message",
+                        message_id=agent_message_id,
+                        thread_id=chat_request.thread_id,
+                    )
 
                     # Save memory summary if available
                     if (
@@ -256,10 +273,18 @@ class multi_agent_chat_service:
                                 content=agent_response.memory_summary,
                             )
                         )
-                        logger.info(f"Saved memory: {memory_id}")
+                        logger.info(
+                            "Saved memory",
+                            memory_id=memory_id,
+                            thread_id=chat_request.thread_id,
+                        )
 
             except Exception as e:
-                logger.warning(f"Failed to save chat history: {e}")
+                logger.warning(
+                    "Failed to save chat history",
+                    thread_id=chat_request.thread_id,
+                    error=str(e),
+                )
 
         return agent_response
 
@@ -340,7 +365,7 @@ class IConversationFlow(ABC):
         self._config = ig_config.get_config()
         self._memory_path = self.GetConfig().chat_history.memory_path
         self._memory_file_path = f"{self._memory_path}/context.md"
-        self._logger = logging.getLogger(__name__)
+        self._logger = get_logger(__name__)
         self._chat_service = parent_multi_agent_chat_service
 
         # Initialize memory manager for cloud storage support

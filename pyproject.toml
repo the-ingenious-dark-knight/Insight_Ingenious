@@ -44,6 +44,7 @@ dependencies = [
   "pymupdf==1.26.1",
   "pyodbc==5.2.0",
   "python-jose[cryptography]>=3.5.0",
+  "structlog>=25.4.0",
   "typer>=0.15.4",
 ]
 

@@ -69,7 +69,6 @@ from __future__ import annotations
 
 import gc
 import io
-import logging
 import mimetypes
 import os
 from pathlib import Path
@@ -78,11 +77,12 @@ from typing import Callable, Iterable, TypeAlias
 import fitz  # PyMuPDF
 import psutil
 
+from ingenious.core.structured_logging import get_logger
 from ingenious.document_processing.utils.fetcher import fetch, is_url
 
 from .base import DocumentExtractor, Element
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # ------------------------------------------------------------------
 # Public type aliases
@@ -143,9 +143,9 @@ class PyMuPDFExtractor(DocumentExtractor):
         memory_growth = current_memory - start_memory
         if memory_growth > max_memory_mb:
             logger.warning(
-                "Memory usage exceeded threshold: %.1fMB growth > %.1fMB limit",
-                memory_growth,
-                max_memory_mb,
+                "Memory usage exceeded threshold",
+                memory_growth_mb=memory_growth,
+                max_memory_mb=max_memory_mb,
             )
             return True
         return False
@@ -188,13 +188,11 @@ class PyMuPDFExtractor(DocumentExtractor):
         - Performs garbage collection after each page
         """
         logger.debug(
-            "PyMuPDFExtractor.extract_stream(src=%r, max_memory_mb=%.1f)",
-            src,
-            max_memory_mb,
+            "Starting stream extraction", src=repr(src), max_memory_mb=max_memory_mb
         )
 
         start_memory = self._get_memory_usage_mb()
-        logger.debug("Starting memory usage: %.1fMB", start_memory)
+        logger.debug("Starting memory usage", memory_mb=start_memory)
 
         # ── Handle input normalization (same as extract()) ──────────────────────
         if isinstance(src, io.BytesIO):
@@ -226,7 +224,9 @@ class PyMuPDFExtractor(DocumentExtractor):
                 else fitz.open(src_for_open)
             )
         except (fitz.FileDataError, RuntimeError) as exc:
-            logger.warning("PyMuPDF failed on %r – %s", src, exc)
+            logger.warning(
+                "PyMuPDF failed to open document", src=repr(src), error=str(exc)
+            )
             return
         finally:
             if stream_bytes is not None:
@@ -235,7 +235,7 @@ class PyMuPDFExtractor(DocumentExtractor):
 
         try:
             total_pages = doc.page_count
-            logger.debug("Processing %d pages with streaming", total_pages)
+            logger.debug("Processing pages with streaming", total_pages=total_pages)
 
             # ── Process pages individually ──────────────────────────────────────
             for page_idx in range(total_pages):
@@ -271,11 +271,11 @@ class PyMuPDFExtractor(DocumentExtractor):
                 if self._should_yield_control(max_memory_mb, start_memory):
                     current_memory = self._get_memory_usage_mb()
                     logger.info(
-                        "Page %d/%d processed. Memory: %.1fMB (+%.1fMB growth)",
-                        current_page_num,
-                        total_pages,
-                        current_memory,
-                        current_memory - start_memory,
+                        "Page processed with high memory usage",
+                        current_page=current_page_num,
+                        total_pages=total_pages,
+                        current_memory_mb=current_memory,
+                        memory_growth_mb=current_memory - start_memory,
                     )
 
                 # Call progress callback if provided
@@ -286,19 +286,19 @@ class PyMuPDFExtractor(DocumentExtractor):
                 if current_page_num % 10 == 0 or current_page_num == total_pages:
                     current_memory = self._get_memory_usage_mb()
                     logger.debug(
-                        "Processed page %d/%d. Memory: %.1fMB (+%.1fMB growth)",
-                        current_page_num,
-                        total_pages,
-                        current_memory,
-                        current_memory - start_memory,
+                        "Processed page",
+                        current_page=current_page_num,
+                        total_pages=total_pages,
+                        current_memory_mb=current_memory,
+                        memory_growth_mb=current_memory - start_memory,
                     )
 
             final_memory = self._get_memory_usage_mb()
             logger.debug(
-                "Completed processing %d pages. Final memory: %.1fMB (+%.1fMB growth)",
-                total_pages,
-                final_memory,
-                final_memory - start_memory,
+                "Completed processing pages",
+                total_pages=total_pages,
+                final_memory_mb=final_memory,
+                memory_growth_mb=final_memory - start_memory,
             )
 
         finally:

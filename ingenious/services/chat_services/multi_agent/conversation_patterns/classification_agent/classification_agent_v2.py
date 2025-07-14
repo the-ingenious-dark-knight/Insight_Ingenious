@@ -1,13 +1,13 @@
-import logging
 from typing import Tuple
 
 from autogen_agentchat.agents import AssistantAgent, UserProxyAgent
 from autogen_agentchat.teams import RoundRobinGroupChat
 from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
 
+from ingenious.core.structured_logging import get_logger
 from ingenious.models import config as _config
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class ConversationPattern:
@@ -55,9 +55,10 @@ class ConversationPattern:
             )
 
         if self.memory_record_switch and self.thread_memory:
-            logger.log(
-                level=logging.DEBUG,
-                msg="Memory recording enabled. Requires `ChatHistorySummariser` for optional dependency.",
+            logger.debug(
+                "Memory recording enabled",
+                thread_memory_length=len(self.thread_memory),
+                note="Requires ChatHistorySummariser for optional dependency",
             )
             run_async_memory_operation(
                 self.memory_manager.write_memory(self.thread_memory)
@@ -124,7 +125,7 @@ class ConversationPattern:
             return final_message, self.context
 
         except Exception as e:
-            logger.error(f"Error in conversation response: {e}")
+            logger.error("Error in conversation response", error=str(e), exc_info=True)
             error_response = {
                 "category": "payload_type_1",
                 "explanation": "Error occurred during classification",

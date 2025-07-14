@@ -1,4 +1,3 @@
-import logging
 import secrets
 from typing import Annotated
 
@@ -12,9 +11,10 @@ from ingenious.auth.jwt import (
     get_username_from_token,
     verify_token,
 )
+from ingenious.core.structured_logging import get_logger
 from ingenious.dependencies import get_config
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 router = APIRouter()
 security = HTTPBearer()
 
@@ -105,7 +105,7 @@ async def refresh_access_token(refresh_data: RefreshRequest):
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error refreshing token: {e}")
+        logger.error("Error refreshing token", error=str(e), exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not refresh token",
@@ -132,7 +132,7 @@ async def verify_token_endpoint(token: Annotated[str, Depends(security)]):
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error verifying token: {e}")
+        logger.error("Error verifying token", error=str(e), exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",

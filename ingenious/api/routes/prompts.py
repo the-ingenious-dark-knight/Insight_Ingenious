@@ -1,5 +1,4 @@
 import asyncio
-import logging
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.security import HTTPBasicCredentials
@@ -7,10 +6,11 @@ from pydantic import BaseModel
 from typing_extensions import Annotated
 
 import ingenious.dependencies as igen_deps
+from ingenious.core.structured_logging import get_logger
 from ingenious.files.files_repository import FileStorage
 from ingenious.utils.namespace_utils import discover_workflows, normalize_workflow_name
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 router = APIRouter()
 
 
@@ -67,7 +67,7 @@ def list_revisions(
             "discovered_from": "template_directories" if revision_ids else "workflows",
         }
     except Exception as e:
-        logger.exception(f"Error listing revisions: {e}")
+        logger.error("Error listing revisions", error=str(e), exc_info=True)
         return {"revisions": [], "count": 0, "error": str(e)}
 
 
@@ -116,7 +116,11 @@ def list_workflows_for_prompts(
                             found_prompts = True
                             break
                 except Exception as e:
-                    logger.debug(f"Error checking workflow {variant}: {e}")
+                    logger.debug(
+                        "Error checking workflow",
+                        workflow_variant=variant,
+                        error=str(e),
+                    )
                     continue
 
             # If we couldn't find prompts, still include the workflow
@@ -137,7 +141,7 @@ def list_workflows_for_prompts(
             "total_workflows_discovered": len(workflows),
         }
     except Exception as e:
-        logger.exception(f"Error listing workflows: {e}")
+        logger.error("Error listing workflows", error=str(e), exc_info=True)
         return {"workflows": [], "count": 0, "error": str(e)}
 
 
@@ -189,7 +193,9 @@ def list_prompts_enhanced(
                     break
 
             except Exception as e:
-                logger.debug(f"Failed to list prompts for revision {rid}: {e}")
+                logger.debug(
+                    "Failed to list prompts for revision", revision_id=rid, error=str(e)
+                )
                 continue
 
         if not files and not successful_revision_id:
@@ -213,7 +219,12 @@ def list_prompts_enhanced(
         }
 
     except Exception as e:
-        logger.exception(f"Error listing prompts for revision {revision_id}: {e}")
+        logger.error(
+            "Error listing prompts for revision",
+            revision_id=revision_id,
+            error=str(e),
+            exc_info=True,
+        )
         return {"revision_id": revision_id, "files": [], "count": 0, "error": str(e)}
 
 
@@ -256,5 +267,11 @@ async def update(
         )
         return {"message": "File updated successfully"}
     except Exception as e:
-        logger.exception(e)
+        logger.error(
+            "Failed to update file",
+            revision_id=revision_id,
+            filename=filename,
+            error=str(e),
+            exc_info=True,
+        )
         raise HTTPException(status_code=500, detail="Failed to update file")

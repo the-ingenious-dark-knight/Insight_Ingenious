@@ -37,16 +37,17 @@ if is_url(url):
 from __future__ import annotations
 
 import contextlib
-import logging
 import os
 import re
 from typing import Final, Union
 
 import requests
 
+from ingenious.core.structured_logging import get_logger
+
 __all__ = ["is_url", "fetch"]
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # --------------------------------------------------------------------------- #
 # Configuration                                                               #
@@ -114,7 +115,12 @@ def fetch(url: str) -> bytes | None:
             content_length = 0
 
         if content_length and content_length > (_MAX_MB << 20):
-            logger.warning("%s exceeds %d MiB – skipped", url, _MAX_MB)
+            logger.warning(
+                "Content size exceeds limit, skipping download",
+                url=url,
+                max_mb=_MAX_MB,
+                content_length_mb=content_length >> 20,
+            )
             return None
 
         # ── Stream with incremental size check ────────────────────────────
@@ -122,14 +128,22 @@ def fetch(url: str) -> bytes | None:
         for chunk in resp.iter_content(chunk_size=1 << 14):  # 16 KiB
             buffer.extend(chunk)
             if len(buffer) > (_MAX_MB << 20):
-                logger.warning("%s exceeds %d MiB – skipped", url, _MAX_MB)
+                logger.warning(
+                    "Download size exceeds limit, aborting",
+                    url=url,
+                    max_mb=_MAX_MB,
+                    current_size_mb=len(buffer) >> 20,
+                )
                 return None
 
         return bytes(buffer)
 
     except requests.RequestException as exc:
         logger.warning(
-            "Download failed for %s – %s: %s", url, exc.__class__.__name__, exc
+            "Download failed",
+            url=url,
+            exception_type=exc.__class__.__name__,
+            error=str(exc),
         )
         return None
 

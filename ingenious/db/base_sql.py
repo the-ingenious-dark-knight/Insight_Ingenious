@@ -2,7 +2,7 @@ import json
 import uuid
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, List
 
 import ingenious.config.config as Config
 from ingenious.db.chat_history_repository import IChatHistoryRepository
@@ -11,7 +11,7 @@ from ingenious.models.message import Message
 
 class BaseSQLRepository(IChatHistoryRepository, ABC):
     """Abstract base class for SQL-based chat history repositories.
-    
+
     Provides common implementation for shared functionality between
     SQLite and Azure SQL repositories, while allowing database-specific
     customizations through abstract methods.
@@ -28,7 +28,9 @@ class BaseSQLRepository(IChatHistoryRepository, ABC):
         pass
 
     @abstractmethod
-    def _execute_sql(self, sql: str, params: List[Any] = None, expect_results: bool = True) -> Any:
+    def _execute_sql(
+        self, sql: str, params: List[Any] = None, expect_results: bool = True
+    ) -> Any:
         """Execute SQL with database-specific connection handling."""
         pass
 
@@ -48,7 +50,7 @@ class BaseSQLRepository(IChatHistoryRepository, ABC):
             self._get_db_specific_query("create_elements_table"),
             self._get_db_specific_query("create_feedbacks_table"),
         ]
-        
+
         for query in table_queries:
             self._execute_sql(query, expect_results=False)
 
@@ -71,7 +73,7 @@ class BaseSQLRepository(IChatHistoryRepository, ABC):
             message.tool_call_id,
             message.tool_call_function,
         ]
-        
+
         self._execute_sql(query, params, expect_results=False)
         return message.message_id
 
@@ -94,7 +96,7 @@ class BaseSQLRepository(IChatHistoryRepository, ABC):
             message.tool_call_id,
             message.tool_call_function,
         ]
-        
+
         self._execute_sql(query, params, expect_results=False)
         return message.message_id
 
@@ -102,7 +104,7 @@ class BaseSQLRepository(IChatHistoryRepository, ABC):
         """Get a specific message by ID and thread ID."""
         query = self._get_db_specific_query("select_message")
         params = [message_id, thread_id]
-        
+
         result = self._execute_sql(query, params, expect_results=True)
         if result:
             row = result[0] if isinstance(result, list) else result
@@ -113,7 +115,7 @@ class BaseSQLRepository(IChatHistoryRepository, ABC):
         """Get the latest memory for a thread."""
         query = self._get_db_specific_query("select_latest_memory")
         params = [thread_id]
-        
+
         result = self._execute_sql(query, params, expect_results=True)
         if result:
             row = result[0] if isinstance(result, list) else result
@@ -152,15 +154,17 @@ class BaseSQLRepository(IChatHistoryRepository, ABC):
         params = [str(content_filter_results), message_id, thread_id]
         self._execute_sql(query, params, expect_results=False)
 
-    async def add_user(self, identifier: str, metadata: dict = {}) -> IChatHistoryRepository.User:
+    async def add_user(
+        self, identifier: str, metadata: dict = {}
+    ) -> IChatHistoryRepository.User:
         """Add a new user."""
         now = self.get_now()
         new_id = str(uuid.uuid4())
-        
+
         query = self._get_db_specific_query("insert_user")
         params = [new_id, identifier, json.dumps(metadata), now]
         self._execute_sql(query, params, expect_results=False)
-        
+
         return IChatHistoryRepository.User(
             id=uuid.UUID(new_id),
             identifier=identifier,
@@ -172,7 +176,7 @@ class BaseSQLRepository(IChatHistoryRepository, ABC):
         """Get user by identifier, creating if not found."""
         query = self._get_db_specific_query("select_user")
         params = [identifier]
-        
+
         result = self._execute_sql(query, params, expect_results=True)
         if result:
             row = result[0] if isinstance(result, list) else result
@@ -184,7 +188,7 @@ class BaseSQLRepository(IChatHistoryRepository, ABC):
         """Get recent messages for a thread."""
         query = self._get_db_specific_query("select_thread_messages")
         params = [thread_id]
-        
+
         result = self._execute_sql(query, params, expect_results=True)
         if result:
             return [self._row_to_message(row) for row in result]
@@ -194,7 +198,7 @@ class BaseSQLRepository(IChatHistoryRepository, ABC):
         """Get memory for a thread."""
         query = self._get_db_specific_query("select_thread_memory")
         params = [thread_id]
-        
+
         result = self._execute_sql(query, params, expect_results=True)
         if result:
             return [self._row_to_message(row) for row in result]
