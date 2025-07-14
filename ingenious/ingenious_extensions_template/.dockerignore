@@ -85,6 +85,21 @@ tests/
 test_*.py
 *_test.py
 
+# Large unnecessary directories
+htmlcov/
+.pytest_cache/
+.coverage*
+.hypothesis/
+.tox/
+.nox/
+.cache/
+*.egg-info/
+build/
+dist/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+
 # Development files
 requirements.txt
 requirements-dev.txt

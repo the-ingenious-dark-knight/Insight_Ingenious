@@ -8,7 +8,11 @@ from typing_extensions import Annotated
 
 import ingenious.dependencies as igen_deps
 from ingenious.models.http_error import HTTPError
-from ingenious.utils.namespace_utils import normalize_workflow_name, discover_workflows, get_workflow_metadata
+from ingenious.utils.namespace_utils import (
+    discover_workflows,
+    get_workflow_metadata,
+    normalize_workflow_name,
+)
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -41,7 +45,7 @@ async def workflow_status(
 
         # Discover available workflows dynamically
         available_workflows = discover_workflows()
-        
+
         # Check against normalized name
         if normalized_workflow_name not in available_workflows:
             raise HTTPException(
@@ -160,7 +164,7 @@ async def list_workflows(
     try:
         # Dynamically discover all available workflows
         discovered_workflows = discover_workflows()
-        
+
         workflow_statuses = []
         for workflow in discovered_workflows:
             # Get status for each workflow

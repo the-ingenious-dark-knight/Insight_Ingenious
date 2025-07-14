@@ -230,7 +230,9 @@ def discover_workflows():
     for namespace in namespaces:
         try:
             # Try to import the conversation flows package
-            flows_module_name = f"{namespace}.services.chat_services.multi_agent.conversation_flows"
+            flows_module_name = (
+                f"{namespace}.services.chat_services.multi_agent.conversation_flows"
+            )
             print(f"DEBUG: Searching for workflows in {flows_module_name}")
 
             try:
@@ -243,8 +245,12 @@ def discover_workflows():
 
                         # Try to import the workflow module to verify it has ConversationFlow class
                         try:
-                            workflow_module_name = f"{flows_module_name}.{workflow_name}.{workflow_name}"
-                            workflow_module = importlib.import_module(workflow_module_name)
+                            workflow_module_name = (
+                                f"{flows_module_name}.{workflow_name}.{workflow_name}"
+                            )
+                            workflow_module = importlib.import_module(
+                                workflow_module_name
+                            )
 
                             # Check if it has a ConversationFlow class
                             if hasattr(workflow_module, "ConversationFlow"):
@@ -252,7 +258,9 @@ def discover_workflows():
                                 print(f"DEBUG: Confirmed workflow: {workflow_name}")
 
                         except (ImportError, AttributeError) as e:
-                            print(f"DEBUG: Skipping {workflow_name} - not a valid workflow: {e}")
+                            print(
+                                f"DEBUG: Skipping {workflow_name} - not a valid workflow: {e}"
+                            )
                             continue
 
             except ImportError as e:
