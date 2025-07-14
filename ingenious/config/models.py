@@ -99,7 +99,7 @@ class ChainlitSettings(BaseModel):
         )
 
     authentication: AuthenticationSettings = Field(
-        default_factory=lambda: ChainlitSettings.AuthenticationSettings(),
+        default_factory=AuthenticationSettings,
         description="Authentication configuration for Chainlit",
     )
 
@@ -221,7 +221,7 @@ class WebSettings(BaseModel):
         False, description="Enable asynchronous response handling"
     )
     authentication: WebAuthenticationSettings = Field(
-        default_factory=lambda: WebAuthenticationSettings(),
+        default_factory=WebAuthenticationSettings,
         description="Web authentication configuration",
     )
 
@@ -293,11 +293,11 @@ class FileStorageSettings(BaseModel):
     """
 
     revisions: FileStorageContainerSettings = Field(
-        default_factory=lambda: FileStorageContainerSettings(),
+        default_factory=FileStorageContainerSettings,
         description="Storage configuration for revision files",
     )
     data: FileStorageContainerSettings = Field(
-        default_factory=lambda: FileStorageContainerSettings(),
+        default_factory=FileStorageContainerSettings,
         description="Storage configuration for data files",
     )
 
