@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional
 
 import pyodbc
 
-import ingenious.config.config as Config
+from ingenious.config.settings import IngeniousSettings
 
 # Future import placeholders for advanced error handling
 # from ingenious.core.error_handling import (
@@ -14,6 +14,7 @@ import ingenious.config.config as Config
 from ingenious.core.structured_logging import get_logger
 from ingenious.db.base_sql import BaseSQLRepository
 from ingenious.db.chat_history_repository import IChatHistoryRepository
+from ingenious.db.query_builder import AzureSQLDialect, QueryBuilder
 from ingenious.errors import (
     DatabaseQueryError,
 )
@@ -22,15 +23,18 @@ logger = get_logger(__name__)
 
 
 class azuresql_ChatHistoryRepository(BaseSQLRepository):
-    def __init__(self, config: Config.Config):
+    def __init__(self, config: IngeniousSettings):
         self.connection_string = config.chat_history.database_connection_string
         if not self.connection_string:
             raise ValueError(
                 "Azure SQL connection string is required for azuresql chat history repository"
             )
 
+        # Initialize query builder with Azure SQL dialect
+        query_builder = QueryBuilder(AzureSQLDialect())
+
         # Call parent constructor which will call _init_connection and _create_tables
-        super().__init__(config)
+        super().__init__(config, query_builder)
 
     def _init_connection(self) -> None:
         """Initialize Azure SQL connection."""
@@ -79,207 +83,6 @@ class azuresql_ChatHistoryRepository(BaseSQLRepository):
         finally:
             if cursor:
                 cursor.close()
-
-    def _get_db_specific_query(self, query_type: str, **kwargs) -> str:
-        """Get Azure SQL-specific queries."""
-        queries = {
-            "create_chat_history_table": """
-                IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='chat_history' AND xtype='U')
-                CREATE TABLE chat_history (
-                    user_id NVARCHAR(255),
-                    thread_id NVARCHAR(255),
-                    message_id NVARCHAR(255),
-                    positive_feedback BIT,
-                    timestamp DATETIME2,
-                    role NVARCHAR(50),
-                    content NVARCHAR(MAX),
-                    content_filter_results NVARCHAR(MAX),
-                    tool_calls NVARCHAR(MAX),
-                    tool_call_id NVARCHAR(255),
-                    tool_call_function NVARCHAR(255)
-                );
-            """,
-            "create_chat_history_summary_table": """
-                IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='chat_history_summary' AND xtype='U')
-                CREATE TABLE chat_history_summary (
-                    user_id NVARCHAR(255),
-                    thread_id NVARCHAR(255),
-                    message_id NVARCHAR(255),
-                    positive_feedback BIT,
-                    timestamp DATETIME2,
-                    role NVARCHAR(50),
-                    content NVARCHAR(MAX),
-                    content_filter_results NVARCHAR(MAX),
-                    tool_calls NVARCHAR(MAX),
-                    tool_call_id NVARCHAR(255),
-                    tool_call_function NVARCHAR(255)
-                );
-            """,
-            "create_users_table": """
-                IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='users' AND xtype='U')
-                CREATE TABLE users (
-                    id UNIQUEIDENTIFIER PRIMARY KEY,
-                    identifier NVARCHAR(255) NOT NULL UNIQUE,
-                    metadata NVARCHAR(MAX) NOT NULL,
-                    createdAt DATETIME2
-                );
-            """,
-            "create_threads_table": """
-                IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='threads' AND xtype='U')
-                CREATE TABLE threads (
-                    id UNIQUEIDENTIFIER PRIMARY KEY,
-                    createdAt DATETIME2,
-                    name NVARCHAR(255),
-                    userId UNIQUEIDENTIFIER,
-                    userIdentifier NVARCHAR(255),
-                    tags NVARCHAR(MAX),
-                    metadata NVARCHAR(MAX),
-                    FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
-                );
-            """,
-            "create_steps_table": """
-                IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='steps' AND xtype='U')
-                CREATE TABLE steps (
-                    id UNIQUEIDENTIFIER PRIMARY KEY,
-                    name NVARCHAR(255) NOT NULL,
-                    type NVARCHAR(50) NOT NULL,
-                    threadId UNIQUEIDENTIFIER NOT NULL,
-                    parentId UNIQUEIDENTIFIER,
-                    disableFeedback BIT NOT NULL,
-                    streaming BIT NOT NULL,
-                    waitForAnswer BIT,
-                    isError BIT,
-                    metadata NVARCHAR(MAX),
-                    tags NVARCHAR(MAX),
-                    input NVARCHAR(MAX),
-                    output NVARCHAR(MAX),
-                    createdAt DATETIME2,
-                    start DATETIME2,
-                    [end] DATETIME2,
-                    generation NVARCHAR(MAX),
-                    showInput NVARCHAR(255),
-                    language NVARCHAR(50),
-                    indent INT
-                );
-            """,
-            "create_elements_table": """
-                IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='elements' AND xtype='U')
-                CREATE TABLE elements (
-                    id UNIQUEIDENTIFIER PRIMARY KEY,
-                    threadId UNIQUEIDENTIFIER,
-                    type NVARCHAR(50),
-                    url NVARCHAR(MAX),
-                    chainlitKey NVARCHAR(255),
-                    name NVARCHAR(255) NOT NULL,
-                    display NVARCHAR(50),
-                    objectKey NVARCHAR(255),
-                    size NVARCHAR(50),
-                    page INT,
-                    language NVARCHAR(50),
-                    forId UNIQUEIDENTIFIER,
-                    mime NVARCHAR(100)
-                );
-            """,
-            "create_feedbacks_table": """
-                IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='feedbacks' AND xtype='U')
-                CREATE TABLE feedbacks (
-                    id UNIQUEIDENTIFIER PRIMARY KEY,
-                    forId UNIQUEIDENTIFIER NOT NULL,
-                    threadId UNIQUEIDENTIFIER NOT NULL,
-                    value INT NOT NULL,
-                    comment NVARCHAR(MAX)
-                );
-            """,
-            "insert_message": """
-                INSERT INTO chat_history (
-                    user_id, thread_id, message_id, positive_feedback, timestamp,
-                    role, content, content_filter_results, tool_calls,
-                    tool_call_id, tool_call_function)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-            "insert_memory": """
-                INSERT INTO chat_history_summary (
-                    user_id, thread_id, message_id, positive_feedback, timestamp,
-                    role, content, content_filter_results, tool_calls,
-                    tool_call_id, tool_call_function)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-            "select_message": """
-                SELECT user_id, thread_id, message_id, positive_feedback, timestamp, role, content,
-                       content_filter_results, tool_calls, tool_call_id, tool_call_function
-                FROM chat_history
-                WHERE message_id = ? AND thread_id = ?
-            """,
-            "select_latest_memory": """
-                SELECT TOP 1 user_id, thread_id, message_id, positive_feedback, timestamp, role, content,
-                       content_filter_results, tool_calls, tool_call_id, tool_call_function
-                FROM chat_history_summary
-                WHERE thread_id = ?
-                ORDER BY timestamp DESC
-            """,
-            "update_message_feedback": """
-                UPDATE chat_history
-                SET positive_feedback = ?
-                WHERE message_id = ? AND thread_id = ?
-            """,
-            "update_memory_feedback": """
-                UPDATE chat_history_summary
-                SET positive_feedback = ?
-                WHERE message_id = ? AND thread_id = ?
-            """,
-            "update_message_content_filter": """
-                UPDATE chat_history
-                SET content_filter_results = ?
-                WHERE message_id = ? AND thread_id = ?
-            """,
-            "update_memory_content_filter": """
-                UPDATE chat_history_summary
-                SET content_filter_results = ?
-                WHERE message_id = ? AND thread_id = ?
-            """,
-            "insert_user": """
-                INSERT INTO users (id, identifier, metadata, createdAt)
-                VALUES (?, ?, ?, ?)
-            """,
-            "select_user": """
-                SELECT id, identifier, metadata, createdAt
-                FROM users
-                WHERE identifier = ?
-            """,
-            "select_thread_messages": """
-                SELECT TOP 5 user_id, thread_id, message_id, positive_feedback, timestamp, role, content,
-                       content_filter_results, tool_calls, tool_call_id, tool_call_function
-                FROM (
-                    SELECT user_id, thread_id, message_id, positive_feedback, timestamp, role, content,
-                           content_filter_results, tool_calls, tool_call_id, tool_call_function,
-                           ROW_NUMBER() OVER (ORDER BY timestamp DESC) as rn
-                    FROM chat_history
-                    WHERE thread_id = ?
-                ) AS ranked
-                WHERE rn <= 5
-                ORDER BY timestamp ASC
-            """,
-            "select_thread_memory": """
-                SELECT TOP 1 user_id, thread_id, message_id, positive_feedback, timestamp, role, content,
-                       content_filter_results, tool_calls, tool_call_id, tool_call_function
-                FROM chat_history_summary
-                WHERE thread_id = ?
-                ORDER BY timestamp DESC
-            """,
-            "delete_thread": """
-                DELETE FROM chat_history
-                WHERE thread_id = ?
-            """,
-            "delete_thread_memory": """
-                DELETE FROM chat_history_summary
-                WHERE thread_id = ?
-            """,
-            "delete_user_memory": """
-                DELETE FROM chat_history_summary
-                WHERE user_id = ?
-            """,
-        }
-        return queries.get(query_type, "")
 
     def execute_sql(self, sql, params=[], expect_results=True):
         """Legacy method for backward compatibility."""

@@ -4,21 +4,22 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Any, List
 
-import ingenious.config.config as Config
+from ingenious.config.settings import IngeniousSettings
 from ingenious.db.chat_history_repository import IChatHistoryRepository
+from ingenious.db.query_builder import QueryBuilder
 from ingenious.models.message import Message
 
 
 class BaseSQLRepository(IChatHistoryRepository, ABC):
     """Abstract base class for SQL-based chat history repositories.
 
-    Provides common implementation for shared functionality between
-    SQLite and Azure SQL repositories, while allowing database-specific
-    customizations through abstract methods.
+    Uses composition with QueryBuilder for database-agnostic query generation,
+    while allowing database-specific connection handling and execution.
     """
 
-    def __init__(self, config: Config.Config):
+    def __init__(self, config: IngeniousSettings, query_builder: QueryBuilder):
         self.config = config
+        self.query_builder = query_builder
         self._init_connection()
         self._create_tables()
 
@@ -34,21 +35,16 @@ class BaseSQLRepository(IChatHistoryRepository, ABC):
         """Execute SQL with database-specific connection handling."""
         pass
 
-    @abstractmethod
-    def _get_db_specific_query(self, query_type: str, **kwargs) -> str:
-        """Get database-specific SQL query for common operations."""
-        pass
-
     def _create_tables(self) -> None:
-        """Create all required tables using database-specific queries."""
+        """Create all required tables using QueryBuilder."""
         table_queries = [
-            self._get_db_specific_query("create_chat_history_table"),
-            self._get_db_specific_query("create_chat_history_summary_table"),
-            self._get_db_specific_query("create_users_table"),
-            self._get_db_specific_query("create_threads_table"),
-            self._get_db_specific_query("create_steps_table"),
-            self._get_db_specific_query("create_elements_table"),
-            self._get_db_specific_query("create_feedbacks_table"),
+            self.query_builder.create_chat_history_table(),
+            self.query_builder.create_chat_history_summary_table(),
+            self.query_builder.create_users_table(),
+            self.query_builder.create_threads_table(),
+            self.query_builder.create_steps_table(),
+            self.query_builder.create_elements_table(),
+            self.query_builder.create_feedbacks_table(),
         ]
 
         for query in table_queries:
@@ -59,7 +55,7 @@ class BaseSQLRepository(IChatHistoryRepository, ABC):
         message.message_id = str(uuid.uuid4())
         message.timestamp = datetime.now()
 
-        query = self._get_db_specific_query("insert_message")
+        query = self.query_builder.insert_message()
         params = [
             message.user_id,
             message.thread_id,
@@ -82,7 +78,7 @@ class BaseSQLRepository(IChatHistoryRepository, ABC):
         message.message_id = str(uuid.uuid4())
         message.timestamp = datetime.now()
 
-        query = self._get_db_specific_query("insert_memory")
+        query = self.query_builder.insert_memory()
         params = [
             message.user_id,
             message.thread_id,
@@ -102,7 +98,7 @@ class BaseSQLRepository(IChatHistoryRepository, ABC):
 
     async def get_message(self, message_id: str, thread_id: str) -> Message | None:
         """Get a specific message by ID and thread ID."""
-        query = self._get_db_specific_query("select_message")
+        query = self.query_builder.select_message()
         params = [message_id, thread_id]
 
         result = self._execute_sql(query, params, expect_results=True)
@@ -113,7 +109,7 @@ class BaseSQLRepository(IChatHistoryRepository, ABC):
 
     async def get_memory(self, message_id: str, thread_id: str) -> Message | None:
         """Get the latest memory for a thread."""
-        query = self._get_db_specific_query("select_latest_memory")
+        query = self.query_builder.select_latest_memory()
         params = [thread_id]
 
         result = self._execute_sql(query, params, expect_results=True)
@@ -126,7 +122,7 @@ class BaseSQLRepository(IChatHistoryRepository, ABC):
         self, message_id: str, thread_id: str, positive_feedback: bool | None
     ) -> None:
         """Update message feedback."""
-        query = self._get_db_specific_query("update_message_feedback")
+        query = self.query_builder.update_message_feedback()
         params = [positive_feedback, message_id, thread_id]
         self._execute_sql(query, params, expect_results=False)
 
@@ -134,7 +130,7 @@ class BaseSQLRepository(IChatHistoryRepository, ABC):
         self, message_id: str, thread_id: str, positive_feedback: bool | None
     ) -> None:
         """Update memory feedback."""
-        query = self._get_db_specific_query("update_memory_feedback")
+        query = self.query_builder.update_memory_feedback()
         params = [positive_feedback, message_id, thread_id]
         self._execute_sql(query, params, expect_results=False)
 
@@ -142,7 +138,7 @@ class BaseSQLRepository(IChatHistoryRepository, ABC):
         self, message_id: str, thread_id: str, content_filter_results: dict[str, object]
     ) -> None:
         """Update message content filter results."""
-        query = self._get_db_specific_query("update_message_content_filter")
+        query = self.query_builder.update_message_content_filter()
         params = [str(content_filter_results), message_id, thread_id]
         self._execute_sql(query, params, expect_results=False)
 
@@ -150,7 +146,7 @@ class BaseSQLRepository(IChatHistoryRepository, ABC):
         self, message_id: str, thread_id: str, content_filter_results: dict[str, object]
     ) -> None:
         """Update memory content filter results."""
-        query = self._get_db_specific_query("update_memory_content_filter")
+        query = self.query_builder.update_memory_content_filter()
         params = [str(content_filter_results), message_id, thread_id]
         self._execute_sql(query, params, expect_results=False)
 
@@ -161,7 +157,7 @@ class BaseSQLRepository(IChatHistoryRepository, ABC):
         now = self.get_now()
         new_id = str(uuid.uuid4())
 
-        query = self._get_db_specific_query("insert_user")
+        query = self.query_builder.insert_user()
         params = [new_id, identifier, json.dumps(metadata), now]
         self._execute_sql(query, params, expect_results=False)
 
@@ -174,7 +170,7 @@ class BaseSQLRepository(IChatHistoryRepository, ABC):
 
     async def get_user(self, identifier: str) -> IChatHistoryRepository.User | None:
         """Get user by identifier, creating if not found."""
-        query = self._get_db_specific_query("select_user")
+        query = self.query_builder.select_user()
         params = [identifier]
 
         result = self._execute_sql(query, params, expect_results=True)
@@ -186,7 +182,7 @@ class BaseSQLRepository(IChatHistoryRepository, ABC):
 
     async def get_thread_messages(self, thread_id: str) -> list[Message]:
         """Get recent messages for a thread."""
-        query = self._get_db_specific_query("select_thread_messages")
+        query = self.query_builder.select_thread_messages()
         params = [thread_id]
 
         result = self._execute_sql(query, params, expect_results=True)
@@ -196,7 +192,7 @@ class BaseSQLRepository(IChatHistoryRepository, ABC):
 
     async def get_thread_memory(self, thread_id: str) -> list[Message]:
         """Get memory for a thread."""
-        query = self._get_db_specific_query("select_thread_memory")
+        query = self.query_builder.select_thread_memory()
         params = [thread_id]
 
         result = self._execute_sql(query, params, expect_results=True)
@@ -206,19 +202,19 @@ class BaseSQLRepository(IChatHistoryRepository, ABC):
 
     async def delete_thread(self, thread_id: str) -> None:
         """Delete all messages for a thread."""
-        query = self._get_db_specific_query("delete_thread")
+        query = self.query_builder.delete_thread()
         params = [thread_id]
         self._execute_sql(query, params, expect_results=False)
 
     async def delete_thread_memory(self, thread_id: str) -> None:
         """Delete memory for a thread."""
-        query = self._get_db_specific_query("delete_thread_memory")
+        query = self.query_builder.delete_thread_memory()
         params = [thread_id]
         self._execute_sql(query, params, expect_results=False)
 
     async def delete_user_memory(self, user_id: str) -> None:
         """Delete memory for a user."""
-        query = self._get_db_specific_query("delete_user_memory")
+        query = self.query_builder.delete_user_memory()
         params = [user_id]
         self._execute_sql(query, params, expect_results=False)
 

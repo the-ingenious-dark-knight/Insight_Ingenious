@@ -1,13 +1,9 @@
 import json
 import os
 import sqlite3
-import threading
-import time
-from contextlib import contextmanager
-from queue import Empty, Queue
 from typing import Any, Dict, List, Optional
 
-import ingenious.config.config as Config
+from ingenious.config.settings import IngeniousSettings
 
 # Future import placeholders for advanced error handling
 # from ingenious.core.error_handling import (
@@ -18,6 +14,8 @@ import ingenious.config.config as Config
 from ingenious.core.structured_logging import get_logger
 from ingenious.db.base_sql import BaseSQLRepository
 from ingenious.db.chat_history_repository import IChatHistoryRepository
+from ingenious.db.connection_pool import ConnectionPool, SQLiteConnectionFactory
+from ingenious.db.query_builder import QueryBuilder, SQLiteDialect
 from ingenious.errors import (
     DatabaseQueryError,
 )
@@ -25,164 +23,8 @@ from ingenious.errors import (
 logger = get_logger(__name__)
 
 
-class ConnectionPool:
-    """Thread-safe SQLite connection pool with health checks and retry logic."""
-
-    def __init__(
-        self,
-        db_path: str,
-        pool_size: int = 8,
-        max_retries: int = 3,
-        retry_delay: float = 0.1,
-    ):
-        self.db_path = db_path
-        self.pool_size = pool_size
-        self.max_retries = max_retries
-        self.retry_delay = retry_delay
-        self._pool = Queue(maxsize=pool_size)
-        self._lock = threading.Lock()
-        self._created_connections = 0
-
-        # Pre-populate the pool
-        self._initialize_pool()
-
-    def _initialize_pool(self):
-        """Initialize the connection pool with healthy connections."""
-        for _ in range(self.pool_size):
-            try:
-                conn = self._create_connection()
-                if self._is_connection_healthy(conn):
-                    self._pool.put(conn)
-                    self._created_connections += 1
-                else:
-                    conn.close()
-            except Exception:
-                # If we can't create initial connections, we'll create them on demand
-                break
-
-    def _create_connection(self) -> sqlite3.Connection:
-        """Create a new SQLite connection with proper configuration."""
-        conn = sqlite3.connect(
-            self.db_path,
-            check_same_thread=False,
-            timeout=30.0,
-            isolation_level=None,  # autocommit mode
-        )
-        conn.row_factory = sqlite3.Row
-        # Enable WAL mode for better concurrency
-        conn.execute("PRAGMA journal_mode=WAL")
-        conn.execute("PRAGMA synchronous=NORMAL")
-        conn.execute("PRAGMA cache_size=10000")
-        conn.execute("PRAGMA temp_store=MEMORY")
-        return conn
-
-    def _is_connection_healthy(self, conn: sqlite3.Connection) -> bool:
-        """Check if a connection is healthy by executing a simple query."""
-        try:
-            conn.execute("SELECT 1").fetchone()
-            return True
-        except Exception:
-            return False
-
-    @contextmanager
-    def get_connection(self):
-        """Context manager to get a connection from the pool."""
-        conn = None
-        retry_count = 0
-
-        while retry_count <= self.max_retries:
-            try:
-                # Try to get a connection from the pool
-                try:
-                    conn = self._pool.get(timeout=5.0)
-                except Empty:
-                    # Pool is empty, create a new connection
-                    with self._lock:
-                        if (
-                            self._created_connections < self.pool_size * 2
-                        ):  # Allow some overflow
-                            conn = self._create_connection()
-                            self._created_connections += 1
-                        else:
-                            # Wait a bit and try again
-                            time.sleep(self.retry_delay)
-                            retry_count += 1
-                            continue
-
-                # Check if connection is healthy
-                if conn and self._is_connection_healthy(conn):
-                    try:
-                        yield conn
-                        # Return connection to pool if still healthy
-                        if self._is_connection_healthy(conn):
-                            self._pool.put_nowait(conn)
-                        else:
-                            conn.close()
-                            with self._lock:
-                                self._created_connections -= 1
-                        return
-                    except Exception as e:
-                        # If there was an error using the connection, close it
-                        if conn:
-                            try:
-                                conn.close()
-                            except Exception:
-                                pass
-                            with self._lock:
-                                self._created_connections -= 1
-                        raise e
-                else:
-                    # Connection is unhealthy, close it and retry
-                    if conn:
-                        try:
-                            conn.close()
-                        except Exception:
-                            pass
-                        with self._lock:
-                            self._created_connections -= 1
-
-                    retry_count += 1
-                    if retry_count <= self.max_retries:
-                        time.sleep(
-                            self.retry_delay * retry_count
-                        )  # Exponential backoff
-
-            except Exception as e:
-                if conn:
-                    try:
-                        conn.close()
-                    except Exception:
-                        pass
-                    with self._lock:
-                        self._created_connections -= 1
-
-                retry_count += 1
-                if retry_count <= self.max_retries:
-                    time.sleep(self.retry_delay * retry_count)
-                else:
-                    raise RuntimeError(
-                        f"Failed to get database connection after {self.max_retries} retries: {e}"
-                    )
-
-        raise RuntimeError(
-            f"Failed to get database connection after {self.max_retries} retries"
-        )
-
-    def close_all(self):
-        """Close all connections in the pool."""
-        while not self._pool.empty():
-            try:
-                conn = self._pool.get_nowait()
-                conn.close()
-            except (Empty, Exception):
-                break
-
-        with self._lock:
-            self._created_connections = 0
-
-
 class sqlite_ChatHistoryRepository(BaseSQLRepository):
-    def __init__(self, config: Config.Config):
+    def __init__(self, config: IngeniousSettings):
         self.db_path = config.chat_history.database_path
         # Check if the directory exists, if not, create it
         db_dir_check = os.path.dirname(self.db_path)
@@ -191,10 +33,14 @@ class sqlite_ChatHistoryRepository(BaseSQLRepository):
 
         # Initialize connection pool
         pool_size = getattr(config.chat_history, "connection_pool_size", 8)
-        self.pool = ConnectionPool(self.db_path, pool_size=pool_size)
+        connection_factory = SQLiteConnectionFactory(self.db_path)
+        self.pool = ConnectionPool(connection_factory, pool_size=pool_size)
+
+        # Initialize query builder with SQLite dialect
+        query_builder = QueryBuilder(SQLiteDialect())
 
         # Call parent constructor which will call _init_connection and _create_tables
-        super().__init__(config)
+        super().__init__(config, query_builder)
 
     def __del__(self):
         """Destructor to ensure connections are properly closed."""
@@ -257,201 +103,6 @@ class sqlite_ChatHistoryRepository(BaseSQLRepository):
     def execute_sql(self, sql, params=[], expect_results=True):
         """Legacy method for backward compatibility."""
         return self._execute_sql(sql, params, expect_results)
-
-    def _get_db_specific_query(self, query_type: str, **kwargs) -> str:
-        """Get SQLite-specific queries."""
-        queries = {
-            "create_chat_history_table": """
-                CREATE TABLE IF NOT EXISTS chat_history (
-                    user_id TEXT,
-                    thread_id TEXT,
-                    message_id TEXT,
-                    positive_feedback BOOLEAN,
-                    timestamp TEXT,
-                    role TEXT,
-                    content TEXT,
-                    content_filter_results TEXT,
-                    tool_calls TEXT,
-                    tool_call_id TEXT,
-                    tool_call_function TEXT
-                );
-            """,
-            "create_chat_history_summary_table": """
-                CREATE TABLE IF NOT EXISTS chat_history_summary (
-                    user_id TEXT,
-                    thread_id TEXT,
-                    message_id TEXT,
-                    positive_feedback BOOLEAN,
-                    timestamp TEXT,
-                    role TEXT,
-                    content TEXT,
-                    content_filter_results TEXT,
-                    tool_calls TEXT,
-                    tool_call_id TEXT,
-                    tool_call_function TEXT
-                );
-            """,
-            "create_users_table": """
-                CREATE TABLE IF NOT EXISTS users (
-                    "id" UUID PRIMARY KEY,
-                    "identifier" TEXT NOT NULL UNIQUE,
-                    "metadata" JSONB NOT NULL,
-                    "createdAt" TEXT
-                );
-            """,
-            "create_threads_table": """
-                CREATE TABLE IF NOT EXISTS threads (
-                    "id" UUID PRIMARY KEY,
-                    "createdAt" TEXT,
-                    "name" TEXT,
-                    "userId" UUID,
-                    "userIdentifier" TEXT,
-                    "tags" TEXT[],
-                    "metadata" JSONB,
-                    FOREIGN KEY ("userId") REFERENCES users("id") ON DELETE CASCADE
-                );
-            """,
-            "create_steps_table": """
-                CREATE TABLE IF NOT EXISTS steps (
-                    "id" UUID PRIMARY KEY,
-                    "name" TEXT NOT NULL,
-                    "type" TEXT NOT NULL,
-                    "threadId" UUID NOT NULL,
-                    "parentId" UUID,
-                    "disableFeedback" BOOLEAN NOT NULL,
-                    "streaming" BOOLEAN NOT NULL,
-                    "waitForAnswer" BOOLEAN,
-                    "isError" BOOLEAN,
-                    "metadata" JSONB,
-                    "tags" TEXT[],
-                    "input" TEXT,
-                    "output" TEXT,
-                    "createdAt" TEXT,
-                    "start" TEXT,
-                    "end" TEXT,
-                    "generation" JSONB,
-                    "showInput" TEXT,
-                    "language" TEXT,
-                    "indent" INT
-                );
-            """,
-            "create_elements_table": """
-                CREATE TABLE IF NOT EXISTS elements (
-                    "id" UUID PRIMARY KEY,
-                    "threadId" UUID,
-                    "type" TEXT,
-                    "url" TEXT,
-                    "chainlitKey" TEXT,
-                    "name" TEXT NOT NULL,
-                    "display" TEXT,
-                    "objectKey" TEXT,
-                    "size" TEXT,
-                    "page" INT,
-                    "language" TEXT,
-                    "forId" UUID,
-                    "mime" TEXT
-                );
-            """,
-            "create_feedbacks_table": """
-                CREATE TABLE IF NOT EXISTS feedbacks (
-                    "id" UUID PRIMARY KEY,
-                    "forId" UUID NOT NULL,
-                    "threadId" UUID NOT NULL,
-                    "value" INT NOT NULL,
-                    "comment" TEXT
-                );
-            """,
-            "insert_message": """
-                INSERT INTO chat_history (
-                    user_id, thread_id, message_id, positive_feedback, timestamp,
-                    role, content, content_filter_results, tool_calls,
-                    tool_call_id, tool_call_function)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-            "insert_memory": """
-                INSERT INTO chat_history_summary (
-                    user_id, thread_id, message_id, positive_feedback, timestamp,
-                    role, content, content_filter_results, tool_calls,
-                    tool_call_id, tool_call_function)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-            "select_message": """
-                SELECT user_id, thread_id, message_id, positive_feedback, timestamp, role, content,
-                       content_filter_results, tool_calls, tool_call_id, tool_call_function
-                FROM chat_history
-                WHERE message_id = ? AND thread_id = ?
-            """,
-            "select_latest_memory": """
-                SELECT user_id, thread_id, message_id, positive_feedback, timestamp, role, content,
-                       content_filter_results, tool_calls, tool_call_id, tool_call_function
-                FROM chat_history_summary
-                WHERE thread_id = ?
-                ORDER BY timestamp DESC
-                LIMIT 1
-            """,
-            "update_message_feedback": """
-                UPDATE chat_history
-                SET positive_feedback = ?
-                WHERE message_id = ? AND thread_id = ?
-            """,
-            "update_memory_feedback": """
-                UPDATE chat_history_summary
-                SET positive_feedback = ?
-                WHERE message_id = ? AND thread_id = ?
-            """,
-            "update_message_content_filter": """
-                UPDATE chat_history
-                SET content_filter_results = ?
-                WHERE message_id = ? AND thread_id = ?
-            """,
-            "update_memory_content_filter": """
-                UPDATE chat_history_summary
-                SET content_filter_results = ?
-                WHERE message_id = ? AND thread_id = ?
-            """,
-            "insert_user": """
-                INSERT INTO users (id, identifier, metadata, createdAt)
-                VALUES (?, ?, ?, ?)
-            """,
-            "select_user": """
-                SELECT id, identifier, metadata, createdAt
-                FROM users
-                WHERE identifier = ?
-            """,
-            "select_thread_messages": """
-                SELECT *
-                FROM (
-                    SELECT user_id, thread_id, message_id, positive_feedback, timestamp, role, content,
-                           content_filter_results, tool_calls, tool_call_id, tool_call_function
-                    FROM chat_history
-                    WHERE thread_id = ?
-                    ORDER BY timestamp DESC
-                    LIMIT 5
-                ) AS last_five
-                ORDER BY timestamp ASC
-            """,
-            "select_thread_memory": """
-                SELECT user_id, thread_id, message_id, positive_feedback, timestamp, role, content,
-                       content_filter_results, tool_calls, tool_call_id, tool_call_function
-                FROM chat_history_summary
-                WHERE thread_id = ?
-                ORDER BY timestamp DESC
-                LIMIT 1
-            """,
-            "delete_thread": """
-                DELETE FROM chat_history
-                WHERE thread_id = ?
-            """,
-            "delete_thread_memory": """
-                DELETE FROM chat_history_summary
-                WHERE thread_id = ?
-            """,
-            "delete_user_memory": """
-                DELETE FROM chat_history_summary
-                WHERE user_id = ?
-            """,
-        }
-        return queries.get(query_type, "")
 
     def _create_table(self):
         """Legacy method for backward compatibility. Tables are now created via base class."""
