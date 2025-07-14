@@ -62,6 +62,7 @@ Start the API server with web interfaces.
 
 **Interfaces:**
 - API: `http://localhost:80/api/v1/`
+- Health Check: `http://localhost:80/api/v1/health`
 - Chat: `http://localhost:80/chainlit`
 - Prompt Tuner: `http://localhost:80/prompt-tuner`
 
@@ -155,7 +156,7 @@ Show detailed help and guides.
 > - For document processing: `uv add ingenious[document-processing]`
 > - For dataprep: `uv add ingenious[dataprep]`
 
-### `ingen document-processing <path>`
+### `ingen document-processing extract <path>`
 Extract text from documents (PDF, DOCX, images).
 
 **Requirements:** `ingenious[document-processing]` optional dependency group
@@ -169,8 +170,8 @@ Extract text from documents (PDF, DOCX, images).
 
 **Example:**
 ```bash
-ingen document-processing document.pdf --engine pymupdf --out extracted.jsonl
-ingen document-processing https://example.com/doc.pdf --out results.jsonl
+ingen document-processing extract document.pdf --engine pymupdf --out extracted.jsonl
+ingen document-processing extract https://example.com/doc.pdf --out results.jsonl
 ```
 
 ### `ingen dataprep`

@@ -42,7 +42,7 @@ Get up and running in 5 minutes with Azure OpenAI!
 5. **Verify Health**:
     ```bash
     # Check server health
-    curl http://localhost:80/health
+    curl http://localhost:80/api/v1/health
     ```
 
 6. **Test the API**:
@@ -72,7 +72,7 @@ Core commands:
 - `ingen help` - Show comprehensive help
 
 Data processing commands:
-- `ingen document-processing <path>` - Extract text from documents (PDF, DOCX, images)
+- `ingen document-processing extract <path>` - Extract text from documents (PDF, DOCX, images)
 - `ingen dataprep crawl <url>` - Web scraping utilities using Scrapfly
 
 For complete CLI reference, see [docs/CLI_REFERENCE.md](docs/CLI_REFERENCE.md).
@@ -83,12 +83,23 @@ When the server is running, the following endpoints are available:
 
 **Core API:**
 - `POST /api/v1/chat` - Chat with AI workflows
-- `GET /health` - Health check endpoint
+- `GET /api/v1/health` - Health check endpoint
 
 **Diagnostics:**
-- `GET /workflows` - List all workflows and their status
-- `GET /workflow-status/{workflow_name}` - Check specific workflow configuration
-- `GET /diagnostic` - System diagnostic information
+- `GET /api/v1/workflows` - List all workflows and their status
+- `GET /api/v1/workflow-status/{workflow_name}` - Check specific workflow configuration
+- `GET /api/v1/diagnostic` - System diagnostic information
+
+**API Management:**
+- `GET /api/v1/prompts/list/{revision_id}` - List prompt templates
+- `GET /api/v1/prompts/view/{revision_id}/{filename}` - View prompt content
+- `POST /api/v1/prompts/update/{revision_id}/{filename}` - Update prompt
+- `PUT /api/v1/messages/{message_id}/feedback` - Submit message feedback
+
+**Authentication (if enabled):**
+- `POST /api/v1/auth/login` - JWT login
+- `POST /api/v1/auth/refresh` - Refresh JWT token
+- `GET /api/v1/auth/verify` - Verify JWT token
 
 **Web Interfaces:**
 - `/chainlit` - Interactive chat interface
@@ -104,7 +115,7 @@ Insight Ingenious provides multiple conversation workflows with different config
 - `sql-manipulation-agent` - Execute SQL queries using local SQLite (stable local implementation)
 
 ### Extension Template Workflows (Available via project template)
-- `bike-insights` - Comprehensive bike sales analysis showcasing multi-agent coordination (created when you run `ingen init`)
+- `bike-insights` - Comprehensive bike sales analysis showcasing multi-agent coordination (**Note**: Created only when you run `ingen init` - not included in core library)
 
 > **Note**: Only local implementations (ChromaDB for knowledge-base-agent, SQLite for sql-manipulation-agent) are currently stable. Azure Search and Azure SQL integrations are experimental and may contain bugs.
 
