@@ -3,7 +3,7 @@ import io
 from enum import Enum
 from typing import List
 
-import markpickle
+import jsonpickle
 import yaml
 from pydantic import BaseModel
 
@@ -98,5 +98,5 @@ def Object_To_Yaml(obj, strip_complex_fields=False):
 
 
 def Object_To_Markdown(obj, name):
-    val = markpickle.dumps(obj)
+    val = jsonpickle.dumps(obj)
     return val
