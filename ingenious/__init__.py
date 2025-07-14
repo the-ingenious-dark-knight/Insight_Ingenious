@@ -7,7 +7,8 @@ with support for dynamic workflows, chat services, and extensible architectures.
 """
 
 # Explicit imports for better IDE support and clearer dependencies
-from . import config, models, services, utils
+# Avoid importing services to prevent circular dependencies with container
+from . import config, models, utils
 
 __version__ = "1.0.0"
-__all__ = ["config", "models", "services", "utils"]
+__all__ = ["config", "models", "utils"]
