@@ -16,12 +16,12 @@ class WorkflowProtocol(Protocol):
     """Protocol for conversation flow/workflow classes."""
 
     @abstractmethod
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Initialize the workflow."""
         ...
 
     @abstractmethod
-    async def execute(self, *args, **kwargs) -> Any:
+    async def execute(self, *args: Any, **kwargs: Any) -> Any:
         """Execute the workflow."""
         ...
 
@@ -31,7 +31,7 @@ class ConversationFlowProtocol(Protocol):
     """Protocol for conversation flow classes in multi-agent systems."""
 
     @abstractmethod
-    def __init__(self, chat_history_repository, config, **kwargs) -> None:
+    def __init__(self, chat_history_repository: Any, config: Any, **kwargs: Any) -> None:
         """Initialize the conversation flow."""
         ...
 
@@ -56,7 +56,7 @@ class ExtractorProtocol(Protocol):
     """Protocol for document extractor classes."""
 
     @abstractmethod
-    def extract(self, document_path: str, **kwargs) -> List[Dict[str, Any]]:
+    def extract(self, document_path: str, **kwargs: Any) -> List[Dict[str, Any]]:
         """Extract structured data from a document."""
         ...
 
@@ -86,17 +86,17 @@ class FileStorageProtocol(Protocol):
     """Protocol for file storage implementations."""
 
     @abstractmethod
-    def read_file(self, file_path: str, **kwargs) -> str:
+    def read_file(self, file_path: str, **kwargs: Any) -> str:
         """Read file content."""
         ...
 
     @abstractmethod
-    def write_file(self, file_path: str, content: str, **kwargs) -> None:
+    def write_file(self, file_path: str, content: str, **kwargs: Any) -> None:
         """Write file content."""
         ...
 
     @abstractmethod
-    def list_files(self, directory_path: str, **kwargs) -> List[str]:
+    def list_files(self, directory_path: str, **kwargs: Any) -> List[str]:
         """List files in a directory."""
         ...
 
@@ -106,7 +106,7 @@ class AgentProtocol(Protocol):
     """Protocol for AI agent implementations."""
 
     @abstractmethod
-    async def process(self, input_data: Any, **kwargs) -> Any:
+    async def process(self, input_data: Any, **kwargs: Any) -> Any:
         """Process input data and return result."""
         ...
 
@@ -151,7 +151,7 @@ class ProcessorProtocol(Protocol):
     """Protocol for data processor classes."""
 
     @abstractmethod
-    def process(self, input_data: Any, **kwargs) -> Any:
+    def process(self, input_data: Any, **kwargs: Any) -> Any:
         """Process input data and return result."""
         ...
 
@@ -262,4 +262,4 @@ def get_protocol_by_name(name: str) -> Optional[type]:
 
 def register_protocol(name: str, protocol: type) -> None:
     """Register a new protocol with a name."""
-    PROTOCOL_REGISTRY[name.lower()] = protocol
+    PROTOCOL_REGISTRY[name.lower()] = protocol  # type: ignore
