@@ -47,7 +47,7 @@ class TestChatService:
 
             mock_config = Mock()
             mock_repository = Mock()
-            with pytest.raises(Exception, match="An unexpected error occurred"):
+            with pytest.raises(Exception, match="Unexpected error during chat service initialization"):
                 ChatService(
                     "invalid_workflow", mock_repository, "test_flow", mock_config
                 )
