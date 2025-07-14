@@ -83,11 +83,11 @@ class FileStorageContainer(BaseModel):
 
 class FileStorage(BaseModel):
     revisions: FileStorageContainer = Field(
-        default_factory=FileStorageContainer,
+        default_factory=lambda: FileStorageContainer(),
         description="File Storage configuration for revisions",
     )
     data: FileStorageContainer = Field(
-        default_factory=FileStorageContainer,
+        default_factory=lambda: FileStorageContainer(),
         description="File Storage configuration for data",
     )
 

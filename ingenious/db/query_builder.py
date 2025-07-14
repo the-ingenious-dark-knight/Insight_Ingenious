@@ -490,5 +490,6 @@ class QueryBuilder:
         if hasattr(self, method_name):
             method = getattr(self, method_name)
             if callable(method):
-                return method(**kwargs)
+                result = method(**kwargs)
+                return str(result) if result is not None else ""
         return ""
