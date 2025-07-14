@@ -67,15 +67,16 @@ Module exports
 
 from __future__ import annotations
 
+import gc
 import io
 import logging
 import mimetypes
-import operator
 import os
 from pathlib import Path
-from typing import Iterable, TypeAlias
+from typing import Callable, Iterable, TypeAlias
 
 import fitz  # PyMuPDF
+import psutil
 
 from ingenious.document_processing.utils.fetcher import fetch, is_url
 
@@ -87,6 +88,7 @@ logger = logging.getLogger(__name__)
 # Public type aliases
 # ------------------------------------------------------------------
 Src: TypeAlias = str | bytes | io.BytesIO | os.PathLike[str]
+ProgressCallback: TypeAlias = Callable[[int, int], None]  # (current_page, total_pages)
 
 
 # ------------------------------------------------------------------
@@ -125,7 +127,185 @@ class PyMuPDFExtractor(DocumentExtractor):
         )
 
     # ------------------------------------------------------------------
-    # Main extraction pipeline
+    # Memory monitoring utilities
+    # ------------------------------------------------------------------
+    def _get_memory_usage_mb(self) -> float:
+        """Get current process memory usage in MB."""
+        try:
+            process = psutil.Process()
+            return process.memory_info().rss / 1024 / 1024
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            return 0.0
+
+    def _should_yield_control(self, max_memory_mb: float, start_memory: float) -> bool:
+        """Check if memory usage exceeds threshold and we should yield control."""
+        current_memory = self._get_memory_usage_mb()
+        memory_growth = current_memory - start_memory
+        if memory_growth > max_memory_mb:
+            logger.warning(
+                "Memory usage exceeded threshold: %.1fMB growth > %.1fMB limit",
+                memory_growth,
+                max_memory_mb,
+            )
+            return True
+        return False
+
+    # ------------------------------------------------------------------
+    # Streaming extraction with memory management
+    # ------------------------------------------------------------------
+    def extract_stream(
+        self,
+        src: Src,
+        max_memory_mb: float = 100.0,
+        progress_callback: ProgressCallback | None = None,
+    ) -> Iterable[Element]:
+        """Yield Elements with memory-efficient streaming and progress tracking.
+
+        This method processes PDFs page-by-page to minimize memory footprint,
+        with configurable memory limits and progress callbacks for long-running
+        extractions.
+
+        Parameters
+        ----------
+        src : Src
+            Source PDF as path/URL/bytes.
+        max_memory_mb : float, default=100.0
+            Maximum memory growth allowed before yielding control (in MB).
+        progress_callback : ProgressCallback | None, default=None
+            Optional callback function called with (current_page, total_pages)
+            for progress tracking.
+
+        Yields
+        ------
+        Element
+            One structured text block per iteration.
+
+        Notes
+        -----
+        - Processes pages individually to reduce memory usage
+        - Monitors memory growth and logs warnings when limits are exceeded
+        - Calls progress_callback after each page if provided
+        - Performs garbage collection after each page
+        """
+        logger.debug(
+            "PyMuPDFExtractor.extract_stream(src=%r, max_memory_mb=%.1f)",
+            src,
+            max_memory_mb,
+        )
+
+        start_memory = self._get_memory_usage_mb()
+        logger.debug("Starting memory usage: %.1fMB", start_memory)
+
+        # ── Handle input normalization (same as extract()) ──────────────────────
+        if isinstance(src, io.BytesIO):
+            src = src.getvalue()
+
+        stream_bytes: bytes | None = None
+        if isinstance(src, (bytes, bytearray)):
+            stream_bytes = bytes(src)
+            src_for_open: bytes = stream_bytes
+        else:
+            if isinstance(src, Path):
+                src_for_open = str(src)
+            else:
+                src_str = str(src)
+                if is_url(src_str):
+                    payload = fetch(src_str)
+                    if payload is None:
+                        return
+                    stream_bytes = payload
+                    src_for_open = stream_bytes
+                else:
+                    src_for_open = src_str
+
+        # ── Open document ───────────────────────────────────────────────────────
+        try:
+            doc = (
+                fitz.open(stream=src_for_open, filetype="pdf")
+                if stream_bytes is not None
+                else fitz.open(src_for_open)
+            )
+        except (fitz.FileDataError, RuntimeError) as exc:
+            logger.warning("PyMuPDF failed on %r – %s", src, exc)
+            return
+        finally:
+            if stream_bytes is not None:
+                del stream_bytes
+                gc.collect()  # Force cleanup of potentially large buffer
+
+        try:
+            total_pages = doc.page_count
+            logger.debug("Processing %d pages with streaming", total_pages)
+
+            # ── Process pages individually ──────────────────────────────────────
+            for page_idx in range(total_pages):
+                current_page_num = page_idx + 1  # 1-based for user display
+
+                # Load single page
+                page = doc[page_idx]
+
+                try:
+                    # Extract blocks from current page only
+                    blocks = [
+                        blk
+                        for blk in page.get_text("blocks")
+                        if blk[6] == 0 and blk[4].strip()
+                    ]
+                    blocks.sort(key=lambda blk: (round(blk[1], 2), blk[0]))
+
+                    # Yield elements from this page
+                    for blk in blocks:
+                        yield {
+                            "page": current_page_num,
+                            "type": "NarrativeText",
+                            "text": blk[4].rstrip(),
+                            "coords": (blk[0], blk[1], blk[2], blk[3]),
+                        }
+
+                finally:
+                    # Clean up page resources immediately
+                    del page
+                    gc.collect()
+
+                # Check memory usage and log if threshold exceeded
+                if self._should_yield_control(max_memory_mb, start_memory):
+                    current_memory = self._get_memory_usage_mb()
+                    logger.info(
+                        "Page %d/%d processed. Memory: %.1fMB (+%.1fMB growth)",
+                        current_page_num,
+                        total_pages,
+                        current_memory,
+                        current_memory - start_memory,
+                    )
+
+                # Call progress callback if provided
+                if progress_callback is not None:
+                    progress_callback(current_page_num, total_pages)
+
+                # Log progress every 10 pages or at end
+                if current_page_num % 10 == 0 or current_page_num == total_pages:
+                    current_memory = self._get_memory_usage_mb()
+                    logger.debug(
+                        "Processed page %d/%d. Memory: %.1fMB (+%.1fMB growth)",
+                        current_page_num,
+                        total_pages,
+                        current_memory,
+                        current_memory - start_memory,
+                    )
+
+            final_memory = self._get_memory_usage_mb()
+            logger.debug(
+                "Completed processing %d pages. Final memory: %.1fMB (+%.1fMB growth)",
+                total_pages,
+                final_memory,
+                final_memory - start_memory,
+            )
+
+        finally:
+            doc.close()
+
+    # ------------------------------------------------------------------
+    # Main extraction pipeline (backward compatible)
     # ------------------------------------------------------------------
     def extract(self, src: Src) -> Iterable[Element]:
         """Yield :class:`Element` mappings in reading order.
@@ -169,78 +349,8 @@ class PyMuPDFExtractor(DocumentExtractor):
             Logged (not raised) when the document is malformed or cannot be
             opened.
         """
-        logger.debug("PyMuPDFExtractor.extract(src=%r, type=%s)", src, type(src))
-
-        # ── 0. Handle BytesIO explicitly ─────────────────────────────────────────
-        if isinstance(src, io.BytesIO):
-            # getvalue() returns a bytes object; no “+” operator used anywhere
-            src = src.getvalue()
-
-        # ── 1. Normalise input ───────────────────────────────────────────────────
-        stream_bytes: bytes | None = None
-        if isinstance(src, (bytes, bytearray)):
-            stream_bytes = bytes(src)  # ensures “bytes” type
-            src_for_open: bytes = stream_bytes
-        else:
-            if isinstance(src, Path):
-                # local filesystem path → keep as str
-                src_for_open = str(src)
-            else:
-                # string that might be an HTTP/S URL
-                src_str = str(src)
-
-                if is_url(src_str):
-                    # ── remote PDF: download, guard size, then treat as bytes ──
-                    payload = fetch(src_str)
-                    if payload is None:  # network failure or > limit
-                        return
-                    stream_bytes = payload  # keep reference for cleanup
-                    src_for_open = stream_bytes  # fitz.open(stream=…, filetype='pdf')
-                else:
-                    # plain local path string
-                    src_for_open = src_str
-
-        # ── 2. Open document ─────────────────────────────────────────────────────
-        try:
-            doc = (
-                fitz.open(stream=src_for_open, filetype="pdf")
-                if stream_bytes is not None
-                else fitz.open(src_for_open)
-            )
-        except (fitz.FileDataError, RuntimeError) as exc:
-            logger.warning("PyMuPDF failed on %r – %s", src, exc)
-            return
-        finally:
-            # Release potentially large in‑memory buffers *immediately*.
-            # This is especially important in worker processes that may keep
-            # thousands of PDFs in flight.
-            if stream_bytes is not None:
-                del stream_bytes
-
-        try:
-            # block tuple spec:
-            # [0:x0, 1:y0, 2:x1, 3:y1, 4:text, 5:block_no, 6:block_type]
-            # ―― 3. Iterate pages & 4. Extract blocks ―――――――――――――――――――――――――
-            for page in doc:  # PyMuPDF page iterator (zero‑based .number)
-                blocks = [
-                    blk
-                    for blk in page.get_text("blocks")
-                    if blk[6] == 0 and blk[4].strip()
-                ]
-                blocks.sort(key=lambda blk: (round(blk[1], 2), blk[0]))
-
-                # ―― 5. Yield user‑facing Element dicts ―――――――――――――――――――――
-                for blk in blocks:
-                    yield {
-                        "page": operator.add(page.number, 1),  # 1‑based index
-                        "type": "NarrativeText",
-                        "text": blk[4].rstrip(),
-                        "coords": (blk[0], blk[1], blk[2], blk[3]),
-                    }
-
-            logger.debug("Processed %s pages from %r", doc.page_count, src)
-        finally:
-            doc.close()
+        # Delegate to the streaming implementation with default settings
+        yield from self.extract_stream(src, max_memory_mb=100.0, progress_callback=None)
 
 
-__all__: list[str] = ["PyMuPDFExtractor"]
+__all__: list[str] = ["PyMuPDFExtractor", "ProgressCallback"]

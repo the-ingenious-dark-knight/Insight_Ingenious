@@ -1360,7 +1360,9 @@ dependencies = [
     { name = "jsonpickle" },
     { name = "openai" },
     { name = "passlib" },
+    { name = "psutil" },
     { name = "pydantic" },
+    { name = "pymupdf" },
     { name = "pyodbc" },
     { name = "python-jose", extra = ["cryptography"] },
     { name = "typer" },
@@ -1377,6 +1379,7 @@ development = [
 ]
 document-processing = [
     { name = "azure-ai-documentintelligence" },
+    { name = "psutil" },
     { name = "pymupdf" },
 ]
 local-implementations = [
@@ -1447,7 +1450,10 @@ requires-dist = [
     { name = "passlib", specifier = ">=1.7.4" },
     { name = "pdfminer-six", marker = "extra == 'pdfminer'", specifier = "==20250506" },
     { name = "pre-commit", marker = "extra == 'tests'", specifier = "==4.2.0" },
+    { name = "psutil", specifier = ">=6.1.0" },
+    { name = "psutil", marker = "extra == 'document-processing'", specifier = ">=6.1.0" },
     { name = "pydantic", specifier = "==2.11.5" },
+    { name = "pymupdf", specifier = "==1.26.1" },
     { name = "pymupdf", marker = "extra == 'document-processing'", specifier = "==1.26.1" },
     { name = "pyodbc", specifier = "==5.2.0" },
     { name = "pytest", marker = "extra == 'tests'", specifier = "==8.3.5" },

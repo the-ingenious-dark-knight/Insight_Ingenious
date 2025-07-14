@@ -39,7 +39,9 @@ dependencies = [
   "jsonpickle>=4.1.1",
   "openai==1.82.0",
   "passlib>=1.7.4",
+  "psutil>=6.1.0",
   "pydantic==2.11.5",
+  "pymupdf==1.26.1",
   "pyodbc==5.2.0",
   "python-jose[cryptography]>=3.5.0",
   "typer>=0.15.4",
@@ -69,6 +71,7 @@ dataprep = ["scrapfly-sdk==0.8.23", "python-dotenv==1.0.1", "backoff==2.2"]
 document-processing = [
   "pymupdf==1.26.1",
   "azure-ai-documentintelligence==1.0.2",
+  "psutil>=6.1.0",
 ]
 local-implementations = ["sentence-transformers>=2.0.0"]
 pdfminer = ["pdfminer.six==20250506"]
