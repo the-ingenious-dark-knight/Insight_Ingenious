@@ -1344,6 +1344,7 @@ dependencies = [
     { name = "fastapi-cli" },
     { name = "flask" },
     { name = "jinja2" },
+    { name = "jsonpickle" },
     { name = "openai" },
     { name = "pydantic" },
     { name = "pyodbc" },
@@ -1424,6 +1425,7 @@ requires-dist = [
     { name = "flask", specifier = "==3.1.1" },
     { name = "ipython", marker = "extra == 'development'", specifier = "==9.2.0" },
     { name = "jinja2", specifier = "==3.1.6" },
+    { name = "jsonpickle", specifier = ">=4.1.1" },
     { name = "matplotlib", marker = "extra == 'visualization'", specifier = "==3.10.3" },
     { name = "openai", specifier = "==1.82.0" },
     { name = "pdfminer-six", marker = "extra == 'pdfminer'", specifier = "==20250506" },
@@ -1630,6 +1632,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/dc/fe/0f5a938c54105553436dbff7a61dc4fed4b1b2c98852f8833beaf4d5968f/joblib-1.5.1.tar.gz", hash = "sha256:f4f86e351f39fe3d0d32a9f2c3d8af1ee4cec285aafcb27003dda5205576b444", size = 330475, upload-time = "2025-05-23T12:04:37.097Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/7d/4f/1195bbac8e0c2acc5f740661631d8d750dc38d4a32b23ee5df3cde6f4e0d/joblib-1.5.1-py3-none-any.whl", hash = "sha256:4719a31f054c7d766948dcd83e9613686b27114f190f717cec7eaa2084f8a74a", size = 307746, upload-time = "2025-05-23T12:04:35.124Z" },
+]
+
+[[package]]
+name = "jsonpickle"
+version = "4.1.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/e4/a6/d07afcfdef402900229bcca795f80506b207af13a838d4d99ad45abf530c/jsonpickle-4.1.1.tar.gz", hash = "sha256:f86e18f13e2b96c1c1eede0b7b90095bbb61d99fedc14813c44dc2f361dbbae1", size = 316885, upload-time = "2025-06-02T20:36:11.57Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c1/73/04df8a6fa66d43a9fd45c30f283cc4afff17da671886e451d52af60bdc7e/jsonpickle-4.1.1-py3-none-any.whl", hash = "sha256:bb141da6057898aa2438ff268362b126826c812a1721e31cf08a6e142910dc91", size = 47125, upload-time = "2025-06-02T20:36:08.647Z" },
 ]
 
 [[package]]
