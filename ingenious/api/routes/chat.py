@@ -2,15 +2,14 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import HTTPBasicCredentials
 from typing_extensions import Annotated
 
-import ingenious.dependencies as igen_deps
 import ingenious.utils.namespace_utils as ns_utils
 from ingenious.core.structured_logging import get_logger
-from ingenious.dependencies import get_chat_service
 from ingenious.errors.content_filter_error import ContentFilterError
 from ingenious.errors.token_limit_exceeded_error import TokenLimitExceededError
 from ingenious.models.chat import ChatRequest, ChatResponse
 from ingenious.models.http_error import HTTPError
 from ingenious.services.chat_service import ChatService
+from ingenious.services.dependencies import get_chat_service, get_conditional_security
 
 logger = get_logger(__name__)
 router = APIRouter()
@@ -35,9 +34,7 @@ sys.path.append(parent_dir)
 async def chat(
     chat_request: ChatRequest,
     chat_service: Annotated[ChatService, Depends(get_chat_service)],
-    credentials: Annotated[
-        HTTPBasicCredentials, Depends(igen_deps.get_conditional_security)
-    ],
+    credentials: Annotated[HTTPBasicCredentials, Depends(get_conditional_security)],
 ) -> ChatResponse:
     try:
         ns_utils.print_namespace_modules(

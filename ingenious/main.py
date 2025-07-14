@@ -162,7 +162,12 @@ class RequestContextMiddleware(BaseHTTPMiddleware):
 
 
 class FastAgentAPI:
-    def __init__(self, config: ingen_config.Config):
+    def __init__(self, config: ingen_config.IngeniousSettings):
+        # Initialize dependency injection container
+        from ingenious.services.container import init_container
+
+        self.container = init_container()
+
         # Set the working directory
         os.chdir(os.environ["INGENIOUS_WORKING_DIR"])
 

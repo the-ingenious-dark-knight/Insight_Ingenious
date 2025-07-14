@@ -9,10 +9,10 @@ from openai.types.chat import ChatCompletionMessageParam
 import ingenious.config.config as ig_config
 from ingenious.core.structured_logging import get_logger
 from ingenious.db.chat_history_repository import ChatHistoryRepository
-from ingenious.dependencies import get_openai_service
 from ingenious.errors.content_filter_error import ContentFilterError
 from ingenious.files.files_repository import FileStorage
 from ingenious.models.chat import IChatRequest, IChatResponse
+from ingenious.services.dependencies import get_openai_service
 from ingenious.utils.namespace_utils import (
     import_class_with_fallback,
     normalize_workflow_name,

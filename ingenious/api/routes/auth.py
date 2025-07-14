@@ -12,7 +12,7 @@ from ingenious.auth.jwt import (
     verify_token,
 )
 from ingenious.core.structured_logging import get_logger
-from ingenious.dependencies import get_config
+from ingenious.services.dependencies import get_config
 
 logger = get_logger(__name__)
 router = APIRouter()

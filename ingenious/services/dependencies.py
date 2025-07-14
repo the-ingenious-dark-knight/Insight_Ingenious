@@ -1,118 +1,119 @@
-"""
-DEPRECATED: This module is deprecated in favor of the dependency injection container.
+"""FastAPI dependency injection using the DI container."""
 
-Please use:
-- ingenious.services.dependencies for FastAPI dependencies
-- ingenious.services.container for the DI container
-
-This module remains for backward compatibility but will be removed in a future version.
-"""
-
-import os
 import secrets
-import warnings
 from typing import Optional
 
-from dotenv import load_dotenv
+from dependency_injector.wiring import Provide, inject
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPBasic, HTTPBasicCredentials, HTTPBearer
 from typing_extensions import Annotated
 
 from ingenious.auth.jwt import get_username_from_token
-from ingenious.config.config import get_config as _get_config
 from ingenious.core.structured_logging import get_logger
-from ingenious.db.chat_history_repository import (
-    ChatHistoryRepository,
-    DatabaseClientType,
-)
-from ingenious.errors import ConfigurationError
-from ingenious.external_services.openai_service import OpenAIService
+from ingenious.db.chat_history_repository import ChatHistoryRepository
 from ingenious.files.files_repository import FileStorage
 from ingenious.services.chat_service import ChatService
+from ingenious.services.container import Container
 from ingenious.services.message_feedback_service import MessageFeedbackService
-
-# Issue deprecation warning
-warnings.warn(
-    "ingenious.dependencies is deprecated. Use ingenious.services.dependencies instead.",
-    DeprecationWarning,
-    stacklevel=2,
-)
-
-# Load environment variables from .env file
-load_dotenv()
 
 logger = get_logger(__name__)
 security = HTTPBasic()
 bearer_security = HTTPBearer()
 
 
-def get_config():
-    """Get config dynamically to ensure environment variables are loaded"""
-    return _get_config()
+@inject
+def get_config(config=Provide[Container.config]):
+    """Get config from container."""
+    return config
 
 
-def get_profile():
-    """Get profile dynamically to ensure environment variables are loaded"""
-    import ingenious.config.profile as Profile
+@inject
+def get_profile(profile=Provide[Container.profile]):
+    """Get profile from container."""
+    return profile
 
-    return Profile.Profiles(os.getenv("INGENIOUS_PROFILE_PATH", ""))
+
+@inject
+def get_openai_service(openai_service=Provide[Container.openai_service]):
+    """Get OpenAI service from container."""
+    return openai_service
 
 
-def get_openai_service():
-    config = get_config()
-    model = config.models[0]
-    return OpenAIService(
-        azure_endpoint=str(model.base_url),
-        api_key=str(model.api_key),
-        api_version=str(model.api_version),
-        open_ai_model=str(model.model),
+@inject
+def get_chat_history_repository(
+    chat_history_repository=Provide[Container.chat_history_repository]
+) -> ChatHistoryRepository:
+    """Get chat history repository from container."""
+    return chat_history_repository
+
+
+@inject
+def get_chat_service(
+    conversation_flow: str = "",
+    config=Provide[Container.config],
+    chat_history_repository=Provide[Container.chat_history_repository],
+) -> ChatService:
+    """Get chat service from container with conversation flow."""
+    cs_type = config.chat_service.type
+    return ChatService(
+        chat_service_type=cs_type,
+        chat_history_repository=chat_history_repository,
+        conversation_flow=conversation_flow,
+        config=config,
     )
 
 
-def get_chat_history_repository():
-    config = get_config()
-    db_type_val = config.chat_history.database_type.lower()
-    try:
-        db_type = DatabaseClientType(db_type_val)
+@inject
+def get_message_feedback_service(
+    feedback_service=Provide[Container.message_feedback_service]
+) -> MessageFeedbackService:
+    """Get message feedback service from container."""
+    return feedback_service
 
-    except ValueError as e:
-        raise ConfigurationError(
-            f"Unknown database type: {db_type_val}",
-            context={
-                "database_type": db_type_val,
-                "available_types": [t.value for t in DatabaseClientType],
-            },
-            cause=e,
-            recovery_suggestion="Check the database_type configuration in config.yml",
-        ) from e
 
-    chr = ChatHistoryRepository(db_type=db_type, config=config)
+@inject
+def get_file_storage_data(
+    file_storage=Provide[Container.file_storage_data]
+) -> FileStorage:
+    """Get file storage for data from container."""
+    return file_storage
 
-    return chr
+
+@inject
+def get_file_storage_revisions(
+    file_storage=Provide[Container.file_storage_revisions]
+) -> FileStorage:
+    """Get file storage for revisions from container."""
+    return file_storage
+
+
+@inject
+def get_project_config(config=Provide[Container.config]):
+    """Get project config from container."""
+    return config
 
 
 def get_security_service(
     token: Annotated[str, Depends(bearer_security)] = None,
     credentials: Annotated[HTTPBasicCredentials, Depends(security)] = None,
+    config=Depends(get_config),
 ):
-    config = get_config()
+    """Security service with JWT and Basic Auth support."""
     if not config.web_configuration.authentication.enable:
-        # Authentication is disabled, allow access without checking credentials
         logger.warning(
             "Authentication is disabled. This is not recommended for production use."
         )
-        return "anonymous"  # Return something that indicates no auth
+        return "anonymous"
 
-    # Try JWT token first (preferred method)
+    # Try JWT token first
     if token and token.credentials:
         try:
             username = get_username_from_token(token.credentials)
             return username
         except HTTPException:
-            # JWT token validation failed, fall back to basic auth if available
             pass
 
-    # Fall back to basic auth for backward compatibility
+    # Fall back to basic auth
     if credentials is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -145,17 +146,15 @@ def get_security_service(
 
 def get_security_service_optional(
     credentials: Optional[HTTPBasicCredentials] = None,
+    config=Depends(get_config),
 ):
-    """Optional security service that doesn't require credentials when auth is disabled"""
-    config = get_config()
+    """Optional security service that doesn't require credentials when auth is disabled."""
     if not config.web_configuration.authentication.enable:
-        # Authentication is disabled, don't require credentials
         logger.warning(
             "Authentication is disabled. This is not recommended for production use."
         )
         return None
 
-    # Authentication is enabled, require credentials
     if credentials is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -186,83 +185,23 @@ def get_security_service_optional(
     return credentials.username
 
 
-def get_chat_service(
-    chat_history_repository: Annotated[
-        ChatHistoryRepository, Depends(get_chat_history_repository)
-    ],
-    conversation_flow: str = "",
-):
-    config = get_config()
-    cs_type = config.chat_service.type
-    return ChatService(
-        chat_service_type=cs_type,
-        chat_history_repository=chat_history_repository,
-        conversation_flow=conversation_flow,
-        config=config,
-    )
-
-
-def get_message_feedback_service(
-    chat_history_repository: Annotated[
-        ChatHistoryRepository, Depends(get_chat_history_repository)
-    ],
-):
-    return MessageFeedbackService(chat_history_repository)
-
-
-def sync_templates():
-    config = get_config()
-    if config.file_storage.storage_type == "local":
-        return
-    else:
-        fs = FileStorage(config)
-        working_dir = os.getcwd()
-        template_path = os.path.join(working_dir, "ingenious", "templates")
-        template_files = fs.list_files(file_path=template_path)
-        for file in template_files:
-            file_name = os.path.basename(file)
-            file_contents = fs.read_file(file_name=file_name, file_path=template_path)
-            file_path = os.path.join(working_dir, "ingenious", "templates", file_name)
-            with open(file_path, "w") as f:
-                f.write(file_contents)
-
-
-def get_file_storage_data() -> FileStorage:
-    config = get_config()
-    return FileStorage(config, Category="data")
-
-
-def get_file_storage_revisions() -> FileStorage:
-    config = get_config()
-    return FileStorage(config, Category="revisions")
-
-
-def get_project_config():
-    return get_config()
-
-
-def get_auth_user(request: Request) -> str:
-    """Get authenticated user - supports both JWT and Basic Auth"""
-    config = get_config()
-
+def get_auth_user(request: Request, config=Depends(get_config)) -> str:
+    """Get authenticated user - supports both JWT and Basic Auth."""
     if not config.web_configuration.authentication.enable:
-        # Authentication is disabled, allow access
         logger.warning(
             "Authentication is disabled. This is not recommended for production use."
         )
         return "anonymous"
 
-    # Authentication is enabled, check for JWT token first
     auth_header = request.headers.get("Authorization", "")
 
     # Try JWT Bearer token first
     if auth_header.startswith("Bearer "):
-        token = auth_header[7:]  # Remove "Bearer " prefix
+        token = auth_header[7:]
         try:
             username = get_username_from_token(token)
             return username
         except HTTPException:
-            # JWT validation failed, continue to basic auth fallback
             pass
 
     # Fall back to Basic Auth
@@ -314,5 +253,24 @@ def get_auth_user(request: Request) -> str:
 
 
 def get_conditional_security(request: Request) -> str:
-    """Get authenticated user - wrapper around get_auth_user for compatibility"""
+    """Get authenticated user - wrapper around get_auth_user for compatibility."""
     return get_auth_user(request)
+
+
+def sync_templates(config=Depends(get_config)):
+    """Sync templates from file storage."""
+    if config.file_storage.storage_type == "local":
+        return
+    else:
+        import os
+        
+        fs = FileStorage(config)
+        working_dir = os.getcwd()
+        template_path = os.path.join(working_dir, "ingenious", "templates")
+        template_files = fs.list_files(file_path=template_path)
+        for file in template_files:
+            file_name = os.path.basename(file)
+            file_contents = fs.read_file(file_name=file_name, file_path=template_path)
+            file_path = os.path.join(working_dir, "ingenious", "templates", file_name)
+            with open(file_path, "w") as f:
+                f.write(file_contents)

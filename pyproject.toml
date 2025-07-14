@@ -32,6 +32,7 @@ dependencies = [
   "azure-storage-blob>=12.25.1",
   "bcrypt>=4.3.0",
   "chainlit==2.5.5",
+  "dependency-injector>=4.48.1",
   "fastapi==0.115.9",
   "fastapi-cli==0.0.7",
   "flask==3.1.1",

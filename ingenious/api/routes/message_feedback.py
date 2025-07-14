@@ -2,12 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from typing_extensions import Annotated
 
 from ingenious.core.structured_logging import get_logger
-from ingenious.dependencies import get_message_feedback_service
 from ingenious.models.http_error import HTTPError
 from ingenious.models.message_feedback import (
     MessageFeedbackRequest,
     MessageFeedbackResponse,
 )
+from ingenious.services.dependencies import get_message_feedback_service
 from ingenious.services.message_feedback_service import MessageFeedbackService
 
 logger = get_logger(__name__)

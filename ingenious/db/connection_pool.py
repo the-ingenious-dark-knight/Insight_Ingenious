@@ -15,14 +15,15 @@ logger = get_logger(__name__)
 
 class DatabaseConnection(Protocol):
     """Protocol for database connections."""
+
     def execute(self, sql: str, params: Any = None) -> Any:
         """Execute SQL query."""
         ...
-    
+
     def commit(self) -> None:
         """Commit transaction."""
         ...
-    
+
     def close(self) -> None:
         """Close connection."""
         ...
@@ -30,12 +31,12 @@ class DatabaseConnection(Protocol):
 
 class ConnectionFactory(ABC):
     """Abstract factory for creating database connections."""
-    
+
     @abstractmethod
     def create_connection(self) -> DatabaseConnection:
         """Create a new database connection."""
         pass
-    
+
     @abstractmethod
     def is_connection_healthy(self, conn: DatabaseConnection) -> bool:
         """Check if connection is healthy."""
@@ -44,10 +45,10 @@ class ConnectionFactory(ABC):
 
 class SQLiteConnectionFactory(ConnectionFactory):
     """Factory for creating SQLite connections."""
-    
+
     def __init__(self, db_path: str):
         self.db_path = db_path
-    
+
     def create_connection(self) -> sqlite3.Connection:
         """Create a new SQLite connection with proper configuration."""
         conn = sqlite3.connect(
@@ -63,7 +64,7 @@ class SQLiteConnectionFactory(ConnectionFactory):
         conn.execute("PRAGMA cache_size=10000")
         conn.execute("PRAGMA temp_store=MEMORY")
         return conn
-    
+
     def is_connection_healthy(self, conn: sqlite3.Connection) -> bool:
         """Check if a SQLite connection is healthy."""
         try:
@@ -75,16 +76,16 @@ class SQLiteConnectionFactory(ConnectionFactory):
 
 class AzureSQLConnectionFactory(ConnectionFactory):
     """Factory for creating Azure SQL connections."""
-    
+
     def __init__(self, connection_string: str):
         self.connection_string = connection_string
-    
+
     def create_connection(self) -> pyodbc.Connection:
         """Create a new Azure SQL connection."""
         conn = pyodbc.connect(self.connection_string)
         conn.autocommit = True
         return conn
-    
+
     def is_connection_healthy(self, conn: pyodbc.Connection) -> bool:
         """Check if an Azure SQL connection is healthy."""
         try:
