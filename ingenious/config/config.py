@@ -3,7 +3,7 @@ import os
 from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
 
-from ingenious.config.settings import IngeniousSettings
+from ingenious.config import IngeniousSettings
 from ingenious.core.structured_logging import get_logger
 
 logger = get_logger(__name__)
@@ -23,7 +23,7 @@ def get_kv_secret(secretName):
         raise ValueError("KEY_VAULT_NAME environment variable not set")
 
 
-def get_config() -> IngeniousSettings:
+def get_config(project_path: str = "") -> IngeniousSettings:
     """
     Get configuration using pydantic-settings system.
 
@@ -32,6 +32,9 @@ def get_config() -> IngeniousSettings:
     - Supports .env files
     - Provides validation with helpful error messages
     - Uses nested configuration models
+
+    Args:
+        project_path: Optional project path (for backward compatibility)
 
     Returns:
         IngeniousSettings: The loaded and validated configuration
