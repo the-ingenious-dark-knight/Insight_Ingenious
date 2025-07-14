@@ -11,8 +11,12 @@ logger = logging.getLogger(__name__)
 
 SECRET_KEY = os.getenv("JWT_SECRET_KEY") or "your-secret-key-change-this-in-production"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES") or "1440")  # 24 hours
-REFRESH_TOKEN_EXPIRE_DAYS = int(os.getenv("JWT_REFRESH_TOKEN_EXPIRE_DAYS") or "7")  # 7 days
+ACCESS_TOKEN_EXPIRE_MINUTES = int(
+    os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES") or "1440"
+)  # 24 hours
+REFRESH_TOKEN_EXPIRE_DAYS = int(
+    os.getenv("JWT_REFRESH_TOKEN_EXPIRE_DAYS") or "7"
+)  # 7 days
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -24,7 +28,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
         expire = datetime.utcnow() + expires_delta
     else:
         expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    
+
     to_encode.update({"exp": expire, "type": "access"})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
@@ -43,7 +47,7 @@ def verify_token(token: str, token_type: str = "access") -> dict:
     """Verify and decode a JWT token"""
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        
+
         # Check if token type matches expected type
         if payload.get("type") != token_type:
             raise HTTPException(
@@ -51,7 +55,7 @@ def verify_token(token: str, token_type: str = "access") -> dict:
                 detail=f"Invalid token type. Expected {token_type}",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        
+
         # Check if token has expired
         exp = payload.get("exp")
         if exp is None:
@@ -60,16 +64,16 @@ def verify_token(token: str, token_type: str = "access") -> dict:
                 detail="Token missing expiration",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        
+
         if datetime.utcnow().timestamp() > exp:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Token has expired",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        
+
         return payload
-        
+
     except JWTError as e:
         logger.debug(f"JWT verification failed: {e}")
         raise HTTPException(
