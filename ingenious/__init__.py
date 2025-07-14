@@ -10,5 +10,5 @@ with support for dynamic workflows, chat services, and extensible architectures.
 # Avoid importing services to prevent circular dependencies with container
 from . import config, models, utils
 
-__version__ = "1.0.0"
+__version__ = "0.1.4"
 __all__ = ["config", "models", "utils"]

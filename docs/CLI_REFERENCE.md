@@ -19,17 +19,14 @@ The `ingen` command-line interface provides intuitive commands for managing your
 # Initialize a new project
 ingen init
 
-# Check your configuration
-ingen status
-
-# Validate setup (recommended)
-ingen validate
-
 # Start the server
 ingen serve
 
 # List available workflows
 ingen workflows
+
+# Run tests
+ingen test
 ```
 
 ## Core Commands
@@ -105,35 +102,6 @@ ingen test --log-level DEBUG --args="--test-name=MyTest"
 
 ## Utility Commands
 
-### `ingen status`
-Check system configuration and status.
-
-Validates:
-- Environment variables
-- Configuration files
-- Dependencies
-- Available workflows
-
-### `ingen validate`
-Comprehensive validation of your Insight Ingenious setup.
-
-**What it validates:**
-- Configuration file syntax and required fields
-- Profile file syntax and credentials
-- Azure OpenAI connectivity
-- Workflow requirements
-- Dependencies
-
-**Usage:**
-```bash
-ingen validate  # Recommended before starting server
-```
-
-This command helps identify issues before starting the server and provides specific fix recommendations.
-
-### `ingen version`
-Show version information.
-
 ### `ingen prompt-tuner`
 Start standalone prompt tuning interface.
 
@@ -141,14 +109,23 @@ Start standalone prompt tuning interface.
 - `--port, -p` - Port (default: 5000)
 - `--host, -h` - Host (default: 127.0.0.1)
 
-### `ingen help [topic]`
-Show detailed help and guides.
+**Example:**
+```bash
+ingen prompt-tuner --port 5000 --host 127.0.0.1
+```
 
-**Topics:**
-- `setup` - Initial project setup
-- `workflows` - Understanding workflows
-- `config` - Configuration details
-- `deployment` - Deployment options
+### `ingen --help`
+Show comprehensive help for all commands.
+
+### `ingen <command> --help`
+Get detailed help for specific commands.
+
+**Examples:**
+```bash
+ingen serve --help     # Get help for serve command
+ingen test --help      # Get help for test command
+ingen workflows --help # Get help for workflows command
+```
 
 ## Data Processing Commands
 
@@ -242,11 +219,11 @@ The CLI provides helpful error messages and suggestions:
 - Missing dependencies
 - Environment variable issues
 
-Use `ingen status` to diagnose configuration problems.
+Use `ingen workflows` to check workflow availability and requirements.
 
 ## Getting Help
 
-- `ingen --help` - General help
-- `ingen <command> --help` - Command-specific help
-- `ingen help` - Comprehensive getting started guide
-- `ingen help <topic>` - Topic-specific guidance
+- `ingen --help` - General help and list of all commands
+- `ingen <command> --help` - Command-specific help and options
+- `ingen workflows` - Show all available workflows and their requirements
+- Documentation available in `docs/` directory

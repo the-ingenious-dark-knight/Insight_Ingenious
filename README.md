@@ -27,11 +27,10 @@ Get up and running in 5 minutes with Azure OpenAI!
     nano .env  # Add AZURE_OPENAI_API_KEY and AZURE_OPENAI_BASE_URL
     ```
 
-3. **Validate Setup** (Recommended):
+3. **Set Environment Variables**:
     ```bash
     export INGENIOUS_PROJECT_PATH=$(pwd)/config.yml
     export INGENIOUS_PROFILE_PATH=$(pwd)/profiles.yml
-    uv run ingen validate  # Check configuration before starting
     ```
 
 4. **Start the Server**:
@@ -41,39 +40,41 @@ Get up and running in 5 minutes with Azure OpenAI!
 
 5. **Verify Health**:
     ```bash
-    # Check server health
+    # Check server health (default port is 80, but configurable)
     curl http://localhost:80/api/v1/health
     ```
 
-6. **Test the API**:
+6. **Test with Core Workflow**:
     ```bash
-    # Test bike insights workflow (the "Hello World" of Ingenious)
+    # Test classification agent (available in core library)
     curl -X POST http://localhost:80/api/v1/chat \
       -H "Content-Type: application/json" \
       -d '{
-        "user_prompt": "{\"stores\": [{\"name\": \"QuickStart Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"QS-001\", \"quantity_sold\": 1, \"sale_date\": \"2023-04-15\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 5.0, \"comment\": \"Perfect bike for getting started!\"}}], \"bike_stock\": []}], \"revision_id\": \"quickstart-1\", \"identifier\": \"hello-world\"}",
-        "conversation_flow": "bike-insights"
+        "user_prompt": "Analyze this customer feedback: Great product!",
+        "conversation_flow": "classification-agent"
       }'
     ```
 
-That's it! You should see a comprehensive JSON response with insights from multiple AI agents analyzing the bike sales data.
+That's it! You should see a JSON response with AI analysis of the input.
 
-**Note**: The `bike-insights` workflow is created when you run `ingen init` - it's part of the project template setup, not included in the core library. You can now build on `bike-insights` as a template for your specific use case.
+**Note**: Core workflows like `classification-agent`, `knowledge-base-agent`, and `sql-manipulation-agent` are included in the library. The `bike-insights` workflow is only available when you run `ingen init` as part of the project template - it demonstrates how to build custom workflows on top of the core framework.
 
 ## CLI Commands
 
-Core commands:
-- `ingen init` - Initialize a new project
-- `ingen serve` - Start the API server
-- `ingen workflows` - List available workflows and requirements
-- `ingen test` - Run workflow tests
-- `ingen status` - Check system configuration
-- `ingen validate` - Validate setup and configuration
-- `ingen help` - Show comprehensive help
+**Core commands:**
+- `ingen init` - Initialize a new project with templates and configuration
+- `ingen serve` - Start the API server with web interface
+- `ingen workflows [workflow_name]` - List available workflows and their requirements
+- `ingen test` - Run agent workflow tests
+- `ingen prompt-tuner` - Start standalone prompt tuning interface
 
-Data processing commands:
-- `ingen document-processing extract <path>` - Extract text from documents (PDF, DOCX, images)
+**Data processing commands:**
+- `ingen document-processing extract <path>` - Extract text from documents (PDF, DOCX, images) 
 - `ingen dataprep crawl <url>` - Web scraping utilities using Scrapfly
+
+**Help and information:**
+- `ingen --help` - Show comprehensive help
+- `ingen <command> --help` - Get help for specific commands
 
 For complete CLI reference, see [docs/CLI_REFERENCE.md](docs/CLI_REFERENCE.md).
 
@@ -111,13 +112,18 @@ Insight Ingenious provides multiple conversation workflows with different config
 
 ### Core Workflows (Available in library)
 - `classification-agent` - Route input to specialized agents based on content (Azure OpenAI only)
-- `knowledge-base-agent` - Search knowledge bases using local ChromaDB (stable local implementation)
-- `sql-manipulation-agent` - Execute SQL queries using local SQLite (stable local implementation)
+- `knowledge-base-agent` - Search knowledge bases (requires Azure Cognitive Search or local ChromaDB)
+- `sql-manipulation-agent` - Execute SQL queries (requires Azure SQL or local SQLite)
 
 ### Extension Template Workflows (Available via project template)
-- `bike-insights` - Comprehensive bike sales analysis showcasing multi-agent coordination (**Note**: Created only when you run `ingen init` - not included in core library)
+- `bike-insights` - Comprehensive bike sales analysis showcasing multi-agent coordination (**Note**: Created only when you run `ingen init` - demonstrates custom workflow development)
 
-> **Note**: Only local implementations (ChromaDB for knowledge-base-agent, SQLite for sql-manipulation-agent) are currently stable. Azure Search and Azure SQL integrations are experimental and may contain bugs.
+### Configuration Requirements by Workflow
+- **Minimal setup** (Azure OpenAI only): `classification-agent`
+- **Requires Azure Search**: `knowledge-base-agent` 
+- **Requires database**: `sql-manipulation-agent` (supports both Azure SQL and SQLite)
+
+> **Note**: Azure integrations (Search, SQL) are supported but may require additional configuration. Local implementations (SQLite) are recommended for development and testing.
 
 
 ## Project Structure
