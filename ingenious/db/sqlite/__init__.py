@@ -371,7 +371,8 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
             for thread in user_threads:
                 thread_ids_list.append(str(thread["thread_id"]))
 
-            thread_ids = "('" + "','".join(thread_ids_list) + "')"
+            # Create parameterized placeholders for IN clause
+            thread_ids_placeholders = ",".join("?" * len(thread_ids_list))
 
         steps_feedbacks_query = f"""
             SELECT
@@ -398,10 +399,10 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
                 f."comment" AS feedback_comment,
                 f."id" AS feedback_id
             FROM steps s LEFT JOIN feedbacks f ON s."id" = f."forId"
-            WHERE s."threadId" IN {thread_ids}
+            WHERE s."threadId" IN ({thread_ids_placeholders})
             ORDER BY s."createdAt" ASC
         """
-        steps_feedbacks = self.execute_sql(steps_feedbacks_query)
+        steps_feedbacks = self.execute_sql(steps_feedbacks_query, thread_ids_list)
 
         elements_query = f"""
             SELECT
@@ -419,9 +420,9 @@ class sqlite_ChatHistoryRepository(IChatHistoryRepository):
                 e."forId" AS element_forid,
                 e."mime" AS element_mime
             FROM elements e
-            WHERE e."threadId" IN {thread_ids}
+            WHERE e."threadId" IN ({thread_ids_placeholders})
         """
-        elements = self.execute_sql(elements_query)
+        elements = self.execute_sql(elements_query, thread_ids_list)
 
         thread_dicts = {}
         for thread in user_threads:

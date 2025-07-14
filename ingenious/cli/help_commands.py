@@ -17,7 +17,7 @@ from typing_extensions import Annotated
 
 def register_commands(app: typer.Typer, console: Console) -> None:
     """Register help and status commands with the typer app."""
-    
+
     @app.command(name="help", help="Show detailed help and getting started guide")
     def help_command(
         topic: Annotated[
@@ -67,11 +67,15 @@ def register_commands(app: typer.Typer, console: Console) -> None:
             console.print("   ingen status      # Check configuration")
             console.print("   ingen workflows   # List available workflows")
             console.print("   ingen test        # Run tests")
-            console.print("   ingen help <topic> # Get detailed help on specific topics")
+            console.print(
+                "   ingen help <topic> # Get detailed help on specific topics"
+            )
             console.print("")
 
             console.print("[bold yellow]📖 Documentation:[/bold yellow]")
-            console.print("   GitHub: https://github.com/Insight-Services-APAC/ingenious")
+            console.print(
+                "   GitHub: https://github.com/Insight-Services-APAC/ingenious"
+            )
 
         elif topic == "setup":
             console.print("[bold blue]🛠️  Project Setup Guide[/bold blue]\n")
@@ -161,7 +165,9 @@ def register_commands(app: typer.Typer, console: Console) -> None:
             console.print("  export INGENIOUS_PROFILE_PATH=$(pwd)/profiles.yml")
 
         if not local_config.exists():
-            console.print("\n[bold yellow]💡 Initialize project:[/bold yellow] ingen init")
+            console.print(
+                "\n[bold yellow]💡 Initialize project:[/bold yellow] ingen init"
+            )
 
     @app.command(name="version", help="Show version information")
     def version():
@@ -177,7 +183,9 @@ def register_commands(app: typer.Typer, console: Console) -> None:
                 f"[bold blue]Insight Ingenious[/bold blue] version [bold]{version_str}[/bold]"
             )
         except Exception:
-            console.print("[bold blue]Insight Ingenious[/bold blue] - Development Version")
+            console.print(
+                "[bold blue]Insight Ingenious[/bold blue] - Development Version"
+            )
 
         console.print("🚀 GenAI Accelerator Framework")
         console.print(
@@ -230,7 +238,9 @@ def register_commands(app: typer.Typer, console: Console) -> None:
             validation_passed = False
         elif not Path(profile_path).exists():
             console.print(f"  ❌ Profile file not found: {profile_path}")
-            console.print("     [dim]Fix: Run 'ingen init' to create profiles.yml[/dim]")
+            console.print(
+                "     [dim]Fix: Run 'ingen init' to create profiles.yml[/dim]"
+            )
             validation_passed = False
         else:
             console.print(f"  ✅ INGENIOUS_PROFILE_PATH: {profile_path}")
@@ -348,7 +358,9 @@ def register_commands(app: typer.Typer, console: Console) -> None:
                 "    [bold]export INGENIOUS_PROFILE_PATH=$(pwd)/profiles.yml[/bold]"
             )
             console.print("  • Create .env file with Azure OpenAI credentials:")
-            console.print("    [bold]echo 'AZURE_OPENAI_API_KEY=your-key' > .env[/bold]")
+            console.print(
+                "    [bold]echo 'AZURE_OPENAI_API_KEY=your-key' > .env[/bold]"
+            )
             console.print(
                 "    [bold]echo 'AZURE_OPENAI_BASE_URL=https://your-resource.openai.azure.com/' >> .env[/bold]"
             )

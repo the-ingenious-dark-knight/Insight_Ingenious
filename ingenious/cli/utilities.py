@@ -17,10 +17,10 @@ from ingenious.utils.namespace_utils import import_class_with_fallback
 
 class CliFunctions:
     """Utility functions for CLI operations."""
-    
+
     class RunTestBatch(stage_executor_module.IActionCallable):
         """Action callable for running test batches."""
-        
+
         async def __call__(self, progress, task_id, **kwargs):
             module_name = "tests.run_tests"
             class_name = "RunBatches"

@@ -17,7 +17,7 @@ from rich.console import Console
 
 def register_commands(app: typer.Typer, console: Console) -> None:
     """Register project-related commands with the typer app."""
-    
+
     @app.command(name="init", help="Initialize a new Insight Ingenious project")
     def init():
         """
@@ -150,7 +150,9 @@ def register_commands(app: typer.Typer, console: Console) -> None:
                     # Create an empty context.md file in the 'tmp' folder
                     (destination / "context.md").touch()
 
-                console.print(f"[info]Folder '{folder_name}' created successfully.[/info]")
+                console.print(
+                    f"[info]Folder '{folder_name}' created successfully.[/info]"
+                )
 
             except Exception as e:
                 console.print(
@@ -172,14 +174,18 @@ def register_commands(app: typer.Typer, console: Console) -> None:
                 f.write("\n".join(git_ignore_content))
 
         # create a config file in project directory - prefer minimal template
-        minimal_config_path = templates_paths["ingenious_extensions"] / "config.minimal.yml"
+        minimal_config_path = (
+            templates_paths["ingenious_extensions"] / "config.minimal.yml"
+        )
         template_config_path = (
             templates_paths["ingenious_extensions"] / "config.template.yml"
         )
 
         # Use minimal template if available, otherwise fall back to full template
         source_config_path = (
-            minimal_config_path if minimal_config_path.exists() else template_config_path
+            minimal_config_path
+            if minimal_config_path.exists()
+            else template_config_path
         )
 
         if source_config_path.exists():
@@ -197,7 +203,9 @@ def register_commands(app: typer.Typer, console: Console) -> None:
                     f"[info]Config file already exists at {config_path}. Preserving existing configuration.[/info]"
                 )
         else:
-            console.print("[warning]Config file templates not found. Skipping...[/warning]")
+            console.print(
+                "[warning]Config file templates not found. Skipping...[/warning]"
+            )
 
         # create profile file in project directory - prefer minimal template
         minimal_profile_path = (
@@ -209,7 +217,9 @@ def register_commands(app: typer.Typer, console: Console) -> None:
 
         # Use minimal template if available, otherwise fall back to full template
         source_profile_path = (
-            minimal_profile_path if minimal_profile_path.exists() else template_profile_path
+            minimal_profile_path
+            if minimal_profile_path.exists()
+            else template_profile_path
         )
 
         if source_profile_path.exists():
@@ -233,7 +243,9 @@ def register_commands(app: typer.Typer, console: Console) -> None:
 
         # create .env.example file - prefer minimal template
         minimal_env_path = templates_paths["ingenious_extensions"] / ".env.minimal"
-        template_env_example_path = templates_paths["ingenious_extensions"] / ".env.example"
+        template_env_example_path = (
+            templates_paths["ingenious_extensions"] / ".env.example"
+        )
 
         # Use minimal template if available, otherwise fall back to full template
         source_env_path = (
@@ -244,7 +256,9 @@ def register_commands(app: typer.Typer, console: Console) -> None:
             env_example_path = Path.cwd() / ".env.example"
             if not env_example_path.exists():
                 shutil.copy2(source_env_path, env_example_path)
-                template_type = "minimal" if source_env_path == minimal_env_path else "full"
+                template_type = (
+                    "minimal" if source_env_path == minimal_env_path else "full"
+                )
                 console.print(
                     f"[info].env.example file created successfully at {env_example_path} using {template_type} template[/info]"
                 )
@@ -259,7 +273,9 @@ def register_commands(app: typer.Typer, console: Console) -> None:
 
         # Create Docker files at project root
         docker_file_path = templates_paths["ingenious_extensions"] / "Dockerfile"
-        dockerignore_file_path = templates_paths["ingenious_extensions"] / ".dockerignore"
+        dockerignore_file_path = (
+            templates_paths["ingenious_extensions"] / ".dockerignore"
+        )
         start_sh_file_path = templates_paths["ingenious_extensions"] / "start.sh"
 
         if docker_file_path.exists():
@@ -274,7 +290,9 @@ def register_commands(app: typer.Typer, console: Console) -> None:
                     f"[info]Dockerfile already exists at {project_docker_path}. Preserving existing file.[/info]"
                 )
         else:
-            console.print("[warning]Dockerfile template not found. Skipping...[/warning]")
+            console.print(
+                "[warning]Dockerfile template not found. Skipping...[/warning]"
+            )
 
         if dockerignore_file_path.exists():
             project_dockerignore_path = Path.cwd() / ".dockerignore"
@@ -318,7 +336,11 @@ def register_commands(app: typer.Typer, console: Console) -> None:
 
         # First try to copy from existing ingenious_extensions in the project
         existing_quickstart_source = (
-            Path.cwd() / "ingenious_extensions" / "templates" / "prompts" / "quickstart-1"
+            Path.cwd()
+            / "ingenious_extensions"
+            / "templates"
+            / "prompts"
+            / "quickstart-1"
         )
         # Fallback to the template directory
         template_quickstart_source = (
@@ -331,7 +353,9 @@ def register_commands(app: typer.Typer, console: Console) -> None:
         quickstart_templates_source = None
         if existing_quickstart_source.exists():
             quickstart_templates_source = existing_quickstart_source
-            console.print("[info]Found existing quickstart-1 templates in project[/info]")
+            console.print(
+                "[info]Found existing quickstart-1 templates in project[/info]"
+            )
         elif template_quickstart_source.exists():
             quickstart_templates_source = template_quickstart_source
             console.print("[info]Using template quickstart-1 templates[/info]")
@@ -368,7 +392,9 @@ def register_commands(app: typer.Typer, console: Console) -> None:
                     )
 
             except Exception as e:
-                console.print(f"[error]Error creating quickstart-1 templates: {e}[/error]")
+                console.print(
+                    f"[error]Error creating quickstart-1 templates: {e}[/error]"
+                )
         else:
             console.print(
                 "[warning]Quickstart-1 template source not found. Creating templates from base prompts...[/warning]"
@@ -410,7 +436,9 @@ def register_commands(app: typer.Typer, console: Console) -> None:
                             f.write(
                                 "### ROLE\nYou are a user proxy agent that coordinates multi-agent conversations for bike sales analysis.\n"
                             )
-                        console.print("[info]  ✓ user_proxy_prompt.jinja (created)[/info]")
+                        console.print(
+                            "[info]  ✓ user_proxy_prompt.jinja (created)[/info]"
+                        )
                         templates_copied += 1
 
                     if templates_copied > 0:
@@ -431,7 +459,9 @@ def register_commands(app: typer.Typer, console: Console) -> None:
         console.print("1. Copy .env.example to .env and fill in your credentials")
         console.print("2. Set environment variables:")
         console.print("[info]   export INGENIOUS_PROJECT_PATH=$(pwd)/config.yml[/info]")
-        console.print("[info]   export INGENIOUS_PROFILE_PATH=$(pwd)/profiles.yml[/info]")
+        console.print(
+            "[info]   export INGENIOUS_PROFILE_PATH=$(pwd)/profiles.yml[/info]"
+        )
         console.print("3. Start the server:")
         console.print("[info]   ingen serve[/info]")
         console.print("\n[bold yellow]💡 Tips:[/bold yellow]")

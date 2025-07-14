@@ -13,14 +13,14 @@ import typer
 from rich.console import Console
 from typing_extensions import Annotated
 
+import ingenious.utils.stage_executor as stage_executor_module
 from ingenious.cli.utilities import CliFunctions
 from ingenious.utils.log_levels import LogLevel
-import ingenious.utils.stage_executor as stage_executor_module
 
 
 def register_commands(app: typer.Typer, console: Console) -> None:
     """Register test-related commands with the typer app."""
-    
+
     @app.command(name="test", help="Run agent workflow tests")
     def test(
         log_level: Annotated[

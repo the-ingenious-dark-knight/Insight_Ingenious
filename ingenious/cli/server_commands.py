@@ -27,7 +27,7 @@ load_dotenv()
 
 def register_commands(app: typer.Typer, console: Console) -> None:
     """Register server-related commands with the typer app."""
-    
+
     @app.command(name="serve", help="Start the API server with web interface")
     def serve(
         config: Annotated[
@@ -48,7 +48,9 @@ def register_commands(app: typer.Typer, console: Console) -> None:
         ] = None,
         host: Annotated[
             str,
-            typer.Option("--host", "-h", help="Host to bind the server (default: 0.0.0.0)"),
+            typer.Option(
+                "--host", "-h", help="Host to bind the server (default: 0.0.0.0)"
+            ),
         ] = "0.0.0.0",
         port: Annotated[
             int,
@@ -58,7 +60,9 @@ def register_commands(app: typer.Typer, console: Console) -> None:
         ] = int(os.getenv("WEB_PORT", "80")),
         no_prompt_tuner: Annotated[
             bool,
-            typer.Option("--no-prompt-tuner", help="Disable the prompt tuner interface"),
+            typer.Option(
+                "--no-prompt-tuner", help="Disable the prompt tuner interface"
+            ),
         ] = False,
     ):
         """
@@ -183,7 +187,9 @@ def register_commands(app: typer.Typer, console: Console) -> None:
                 else:
                     # Fall back to home directory
                     home_dir = os.path.expanduser("~")
-                    profile_dir = Path(home_dir) / Path(".ingenious") / Path("profiles.yml")
+                    profile_dir = (
+                        Path(home_dir) / Path(".ingenious") / Path("profiles.yml")
+                    )
                     print(f"Using profiles.yml from home directory: {profile_dir}")
             else:
                 profile_dir = Path(os.getenv("INGENIOUS_PROFILE_PATH"))
@@ -208,7 +214,9 @@ def register_commands(app: typer.Typer, console: Console) -> None:
         from ingenious.main import FastAgentAPI
 
         os.environ["LOADENV"] = "False"
-        console.print(f"Running all elements of the project in {project_dir}", style="info")
+        console.print(
+            f"Running all elements of the project in {project_dir}", style="info"
+        )
         # If the code has been pip installed then recursively copy the ingenious folder into the site-packages directory
         if CliFunctions.PureLibIncludeDirExists():
             src = Path(os.getcwd()) / Path("ingenious/")
@@ -249,12 +257,16 @@ def register_commands(app: typer.Typer, console: Console) -> None:
     def prompt_tuner(
         port: Annotated[
             int,
-            typer.Option("--port", "-p", help="Port for the prompt tuner (default: 5000)"),
+            typer.Option(
+                "--port", "-p", help="Port for the prompt tuner (default: 5000)"
+            ),
         ] = 5000,
         host: Annotated[
             str,
             typer.Option(
-                "--host", "-h", help="Host to bind the prompt tuner (default: 127.0.0.1)"
+                "--host",
+                "-h",
+                help="Host to bind the prompt tuner (default: 127.0.0.1)",
             ),
         ] = "127.0.0.1",
     ):

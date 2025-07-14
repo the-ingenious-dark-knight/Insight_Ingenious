@@ -154,27 +154,39 @@ class SQL_ToolFunctions:
             or _config.azure_sql_services.database_name == "skip"
         ):
             table_name = _config.local_sql_db.sample_database_name
-            result = test_db.execute_sql(f"""SELECT * FROM {table_name} LIMIT 1""")
+            # Validate table name to prevent SQL injection
+            if not table_name.replace("_", "").replace("-", "").isalnum():
+                raise ValueError(f"Invalid table name: {table_name}")
+            result = test_db.execute_sql(f"""SELECT * FROM "{table_name}" LIMIT 1""")
             column_names = [key for key in result[0]]
             return table_name, column_names
         else:
             database_name = _config.azure_sql_services.database_name
             table_name = _config.azure_sql_services.table_name
+            # Validate table name to prevent SQL injection
+            if not table_name.replace("_", "").replace("-", "").isalnum():
+                raise ValueError(f"Invalid table name: {table_name}")
             if cursor is not None:
-                cursor.execute(f"""
+                cursor.execute(
+                    """
                     SELECT COLUMN_NAME
                     FROM INFORMATION_SCHEMA.COLUMNS
-                    WHERE TABLE_NAME = '{table_name}'
-                """)
+                    WHERE TABLE_NAME = ?
+                """,
+                    (table_name,),
+                )
                 column_names = [row[0] for row in cursor.fetchall()]
             else:
                 # Fallback - create temporary connection
                 conn_temp, cursor_temp = get_conn(_config)
-                cursor_temp.execute(f"""
+                cursor_temp.execute(
+                    """
                     SELECT COLUMN_NAME
                     FROM INFORMATION_SCHEMA.COLUMNS
-                    WHERE TABLE_NAME = '{table_name}'
-                """)
+                    WHERE TABLE_NAME = ?
+                """,
+                    (table_name,),
+                )
                 column_names = [row[0] for row in cursor_temp.fetchall()]
                 conn_temp.close()
             return database_name, table_name, column_names
@@ -186,22 +198,31 @@ class SQL_ToolFunctions:
         database_name = _config.azure_sql_services.database_name
         table_name = _config.azure_sql_services.table_name
 
+        # Validate table name to prevent SQL injection
+        if not table_name.replace("_", "").replace("-", "").isalnum():
+            raise ValueError(f"Invalid table name: {table_name}")
         # Get connection if needed
         if cursor is not None:
-            cursor.execute(f"""
+            cursor.execute(
+                """
                 SELECT COLUMN_NAME
                 FROM INFORMATION_SCHEMA.COLUMNS
-                WHERE TABLE_NAME = '{table_name}'
-            """)
+                WHERE TABLE_NAME = ?
+            """,
+                (table_name,),
+            )
             column_names = [row[0] for row in cursor.fetchall()]
         else:
             # Fallback - create temporary connection
             conn_temp, cursor_temp = get_conn(_config)
-            cursor_temp.execute(f"""
+            cursor_temp.execute(
+                """
                 SELECT COLUMN_NAME
                 FROM INFORMATION_SCHEMA.COLUMNS
-                WHERE TABLE_NAME = '{table_name}'
-            """)
+                WHERE TABLE_NAME = ?
+            """,
+                (table_name,),
+            )
             column_names = [row[0] for row in cursor_temp.fetchall()]
             conn_temp.close()
         return database_name, table_name, column_names

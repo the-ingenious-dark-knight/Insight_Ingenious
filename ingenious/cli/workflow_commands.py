@@ -13,12 +13,16 @@ from typing_extensions import Annotated
 
 def register_commands(app: typer.Typer, console: Console) -> None:
     """Register workflow-related commands with the typer app."""
-    
-    @app.command(name="workflows", help="Show available workflows and their requirements")
+
+    @app.command(
+        name="workflows", help="Show available workflows and their requirements"
+    )
     def workflows(
         workflow: Annotated[
             str,
-            typer.Argument(help="Specific workflow to check, or 'all' to list everything"),
+            typer.Argument(
+                help="Specific workflow to check, or 'all' to list everything"
+            ),
         ] = "all",
     ):
         """
@@ -190,7 +194,9 @@ def register_commands(app: typer.Typer, console: Console) -> None:
 
         elif workflow in workflows:
             info = workflows[workflow]
-            console.print(f"\n[bold blue]📋 {workflow.upper()} REQUIREMENTS[/bold blue]\n")
+            console.print(
+                f"\n[bold blue]📋 {workflow.upper()} REQUIREMENTS[/bold blue]\n"
+            )
             console.print(f"[bold]Description:[/bold] {info['description']}")
             console.print(f"[bold]Category:[/bold] {info['category']}")
             console.print("[bold]External Services Needed:[/bold]")
@@ -225,4 +231,6 @@ def register_commands(app: typer.Typer, console: Console) -> None:
             for name, info in workflows.items():
                 if "DEPRECATED" not in info["description"]:
                     console.print(f"  • {name}")
-            console.print("\nUse 'ingen workflows' to see all workflows with descriptions")
+            console.print(
+                "\nUse 'ingen workflows' to see all workflows with descriptions"
+            )
