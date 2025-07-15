@@ -46,10 +46,11 @@ Get up and running in 5 minutes with Azure OpenAI!
 
 3. **Validate Setup** (Recommended):
     ```bash
-    export INGENIOUS_PROJECT_PATH=$(pwd)/config.yml
-    export INGENIOUS_PROFILE_PATH=$(pwd)/profiles.yml
+    # No need to set project/profile paths - pydantic-settings handles configuration
     uv run ingen validate  # Check configuration before starting
     ```
+    
+    > **Important**: YAML configuration files (`config.yml`, `profiles.yml`) are no longer supported. All configuration must be done via environment variables with `INGENIOUS_` prefixes.
 
 4. **Start the Server**:
     ```bash
@@ -87,11 +88,39 @@ Insight Ingenious provides multiple conversation workflows with different config
 ### **Core Workflows (Azure OpenAI only)**
 - `classification-agent` - Route input to specialized agents based on content
 
-### **Local Stable Implementations**
-- `knowledge-base-agent` - Search knowledge bases using local ChromaDB (stable local implementation)
-- `sql-manipulation-agent` - Execute SQL queries using local SQLite (stable local implementation)
+### **Local Stable Implementations** (RECENTLY FIXED)
+- `knowledge-base-agent` - Search knowledge bases using local ChromaDB ✅ **STABLE & WORKING**
+- `sql-manipulation-agent` - Execute SQL queries using local SQLite ✅ **STABLE & WORKING**
 
-> **Note**: Only local implementations (ChromaDB for knowledge-base-agent, SQLite for sql-manipulation-agent) are currently stable. Azure Search and Azure SQL integrations are experimental and may contain bugs.
+> **Note**: Local implementations (ChromaDB for knowledge-base-agent, SQLite for sql-manipulation-agent) are stable and have been recently fixed to work with the latest autogen and pydantic-settings. Azure Search and Azure SQL integrations are experimental and contain known bugs.
+
+### Quick Local Agent Testing
+
+**Test SQL Agent:**
+```bash
+# No setup required - creates SQLite database automatically
+curl -X POST http://localhost:8000/api/v1/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_prompt": "What is the average math score for students?",
+    "conversation_flow": "sql-manipulation-agent"
+  }'
+```
+
+**Test Knowledge Base Agent:**
+```bash
+# Create a simple knowledge base document first
+mkdir -p .tmp/knowledge_base
+echo "# Health Guide\n\nDrink 8 glasses of water daily for proper hydration." > .tmp/knowledge_base/health.md
+
+# Test the agent
+curl -X POST http://localhost:8000/api/v1/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_prompt": "How much water should I drink daily?",
+    "conversation_flow": "knowledge-base-agent"
+  }'
+```
 
 ## Azure SQL Database Setup (Optional)
 
@@ -198,23 +227,38 @@ curl -X POST http://localhost:8000/api/v1/chat \
   }'
 ```
 
-### Quick SQL Agent Setup (EXPERIMENTAL/MAY CONTAIN BUGS)
+### Dependencies for Local Agents
 
-If you want to try database queries with natural language:
+If you're using the local stable implementations, you may need to install additional dependencies:
 
 ```bash
-# Set up SQLite database
-uv run python -c "
-from ingenious.utils.load_sample_data import sqlite_sample_db
-sqlite_sample_db()
-print('✅ Sample database created')
-"
+# For knowledge-base-agent (ChromaDB support)
+uv add chromadb
 
-# Test SQL queries
+# For sql-manipulation-agent (async file operations)
+uv add aiofiles
+
+# For autogen compatibility (latest version)
+uv add autogen-ext
+```
+
+These dependencies are automatically included in:
+- `ingenious[standard]` (includes aiofiles)
+- `ingenious[knowledge-base]` (includes chromadb)
+- `ingenious[azure-full]` (includes all dependencies)
+
+### SQL Agent Setup (STABLE LOCAL IMPLEMENTATION)
+
+The SQL agent now works out-of-the-box with local SQLite:
+
+```bash
+# Test SQL queries - database is created automatically with sample data
 curl -X POST http://localhost:8000/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
-    "user_prompt": "Show me all tables in the database",
+    "user_prompt": "What is the average math score for students?",
     "conversation_flow": "sql-manipulation-agent"
   }'
 ```
+
+The SQL agent automatically creates a SQLite database with sample student performance data for testing.

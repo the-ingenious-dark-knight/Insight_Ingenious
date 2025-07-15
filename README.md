@@ -46,8 +46,19 @@ Get up and running in 5 minutes with Azure OpenAI!
     AZURE_OPENAI_API_KEY=your-api-key-here
     AZURE_OPENAI_BASE_URL=https://your-resource.openai.azure.com/
     
-    # Model Configuration (JSON format)
-    INGENIOUS_MODELS='[{"model": "gpt-4.1-nano", "api_type": "rest", "api_version": "2024-02-01", "deployment": "gpt-4.1-nano", "api_key": "${AZURE_OPENAI_API_KEY}", "base_url": "${AZURE_OPENAI_BASE_URL}"}]'
+    # Model Configuration (pydantic-settings format)
+    INGENIOUS_MODELS__0__MODEL=gpt-4.1-nano
+    INGENIOUS_MODELS__0__API_TYPE=rest
+    INGENIOUS_MODELS__0__API_VERSION=2024-12-01-preview
+    INGENIOUS_MODELS__0__DEPLOYMENT=gpt-4.1-nano
+    INGENIOUS_MODELS__0__API_KEY=${AZURE_OPENAI_API_KEY}
+    INGENIOUS_MODELS__0__BASE_URL=${AZURE_OPENAI_BASE_URL}
+    
+    # Basic required settings
+    INGENIOUS_CHAT_SERVICE__TYPE=multi_agent
+    INGENIOUS_CHAT_HISTORY__DATABASE_TYPE=sqlite
+    INGENIOUS_CHAT_HISTORY__DATABASE_PATH=./.tmp/chat_history.db
+    INGENIOUS_CHAT_HISTORY__MEMORY_PATH=./.tmp
     ```
 
 3. **Validate Configuration**:
@@ -55,7 +66,7 @@ Get up and running in 5 minutes with Azure OpenAI!
     uv run ingen validate  # Check configuration before starting
     ```
 
-    > **Note**: Ingenious now uses **pydantic-settings** for configuration via environment variables. Legacy YAML configuration files (`config.yml`, `profiles.yml`) can be migrated to environment variables with `INGENIOUS_` prefixes using the migration script at `scripts/migrate_config.py`.
+    > **Note**: Ingenious now uses **pydantic-settings** for configuration via environment variables. Legacy YAML configuration files (`config.yml`, `profiles.yml`) are no longer supported and must be migrated to environment variables with `INGENIOUS_` prefixes using the migration script at `scripts/migrate_config.py`.
 
 4. **Start the Server**:
     ```bash
@@ -145,8 +156,8 @@ Insight Ingenious provides multiple conversation workflows with different config
 
 ### Core Workflows (Available in library)
 - `classification-agent` - Route input to specialized agents based on content (Azure OpenAI only)
-- `knowledge-base-agent` - Search knowledge bases (stable local ChromaDB implementation, experimental Azure Search)
-- `sql-manipulation-agent` - Execute SQL queries (stable local SQLite implementation, experimental Azure SQL)
+- `knowledge-base-agent` - Search knowledge bases using local ChromaDB (STABLE - recently fixed)
+- `sql-manipulation-agent` - Execute SQL queries using local SQLite (STABLE - recently fixed)
 
 > **Note**: Workflow names support both hyphenated (classification-agent) and underscored (classification_agent) formats for backward compatibility.
 
@@ -157,10 +168,25 @@ Insight Ingenious provides multiple conversation workflows with different config
 
 ### Configuration Requirements by Workflow
 - **Minimal setup** (Azure OpenAI only): `classification-agent`, `bike-insights`
-- **Local implementations** (stable): `knowledge-base-agent` (ChromaDB), `sql-manipulation-agent` (SQLite)
-- **Azure integrations** (experimental): Azure Search for knowledge base, Azure SQL for database queries
+- **Local implementations** (STABLE): `knowledge-base-agent` (ChromaDB), `sql-manipulation-agent` (SQLite)
+- **Azure integrations** (EXPERIMENTAL): Azure Search for knowledge base, Azure SQL for database queries
 
-> **Note**: Local implementations (ChromaDB, SQLite) are stable and recommended for production. Azure integrations are experimental and may contain bugs. Use `ingen workflows` to check configuration requirements for each workflow.
+> **Important**: Local implementations (ChromaDB, SQLite) are stable and work out-of-the-box. Azure integrations are experimental and contain known bugs. For production use, stick with local implementations. Use `ingen workflows` to check configuration requirements for each workflow.
+
+### Required Dependencies
+
+Some workflows require additional dependencies:
+
+```bash
+# For knowledge-base-agent (ChromaDB)
+uv add chromadb
+
+# For sql-manipulation-agent (SQLite support)  
+uv add aiofiles
+
+# For updated autogen compatibility
+uv add autogen-ext
+```
 
 ## Installation Options
 
@@ -197,9 +223,11 @@ uv add ingenious[full]
 ### Knowledge Base Features
 ```bash
 uv add ingenious[knowledge-base]
+# OR manually install dependencies
+uv add ingenious && uv add chromadb aiofiles autogen-ext
 ```
 **Includes**: Core features + ChromaDB and ML capabilities for knowledge-base-agent
-**Use for**: Local knowledge base and search functionality
+**Use for**: Local knowledge base and search functionality (STABLE)
 
 
 ## Project Structure
