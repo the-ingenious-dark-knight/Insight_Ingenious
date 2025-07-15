@@ -410,7 +410,8 @@ class IConversationFlow(ABC):
         self, parent_multi_agent_chat_service: multi_agent_chat_service
     ) -> None:
         super().__init__()
-        self._config = ig_config.get_config()
+        # Use configuration from parent service instead of loading separately
+        self._config = parent_multi_agent_chat_service.config
         self._memory_path = self.GetConfig().chat_history.memory_path
         self._memory_file_path = f"{self._memory_path}/context.md"
         self._logger = get_logger(__name__)  # type: ignore
