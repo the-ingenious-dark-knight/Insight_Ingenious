@@ -287,58 +287,72 @@ class ValidateCommand(BaseCommand):
         Comprehensive validation of Insight Ingenious setup.
 
         Performs deep validation of:
+        • Environment variables and configuration
         • Configuration file syntax and required fields
-        • Profile file syntax and credentials
         • Azure OpenAI connectivity
-        • Workflow requirements
-        • Dependencies
+        • Dependencies and imports
+        • Workflow requirements and availability
         """
         self.console.print(
             "[bold blue]✅ Insight Ingenious Configuration Validation[/bold blue]\n"
         )
 
         validation_passed = True
+        issues_found = []
 
         # 1. Check environment variables
         self.print_info("1. Checking environment variables...")
-        env_passed = self._validate_environment_variables()
+        env_passed, env_issues = self._validate_environment_variables()
         validation_passed = validation_passed and env_passed
+        issues_found.extend(env_issues)
 
         # 2. Validate configuration files
         self.print_info("2. Validating configuration files...")
-        config_passed = self._validate_configuration_files()
+        config_passed, config_issues = self._validate_configuration_files()
         validation_passed = validation_passed and config_passed
+        issues_found.extend(config_issues)
 
-        # 3. Check Azure OpenAI connectivity
-        self.print_info("3. Checking Azure OpenAI connectivity...")
-        azure_passed = self._validate_azure_connectivity()
+        # 3. Check dependencies
+        self.print_info("3. Checking dependencies...")
+        deps_passed, deps_issues = self._validate_dependencies()
+        validation_passed = validation_passed and deps_passed
+        issues_found.extend(deps_issues)
+
+        # 4. Check Azure OpenAI connectivity
+        self.print_info("4. Checking Azure OpenAI connectivity...")
+        azure_passed, azure_issues = self._validate_azure_connectivity()
         validation_passed = validation_passed and azure_passed
+        issues_found.extend(azure_issues)
 
-        # 4. Check workflow availability
-        self.print_info("4. Checking workflow availability...")
-        workflow_passed = self._validate_workflows()
+        # 5. Check workflow availability
+        self.print_info("5. Checking workflow availability...")
+        workflow_passed, workflow_issues = self._validate_workflows()
         validation_passed = validation_passed and workflow_passed
+        issues_found.extend(workflow_issues)
 
-        # 5. Summary and recommendations
-        self._show_validation_summary(validation_passed)
+        # 6. Summary and recommendations
+        self._show_validation_summary(validation_passed, issues_found)
 
         if not validation_passed:
             raise CommandError("Validation failed", ExitCode.VALIDATION_ERROR)
 
-    def _validate_environment_variables(self) -> bool:
+    def _validate_environment_variables(self) -> tuple[bool, list[str]]:
         """Validate environment variables."""
+        issues = []
         try:
             self.validate_config_paths()
             self.print_success("Environment variables are properly configured")
-            return True
+            return True, issues
         except CommandError as e:
             self.print_error(f"Environment validation failed: {e}")
+            issues.append(f"Environment setup: {e}")
             self._show_env_fix_commands()
-            return False
+            return False, issues
 
-    def _validate_configuration_files(self) -> bool:
+    def _validate_configuration_files(self) -> tuple[bool, list[str]]:
         """Validate configuration file syntax and content."""
         success = True
+        issues = []
 
         # Validate config.yml
         try:
@@ -348,9 +362,11 @@ class ValidateCommand(BaseCommand):
                 self.print_success("config.yml syntax validation passed")
             else:
                 self.print_error(f"config.yml validation failed: {error}")
+                issues.append(f"config.yml: {error}")
                 success = False
         except Exception as e:
             self.print_error(f"config.yml validation error: {e}")
+            issues.append(f"config.yml: {e}")
             success = False
 
         # Validate profiles.yml
@@ -361,37 +377,92 @@ class ValidateCommand(BaseCommand):
                 self.print_success("profiles.yml syntax validation passed")
             else:
                 self.print_error(f"profiles.yml validation failed: {error}")
+                issues.append(f"profiles.yml: {error}")
                 success = False
         except Exception as e:
             self.print_error(f"profiles.yml validation error: {e}")
+            issues.append(f"profiles.yml: {e}")
             success = False
 
-        return success
+        return success, issues
 
-    def _validate_azure_connectivity(self) -> bool:
+    def _validate_dependencies(self) -> tuple[bool, list[str]]:
+        """Validate required dependencies are available."""
+        success = True
+        issues = []
+        
+        # Core dependencies that should always be available
+        core_deps = [
+            ("pandas", "Required for sql-manipulation-agent"),
+            ("fastapi", "Core web framework"),
+            ("openai", "Azure OpenAI connectivity"),
+            ("typer", "CLI framework"),
+        ]
+        
+        optional_deps = [
+            ("chromadb", "Required for knowledge-base-agent"),
+            ("azure.storage.blob", "Required for Azure Blob Storage"),
+            ("pyodbc", "Required for SQL database connectivity"),
+        ]
+        
+        # Check core dependencies
+        for dep_name, description in core_deps:
+            try:
+                __import__(dep_name)
+                self.console.print(f"    ✅ {dep_name}: Available")
+            except ImportError:
+                self.print_error(f"Missing dependency: {dep_name} ({description})")
+                issues.append(f"Missing core dependency: {dep_name}")
+                success = False
+        
+        # Check optional dependencies (warn but don't fail)
+        missing_optional = []
+        for dep_name, description in optional_deps:
+            try:
+                __import__(dep_name)
+                self.console.print(f"    ✅ {dep_name}: Available")
+            except ImportError:
+                self.console.print(f"    ⚠️  {dep_name}: Not available ({description})")
+                missing_optional.append(dep_name)
+        
+        if missing_optional:
+            self.console.print(f"    💡 Optional dependencies missing: {', '.join(missing_optional)}")
+            self.console.print("    Install with: uv add ingenious[azure,full] for all features")
+        
+        if success:
+            self.print_success(f"Core dependencies available")
+        
+        return success, issues
+
+    def _validate_azure_connectivity(self) -> tuple[bool, list[str]]:
         """Validate Azure OpenAI connectivity."""
+        issues = []
         azure_key = os.getenv("AZURE_OPENAI_API_KEY")
         azure_endpoint = os.getenv("AZURE_OPENAI_BASE_URL")
 
         if not azure_key:
             self.print_error("AZURE_OPENAI_API_KEY not set")
-            return False
+            issues.append("AZURE_OPENAI_API_KEY environment variable missing")
+            return False, issues
 
         if not azure_endpoint:
             self.print_error("AZURE_OPENAI_BASE_URL not set")
-            return False
+            issues.append("AZURE_OPENAI_BASE_URL environment variable missing")
+            return False, issues
 
         # Validate URL format
         is_valid_url, error = ValidationUtils.validate_url(azure_endpoint)
         if not is_valid_url:
             self.print_error(f"Invalid Azure endpoint URL: {error}")
-            return False
+            issues.append(f"Invalid Azure endpoint URL: {error}")
+            return False, issues
 
         self.print_success("Azure OpenAI configuration found")
-        return True
+        return True, issues
 
-    def _validate_workflows(self) -> bool:
+    def _validate_workflows(self) -> tuple[bool, list[str]]:
         """Validate workflow availability."""
+        issues = []
         try:
             extensions_path = Path.cwd() / "ingenious_extensions"
             if extensions_path.exists():
@@ -400,16 +471,48 @@ class ValidateCommand(BaseCommand):
                 services_path = extensions_path / "services"
                 if services_path.exists():
                     self.print_success("Services directory found")
-                    return True
+                    
+                    # Try to validate specific workflows
+                    workflows_checked = 0
+                    workflows_working = 0
+                    
+                    # Check bike-insights workflow
+                    bike_insights_path = services_path / "chat_services" / "multi_agent" / "conversation_flows" / "bike_insights"
+                    if bike_insights_path.exists():
+                        self.console.print("    ✅ bike-insights: Available")
+                        workflows_checked += 1
+                        workflows_working += 1
+                    else:
+                        self.console.print("    ❌ bike-insights: Not found")
+                        workflows_checked += 1
+                        issues.append("bike-insights workflow not found")
+                    
+                    # Check core workflows import
+                    try:
+                        from ingenious.services.chat_services.multi_agent.conversation_flows import classification_agent
+                        self.console.print("    ✅ classification-agent: Available")
+                        workflows_checked += 1
+                        workflows_working += 1
+                    except ImportError as e:
+                        self.console.print("    ❌ classification-agent: Import failed")
+                        workflows_checked += 1
+                        issues.append(f"classification-agent import failed: {e}")
+                    
+                    self.console.print(f"    📊 Workflows status: {workflows_working}/{workflows_checked} working")
+                    
+                    return workflows_working > 0, issues
                 else:
                     self.print_warning("Services directory not found")
-                    return False
+                    issues.append("Services directory missing")
+                    return False, issues
             else:
                 self.print_error("ingenious_extensions directory not found")
-                return False
+                issues.append("ingenious_extensions directory missing")
+                return False, issues
         except Exception as e:
             self.print_error(f"Workflow validation failed: {e}")
-            return False
+            issues.append(f"Workflow validation error: {e}")
+            return False, issues
 
     def _show_env_fix_commands(self) -> None:
         """Show commands to fix environment variable issues."""
@@ -425,7 +528,7 @@ class ValidateCommand(BaseCommand):
         )
         self.console.print(panel)
 
-    def _show_validation_summary(self, validation_passed: bool) -> None:
+    def _show_validation_summary(self, validation_passed: bool, issues_found: list[str]) -> None:
         """Show validation summary and next steps."""
         if validation_passed:
             success_panel = Panel(
@@ -436,19 +539,51 @@ class ValidateCommand(BaseCommand):
             )
             self.console.print(success_panel)
         else:
-            fix_commands = [
-                "• Missing files: ingen init",
-                "• Set environment variables:",
-                "  export INGENIOUS_PROJECT_PATH=$(pwd)/config.yml",
-                "  export INGENIOUS_PROFILE_PATH=$(pwd)/profiles.yml",
-                "• Create .env file with Azure OpenAI credentials:",
-                "  echo 'AZURE_OPENAI_API_KEY=your-key' > .env",
-                "  echo 'AZURE_OPENAI_BASE_URL=https://your-resource.openai.azure.com/' >> .env",
-            ]
+            # Show specific issues found
+            if issues_found:
+                self.console.print("\n[bold red]Issues Found:[/bold red]")
+                for issue in issues_found:
+                    self.console.print(f"  ❌ {issue}")
+                self.console.print("")
+            
+            # Show fix suggestions based on issues
+            fix_commands = []
+            
+            if any("missing" in issue.lower() for issue in issues_found):
+                fix_commands.extend([
+                    "• Missing files: ingen init",
+                    "• Set environment variables:",
+                    "  export INGENIOUS_PROJECT_PATH=$(pwd)/config.yml",
+                    "  export INGENIOUS_PROFILE_PATH=$(pwd)/profiles.yml",
+                ])
+            
+            if any("azure" in issue.lower() for issue in issues_found):
+                fix_commands.extend([
+                    "• Create .env file with Azure OpenAI credentials:",
+                    "  echo 'AZURE_OPENAI_API_KEY=your-key' > .env",
+                    "  echo 'AZURE_OPENAI_BASE_URL=https://your-resource.openai.azure.com/' >> .env",
+                ])
+            
+            if any("dependency" in issue.lower() for issue in issues_found):
+                fix_commands.extend([
+                    "• Install missing dependencies:",
+                    "  uv add ingenious[standard]  # For SQL agent support",
+                    "  uv add ingenious[azure-full]  # For full Azure integration",
+                ])
+            
+            if any("workflow" in issue.lower() for issue in issues_found):
+                fix_commands.extend([
+                    "• Fix workflow issues:",
+                    "  Check that ingenious_extensions directory exists",
+                    "  Verify workflow files are properly configured",
+                ])
+            
+            if not fix_commands:
+                fix_commands = ["• Run 'ingen init' to set up missing components"]
 
             error_panel = Panel(
                 "\n".join(fix_commands),
-                title="❌ Validation Issues - Fix Commands",
+                title="❌ Validation Issues - Suggested Fixes",
                 border_style="red",
             )
             self.console.print(error_panel)

@@ -6,7 +6,7 @@ from dependency_injector import containers, providers
 from dotenv import load_dotenv
 
 from ingenious.config.config import get_config as _get_config
-from ingenious.config.profile import Profiles
+# Legacy profile import removed - now using new config system
 from ingenious.core.structured_logging import get_logger
 from ingenious.db.chat_history_repository import (
     ChatHistoryRepository,
@@ -83,9 +83,7 @@ class Container(containers.DeclarativeContainer):
     # Core configuration
     config = providers.Singleton(lambda: _get_config())
 
-    profile = providers.Singleton(
-        lambda: Profiles(os.getenv("INGENIOUS_PROFILE_PATH", ""))
-    )
+    # Legacy profile system removed - all configuration now handled by the new config system
 
     logger = providers.Singleton(get_logger, __name__)
 

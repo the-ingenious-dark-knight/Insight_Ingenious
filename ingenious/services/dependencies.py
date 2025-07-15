@@ -27,10 +27,7 @@ def get_config(config=Provide[Container.config]):
     return config
 
 
-@inject
-def get_profile(profile=Provide[Container.profile]):
-    """Get profile from container."""
-    return profile
+# Legacy profile system removed - all configuration now in the main config object
 
 
 @inject

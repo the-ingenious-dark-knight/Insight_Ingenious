@@ -22,16 +22,26 @@ Get up and running in 5 minutes with Azure OpenAI!
 
 1. **Install and Initialize**:
     ```bash
-    # From your project directory
-    uv add ingenious
+    # From your project directory - choose based on features needed
+    uv add ingenious[standard]    # Recommended: includes SQL agent support
+    # OR  
+    uv add ingenious[azure-full]  # Full Azure integration
+    # OR
+    uv add ingenious             # Minimal installation
+    
+    # Initialize project  
     uv run ingen init
     ```
 
 2. **Configure Credentials**:
     ```bash
-    # Edit .env with your Azure OpenAI credentials
-    cp .env.example .env
-    nano .env  # Add AZURE_OPENAI_API_KEY and AZURE_OPENAI_BASE_URL
+    # Copy appropriate template and edit with your credentials
+    cp .env.development .env      # For local development
+    # OR
+    cp .env.azure-full .env       # For full Azure integration
+    
+    # Edit with your actual Azure OpenAI credentials
+    nano .env
     ```
 
 3. **Validate Setup** (Recommended):
@@ -48,14 +58,14 @@ Get up and running in 5 minutes with Azure OpenAI!
 
 5. **Verify Health**:
     ```bash
-    # Check server health
-    curl http://localhost:80/api/v1/health
+    # Check server health (default development port is 8000)
+    curl http://localhost:8000/api/v1/health
     ```
 
 6. **Test the API**:
     ```bash
     # Test bike insights workflow (the "Hello World" of Ingenious)
-    curl -X POST http://localhost:80/api/v1/chat \
+    curl -X POST http://localhost:8000/api/v1/chat \
       -H "Content-Type: application/json" \
       -d '{
         "user_prompt": "{\"stores\": [{\"name\": \"QuickStart Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"QS-001\", \"quantity_sold\": 1, \"sale_date\": \"2023-04-15\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 5.0, \"comment\": \"Perfect bike for getting started!\"}}], \"bike_stock\": []}], \"revision_id\": \"quickstart-1\", \"identifier\": \"hello-world\"}",
@@ -130,7 +140,7 @@ For production deployments with persistent chat history storage in Azure SQL Dat
 6. **Test with Azure SQL**:
     ```bash
     # Start server and test - chat history will now be stored in Azure SQL
-    uv run ingen serve --port 8080
+    uv run ingen serve --port 8000
     ```
 
 **Benefits of Azure SQL:**
@@ -180,7 +190,7 @@ The `bike_stock` array requires objects with this structure:
 
 ### Multiple Stores Example
 ```bash
-curl -X POST http://localhost:8080/api/v1/chat \
+curl -X POST http://localhost:8000/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "{\"stores\": [{\"name\": \"Store A\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"A-001\", \"quantity_sold\": 2, \"sale_date\": \"2024-01-10\", \"year\": 2024, \"month\": \"January\", \"customer_review\": {\"rating\": 4.5, \"comment\": \"Good value\"}}], \"bike_stock\": []}, {\"name\": \"Store B\", \"location\": \"VIC\", \"bike_sales\": [{\"product_code\": \"B-001\", \"quantity_sold\": 1, \"sale_date\": \"2024-01-12\", \"year\": 2024, \"month\": \"January\", \"customer_review\": {\"rating\": 5.0, \"comment\": \"Perfect!\"}}], \"bike_stock\": []}], \"revision_id\": \"multi-store-1\", \"identifier\": \"comparison\"}",
@@ -201,7 +211,7 @@ print('✅ Sample database created')
 "
 
 # Test SQL queries
-curl -X POST http://localhost:8080/api/v1/chat \
+curl -X POST http://localhost:8000/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Show me all tables in the database",

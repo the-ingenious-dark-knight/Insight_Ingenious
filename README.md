@@ -15,26 +15,39 @@ Get up and running in 5 minutes with Azure OpenAI!
 
 1. **Install and Initialize**:
     ```bash
-    # From your project directory
-    uv add ingenious
+    # From your project directory - choose installation based on features needed
+    uv add ingenious[standard]    # Most common: includes SQL agent support
+    # OR
+    uv add ingenious[azure-full]  # Full Azure integration
+    # OR  
+    uv add ingenious             # Minimal installation
+    
+    # Initialize project
     uv run ingen init
     ```
 
 2. **Configure Credentials**:
-    Create a `.env` file with your Azure OpenAI credentials:
+    Copy the example template and add your Azure OpenAI credentials:
     ```bash
-    # Create .env file with your credentials
-    cat > .env << 'EOF'
+    # Copy environment template (choose based on your needs)
+    cp .env.example .env          # Full configuration options
+    # OR
+    cp .env.development .env      # Minimal development setup
+    # OR  
+    cp .env.azure-full .env       # Full Azure integration
+    
+    # Edit .env file with your actual credentials
+    nano .env
+    ```
+    
+    **Required configuration (add to .env file)**:
+    ```bash
     # Azure OpenAI Configuration
-    INGENIOUS_MODELS__0__MODEL=gpt-4o-mini
-    INGENIOUS_MODELS__0__API_KEY=your-api-key-here
-    INGENIOUS_MODELS__0__BASE_URL=https://your-resource.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-08-01-preview
-    INGENIOUS_MODELS__0__API_TYPE=rest
-    INGENIOUS_MODELS__0__API_VERSION=2024-08-01-preview
-
-    # Optional: Enable authentication
-    INGENIOUS_WEB_CONFIGURATION__AUTHENTICATION__ENABLE=false
-    EOF
+    AZURE_OPENAI_API_KEY=your-api-key-here
+    AZURE_OPENAI_BASE_URL=https://your-resource.openai.azure.com/
+    
+    # Model Configuration (JSON format)
+    INGENIOUS_MODELS='[{"model": "gpt-4o-mini", "api_type": "azure", "api_version": "2024-02-01", "deployment": "gpt-4o-mini", "api_key": "${AZURE_OPENAI_API_KEY}", "base_url": "${AZURE_OPENAI_BASE_URL}"}]'
     ```
 
 3. **Validate Configuration**:
@@ -148,6 +161,45 @@ Insight Ingenious provides multiple conversation workflows with different config
 - **Azure integrations** (experimental): Azure Search for knowledge base, Azure SQL for database queries
 
 > **Note**: Local implementations (ChromaDB, SQLite) are stable and recommended for production. Azure integrations are experimental and may contain bugs. Use `ingen workflows` to check configuration requirements for each workflow.
+
+## Installation Options
+
+Choose the installation option that matches your intended use case:
+
+### Minimal Installation
+```bash
+uv add ingenious
+```
+**Includes**: Core chat functionality, classification-agent workflow
+**Use for**: Basic API development, testing Azure OpenAI connectivity
+
+### Standard Installation (Recommended)
+```bash
+uv add ingenious[standard]
+```
+**Includes**: Core features + SQL agent support (pandas, database connectivity)
+**Use for**: Most production deployments with local database features
+
+### Azure Full Integration
+```bash
+uv add ingenious[azure-full]
+```
+**Includes**: Standard features + Azure services (Azure SQL, Blob Storage, Search)
+**Use for**: Full cloud deployment with Azure integrations
+
+### Complete Feature Set
+```bash
+uv add ingenious[full]
+```
+**Includes**: All features including document processing, ML capabilities, data preparation
+**Use for**: Advanced use cases requiring all available features
+
+### Knowledge Base Features
+```bash
+uv add ingenious[knowledge-base]
+```
+**Includes**: Core features + ChromaDB and ML capabilities for knowledge-base-agent
+**Use for**: Local knowledge base and search functionality
 
 
 ## Project Structure

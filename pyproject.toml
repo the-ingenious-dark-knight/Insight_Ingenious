@@ -31,6 +31,7 @@ dependencies = [
   "jsonpickle==4.1.1",
   "markdown>=3.8.2",
   "openai>=1.82.0",
+  "pandas>=2.3.1",
   "passlib>=1.7.4",
   "pydantic==2.11.5",
   "pydantic-settings>=2.10.1",
@@ -128,8 +129,14 @@ visualization = ["matplotlib==3.10.3", "seaborn==0.13.2"]
 # Development tools
 development = ["ipython==9.2.0"]
 
-# Standard production deployment (most common features)
-standard = ["ingenious[core,auth, azure, ai,database]"]
+# Standard production deployment (most common features including SQL agent support)
+standard = ["ingenious[core,auth,ai,database]"]
+
+# Azure cloud deployment with full integration
+azure-full = ["ingenious[core,auth,azure,ai,database,ui]"]
+
+# Knowledge base and ML features
+knowledge-base = ["ingenious[core,ai,ml]"]
 
 # Full feature set
 full = [

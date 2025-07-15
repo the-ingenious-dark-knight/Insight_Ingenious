@@ -1417,6 +1417,7 @@ dependencies = [
     { name = "jsonpickle" },
     { name = "markdown" },
     { name = "openai" },
+    { name = "pandas" },
     { name = "passlib" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
@@ -1446,6 +1447,28 @@ azure = [
     { name = "azure-keyvault" },
     { name = "azure-search-documents" },
     { name = "azure-storage-blob" },
+]
+azure-full = [
+    { name = "aiosqlite" },
+    { name = "autogen-agentchat" },
+    { name = "autogen-ext", extra = ["openai"] },
+    { name = "azure-core" },
+    { name = "azure-cosmos" },
+    { name = "azure-identity" },
+    { name = "azure-keyvault" },
+    { name = "azure-search-documents" },
+    { name = "azure-storage-blob" },
+    { name = "bcrypt" },
+    { name = "chainlit" },
+    { name = "fastapi-cli" },
+    { name = "flask" },
+    { name = "jinja2" },
+    { name = "openai" },
+    { name = "passlib" },
+    { name = "psutil" },
+    { name = "pyodbc" },
+    { name = "python-dotenv" },
+    { name = "python-jose", extra = ["cryptography"] },
 ]
 core = [
     { name = "aiosqlite" },
@@ -1504,6 +1527,17 @@ full = [
     { name = "seaborn" },
     { name = "sentence-transformers" },
 ]
+knowledge-base = [
+    { name = "aiosqlite" },
+    { name = "autogen-agentchat" },
+    { name = "autogen-ext", extra = ["openai"] },
+    { name = "chromadb" },
+    { name = "fastapi-cli" },
+    { name = "jinja2" },
+    { name = "openai" },
+    { name = "python-dotenv" },
+    { name = "sentence-transformers" },
+]
 ml = [
     { name = "chromadb" },
     { name = "sentence-transformers" },
@@ -1512,12 +1546,6 @@ standard = [
     { name = "aiosqlite" },
     { name = "autogen-agentchat" },
     { name = "autogen-ext", extra = ["openai"] },
-    { name = "azure-core" },
-    { name = "azure-cosmos" },
-    { name = "azure-identity" },
-    { name = "azure-keyvault" },
-    { name = "azure-search-documents" },
-    { name = "azure-storage-blob" },
     { name = "bcrypt" },
     { name = "fastapi-cli" },
     { name = "jinja2" },
@@ -1581,7 +1609,9 @@ requires-dist = [
     { name = "fastapi-cli", marker = "extra == 'core'", specifier = "==0.0.7" },
     { name = "flask", specifier = ">=3.1.1" },
     { name = "flask", marker = "extra == 'ui'", specifier = "==3.1.1" },
-    { name = "ingenious", extras = ["core", "auth", "azure", "ai", "database"], marker = "extra == 'standard'" },
+    { name = "ingenious", extras = ["core", "ai", "ml"], marker = "extra == 'knowledge-base'" },
+    { name = "ingenious", extras = ["core", "auth", "ai", "database"], marker = "extra == 'standard'" },
+    { name = "ingenious", extras = ["core", "auth", "azure", "ai", "database", "ui"], marker = "extra == 'azure-full'" },
     { name = "ingenious", extras = ["core", "auth", "azure", "ai", "database", "ui", "document-processing", "ml", "dataprep", "visualization"], marker = "extra == 'full'" },
     { name = "ipython", marker = "extra == 'development'", specifier = "==9.2.0" },
     { name = "jinja2", marker = "extra == 'core'", specifier = "==3.1.6" },
@@ -1590,6 +1620,7 @@ requires-dist = [
     { name = "matplotlib", marker = "extra == 'visualization'", specifier = "==3.10.3" },
     { name = "openai", specifier = ">=1.82.0" },
     { name = "openai", marker = "extra == 'ai'", specifier = "==1.82.0" },
+    { name = "pandas", specifier = ">=2.3.1" },
     { name = "passlib", specifier = ">=1.7.4" },
     { name = "passlib", marker = "extra == 'auth'", specifier = "==1.7.4" },
     { name = "pdfminer-six", marker = "extra == 'document-advanced'", specifier = "==20250506" },
@@ -1613,7 +1644,7 @@ requires-dist = [
     { name = "unstructured", extras = ["all-docs"], marker = "extra == 'document-advanced'", specifier = "==0.17.2" },
     { name = "uvicorn", specifier = ">=0.35.0" },
 ]
-provides-extras = ["minimal", "core", "auth", "azure", "ai", "database", "ui", "document-processing", "document-advanced", "ml", "dataprep", "visualization", "development", "standard", "full"]
+provides-extras = ["minimal", "core", "auth", "azure", "ai", "database", "ui", "document-processing", "document-advanced", "ml", "dataprep", "visualization", "development", "standard", "azure-full", "knowledge-base", "full"]
 
 [package.metadata.requires-dev]
 dev = [
