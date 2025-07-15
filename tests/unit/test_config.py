@@ -719,3 +719,54 @@ AZURE_OPENAI_BASE_URL=https://env.openai.azure.com/
                 settings.file_storage.revisions.url
                 == "https://storage.blob.core.windows.net"
             )
+
+    def test_models_nested_environment_variables(self):
+        """Test models configuration with nested environment variables"""
+        with patch.dict(
+            os.environ,
+            {
+                "INGENIOUS_MODELS__0__MODEL": "gpt-4.1-nano",
+                "INGENIOUS_MODELS__0__API_KEY": "test-nested-key",
+                "INGENIOUS_MODELS__0__BASE_URL": "https://nested.openai.azure.com/",
+                "INGENIOUS_MODELS__0__API_VERSION": "2024-12-01-preview",
+                "INGENIOUS_MODELS__0__DEPLOYMENT": "gpt-4.1-nano",
+                "INGENIOUS_MODELS__1__MODEL": "gpt-3.5-turbo",
+                "INGENIOUS_MODELS__1__API_KEY": "test-nested-key-2",
+                "INGENIOUS_MODELS__1__BASE_URL": "https://nested2.openai.azure.com/",
+                "INGENIOUS_MODELS__1__DEPLOYMENT": "gpt-35-turbo",
+            },
+            clear=True,
+        ):
+            settings = IngeniousSettings()
+
+            assert len(settings.models) == 2
+            assert settings.models[0].model == "gpt-4.1-nano"
+            assert settings.models[0].api_key == "test-nested-key"
+            assert settings.models[0].base_url == "https://nested.openai.azure.com/"
+            assert settings.models[0].api_version == "2024-12-01-preview"
+            assert settings.models[0].deployment == "gpt-4.1-nano"
+            
+            assert settings.models[1].model == "gpt-3.5-turbo"
+            assert settings.models[1].api_key == "test-nested-key-2"
+            assert settings.models[1].base_url == "https://nested2.openai.azure.com/"
+            assert settings.models[1].deployment == "gpt-35-turbo"
+
+    def test_models_json_string_format(self):
+        """Test models configuration with JSON string format"""
+        models_json = '[{"model": "gpt-4.1-nano", "api_key": "test-json-key", "base_url": "https://json.openai.azure.com/", "api_version": "2024-12-01-preview", "deployment": "gpt-4.1-nano"}]'
+        
+        with patch.dict(
+            os.environ,
+            {
+                "INGENIOUS_MODELS": models_json,
+            },
+            clear=True,
+        ):
+            settings = IngeniousSettings()
+
+            assert len(settings.models) == 1
+            assert settings.models[0].model == "gpt-4.1-nano"
+            assert settings.models[0].api_key == "test-json-key"
+            assert settings.models[0].base_url == "https://json.openai.azure.com/"
+            assert settings.models[0].api_version == "2024-12-01-preview"
+            assert settings.models[0].deployment == "gpt-4.1-nano"

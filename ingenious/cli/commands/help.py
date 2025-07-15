@@ -337,51 +337,110 @@ class ValidateCommand(BaseCommand):
             raise CommandError("Validation failed", ExitCode.VALIDATION_ERROR)
 
     def _validate_environment_variables(self) -> tuple[bool, list[str]]:
-        """Validate environment variables."""
+        """Validate environment variables for pydantic-settings configuration."""
         issues = []
         try:
-            self.validate_config_paths()
-            self.print_success("Environment variables are properly configured")
-            return True, issues
-        except CommandError as e:
+            # Check for .env file
+            from pathlib import Path
+            from ingenious.config.main_settings import IngeniousSettings
+            
+            # Look for .env files
+            env_files = [".env", ".env.local", ".env.dev", ".env.prod"]
+            env_file_found = any(Path(f).exists() for f in env_files)
+            
+            if env_file_found:
+                self.print_success("Environment file (.env) found")
+            else:
+                self.print_warning("No .env file found - using system environment variables")
+            
+            # Load settings and check if models are configured
+            try:
+                settings = IngeniousSettings()
+                
+                if settings.models and len(settings.models) > 0:
+                    self.print_success("Configuration loaded successfully from environment")
+                    
+                    # Check if first model has required fields
+                    first_model = settings.models[0]
+                    if first_model.api_key and first_model.base_url and first_model.model:
+                        self.print_success("Primary model environment configuration is complete")
+                        return True, issues
+                    else:
+                        missing_fields = []
+                        if not first_model.api_key:
+                            missing_fields.append("api_key")
+                        if not first_model.base_url:
+                            missing_fields.append("base_url") 
+                        if not first_model.model:
+                            missing_fields.append("model")
+                        
+                        self.print_error(f"Model missing required configuration: {', '.join(missing_fields)}")
+                        issues.append(f"Missing model configuration: {', '.join(missing_fields)}")
+                        self._show_env_fix_commands()
+                        return False, issues
+                else:
+                    self.print_error("No models configured in environment")
+                    issues.append("No models configured")
+                    self._show_env_fix_commands()
+                    return False, issues
+                    
+            except Exception as e:
+                self.print_error(f"Failed to load configuration: {e}")
+                issues.append(f"Configuration loading error: {e}")
+                self._show_env_fix_commands()
+                return False, issues
+            
+        except Exception as e:
             self.print_error(f"Environment validation failed: {e}")
             issues.append(f"Environment setup: {e}")
-            self._show_env_fix_commands()
             return False, issues
 
     def _validate_configuration_files(self) -> tuple[bool, list[str]]:
-        """Validate configuration file syntax and content."""
+        """Validate pydantic-settings configuration."""
         success = True
         issues = []
 
-        # Validate config.yml
         try:
-            project_path = os.getenv("INGENIOUS_PROJECT_PATH") or "config.yml"
-            is_valid, error = ValidationUtils.validate_yaml_file(project_path)
-            if is_valid:
-                self.print_success("config.yml syntax validation passed")
+            # Import and validate pydantic-settings configuration
+            from ingenious.config.main_settings import IngeniousSettings
+            
+            # Attempt to load and validate the configuration
+            settings = IngeniousSettings()
+            
+            # Call the validation method if it exists
+            if hasattr(settings, 'validate_configuration'):
+                settings.validate_configuration()
+            
+            self.print_success("Pydantic-settings configuration validation passed")
+            
+            # Validate that required models are configured
+            if settings.models and len(settings.models) > 0:
+                self.print_success(f"Found {len(settings.models)} configured model(s)")
+                
+                # Validate first model has required fields
+                first_model = settings.models[0]
+                if first_model.api_key and first_model.base_url and first_model.model:
+                    self.print_success("Primary model configuration is complete")
+                else:
+                    missing_fields = []
+                    if not first_model.api_key:
+                        missing_fields.append("api_key")
+                    if not first_model.base_url:
+                        missing_fields.append("base_url") 
+                    if not first_model.model:
+                        missing_fields.append("model")
+                    
+                    self.print_error(f"Primary model missing required fields: {', '.join(missing_fields)}")
+                    issues.append(f"Model configuration incomplete: missing {', '.join(missing_fields)}")
+                    success = False
             else:
-                self.print_error(f"config.yml validation failed: {error}")
-                issues.append(f"config.yml: {error}")
+                self.print_error("No models configured in settings")
+                issues.append("No models configured")
                 success = False
+                
         except Exception as e:
-            self.print_error(f"config.yml validation error: {e}")
-            issues.append(f"config.yml: {e}")
-            success = False
-
-        # Validate profiles.yml
-        try:
-            profile_path = os.getenv("INGENIOUS_PROFILE_PATH") or "profiles.yml"
-            is_valid, error = ValidationUtils.validate_yaml_file(profile_path)
-            if is_valid:
-                self.print_success("profiles.yml syntax validation passed")
-            else:
-                self.print_error(f"profiles.yml validation failed: {error}")
-                issues.append(f"profiles.yml: {error}")
-                success = False
-        except Exception as e:
-            self.print_error(f"profiles.yml validation error: {e}")
-            issues.append(f"profiles.yml: {e}")
+            self.print_error(f"Configuration validation failed: {e}")
+            issues.append(f"Configuration: {e}")
             success = False
 
         return success, issues
@@ -435,30 +494,47 @@ class ValidateCommand(BaseCommand):
         return success, issues
 
     def _validate_azure_connectivity(self) -> tuple[bool, list[str]]:
-        """Validate Azure OpenAI connectivity."""
+        """Validate Azure OpenAI connectivity using pydantic-settings."""
         issues = []
-        azure_key = os.getenv("AZURE_OPENAI_API_KEY")
-        azure_endpoint = os.getenv("AZURE_OPENAI_BASE_URL")
+        
+        try:
+            from ingenious.config.main_settings import IngeniousSettings
+            
+            # Load settings and check for configured models
+            settings = IngeniousSettings()
+            
+            if not settings.models or len(settings.models) == 0:
+                self.print_error("No models configured")
+                issues.append("No Azure OpenAI models configured")
+                return False, issues
 
-        if not azure_key:
-            self.print_error("AZURE_OPENAI_API_KEY not set")
-            issues.append("AZURE_OPENAI_API_KEY environment variable missing")
+            # Check first model configuration
+            first_model = settings.models[0]
+            
+            if not first_model.api_key:
+                self.print_error("Azure OpenAI API key not configured")
+                issues.append("Azure OpenAI API key not configured")
+                return False, issues
+
+            if not first_model.base_url:
+                self.print_error("Azure OpenAI endpoint not configured")
+                issues.append("Azure OpenAI endpoint not configured")
+                return False, issues
+
+            # Validate URL format
+            is_valid_url, error = ValidationUtils.validate_url(first_model.base_url)
+            if not is_valid_url:
+                self.print_error(f"Invalid Azure endpoint URL: {error}")
+                issues.append(f"Invalid Azure endpoint URL: {error}")
+                return False, issues
+
+            self.print_success("Azure OpenAI configuration found")
+            return True, issues
+            
+        except Exception as e:
+            self.print_error(f"Azure connectivity validation failed: {e}")
+            issues.append(f"Azure connectivity: {e}")
             return False, issues
-
-        if not azure_endpoint:
-            self.print_error("AZURE_OPENAI_BASE_URL not set")
-            issues.append("AZURE_OPENAI_BASE_URL environment variable missing")
-            return False, issues
-
-        # Validate URL format
-        is_valid_url, error = ValidationUtils.validate_url(azure_endpoint)
-        if not is_valid_url:
-            self.print_error(f"Invalid Azure endpoint URL: {error}")
-            issues.append(f"Invalid Azure endpoint URL: {error}")
-            return False, issues
-
-        self.print_success("Azure OpenAI configuration found")
-        return True, issues
 
     def _validate_workflows(self) -> tuple[bool, list[str]]:
         """Validate workflow availability."""
@@ -517,13 +593,19 @@ class ValidateCommand(BaseCommand):
     def _show_env_fix_commands(self) -> None:
         """Show commands to fix environment variable issues."""
         fix_commands = [
-            "export INGENIOUS_PROJECT_PATH=$(pwd)/config.yml",
-            "export INGENIOUS_PROFILE_PATH=$(pwd)/profiles.yml",
+            "# Create .env file with required configuration:",
+            "cp .env.example .env",
+            "# Edit .env file and set required variables:",
+            "INGENIOUS_MODELS__0__API_KEY=your-azure-openai-api-key",
+            "INGENIOUS_MODELS__0__BASE_URL=https://your-resource.openai.azure.com/",
+            "INGENIOUS_MODELS__0__MODEL=gpt-4o-mini",
+            "INGENIOUS_MODELS__0__API_VERSION=2024-02-01",
+            "INGENIOUS_MODELS__0__DEPLOYMENT=gpt-4o-mini"
         ]
 
         panel = Panel(
             "\n".join(fix_commands),
-            title="🔧 Environment Fix Commands",
+            title="🔧 Environment Configuration Setup",
             border_style="yellow",
         )
         self.console.print(panel)

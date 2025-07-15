@@ -5,7 +5,8 @@ This module contains the primary IngeniousSettings class that combines
 all configuration models and provides the main configuration interface.
 """
 
-from typing import List, Optional
+import json
+from typing import Any, List, Optional
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings
@@ -115,6 +116,29 @@ class IngeniousSettings(BaseSettings):
     azure_sql_services: Optional[AzureSqlSettings] = Field(
         default=None, description="Azure SQL service configuration (optional)"
     )
+
+    @field_validator("models", mode="before")
+    @classmethod
+    def parse_models_field(cls, v: Any) -> Any:
+        """Parse models from JSON string or nested environment variables."""
+        # Handle JSON string format (e.g., INGENIOUS_MODELS='[{...}]')
+        if isinstance(v, str):
+            try:
+                return json.loads(v)
+            except json.JSONDecodeError:
+                # If not valid JSON, let pydantic handle the error
+                return v
+        
+        # Handle dictionary format from nested env vars (e.g., INGENIOUS_MODELS__0__*)
+        if isinstance(v, dict):
+            # Convert {'0': {...}, '1': {...}} to [{...}, {...}]
+            result = []
+            for key in sorted(v.keys()):
+                if key.isdigit():
+                    result.append(v[key])
+            return result
+            
+        return v
 
     @field_validator("models")
     @classmethod
