@@ -7,7 +7,7 @@ An enterprise-grade Python library for quickly setting up APIs to interact with 
 Get up and running in 5 minutes with Azure OpenAI!
 
 ### Prerequisites
-- Python 3.13+
+- Python 3.13 or higher
 - Azure OpenAI API credentials
 - [uv package manager](https://docs.astral.sh/uv/)
 
@@ -42,7 +42,7 @@ Get up and running in 5 minutes with Azure OpenAI!
     uv run ingen validate  # Check configuration before starting
     ```
 
-    > **Note**: Ingenious now uses **pydantic-settings** for configuration via environment variables. The legacy YAML configuration files (`config.yml`, `profiles.yml`) have been migrated to environment variables with `INGENIOUS_` prefixes.
+    > **Note**: Ingenious now uses **pydantic-settings** for configuration via environment variables. Legacy YAML configuration files (`config.yml`, `profiles.yml`) can be migrated to environment variables with `INGENIOUS_` prefixes using the migration script at `scripts/migrate_config.py`.
 
 4. **Start the Server**:
     ```bash
@@ -51,14 +51,14 @@ Get up and running in 5 minutes with Azure OpenAI!
 
 5. **Verify Health**:
     ```bash
-    # Check server health (default port is 80)
-    curl http://localhost:80/api/v1/health
+    # Check server health (default port is 8000)
+    curl http://localhost:8000/api/v1/health
     ```
 
 6. **Test with Core Workflow**:
     ```bash
     # Test classification agent (available in core library)
-    curl -X POST http://localhost:80/api/v1/chat \
+    curl -X POST http://localhost:8000/api/v1/chat \
       -H "Content-Type: application/json" \
       -d '{
         "user_prompt": "Analyze this customer feedback: Great product!",
@@ -79,6 +79,9 @@ That's it! You should see a JSON response with AI analysis of the input.
 - `ingen test` - Run agent workflow tests
 - `ingen validate` - Validate system configuration and requirements
 - `ingen prompt-tuner` - Start standalone prompt tuning interface
+- `ingen help [topic]` - Show detailed help and getting started guide
+- `ingen status` - Check system status and configuration
+- `ingen version` - Show version information
 
 **Data processing commands:**
 - `ingen document-processing extract <path>` - Extract text from documents (PDF, DOCX, images)
@@ -103,11 +106,12 @@ When the server is running, the following endpoints are available:
 - `GET /api/v1/workflow-status/{workflow_name}` - Check specific workflow configuration
 - `GET /api/v1/diagnostic` - System diagnostic information
 
-**API Management:**
-- `GET /api/v1/prompts/list/{revision_id}` - List prompt templates
+**Prompt Management:**
+- `GET /api/v1/prompts/revisions/list` - List available prompt revisions
+- `GET /api/v1/prompts/workflows/list` - List workflows with prompts
+- `GET /api/v1/prompts/list/{revision_id}` - List prompt templates for revision
 - `GET /api/v1/prompts/view/{revision_id}/{filename}` - View prompt content
-- `POST /api/v1/prompts/update/{revision_id}/{filename}` - Update prompt
-- `PUT /api/v1/messages/{message_id}/feedback` - Submit message feedback
+- `POST /api/v1/prompts/update/{revision_id}/{filename}` - Update prompt template
 
 **Authentication (if enabled):**
 - `POST /api/v1/auth/login` - JWT login
@@ -115,8 +119,12 @@ When the server is running, the following endpoints are available:
 - `GET /api/v1/auth/verify` - Verify JWT token
 
 **Web Interfaces:**
-- `/chainlit` - Interactive chat interface
+- `/chainlit` - Interactive chat interface (if enabled)
 - `/prompt-tuner` - Prompt tuning interface (if enabled)
+
+**Additional Routes:**
+- `GET /api/v1/conversations/{thread_id}` - Retrieve conversation history
+- `PUT /api/v1/messages/{message_id}/feedback` - Submit message feedback
 
 ## Workflow Categories
 
@@ -127,46 +135,57 @@ Insight Ingenious provides multiple conversation workflows with different config
 - `knowledge-base-agent` - Search knowledge bases (stable local ChromaDB implementation, experimental Azure Search)
 - `sql-manipulation-agent` - Execute SQL queries (stable local SQLite implementation, experimental Azure SQL)
 
+> **Note**: Workflow names support both hyphenated (classification-agent) and underscored (classification_agent) formats for backward compatibility.
+
 ### Extension Template Workflows (Available via project template)
 - `bike-insights` - Comprehensive bike sales analysis showcasing multi-agent coordination (**Note**: Created only when you run `ingen init` - demonstrates custom workflow development)
+
+> **Note**: The `bike-insights` workflow is the recommended starting point and "Hello World" example for Ingenious.
 
 ### Configuration Requirements by Workflow
 - **Minimal setup** (Azure OpenAI only): `classification-agent`, `bike-insights`
 - **Local implementations** (stable): `knowledge-base-agent` (ChromaDB), `sql-manipulation-agent` (SQLite)
 - **Azure integrations** (experimental): Azure Search for knowledge base, Azure SQL for database queries
 
-> **Note**: Local implementations (ChromaDB, SQLite) are stable and recommended for production. Azure integrations are experimental and may contain bugs. Use `uv run ingen workflows` to check configuration requirements for each workflow.
+> **Note**: Local implementations (ChromaDB, SQLite) are stable and recommended for production. Azure integrations are experimental and may contain bugs. Use `ingen workflows` to check configuration requirements for each workflow.
 
 
 ## Project Structure
 
 - `ingenious/`: Core framework code
-  - `api/`: API endpoints and routes
-  - `auth/`: Authentication and JWT handling
-  - `chainlit/`: Web UI components
+  - `api/`: FastAPI routes and endpoints
+    - `routes/`: Individual route modules (auth, chat, diagnostic, etc.)
+  - `auth/`: JWT authentication and security
+  - `chainlit/`: Chainlit web UI integration
   - `cli/`: Command-line interface modules
-  - `config/`: Configuration management (pydantic-settings based, environment variables)
+    - `commands/`: Individual command implementations
+  - `config/`: Configuration management (pydantic-settings based)
+    - `main_settings.py`: Primary settings class
+    - `models.py`: Configuration model definitions
+    - `environment.py`: Environment handling
   - `core/`: Core logging and error handling
-  - `dataprep/`: Data preparation utilities
+  - `dataprep/`: Web scraping and data preparation utilities
   - `db/`: Database integration (SQLite and Azure SQL)
-  - `document_processing/`: Document analysis and processing
-  - `errors/`: Error handling and custom exceptions
-  - `external_services/`: External service integrations
-  - `files/`: File storage utilities
-  - `main/`: FastAPI application factory and routing
-  - `models/`: Data models and schemas
-  - `services/`: Core services including chat and agent services
-  - `templates/`: Prompt templates and HTML templates
-  - `utils/`: Utility functions
-  - `ingenious_extensions_template/`: Template for custom extensions
-    - `api/`: Custom API routes
-    - `models/`: Custom data models
-    - `sample_data/`: Sample data for testing
-    - `services/`: Custom agent services
-    - `templates/`: Custom prompt templates
-    - `tests/`: Test harness for agent prompts
+  - `document_processing/`: PDF/document text extraction
+  - `errors/`: Custom exception classes
+  - `external_services/`: OpenAI and other service integrations
+  - `files/`: File storage (local and Azure Blob)
+  - `main/`: FastAPI application factory and middleware
+  - `models/`: Pydantic data models and schemas
+  - `services/`: Core business logic and services
+    - `chat_services/multi_agent/`: Multi-agent conversation flows
+      - `conversation_flows/`: Individual workflow implementations
+  - `templates/`: Jinja2 prompt templates and HTML
+  - `utils/`: Utility functions and helpers
+  - `ingenious_extensions_template/`: Template for custom projects
+    - `services/chat_services/multi_agent/conversation_flows/bike_insights/`: Sample workflow
 
-- `ingenious_prompt_tuner/`: Tool for tuning and testing prompts
+- `ingenious_prompt_tuner/`: Flask-based prompt tuning web interface
+- `scripts/`: Utility scripts
+  - `migrate_config.py`: Migrate YAML configs to environment variables
+- `tests/`: Test suite
+  - `unit/`: Unit tests
+  - `integration/`: Integration tests
 
 ## Documentation
 

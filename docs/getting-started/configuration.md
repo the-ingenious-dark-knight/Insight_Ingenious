@@ -217,105 +217,86 @@ The Azure SQL database tables will be automatically created by Ingenious when fi
 
 ### Models
 
-Configures LLM models:
+Configures LLM models using environment variables:
 
-```yaml
-models:
-  - model: "gpt-4.1-nano"  # Model identifier
-    api_type: "azure"  # API type (azure, openai)
-    api_version: "2024-12-01-preview"  # API version
-```
+```bash
+# Primary model configuration
+INGENIOUS_MODELS__0__MODEL=gpt-4o-mini
+INGENIOUS_MODELS__0__API_TYPE=rest
+INGENIOUS_MODELS__0__API_VERSION=2024-08-01-preview
+INGENIOUS_MODELS__0__API_KEY=your-api-key
+INGENIOUS_MODELS__0__BASE_URL=https://your-resource.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-08-01-preview
+INGENIOUS_MODELS__0__DEPLOYMENT=gpt-4o-mini
 
-In `profiles.yml`:
-
-```yaml
-models:
-  - model: "gpt-4.1-nano"
-    api_key: "your-api-key"  # OpenAI or Azure OpenAI API key
-    base_url: "https://your-endpoint.openai.azure.com/openai/deployments/gpt-4.1-nano/chat/completions?api-version=2024-12-01-preview"  # API endpoint
+# Additional models (if needed)
+INGENIOUS_MODELS__1__MODEL=gpt-4
+INGENIOUS_MODELS__1__API_KEY=your-api-key-2
+# ... etc
 ```
 
 ### Logging
 
 Controls logging levels:
 
-```yaml
-logging:
-  root_log_level: "debug"  # Global logging level (debug, info, warning, error)
-  log_level: "debug"  # Application-specific logging level
+```bash
+# Logging configuration
+INGENIOUS_LOGGING__ROOT_LOG_LEVEL=info
+INGENIOUS_LOGGING__LOG_LEVEL=info
 ```
+
+Valid levels: `debug`, `info`, `warning`, `error`, `critical`
 
 ### Chat Service
 
 Specifies the chat service implementation:
 
-```yaml
-chat_service:
-  type: "multi_agent"  # The conversation service to use
+```bash
+# Chat service configuration
+INGENIOUS_CHAT_SERVICE__TYPE=multi_agent
 ```
 
 ### Chainlit Configuration
 
 Controls the web UI:
 
-```yaml
-chainlit_configuration:
-  enable: true  # Whether to enable the Chainlit UI
-```
-
-In `profiles.yml`:
-
-```yaml
-chainlit_configuration:
-  authentication:
-    enable: false  # Whether to require authentication
-    github_client_id: ""  # For GitHub OAuth
-    github_secret: ""  # For GitHub OAuth
+```bash
+# Chainlit UI configuration
+INGENIOUS_CHAINLIT_CONFIGURATION__ENABLE=false
+INGENIOUS_CHAINLIT_CONFIGURATION__AUTHENTICATION__ENABLE=false
+INGENIOUS_CHAINLIT_CONFIGURATION__AUTHENTICATION__GITHUB_CLIENT_ID=
+INGENIOUS_CHAINLIT_CONFIGURATION__AUTHENTICATION__GITHUB_SECRET=
 ```
 
 ### Azure Search Services
 
 Configures Azure Cognitive Search for knowledge bases:
 
-```yaml
-azure_search_services:
-  - service: "default"  # Service identifier
-    endpoint: "https://your-search-service.search.windows.net"
-```
-
-In `profiles.yml`:
-
-```yaml
-azure_search_services:
-  - service: "default"
-    key: "your-search-key"  # Azure Search API key
+```bash
+# Azure Search configuration
+INGENIOUS_AZURE_SEARCH_SERVICES__0__SERVICE=default
+INGENIOUS_AZURE_SEARCH_SERVICES__0__ENDPOINT=https://your-search-service.search.windows.net
+INGENIOUS_AZURE_SEARCH_SERVICES__0__KEY=your-search-api-key
 ```
 
 ### Web Configuration
 
 Controls API authentication and server settings:
 
-```yaml
-web_configuration:
-  type: "fastapi"  # Web framework type
-  ip_address: "0.0.0.0"  # IP address to bind to
-  port: 8000  # Default port (CLI overrides to 80 when using `ingen serve`)
-  authentication:
-    type: "basic"  # Authentication type
-    enable: true  # Whether authentication is required
+```bash
+# Web server configuration
+INGENIOUS_WEB_CONFIGURATION__TYPE=fastapi
+INGENIOUS_WEB_CONFIGURATION__IP_ADDRESS=0.0.0.0
+INGENIOUS_WEB_CONFIGURATION__PORT=8000
+INGENIOUS_WEB_CONFIGURATION__ASYNCHRONOUS=false
+
+# Authentication settings
+INGENIOUS_WEB_CONFIGURATION__AUTHENTICATION__ENABLE=false
+INGENIOUS_WEB_CONFIGURATION__AUTHENTICATION__TYPE=basic
+INGENIOUS_WEB_CONFIGURATION__AUTHENTICATION__USERNAME=admin
+INGENIOUS_WEB_CONFIGURATION__AUTHENTICATION__PASSWORD=your-secure-password
 ```
 
-> **Note**: The default port in configuration is 8000, but the CLI command `ingen serve` defaults to port 80 unless specified otherwise. To use a different port, use `ingen serve --port 8000` or set the `WEB_PORT` environment variable.
-
-In `profiles.yml`:
-
-```yaml
-web_configuration:
-  authentication:
-    enable: false  # Whether to enable authentication
-    username: "admin"  # Basic auth username
-    password: "your-secure-password"  # Basic auth password
-```
+> **Note**: The default port in configuration is 8000. The CLI command `ingen serve` also defaults to port 8000, but can be overridden with `--port` or the `WEB_PORT` environment variable.
 
 ### File Storage
 
@@ -323,38 +304,38 @@ Configures file storage with support for both local and Azure Blob Storage backe
 
 #### Local Storage Configuration
 
-```yaml
-file_storage:
-  revisions:
-    enable: true
-    storage_type: "local"
-    container_name: "revisions"  # Not used for local storage
-    path: ".files"  # Local directory path
-    add_sub_folders: true
-  data:
-    enable: true
-    storage_type: "local"
-    container_name: "data"  # Not used for local storage
-    path: ".files"  # Local directory path
-    add_sub_folders: true
+```bash
+# Local file storage configuration
+INGENIOUS_FILE_STORAGE__REVISIONS__ENABLE=true
+INGENIOUS_FILE_STORAGE__REVISIONS__STORAGE_TYPE=local
+INGENIOUS_FILE_STORAGE__REVISIONS__PATH=.files
+INGENIOUS_FILE_STORAGE__REVISIONS__ADD_SUB_FOLDERS=true
+
+INGENIOUS_FILE_STORAGE__DATA__ENABLE=true
+INGENIOUS_FILE_STORAGE__DATA__STORAGE_TYPE=local
+INGENIOUS_FILE_STORAGE__DATA__PATH=.files
+INGENIOUS_FILE_STORAGE__DATA__ADD_SUB_FOLDERS=true
 ```
 
 #### Azure Blob Storage Configuration
 
-```yaml
-file_storage:
-  revisions:
-    enable: true
-    storage_type: "azure"  # Use Azure Blob Storage
-    container_name: "revisions"  # Azure container name
-    path: "ingenious-files"  # Base path within container
-    add_sub_folders: true
-  data:
-    enable: true
-    storage_type: "azure"  # Use Azure Blob Storage
-    container_name: "data"  # Azure container name
-    path: "ingenious-files"  # Base path within container
-    add_sub_folders: true
+```bash
+# Azure Blob Storage configuration
+INGENIOUS_FILE_STORAGE__REVISIONS__ENABLE=true
+INGENIOUS_FILE_STORAGE__REVISIONS__STORAGE_TYPE=azure
+INGENIOUS_FILE_STORAGE__REVISIONS__CONTAINER_NAME=revisions
+INGENIOUS_FILE_STORAGE__REVISIONS__PATH=ingenious-files
+INGENIOUS_FILE_STORAGE__REVISIONS__ADD_SUB_FOLDERS=true
+INGENIOUS_FILE_STORAGE__REVISIONS__URL=https://your-storage.blob.core.windows.net/
+INGENIOUS_FILE_STORAGE__REVISIONS__AUTHENTICATION_METHOD=default_credential
+
+INGENIOUS_FILE_STORAGE__DATA__ENABLE=true
+INGENIOUS_FILE_STORAGE__DATA__STORAGE_TYPE=azure
+INGENIOUS_FILE_STORAGE__DATA__CONTAINER_NAME=data
+INGENIOUS_FILE_STORAGE__DATA__PATH=ingenious-files
+INGENIOUS_FILE_STORAGE__DATA__ADD_SUB_FOLDERS=true
+INGENIOUS_FILE_STORAGE__DATA__URL=https://your-storage.blob.core.windows.net/
+INGENIOUS_FILE_STORAGE__DATA__AUTHENTICATION_METHOD=default_credential
 ```
 
 #### Azure Blob Storage profiles.yml Configuration
@@ -427,48 +408,43 @@ For detailed setup instructions, see the [Azure Blob Storage Setup Guide](../gui
 
 Configures local SQL database for testing and development:
 
-```yaml
-local_sql_db:
-  database_path: "/tmp/sample_sql_db"  # Path to SQLite database
-  sample_csv_path: ""  # Path to sample CSV files for data loading
-  sample_database_name: "sample_sql_db"
+```bash
+# Local SQLite database configuration
+INGENIOUS_LOCAL_SQL_DB__DATABASE_PATH=/tmp/sample_sql_db
+INGENIOUS_LOCAL_SQL_DB__SAMPLE_CSV_PATH=
+INGENIOUS_LOCAL_SQL_DB__SAMPLE_DATABASE_NAME=sample_sql_db
 ```
 
 ### Azure SQL Services
 
 Configures Azure SQL Database:
 
-```yaml
-azure_sql_services:
-  database_name: "dbo"  # Database name
-  table_name: "sample_table"  # Table name
-```
-
-In `profiles.yml`:
-
-```yaml
-azure_sql_services:
-  database_connection_string: "Server=..."  # Azure SQL connection string
+```bash
+# Azure SQL configuration
+INGENIOUS_AZURE_SQL_SERVICES__DATABASE_NAME=your_database
+INGENIOUS_AZURE_SQL_SERVICES__TABLE_NAME=sample_table
+INGENIOUS_AZURE_SQL_SERVICES__DATABASE_CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
 ```
 
 ### Prompt Tuner
 
 Configures the prompt tuning interface:
 
-```yaml
-prompt_tuner:
-  mode: "fast_api"  # Options: "fast_api", "flask"
+```bash
+# Prompt tuner configuration
+INGENIOUS_PROMPT_TUNER__MODE=fast_api
+INGENIOUS_PROMPT_TUNER__ENABLE=true
 ```
 
 ### Receiver Configuration
 
-Configures external API integration in `profiles.yml`:
+Configures external API integration:
 
-```yaml
-receiver_configuration:
-  enable: false
-  api_url: "https://your-api.azurewebsites.net/api/ai-response/publish"
-  api_key: "DevApiKey"
+```bash
+# External API integration
+INGENIOUS_RECEIVER_CONFIGURATION__ENABLE=false
+INGENIOUS_RECEIVER_CONFIGURATION__API_URL=https://your-api.azurewebsites.net/api/ai-response/publish
+INGENIOUS_RECEIVER_CONFIGURATION__API_KEY=DevApiKey
 ```
 
 ## Multi-Agent Conversation Flows
@@ -494,25 +470,16 @@ Insight Ingenious supports several built-in conversation flows for different use
 
 For `classification-agent` and `bike-insights` (if created via `ingen init`), you only need basic Azure OpenAI setup:
 
-```yaml
-# config.yml
-profile: dev
-models:
-  - model: ${AZURE_OPENAI_MODEL_NAME:gpt-4.1-nano}  # Environment variable substitution
-    api_type: azure
-    api_version: ${AZURE_OPENAI_API_VERSION:2024-12-01-preview}
-    deployment: ${AZURE_OPENAI_DEPLOYMENT:gpt-4.1-nano}
-chat_service:
-  type: multi_agent
-```
-
-```yaml
-# profiles.yml
-- name: "dev"
-  models:
-    - model: "gpt-4.1-nano"
-      api_key: "your-api-key"
-      base_url: "https://your-endpoint.openai.azure.com/..."
+```bash
+# Basic configuration for minimal workflows
+INGENIOUS_PROFILE=dev
+INGENIOUS_MODELS__0__MODEL=gpt-4o-mini
+INGENIOUS_MODELS__0__API_TYPE=rest
+INGENIOUS_MODELS__0__API_VERSION=2024-08-01-preview
+INGENIOUS_MODELS__0__DEPLOYMENT=gpt-4o-mini
+INGENIOUS_MODELS__0__API_KEY=your-api-key
+INGENIOUS_MODELS__0__BASE_URL=https://your-resource.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-08-01-preview
+INGENIOUS_CHAT_SERVICE__TYPE=multi_agent
 ```
 
 #### 🔍 Knowledge Base Workflows
@@ -520,23 +487,18 @@ chat_service:
 For `knowledge-base-agent`, the local ChromaDB implementation is used by default and is stable:
 
 **Local ChromaDB Implementation (Recommended - Stable)**
-```yaml
+```bash
 # No additional configuration needed!
 # The knowledge-base-agent uses local ChromaDB storage automatically
 # Simply add documents to: ./.tmp/knowledge_base/
 ```
 
 **Experimental Azure Search (May contain bugs)**
-```yaml
-# config.yml (additional)
-azure_search_services:
-  - service: "default"
-    endpoint: "https://your-search-service.search.windows.net"
-
-# profiles.yml (additional)
-azure_search_services:
-  - service: "default"
-    key: "your-search-key"
+```bash
+# Additional Azure Search configuration
+INGENIOUS_AZURE_SEARCH_SERVICES__0__SERVICE=default
+INGENIOUS_AZURE_SEARCH_SERVICES__0__ENDPOINT=https://your-search-service.search.windows.net
+INGENIOUS_AZURE_SEARCH_SERVICES__0__KEY=your-search-key
 ```
 
 > **Recommendation**: Use the local ChromaDB implementation, which requires no additional configuration and is stable.
@@ -546,28 +508,19 @@ azure_search_services:
 For `sql-manipulation-agent` workflow, you have two database options:
 
 **Local SQLite (Recommended - Stable)**
-```yaml
-# config.yml
-local_sql_db:
-  database_path: "/tmp/sample_sql_db"
-  sample_csv_path: "./data/your_data.csv"
-
-# profiles.yml
-azure_sql_services:
-  database_name: "skip"  # This enables SQLite mode
+```bash
+# Local SQLite configuration
+INGENIOUS_LOCAL_SQL_DB__DATABASE_PATH=/tmp/sample_sql_db
+INGENIOUS_LOCAL_SQL_DB__SAMPLE_CSV_PATH=./data/your_data.csv
+INGENIOUS_LOCAL_SQL_DB__SAMPLE_DATABASE_NAME=sample_sql_db
 ```
 
 **Experimental Azure SQL (May contain bugs)**
-```yaml
-# config.yml
-azure_sql_services:
-  database_name: "your_database"
-  server_name: "your-server.database.windows.net"
-  driver: "ODBC Driver 18 for SQL Server"
-
-# profiles.yml
-azure_sql_services:
-  connection_string: "Driver={ODBC Driver 18 for SQL Server};Server=tcp:yourserver.database.windows.net,1433;Database=your_database;Uid=your_username;Pwd=your_password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+```bash
+# Azure SQL configuration
+INGENIOUS_AZURE_SQL_SERVICES__DATABASE_NAME=your_database
+INGENIOUS_AZURE_SQL_SERVICES__TABLE_NAME=your_table
+INGENIOUS_AZURE_SQL_SERVICES__DATABASE_CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:yourserver.database.windows.net,1433;Database=your_database;Uid=your_username;Pwd=your_password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
 ```
 
 **Quick SQLite Setup:**
@@ -610,9 +563,9 @@ curl -X POST http://localhost:8000/api/v1/chat \
 
 The conversation flow is specified in the chat service configuration:
 
-```yaml
-chat_service:
-  type: "multi_agent"  # Enables multi-agent conversation flows
+```bash
+# Enable multi-agent conversation flows
+INGENIOUS_CHAT_SERVICE__TYPE=multi_agent
 ```
 
 Each conversation flow has its own directory structure under:

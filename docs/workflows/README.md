@@ -258,36 +258,31 @@ graph LR
         AZURE_OPENAI[🧠 Azure OpenAI<br/>Intent Classification]
     end
 
-    subgraph "Configuration Files"
-        CONFIG[📄 config.yml<br/>Model Settings]
-        PROFILES[🔐 profiles.yml<br/>API Keys]
+    subgraph "Configuration Method"
+        ENV_VARS[⚙️ Environment Variables<br/>INGENIOUS_ prefixed]
+        ENV_FILE[📄 .env file<br/>Local development]
     end
 
-    CONFIG --> AZURE_OPENAI
-    PROFILES --> AZURE_OPENAI
+    ENV_VARS --> AZURE_OPENAI
+    ENV_FILE --> AZURE_OPENAI
 
     classDef service fill:#e3f2fd
     classDef config fill:#f1f8e9
 
     class AZURE_OPENAI service
-    class CONFIG,PROFILES config
+    class ENV_VARS,ENV_FILE config
 ```
 
 **Required Configuration:**
-```yaml
-# config.yml
-profile: dev
-models:
-  - model: "gpt-4.1-nano"
-    api_type: "rest"
-    api_version: "2024-12-01-preview"
-
-# profiles.yml
-- name: "dev"
-  models:
-    - model: "gpt-4.1-nano"
-      api_key: "your-api-key"
-      base_url: "https://your-resource.openai.azure.com/openai/deployments/gpt-4.1-nano/chat/completions?api-version=2024-12-01-preview"
+```bash
+# Environment variables for classification agent
+INGENIOUS_PROFILE=dev
+INGENIOUS_MODELS__0__MODEL=gpt-4o-mini
+INGENIOUS_MODELS__0__API_TYPE=rest
+INGENIOUS_MODELS__0__API_VERSION=2024-08-01-preview
+INGENIOUS_MODELS__0__API_KEY=your-api-key
+INGENIOUS_MODELS__0__BASE_URL=https://your-resource.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-08-01-preview
+INGENIOUS_CHAT_SERVICE__TYPE=multi_agent
 ```
 
 ### ⭐ Template-Based Workflows (Azure OpenAI only)
@@ -373,18 +368,14 @@ graph TB
 ```
 
 **Additional Configuration Required:**
-```yaml
-# config.yml (additional)
-azure_search_services:
-  - service: "default"
-    endpoint: "https://your-search-service.search.windows.net"
-
-# profiles.yml (additional)
-- name: "dev"
-  azure_search_services:
-    - service: "default"
-      key: "your-search-api-key"
+```bash
+# Azure Search configuration (experimental)
+INGENIOUS_AZURE_SEARCH_SERVICES__0__SERVICE=default
+INGENIOUS_AZURE_SEARCH_SERVICES__0__ENDPOINT=https://your-search-service.search.windows.net
+INGENIOUS_AZURE_SEARCH_SERVICES__0__KEY=your-search-api-key
 ```
+
+> **Note**: The local ChromaDB implementation is recommended and requires no additional configuration.
 
 ### 📊 Core Library Workflows (Database Required)
 
@@ -428,23 +419,24 @@ graph TB
 ```
 
 **Additional Configuration Required:**
-```yaml
-# config.yml (additional)
-azure_sql_services:
-  database_name: "your-database-name"
-  table_name: "your-table-name"
 
-# OR for local SQLite:
-local_sql_db:
-  database_path: "/tmp/sample_sql_db"
-  sample_csv_path: "./data/your_data.csv"
-  sample_database_name: "sample_sql_db"
-
-# profiles.yml (additional)
-- name: "dev"
-  azure_sql_services:
-    database_connection_string: "Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+**Local SQLite (Recommended):**
+```bash
+# Local SQLite configuration
+INGENIOUS_LOCAL_SQL_DB__DATABASE_PATH=/tmp/sample_sql_db
+INGENIOUS_LOCAL_SQL_DB__SAMPLE_CSV_PATH=./data/your_data.csv
+INGENIOUS_LOCAL_SQL_DB__SAMPLE_DATABASE_NAME=sample_sql_db
 ```
+
+**Azure SQL (Experimental):**
+```bash
+# Azure SQL configuration
+INGENIOUS_AZURE_SQL_SERVICES__DATABASE_NAME=your-database-name
+INGENIOUS_AZURE_SQL_SERVICES__TABLE_NAME=your-table-name
+INGENIOUS_AZURE_SQL_SERVICES__DATABASE_CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+```
+
+> **Note**: The local SQLite implementation is recommended for stability.
 
 ## Workflow Selection Guide
 

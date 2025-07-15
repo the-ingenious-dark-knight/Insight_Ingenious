@@ -57,14 +57,14 @@ Start the API server with web interfaces.
 
 **Options:**
 - `--host, -h` - Host to bind (default: 0.0.0.0)
-- `--port` - Port to bind (default: 80)
+- `--port` - Port to bind (default: 80 or $WEB_PORT)
 - `--no-prompt-tuner` - Disable prompt tuner interface
 
 **Interfaces:**
 - API: `http://localhost:80/api/v1/`
 - Health Check: `http://localhost:80/api/v1/health`
-- Chat: `http://localhost:80/chainlit`
-- Prompt Tuner: `http://localhost:80/prompt-tuner`
+- Chat: `http://localhost:80/chainlit` (if Chainlit is enabled)
+- Prompt Tuner: `http://localhost:80/prompt-tuner` (if enabled)
 
 > **Configuration**: The server uses environment variables for configuration. Ensure your `.env` file is properly configured before starting the server.
 
@@ -80,7 +80,7 @@ ingen workflows bike-insights            # Show bike insights workflow (recommen
 
 **Available Workflows:**
 - `classification-agent` - Route input to specialized agents (core library, minimal config)
-- `bike-insights` - Sample domain-specific analysis (project template, minimal config) ⭐ **RECOMMENDED**
+- `bike-insights` - Sample domain-specific multi-agent analysis (project template, minimal config) ⭐ **RECOMMENDED**
 - `knowledge-base-agent` - Search knowledge bases using local ChromaDB (core library, stable local implementation)
 - `sql-manipulation-agent` - Execute SQL queries using local SQLite (core library, stable local implementation)
 
@@ -131,6 +131,36 @@ Start standalone prompt tuning interface.
 ingen prompt-tuner --port 5000 --host 127.0.0.1
 ```
 
+### `ingen help [topic]`
+Show detailed help and getting started guide.
+
+**Topics:**
+- `setup` - Initial project setup steps
+- `workflows` - Understanding and configuring workflows
+- `config` - Configuration file details
+- `deployment` - Deployment options and best practices
+
+**Example:**
+```bash
+ingen help workflows    # Get workflow-specific help
+```
+
+### `ingen status`
+Check system status and configuration.
+
+**Example:**
+```bash
+ingen status
+```
+
+### `ingen version`
+Show version information.
+
+**Example:**
+```bash
+ingen version
+```
+
 ### `ingen --help`
 Show comprehensive help for all commands.
 
@@ -151,13 +181,15 @@ Web scraping utilities using Scrapfly.
 
 **Subcommands:**
 - `crawl <url>` - Scrape single page
-- `batch <urls...>` - Scrape multiple pages
+- `batch <url1> <url2> ...` - Scrape multiple pages, outputs NDJSON
 
 **Example:**
 ```bash
-ingen dataprep crawl https://example.com --pretty
-ingen dataprep batch https://a.com https://b.com --out results.ndjson
+ingen dataprep crawl https://example.com
+ingen dataprep batch https://example.com/page1 https://example.com/page2
 ```
+
+> **Note**: Requires `scrapfly-sdk` optional dependency. Install with `uv add scrapfly-sdk`.
 
 ### `ingen document-processing extract <path>`
 Extract text from documents (PDF, DOCX, images).
@@ -166,7 +198,7 @@ Extract text from documents (PDF, DOCX, images).
 - `path` - File path, directory, or HTTP/S URL
 
 **Options:**
-- `--engine, -e` - Extractor backend (pymupdf, pdfminer, unstructured) (default: pymupdf)
+- `--engine, -e` - Extractor backend (pymupdf, pdfminer, unstructured, azdocint) (default: pymupdf)
 - `--out, -o` - Output file for NDJSON results (default: stdout)
 
 **Example:**
@@ -174,6 +206,9 @@ Extract text from documents (PDF, DOCX, images).
 ingen document-processing extract document.pdf --engine pymupdf --out extracted.jsonl
 ingen document-processing extract https://example.com/doc.pdf --out results.jsonl
 ```
+
+> **Note**: Requires document processing dependencies. Install with `uv add ingenious[document-processing]`.
+> **For OCR needs**: Use the `azdocint` engine.
 
 ## Environment Setup
 
