@@ -47,7 +47,7 @@ Get up and running in 5 minutes with Azure OpenAI!
     AZURE_OPENAI_BASE_URL=https://your-resource.openai.azure.com/
     
     # Model Configuration (JSON format)
-    INGENIOUS_MODELS='[{"model": "gpt-4o-mini", "api_type": "azure", "api_version": "2024-02-01", "deployment": "gpt-4o-mini", "api_key": "${AZURE_OPENAI_API_KEY}", "base_url": "${AZURE_OPENAI_BASE_URL}"}]'
+    INGENIOUS_MODELS='[{"model": "gpt-4.1-nano", "api_type": "rest", "api_version": "2024-02-01", "deployment": "gpt-4.1-nano", "api_key": "${AZURE_OPENAI_API_KEY}", "base_url": "${AZURE_OPENAI_BASE_URL}"}]'
     ```
 
 3. **Validate Configuration**:

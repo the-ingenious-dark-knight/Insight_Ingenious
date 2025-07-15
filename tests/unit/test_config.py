@@ -589,7 +589,7 @@ AZURE_OPENAI_BASE_URL=https://env.openai.azure.com/
             settings = IngeniousSettings.create_minimal_config()
 
             assert len(settings.models) == 1
-            assert settings.models[0].model == "gpt-4"
+            assert settings.models[0].model == "gpt-4.1-nano"
             assert settings.logging.root_log_level == "debug"
             assert not settings.web_configuration.authentication.enable
 

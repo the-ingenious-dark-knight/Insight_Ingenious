@@ -127,3 +127,14 @@ class IngeniousSettings(BaseSettings):
     def validate_configuration(self) -> None:
         """Validate the complete configuration and provide helpful feedback."""
         validate_configuration(self)
+
+    @classmethod
+    def load_from_env_file(cls, env_file: str = ".env") -> "IngeniousSettings":
+        """Load settings from a specific .env file."""
+        return cls(_env_file=env_file)
+
+    @classmethod
+    def create_minimal_config(cls) -> "IngeniousSettings":
+        """Create a minimal configuration for development."""
+        from .environment import create_minimal_config
+        return create_minimal_config()
