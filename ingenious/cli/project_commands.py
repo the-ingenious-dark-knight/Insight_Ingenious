@@ -21,9 +21,7 @@ def register_commands(app: typer.Typer, console: Console) -> None:
         🏗️  Initialize a new Insight Ingenious project in the current directory.
 
         Creates a complete project structure with:
-        • config.yml - Project configuration (non-sensitive settings)
-        • profiles.yml - Environment profiles (API keys, secrets)
-        • .env.example - Example environment variables
+        • .env.example - Example environment variables for pydantic-settings configuration
         • ingenious_extensions/ - Your custom agents and workflows
         • templates/prompts/quickstart-1/ - Ready-to-use bike-insights workflow templates
         • Dockerfile - Docker containerization setup
@@ -34,13 +32,11 @@ def register_commands(app: typer.Typer, console: Console) -> None:
 
         NEXT STEPS after running this command:
         1. Copy .env.example to .env and add your credentials
-        2. Update config.yml and profiles.yml for your environment
-        3. Set environment variables:
-           export INGENIOUS_PROJECT_PATH=$(pwd)/config.yml
-           export INGENIOUS_PROFILE_PATH=$(pwd)/profiles.yml
+        2. Edit .env file with your API keys and configuration
+        3. Validate your configuration: ingen validate
         4. Start the server: ingen serve
 
-        For detailed configuration help: igen workflows --help
+        For detailed configuration help: ingen workflows --help
         """
         cmd = InitCommand(console)
         cmd.run()
@@ -52,10 +48,8 @@ def register_commands(app: typer.Typer, console: Console) -> None:
         Generate template folders for a new project using the Ingenious framework.
 
         Creates the following structure:
-        • config.yml - Project configuration (non-sensitive settings) in project directory
-        • profiles.yml - Environment profiles (API keys, secrets) in project directory
-        • .env.example - Example environment variables file
-        • ingenious_extensions/ - Your custom agents and workflows
+        • .env.example - Example environment variables for pydantic-settings configuration
+        • ingenious_extensions/ - Your custom agents and workflows  
         • templates/prompts/quickstart-1/ - Pre-configured bike-insights workflow templates
         • Dockerfile - Docker containerization setup at project root
         • .dockerignore - Docker build exclusions at project root
@@ -63,10 +57,8 @@ def register_commands(app: typer.Typer, console: Console) -> None:
 
         NEXT STEPS after running this command:
         1. Copy .env.example to .env and fill in your credentials
-        2. Update config.yml and profiles.yml as needed for your project
-        3. Set environment variables:
-           export INGENIOUS_PROJECT_PATH=$(pwd)/config.yml
-           export INGENIOUS_PROFILE_PATH=$(pwd)/profiles.yml
+        2. Edit .env file with your API keys and configuration
+        3. Validate your configuration: ingen validate
         4. Start the server: ingen serve
 
         For workflow-specific configuration requirements, see:
