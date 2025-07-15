@@ -15,144 +15,121 @@ This guide explains how to configure Insight Ingenious - an enterprise-grade Pyt
 
 ## Configuration Overview
 
-Insight Ingenious uses a two-file configuration approach:
+Insight Ingenious uses **pydantic-settings** for configuration via environment variables:
 
-1. `config.yml`: Project-specific, non-sensitive configuration
-2. `profiles.yml`: Environment-specific, sensitive configuration (API keys, credentials)
+- **Environment Variables**: All configuration is done through environment variables with `INGENIOUS_` prefixes
+- **`.env` Files**: Local configuration via `.env` files (recommended for development)
+- **Environment Variable Hierarchies**: Support for nested configuration using double underscores (`__`)
 
-## Setting Up Configuration Files
+## Migration from YAML Configuration
 
-### Initial Setup
+> **Important**: The legacy YAML configuration system (`config.yml`, `profiles.yml`) has been replaced with environment variables. If you have existing YAML files, use the migration script:
 
-When you run `ingen init`, template configuration files are generated:
+```bash
+# Migrate existing YAML configuration to environment variables
+uv run python scripts/migrate_config.py --yaml-file config.yml --output .env
+uv run python scripts/migrate_config.py --yaml-file profiles.yml --output .env.profiles
+```
 
-- `config.yml` and `profiles.yml` in your project directory
+## Setting Up Configuration
 
 ### Environment Variables
 
-Set these environment variables to specify configuration locations:
+Configuration is now managed through environment variables with the `INGENIOUS_` prefix:
 
-- `INGENIOUS_PROJECT_PATH`: Path to your project's `config.yml`
-- `INGENIOUS_PROFILE_PATH`: Path to your `profiles.yml`
+- Direct environment variables (e.g., `export INGENIOUS_MODELS__0__API_KEY=your-key`)
+- `.env` files (recommended for local development)
+- System environment variables (recommended for production)
 
-Alternatively, for Azure deployments:
-- `APPSETTING_INGENIOUS_CONFIG`: JSON configuration string
-- `APPSETTING_INGENIOUS_PROFILE`: JSON profile string
+### Configuration Loading Order
 
-## Configuration File Structure
+Ingenious loads configuration in this order (later sources override earlier ones):
+1. Default values from pydantic models
+2. Environment variables (system-wide)
+3. `.env` file in current directory
+4. `.env.local` file (for local overrides)
 
-### config.yml
+## Environment Variable Configuration
 
-```yaml
-chat_history:
-  database_type: "sqlite"  # or "azuresql"
-  database_path: "./.tmp/high_level_logs.db"  # Path to SQLite database file
-  database_name: "chat_history"  # Name of the database (used for Azure SQL)
-  memory_path: "./.tmp"  # Location for temporary memory/cache files (used by ChromaDB)
+### Basic Configuration (.env file)
 
-profile: "dev"  # Name of the profile to use from profiles.yml
+Create a `.env` file in your project directory with your configuration:
 
-models:
-  - model: "gpt-4.1-nano"
-    api_type: "azure"
-    api_version: "2024-12-01-preview"
+```bash
+# Profile and Basic Settings
+INGENIOUS_PROFILE=dev
 
-logging:
-  root_log_level: "debug"
-  log_level: "debug"
+# AI Model Configuration
+INGENIOUS_MODELS__0__MODEL=gpt-4o-mini
+INGENIOUS_MODELS__0__API_TYPE=rest
+INGENIOUS_MODELS__0__API_VERSION=2024-08-01-preview
+INGENIOUS_MODELS__0__API_KEY=your-api-key-here
+INGENIOUS_MODELS__0__BASE_URL=https://your-resource.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-08-01-preview
 
-tool_service:
-  enable: false
+# Chat History Storage
+INGENIOUS_CHAT_HISTORY__DATABASE_TYPE=sqlite
+INGENIOUS_CHAT_HISTORY__DATABASE_PATH=./tmp/high_level_logs.db
+INGENIOUS_CHAT_HISTORY__MEMORY_PATH=./tmp
 
-chat_service:
-  type: "multi_agent"  # The type of chat service to use
+# Logging Configuration
+INGENIOUS_LOGGING__ROOT_LOG_LEVEL=info
+INGENIOUS_LOGGING__LOG_LEVEL=info
 
-chainlit_configuration:
-  enable: false
+# Chat Service
+INGENIOUS_CHAT_SERVICE__TYPE=multi_agent
 
-azure_search_services:
-  - service: "default"
-    endpoint: "https://your-search-service.search.windows.net"
+# Web Server Configuration
+INGENIOUS_WEB_CONFIGURATION__IP_ADDRESS=0.0.0.0
+INGENIOUS_WEB_CONFIGURATION__PORT=8000
+INGENIOUS_WEB_CONFIGURATION__AUTHENTICATION__ENABLE=false
 
-azure_sql_services:
-  database_name: "dbo"
-  table_name: "sample_table"
+# Tool and UI Services
+INGENIOUS_TOOL_SERVICE__ENABLE=false
+INGENIOUS_CHAINLIT_CONFIGURATION__ENABLE=false
+INGENIOUS_PROMPT_TUNER__ENABLE=true
 
-web_configuration:
-  type: "fastapi"
-  ip_address: "0.0.0.0"
-  port: 8000  # Default port (CLI overrides to 80 when using `ingen serve`)
-  authentication:
-    type: "basic"
-    enable: true
+# File Storage (Local)
+INGENIOUS_FILE_STORAGE__REVISIONS__ENABLE=true
+INGENIOUS_FILE_STORAGE__REVISIONS__STORAGE_TYPE=local
+INGENIOUS_FILE_STORAGE__REVISIONS__PATH=.files
+INGENIOUS_FILE_STORAGE__DATA__ENABLE=true
+INGENIOUS_FILE_STORAGE__DATA__STORAGE_TYPE=local
+INGENIOUS_FILE_STORAGE__DATA__PATH=.files
 
-local_sql_db:
-  database_path: "/tmp/sample_sql_db"
-  sample_csv_path: ""
-  sample_database_name: "sample_sql_db"
-
-prompt_tuner:
-  mode: "fast_api"  # Mount in fast_api or standalone flask
-
-file_storage:
-  revisions:
-    enable: true
-    storage_type: "local"
-    container_name: "jrsrevisions"
-    path: ".files"
-    add_sub_folders: true
-  data:
-    enable: true
-    storage_type: "local"
-    container_name: "jrsdata"
-    path: ".files"
-    add_sub_folders: true
+# Local SQL Database (for sql-manipulation-agent)
+INGENIOUS_LOCAL_SQL_DB__DATABASE_PATH=/tmp/sample_sql_db
+INGENIOUS_LOCAL_SQL_DB__SAMPLE_CSV_PATH=
+INGENIOUS_LOCAL_SQL_DB__SAMPLE_DATABASE_NAME=sample_sql_db
 ```
 
-### profiles.yml
+### Advanced Configuration with Azure Services
 
-```yaml
-- name: "dev"
-  models:
-    - model: "gpt-4.1-nano"
-      api_key: "your-api-key"
-      base_url: "https://your-endpoint.openai.azure.com/openai/deployments/gpt-4.1-nano/chat/completions?api-version=2024-12-01-preview"
+For production deployments with Azure services:
 
-  chat_history:
-    database_connection_string: "AccountEndpoint=..."
+```bash
+# Basic AI Model Configuration (same as above)
+INGENIOUS_MODELS__0__MODEL=gpt-4o-mini
+INGENIOUS_MODELS__0__API_KEY=your-api-key
+INGENIOUS_MODELS__0__BASE_URL=https://your-resource.openai.azure.com/...
 
-  azure_search_services:
-    - service: "default"
-      key: "your-search-key"
+# Azure SQL Configuration (experimental)
+INGENIOUS_AZURE_SQL_SERVICES__DATABASE_NAME=your-database
+INGENIOUS_AZURE_SQL_SERVICES__CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=..."
 
-  azure_sql_services:
-    database_connection_string: ""
+# Azure Search Configuration (experimental)
+INGENIOUS_AZURE_SEARCH_SERVICES__0__SERVICE=default
+INGENIOUS_AZURE_SEARCH_SERVICES__0__ENDPOINT=https://your-search-service.search.windows.net
+INGENIOUS_AZURE_SEARCH_SERVICES__0__KEY=your-search-api-key
 
-  receiver_configuration:
-    enable: false
-    api_url: "https://your-api.azurewebsites.net/api/ai-response/publish"
-    api_key: "DevApiKey"
+# Azure Blob Storage
+INGENIOUS_FILE_STORAGE__REVISIONS__STORAGE_TYPE=azure
+INGENIOUS_FILE_STORAGE__REVISIONS__URL=https://your-storage.blob.core.windows.net/
+INGENIOUS_FILE_STORAGE__REVISIONS__AUTHENTICATION_METHOD=default_credential
 
-  chainlit_configuration:
-    enable: false
-    authentication:
-      enable: false
-      github_client_id: ""
-      github_secret: ""
-
-  web_configuration:
-    authentication:
-      enable: false
-      username: "admin"
-      password: "your-secure-password"
-
-  file_storage:
-    revisions:
-      url: "https://your-storage.blob.core.windows.net/"
-      authentication_method: "default_credential"  # or "msi"
-    data:
-      url: "https://your-storage.blob.core.windows.net/"
-      authentication_method: "default_credential"  # or "msi"
+# Web Authentication
+INGENIOUS_WEB_CONFIGURATION__AUTHENTICATION__ENABLE=true
+INGENIOUS_WEB_CONFIGURATION__AUTHENTICATION__USERNAME=admin
+INGENIOUS_WEB_CONFIGURATION__AUTHENTICATION__PASSWORD=your-secure-password
 ```
 
 ## Configuration Options Explained
@@ -161,27 +138,18 @@ file_storage:
 
 Controls how conversation history is stored. Ingenious supports both SQLite (development) and Azure SQL (production) for chat history storage.
 
-```yaml
-chat_history:
-  database_type: "sqlite"  # Options: "sqlite", "azuresql"
-  database_path: "./.tmp/high_level_logs.db"  # SQLite database file path
-  database_name: "chat_history"  # Database name (used for Azure SQL)
-  memory_path: "./.tmp"  # Path for context memory files (used by ChromaDB)
-```
-
-#### SQLite Setup (Development)
+#### SQLite Setup (Development - Recommended)
 
 For development environments, use SQLite (default):
 
-```yaml
-# config.yml
-chat_history:
-  database_type: "sqlite"
-  database_path: "./.tmp/high_level_logs.db"
-  database_name: "chat_history"
+```bash
+# SQLite configuration (recommended for development)
+INGENIOUS_CHAT_HISTORY__DATABASE_TYPE=sqlite
+INGENIOUS_CHAT_HISTORY__DATABASE_PATH=./tmp/high_level_logs.db
+INGENIOUS_CHAT_HISTORY__MEMORY_PATH=./tmp
 ```
 
-No additional configuration required in `profiles.yml`.
+No additional configuration required for SQLite.
 
 #### Azure SQL Setup (Production)
 
@@ -213,45 +181,24 @@ Download and install the ODBC Driver 18 for SQL Server from the Microsoft websit
 
 **Step 2: Configure Environment Variables**
 
-Add the Azure SQL connection string to your `.env` file:
+Add the Azure SQL configuration to your `.env` file:
 
 ```bash
-# .env
-AZURE_SQL_CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+# Azure SQL Configuration (experimental)
+INGENIOUS_CHAT_HISTORY__DATABASE_TYPE=azuresql
+INGENIOUS_CHAT_HISTORY__DATABASE_NAME=your_database_name
+INGENIOUS_CHAT_HISTORY__DATABASE_CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
 
-# Also required for sample data functionality
-LOCAL_SQL_CSV_PATH=./sample_data.csv
-
-# Azure OpenAI credentials (if not already set)
-AZURE_OPENAI_API_KEY=your_api_key_here
-AZURE_OPENAI_BASE_URL=https://your-endpoint.openai.azure.com/
-AZURE_OPENAI_MODEL_NAME=gpt-4.1-nano
-AZURE_OPENAI_DEPLOYMENT=gpt-4.1-nano
-AZURE_OPENAI_API_VERSION=2024-12-01-preview
+# Azure SQL Services Configuration
+INGENIOUS_AZURE_SQL_SERVICES__DATABASE_NAME=your_database_name
+INGENIOUS_AZURE_SQL_SERVICES__CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
 ```
 
 **Important Notes:**
 - Use double quotes around the connection string to handle special characters
-- Install `python-dotenv` dependency: `uv add python-dotenv`
+- Azure SQL integration is experimental and may contain bugs
 - The connection string format is critical - ensure all parameters are correct
-
-**Step 3: Update Configuration Files**
-
-```yaml
-# config.yml
-chat_history:
-  database_type: "azuresql"
-  database_name: "your_database_name"
-```
-
-```yaml
-# profiles.yml
-chat_history:
-  database_connection_string: ${AZURE_SQL_CONNECTION_STRING}
-```
-
-**Environment Variable Substitution:**
-The `${VARIABLE_NAME}` syntax enables environment variable substitution in configuration files. This allows you to keep sensitive credentials in environment variables while referencing them in configuration.
+- Local SQLite implementation is recommended for stable operation
 
 **Step 4: Validate Configuration**
 

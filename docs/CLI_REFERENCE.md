@@ -38,24 +38,24 @@ ingen test
 Initialize a new Insight Ingenious project in the current directory.
 
 **What it creates:**
-- `config.yml` - Project configuration (non-sensitive)
-- `profiles.yml` - Environment profiles (API keys, secrets)
-- `.env.example` - Example environment variables
+- `.env.example` - Example environment variables for configuration
 - `ingenious_extensions/` - Custom agents and workflows
 - `Dockerfile and .dockerignore` - Docker deployment templates
 - `tmp/` - Temporary files and memory
+- Migration templates for legacy YAML configurations (if needed)
 
 **Next Steps:**
-1. Copy `.env.example` to `.env` and add credentials
-2. Set environment variables
-3. Run `ingen serve`
+1. Copy `.env.example` to `.env` and add your credentials
+2. Configure environment variables (see Configuration Guide)
+3. Run `ingen validate` to verify setup
+4. Run `ingen serve` to start the server
+
+> **Note**: Ingenious now uses pydantic-settings with environment variables instead of YAML files. Legacy `config.yml` and `profiles.yml` can be migrated using the migration script.
 
 ### `ingen serve`
 Start the API server with web interfaces.
 
 **Options:**
-- `--config, -c` - Path to config.yml (default: ./config.yml)
-- `--profile, -p` - Path to profiles.yml (default: ./profiles.yml)
 - `--host, -h` - Host to bind (default: 0.0.0.0)
 - `--port` - Port to bind (default: 80)
 - `--no-prompt-tuner` - Disable prompt tuner interface
@@ -65,6 +65,8 @@ Start the API server with web interfaces.
 - Health Check: `http://localhost:80/api/v1/health`
 - Chat: `http://localhost:80/chainlit`
 - Prompt Tuner: `http://localhost:80/prompt-tuner`
+
+> **Configuration**: The server uses environment variables for configuration. Ensure your `.env` file is properly configured before starting the server.
 
 ### `ingen workflows [workflow-name]`
 Show available workflows and their requirements.
@@ -176,33 +178,50 @@ ingen document-processing extract https://example.com/doc.pdf --out results.json
 ## Environment Setup
 
 ### Required Environment Variables
+
+Ingenious uses environment variables with `INGENIOUS_` prefixes for all configuration:
+
 ```bash
-export INGENIOUS_PROJECT_PATH=$(pwd)/config.yml
-export INGENIOUS_PROFILE_PATH=$(pwd)/profiles.yml
+# Core AI Model Configuration (required)
+export INGENIOUS_MODELS__0__MODEL=gpt-4o-mini
+export INGENIOUS_MODELS__0__API_KEY=your-api-key-here
+export INGENIOUS_MODELS__0__BASE_URL=https://your-resource.openai.azure.com/...
+
+# Optional: Web server settings
+export INGENIOUS_WEB_CONFIGURATION__PORT=8000
+export INGENIOUS_WEB_CONFIGURATION__AUTHENTICATION__ENABLE=false
 ```
 
 ### Optional Environment Variables
 ```bash
-export SCRAPFLY_API_KEY=your_key_here  # For dataprep commands
+# For dataprep commands
+export SCRAPFLY_API_KEY=your_key_here
+
+# For database workflows
+export INGENIOUS_LOCAL_SQL_DB__DATABASE_PATH=/tmp/sample_sql_db
+
+# For Azure services (experimental)
+export INGENIOUS_AZURE_SEARCH_SERVICES__0__KEY=your-search-key
+export INGENIOUS_AZURE_SQL_SERVICES__CONNECTION_STRING="Driver=..."
 ```
 
-## Configuration Files
+## Configuration Methods
 
-### `config.yml`
-Non-sensitive project configuration:
-- Model settings
-- Service configurations
-- Logging settings
-- Workflow definitions
+### `.env` File (Recommended)
+Create a `.env` file in your project directory with your configuration:
+```bash
+# All INGENIOUS_ prefixed environment variables
+# See Configuration Guide for complete examples
+```
 
-### `profiles.yml`
-Sensitive environment-specific settings:
-- API keys
-- Connection strings
-- Secrets
+### Direct Environment Variables
+Export variables directly in your shell or deployment environment.
 
-### `.env`
-Environment variables for local development.
+### Migration from YAML
+If you have legacy `config.yml` and `profiles.yml` files:
+```bash
+uv run python scripts/migrate_config.py --yaml-file config.yml --output .env
+```
 
 ## Backward Compatibility
 

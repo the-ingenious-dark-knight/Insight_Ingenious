@@ -21,33 +21,28 @@ Get up and running in 5 minutes with Azure OpenAI!
     ```
 
 2. **Configure Credentials**:
-    #### For Linux-based Environments
+    Create a `.env` file with your Azure OpenAI credentials:
     ```bash
-    # Edit .env with your Azure OpenAI credentials
-    cp .env.example .env
-    nano .env  # Add AZURE_OPENAI_API_KEY and AZURE_OPENAI_BASE_URL
-    ```
-    #### For Windows-based Environments
-    ```bash
-    # Edit .env with your Azure OpenAI credentials
-    cp .env.example .env
-    # Assuming you have VSCode installation. If none, open .env file with your favorite editor
-    # and add  AZURE_OPENAI_API_KEY and AZURE_OPENAI_BASE_URL to it.
-    code .env  # Add AZURE_OPENAI_API_KEY and AZURE_OPENAI_BASE_URL
+    # Create .env file with your credentials
+    cat > .env << 'EOF'
+    # Azure OpenAI Configuration
+    INGENIOUS_MODELS__0__MODEL=gpt-4o-mini
+    INGENIOUS_MODELS__0__API_KEY=your-api-key-here
+    INGENIOUS_MODELS__0__BASE_URL=https://your-resource.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-08-01-preview
+    INGENIOUS_MODELS__0__API_TYPE=rest
+    INGENIOUS_MODELS__0__API_VERSION=2024-08-01-preview
+
+    # Optional: Enable authentication
+    INGENIOUS_WEB_CONFIGURATION__AUTHENTICATION__ENABLE=false
+    EOF
     ```
 
-3. **Set Environment Variables**:
+3. **Validate Configuration**:
     ```bash
-    export INGENIOUS_PROJECT_PATH=$(pwd)/config.yml
-    export INGENIOUS_PROFILE_PATH=$(pwd)/profiles.yml
-    ```
-
-    #### For Windows-based Environments
-    ```bash
-    $env:INGENIOUS_PROJECT_PATH = "{your_project_folder}/config.yml"
-    $env:INGENIOUS_PROFILE_PATH = "{profile_folder_location}/profiles.yml"
     uv run ingen validate  # Check configuration before starting
     ```
+
+    > **Note**: Ingenious now uses **pydantic-settings** for configuration via environment variables. The legacy YAML configuration files (`config.yml`, `profiles.yml`) have been migrated to environment variables with `INGENIOUS_` prefixes.
 
 4. **Start the Server**:
     ```bash
@@ -56,7 +51,7 @@ Get up and running in 5 minutes with Azure OpenAI!
 
 5. **Verify Health**:
     ```bash
-    # Check server health (default port is 80 for CLI, 8000 for config)
+    # Check server health (default port is 80)
     curl http://localhost:80/api/v1/health
     ```
 
@@ -129,18 +124,18 @@ Insight Ingenious provides multiple conversation workflows with different config
 
 ### Core Workflows (Available in library)
 - `classification-agent` - Route input to specialized agents based on content (Azure OpenAI only)
-- `knowledge-base-agent` - Search knowledge bases (requires Azure Cognitive Search or local ChromaDB)
-- `sql-manipulation-agent` - Execute SQL queries (requires Azure SQL or local SQLite)
+- `knowledge-base-agent` - Search knowledge bases (stable local ChromaDB implementation, experimental Azure Search)
+- `sql-manipulation-agent` - Execute SQL queries (stable local SQLite implementation, experimental Azure SQL)
 
 ### Extension Template Workflows (Available via project template)
 - `bike-insights` - Comprehensive bike sales analysis showcasing multi-agent coordination (**Note**: Created only when you run `ingen init` - demonstrates custom workflow development)
 
 ### Configuration Requirements by Workflow
-- **Minimal setup** (Azure OpenAI only): `classification-agent`
-- **Requires Azure Search**: `knowledge-base-agent`
-- **Requires database**: `sql-manipulation-agent` (supports both Azure SQL and SQLite)
+- **Minimal setup** (Azure OpenAI only): `classification-agent`, `bike-insights`
+- **Local implementations** (stable): `knowledge-base-agent` (ChromaDB), `sql-manipulation-agent` (SQLite)
+- **Azure integrations** (experimental): Azure Search for knowledge base, Azure SQL for database queries
 
-> **Note**: Azure integrations (Search, SQL) are supported but may require additional configuration. Local implementations (SQLite) are recommended for development and testing.
+> **Note**: Local implementations (ChromaDB, SQLite) are stable and recommended for production. Azure integrations are experimental and may contain bugs. Use `uv run ingen workflows` to check configuration requirements for each workflow.
 
 
 ## Project Structure
@@ -150,7 +145,7 @@ Insight Ingenious provides multiple conversation workflows with different config
   - `auth/`: Authentication and JWT handling
   - `chainlit/`: Web UI components
   - `cli/`: Command-line interface modules
-  - `config/`: Configuration management (pydantic-based)
+  - `config/`: Configuration management (pydantic-settings based, environment variables)
   - `core/`: Core logging and error handling
   - `dataprep/`: Data preparation utilities
   - `db/`: Database integration (SQLite and Azure SQL)
