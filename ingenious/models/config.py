@@ -122,7 +122,7 @@ class ReceiverConfig(profile_models.ReceiverConfig):
 
 
 class WebConfig(config_ns_models.WebConfig):
-    authentication: profile_models.WebAuthConfig = {}
+    authentication: profile_models.WebAuthConfig = Field(default_factory=profile_models.WebAuthConfig)
 
     def __init__(
         self, config: config_ns_models.WebConfig, profile: profile_models.WebConfig
@@ -176,18 +176,11 @@ class FileStorageContainer(config_ns_models.FileStorageContainer):
         self.url = profile.url
         self.token = profile.token
         self.client_id = profile.client_id
-        self.authentication_method = profile.authentication_method
+        self.authentication_method = AuthenticationMethod(profile.authentication_method)
 
 
 class FileStorage(config_ns_models.FileStorage):
-    revisions: FileStorageContainer = Field(
-        default_factory=FileStorageContainer,
-        description="File Storage configuration for revisions",
-    )
-    data: FileStorageContainer = Field(
-        default_factory=FileStorageContainer,
-        description="File Storage configuration for data",
-    )
+    pass
 
     def __init__(
         self, config: config_ns_models.FileStorage, profile: profile_models.FileStorage

@@ -34,10 +34,10 @@ class ImportError(Exception):
     def __init__(
         self,
         message: str,
-        module_name: str = None,
-        class_name: str = None,
-        attempted_paths: List[str] = None,
-        original_error: Exception = None,
+        module_name: str | None = None,
+        class_name: str | None = None,
+        attempted_paths: list[str] | None = None,
+        original_error: Exception | None = None,
     ):
         super().__init__(message)
         self.module_name = module_name

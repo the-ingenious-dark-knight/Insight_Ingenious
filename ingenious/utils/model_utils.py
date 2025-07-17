@@ -3,7 +3,7 @@ import io
 from enum import Enum
 from typing import Any, Dict, List
 
-import jsonpickle
+import jsonpickle  # type: ignore
 import yaml
 from pydantic import BaseModel
 

@@ -173,7 +173,7 @@ def register_commands(app: typer.Typer, console: Console) -> None:
                 if "DEPRECATED" in info["description"]:
                     continue
 
-                cat = info["category"]
+                cat = str(info["category"])
                 if cat not in categories:
                     categories[cat] = []
                 categories[cat].append((name, info))

@@ -1,6 +1,6 @@
 from pathlib import Path
 
-import aiofiles
+import aiofiles  # type: ignore
 
 from ingenious.files.files_repository import IFileStorage
 from ingenious.models.config import Config, FileStorageContainer
