@@ -7,14 +7,14 @@ import pytest
 import yaml
 from pydantic import ValidationError
 
-from ingenious.config import get_config
-from ingenious.config.profile import substitute_environment_variables
-from ingenious.config.settings import (
+from ingenious.config import (
     AzureSearchSettings,
     IngeniousSettings,
     ModelSettings,
     WebSettings,
+    get_config,
 )
+from ingenious.config.profile import substitute_environment_variables
 
 
 @pytest.mark.unit

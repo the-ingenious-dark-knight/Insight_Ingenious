@@ -221,8 +221,7 @@ def register_commands(app: typer.Typer, console: Console) -> None:
 
         config = ingen_config.get_config()
 
-        # Override prompt tuner setting based on CLI flag
-        config.prompt_tuner.enable = enable_prompt_tuner
+        # Note: prompt tuner functionality has been removed
 
         # Override host and port from CLI parameters only if they differ from defaults
         config.web_configuration.ip_address = host

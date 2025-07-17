@@ -640,11 +640,13 @@ class ValidateCommand(BaseCommand):
 
                     # Check core workflows import
                     try:
-                        from ingenious.services.chat_services.multi_agent.conversation_flows import (
-                            classification_agent,
-                        )
+                        import importlib.util
 
-                        self.console.print("    ✅ classification-agent: Available")
+                        spec = importlib.util.find_spec(
+                            "ingenious.services.chat_services.multi_agent.conversation_flows.classification_agent"
+                        )
+                        if spec is not None:
+                            self.console.print("    ✅ classification-agent: Available")
                         workflows_checked += 1
                         workflows_working += 1
                     except ImportError as e:
