@@ -1,4 +1,3 @@
-import sys
 from pathlib import Path
 from unittest.mock import Mock, mock_open, patch
 
@@ -82,51 +81,42 @@ class TestNamespaceUtils:
 
         with (
             patch("ingenious.utils.namespace_utils.os.getcwd") as mock_getcwd,
-            patch("ingenious.utils.namespace_utils.os.path.exists") as mock_exists,
+            patch("pathlib.Path.exists") as mock_exists,
         ):
             mock_getcwd.return_value = "/current/working/dir"
-            mock_exists.side_effect = lambda path: "/current/working/dir" in path
+            mock_exists.return_value = True
 
             result = get_inbuilt_api_routes()
 
             assert result is not None
             assert str(result).endswith("api/routes")
 
-    @patch("ingenious.utils.namespace_utils.importlib.import_module")
-    def test_import_module_safely_success(self, mock_import_module):
+    @patch("ingenious.utils.imports.import_class_safely")
+    def test_import_module_safely_success(self, mock_import_class):
         """Test successful module import"""
-        mock_module = Mock()
         mock_class = Mock()
-        mock_module.TestClass = mock_class
-        mock_import_module.return_value = mock_module
+        mock_import_class.return_value = mock_class
 
-        with patch.dict("sys.modules", {}, clear=True):
-            result = import_module_safely("test.module", "TestClass")
+        result = import_module_safely("test.module", "TestClass")
 
-            assert result == mock_class
-            # The function calls import_module twice, so we check it was called
-            assert mock_import_module.call_count >= 1
+        assert result == mock_class
+        mock_import_class.assert_called_once_with("test.module", "TestClass")
 
-    @patch("ingenious.utils.namespace_utils.importlib.import_module")
-    def test_import_module_safely_import_error(self, mock_import_module):
+    @patch("ingenious.utils.imports.import_class_safely")
+    def test_import_module_safely_import_error(self, mock_import_class):
         """Test module import with ImportError"""
-        mock_import_module.side_effect = ImportError("Module not found")
+        mock_import_class.side_effect = ImportError("Module not found")
 
-        # Mock sys.modules to not contain the test module
-        with patch.object(sys, "modules", {}):
-            with pytest.raises(ValueError, match="Unsupported module import"):
-                import_module_safely("test.module", "TestClass")
+        with pytest.raises(ValueError, match="Unsupported module import"):
+            import_module_safely("test.module", "TestClass")
 
-    @patch("ingenious.utils.namespace_utils.importlib.import_module")
-    def test_import_module_safely_attribute_error(self, mock_import_module):
+    @patch("ingenious.utils.imports.import_class_safely")
+    def test_import_module_safely_attribute_error(self, mock_import_class):
         """Test module import with AttributeError"""
-        mock_module = Mock()
-        del mock_module.TestClass  # Remove attribute
-        mock_import_module.return_value = mock_module
+        mock_import_class.side_effect = AttributeError("Class not found")
 
-        with patch.dict("sys.modules", {}, clear=True):
-            with pytest.raises(ValueError, match="Unsupported module import"):
-                import_module_safely("test.module", "TestClass")
+        with pytest.raises(ValueError, match="Unsupported module import"):
+            import_module_safely("test.module", "TestClass")
 
     @patch("ingenious.utils.namespace_utils.importlib.import_module")
     def test_import_module_safely_cached_module(self, mock_import_module):

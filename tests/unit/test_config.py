@@ -3,13 +3,6 @@ from unittest.mock import patch
 
 import pytest
 
-from ingenious.config import (
-    AzureSearchSettings,
-    IngeniousSettings,
-    ModelSettings,
-    WebSettings,
-    get_config,
-)
 from ingenious.config.profile import substitute_environment_variables
 
 

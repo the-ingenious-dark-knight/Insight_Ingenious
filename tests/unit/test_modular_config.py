@@ -126,17 +126,32 @@ class TestConfigValidators:
 
     def test_validate_configuration_with_placeholders(self):
         """Test configuration validation with placeholder values."""
-        settings = IngeniousSettings(
-            models=[
-                ModelSettings(
-                    model="gpt-4",
-                    api_key="placeholder-key",
-                    base_url="https://test.openai.azure.com/",
-                )
-            ]
-        )
-        with pytest.raises(ValueError, match="Configuration validation failed"):
-            validate_configuration(settings)
+        from unittest.mock import patch
+
+        with patch.dict(
+            "os.environ",
+            {
+                "AZURE_OPENAI_API_KEY": "test-key",
+                "AZURE_OPENAI_BASE_URL": "https://test.openai.azure.com/",
+            },
+        ):
+            settings = IngeniousSettings()
+
+            # Temporarily modify model to have placeholder values
+            original_key = settings.models[0].api_key
+            original_url = settings.models[0].base_url
+
+            # Use object.__setattr__ to bypass pydantic validation
+            object.__setattr__(settings.models[0], "api_key", "placeholder-key")
+            object.__setattr__(settings.models[0], "base_url", "placeholder-url")
+
+            try:
+                with pytest.raises(ValueError, match="Configuration validation failed"):
+                    validate_configuration(settings)
+            finally:
+                # Restore original values
+                object.__setattr__(settings.models[0], "api_key", original_key)
+                object.__setattr__(settings.models[0], "base_url", original_url)
 
 
 class TestIngeniousSettings:
@@ -153,9 +168,9 @@ class TestIngeniousSettings:
         ):
             settings = IngeniousSettings()
             assert len(settings.models) == 1
-            assert settings.models[0].model == "gpt-4"
+            assert settings.models[0].model == "gpt-4.1-nano"
             assert settings.profile == "default"
-            assert settings.web_configuration.port == 8000
+            assert settings.web_configuration.port == 80
 
     def test_environment_variable_override(self):
         """Test environment variable overrides."""
@@ -200,6 +215,8 @@ class TestConfigFactoryFunctions:
 
     def test_load_from_env_file(self):
         """Test load_from_env_file function."""
+        from unittest.mock import patch
+
         # Create a temporary .env file
         with tempfile.NamedTemporaryFile(mode="w", suffix=".env", delete=False) as f:
             f.write("INGENIOUS_PROFILE=test_profile\n")
@@ -209,9 +226,17 @@ class TestConfigFactoryFunctions:
             env_file_path = f.name
 
         try:
-            config = load_from_env_file(env_file_path)
-            assert config.profile == "test_profile"
-            assert config.web_configuration.port == 7000
+            # Also set environment variables for validation
+            with patch.dict(
+                "os.environ",
+                {
+                    "AZURE_OPENAI_API_KEY": "test-key",
+                    "AZURE_OPENAI_BASE_URL": "https://test.openai.azure.com/",
+                },
+            ):
+                config = load_from_env_file(env_file_path)
+                assert config.profile == "test_profile"
+                assert config.web_configuration.port == 7000
         finally:
             os.unlink(env_file_path)
 

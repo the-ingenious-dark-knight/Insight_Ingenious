@@ -283,7 +283,6 @@ class TestValidationUtils:
             "test.txt", [".yml", ".yaml"]
         )
 
-
     def test_validate_port(self):
         """Test port validation."""
         # Valid ports

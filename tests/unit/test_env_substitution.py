@@ -1,10 +1,9 @@
 import os
-from unittest.mock import mock_open, patch
+from unittest.mock import patch
 
 import pytest
 
 from ingenious.utils.env_substitution import (
-    load_yaml_with_env_substitution,
     substitute_env_vars,
 )
 
@@ -62,7 +61,6 @@ class TestEnvSubstitution:
         result = substitute_env_vars("plain text without variables")
         assert result == "plain text without variables"
 
-
     def test_substitute_env_vars_special_characters_in_default(self):
         """Test substitution with special characters in default value"""
         with patch.dict(os.environ, {}, clear=True):
@@ -74,5 +72,3 @@ class TestEnvSubstitution:
         with patch.dict(os.environ, {"VAR": "value"}):
             result = substitute_env_vars("${VAR:default} and {not_a_var}")
             assert result == "value and {not_a_var}"
-
-
