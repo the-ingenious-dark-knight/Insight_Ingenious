@@ -49,7 +49,7 @@ def register_commands(app: typer.Typer, console: Console) -> None:
 
         Creates the following structure:
         • .env.example - Example environment variables for pydantic-settings configuration
-        • ingenious_extensions/ - Your custom agents and workflows  
+        • ingenious_extensions/ - Your custom agents and workflows
         • templates/prompts/quickstart-1/ - Pre-configured bike-insights workflow templates
         • Dockerfile - Docker containerization setup at project root
         • .dockerignore - Docker build exclusions at project root

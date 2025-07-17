@@ -42,7 +42,7 @@ class ConversationFlow(IConversationFlow):
             raise ValueError(
                 f"bike-insights workflow requires JSON-formatted data. "
                 f"Please provide a valid JSON string with fields: revision_id, identifier, stores. "
-                f"Example: {{\"revision_id\": \"test-v1\", \"identifier\": \"test-001\", \"stores\": [...]}}\n"
+                f'Example: {{"revision_id": "test-v1", "identifier": "test-001", "stores": [...]}}\n'
                 f"JSON parsing error: {str(e)}"
             ) from e
         # event_type = chat_request.event_type

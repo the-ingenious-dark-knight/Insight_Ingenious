@@ -28,10 +28,6 @@ class ModelConfig(BaseModel):
     deployment: str = Field("", description="Azure deployment name")
 
 
-
-
-
-
 class ChatServiceConfig(BaseModel):
     type: str = Field(
         "multi_agent", description="Right now only valid value is 'multi_agent'"

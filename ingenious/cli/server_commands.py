@@ -226,7 +226,7 @@ def register_commands(app: typer.Typer, console: Console) -> None:
 
         # Override host and port from CLI parameters only if they differ from defaults
         config.web_configuration.ip_address = host
-        
+
         # Only override port if it was explicitly provided via CLI (different from env var default)
         default_port_from_env = int(os.getenv("WEB_PORT", "80"))
         if port != default_port_from_env or os.getenv("WEB_PORT") is not None:

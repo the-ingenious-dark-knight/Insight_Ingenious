@@ -1,7 +1,6 @@
 import os
-from autogen_agentchat.agents import AssistantAgent, UserProxyAgent
-from autogen_agentchat.conditions import MaxMessageTermination, TextMentionTermination
-from autogen_agentchat.teams import RoundRobinGroupChat
+
+from autogen_agentchat.agents import AssistantAgent
 from autogen_core import CancellationToken
 from autogen_core.tools import FunctionTool
 from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
@@ -28,9 +27,11 @@ class ConversationFlow(IConversationFlow):
 
         # Create the model client
         model_client = AzureOpenAIChatCompletionClient(**azure_config)
-        
+
         # Set up context for conversation
-        context = "Knowledge base search assistant for finding information in local ChromaDB."
+        context = (
+            "Knowledge base search assistant for finding information in local ChromaDB."
+        )
 
         # Create local search tool function using ChromaDB
         async def search_tool(search_query: str, topic: str = "general") -> str:
@@ -101,7 +102,7 @@ class ConversationFlow(IConversationFlow):
         )
 
         # Create the search assistant agent
-        search_system_message = f"""You are a knowledge base search assistant using local ChromaDB storage.
+        search_system_message = """You are a knowledge base search assistant using local ChromaDB storage.
 
 Tasks:
 - Help users find information by searching the local knowledge base
@@ -126,7 +127,7 @@ Format your responses clearly and cite the knowledge base when providing informa
 TERMINATE your response when the task is complete.
 """
 
-        # Set up the search assistant agent  
+        # Set up the search assistant agent
         search_assistant = AssistantAgent(
             name="search_assistant",
             system_message=search_system_message,
@@ -140,7 +141,9 @@ TERMINATE your response when the task is complete.
 
         # Prepare user message with context
         user_msg = (
-            f"Context: {context}\n\nUser question: {chat_request.user_prompt}" if context else chat_request.user_prompt
+            f"Context: {context}\n\nUser question: {chat_request.user_prompt}"
+            if context
+            else chat_request.user_prompt
         )
 
         # Use the search assistant directly with on_messages for a simpler interaction

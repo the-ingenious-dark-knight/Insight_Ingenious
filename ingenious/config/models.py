@@ -75,10 +75,6 @@ class ModelSettings(BaseModel):
         return v
 
 
-
-
-
-
 class ChatServiceSettings(BaseModel):
     """Configuration for the chat service backend.
 

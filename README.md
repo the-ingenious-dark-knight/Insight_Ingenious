@@ -19,12 +19,12 @@ Get up and running in 5 minutes with Azure OpenAI!
     uv add ingenious[standard]    # Most common: includes SQL agent support
     # OR
     uv add ingenious[azure-full]  # Full Azure integration
-    # OR  
+    # OR
     uv add ingenious             # Minimal installation
-    
+
     # Add required dependencies for knowledge-base and SQL workflows
     uv add chromadb aiofiles autogen-ext
-    
+
     # Initialize project
     uv run ingen init
     ```
@@ -36,19 +36,19 @@ Get up and running in 5 minutes with Azure OpenAI!
     cp .env.example .env          # Full configuration options
     # OR
     cp .env.development .env      # Minimal development setup
-    # OR  
+    # OR
     cp .env.azure-full .env       # Full Azure integration
-    
+
     # Edit .env file with your actual credentials
     nano .env
     ```
-    
+
     **Required configuration (add to .env file)**:
     ```bash
     # Azure OpenAI Configuration
     AZURE_OPENAI_API_KEY=your-api-key-here
     AZURE_OPENAI_BASE_URL=https://your-resource.openai.azure.com/
-    
+
     # Model Configuration (pydantic-settings format)
     INGENIOUS_MODELS__0__MODEL=gpt-4.1-nano
     INGENIOUS_MODELS__0__API_TYPE=rest
@@ -56,7 +56,7 @@ Get up and running in 5 minutes with Azure OpenAI!
     INGENIOUS_MODELS__0__DEPLOYMENT=gpt-4.1-nano
     INGENIOUS_MODELS__0__API_KEY=your-actual-api-key-here
     INGENIOUS_MODELS__0__BASE_URL=https://your-resource.openai.azure.com/
-    
+
     # Basic required settings
     INGENIOUS_CHAT_SERVICE__TYPE=multi_agent
     INGENIOUS_CHAT_HISTORY__DATABASE_TYPE=sqlite
@@ -84,14 +84,14 @@ Get up and running in 5 minutes with Azure OpenAI!
     ```
 
 6. **Test with Core Workflows**:
-    
+
     Create test files to avoid JSON escaping issues:
     ```bash
     # Create test files for each workflow
     echo '{"user_prompt": "Analyze this customer feedback: Great product", "conversation_flow": "classification-agent"}' > test_classification.json
     echo '{"user_prompt": "Search for documentation about setup", "conversation_flow": "knowledge-base-agent"}' > test_knowledge.json
     echo '{"user_prompt": "Show me all tables in the database", "conversation_flow": "sql-manipulation-agent"}' > test_sql.json
-    
+
     # Test each workflow
     curl -X POST http://localhost:8000/api/v1/chat -H "Content-Type: application/json" -d @test_classification.json
     curl -X POST http://localhost:8000/api/v1/chat -H "Content-Type: application/json" -d @test_knowledge.json
@@ -107,14 +107,14 @@ Get up and running in 5 minutes with Azure OpenAI!
   "conversation_flow": "bike-insights"
 }
 EOF
-    
+
     # Test bike-insights workflow
     curl -X POST http://localhost:8000/api/v1/chat -H "Content-Type: application/json" -d @test_bike_insights.json
     ```
 
 That's it! You should see a JSON response with AI analysis of the input.
 
-**Important Notes**: 
+**Important Notes**:
 - Core workflows like `classification-agent`, `knowledge-base-agent`, and `sql-manipulation-agent` accept simple text prompts
 - The `bike-insights` workflow requires JSON-formatted data with specific fields (`revision_id`, `identifier`, `stores`)
 - The `bike-insights` workflow is only available after running `ingen init` as part of the project template
@@ -204,7 +204,7 @@ Some workflows require additional dependencies:
 # For knowledge-base-agent (ChromaDB)
 uv add chromadb
 
-# For sql-manipulation-agent (SQLite support)  
+# For sql-manipulation-agent (SQLite support)
 uv add aiofiles
 
 # For updated autogen compatibility

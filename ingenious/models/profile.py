@@ -25,10 +25,6 @@ class AzureSearchConfig(BaseModel):
     key: str = ""
 
 
-
-
-
-
 class ToolServiceConfig(BaseModel):
     pass
 

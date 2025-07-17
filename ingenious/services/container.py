@@ -1,11 +1,10 @@
 """Dependency injection container for Ingenious services."""
 
-import os
-
 from dependency_injector import containers, providers
 from dotenv import load_dotenv
 
 from ingenious.config.config import get_config as _get_config
+
 # Legacy profile import removed - now using new config system
 from ingenious.core.structured_logging import get_logger
 from ingenious.db.chat_history_repository import (
@@ -74,7 +73,7 @@ class Container(containers.DeclarativeContainer):
             "ingenious.api.routes.diagnostic",
             "ingenious.services.dependencies",
             "ingenious.services.auth_dependencies",
-            "ingenious.services.chat_dependencies", 
+            "ingenious.services.chat_dependencies",
             "ingenious.services.file_dependencies",
             "ingenious.main",
         ]
@@ -186,7 +185,7 @@ def get_container() -> Container:
 def init_container() -> Container:
     """Initialize the container and return it."""
     global _container
-    
+
     # Load environment variables
     load_dotenv()
 
@@ -204,7 +203,7 @@ def init_container() -> Container:
             "ingenious.api.routes.diagnostic",
             "ingenious.services.dependencies",
             "ingenious.services.auth_dependencies",
-            "ingenious.services.chat_dependencies", 
+            "ingenious.services.chat_dependencies",
             "ingenious.services.file_dependencies",
             "ingenious.main",
         ]

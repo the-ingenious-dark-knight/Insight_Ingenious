@@ -727,7 +727,7 @@ AZURE_OPENAI_BASE_URL=https://env.openai.azure.com/
             assert settings.models[0].base_url == "https://nested.openai.azure.com/"
             assert settings.models[0].api_version == "2024-12-01-preview"
             assert settings.models[0].deployment == "gpt-4.1-nano"
-            
+
             assert settings.models[1].model == "gpt-3.5-turbo"
             assert settings.models[1].api_key == "test-nested-key-2"
             assert settings.models[1].base_url == "https://nested2.openai.azure.com/"
@@ -736,7 +736,7 @@ AZURE_OPENAI_BASE_URL=https://env.openai.azure.com/
     def test_models_json_string_format(self):
         """Test models configuration with JSON string format"""
         models_json = '[{"model": "gpt-4.1-nano", "api_key": "test-json-key", "base_url": "https://json.openai.azure.com/", "api_version": "2024-12-01-preview", "deployment": "gpt-4.1-nano"}]'
-        
+
         with patch.dict(
             os.environ,
             {

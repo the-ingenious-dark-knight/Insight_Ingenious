@@ -263,13 +263,16 @@ class WorkflowDiscovery:
                 # Validate against protocol
                 try:
                     # Check basic protocol compliance - workflows can use either method name
-                    required_methods = ["get_conversation_response", "get_chat_response"]
+                    required_methods = [
+                        "get_conversation_response",
+                        "get_chat_response",
+                    ]
                     has_required_method = False
                     for method in required_methods:
                         if hasattr(conversation_flow_class, method):
                             has_required_method = True
                             break
-                    
+
                     if not has_required_method:
                         logger.debug(
                             f"Workflow {workflow_name} missing required method. "

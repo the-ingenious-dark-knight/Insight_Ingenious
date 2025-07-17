@@ -1,5 +1,6 @@
-import sqlite3
 import os
+import sqlite3
+
 from autogen_agentchat.agents import AssistantAgent
 from autogen_core import CancellationToken
 from autogen_core.tools import FunctionTool
@@ -27,31 +28,31 @@ class ConversationFlow(IConversationFlow):
 
         # Create the model client
         model_client = AzureOpenAIChatCompletionClient(**azure_config)
-        
+
         # Set up context for conversation
         context = "SQL Expert Assistant for analyzing data."
 
         # Set up local SQLite database with student performance data
-        import sqlite3
-        import os
-        
+
         # Create SQLite database with sample data
         db_path = os.path.join(self._memory_path, "students_performance.db")
-        
+
         # Create a simple test table with dummy data
         with sqlite3.connect(db_path) as conn:
-            conn.execute('''CREATE TABLE IF NOT EXISTS students_performance (
+            conn.execute("""CREATE TABLE IF NOT EXISTS students_performance (
                 parental_education TEXT,
                 lunch TEXT,
                 test_prep_course TEXT,
                 math_score INTEGER,
                 reading_score INTEGER,
                 writing_score INTEGER
-            )''')
+            )""")
             # Insert some sample data if table is empty
-            count = conn.execute('SELECT COUNT(*) FROM students_performance').fetchone()[0]
+            count = conn.execute(
+                "SELECT COUNT(*) FROM students_performance"
+            ).fetchone()[0]
             if count == 0:
-                conn.execute('''INSERT INTO students_performance VALUES 
+                conn.execute("""INSERT INTO students_performance VALUES
                     ('bachelor''s degree', 'standard', 'none', 72, 72, 74),
                     ('some college', 'standard', 'completed', 69, 90, 88),
                     ('master''s degree', 'standard', 'none', 90, 95, 93),
@@ -59,10 +60,17 @@ class ConversationFlow(IConversationFlow):
                     ('some college', 'standard', 'none', 76, 78, 75),
                     ('high school', 'free/reduced', 'completed', 64, 64, 67),
                     ('high school', 'free/reduced', 'none', 38, 60, 50)
-                ''')
-        
+                """)
+
         table_name = "students_performance"
-        column_names = ['parental_education', 'lunch', 'test_prep_course', 'math_score', 'reading_score', 'writing_score']
+        column_names = [
+            "parental_education",
+            "lunch",
+            "test_prep_course",
+            "math_score",
+            "reading_score",
+            "writing_score",
+        ]
 
         # Create SQL tool as function
         async def execute_sql_tool(query: str) -> str:
@@ -73,10 +81,10 @@ class ConversationFlow(IConversationFlow):
                     cursor = conn.execute(query)
                     results = cursor.fetchall()
                     columns = [description[0] for description in cursor.description]
-                    
+
                     if not results:
                         return "No results found."
-                    
+
                     # Format results
                     if len(results) == 1:
                         # Single row: return as dictionary
@@ -129,7 +137,9 @@ Example queries:
 
         # Prepare user message with context
         user_msg = (
-            f"Context: {context}\n\nUser question: {chat_request.user_prompt}" if context else chat_request.user_prompt
+            f"Context: {context}\n\nUser question: {chat_request.user_prompt}"
+            if context
+            else chat_request.user_prompt
         )
 
         # Use the SQL assistant directly with on_messages for a simpler interaction

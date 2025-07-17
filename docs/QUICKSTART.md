@@ -24,12 +24,12 @@ Get up and running in 5 minutes with Azure OpenAI!
     ```bash
     # From your project directory - choose based on features needed
     uv add ingenious[standard]    # Recommended: includes SQL agent support
-    # OR  
+    # OR
     uv add ingenious[azure-full]  # Full Azure integration
     # OR
     uv add ingenious             # Minimal installation
-    
-    # Initialize project  
+
+    # Initialize project
     uv run ingen init
     ```
 
@@ -39,7 +39,7 @@ Get up and running in 5 minutes with Azure OpenAI!
     cp .env.development .env      # For local development
     # OR
     cp .env.azure-full .env       # For full Azure integration
-    
+
     # Edit with your actual Azure OpenAI credentials
     nano .env
     ```
@@ -49,7 +49,7 @@ Get up and running in 5 minutes with Azure OpenAI!
     # No need to set project/profile paths - pydantic-settings handles configuration
     uv run ingen validate  # Check configuration before starting
     ```
-    
+
     > **Important**: YAML configuration files (`config.yml`, `profiles.yml`) are no longer supported. All configuration must be done via environment variables with `INGENIOUS_` prefixes.
 
 4. **Start the Server**:

@@ -76,8 +76,6 @@ class IngeniousSettings(BaseSettings):
         description="Chat service backend configuration",
     )
 
-
-
     web_configuration: WebSettings = Field(
         default_factory=lambda: WebSettings(),
         description="Web server and API configuration",
@@ -118,7 +116,7 @@ class IngeniousSettings(BaseSettings):
             except json.JSONDecodeError:
                 # If not valid JSON, let pydantic handle the error
                 return v
-        
+
         # Handle dictionary format from nested env vars (e.g., INGENIOUS_MODELS__0__*)
         if isinstance(v, dict):
             # Convert {'0': {...}, '1': {...}} to [{...}, {...}]
@@ -127,7 +125,7 @@ class IngeniousSettings(BaseSettings):
                 if key.isdigit():
                     result.append(v[key])
             return result
-            
+
         return v
 
     @field_validator("models")
@@ -151,4 +149,5 @@ class IngeniousSettings(BaseSettings):
     def create_minimal_config(cls) -> "IngeniousSettings":
         """Create a minimal configuration for development."""
         from .environment import create_minimal_config
+
         return create_minimal_config()

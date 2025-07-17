@@ -348,40 +348,55 @@ class ValidateCommand(BaseCommand):
         try:
             # Check for .env file
             from pathlib import Path
+
             from ingenious.config.main_settings import IngeniousSettings
-            
+
             # Look for .env files
             env_files = [".env", ".env.local", ".env.dev", ".env.prod"]
             env_file_found = any(Path(f).exists() for f in env_files)
-            
+
             if env_file_found:
                 self.print_success("Environment file (.env) found")
             else:
-                self.print_warning("No .env file found - using system environment variables")
-            
+                self.print_warning(
+                    "No .env file found - using system environment variables"
+                )
+
             # Load settings and check if models are configured
             try:
                 settings = IngeniousSettings()
-                
+
                 if settings.models and len(settings.models) > 0:
-                    self.print_success("Configuration loaded successfully from environment")
-                    
+                    self.print_success(
+                        "Configuration loaded successfully from environment"
+                    )
+
                     # Check if first model has required fields
                     first_model = settings.models[0]
-                    if first_model.api_key and first_model.base_url and first_model.model:
-                        self.print_success("Primary model environment configuration is complete")
+                    if (
+                        first_model.api_key
+                        and first_model.base_url
+                        and first_model.model
+                    ):
+                        self.print_success(
+                            "Primary model environment configuration is complete"
+                        )
                         return True, issues
                     else:
                         missing_fields = []
                         if not first_model.api_key:
                             missing_fields.append("api_key")
                         if not first_model.base_url:
-                            missing_fields.append("base_url") 
+                            missing_fields.append("base_url")
                         if not first_model.model:
                             missing_fields.append("model")
-                        
-                        self.print_error(f"Model missing required configuration: {', '.join(missing_fields)}")
-                        issues.append(f"Missing model configuration: {', '.join(missing_fields)}")
+
+                        self.print_error(
+                            f"Model missing required configuration: {', '.join(missing_fields)}"
+                        )
+                        issues.append(
+                            f"Missing model configuration: {', '.join(missing_fields)}"
+                        )
                         self._show_env_fix_commands()
                         return False, issues
                 else:
@@ -389,13 +404,13 @@ class ValidateCommand(BaseCommand):
                     issues.append("No models configured")
                     self._show_env_fix_commands()
                     return False, issues
-                    
+
             except Exception as e:
                 self.print_error(f"Failed to load configuration: {e}")
                 issues.append(f"Configuration loading error: {e}")
                 self._show_env_fix_commands()
                 return False, issues
-            
+
         except Exception as e:
             self.print_error(f"Environment validation failed: {e}")
             issues.append(f"Environment setup: {e}")
@@ -409,20 +424,20 @@ class ValidateCommand(BaseCommand):
         try:
             # Import and validate pydantic-settings configuration
             from ingenious.config.main_settings import IngeniousSettings
-            
+
             # Attempt to load and validate the configuration
             settings = IngeniousSettings()
-            
+
             # Call the validation method if it exists
-            if hasattr(settings, 'validate_configuration'):
+            if hasattr(settings, "validate_configuration"):
                 settings.validate_configuration()
-            
+
             self.print_success("Pydantic-settings configuration validation passed")
-            
+
             # Validate that required models are configured
             if settings.models and len(settings.models) > 0:
                 self.print_success(f"Found {len(settings.models)} configured model(s)")
-                
+
                 # Validate first model has required fields
                 first_model = settings.models[0]
                 if first_model.api_key and first_model.base_url and first_model.model:
@@ -432,18 +447,22 @@ class ValidateCommand(BaseCommand):
                     if not first_model.api_key:
                         missing_fields.append("api_key")
                     if not first_model.base_url:
-                        missing_fields.append("base_url") 
+                        missing_fields.append("base_url")
                     if not first_model.model:
                         missing_fields.append("model")
-                    
-                    self.print_error(f"Primary model missing required fields: {', '.join(missing_fields)}")
-                    issues.append(f"Model configuration incomplete: missing {', '.join(missing_fields)}")
+
+                    self.print_error(
+                        f"Primary model missing required fields: {', '.join(missing_fields)}"
+                    )
+                    issues.append(
+                        f"Model configuration incomplete: missing {', '.join(missing_fields)}"
+                    )
                     success = False
             else:
                 self.print_error("No models configured in settings")
                 issues.append("No models configured")
                 success = False
-                
+
         except Exception as e:
             self.print_error(f"Configuration validation failed: {e}")
             issues.append(f"Configuration: {e}")
@@ -455,7 +474,7 @@ class ValidateCommand(BaseCommand):
         """Validate required dependencies are available."""
         success = True
         issues = []
-        
+
         # Core dependencies that should always be available
         core_deps = [
             ("pandas", "Required for sql-manipulation-agent"),
@@ -463,13 +482,13 @@ class ValidateCommand(BaseCommand):
             ("openai", "Azure OpenAI connectivity"),
             ("typer", "CLI framework"),
         ]
-        
+
         optional_deps = [
             ("chromadb", "Required for knowledge-base-agent"),
             ("azure.storage.blob", "Required for Azure Blob Storage"),
             ("pyodbc", "Required for SQL database connectivity"),
         ]
-        
+
         # Check core dependencies
         for dep_name, description in core_deps:
             try:
@@ -479,7 +498,7 @@ class ValidateCommand(BaseCommand):
                 self.print_error(f"Missing dependency: {dep_name} ({description})")
                 issues.append(f"Missing core dependency: {dep_name}")
                 success = False
-        
+
         # Check optional dependencies (warn but don't fail)
         missing_optional = []
         for dep_name, description in optional_deps:
@@ -489,26 +508,30 @@ class ValidateCommand(BaseCommand):
             except ImportError:
                 self.console.print(f"    ⚠️  {dep_name}: Not available ({description})")
                 missing_optional.append(dep_name)
-        
+
         if missing_optional:
-            self.console.print(f"    💡 Optional dependencies missing: {', '.join(missing_optional)}")
-            self.console.print("    Install with: uv add ingenious[azure,full] for all features")
-        
+            self.console.print(
+                f"    💡 Optional dependencies missing: {', '.join(missing_optional)}"
+            )
+            self.console.print(
+                "    Install with: uv add ingenious[azure,full] for all features"
+            )
+
         if success:
-            self.print_success(f"Core dependencies available")
-        
+            self.print_success("Core dependencies available")
+
         return success, issues
 
     def _validate_azure_connectivity(self) -> tuple[bool, list[str]]:
         """Validate Azure OpenAI connectivity using pydantic-settings."""
         issues = []
-        
+
         try:
             from ingenious.config.main_settings import IngeniousSettings
-            
+
             # Load settings and check for configured models
             settings = IngeniousSettings()
-            
+
             if not settings.models or len(settings.models) == 0:
                 self.print_error("No models configured")
                 issues.append("No Azure OpenAI models configured")
@@ -516,7 +539,7 @@ class ValidateCommand(BaseCommand):
 
             # Check first model configuration
             first_model = settings.models[0]
-            
+
             if not first_model.api_key:
                 self.print_error("Azure OpenAI API key not configured")
                 issues.append("Azure OpenAI API key not configured")
@@ -536,36 +559,47 @@ class ValidateCommand(BaseCommand):
 
             # Test actual connectivity to Azure OpenAI service
             try:
-                import requests
                 import urllib.parse
-                
+
+                import requests
+
                 # Create a test URL to check connectivity
                 parsed_url = urllib.parse.urlparse(first_model.base_url)
                 test_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
-                
+
                 # Simple connectivity test with timeout
                 response = requests.get(test_url, timeout=10)
                 if response.status_code in [200, 401, 403]:  # Service is responding
                     self.print_success("Azure OpenAI service is reachable")
                 else:
-                    self.print_warning(f"Azure OpenAI service returned status {response.status_code}")
-                    issues.append(f"Azure service returned unexpected status: {response.status_code}")
-                    
+                    self.print_warning(
+                        f"Azure OpenAI service returned status {response.status_code}"
+                    )
+                    issues.append(
+                        f"Azure service returned unexpected status: {response.status_code}"
+                    )
+
             except requests.exceptions.ConnectTimeout:
-                self.print_warning("Azure OpenAI service connection timeout - check network connectivity")
+                self.print_warning(
+                    "Azure OpenAI service connection timeout - check network connectivity"
+                )
                 issues.append("Azure OpenAI service connection timeout")
             except requests.exceptions.ConnectionError:
-                self.print_warning("Cannot connect to Azure OpenAI service - check endpoint URL and network")
+                self.print_warning(
+                    "Cannot connect to Azure OpenAI service - check endpoint URL and network"
+                )
                 issues.append("Cannot connect to Azure OpenAI service")
             except ImportError:
-                self.print_info("Skipping connectivity test - requests library not available")
+                self.print_info(
+                    "Skipping connectivity test - requests library not available"
+                )
             except Exception as conn_e:
                 self.print_warning(f"Azure connectivity test failed: {conn_e}")
                 # Don't treat connectivity test failures as critical errors
-                
+
             self.print_success("Azure OpenAI configuration found")
             return True, issues
-            
+
         except Exception as e:
             self.print_error(f"Azure connectivity validation failed: {e}")
             issues.append(f"Azure connectivity: {e}")
@@ -582,13 +616,19 @@ class ValidateCommand(BaseCommand):
                 services_path = extensions_path / "services"
                 if services_path.exists():
                     self.print_success("Services directory found")
-                    
+
                     # Try to validate specific workflows
                     workflows_checked = 0
                     workflows_working = 0
-                    
+
                     # Check bike-insights workflow
-                    bike_insights_path = services_path / "chat_services" / "multi_agent" / "conversation_flows" / "bike_insights"
+                    bike_insights_path = (
+                        services_path
+                        / "chat_services"
+                        / "multi_agent"
+                        / "conversation_flows"
+                        / "bike_insights"
+                    )
                     if bike_insights_path.exists():
                         self.console.print("    ✅ bike-insights: Available")
                         workflows_checked += 1
@@ -597,10 +637,13 @@ class ValidateCommand(BaseCommand):
                         self.console.print("    ❌ bike-insights: Not found")
                         workflows_checked += 1
                         issues.append("bike-insights workflow not found")
-                    
+
                     # Check core workflows import
                     try:
-                        from ingenious.services.chat_services.multi_agent.conversation_flows import classification_agent
+                        from ingenious.services.chat_services.multi_agent.conversation_flows import (
+                            classification_agent,
+                        )
+
                         self.console.print("    ✅ classification-agent: Available")
                         workflows_checked += 1
                         workflows_working += 1
@@ -608,9 +651,11 @@ class ValidateCommand(BaseCommand):
                         self.console.print("    ❌ classification-agent: Import failed")
                         workflows_checked += 1
                         issues.append(f"classification-agent import failed: {e}")
-                    
-                    self.console.print(f"    📊 Workflows status: {workflows_working}/{workflows_checked} working")
-                    
+
+                    self.console.print(
+                        f"    📊 Workflows status: {workflows_working}/{workflows_checked} working"
+                    )
+
                     return workflows_working > 0, issues
                 else:
                     self.print_warning("Services directory not found")
@@ -630,40 +675,52 @@ class ValidateCommand(BaseCommand):
         issues = []
         try:
             import socket
+
             from ingenious.config import config as config_module
-            
+
             config = config_module.get_config()
             port = config.web_configuration.port
-            
+
             # Test if port is already in use
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
                 sock.settimeout(2)  # 2 second timeout
-                result = sock.connect_ex(('localhost', port))
-                
+                result = sock.connect_ex(("localhost", port))
+
                 if result == 0:
                     # Port is in use
                     self.print_warning(f"Port {port} is already in use")
-                    issues.append(f"Port {port} is already in use - server may fail to start")
-                    
+                    issues.append(
+                        f"Port {port} is already in use - server may fail to start"
+                    )
+
                     # Try to identify what's using the port
                     try:
                         import subprocess
-                        if hasattr(subprocess, 'run'):
+
+                        if hasattr(subprocess, "run"):
                             # Try lsof command on Unix-like systems
-                            result = subprocess.run(['lsof', '-i', f':{port}'], 
-                                                  capture_output=True, text=True, timeout=5)
+                            result = subprocess.run(
+                                ["lsof", "-i", f":{port}"],
+                                capture_output=True,
+                                text=True,
+                                timeout=5,
+                            )
                             if result.stdout:
                                 self.print_info(f"Process using port {port}:")
                                 self.console.print(f"    {result.stdout.strip()}")
-                    except (subprocess.TimeoutExpired, FileNotFoundError, subprocess.SubprocessError):
+                    except (
+                        subprocess.TimeoutExpired,
+                        FileNotFoundError,
+                        subprocess.SubprocessError,
+                    ):
                         pass  # lsof not available or failed
-                        
+
                     return False, issues
                 else:
                     # Port is available
                     self.print_success(f"Port {port} is available for binding")
                     return True, issues
-                    
+
         except ImportError:
             self.print_warning("Socket module not available - cannot test port binding")
             issues.append("Cannot test port availability")
@@ -683,7 +740,7 @@ class ValidateCommand(BaseCommand):
             "INGENIOUS_MODELS__0__BASE_URL=https://your-resource.openai.azure.com/",
             "INGENIOUS_MODELS__0__MODEL=gpt-4o-mini",
             "INGENIOUS_MODELS__0__API_VERSION=2024-02-01",
-            "INGENIOUS_MODELS__0__DEPLOYMENT=gpt-4o-mini"
+            "INGENIOUS_MODELS__0__DEPLOYMENT=gpt-4o-mini",
         ]
 
         panel = Panel(
@@ -693,7 +750,9 @@ class ValidateCommand(BaseCommand):
         )
         self.console.print(panel)
 
-    def _show_validation_summary(self, validation_passed: bool, issues_found: list[str]) -> None:
+    def _show_validation_summary(
+        self, validation_passed: bool, issues_found: list[str]
+    ) -> None:
         """Show validation summary and next steps."""
         if validation_passed:
             success_panel = Panel(
@@ -710,39 +769,47 @@ class ValidateCommand(BaseCommand):
                 for issue in issues_found:
                     self.console.print(f"  ❌ {issue}")
                 self.console.print("")
-            
+
             # Show fix suggestions based on issues
             fix_commands = []
-            
+
             if any("missing" in issue.lower() for issue in issues_found):
-                fix_commands.extend([
-                    "• Missing files: ingen init",
-                    "• Set environment variables:",
-                    "  export INGENIOUS_PROJECT_PATH=$(pwd)/config.yml",
-                    "  export INGENIOUS_PROFILE_PATH=$(pwd)/profiles.yml",
-                ])
-            
+                fix_commands.extend(
+                    [
+                        "• Missing files: ingen init",
+                        "• Set environment variables:",
+                        "  export INGENIOUS_PROJECT_PATH=$(pwd)/config.yml",
+                        "  export INGENIOUS_PROFILE_PATH=$(pwd)/profiles.yml",
+                    ]
+                )
+
             if any("azure" in issue.lower() for issue in issues_found):
-                fix_commands.extend([
-                    "• Create .env file with Azure OpenAI credentials:",
-                    "  echo 'AZURE_OPENAI_API_KEY=your-key' > .env",
-                    "  echo 'AZURE_OPENAI_BASE_URL=https://your-resource.openai.azure.com/' >> .env",
-                ])
-            
+                fix_commands.extend(
+                    [
+                        "• Create .env file with Azure OpenAI credentials:",
+                        "  echo 'AZURE_OPENAI_API_KEY=your-key' > .env",
+                        "  echo 'AZURE_OPENAI_BASE_URL=https://your-resource.openai.azure.com/' >> .env",
+                    ]
+                )
+
             if any("dependency" in issue.lower() for issue in issues_found):
-                fix_commands.extend([
-                    "• Install missing dependencies:",
-                    "  uv add ingenious[standard]  # For SQL agent support",
-                    "  uv add ingenious[azure-full]  # For full Azure integration",
-                ])
-            
+                fix_commands.extend(
+                    [
+                        "• Install missing dependencies:",
+                        "  uv add ingenious[standard]  # For SQL agent support",
+                        "  uv add ingenious[azure-full]  # For full Azure integration",
+                    ]
+                )
+
             if any("workflow" in issue.lower() for issue in issues_found):
-                fix_commands.extend([
-                    "• Fix workflow issues:",
-                    "  Check that ingenious_extensions directory exists",
-                    "  Verify workflow files are properly configured",
-                ])
-            
+                fix_commands.extend(
+                    [
+                        "• Fix workflow issues:",
+                        "  Check that ingenious_extensions directory exists",
+                        "  Verify workflow files are properly configured",
+                    ]
+                )
+
             if not fix_commands:
                 fix_commands = ["• Run 'ingen init' to set up missing components"]
 

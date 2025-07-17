@@ -189,7 +189,7 @@ INGENIOUS_LOGGING__LOG_LEVEL=info
 # Optional: Azure SQL Database (for Azure SQL workflows)
 # INGENIOUS_AZURE_SQL_SERVICES__CONNECTION_STRING=Driver={ODBC Driver 17 for SQL Server};Server=...
 
-# Optional: Azure Search (for knowledge-base workflows)  
+# Optional: Azure Search (for knowledge-base workflows)
 # INGENIOUS_AZURE_SEARCH_SERVICES__0__KEY=your-search-api-key
 # INGENIOUS_AZURE_SEARCH_SERVICES__0__ENDPOINT=https://your-search-service.search.windows.net
 
@@ -278,8 +278,8 @@ coverage.xml
             "   ingen serve",
             "5. Test the sample bike-insights workflow:",
             "   curl -X POST http://localhost:80/api/v1/chat \\",
-            "     -H 'Content-Type: application/json' \\", 
-            "     -d '{\"user_prompt\": \"Analyze bike sales\", \"conversation_flow\": \"bike-insights\"}'",
+            "     -H 'Content-Type: application/json' \\",
+            '     -d \'{"user_prompt": "Analyze bike sales", "conversation_flow": "bike-insights"}\'',
         ]
 
         panel = OutputFormatters.create_info_panel(
@@ -291,8 +291,10 @@ coverage.xml
             "\n[bold yellow]💡 Migration from YAML configuration:[/bold yellow]"
         )
         self.console.print("   If you have existing config.yml and profiles.yml files:")
-        self.console.print("   uv run python scripts/migrate_config.py --yaml-file config.yml --output .env")
-        
+        self.console.print(
+            "   uv run python scripts/migrate_config.py --yaml-file config.yml --output .env"
+        )
+
         self.console.print(
             "\n[bold yellow]💡 For detailed configuration help:[/bold yellow]"
         )

@@ -5,14 +5,12 @@ This module contains the factory function for creating and configuring
 the FastAPI application with all necessary middleware, routes, and services.
 """
 
-import importlib.resources as pkg_resources
 import os
 from typing import TYPE_CHECKING
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.wsgi import WSGIMiddleware
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import RedirectResponse
 
 from .exception_handlers import ExceptionHandlers
 from .middleware import RequestContextMiddleware
@@ -86,8 +84,6 @@ class FastAgentAPI:
         """Setup optional services based on configuration."""
         pass
 
-
-
     def _setup_root_redirect(self) -> None:
         """Setup root endpoint redirect."""
         self.app.get("/", tags=["Root"])(self.redirect_to_docs)
@@ -95,7 +91,6 @@ class FastAgentAPI:
     async def redirect_to_docs(self) -> RedirectResponse:
         """Redirect the root endpoint to /docs."""
         return RedirectResponse(url="/docs")
-
 
 
 def create_app(config: "IngeniousSettings") -> FastAPI:
