@@ -43,13 +43,13 @@ class TestSubstituteEnvironmentVariables:
 
         with (
             patch.dict(os.environ, {}, clear=True),
-            patch("ingenious.config.config.logger") as mock_logger,
+            patch("builtins.print") as mock_print,
         ):
             result = substitute_environment_variables(yaml_content)
 
             assert result == "api_key: default_key"
-            mock_logger.warning.assert_called_once()
-            assert "AZURE_OPENAI_API_KEY" in str(mock_logger.warning.call_args)
+            mock_print.assert_called_once()
+            assert "AZURE_OPENAI_API_KEY" in str(mock_print.call_args)
 
     def test_substitute_placeholder_info(self):
         """Test substitution with placeholder value shows info"""
@@ -57,13 +57,13 @@ class TestSubstituteEnvironmentVariables:
 
         with (
             patch.dict(os.environ, {}, clear=True),
-            patch("ingenious.config.config.logger") as mock_logger,
+            patch("builtins.print") as mock_print,
         ):
             result = substitute_environment_variables(yaml_content)
 
             assert result == "service: placeholder_service"
-            mock_logger.info.assert_called_once()
-            assert "OPTIONAL_SERVICE" in str(mock_logger.info.call_args)
+            mock_print.assert_called_once()
+            assert "OPTIONAL_SERVICE" in str(mock_print.call_args)
 
     def test_substitute_missing_var_no_default(self):
         """Test substitution with missing var and no default shows error"""
@@ -71,13 +71,13 @@ class TestSubstituteEnvironmentVariables:
 
         with (
             patch.dict(os.environ, {}, clear=True),
-            patch("ingenious.config.config.logger") as mock_logger,
+            patch("builtins.print") as mock_print,
         ):
             result = substitute_environment_variables(yaml_content)
 
             assert result == "required: ${REQUIRED_VAR}"  # Returns original
-            mock_logger.error.assert_called_once()
-            assert "REQUIRED_VAR" in str(mock_logger.error.call_args)
+            mock_print.assert_called_once()
+            assert "REQUIRED_VAR" in str(mock_print.call_args)
 
     def test_substitute_multiple_variables(self):
         """Test substitution with multiple environment variables"""

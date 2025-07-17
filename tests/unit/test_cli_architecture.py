@@ -46,6 +46,11 @@ class TestBaseCommand:
     def setup_method(self):
         """Set up test fixtures."""
         self.console = Mock(spec=Console)
+        self.console.get_time = Mock(return_value=0.0)
+        self.console.is_jupyter = False
+        self.console.is_interactive = True
+        self.console.__enter__ = Mock(return_value=self.console)
+        self.console.__exit__ = Mock(return_value=None)
         self.command = TestCommand(self.console)
 
     def test_command_initialization(self):
