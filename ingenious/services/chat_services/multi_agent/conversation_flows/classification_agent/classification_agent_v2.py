@@ -15,7 +15,7 @@ from ingenious.services.chat_services.multi_agent.conversation_patterns.classifi
 
 class ConversationFlow:
     @staticmethod
-    async def get_conversation_response(chatrequest: ChatRequest):
+    async def get_conversation_response(chatrequest: ChatRequest) -> tuple[str, str]:
         message = chatrequest.user_prompt
         topics = chatrequest.topic
         thread_memory = chatrequest.thread_memory
@@ -55,10 +55,10 @@ class ConversationFlow:
         # Initialize the new conversation pattern
         _classification_agent_pattern = ConversationPattern(
             default_llm_config=llm_config,
-            topics=topics,
-            memory_record_switch=memory_record_switch,
+            topics=topics or [],
+            memory_record_switch=memory_record_switch or False,
             memory_path=memory_path,
-            thread_memory=thread_memory,
+            thread_memory=thread_memory or "",
         )
 
         response_id = str(uuid.uuid4())

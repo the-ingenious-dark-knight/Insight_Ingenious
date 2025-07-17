@@ -65,7 +65,7 @@ class SQLiteConnectionFactory(ConnectionFactory):
         conn.execute("PRAGMA temp_store=MEMORY")
         return conn
 
-    def is_connection_healthy(self, conn: sqlite3.Connection) -> bool:
+    def is_connection_healthy(self, conn: DatabaseConnection) -> bool:
         """Check if a SQLite connection is healthy."""
         try:
             conn.execute("SELECT 1").fetchone()

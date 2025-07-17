@@ -53,7 +53,7 @@ def add_performance_metrics(
     """Add basic performance metrics if available."""
     # Add memory usage if psutil is available
     try:
-        import psutil  # type: ignore
+        import psutil
 
         process = psutil.Process()
         event_dict["memory_mb"] = round(process.memory_info().rss / 1024 / 1024, 2)

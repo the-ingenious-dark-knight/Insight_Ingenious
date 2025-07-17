@@ -4,7 +4,7 @@ import autogen.runtime_logging
 from autogen.agentchat.contrib.retrieve_user_proxy_agent import RetrieveUserProxyAgent
 
 from ingenious.core.structured_logging import get_logger
-from ingenious.models import config as _config
+from ingenious.config import get_config
 
 logger = get_logger(__name__)
 
@@ -31,7 +31,7 @@ class ConversationPattern:
             run_async_memory_operation,
         )
 
-        self.memory_manager = get_memory_manager(_config.get_config(), memory_path)
+        self.memory_manager = get_memory_manager(get_config(), memory_path)
 
         if not self.thread_memory:
             run_async_memory_operation(
@@ -175,4 +175,4 @@ class ConversationPattern:
         context = res.summary
 
         # Send a response back to the user
-        return res.summary, context
+        return [res.summary, context]
