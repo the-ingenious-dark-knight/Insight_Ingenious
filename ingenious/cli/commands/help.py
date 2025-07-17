@@ -324,13 +324,19 @@ class ValidateCommand(BaseCommand):
         validation_passed = validation_passed and azure_passed
         issues_found.extend(azure_issues)
 
-        # 5. Check workflow availability
-        self.print_info("5. Checking workflow availability...")
+        # 5. Check port availability
+        self.print_info("5. Checking port availability...")
+        port_passed, port_issues = self._validate_port_availability()
+        validation_passed = validation_passed and port_passed
+        issues_found.extend(port_issues)
+
+        # 6. Check workflow availability
+        self.print_info("6. Checking workflow availability...")
         workflow_passed, workflow_issues = self._validate_workflows()
         validation_passed = validation_passed and workflow_passed
         issues_found.extend(workflow_issues)
 
-        # 6. Summary and recommendations
+        # 7. Summary and recommendations
         self._show_validation_summary(validation_passed, issues_found)
 
         if not validation_passed:
@@ -528,6 +534,35 @@ class ValidateCommand(BaseCommand):
                 issues.append(f"Invalid Azure endpoint URL: {error}")
                 return False, issues
 
+            # Test actual connectivity to Azure OpenAI service
+            try:
+                import requests
+                import urllib.parse
+                
+                # Create a test URL to check connectivity
+                parsed_url = urllib.parse.urlparse(first_model.base_url)
+                test_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
+                
+                # Simple connectivity test with timeout
+                response = requests.get(test_url, timeout=10)
+                if response.status_code in [200, 401, 403]:  # Service is responding
+                    self.print_success("Azure OpenAI service is reachable")
+                else:
+                    self.print_warning(f"Azure OpenAI service returned status {response.status_code}")
+                    issues.append(f"Azure service returned unexpected status: {response.status_code}")
+                    
+            except requests.exceptions.ConnectTimeout:
+                self.print_warning("Azure OpenAI service connection timeout - check network connectivity")
+                issues.append("Azure OpenAI service connection timeout")
+            except requests.exceptions.ConnectionError:
+                self.print_warning("Cannot connect to Azure OpenAI service - check endpoint URL and network")
+                issues.append("Cannot connect to Azure OpenAI service")
+            except ImportError:
+                self.print_info("Skipping connectivity test - requests library not available")
+            except Exception as conn_e:
+                self.print_warning(f"Azure connectivity test failed: {conn_e}")
+                # Don't treat connectivity test failures as critical errors
+                
             self.print_success("Azure OpenAI configuration found")
             return True, issues
             
@@ -588,6 +623,54 @@ class ValidateCommand(BaseCommand):
         except Exception as e:
             self.print_error(f"Workflow validation failed: {e}")
             issues.append(f"Workflow validation error: {e}")
+            return False, issues
+
+    def _validate_port_availability(self) -> tuple[bool, list[str]]:
+        """Validate that configured ports are available for binding."""
+        issues = []
+        try:
+            import socket
+            from ingenious.config import config as config_module
+            
+            config = config_module.get_config()
+            port = config.web_configuration.port
+            
+            # Test if port is already in use
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                sock.settimeout(2)  # 2 second timeout
+                result = sock.connect_ex(('localhost', port))
+                
+                if result == 0:
+                    # Port is in use
+                    self.print_warning(f"Port {port} is already in use")
+                    issues.append(f"Port {port} is already in use - server may fail to start")
+                    
+                    # Try to identify what's using the port
+                    try:
+                        import subprocess
+                        if hasattr(subprocess, 'run'):
+                            # Try lsof command on Unix-like systems
+                            result = subprocess.run(['lsof', '-i', f':{port}'], 
+                                                  capture_output=True, text=True, timeout=5)
+                            if result.stdout:
+                                self.print_info(f"Process using port {port}:")
+                                self.console.print(f"    {result.stdout.strip()}")
+                    except (subprocess.TimeoutExpired, FileNotFoundError, subprocess.SubprocessError):
+                        pass  # lsof not available or failed
+                        
+                    return False, issues
+                else:
+                    # Port is available
+                    self.print_success(f"Port {port} is available for binding")
+                    return True, issues
+                    
+        except ImportError:
+            self.print_warning("Socket module not available - cannot test port binding")
+            issues.append("Cannot test port availability")
+            return False, issues
+        except Exception as e:
+            self.print_error(f"Port validation failed: {e}")
+            issues.append(f"Port validation error: {e}")
             return False, issues
 
     def _show_env_fix_commands(self) -> None:
