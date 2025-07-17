@@ -182,12 +182,6 @@ class TestConfig:
     enable: false
     api_url: ""
     api_key: "DevApiKey"
-  chainlit_configuration:
-    enable: false
-    authentication:
-      enable: false
-      github_secret: ""
-      github_client_id: ""
   web_configuration:
     authentication:
       enable: false
@@ -324,12 +318,6 @@ tool_service:
 chat_service:
   type: multi_agent
 
-chainlit_configuration:
-  enable: false
-
-prompt_tuner:
-  mode: fast_api
-  enable: true
 
 web_configuration:
   ip_address: 0.0.0.0
@@ -358,12 +346,6 @@ local_sql_db:
     enable: false
     api_url: ""
     api_key: "DevApiKey"
-  chainlit_configuration:
-    enable: false
-    authentication:
-      enable: false
-      github_secret: ""
-      github_client_id: ""
   web_configuration:
     authentication:
       enable: false

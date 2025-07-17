@@ -75,43 +75,8 @@ class ModelSettings(BaseModel):
         return v
 
 
-class ChainlitSettings(BaseModel):
-    """Configuration for Chainlit chat interface.
-
-    Enables a Python-based chat interface for development and testing.
-    Disable in production if using custom web interfaces.
-    """
-
-    enable: bool = Field(
-        False,
-        description="Enable Chainlit chat interface (recommended for development)",
-    )
-
-    class AuthenticationSettings(BaseModel):
-        """Authentication settings for Chainlit interface."""
-
-        enable: bool = Field(False, description="Enable authentication for Chainlit")
-        github_secret: str = Field(
-            "", description="GitHub OAuth secret (if using GitHub auth)"
-        )
-        github_client_id: str = Field(
-            "", description="GitHub OAuth client ID (if using GitHub auth)"
-        )
-
-    authentication: AuthenticationSettings = AuthenticationSettings()
 
 
-class PromptTunerSettings(BaseModel):
-    """Configuration for the prompt tuning interface.
-
-    Provides a web interface for editing and testing prompts.
-    Useful for development and experimentation with prompt engineering.
-    """
-
-    mode: str = Field(
-        "fast_api", description="Mode for prompt tuner: 'fast_api' for web interface"
-    )
-    enable: bool = Field(True, description="Enable prompt tuner interface")
 
 
 class ChatServiceSettings(BaseModel):

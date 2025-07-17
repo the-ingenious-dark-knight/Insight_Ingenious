@@ -127,7 +127,6 @@ That's it! You should see a JSON response with AI analysis of the input.
 - `ingen workflows [workflow_name]` - List available workflows and their requirements
 - `ingen test` - Run agent workflow tests
 - `ingen validate` - Validate system configuration and requirements
-- `ingen prompt-tuner` - Start standalone prompt tuning interface
 - `ingen help [topic]` - Show detailed help and getting started guide
 - `ingen status` - Check system status and configuration
 - `ingen version` - Show version information
@@ -168,8 +167,7 @@ When the server is running, the following endpoints are available:
 - `GET /api/v1/auth/verify` - Verify JWT token
 
 **Web Interfaces:**
-- `/chainlit` - Interactive chat interface (if enabled)
-- `/prompt-tuner` - Prompt tuning interface (if enabled)
+- API documentation available at `/docs`
 
 **Additional Routes:**
 - `GET /api/v1/conversations/{thread_id}` - Retrieve conversation history
@@ -261,7 +259,6 @@ uv add ingenious && uv add chromadb aiofiles autogen-ext
   - `api/`: FastAPI routes and endpoints
     - `routes/`: Individual route modules (auth, chat, diagnostic, etc.)
   - `auth/`: JWT authentication and security
-  - `chainlit/`: Chainlit web UI integration
   - `cli/`: Command-line interface modules
     - `commands/`: Individual command implementations
   - `config/`: Configuration management (pydantic-settings based)
@@ -285,7 +282,6 @@ uv add ingenious && uv add chromadb aiofiles autogen-ext
   - `ingenious_extensions_template/`: Template for custom projects
     - `services/chat_services/multi_agent/conversation_flows/bike_insights/`: Sample workflow
 
-- `ingenious_prompt_tuner/`: Flask-based prompt tuning web interface
 - `scripts/`: Utility scripts
   - `migrate_config.py`: Migrate YAML configs to environment variables
 - `tests/`: Test suite

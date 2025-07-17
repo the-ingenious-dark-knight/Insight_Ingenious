@@ -74,7 +74,6 @@ def register_commands(app: typer.Typer, console: Console) -> None:
 
         The server provides:
         • REST API endpoints for agent workflows
-        • Chainlit chat interface at /chainlit
         • Prompt tuning interface at /prompt-tuner (unless disabled)
 
         AVAILABLE WORKFLOWS & CONFIGURATION REQUIREMENTS:
@@ -339,12 +338,6 @@ def register_commands(app: typer.Typer, console: Console) -> None:
             "💡 Tip: Use 'ingen serve' to start the full server with all interfaces"
         )
 
-        # Import and start the Flask app for prompt tuning
-        try:
-            from ingenious_prompt_tuner.run_flask_app import app as flask_app
-
-            flask_app.run(host=host, port=port, debug=True)
-        except ImportError:
-            console.print("[red]❌ Prompt tuner dependencies not available[/red]")
-            console.print("Install with: uv add flask")
-            raise typer.Exit(1)
+        console.print("[red]❌ Prompt tuner has been removed from this version[/red]")
+        console.print("Use the main API server instead: ingen serve")
+        raise typer.Exit(1)

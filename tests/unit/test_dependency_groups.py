@@ -142,7 +142,7 @@ class TestDependencyGroups:
     @pytest.mark.slow
     def test_ui_group(self, dependency_tester):
         """Test that ui group installs successfully."""
-        ui_imports = ["chainlit", "flask"]
+        ui_imports = ["flask"]
 
         assert dependency_tester.test_group_installation("ui", ui_imports)
 

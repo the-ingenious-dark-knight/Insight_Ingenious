@@ -53,22 +53,8 @@ class ModelConfig(config_ns_models.ModelConfig):
         )
 
 
-class ChainlitConfig(config_ns_models.ChainlitConfig):
-    authentication: profile_models.ChainlitAuthConfig = Field(
-        default_factory=profile_models.ChainlitAuthConfig
-    )
-
-    def __init__(
-        self,
-        config: config_ns_models.ChainlitConfig,
-        profile: profile_models.ChainlitConfig,
-    ):
-        super().__init__(enable=config.enable, authentication=profile.authentication)
 
 
-class PromptTunerConfig(config_ns_models.PromptTunerConfig):
-    def __init__(self, config: config_ns_models.PromptTunerConfig):
-        super().__init__(mode=config.mode, enable=config.enable)
 
 
 class ChatServiceConfig(config_ns_models.ChatServiceConfig):
@@ -226,8 +212,6 @@ class Config(BaseModel):
     logging: LoggingConfig
     tool_service: ToolServiceConfig
     chat_service: ChatServiceConfig
-    chainlit_configuration: ChainlitConfig
-    prompt_tuner: PromptTunerConfig
     azure_search_services: Optional[List[AzureSearchConfig]] = Field(
         default=None, description="Azure Search services configuration (optional)"
     )
@@ -248,10 +232,6 @@ class Config(BaseModel):
             logging=LoggingConfig(config.logging, profile.logging),
             tool_service=ToolServiceConfig(config.tool_service, profile.tool_service),
             chat_service=ChatServiceConfig(config.chat_service, profile.chat_service),
-            chainlit_configuration=ChainlitConfig(
-                config.chainlit_configuration, profile.chainlit_configuration
-            ),
-            prompt_tuner=PromptTunerConfig(config.prompt_tuner),
             azure_search_services=[],
             web_configuration=WebConfig(
                 config.web_configuration, profile.web_configuration

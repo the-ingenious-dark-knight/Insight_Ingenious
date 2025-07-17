@@ -107,8 +107,8 @@ ai = [
 # Database connectivity
 database = ["pyodbc==5.2.0", "psutil==7.0.0"]
 
-# Web UI with Chainlit
-ui = ["chainlit==2.5.5", "flask==3.1.1"]
+# Web UI
+ui = ["flask==3.1.1"]
 
 # Document processing capabilities
 document-processing = [
@@ -151,10 +151,10 @@ requires = ["hatchling>=1.26"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.sdist]
-include = ["ingenious/", "ingenious_prompt_tuner/", "README.md", "LICENSE"]
+include = ["ingenious/", "README.md", "LICENSE"]
 
 [tool.hatch.build.targets.wheel]
-packages = ["ingenious", "ingenious_prompt_tuner"]
+packages = ["ingenious"]
 
 [project.scripts]
 ingen = "ingenious.cli:app"

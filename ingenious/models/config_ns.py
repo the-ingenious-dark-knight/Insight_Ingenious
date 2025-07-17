@@ -28,16 +28,8 @@ class ModelConfig(BaseModel):
     deployment: str = Field("", description="Azure deployment name")
 
 
-class ChainlitConfig(BaseModel):
-    enable: bool = Field(
-        False,
-        description="Enables or Disables the Python based Chainlit chat interface",
-    )
 
 
-class PromptTunerConfig(BaseModel):
-    mode: str = Field("fast_api", description="Mode for the prompt tuner")
-    enable: bool = Field(True, description="Enable or disable the prompt tuner")
 
 
 class ChatServiceConfig(BaseModel):
@@ -128,8 +120,6 @@ class Config(BaseModel):
     logging: LoggingConfig
     tool_service: ToolServiceConfig
     chat_service: ChatServiceConfig
-    chainlit_configuration: ChainlitConfig
-    prompt_tuner: PromptTunerConfig
     azure_search_services: Optional[List[AzureSearchConfig]] = Field(
         default=None, description="Azure Search services configuration (optional)"
     )

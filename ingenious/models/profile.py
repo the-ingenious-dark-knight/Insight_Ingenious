@@ -25,14 +25,8 @@ class AzureSearchConfig(BaseModel):
     key: str = ""
 
 
-class ChainlitAuthConfig(BaseModel):
-    enable: bool = False
-    github_secret: str = ""
-    github_client_id: str = ""
 
 
-class ChainlitConfig(BaseModel):
-    authentication: ChainlitAuthConfig = Field(default_factory=ChainlitAuthConfig)
 
 
 class ToolServiceConfig(BaseModel):
@@ -111,7 +105,6 @@ class Profile(BaseModel):
     )
     web_configuration: WebConfig
     receiver_configuration: ReceiverConfig
-    chainlit_configuration: ChainlitConfig
     tool_service: ToolServiceConfig = Field(
         default_factory=ToolServiceConfig, description="Tool service configuration"
     )

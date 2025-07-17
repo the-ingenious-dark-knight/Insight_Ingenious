@@ -15,14 +15,12 @@ from .environment import get_settings_config
 from .models import (
     AzureSearchSettings,
     AzureSqlSettings,
-    ChainlitSettings,
     ChatHistorySettings,
     ChatServiceSettings,
     FileStorageSettings,
     LocalSqlSettings,
     LoggingSettings,
     ModelSettings,
-    PromptTunerSettings,
     ReceiverSettings,
     ToolServiceSettings,
     WebSettings,
@@ -78,15 +76,7 @@ class IngeniousSettings(BaseSettings):
         description="Chat service backend configuration",
     )
 
-    chainlit_configuration: ChainlitSettings = Field(
-        default_factory=lambda: ChainlitSettings(),
-        description="Chainlit chat interface configuration",
-    )
 
-    prompt_tuner: PromptTunerSettings = Field(
-        default_factory=lambda: PromptTunerSettings(),
-        description="Prompt tuning interface configuration",
-    )
 
     web_configuration: WebSettings = Field(
         default_factory=lambda: WebSettings(),
