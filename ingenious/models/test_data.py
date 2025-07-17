@@ -17,17 +17,17 @@ class Event(BaseModel):
 
 class Events(BaseModel):
     _events: List[Event] = []
-    _fs: FileStorage = None
+    _fs: FileStorage | None = None
 
     def __init__(self, fs: FileStorage):
         super().__init__()
         self._fs = fs
         print("loaded events")
 
-    def add_event(self, event: Event):
+    def add_event(self, event: Event) -> None:
         self._events.append(event)
 
-    def get_events(self):
+    def get_events(self) -> list[Event]:
         return self._events
 
     def get_event_by_identifier(self, identifier: str) -> Event:
@@ -43,10 +43,10 @@ class Events(BaseModel):
                 events.append(event)
         return events
 
-    async def load_events_from_file(self, file_path: str):
+    async def load_events_from_file(self, file_path: str) -> None:
         try:
             self._events = []
-            if await self._fs.check_if_file_exists(
+            if self._fs and await self._fs.check_if_file_exists(
                 file_name="events.yml", file_path=file_path
             ):
                 events_raw = yaml.safe_load(

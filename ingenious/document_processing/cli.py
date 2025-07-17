@@ -56,7 +56,7 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import Iterable, Tuple, Union
+from typing import Iterable, TextIO, Tuple, Union
 
 import typer
 from rich import print as rprint
@@ -153,12 +153,12 @@ def extract_cmd(
     Write extraction results to *stdout* or a file in **NDJSON** format.
     """
 
-    def _stream_blocks(src_path: str, sink) -> int:
+    def _stream_blocks(src_path: str, sink: TextIO) -> int:
         """Inner helper so we can share the write logic."""
         count = 0
         for label, src in _iter_sources(src_path):
             for element in _extract(src, engine=engine):
-                element.setdefault("source", label)
+                element["source"] = label
                 sink.write(f"{json.dumps(element, ensure_ascii=False)}\n")
                 count += 1
         return count
@@ -177,7 +177,7 @@ def extract_cmd(
         # descriptor is closed **even if `_extract` raises** midway through.
         with open(out, "w", encoding="utf-8") as sink:
             written = _stream_blocks(path, sink)
-        target_label = out
+        target_label = str(out)
 
     colour = "green" if written else "red"
     rprint(f"[{colour}]✓ wrote {written} elements → {target_label}[/{colour}]")

@@ -37,7 +37,7 @@ class CliFunctions:
     class RunTestBatch(stage_executor_module.IActionCallable):
         """Action callable for running test batches."""
 
-        async def __call__(self, progress, task_id, **kwargs):
+        async def __call__(self, progress: Any, task_id: Any, **kwargs: Any) -> None:
             module_name = "tests.run_tests"
             class_name = "RunBatches"
             try:
@@ -54,13 +54,13 @@ class CliFunctions:
                 raise ValueError(f"Batch Run Failed: {module_name}") from e
 
     @staticmethod
-    def PureLibIncludeDirExists():
+    def PureLibIncludeDirExists() -> bool:
         """Check if the ingenious package exists in site-packages."""
         ChkPath = Path(get_paths()["purelib"]) / Path("ingenious/")
         return os.path.exists(ChkPath)
 
     @staticmethod
-    def GetIncludeDir():
+    def GetIncludeDir() -> Path:
         """Get the include directory for the ingenious package."""
         ChkPath = Path(get_paths()["purelib"]) / Path("ingenious/")
         # print(ChkPath)
@@ -73,7 +73,7 @@ class CliFunctions:
             return path
 
     @staticmethod
-    def copy_ingenious_folder(src, dst):
+    def copy_ingenious_folder(src: Union[str, Path], dst: Union[str, Path]) -> None:
         """Copy the ingenious folder from source to destination."""
         if not os.path.exists(dst):
             os.makedirs(dst)  # Create the destination directory if it doesn't exist
@@ -466,7 +466,7 @@ class ConfigUtils:
         Returns:
             Dictionary of environment variables
         """
-        env_vars = {}
+        env_vars: Dict[str, str] = {}
         env_file = Path(env_path)
 
         if not env_file.exists():

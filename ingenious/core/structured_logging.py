@@ -132,7 +132,7 @@ def setup_structured_logging(
 
 def get_logger(name: str) -> structlog.BoundLogger:
     """Get a structured logger instance."""
-    return structlog.get_logger(name)
+    return structlog.get_logger(name)  # type: ignore
 
 
 def set_request_context(
@@ -178,18 +178,20 @@ def get_request_id() -> Optional[str]:
 class PerformanceLogger:
     """Context manager for logging performance metrics."""
 
-    def __init__(self, logger: structlog.BoundLogger, operation: str, **context):
+    def __init__(
+        self, logger: structlog.BoundLogger, operation: str, **context: Any
+    ) -> None:
         self.logger = logger
         self.operation = operation
         self.context = context
         self.start_time: Optional[float] = None
 
-    def __enter__(self):
+    def __enter__(self) -> Any:
         self.start_time = time.time()
         self.logger.info("Operation started", operation=self.operation, **self.context)
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         if self.start_time:
             duration = time.time() - self.start_time
 
@@ -217,7 +219,7 @@ def log_api_call(
     url: str,
     status_code: Optional[int] = None,
     duration: Optional[float] = None,
-    **kwargs,
+    **kwargs: Any,
 ) -> None:
     """Helper function to log API calls with consistent structure."""
     log_data = {"event_type": "api_call", "method": method, "url": url, **kwargs}
@@ -239,7 +241,7 @@ def log_database_operation(
     table: Optional[str] = None,
     duration: Optional[float] = None,
     affected_rows: Optional[int] = None,
-    **kwargs,
+    **kwargs: Any,
 ) -> None:
     """Helper function to log database operations with consistent structure."""
     log_data = {"event_type": "database_operation", "operation": operation, **kwargs}
@@ -260,7 +262,7 @@ def log_agent_action(
     action: str,
     success: bool = True,
     duration: Optional[float] = None,
-    **kwargs,
+    **kwargs: Any,
 ) -> None:
     """Helper function to log agent actions with consistent structure."""
     log_data = {

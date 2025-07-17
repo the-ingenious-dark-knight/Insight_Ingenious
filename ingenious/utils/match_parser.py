@@ -12,7 +12,9 @@ class MatchDataParser:
     This handles sports/match data parsing but provides fallback for general testing.
     """
 
-    def __init__(self, payload: Optional[Any] = None, event_type: Optional[str] = None) -> None:
+    def __init__(
+        self, payload: Optional[Any] = None, event_type: Optional[str] = None
+    ) -> None:
         self.payload: Optional[Any] = payload
         self.event_type: Optional[str] = event_type
 

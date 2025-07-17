@@ -127,7 +127,7 @@ def _pdf_to_text(src: Path) -> str:
 # ───────────────────── fixtures ─────────────────────
 # Third-party modules -----------------------------------------------------------
 @pytest.fixture(scope="session")
-def fitz_mod():
+def fitz_mod() -> Any:
     """Import and expose the *PyMuPDF* ``fitz`` module."""
     try:
         return importlib.import_module("fitz")
@@ -136,7 +136,7 @@ def fitz_mod():
 
 
 @pytest.fixture(scope="session")
-def docx_mod():
+def docx_mod() -> Any:
     """Import and expose *python-docx*."""
     try:
         return importlib.import_module("docx")
@@ -165,7 +165,7 @@ def pptx_available() -> bool:
 
 # Extractor helper -------------------------------------------------------------
 @pytest.fixture(scope="session")
-def pymupdf():
+def pymupdf() -> Any:
     """Return a session-scoped *PyMuPDF* extractor instance."""
     return _load("pymupdf")
 
@@ -188,7 +188,7 @@ def pdf_bytes(pdf_path: Path) -> bytes:
 
 # DOCX fixtures ----------------------------------------------------------------
 @pytest.fixture()
-def docx_path(tmp_path: Path, pdf_path: Path, docx_mod):
+def docx_path(tmp_path: Path, pdf_path: Path, docx_mod: Any) -> Path:
     """Generate a DOCX mirroring the textual content of *pdf_path*."""
     destination = tmp_path / f"{pdf_path.stem}.docx"
     if destination.exists():
@@ -243,8 +243,8 @@ def sample_pdf_bytes(sample_pdf_path: Path) -> bytes:
 # DOCX generated from the synthetic PDF ----------------------------------------
 @pytest.fixture(scope="session")
 def sample_docx_path(
-    tmp_path_factory: pytest.TempPathFactory, sample_pdf_path: Path, docx_mod
-):
+    tmp_path_factory: pytest.TempPathFactory, sample_pdf_path: Path, docx_mod: Any
+) -> Path:
     """Generate a DOCX derived from the one-page synthetic PDF."""
     out = tmp_path_factory.getbasetemp() / "sample_from_pdf.docx"
     if out.exists():

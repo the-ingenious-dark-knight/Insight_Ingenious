@@ -313,7 +313,7 @@ class AzureDocIntelligenceExtractor(DocumentExtractor):
 
             time.sleep(_POLLER_DELAY_SEC)
 
-        result: dict = poll.json().get("analyzeResult", {})
+        result: dict[str, object] = poll.json().get("analyzeResult", {})
 
         # ------------------------- stream paragraphs --------------------
         for para in result.get("paragraphs", []):

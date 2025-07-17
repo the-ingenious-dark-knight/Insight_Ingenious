@@ -59,11 +59,11 @@ from contextlib import suppress
 from pathlib import Path
 from typing import Iterable, TypeAlias
 
-from pdfminer.high_level import extract_pages
-from pdfminer.layout import LTTextContainer
-from pdfminer.pdfdocument import PDFPasswordIncorrect
-from pdfminer.pdfpage import PDFTextExtractionNotAllowed
-from pdfminer.pdfparser import PDFSyntaxError
+from pdfminer.high_level import extract_pages  # type: ignore
+from pdfminer.layout import LTTextContainer  # type: ignore
+from pdfminer.pdfdocument import PDFPasswordIncorrect  # type: ignore
+from pdfminer.pdfpage import PDFTextExtractionNotAllowed  # type: ignore
+from pdfminer.pdfparser import PDFSyntaxError  # type: ignore
 
 from ingenious.document_processing.utils.fetcher import fetch, is_url
 

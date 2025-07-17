@@ -36,15 +36,40 @@ class ConversationFlow(IConversationFlow):
         self,
         chat_request: ChatRequest,  # This needs to be an object that implements the IChatRequest model so you can extend this by creating a new model in the models folder
     ) -> ChatResponse:
-        message = json.loads(chat_request.user_prompt)
+        try:
+            message = json.loads(chat_request.user_prompt)
+        except json.JSONDecodeError as e:
+            raise ValueError(
+                f"bike-insights workflow requires JSON-formatted data. "
+                f"Please provide a valid JSON string with fields: revision_id, identifier, stores. "
+                f'Example: {{"revision_id": "test-v1", "identifier": "test-001", "stores": [...]}}\n'
+                f"JSON parsing error: {str(e)}"
+            ) from e
         # event_type = chat_request.event_type
+
+        # Validate required fields
+        required_fields = ["revision_id", "identifier", "stores"]
+        missing_fields = [field for field in required_fields if field not in message]
+        if missing_fields:
+            raise ValueError(
+                f"bike-insights workflow requires the following fields in JSON data: {', '.join(missing_fields)}. "
+                f"Current data contains: {list(message.keys())}. "
+                f"Please include all required fields: revision_id, identifier, stores"
+            )
 
         #  Get your agents and agent chats from your custom class in models folder
         project_agents = ProjectAgents()
         agents = project_agents.Get_Project_Agents(self._config)
 
         # Process your data payload using your custom data model class
-        bike_sales_data = RootModel.model_validate(message)
+        try:
+            bike_sales_data = RootModel.model_validate(message)
+        except Exception as e:
+            raise ValueError(
+                f"bike-insights workflow data validation failed. "
+                f"Please ensure your JSON data matches the expected schema for bike sales data. "
+                f"Validation error: {str(e)}"
+            ) from e
 
         # Get the revision id and identifier from the message payload
         revision_id = message["revision_id"]

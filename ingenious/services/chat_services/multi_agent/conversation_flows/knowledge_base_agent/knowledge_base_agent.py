@@ -1,32 +1,20 @@
 import os
 
-from autogen_agentchat.agents import AssistantAgent, UserProxyAgent
-from autogen_agentchat.conditions import MaxMessageTermination, TextMentionTermination
-from autogen_agentchat.teams import RoundRobinGroupChat
+from autogen_agentchat.agents import AssistantAgent
 from autogen_core import CancellationToken
 from autogen_core.tools import FunctionTool
 from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
 
-import ingenious.config.config as config
-from ingenious.models.chat import ChatResponse
-from ingenious.services.memory_manager import (
-    get_memory_manager,
-    run_async_memory_operation,
-)
+from ingenious.models.chat import ChatRequest, ChatResponse
+from ingenious.services.chat_services.multi_agent.service import IConversationFlow
 
 
-class ConversationFlow:
-    @staticmethod
+class ConversationFlow(IConversationFlow):
     async def get_conversation_response(
-        message: str,
-        topics: list = [],
-        thread_memory: str = "",
-        memory_record_switch=True,
-        thread_chat_history: list[str, str] = [],
+        self, chat_request: ChatRequest
     ) -> ChatResponse:
-        # Get configuration for the LLM
-        _config = config.get_config()
-        model_config = _config.models[0]
+        # Get configuration from the parent service
+        model_config = self._config.models[0]
 
         # Configure Azure OpenAI client for v0.4
         azure_config = {
@@ -39,26 +27,10 @@ class ConversationFlow:
 
         # Create the model client
         model_client = AzureOpenAIChatCompletionClient(**azure_config)
-        memory_path = _config.chat_history.memory_path
 
-        # Initialize memory manager for cloud storage support
-        memory_manager = get_memory_manager(_config, memory_path)
-
-        # Set up context handling
-        if not thread_memory:
-            run_async_memory_operation(
-                memory_manager.write_memory(
-                    "New conversation. Continue based on user question."
-                )
-            )
-        else:
-            run_async_memory_operation(memory_manager.write_memory(thread_memory))
-
-        # Read current context
-        context = run_async_memory_operation(
-            memory_manager.read_memory(
-                default_content="New conversation. Continue based on user question."
-            )
+        # Set up context for conversation
+        context = (
+            "Knowledge base search assistant for finding information in local ChromaDB."
         )
 
         # Create local search tool function using ChromaDB
@@ -72,8 +44,8 @@ class ConversationFlow:
                     return "Error: ChromaDB not installed. Please install with: uv add chromadb"
 
                 # Initialize ChromaDB client
-                knowledge_base_path = os.path.join(memory_path, "knowledge_base")
-                chroma_path = os.path.join(memory_path, "chroma_db")
+                knowledge_base_path = os.path.join(self._memory_path, "knowledge_base")
+                chroma_path = os.path.join(self._memory_path, "chroma_db")
 
                 # Ensure knowledge base directory exists
                 if not os.path.exists(knowledge_base_path):
@@ -130,7 +102,7 @@ class ConversationFlow:
         )
 
         # Create the search assistant agent
-        search_system_message = f"""You are a knowledge base search assistant using local ChromaDB storage.
+        search_system_message = """You are a knowledge base search assistant using local ChromaDB storage.
 
 Tasks:
 - Help users find information by searching the local knowledge base
@@ -141,9 +113,7 @@ Tasks:
 Guidelines for search queries:
 - Use specific, relevant keywords
 - Try different phrasings if initial search doesn't return results
-- Focus on health and safety topics as that's what the knowledge base contains
-
-The available topics are: {", ".join(topics) if topics else "health and safety topics"}
+- Focus on topics that are relevant to the knowledge base content
 
 Knowledge base contains documents about:
 - Workplace safety guidelines
@@ -151,12 +121,13 @@ Knowledge base contains documents about:
 - Emergency procedures
 - Mental health and wellbeing
 - First aid basics
+- General informational content
 
 Format your responses clearly and cite the knowledge base when providing information.
 TERMINATE your response when the task is complete.
 """
 
-        # Set up the agent team with the search assistant and a user proxy
+        # Set up the search assistant agent
         search_assistant = AssistantAgent(
             name="search_assistant",
             system_message=search_system_message,
@@ -165,49 +136,44 @@ TERMINATE your response when the task is complete.
             reflect_on_tool_use=True,
         )
 
-        user_proxy = UserProxyAgent("user_proxy")
-
-        # Set up termination conditions
-        termination = TextMentionTermination("TERMINATE") | MaxMessageTermination(10)
-
-        # Create the group chat with round-robin configuration
-        group_chat = RoundRobinGroupChat(
-            agents=[search_assistant, user_proxy],
-            termination_condition=termination,
-            max_turns=10,
-        )
-
         # Create cancellation token
         cancellation_token = CancellationToken()
 
         # Prepare user message with context
         user_msg = (
-            f"Context: {context}\n\nUser question: {message}" if context else message
+            f"Context: {context}\n\nUser question: {chat_request.user_prompt}"
+            if context
+            else chat_request.user_prompt
         )
 
-        # Run the conversation
-        result = await group_chat.run(
-            task=user_msg, cancellation_token=cancellation_token
+        # Use the search assistant directly with on_messages for a simpler interaction
+        from autogen_agentchat.messages import TextMessage
+
+        # Send the message directly to the search assistant
+        response = await search_assistant.on_messages(
+            messages=[TextMessage(content=user_msg, source="user")],
+            cancellation_token=cancellation_token,
         )
 
-        # Extract the response
+        # Extract the response content
         final_message = (
-            result.messages[-1].content if result.messages else "No response generated"
+            response.chat_message.content
+            if response.chat_message
+            else "No response generated"
         )
 
-        # Update context for future conversations if memory recording is enabled
-        if memory_record_switch:
-            run_async_memory_operation(memory_manager.write_memory(final_message))
+        # Update memory for future conversations (simplified for local testing)
+        # In production, this would use the memory manager
 
         # Make sure to close the model client connection when done
         await model_client.close()
 
         # Return the response
         return ChatResponse(
-            thread_id="",
+            thread_id=chat_request.thread_id or "",
             message_id="",
             agent_response=final_message,
             token_count=0,
             max_token_count=0,
             memory_summary=final_message,
-        ), final_message
+        )

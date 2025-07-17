@@ -19,4 +19,5 @@ warnings.warn(
 )
 
 # Import everything from the new modular structure for backward compatibility
+from .main_settings import IngeniousSettings  # noqa: F401
 from .models import *  # noqa: F403, F401

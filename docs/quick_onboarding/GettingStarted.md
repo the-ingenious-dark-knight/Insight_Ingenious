@@ -85,22 +85,21 @@ For quick testing, start with workflows that only need Azure OpenAI:
 uv run ingen serve
 ```
 
-Starts the FastAPI server with Chainlit UI.
+Starts the FastAPI server with web API endpoints.
 
 ### Testing the UI
 
-Once the application is running, access the web UI at:
+Once the application is running, access the web application at:
 - http://localhost:80 - Main application
-- http://localhost:80/chainlit - Chainlit chat interface
-- http://localhost:80/prompt-tuner - Prompt tuning interface
+- http://localhost:80/docs - API documentation
 
 ### Testing chat with the agents
 
 #### Quick Test (Minimal Configuration)
 Test with workflows that only need Azure OpenAI:
 
-1. Navigate to http://localhost:80/chainlit
-2. Start a new conversation
+1. Use the API endpoints at http://localhost:80/docs
+2. Test with POST requests to /api/v1/chat
 3. Try these workflows:
    - "Hello" with `classification-agent`
    - "Analyze bike sales" with `bike-insights`

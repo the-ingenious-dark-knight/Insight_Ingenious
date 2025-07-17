@@ -1,7 +1,7 @@
 import logging
 import uuid as uuid_module
 from abc import ABC, abstractmethod
-from typing import List, Optional, Dict, Any, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from jinja2 import Environment
 from openai.types.chat import ChatCompletionMessageParam
@@ -86,7 +86,10 @@ class multi_agent_chat_service:
                     content_filter_results=thread_message.content_filter_results
                 )
 
-            if hasattr(chat_request, 'thread_chat_history') and chat_request.thread_chat_history:
+            if (
+                hasattr(chat_request, "thread_chat_history")
+                and chat_request.thread_chat_history
+            ):
                 chat_request.thread_chat_history.append(  # type: ignore
                     {"role": thread_message.role, "content": thread_message.content}
                 )
@@ -185,7 +188,9 @@ class multi_agent_chat_service:
                     response_task = (
                         conversation_flow_service_class.get_conversation_response(
                             message=chat_request.user_prompt,
-                            topics=chat_request.topic if isinstance(chat_request.topic, list) else ([chat_request.topic] if chat_request.topic else []),
+                            topics=chat_request.topic
+                            if isinstance(chat_request.topic, list)
+                            else ([chat_request.topic] if chat_request.topic else []),
                             thread_memory=getattr(chat_request, "thread_memory", ""),
                             memory_record_switch=getattr(
                                 chat_request, "memory_record", True
@@ -401,9 +406,12 @@ class IConversationFlow(ABC):
     _chat_service: multi_agent_chat_service
     _memory_manager: Any
 
-    def __init__(self, parent_multi_agent_chat_service: multi_agent_chat_service) -> None:
+    def __init__(
+        self, parent_multi_agent_chat_service: multi_agent_chat_service
+    ) -> None:
         super().__init__()
-        self._config = ig_config.get_config()
+        # Use configuration from parent service instead of loading separately
+        self._config = parent_multi_agent_chat_service.config
         self._memory_path = self.GetConfig().chat_history.memory_path
         self._memory_file_path = f"{self._memory_path}/context.md"
         self._logger = get_logger(__name__)  # type: ignore

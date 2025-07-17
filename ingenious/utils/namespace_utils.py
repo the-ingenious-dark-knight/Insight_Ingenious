@@ -16,7 +16,7 @@ import pkgutil
 import sys
 from pathlib import Path
 from sysconfig import get_paths
-from typing import Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional, Set
 
 from ingenious.core.structured_logging import get_logger
 from ingenious.utils.imports import SafeImporter, _deprecated_import_warning
@@ -180,9 +180,9 @@ def get_inbuilt_api_routes() -> Optional[Path]:
 class WorkflowDiscovery:
     """Enhanced workflow discovery with validation and caching."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._workflow_cache: Optional[List[str]] = None
-        self._metadata_cache: Dict[str, Dict] = {}
+        self._metadata_cache: Dict[str, Dict[str, Any]] = {}
 
     def discover_workflows(self, force_refresh: bool = False) -> List[str]:
         """
@@ -262,14 +262,23 @@ class WorkflowDiscovery:
 
                 # Validate against protocol
                 try:
-                    # Check basic protocol compliance
-                    required_methods = ["get_chat_response"]
+                    # Check basic protocol compliance - workflows can use either method name
+                    required_methods = [
+                        "get_conversation_response",
+                        "get_chat_response",
+                    ]
+                    has_required_method = False
                     for method in required_methods:
-                        if not hasattr(conversation_flow_class, method):
-                            logger.debug(
-                                f"Workflow {workflow_name} missing method: {method}"
-                            )
-                            return False
+                        if hasattr(conversation_flow_class, method):
+                            has_required_method = True
+                            break
+
+                    if not has_required_method:
+                        logger.debug(
+                            f"Workflow {workflow_name} missing required method. "
+                            f"Must have one of: {required_methods}"
+                        )
+                        return False
 
                     return True
 
@@ -284,7 +293,7 @@ class WorkflowDiscovery:
             logger.debug(f"Skipping {workflow_name} - not a valid workflow: {e}")
             return False
 
-    def get_workflow_metadata(self, workflow_name: str) -> Dict:
+    def get_workflow_metadata(self, workflow_name: str) -> Dict[str, Any]:
         """
         Get metadata for a specific workflow.
 
@@ -368,7 +377,7 @@ def discover_workflows(force_refresh: bool = False) -> List[str]:
     return _workflow_discovery.discover_workflows(force_refresh)
 
 
-def get_workflow_metadata(workflow_name: str) -> Dict:
+def get_workflow_metadata(workflow_name: str) -> Dict[str, Any]:
     """Get metadata for a specific workflow."""
     return _workflow_discovery.get_workflow_metadata(workflow_name)
 
@@ -379,7 +388,7 @@ def clear_workflow_cache() -> None:
 
 
 # DEPRECATED FUNCTIONS - Issue warnings and delegate to new implementation
-def import_module_safely(module_name: str, class_name: str):
+def import_module_safely(module_name: str, class_name: str) -> Any:
     """
     DEPRECATED: Use ingenious.utils.imports.import_class_safely instead.
     """
@@ -400,7 +409,7 @@ def import_module_safely(module_name: str, class_name: str):
         return import_class_safely(module_name, class_name)
 
 
-def import_class_safely(module_name: str, class_name: str):
+def import_class_safely(module_name: str, class_name: str) -> Any:
     """
     DEPRECATED: Use ingenious.utils.imports.import_class_safely instead.
     """
@@ -413,7 +422,7 @@ def import_class_safely(module_name: str, class_name: str):
     return new_import_class_safely(module_name, class_name)
 
 
-def import_module_with_fallback(module_name: str):
+def import_module_with_fallback(module_name: str) -> Any:
     """
     DEPRECATED: Use ingenious.utils.imports.import_module_with_fallback instead.
     """
@@ -429,7 +438,7 @@ def import_module_with_fallback(module_name: str):
     return new_import_module_with_fallback(module_name)
 
 
-def import_class_with_fallback(module_name: str, class_name: str):
+def import_class_with_fallback(module_name: str, class_name: str) -> Any:
     """
     DEPRECATED: Use ingenious.utils.imports.import_class_with_fallback instead.
     """

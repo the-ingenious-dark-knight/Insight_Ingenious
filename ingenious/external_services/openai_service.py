@@ -27,7 +27,7 @@ class OpenAIService:
         self,
         messages: list[ChatCompletionMessageParam],
         tools: list[ChatCompletionToolParam] | None = None,
-        tool_choice: str | dict | None = None,
+        tool_choice: str | dict[str, object] | None = None,
         json_mode=False,
     ) -> ChatCompletionMessage:
         logger.debug(

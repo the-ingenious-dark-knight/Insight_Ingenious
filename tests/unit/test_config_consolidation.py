@@ -72,7 +72,7 @@ INGENIOUS_WEB_CONFIGURATION__PORT=9000
                 settings = IngeniousSettings(_env_file=env_file)
 
             assert settings.profile == "test_profile"
-            assert settings.models[0].model == "gpt-4"
+            assert settings.models[0].model == "gpt-4.1-nano"
             assert settings.models[0].api_key == "test-api-key"
             assert settings.models[0].base_url == "https://test.example.com/"
             assert settings.chat_history.database_type == "sqlite"
@@ -227,7 +227,7 @@ class TestWebSettings:
         web = WebSettings()
 
         assert web.ip_address == "0.0.0.0"
-        assert web.port == 8000
+        assert web.port == 80
         assert web.type == "fastapi"
         assert web.asynchronous is False
         assert web.authentication.enable is False

@@ -33,6 +33,7 @@ from typing import Any, Final, Iterator
 
 import pytest
 from requests.models import Response
+from requests.structures import CaseInsensitiveDict
 
 from ingenious.document_processing import extract
 
@@ -68,15 +69,20 @@ class _FakeResp(Response):
         self.status_code = status
         self._content = body
         # Only *Content‑Length* is inspected upstream, so a single header suffices.
-        self.headers = {"Content-Length": str(len(body))}
+        self.headers: CaseInsensitiveDict[str] = CaseInsensitiveDict(
+            {"Content-Length": str(len(body))}
+        )
 
     # --------------------------------------------------------------------- #
     # Public shim API                                                       #
     # --------------------------------------------------------------------- #
-    def iter_content(self, chunk_size: int = 1 << 14) -> Iterator[bytes]:  # noqa: D401 – clear enough without “Returns”.
+    def iter_content(
+        self, chunk_size: int | None = None, decode_unicode: bool = False
+    ) -> Iterator[bytes]:  # noqa: D401 – clear enough without "Returns".
         """Yield the entire *body* once to emulate a streamed download."""
 
-        yield self._content
+        if self._content:
+            yield self._content
 
 
 # --------------------------------------------------------------------------- #

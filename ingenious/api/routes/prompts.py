@@ -1,4 +1,5 @@
 import asyncio
+from typing import Any, Dict
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.security import HTTPBasicCredentials
@@ -25,7 +26,7 @@ def list_revisions(
         HTTPBasicCredentials, Depends(igen_deps.get_conditional_security)
     ],
     fs: FileStorage = Depends(igen_deps.get_file_storage_revisions),
-):
+) -> Dict[str, Any]:
     """
     List all available revisions (workflow directories) in the prompt templates.
     """
@@ -78,7 +79,7 @@ def list_workflows_for_prompts(
         HTTPBasicCredentials, Depends(igen_deps.get_conditional_security)
     ],
     fs: FileStorage = Depends(igen_deps.get_file_storage_revisions),
-):
+) -> Dict[str, Any]:
     """
     List all available workflows that have prompt templates.
     """
@@ -153,7 +154,7 @@ def list_prompts_enhanced(
         HTTPBasicCredentials, Depends(igen_deps.get_conditional_security)
     ],
     fs: FileStorage = Depends(igen_deps.get_file_storage_revisions),
-):
+) -> Dict[str, Any]:
     """
     Enhanced prompt listing with better metadata and error handling.
     """
@@ -237,7 +238,7 @@ def view(
         HTTPBasicCredentials, Depends(igen_deps.get_conditional_security)
     ],
     fs: FileStorage = Depends(igen_deps.get_file_storage_revisions),
-):
+) -> str:
     prompt_template_folder = asyncio.run(
         fs.get_prompt_template_path(revision_id=revision_id)
     )
@@ -257,7 +258,7 @@ async def update(
         HTTPBasicCredentials, Depends(igen_deps.get_conditional_security)
     ],
     fs: FileStorage = Depends(igen_deps.get_file_storage_revisions),
-):
+) -> Dict[str, str]:
     prompt_template_folder = await fs.get_prompt_template_path(revision_id=revision_id)
     try:
         await fs.write_file(

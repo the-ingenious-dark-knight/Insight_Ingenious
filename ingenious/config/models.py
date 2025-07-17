@@ -75,48 +75,6 @@ class ModelSettings(BaseModel):
         return v
 
 
-class ChainlitSettings(BaseModel):
-    """Configuration for Chainlit chat interface.
-
-    Enables a Python-based chat interface for development and testing.
-    Disable in production if using custom web interfaces.
-    """
-
-    enable: bool = Field(
-        False,
-        description="Enable Chainlit chat interface (recommended for development)",
-    )
-
-    class AuthenticationSettings(BaseModel):
-        """Authentication settings for Chainlit interface."""
-
-        enable: bool = Field(False, description="Enable authentication for Chainlit")
-        github_secret: str = Field(
-            "", description="GitHub OAuth secret (if using GitHub auth)"
-        )
-        github_client_id: str = Field(
-            "", description="GitHub OAuth client ID (if using GitHub auth)"
-        )
-
-    authentication: AuthenticationSettings = Field(
-        default_factory=AuthenticationSettings,
-        description="Authentication configuration for Chainlit",
-    )
-
-
-class PromptTunerSettings(BaseModel):
-    """Configuration for the prompt tuning interface.
-
-    Provides a web interface for editing and testing prompts.
-    Useful for development and experimentation with prompt engineering.
-    """
-
-    mode: str = Field(
-        "fast_api", description="Mode for prompt tuner: 'fast_api' for web interface"
-    )
-    enable: bool = Field(True, description="Enable prompt tuner interface")
-
-
 class ChatServiceSettings(BaseModel):
     """Configuration for the chat service backend.
 
@@ -213,17 +171,14 @@ class WebSettings(BaseModel):
         "0.0.0.0",
         description="IP address to bind the web server (0.0.0.0 for all interfaces)",
     )
-    port: int = Field(8000, description="Port number for the web server")
+    port: int = Field(80, description="Port number for the web server")
     type: str = Field(
         "fastapi", description="Web framework type: 'fastapi' for FastAPI"
     )
     asynchronous: bool = Field(
         False, description="Enable asynchronous response handling"
     )
-    authentication: WebAuthenticationSettings = Field(
-        default_factory=WebAuthenticationSettings,
-        description="Web authentication configuration",
-    )
+    authentication: WebAuthenticationSettings = WebAuthenticationSettings()
 
     @field_validator("port")
     @classmethod
@@ -292,14 +247,8 @@ class FileStorageSettings(BaseModel):
     Supports local and cloud storage options.
     """
 
-    revisions: FileStorageContainerSettings = Field(
-        default_factory=FileStorageContainerSettings,
-        description="Storage configuration for revision files",
-    )
-    data: FileStorageContainerSettings = Field(
-        default_factory=FileStorageContainerSettings,
-        description="Storage configuration for data files",
-    )
+    revisions: FileStorageContainerSettings = FileStorageContainerSettings()
+    data: FileStorageContainerSettings = FileStorageContainerSettings()
 
 
 class ReceiverSettings(BaseModel):

@@ -5,18 +5,21 @@ Welcome to your **Insight Ingenious** project! This template provides everything
 ## 🚀 **Quick Start**
 
 ### **1. Initial Setup**
-After running `uv run ingen initialize-new-project`, you should have:
-- ✅ `config.yml` - Project configuration
-- ✅ `profiles.yml` - API keys and credentials
-- ✅ `.env.example` - Environment variables template
+After running `uv run ingen init`, you should have:
+- ✅ `.env.example` - Environment variables template for pydantic-settings configuration
 - ✅ This project structure with sample workflows
+
+**Configuration Steps:**
+1. Copy the environment template: `cp .env.example .env`
+2. Edit `.env` with your API keys and configuration
+3. Validate your setup: `ingen validate`
 
 ### **2. Test the Built-in Bike Insights Workflow**
 
 The template includes a complete **bike sales analysis workflow** that you can test immediately:
 
 ```bash
-# 1. Start the server
+# 1. Start the server (make sure you've configured .env first)
 uv run ingen serve
 
 # 2. Test the bike insights workflow
@@ -27,6 +30,8 @@ curl -X POST http://localhost:80/api/v1/chat \
     "conversation_flow": "bike-insights"
   }'
 ```
+
+**Requirements:** Your `.env` file must have the required `INGENIOUS_MODELS__0__*` configuration for the AI model to work.
 
 ## 📁 **Project Structure**
 
@@ -148,9 +153,17 @@ Access your workflows through the web interface:
 ## 📚 **Next Steps**
 
 ### **🎯 Learn More:**
-- [📖 Configuration Guide](../docs/configuration/README.md) - Detailed setup options
+- [📖 Configuration Guide](../docs/getting-started/configuration.md) - Environment variable setup
 - [🔌 Extensions Guide](../docs/extensions/README.md) - Advanced customization
 - [🌐 API Integration](../docs/guides/api-integration.md) - REST API usage
+
+### **📝 Configuration Migration:**
+If you have existing YAML configuration files (`config.yml`, `profiles.yml`) from an older version:
+```bash
+# Migrate your existing configuration
+uv run python scripts/migrate_config.py --yaml-file config.yml --output .env
+uv run python scripts/migrate_config.py --yaml-file profiles.yml --output .env --append
+```
 
 ### **🚀 Advanced Features:**
 - **🔍 Knowledge Base Search** - Add Azure Cognitive Search integration
@@ -165,8 +178,9 @@ Access your workflows through the web interface:
 
 ## 🆘 **Need Help?**
 
-- **📋 Workflow Requirements:** Check `uv run ingen workflow-requirements all`
-- **🔧 Configuration Issues:** See [Troubleshooting Guide](../docs/getting-started/troubleshooting.md)
+- **📋 Workflow Requirements:** Check `uv run ingen workflows`
+- **✅ Configuration Validation:** Run `uv run ingen validate`
+- **🔧 Configuration Issues:** See [Troubleshooting Guide](../docs/troubleshooting/README.md)
 - **💻 Development:** Review [Development Guide](../docs/development/README.md)
 - **🐛 Issues:** Check the [GitHub Issues](https://github.com/Insight-Services-APAC/ingenious/issues)
 

@@ -1,7 +1,7 @@
 import json
 from typing import Any, Dict, List, Optional
 
-import pyodbc
+import pyodbc  # type: ignore
 
 from ingenious.config.settings import IngeniousSettings
 
@@ -84,7 +84,9 @@ class azuresql_ChatHistoryRepository(BaseSQLRepository):
             if cursor:
                 cursor.close()
 
-    def execute_sql(self, sql: str, params: List[Any] = None, expect_results: bool = True) -> Any:
+    def execute_sql(
+        self, sql: str, params: List[Any] = None, expect_results: bool = True
+    ) -> Any:
         """Legacy method for backward compatibility."""
         if params is None:
             params = []
@@ -182,7 +184,7 @@ class azuresql_ChatHistoryRepository(BaseSQLRepository):
         thread_id: str,
         name: Optional[str] = None,
         user_id: Optional[str] = None,
-        metadata: Optional[Dict] = None,
+        metadata: Optional[Dict[str, object]] = None,
         tags: Optional[List[str]] = None,
     ) -> str:
         logger.info(

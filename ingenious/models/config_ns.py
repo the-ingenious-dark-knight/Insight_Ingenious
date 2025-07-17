@@ -28,18 +28,6 @@ class ModelConfig(BaseModel):
     deployment: str = Field("", description="Azure deployment name")
 
 
-class ChainlitConfig(BaseModel):
-    enable: bool = Field(
-        False,
-        description="Enables or Disables the Python based Chainlit chat interface",
-    )
-
-
-class PromptTunerConfig(BaseModel):
-    mode: str = Field("fast_api", description="Mode for the prompt tuner")
-    enable: bool = Field(True, description="Enable or disable the prompt tuner")
-
-
 class ChatServiceConfig(BaseModel):
     type: str = Field(
         "multi_agent", description="Right now only valid value is 'multi_agent'"
@@ -86,19 +74,15 @@ class LocaldbConfig(BaseModel):
 
 
 class FileStorageContainer(BaseModel):
-    enable: bool = (Field(True, description="Enables or Disables File Storage"),)
-    storage_type: str = (Field("local", description="Type of the File Storage"),)
-    container_name: str = (
-        Field(
-            default="",
-            description="Name of the container. Used for Azure storage. Not used for local storage.",
-        ),
+    enable: bool = Field(True, description="Enables or Disables File Storage")
+    storage_type: str = Field("local", description="Type of the File Storage")
+    container_name: str = Field(
+        default="",
+        description="Name of the container. Used for Azure storage. Not used for local storage.",
     )
-    path: str = (
-        Field(
-            "./",
-            description="Path to the file storage. Used for local storage and Azure storage.",
-        ),
+    path: str = Field(
+        "./",
+        description="Path to the file storage. Used for local storage and Azure storage.",
     )
     add_sub_folders: bool = Field(
         default=True,
@@ -132,8 +116,6 @@ class Config(BaseModel):
     logging: LoggingConfig
     tool_service: ToolServiceConfig
     chat_service: ChatServiceConfig
-    chainlit_configuration: ChainlitConfig
-    prompt_tuner: PromptTunerConfig
     azure_search_services: Optional[List[AzureSearchConfig]] = Field(
         default=None, description="Azure Search services configuration (optional)"
     )
@@ -143,8 +125,6 @@ class Config(BaseModel):
         default=None, description="Azure SQL services configuration (optional)"
     )
     file_storage: FileStorage = Field(
-        default_factory=lambda: FileStorage(
-            enable=True, storage_type="local", container_name="", path="./"
-        ),
+        default_factory=lambda: FileStorage(),
         description="File Storage configuration",
     )

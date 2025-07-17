@@ -1,4 +1,6 @@
 {
+    "revision_id": "sample-revision-v1",
+    "identifier": "bike-sales-sample-001",
     "stores": [
         {
             "name": "Bike World Sydney",

@@ -53,24 +53,6 @@ class ModelConfig(config_ns_models.ModelConfig):
         )
 
 
-class ChainlitConfig(config_ns_models.ChainlitConfig):
-    authentication: profile_models.ChainlitAuthConfig = Field(
-        default_factory=profile_models.ChainlitAuthConfig
-    )
-
-    def __init__(
-        self,
-        config: config_ns_models.ChainlitConfig,
-        profile: profile_models.ChainlitConfig,
-    ):
-        super().__init__(enable=config.enable, authentication=profile.authentication)
-
-
-class PromptTunerConfig(config_ns_models.PromptTunerConfig):
-    def __init__(self, config: config_ns_models.PromptTunerConfig):
-        super().__init__(mode=config.mode, enable=config.enable)
-
-
 class ChatServiceConfig(config_ns_models.ChatServiceConfig):
     def __init__(
         self,
@@ -140,7 +122,9 @@ class ReceiverConfig(profile_models.ReceiverConfig):
 
 
 class WebConfig(config_ns_models.WebConfig):
-    authentication: profile_models.WebAuthConfig = {}
+    authentication: profile_models.WebAuthConfig = Field(
+        default_factory=profile_models.WebAuthConfig
+    )
 
     def __init__(
         self, config: config_ns_models.WebConfig, profile: profile_models.WebConfig
@@ -194,18 +178,11 @@ class FileStorageContainer(config_ns_models.FileStorageContainer):
         self.url = profile.url
         self.token = profile.token
         self.client_id = profile.client_id
-        self.authentication_method = profile.authentication_method
+        self.authentication_method = AuthenticationMethod(profile.authentication_method)
 
 
 class FileStorage(config_ns_models.FileStorage):
-    revisions: FileStorageContainer = Field(
-        default_factory=FileStorageContainer,
-        description="File Storage configuration for revisions",
-    )
-    data: FileStorageContainer = Field(
-        default_factory=FileStorageContainer,
-        description="File Storage configuration for data",
-    )
+    pass
 
     def __init__(
         self, config: config_ns_models.FileStorage, profile: profile_models.FileStorage
@@ -226,8 +203,6 @@ class Config(BaseModel):
     logging: LoggingConfig
     tool_service: ToolServiceConfig
     chat_service: ChatServiceConfig
-    chainlit_configuration: ChainlitConfig
-    prompt_tuner: PromptTunerConfig
     azure_search_services: Optional[List[AzureSearchConfig]] = Field(
         default=None, description="Azure Search services configuration (optional)"
     )
@@ -248,10 +223,6 @@ class Config(BaseModel):
             logging=LoggingConfig(config.logging, profile.logging),
             tool_service=ToolServiceConfig(config.tool_service, profile.tool_service),
             chat_service=ChatServiceConfig(config.chat_service, profile.chat_service),
-            chainlit_configuration=ChainlitConfig(
-                config.chainlit_configuration, profile.chainlit_configuration
-            ),
-            prompt_tuner=PromptTunerConfig(config.prompt_tuner),
             azure_search_services=[],
             web_configuration=WebConfig(
                 config.web_configuration, profile.web_configuration

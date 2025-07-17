@@ -5,7 +5,7 @@ This ensures that memory operations work with both local and Azure Blob Storage.
 
 import asyncio
 import os
-from typing import Optional, Any
+from typing import Any, Optional
 
 from ingenious.core.structured_logging import get_logger
 from ingenious.files.files_repository import FileStorage
@@ -213,7 +213,9 @@ class LegacyMemoryManager:
         else:
             return os.path.join(self.memory_path, "context.md")
 
-    def read_memory(self, thread_id: Optional[str] = None, default_content: str = "") -> str:
+    def read_memory(
+        self, thread_id: Optional[str] = None, default_content: str = ""
+    ) -> str:
         """
         Read memory content from local file.
 
@@ -320,7 +322,9 @@ class LegacyMemoryManager:
             return False
 
 
-def get_memory_manager(config: Config, memory_path: Optional[str] = None) -> MemoryManager:
+def get_memory_manager(
+    config: Config, memory_path: Optional[str] = None
+) -> MemoryManager:
     """
     Get appropriate memory manager based on configuration.
 

@@ -15,7 +15,6 @@ from .main_settings import IngeniousSettings
 from .models import (
     AzureSearchSettings,
     AzureSqlSettings,
-    ChainlitSettings,
     ChatHistorySettings,
     ChatServiceSettings,
     FileStorageContainerSettings,
@@ -23,7 +22,6 @@ from .models import (
     LocalSqlSettings,
     LoggingSettings,
     ModelSettings,
-    PromptTunerSettings,
     ReceiverSettings,
     ToolServiceSettings,
     WebAuthenticationSettings,
@@ -40,8 +38,6 @@ __all__ = [
     # Configuration models
     "ChatHistorySettings",
     "ModelSettings",
-    "ChainlitSettings",
-    "PromptTunerSettings",
     "ChatServiceSettings",
     "ToolServiceSettings",
     "LoggingSettings",

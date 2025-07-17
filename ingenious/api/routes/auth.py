@@ -1,5 +1,5 @@
 import secrets
-from typing import Annotated
+from typing import Annotated, Any, Dict
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPBearer
@@ -35,9 +35,9 @@ class RefreshRequest(BaseModel):
 
 
 @router.post("/login", response_model=TokenResponse)
-async def login(login_data: LoginRequest):
+async def login(login_data: LoginRequest) -> TokenResponse:
     """Login endpoint that returns JWT tokens"""
-    config = get_config()
+    config = get_config()  # type: ignore
 
     # Check if authentication is disabled
     if not config.web_configuration.authentication.enable:
@@ -80,7 +80,7 @@ async def login(login_data: LoginRequest):
 
 
 @router.post("/refresh", response_model=TokenResponse)
-async def refresh_access_token(refresh_data: RefreshRequest):
+async def refresh_access_token(refresh_data: RefreshRequest) -> TokenResponse:
     """Refresh access token using refresh token"""
     try:
         # Verify refresh token
@@ -113,7 +113,9 @@ async def refresh_access_token(refresh_data: RefreshRequest):
 
 
 @router.get("/verify")
-async def verify_token_endpoint(token: Annotated[str, Depends(security)]):
+async def verify_token_endpoint(
+    token: Annotated[str, Depends(security)],
+) -> Dict[str, Any]:
     """Verify if a token is valid"""
     try:
         credentials_exception = HTTPException(
@@ -123,10 +125,10 @@ async def verify_token_endpoint(token: Annotated[str, Depends(security)]):
         )
 
         # Extract token from bearer scheme
-        if not token.credentials:
+        if not token:
             raise credentials_exception
 
-        username = get_username_from_token(token.credentials)
+        username = get_username_from_token(token)
         return {"username": username, "valid": True}
 
     except HTTPException:

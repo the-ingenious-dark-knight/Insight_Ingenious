@@ -1,3 +1,5 @@
+from typing import Any, Dict, List
+
 from pydantic import BaseModel
 
 
@@ -7,4 +9,4 @@ class SearchQuery(BaseModel):
 
 
 class SearchResult(BaseModel):
-    results: list[dict]
+    results: List[Dict[str, Any]]

@@ -36,8 +36,6 @@ Get up and running in 5 minutes with Azure OpenAI!
 
 3. **Validate Setup** (Recommended):
     ```bash
-    export INGENIOUS_PROJECT_PATH=$(pwd)/config.yml
-    export INGENIOUS_PROFILE_PATH=$(pwd)/profiles.yml
     uv run ingen validate  # Check configuration before starting
     ```
 
@@ -49,13 +47,13 @@ Get up and running in 5 minutes with Azure OpenAI!
 5. **Verify Health**:
     ```bash
     # Check server health
-    curl http://localhost:80/api/v1/health
+    curl http://localhost:8000/api/v1/health
     ```
 
 6. **Test the API**:
     ```bash
     # Test bike insights workflow (the "Hello World" of Ingenious)
-    curl -X POST http://localhost:80/api/v1/chat \
+    curl -X POST http://localhost:8000/api/v1/chat \
       -H "Content-Type: application/json" \
       -d '{
         "user_prompt": "{\"stores\": [{\"name\": \"QuickStart Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"QS-001\", \"quantity_sold\": 1, \"sale_date\": \"2023-04-15\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 5.0, \"comment\": \"Perfect bike for getting started!\"}}], \"bike_stock\": []}], \"revision_id\": \"quickstart-1\", \"identifier\": \"hello-world\"}",

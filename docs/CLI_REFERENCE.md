@@ -19,6 +19,9 @@ The `ingen` command-line interface provides intuitive commands for managing your
 # Initialize a new project
 ingen init
 
+# Validate configuration
+ingen validate
+
 # Start the server
 ingen serve
 
@@ -35,33 +38,34 @@ ingen test
 Initialize a new Insight Ingenious project in the current directory.
 
 **What it creates:**
-- `config.yml` - Project configuration (non-sensitive)
-- `profiles.yml` - Environment profiles (API keys, secrets)
-- `.env.example` - Example environment variables
+- `.env.example` - Example environment variables for configuration
 - `ingenious_extensions/` - Custom agents and workflows
 - `Dockerfile and .dockerignore` - Docker deployment templates
 - `tmp/` - Temporary files and memory
+- Migration templates for legacy YAML configurations (if needed)
 
 **Next Steps:**
-1. Copy `.env.example` to `.env` and add credentials
-2. Set environment variables
-3. Run `ingen serve`
+1. Copy `.env.example` to `.env` and add your credentials
+2. Configure environment variables (see Configuration Guide)
+3. Run `ingen validate` to verify setup
+4. Run `ingen serve` to start the server
+
+> **Note**: Ingenious now uses pydantic-settings with environment variables instead of YAML files. Legacy `config.yml` and `profiles.yml` can be migrated using the migration script.
 
 ### `ingen serve`
 Start the API server with web interfaces.
 
 **Options:**
-- `--config, -c` - Path to config.yml (default: ./config.yml)
-- `--profile, -p` - Path to profiles.yml (default: ./profiles.yml)
 - `--host, -h` - Host to bind (default: 0.0.0.0)
-- `--port` - Port to bind (default: 80)
-- `--no-prompt-tuner` - Disable prompt tuner interface
+- `--port` - Port to bind (default: 80 or $WEB_PORT, CLI override default is 8000)
 
 **Interfaces:**
-- API: `http://localhost:80/api/v1/`
-- Health Check: `http://localhost:80/api/v1/health`
-- Chat: `http://localhost:80/chainlit`
-- Prompt Tuner: `http://localhost:80/prompt-tuner`
+- API: `http://localhost:8000/api/v1/`
+- Health Check: `http://localhost:8000/api/v1/health`
+- API Documentation: `http://localhost:8000/docs`
+- Prompt Management: `/api/v1/prompts/*` endpoints
+
+> **Configuration**: The server uses environment variables for configuration. Ensure your `.env` file is properly configured before starting the server.
 
 ### `ingen workflows [workflow-name]`
 Show available workflows and their requirements.
@@ -74,18 +78,15 @@ ingen workflows bike-insights            # Show bike insights workflow (recommen
 ```
 
 **Available Workflows:**
+- `classification-agent` - Route input to specialized agents (core library, minimal config)
+- `bike-insights` - Sample domain-specific multi-agent analysis (project template, minimal config) ⭐ **RECOMMENDED**
+- `knowledge-base-agent` - Search knowledge bases using local ChromaDB (core library, stable local implementation)
+- `sql-manipulation-agent` - Execute SQL queries using local SQLite (core library, stable local implementation)
 
-**Core Library Workflows (Always Available):**
-- `classification-agent` - Route input to specialized agents (minimal config - Azure OpenAI only)
-- `knowledge-base-agent` - Search knowledge bases (supports both local ChromaDB and Azure Search)
-- `sql-manipulation-agent` - Execute SQL queries (supports both local SQLite and Azure SQL)
-
-**Project Template Workflows (Created with `ingen init`):**
-- `bike-insights` - Sample domain-specific multi-agent analysis ⭐ **RECOMMENDED START HERE**
-
-**Implementation Notes:**
-- **Local implementations are stable**: ChromaDB (knowledge-base-agent), SQLite (sql-manipulation-agent)
-- **Azure integrations are experimental**: Azure Search, Azure SQL may contain bugs
+**Note:**
+- Core library workflows are always available
+- Template workflows like `bike-insights` are created with `ingen init`
+- Only local implementations (ChromaDB, SQLite) are stable; Azure integrations are experimental
 - Legacy underscore names (`classification_agent`, `bike_insights`, etc.) are still supported for backward compatibility
 
 ### `ingen test`
@@ -100,18 +101,57 @@ Run agent workflow tests.
 ingen test --log-level DEBUG --args="--test-name=MyTest"
 ```
 
-## Utility Commands
+### `ingen validate`
+Validate system configuration and requirements.
 
-### `ingen prompt-tuner`
-Start standalone prompt tuning interface.
-
-**Options:**
-- `--port, -p` - Port (default: 5000)
-- `--host, -h` - Host (default: 127.0.0.1)
+**Purpose:**
+Comprehensive validation of your Insight Ingenious setup including:
+- Configuration file syntax
+- Required dependencies
+- Environment variables
+- Service connectivity
 
 **Example:**
 ```bash
-ingen prompt-tuner --port 5000 --host 127.0.0.1
+ingen validate
+```
+
+## Utility Commands
+
+### ~~`ingen prompt-tuner`~~ (Deprecated)
+
+> **Note**: The standalone prompt tuner has been removed. Use the main API server's prompt management endpoints instead (`/api/v1/prompts/*`).
+
+The command exists but shows an error message directing users to use `ingen serve` instead.
+
+### `ingen help [topic]`
+Show detailed help and getting started guide.
+
+**Topics:**
+- `setup` - Initial project setup steps
+- `workflows` - Understanding and configuring workflows
+- `config` - Configuration file details
+- `deployment` - Deployment options and best practices
+
+**Example:**
+```bash
+ingen help workflows    # Get workflow-specific help
+```
+
+### `ingen status`
+Check system status and configuration.
+
+**Example:**
+```bash
+ingen status
+```
+
+### `ingen version`
+Show version information.
+
+**Example:**
+```bash
+ingen version
 ```
 
 ### `ingen --help`
@@ -129,20 +169,29 @@ ingen workflows --help # Get help for workflows command
 
 ## Data Processing Commands
 
-> **Note**: Data processing commands require additional dependencies. Install with:
-> - For document processing: `uv add ingenious[document-processing]`
-> - For dataprep: `uv add ingenious[dataprep]`
+### `ingen dataprep`
+Web scraping utilities using Scrapfly.
+
+**Subcommands:**
+- `crawl <url>` - Scrape single page
+- `batch <url1> <url2> ...` - Scrape multiple pages, outputs NDJSON
+
+**Example:**
+```bash
+ingen dataprep crawl https://example.com
+ingen dataprep batch https://example.com/page1 https://example.com/page2
+```
+
+> **Note**: Requires `scrapfly-sdk` optional dependency. Install with `uv add scrapfly-sdk`.
 
 ### `ingen document-processing extract <path>`
 Extract text from documents (PDF, DOCX, images).
-
-**Requirements:** `ingenious[document-processing]` optional dependency group
 
 **Arguments:**
 - `path` - File path, directory, or HTTP/S URL
 
 **Options:**
-- `--engine, -e` - Extractor backend (pymupdf, pdfminer, unstructured) (default: pymupdf)
+- `--engine, -e` - Extractor backend (pymupdf, pdfminer, unstructured, azdocint) (default: pymupdf)
 - `--out, -o` - Output file for NDJSON results (default: stdout)
 
 **Example:**
@@ -151,57 +200,56 @@ ingen document-processing extract document.pdf --engine pymupdf --out extracted.
 ingen document-processing extract https://example.com/doc.pdf --out results.jsonl
 ```
 
-### `ingen dataprep`
-Web scraping utilities using Scrapfly.
-
-**Requirements:** `ingenious[dataprep]` optional dependency group
-
-**Subcommands:**
-- `crawl <url>` - Scrape single page
-- `batch <urls...>` - Scrape multiple pages
-
-**Common Options:**
-- `--api-key` - Override Scrapfly API key (or use SCRAPFLY_API_KEY env var)
-- `--max-attempts` - Total tries per URL (default: 5)
-- `--delay` - Initial back-off delay in seconds (default: 1)
-- `--js / --no-js` - Enable/disable JavaScript rendering
-
-**Example:**
-```bash
-ingen dataprep crawl https://example.com --pretty
-ingen dataprep batch https://a.com https://b.com --max-attempts 3
-```
+> **Note**: Requires document processing dependencies. Install with `uv add ingenious[document-processing]`.
+> **For OCR needs**: Use the `azdocint` engine.
 
 ## Environment Setup
 
 ### Required Environment Variables
+
+Ingenious uses environment variables with `INGENIOUS_` prefixes for all configuration:
+
 ```bash
-export INGENIOUS_PROJECT_PATH=$(pwd)/config.yml
-export INGENIOUS_PROFILE_PATH=$(pwd)/profiles.yml
+# Core AI Model Configuration (required)
+export INGENIOUS_MODELS__0__MODEL=gpt-4o-mini
+export INGENIOUS_MODELS__0__API_KEY=your-api-key-here
+export INGENIOUS_MODELS__0__BASE_URL=https://your-resource.openai.azure.com/...
+
+# Optional: Web server settings
+export INGENIOUS_WEB_CONFIGURATION__PORT=8000
+export INGENIOUS_WEB_CONFIGURATION__AUTHENTICATION__ENABLE=false
 ```
 
 ### Optional Environment Variables
 ```bash
-export SCRAPFLY_API_KEY=your_key_here  # For dataprep commands
+# For dataprep commands
+export SCRAPFLY_API_KEY=your_key_here
+
+# For database workflows
+export INGENIOUS_LOCAL_SQL_DB__DATABASE_PATH=/tmp/sample_sql_db
+
+# For Azure services (experimental)
+export INGENIOUS_AZURE_SEARCH_SERVICES__0__KEY=your-search-key
+export INGENIOUS_AZURE_SQL_SERVICES__CONNECTION_STRING="Driver=..."
 ```
 
-## Configuration Files
+## Configuration Methods
 
-### `config.yml`
-Non-sensitive project configuration:
-- Model settings
-- Service configurations
-- Logging settings
-- Workflow definitions
+### `.env` File (Recommended)
+Create a `.env` file in your project directory with your configuration:
+```bash
+# All INGENIOUS_ prefixed environment variables
+# See Configuration Guide for complete examples
+```
 
-### `profiles.yml`
-Sensitive environment-specific settings:
-- API keys
-- Connection strings
-- Secrets
+### Direct Environment Variables
+Export variables directly in your shell or deployment environment.
 
-### `.env`
-Environment variables for local development.
+### Migration from YAML
+If you have legacy `config.yml` and `profiles.yml` files:
+```bash
+uv run python scripts/migrate_config.py --yaml-file config.yml --output .env
+```
 
 ## Backward Compatibility
 

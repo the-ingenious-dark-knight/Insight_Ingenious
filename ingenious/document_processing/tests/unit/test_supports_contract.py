@@ -37,8 +37,9 @@ Type aliases
 
 from __future__ import annotations
 
+from io import BytesIO
 from pathlib import Path
-from typing import Callable, List
+from typing import Callable, List, Union
 
 import pytest
 
@@ -49,7 +50,7 @@ from ingenious.document_processing.extractor import _ENGINES, _load
 # --------------------------------------------------------------------------- #
 ENGINES: List[str] = sorted(_ENGINES)  # deterministic order for pytest output
 
-ProbeBuilder = Callable[[Path], object]
+ProbeBuilder = Callable[[Path], Union[Path, str, bytes, BytesIO]]
 Expectation = bool | Callable[[str], bool]
 
 

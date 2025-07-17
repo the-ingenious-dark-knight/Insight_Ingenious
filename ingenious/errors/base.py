@@ -317,7 +317,9 @@ class ConfigurationError(IngeniousError):
 class ConfigFileError(ConfigurationError):
     """Raised when configuration file operations fail."""
 
-    def __init__(self, message: str, config_path: Optional[str] = None, **kwargs: Any) -> None:
+    def __init__(
+        self, message: str, config_path: Optional[str] = None, **kwargs: Any
+    ) -> None:
         if config_path:
             kwargs.setdefault("context", {}).update({"config_path": config_path})
         super().__init__(message, **kwargs)
@@ -326,7 +328,9 @@ class ConfigFileError(ConfigurationError):
 class EnvironmentError(ConfigurationError):
     """Raised when environment variable operations fail."""
 
-    def __init__(self, message: str, env_var: Optional[str] = None, **kwargs: Any) -> None:
+    def __init__(
+        self, message: str, env_var: Optional[str] = None, **kwargs: Any
+    ) -> None:
         if env_var:
             kwargs.setdefault("context", {}).update({"env_var": env_var})
         super().__init__(message, **kwargs)
@@ -336,7 +340,11 @@ class ValidationError(ConfigurationError):
     """Raised when data validation fails."""
 
     def __init__(
-        self, message: str, field: Optional[str] = None, value: Any = None, **kwargs: Any
+        self,
+        message: str,
+        field: Optional[str] = None,
+        value: Any = None,
+        **kwargs: Any,
     ) -> None:
         if field:
             kwargs.setdefault("context", {}).update(
@@ -366,7 +374,9 @@ class DatabaseError(IngeniousError):
 class DatabaseConnectionError(DatabaseError):
     """Raised when database connection fails."""
 
-    def __init__(self, message: str, connection_string: Optional[str] = None, **kwargs: Any) -> None:
+    def __init__(
+        self, message: str, connection_string: Optional[str] = None, **kwargs: Any
+    ) -> None:
         kwargs.setdefault("severity", ErrorSeverity.CRITICAL)
         if connection_string:
             # Sanitize connection string (remove sensitive info)
@@ -389,7 +399,9 @@ class DatabaseConnectionError(DatabaseError):
 class DatabaseQueryError(DatabaseError):
     """Raised when database query execution fails."""
 
-    def __init__(self, message: str, query: Optional[str] = None, **kwargs: Any) -> None:
+    def __init__(
+        self, message: str, query: Optional[str] = None, **kwargs: Any
+    ) -> None:
         if query:
             # Truncate long queries
             truncated_query = query[:500] + "..." if len(query) > 500 else query
@@ -400,7 +412,9 @@ class DatabaseQueryError(DatabaseError):
 class DatabaseTransactionError(DatabaseError):
     """Raised when database transaction fails."""
 
-    def __init__(self, message: str, transaction_id: Optional[str] = None, **kwargs: Any) -> None:
+    def __init__(
+        self, message: str, transaction_id: Optional[str] = None, **kwargs: Any
+    ) -> None:
         if transaction_id:
             kwargs.setdefault("context", {}).update({"transaction_id": transaction_id})
         super().__init__(message, **kwargs)
@@ -409,7 +423,9 @@ class DatabaseTransactionError(DatabaseError):
 class DatabaseMigrationError(DatabaseError):
     """Raised when database migration fails."""
 
-    def __init__(self, message: str, migration_version: Optional[str] = None, **kwargs: Any) -> None:
+    def __init__(
+        self, message: str, migration_version: Optional[str] = None, **kwargs: Any
+    ) -> None:
         kwargs.setdefault("severity", ErrorSeverity.CRITICAL)
         kwargs.setdefault("recoverable", False)
         if migration_version:
@@ -439,7 +455,9 @@ class WorkflowError(IngeniousError):
 class WorkflowNotFoundError(WorkflowError):
     """Raised when a workflow cannot be found."""
 
-    def __init__(self, message: str, workflow_name: Optional[str] = None, **kwargs: Any) -> None:
+    def __init__(
+        self, message: str, workflow_name: Optional[str] = None, **kwargs: Any
+    ) -> None:
         kwargs.setdefault("recoverable", False)
         if workflow_name:
             kwargs.setdefault("context", {}).update({"workflow_name": workflow_name})
@@ -501,7 +519,9 @@ class ServiceError(IngeniousError):
 class ChatServiceError(ServiceError):
     """Raised when chat service operations fail."""
 
-    def __init__(self, message: str, service_type: Optional[str] = None, **kwargs: Any) -> None:
+    def __init__(
+        self, message: str, service_type: Optional[str] = None, **kwargs: Any
+    ) -> None:
         if service_type:
             kwargs.setdefault("context", {}).update({"service_type": service_type})
         super().__init__(message, **kwargs)
@@ -578,7 +598,11 @@ class RequestValidationError(APIError):
     """Raised when API request validation fails."""
 
     def __init__(
-        self, message: str, field: Optional[str] = None, value: Any = None, **kwargs: Any
+        self,
+        message: str,
+        field: Optional[str] = None,
+        value: Any = None,
+        **kwargs: Any,
     ) -> None:
         kwargs.setdefault("severity", ErrorSeverity.LOW)
         kwargs.setdefault("recoverable", False)
@@ -592,7 +616,9 @@ class RequestValidationError(APIError):
 class ResponseError(APIError):
     """Raised when API response generation fails."""
 
-    def __init__(self, message: str, response_type: Optional[str] = None, **kwargs: Any) -> None:
+    def __init__(
+        self, message: str, response_type: Optional[str] = None, **kwargs: Any
+    ) -> None:
         if response_type:
             kwargs.setdefault("context", {}).update({"response_type": response_type})
         super().__init__(message, **kwargs)
@@ -639,7 +665,9 @@ class ResourceError(IngeniousError):
 class FileNotFoundError(ResourceError):
     """Raised when a file cannot be found."""
 
-    def __init__(self, message: str, file_path: Optional[str] = None, **kwargs: Any) -> None:
+    def __init__(
+        self, message: str, file_path: Optional[str] = None, **kwargs: Any
+    ) -> None:
         kwargs.setdefault("recoverable", False)
         if file_path:
             kwargs.setdefault("context", {}).update({"file_path": file_path})
@@ -649,7 +677,9 @@ class FileNotFoundError(ResourceError):
 class PermissionError(ResourceError):
     """Raised when permission to access a resource is denied."""
 
-    def __init__(self, message: str, resource_path: Optional[str] = None, **kwargs: Any) -> None:
+    def __init__(
+        self, message: str, resource_path: Optional[str] = None, **kwargs: Any
+    ) -> None:
         kwargs.setdefault("severity", ErrorSeverity.HIGH)
         kwargs.setdefault("recoverable", False)
         if resource_path:
@@ -660,7 +690,9 @@ class PermissionError(ResourceError):
 class StorageError(ResourceError):
     """Raised when storage operations fail."""
 
-    def __init__(self, message: str, storage_type: Optional[str] = None, **kwargs: Any) -> None:
+    def __init__(
+        self, message: str, storage_type: Optional[str] = None, **kwargs: Any
+    ) -> None:
         if storage_type:
             kwargs.setdefault("context", {}).update({"storage_type": storage_type})
         super().__init__(message, **kwargs)

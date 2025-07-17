@@ -27,10 +27,7 @@ def get_config(config=Provide[Container.config]):
     return config
 
 
-@inject
-def get_profile(profile=Provide[Container.profile]):
-    """Get profile from container."""
-    return profile
+# Legacy profile system removed - all configuration now in the main config object
 
 
 @inject
@@ -252,9 +249,9 @@ def get_auth_user(request: Request, config=Depends(get_config)) -> str:
     )
 
 
-def get_conditional_security(request: Request) -> str:
+def get_conditional_security(request: Request, config=Depends(get_config)) -> str:
     """Get authenticated user - wrapper around get_auth_user for compatibility."""
-    return get_auth_user(request)
+    return get_auth_user(request, config)
 
 
 def sync_templates(config=Depends(get_config)):

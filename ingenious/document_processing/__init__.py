@@ -62,7 +62,7 @@ _expose_requests_for_testing()
 # Public lazy re-export                                                       #
 # --------------------------------------------------------------------------- #
 
-extract: Callable[..., Iterable[dict[str, Any]]] = getattr(  # type: ignore[index]
+extract: Callable[..., Iterable[dict[str, Any]]] = getattr(
     import_module("ingenious.document_processing.extractor"),
     "extract",
 )

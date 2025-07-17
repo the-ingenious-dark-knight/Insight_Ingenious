@@ -12,7 +12,7 @@ class DatabaseClientType(enum.Enum):
 # Define an interface or base class for the database client
 class DatabaseClient(Protocol):
     """Protocol for database client implementations."""
-    
+
     def connect(self) -> None:
         """Establish connection to the database."""
         ...
@@ -25,6 +25,8 @@ class DatabaseClient(Protocol):
         """Execute a query and fetch all results."""
         ...
 
-    def fetch_one(self, query: str, params: Optional[List[Any]] = None) -> Optional[Any]:
+    def fetch_one(
+        self, query: str, params: Optional[List[Any]] = None
+    ) -> Optional[Any]:
         """Execute a query and fetch one result."""
         ...

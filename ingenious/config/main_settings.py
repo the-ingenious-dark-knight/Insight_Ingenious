@@ -5,7 +5,8 @@ This module contains the primary IngeniousSettings class that combines
 all configuration models and provides the main configuration interface.
 """
 
-from typing import List, Optional
+import json
+from typing import Any, List, Optional
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings
@@ -14,14 +15,12 @@ from .environment import get_settings_config
 from .models import (
     AzureSearchSettings,
     AzureSqlSettings,
-    ChainlitSettings,
     ChatHistorySettings,
     ChatServiceSettings,
     FileStorageSettings,
     LocalSqlSettings,
     LoggingSettings,
     ModelSettings,
-    PromptTunerSettings,
     ReceiverSettings,
     ToolServiceSettings,
     WebSettings,
@@ -54,7 +53,7 @@ class IngeniousSettings(BaseSettings):
     )
 
     chat_history: ChatHistorySettings = Field(
-        default_factory=ChatHistorySettings,
+        default_factory=lambda: ChatHistorySettings(),
         description="Chat history storage configuration",
     )
 
@@ -63,45 +62,37 @@ class IngeniousSettings(BaseSettings):
     )
 
     logging: LoggingSettings = Field(
-        default_factory=LoggingSettings, description="Application logging configuration"
+        default_factory=lambda: LoggingSettings(),
+        description="Application logging configuration",
     )
 
     tool_service: ToolServiceSettings = Field(
-        default_factory=ToolServiceSettings,
+        default_factory=lambda: ToolServiceSettings(),
         description="External tool service configuration",
     )
 
     chat_service: ChatServiceSettings = Field(
-        default_factory=ChatServiceSettings,
+        default_factory=lambda: ChatServiceSettings(),
         description="Chat service backend configuration",
     )
 
-    chainlit_configuration: ChainlitSettings = Field(
-        default_factory=ChainlitSettings,
-        description="Chainlit chat interface configuration",
-    )
-
-    prompt_tuner: PromptTunerSettings = Field(
-        default_factory=PromptTunerSettings,
-        description="Prompt tuning interface configuration",
-    )
-
     web_configuration: WebSettings = Field(
-        default_factory=WebSettings, description="Web server and API configuration"
+        default_factory=lambda: WebSettings(),
+        description="Web server and API configuration",
     )
 
     receiver_configuration: ReceiverSettings = Field(
-        default_factory=ReceiverSettings,
+        default_factory=lambda: ReceiverSettings(),
         description="External event receiver configuration",
     )
 
     local_sql_db: LocalSqlSettings = Field(
-        default_factory=LocalSqlSettings,
+        default_factory=lambda: LocalSqlSettings(),
         description="Local SQLite database configuration",
     )
 
     file_storage: FileStorageSettings = Field(
-        default_factory=FileStorageSettings,
+        default_factory=lambda: FileStorageSettings(),
         description="File storage system configuration",
     )
 
@@ -114,6 +105,29 @@ class IngeniousSettings(BaseSettings):
         default=None, description="Azure SQL service configuration (optional)"
     )
 
+    @field_validator("models", mode="before")
+    @classmethod
+    def parse_models_field(cls, v: Any) -> Any:
+        """Parse models from JSON string or nested environment variables."""
+        # Handle JSON string format (e.g., INGENIOUS_MODELS='[{...}]')
+        if isinstance(v, str):
+            try:
+                return json.loads(v)
+            except json.JSONDecodeError:
+                # If not valid JSON, let pydantic handle the error
+                return v
+
+        # Handle dictionary format from nested env vars (e.g., INGENIOUS_MODELS__0__*)
+        if isinstance(v, dict):
+            # Convert {'0': {...}, '1': {...}} to [{...}, {...}]
+            result = []
+            for key in sorted(v.keys()):
+                if key.isdigit():
+                    result.append(v[key])
+            return result
+
+        return v
+
     @field_validator("models")
     @classmethod
     def validate_models_not_empty_field(
@@ -125,3 +139,15 @@ class IngeniousSettings(BaseSettings):
     def validate_configuration(self) -> None:
         """Validate the complete configuration and provide helpful feedback."""
         validate_configuration(self)
+
+    @classmethod
+    def load_from_env_file(cls, env_file: str = ".env") -> "IngeniousSettings":
+        """Load settings from a specific .env file."""
+        return cls(_env_file=env_file)
+
+    @classmethod
+    def create_minimal_config(cls) -> "IngeniousSettings":
+        """Create a minimal configuration for development."""
+        from .environment import create_minimal_config
+
+        return create_minimal_config()

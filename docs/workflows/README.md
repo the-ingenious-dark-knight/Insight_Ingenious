@@ -258,35 +258,31 @@ graph LR
         AZURE_OPENAI[🧠 Azure OpenAI<br/>Intent Classification]
     end
 
-    subgraph "Configuration Files"
-        CONFIG[📄 config.yml<br/>Model Settings]
-        PROFILES[🔐 profiles.yml<br/>API Keys]
+    subgraph "Configuration Method"
+        ENV_VARS[⚙️ Environment Variables<br/>INGENIOUS_ prefixed]
+        ENV_FILE[📄 .env file<br/>Local development]
     end
 
-    CONFIG --> AZURE_OPENAI
-    PROFILES --> AZURE_OPENAI
+    ENV_VARS --> AZURE_OPENAI
+    ENV_FILE --> AZURE_OPENAI
 
     classDef service fill:#e3f2fd
     classDef config fill:#f1f8e9
 
     class AZURE_OPENAI service
-    class CONFIG,PROFILES config
+    class ENV_VARS,ENV_FILE config
 ```
 
 **Required Configuration:**
-```yaml
-# config.yml
-profile: dev
-models:
-  - model: "gpt-4.1-nano"
-    api_type: azure
-    api_version: "2024-12-01-preview"
-
-# profiles.yml
-dev:
-  azure_openai:
-    endpoint: "https://your-resource.cognitiveservices.azure.com/"
-    api_key: "your-api-key"
+```bash
+# Environment variables for classification agent
+INGENIOUS_PROFILE=dev
+INGENIOUS_MODELS__0__MODEL=gpt-4o-mini
+INGENIOUS_MODELS__0__API_TYPE=rest
+INGENIOUS_MODELS__0__API_VERSION=2024-08-01-preview
+INGENIOUS_MODELS__0__API_KEY=your-api-key
+INGENIOUS_MODELS__0__BASE_URL=https://your-resource.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-08-01-preview
+INGENIOUS_CHAT_SERVICE__TYPE=multi_agent
 ```
 
 ### ⭐ Template-Based Workflows (Azure OpenAI only)
@@ -326,10 +322,10 @@ graph TB
     class BIKE_AGENT,AGENT_FLOW agent
 ```
 
-### 🔍 Core Library Workflows (Azure Search Required)
+### 🔍 Core Library Workflows (Local Implementation - Stable)
 
 #### 📚 Knowledge Base Agent
-Search and retrieve information from knowledge bases.
+Search and retrieve information from knowledge bases using local ChromaDB (stable) or Azure Search (experimental).
 
 ```mermaid
 graph TB
@@ -371,19 +367,24 @@ graph TB
     class VECTOR_SEARCH,KEYWORD_SEARCH,HYBRID_SEARCH search
 ```
 
-**Additional Configuration Required:**
-```yaml
-# config.yml (additional)
-azure_search:
-  service_name: "your-search-service"
-  index_name: "your-knowledge-index"
-  api_version: "2023-11-01"
+**Configuration Options:**
 
-# profiles.yml (additional)
-dev:
-  azure_search:
-    api_key: "your-search-api-key"
+**Recommended: Local ChromaDB (Stable - No additional configuration needed)**
+```bash
+# No additional configuration required!
+# Uses local ChromaDB for vector storage
+# Documents stored in ./.tmp/knowledge_base/
 ```
+
+**Optional: Azure Search (Experimental - May contain bugs)**
+```bash
+# Additional Azure Search configuration (experimental)
+INGENIOUS_AZURE_SEARCH_SERVICES__0__SERVICE=default
+INGENIOUS_AZURE_SEARCH_SERVICES__0__ENDPOINT=https://your-search-service.search.windows.net
+INGENIOUS_AZURE_SEARCH_SERVICES__0__KEY=your-search-api-key
+```
+
+> **Recommendation**: Use the local ChromaDB implementation for stable production deployments. It requires no additional configuration and works out-of-the-box.
 
 ### 📊 Core Library Workflows (Database Required)
 
@@ -427,22 +428,24 @@ graph TB
 ```
 
 **Additional Configuration Required:**
-```yaml
-# config.yml (additional)
-database:
-  type: "azure_sql"  # or "postgresql", "mysql", "sqlite"
-  server: "your-server.database.windows.net"
-  database: "your-database-name"
-  driver: "ODBC Driver 18 for SQL Server"
 
-# profiles.yml (additional)
-dev:
-  database:
-    username: "your-username"
-    password: "your-password"
-    # Or use connection string:
-    # connection_string: "your-full-connection-string"
+**Local SQLite (Recommended):**
+```bash
+# Local SQLite configuration
+INGENIOUS_LOCAL_SQL_DB__DATABASE_PATH=/tmp/sample_sql_db
+INGENIOUS_LOCAL_SQL_DB__SAMPLE_CSV_PATH=./data/your_data.csv
+INGENIOUS_LOCAL_SQL_DB__SAMPLE_DATABASE_NAME=sample_sql_db
 ```
+
+**Azure SQL (Experimental):**
+```bash
+# Azure SQL configuration
+INGENIOUS_AZURE_SQL_SERVICES__DATABASE_NAME=your-database-name
+INGENIOUS_AZURE_SQL_SERVICES__TABLE_NAME=your-table-name
+INGENIOUS_AZURE_SQL_SERVICES__DATABASE_CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+```
+
+> **Note**: The local SQLite implementation is recommended for stability.
 
 ## Workflow Selection Guide
 

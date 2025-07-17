@@ -2,8 +2,8 @@ import autogen
 import autogen.retrieve_utils
 import autogen.runtime_logging
 
+from ingenious.config import get_config
 from ingenious.core.structured_logging import get_logger
-from ingenious.models import config as _config
 
 logger = get_logger(__name__)
 
@@ -11,8 +11,8 @@ logger = get_logger(__name__)
 class ConversationPattern:
     def __init__(
         self,
-        default_llm_config: dict,
-        topics: list,
+        default_llm_config: dict[str, object],
+        topics: list[str],
         memory_record_switch: bool,
         memory_path: str,
         thread_memory: str,
@@ -29,7 +29,7 @@ class ConversationPattern:
             run_async_memory_operation,
         )
 
-        self.memory_manager = get_memory_manager(_config, memory_path)
+        self.memory_manager = get_memory_manager(get_config(), memory_path)
 
         if not self.thread_memory:
             run_async_memory_operation(
@@ -188,4 +188,4 @@ class ConversationPattern:
             self.context = res.summary
 
         # Send a response back to the user
-        return res.summary, self.context
+        return [res.summary, self.context]

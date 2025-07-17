@@ -1,3 +1,5 @@
+from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException
 from typing_extensions import Annotated
 
@@ -20,10 +22,10 @@ async def get_conversation(
     chat_history_repository: Annotated[
         ChatHistoryRepository, Depends(get_chat_history_repository)
     ],
-) -> list[Message]:
+) -> List[Message]:
     try:
         messages = await chat_history_repository.get_thread_messages(thread_id)
-        return messages
+        return messages or []
     except Exception as e:
         logger.error(
             "Failed to get conversation",

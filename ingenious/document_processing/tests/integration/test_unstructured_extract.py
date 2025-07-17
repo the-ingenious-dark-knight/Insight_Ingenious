@@ -98,7 +98,7 @@ def _assert_valid_element(element: dict[str, Any]) -> None:
 # fixtures                                                                    #
 # --------------------------------------------------------------------------- #
 @pytest.fixture(scope="module")
-def ux(unstructured_available: bool):
+def ux(unstructured_available: bool) -> Any:
     """Provide a singleton :class:`UnstructuredExtractor` instance.
 
     The fixture is module‑scoped to avoid paying the relatively expensive
@@ -111,7 +111,7 @@ def ux(unstructured_available: bool):
 
 
 @pytest.fixture
-def src(request):  # noqa: D401 – simple fixture wrapper
+def src(request: Any) -> Any:  # noqa: D401 – simple fixture wrapper
     """Resolve the indirect *src* fixture used by parametrised probes.
 
     `pytest.mark.parametrize` sets *request.param* to the name of the fixture
@@ -132,7 +132,7 @@ def test_extract_happy_and_deterministic(
     label: str,
     fixture_name: str,
     needs_pptx: bool,
-    ux,  # extractor fixture
+    ux: Any,  # extractor fixture
     pptx_available: bool,
     request: pytest.FixtureRequest,
 ) -> None:
@@ -149,7 +149,7 @@ def test_extract_happy_and_deterministic(
 
     # Convert bytes → BytesIO when explicitly requested by the probe label
     if label.endswith("bytesio"):
-        probe = io.BytesIO(probe)  # type: ignore[arg-type]
+        probe = io.BytesIO(probe)
 
     first_run = list(ux.extract(probe))
     assert first_run, f"extractor returned 0 elements for {label}"
@@ -164,7 +164,7 @@ def test_extract_happy_and_deterministic(
 # --------------------------------------------------------------------------- #
 # 2. Fail‑soft behaviour on corrupt bytes                                     #
 # --------------------------------------------------------------------------- #
-def test_extract_corrupt_bytes_returns_empty(ux) -> None:
+def test_extract_corrupt_bytes_returns_empty(ux: Any) -> None:
     """Invalid PDF bytes must yield an empty iterator and raise **no** exceptions."""
     assert list(ux.extract(_CORRUPT_PDF)) == []
 
@@ -187,9 +187,9 @@ def test_extract_corrupt_bytes_returns_empty(ux) -> None:
     ],
     ids=["None", "points", "to_dict", "fallback"],
 )
-def test_coords_to_jsonable_paths(ux, coords: Any, expected: Any) -> None:
+def test_coords_to_jsonable_paths(ux: Any, coords: Any, expected: Any) -> None:
     """Ensure *_coords_to_jsonable* normalises every coordinate shape."""
-    assert ux._coords_to_jsonable(coords) == expected  # type: ignore[attr-defined]
+    assert ux._coords_to_jsonable(coords) == expected
 
 
 # --------------------------------------------------------------------------- #
@@ -200,7 +200,7 @@ def test_coords_to_jsonable_paths(ux, coords: Any, expected: Any) -> None:
     [(".pdf", True), (".docx", True), (".pptx", True), (".foo", False)],
 )
 def test_supports_suffix_probe(
-    tmp_path: Path, ux, suffix: str, supported: bool
+    tmp_path: Path, ux: Any, suffix: str, supported: bool
 ) -> None:
     """Truth‑table for :py:meth:`supports` across common and unknown suffixes."""
     dummy = tmp_path / f"sample{suffix}"
@@ -214,7 +214,7 @@ def test_supports_suffix_probe(
 # --------------------------------------------------------------------------- #
 # 5. extract rejects unknown suffix                                           #
 # --------------------------------------------------------------------------- #
-def test_extract_rejects_unknown_suffix(tmp_path: Path, ux) -> None:
+def test_extract_rejects_unknown_suffix(tmp_path: Path, ux: Any) -> None:
     """Unsupported formats must be skipped **gracefully**.
 
     Behaviour

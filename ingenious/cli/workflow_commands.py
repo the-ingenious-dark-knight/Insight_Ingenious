@@ -6,6 +6,8 @@ This module contains commands for managing and viewing workflow requirements.
 
 from __future__ import annotations
 
+from typing import Any
+
 import typer
 from rich.console import Console
 from typing_extensions import Annotated
@@ -24,7 +26,7 @@ def register_commands(app: typer.Typer, console: Console) -> None:
                 help="Specific workflow to check, or 'all' to list everything"
             ),
         ] = "all",
-    ):
+    ) -> None:
         """
         📋 Display available conversation workflows and their configuration requirements.
 
@@ -47,7 +49,7 @@ def register_commands(app: typer.Typer, console: Console) -> None:
                 help="Workflow name to check requirements for, or 'all' to list all workflows"
             ),
         ] = "all",
-    ):
+    ) -> None:
         """
         Show configuration requirements for conversation workflows.
 
@@ -165,13 +167,13 @@ def register_commands(app: typer.Typer, console: Console) -> None:
             )
 
             # Group by category, prioritizing new hyphenated names
-            categories = {}
+            categories: dict[str, list[tuple[str, dict[str, Any]]]] = {}
             for name, info in workflows.items():
                 # Skip deprecated workflow names in the main listing
                 if "DEPRECATED" in info["description"]:
                     continue
 
-                cat = info["category"]
+                cat = str(info["category"])
                 if cat not in categories:
                     categories[cat] = []
                 categories[cat].append((name, info))

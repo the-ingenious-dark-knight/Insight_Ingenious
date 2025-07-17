@@ -76,7 +76,7 @@ def _load_ndjson(stream: str) -> Iterator[dict[str, Any]]:
 @pytest.mark.parametrize("cli_kind", ["sub", "root"], ids=["doc_app", "root_app"])
 @pytest.mark.parametrize("engine", sorted(_ENGINES))
 def test_cli_local_pdf_ok(
-    _cli,
+    _cli: Any,
     cli_kind: str,
     engine: str,
     pdf_path: Path,
@@ -100,12 +100,12 @@ def test_cli_local_pdf_ok(
 @pytest.mark.parametrize("cli_kind", ["sub", "root"], ids=["doc_app", "root_app"])
 @pytest.mark.parametrize("engine", sorted(_ENGINES))
 def test_cli_remote_pdf_ok(
-    _cli,
+    _cli: Any,
     cli_kind: str,
     engine: str,
     tmp_path: Path,
     pdf_path: Path,
-    monkeypatch,
+    monkeypatch: Any,
 ) -> None:
     """
     Validate that **all** engines can parse a *remote* HTTPS-hosted PDF.
@@ -126,7 +126,7 @@ def test_cli_remote_pdf_ok(
     mock_response.raise_for_status = Mock()
     mock_response.headers = {"content-type": "application/pdf"}
 
-    def mock_get(*args, **kwargs):
+    def mock_get(*args: Any, **kwargs: Any) -> Mock:
         return mock_response
 
     monkeypatch.setattr(requests, "get", mock_get)
@@ -140,7 +140,7 @@ def test_cli_remote_pdf_ok(
 
 @pytest.mark.parametrize("cli_kind", ["sub", "root"], ids=["doc_app", "root_app"])
 def test_cli_docx_unstructured_ok(
-    _cli,
+    _cli: Any,
     cli_kind: str,
     docx_path: Path,
     tmp_path: Path,
@@ -158,7 +158,7 @@ def test_cli_docx_unstructured_ok(
 
 
 @pytest.mark.parametrize("cli_kind", ["sub", "root"], ids=["doc_app", "root_app"])
-def test_cli_stdout_fallback_ok(_cli, cli_kind: str, pdf_path: Path) -> None:
+def test_cli_stdout_fallback_ok(_cli: Any, cli_kind: str, pdf_path: Path) -> None:
     """
     Confirm that NDJSON records stream to *stdout* when ``--out`` is omitted.
 
@@ -173,7 +173,7 @@ def test_cli_stdout_fallback_ok(_cli, cli_kind: str, pdf_path: Path) -> None:
 
 
 @pytest.mark.parametrize("cli_target", ["sub", "root"], ids=["doc_app", "root_app"])
-def test_cli_stdout_json_integrity(_cli, cli_target: str, pdf_path: Path) -> None:
+def test_cli_stdout_json_integrity(_cli: Any, cli_target: str, pdf_path: Path) -> None:
     """
     Confirm that NDJSON streams cleanly to *stdout* when no --out flag is
     given.

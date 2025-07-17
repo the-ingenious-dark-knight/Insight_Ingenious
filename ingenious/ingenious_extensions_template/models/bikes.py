@@ -64,13 +64,14 @@ class RootModel_Store(BaseModel):
 class RootModel(BaseModel):
     stores: List[RootModel_Store]
 
-    def load_from_json(json_data: str):
+    @staticmethod
+    def load_from_json(json_data: str) -> None:
         data = json.loads(json_data)
         root_model = RootModel(**data)
         print(root_model)
 
-    def display_bike_sales_as_table(self):
-        table_data: List[RootModel_BikeSale_Extended] = []
+    def display_bike_sales_as_table(self) -> str:
+        table_data: list[RootModel_BikeSale_Extended] = []
 
         for store in self.stores:
             for sale in store.bike_sales:

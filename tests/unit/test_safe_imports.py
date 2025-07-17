@@ -54,7 +54,7 @@ class TestSafeImporter:
 
     def test_import_module_missing_attrs(self):
         """Test module import fails when expected attributes are missing."""
-        with pytest.raises(SafeImportError):
+        with pytest.raises(ImportValidationError):
             self.importer.import_module("os", expected_attrs=["nonexistent_attr"])
 
     def test_import_module_not_found(self):

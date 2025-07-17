@@ -25,6 +25,7 @@ from __future__ import annotations
 import os
 import stat
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -73,7 +74,7 @@ def _make_unwritable_dir(parent: Path) -> Path:
 # --------------------------------------------------------------------------- #
 @pytest.mark.parametrize("cli_target", ["sub", "root"], ids=["doc_app", "root_app"])
 def test_cli_unknown_engine(
-    _cli, cli_target: str, pdf_path: Path, tmp_path: Path
+    _cli: Any, cli_target: str, pdf_path: Path, tmp_path: Path
 ) -> None:
     """
     Ensure an invalid ``--engine`` value aborts execution with *ValueError*.
@@ -113,7 +114,7 @@ def test_cli_unknown_engine(
 
 @pytest.mark.parametrize("cli_target", ["sub", "root"], ids=["doc_app", "root_app"])
 def test_cli_unwritable_out(
-    _cli, cli_target: str, pdf_path: Path, tmp_path: Path
+    _cli: Any, cli_target: str, pdf_path: Path, tmp_path: Path
 ) -> None:
     """
     Verify that writing to an unwritable destination fails gracefully.

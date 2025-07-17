@@ -22,13 +22,15 @@ Any inequality in the resulting element lists demands an immediate code
 review.
 """
 
+from pathlib import Path
+
 from ingenious.document_processing import extract
 
 
 # --------------------------------------------------------------------------- #
 # tests                                                                       #
 # --------------------------------------------------------------------------- #
-def test_public_extract_is_thin_wrapper(pdf_path):
+def test_public_extract_is_thin_wrapper(pdf_path: Path) -> None:
     """
     Assert that explicit and implicit engine selection produce *identical*
     output.

@@ -1,12 +1,11 @@
 """Dependency injection container for Ingenious services."""
 
-import os
-
 from dependency_injector import containers, providers
 from dotenv import load_dotenv
 
 from ingenious.config.config import get_config as _get_config
-from ingenious.config.profile import Profiles
+
+# Legacy profile import removed - now using new config system
 from ingenious.core.structured_logging import get_logger
 from ingenious.db.chat_history_repository import (
     ChatHistoryRepository,
@@ -72,6 +71,10 @@ class Container(containers.DeclarativeContainer):
             "ingenious.api.routes.auth",
             "ingenious.api.routes.prompts",
             "ingenious.api.routes.diagnostic",
+            "ingenious.services.dependencies",
+            "ingenious.services.auth_dependencies",
+            "ingenious.services.chat_dependencies",
+            "ingenious.services.file_dependencies",
             "ingenious.main",
         ]
     )
@@ -79,9 +82,7 @@ class Container(containers.DeclarativeContainer):
     # Core configuration
     config = providers.Singleton(lambda: _get_config())
 
-    profile = providers.Singleton(
-        lambda: Profiles(os.getenv("INGENIOUS_PROFILE_PATH", ""))
-    )
+    # Legacy profile system removed - all configuration now handled by the new config system
 
     logger = providers.Singleton(get_logger, __name__)
 
@@ -170,32 +171,45 @@ def _create_chat_service(
 
 
 # Global container instance
-container = Container()
+_container: Container | None = None
 
 
 def get_container() -> Container:
-    """Get the global container instance."""
-    return container
+    """Get the global container instance, creating it if needed."""
+    global _container
+    if _container is None:
+        _container = Container()
+    return _container
 
 
 def init_container() -> Container:
     """Initialize the container and return it."""
+    global _container
+
     # Load environment variables
     load_dotenv()
 
+    # Create container if it doesn't exist
+    if _container is None:
+        _container = Container()
+
     # Wire the container
-    container.wire(
+    _container.wire(
         modules=[
             "ingenious.api.routes.chat",
             "ingenious.api.routes.message_feedback",
             "ingenious.api.routes.auth",
             "ingenious.api.routes.prompts",
             "ingenious.api.routes.diagnostic",
+            "ingenious.services.dependencies",
+            "ingenious.services.auth_dependencies",
+            "ingenious.services.chat_dependencies",
+            "ingenious.services.file_dependencies",
             "ingenious.main",
         ]
     )
 
-    return container
+    return _container
 
 
 def configure_for_testing():
@@ -204,6 +218,7 @@ def configure_for_testing():
     from unittest.mock import Mock
 
     # Mock external services for testing
+    container = get_container()
     mock_openai_service = Mock()
     container.openai_service.override(mock_openai_service)
 
@@ -218,17 +233,18 @@ def configure_for_testing():
 def configure_for_development():
     """Configure container for development environment."""
     # Development-specific configurations
-    return container
+    return get_container()
 
 
 def configure_for_production():
     """Configure container for production environment."""
     # Production-specific configurations
-    return container
+    return get_container()
 
 
 def override_for_testing(**overrides):
     """Override container providers for testing."""
+    container = get_container()
     for provider_name, override_value in overrides.items():
         if hasattr(container, provider_name):
             provider = getattr(container, provider_name)
@@ -237,4 +253,5 @@ def override_for_testing(**overrides):
 
 def reset_overrides():
     """Reset all container overrides."""
+    container = get_container()
     container.reset_override()

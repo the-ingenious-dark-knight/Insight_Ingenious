@@ -103,7 +103,7 @@ def fetch_pages(
     urls: List[str],
     *,
     api_key: str | None = None,
-    extra_scrapfly_cfg: Optional[dict] = None,
+    extra_scrapfly_cfg: Optional[dict[str, object]] = None,
     max_attempts: int = DEFAULT_MAX_ATTEMPTS,
     retry_on_status_code: Optional[Sequence[int]] = None,
     delay: int = DEFAULT_INITIAL_DELAY,

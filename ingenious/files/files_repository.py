@@ -62,7 +62,7 @@ class FileStorage:
 
         try:
             module = importlib.import_module(module_name)
-            repository_class: IFileStorage = getattr(module, class_name)
+            repository_class = getattr(module, class_name)
             self.repository: IFileStorage = repository_class(
                 config=self.config, fs_config=fs_config
             )
@@ -72,34 +72,34 @@ class FileStorage:
                 f"Unsupported File Storage client type: {module_name}.{class_name}"
             ) from e
 
-    async def write_file(self, contents: str, file_name: str, file_path: str):
+    async def write_file(self, contents: str, file_name: str, file_path: str) -> str:
         return await self.repository.write_file(
             contents=contents, file_name=file_name, file_path=file_path
         )
 
-    async def get_base_path(self):
+    async def get_base_path(self) -> str:
         return await self.repository.get_base_path()
 
-    async def read_file(self, file_name: str, file_path: str):
+    async def read_file(self, file_name: str, file_path: str) -> str:
         return await self.repository.read_file(file_name, file_path)
 
-    async def delete_file(self, file_name: str, file_path: str):
+    async def delete_file(self, file_name: str, file_path: str) -> str:
         return await self.repository.delete_file(file_name, file_path)
 
-    async def list_files(self, file_path: str):
+    async def list_files(self, file_path: str) -> str:
         return await self.repository.list_files(file_path)
 
-    async def check_if_file_exists(self, file_path: str, file_name: str):
+    async def check_if_file_exists(self, file_path: str, file_name: str) -> bool:
         return await self.repository.check_if_file_exists(file_path, file_name)
 
-    async def get_prompt_template_path(self, revision_id: str = None):
+    async def get_prompt_template_path(self, revision_id: str | None = None) -> str:
         if revision_id:
             template_path = str(Path("templates") / Path("prompts") / Path(revision_id))
         else:
             template_path = str(Path("templates") / Path("prompts"))
         return template_path
 
-    async def get_data_path(self, revision_id: str = None):
+    async def get_data_path(self, revision_id: str | None = None) -> str:
         if self.add_sub_folders:
             if revision_id:
                 template_path = str(Path("functional_test_outputs") / Path(revision_id))
@@ -109,14 +109,14 @@ class FileStorage:
             template_path = ""
         return template_path
 
-    async def get_output_path(self, revision_id: str = None):
+    async def get_output_path(self, revision_id: str | None = None) -> str:
         if revision_id:
             template_path = str(Path("functional_test_outputs") / Path(revision_id))
         else:
             template_path = str(Path("functional_test_outputs"))
         return template_path
 
-    async def get_events_path(self, revision_id: str = None):
+    async def get_events_path(self, revision_id: str | None = None) -> str:
         if revision_id:
             template_path = str(Path("functional_test_outputs") / Path(revision_id))
         else:

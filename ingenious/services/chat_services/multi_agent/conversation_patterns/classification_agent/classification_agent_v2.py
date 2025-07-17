@@ -4,8 +4,8 @@ from autogen_agentchat.agents import AssistantAgent, UserProxyAgent
 from autogen_agentchat.teams import RoundRobinGroupChat
 from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
 
+from ingenious.config import get_config
 from ingenious.core.structured_logging import get_logger
-from ingenious.models import config as _config
 
 logger = get_logger(__name__)
 
@@ -13,8 +13,8 @@ logger = get_logger(__name__)
 class ConversationPattern:
     def __init__(
         self,
-        default_llm_config: dict,
-        topics: list,
+        default_llm_config: dict[str, object],
+        topics: list[str],
         memory_record_switch: bool,
         memory_path: str,
         thread_memory: str,
@@ -28,14 +28,18 @@ class ConversationPattern:
 
         # Create Azure OpenAI model client from config
         self.model_client = AzureOpenAIChatCompletionClient(
-            model=default_llm_config.get(
-                "azure_deployment", default_llm_config.get("model", "gpt-4.1-nano")
+            model=str(
+                default_llm_config.get(
+                    "azure_deployment", default_llm_config.get("model", "gpt-4.1-nano")
+                )
             ),
-            api_key=default_llm_config.get("api_key", "mock-openai-key"),
-            azure_endpoint=default_llm_config.get(
-                "azure_endpoint", "http://127.0.0.1:3001"
+            api_key=str(default_llm_config.get("api_key", "mock-openai-key")),
+            azure_endpoint=str(
+                default_llm_config.get("azure_endpoint", "http://127.0.0.1:3001")
             ),
-            api_version=default_llm_config.get("api_version", "2024-08-01-preview"),
+            api_version=str(
+                default_llm_config.get("api_version", "2024-08-01-preview")
+            ),
         )
 
         # Initialize memory manager for cloud storage support
@@ -44,7 +48,7 @@ class ConversationPattern:
             run_async_memory_operation,
         )
 
-        self.memory_manager = get_memory_manager(_config.get_config(), memory_path)
+        self.memory_manager = get_memory_manager(get_config(), memory_path)
 
         # Initialize context file
         if not self.thread_memory:
@@ -88,12 +92,9 @@ class ConversationPattern:
         )
 
         # Simple user proxy to start the conversation
-        self.user_proxy = UserProxyAgent(
-            name="user_proxy",
-            human_input_mode="NEVER",
-        )
+        self.user_proxy = UserProxyAgent(name="user_proxy")
 
-    def add_topic_agent(self, agent_name: str, system_message: str):
+    def add_topic_agent(self, agent_name: str, system_message: str) -> None:
         """Add a topic agent - simplified to do nothing since we use single classifier"""
         pass
 
@@ -105,16 +106,19 @@ class ConversationPattern:
             # Create a simple round-robin team with just 2 agents
             team = RoundRobinGroupChat(participants=[self.user_proxy, self.classifier])
 
-            # Run with a much simpler task and max 2 turns
+            # Run with a much simpler task
             result = await team.run(
-                task=f"Classify and respond to this message: {input_message}",
-                max_turns=2,  # Much faster - just user proxy -> classifier -> done
+                task=f"Classify and respond to this message: {input_message}"
             )
 
             # Get the final message content
-            final_message = (
-                result.messages[-1].content if result.messages else "No response"
-            )
+            final_message = "No response"
+            if result.messages:
+                last_msg = result.messages[-1]
+                if hasattr(last_msg, "content"):
+                    final_message = str(last_msg.content)
+                else:
+                    final_message = str(last_msg)
 
             # Update context using MemoryManager
             from ingenious.services.memory_manager import run_async_memory_operation
@@ -133,6 +137,6 @@ class ConversationPattern:
             }
             return str(error_response), str(e)
 
-    async def close(self):
+    async def close(self) -> None:
         """Close the model client connection"""
         await self.model_client.close()

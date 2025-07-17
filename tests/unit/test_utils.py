@@ -17,7 +17,6 @@ from ingenious.utils.model_utils import (
     List_To_Csv,
     Listable_Object_To_Csv,
     Object_To_Markdown,
-    Object_To_Yaml,
 )
 
 # load_sample_data import removed - function doesn't exist
@@ -169,20 +168,6 @@ class TestModelUtils:
 
         assert "``` csv" in csv_content
         assert "value" in csv_content
-
-    def test_object_to_yaml_simple_object(self):
-        """Test converting object to YAML."""
-
-        class SimpleModel:
-            def __init__(self):
-                self.name = "test"
-                self.age = 25
-
-        obj = SimpleModel()
-        yaml_content = Object_To_Yaml(obj)
-
-        assert "name: test" in yaml_content
-        assert "age: 25" in yaml_content
 
     def test_object_to_markdown_simple_object(self):
         """Test converting object to Markdown."""

@@ -2,6 +2,7 @@ import json
 import os
 import re
 from pathlib import Path
+from typing import Any, Optional
 
 import yaml
 from azure.identity import DefaultAzureCredential
@@ -17,7 +18,7 @@ def substitute_environment_variables(yaml_content: str) -> str:
     Supports patterns like ${VAR_NAME} and ${VAR_NAME:default_value}
     """
 
-    def replacer(match):
+    def replacer(match: re.Match[str]) -> str:
         var_expr = match.group(1)
         if ":" in var_expr:
             var_name, default_value = var_expr.split(":", 1)
@@ -54,11 +55,11 @@ def substitute_environment_variables(yaml_content: str) -> str:
 
 
 class Profiles:
-    def __init__(self, profiles_path=None):
+    def __init__(self, profiles_path: Optional[str] = None) -> None:
         self.profiles: profile_models.Profiles = Profiles._get_profiles(profiles_path)
 
     @staticmethod
-    def from_yaml_str(profile_yml):
+    def from_yaml_str(profile_yml: str) -> Any:
         # Substitute environment variables in the profile YAML
         profile_yml = substitute_environment_variables(profile_yml)
         yaml_data = yaml.safe_load(profile_yml)
@@ -171,7 +172,7 @@ class Profiles:
         return profiles
 
     @staticmethod
-    def from_yaml(file_path):
+    def from_yaml(file_path: str) -> Any:
         with open(file_path, "r") as file:
             file_str = file.read()
             # Substitute environment variables before parsing
@@ -180,7 +181,7 @@ class Profiles:
             return profiles
 
     @staticmethod
-    def _get_profiles(profiles_path=None):
+    def _get_profiles(profiles_path: Optional[str] = None) -> Any:
         # Check if os.getenv('INGENIOUS_PROFILE') is set
         if os.getenv("APPSETTING_INGENIOUS_PROFILE", "") != "":
             # print("Profile JSON loaded from environment variable")
@@ -195,7 +196,7 @@ class Profiles:
         if profiles_path is None or profiles_path == "":
             if os.getenv("INGENIOUS_PROFILE_PATH", "") != "":
                 print("Profile Path loaded from environment variable")
-                profiles_path_object = Path(os.getenv("INGENIOUS_PROFILE_PATH"))
+                profiles_path_object = Path(os.getenv("INGENIOUS_PROFILE_PATH", ""))
             else:
                 print("Profile loaded from default path")
                 home_directory = os.path.expanduser("~")
@@ -216,15 +217,14 @@ class Profiles:
 
         return profiles
 
-    def get_profile_by_name(self, name):
+    def get_profile_by_name(self, name: str) -> Optional[Any]:
         for profile in self.profiles:
-            if profile.name == name:
+            if hasattr(profile, "name") and profile.name == name:
                 return profile
         return None
 
 
-@staticmethod
-def get_kv_secret(secretName):
+def get_kv_secret(secretName: str) -> str:
     try:
         keyVaultName = os.environ["KEY_VAULT_NAME"]
     except KeyError:
@@ -234,4 +234,4 @@ def get_kv_secret(secretName):
     credential = DefaultAzureCredential()
     client = SecretClient(vault_url=KVUri, credential=credential)
     secret = client.get_secret(secretName)
-    return secret.value
+    return secret.value or ""

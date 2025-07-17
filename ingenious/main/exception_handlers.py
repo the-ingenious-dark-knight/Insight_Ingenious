@@ -200,5 +200,6 @@ class ExceptionHandlers:
         """Register all exception handlers with the FastAPI app."""
         app.add_exception_handler(Exception, cls.generic_exception_handler)
         app.add_exception_handler(
-            FastAPIValidationError, cls.validation_exception_handler
+            FastAPIValidationError,
+            cls.validation_exception_handler,  # type: ignore
         )

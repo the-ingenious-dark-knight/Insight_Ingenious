@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Set
+from typing import Dict, List, Set
 
 import tiktoken
 from openai.types.chat import ChatCompletionMessageParam
@@ -49,7 +49,7 @@ def num_tokens_from_messages(
         "gpt-4-0613",
         "gpt-4-32k-0613",
     }
-    
+
     if model in supported_models:
         tokens_per_message: int = 3
         tokens_per_name: int = 1
@@ -75,7 +75,7 @@ def num_tokens_from_messages(
             model
         }. See https://github.com/openai/openai-python/blob/main/chatml.md for information
             on how messages are converted to tokens.""")
-    
+
     num_tokens: int = 0
     for message in messages:
         num_tokens += tokens_per_message

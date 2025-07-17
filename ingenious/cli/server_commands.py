@@ -74,7 +74,6 @@ def register_commands(app: typer.Typer, console: Console) -> None:
 
         The server provides:
         • REST API endpoints for agent workflows
-        • Chainlit chat interface at /chainlit
         • Prompt tuning interface at /prompt-tuner (unless disabled)
 
         AVAILABLE WORKFLOWS & CONFIGURATION REQUIREMENTS:
@@ -222,12 +221,17 @@ def register_commands(app: typer.Typer, console: Console) -> None:
 
         config = ingen_config.get_config()
 
-        # Override prompt tuner setting based on CLI flag
-        config.prompt_tuner.enable = enable_prompt_tuner
+        # Note: prompt tuner functionality has been removed
 
-        # Override host and port from CLI parameters
+        # Override host and port from CLI parameters only if they differ from defaults
         config.web_configuration.ip_address = host
-        config.web_configuration.port = port
+
+        # Only override port if it was explicitly provided via CLI (different from env var default)
+        default_port_from_env = int(os.getenv("WEB_PORT", "80"))
+        if port != default_port_from_env or os.getenv("WEB_PORT") is not None:
+            # If port was explicitly set via CLI or WEB_PORT env var, use it
+            config.web_configuration.port = port
+        # Otherwise, let the configuration system use INGENIOUS_WEB_CONFIGURATION__PORT
 
         # We need to clean this up and probably separate overall system config from fast api, eg. set the config here in cli and then pass it to FastAgentAPI
         # As soon as we import FastAgentAPI, config will be loaded hence to ensure that the environment variables above are loaded first we need to import FastAgentAPI after setting the environment variables
@@ -333,12 +337,6 @@ def register_commands(app: typer.Typer, console: Console) -> None:
             "💡 Tip: Use 'ingen serve' to start the full server with all interfaces"
         )
 
-        # Import and start the Flask app for prompt tuning
-        try:
-            from ingenious_prompt_tuner.run_flask_app import app as flask_app
-
-            flask_app.run(host=host, port=port, debug=True)
-        except ImportError:
-            console.print("[red]❌ Prompt tuner dependencies not available[/red]")
-            console.print("Install with: uv add flask")
-            raise typer.Exit(1)
+        console.print("[red]❌ Prompt tuner has been removed from this version[/red]")
+        console.print("Use the main API server instead: ingen serve")
+        raise typer.Exit(1)

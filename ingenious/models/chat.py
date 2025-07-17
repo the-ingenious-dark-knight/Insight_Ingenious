@@ -34,3 +34,20 @@ class ChatRequest(IChatRequest):
 
 class ChatResponse(IChatResponse):
     pass
+
+
+class Action(BaseModel):
+    name: str
+    description: Optional[str] = None
+
+
+class KnowledgeBaseLink(BaseModel):
+    title: str
+    url: str
+    description: Optional[str] = None
+
+
+class Product(BaseModel):
+    name: str
+    description: Optional[str] = None
+    price: Optional[float] = None
