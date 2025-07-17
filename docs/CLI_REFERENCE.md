@@ -57,14 +57,13 @@ Start the API server with web interfaces.
 
 **Options:**
 - `--host, -h` - Host to bind (default: 0.0.0.0)
-- `--port` - Port to bind (default: 80 or $WEB_PORT)
-- `--no-prompt-tuner` - Disable prompt tuner interface
+- `--port` - Port to bind (default: 80 or $WEB_PORT, CLI override default is 8000)
 
 **Interfaces:**
-- API: `http://localhost:80/api/v1/`
-- Health Check: `http://localhost:80/api/v1/health`
-- Chat: `http://localhost:80/chainlit` (if Chainlit is enabled)
-- Prompt Tuner: `http://localhost:80/prompt-tuner` (if enabled)
+- API: `http://localhost:8000/api/v1/`
+- Health Check: `http://localhost:8000/api/v1/health`
+- API Documentation: `http://localhost:8000/docs`
+- Prompt Management: `/api/v1/prompts/*` endpoints
 
 > **Configuration**: The server uses environment variables for configuration. Ensure your `.env` file is properly configured before starting the server.
 
@@ -119,17 +118,11 @@ ingen validate
 
 ## Utility Commands
 
-### `ingen prompt-tuner`
-Start standalone prompt tuning interface.
+### ~~`ingen prompt-tuner`~~ (Deprecated)
 
-**Options:**
-- `--port, -p` - Port (default: 5000)
-- `--host, -h` - Host (default: 127.0.0.1)
+> **Note**: The standalone prompt tuner has been removed. Use the main API server's prompt management endpoints instead (`/api/v1/prompts/*`).
 
-**Example:**
-```bash
-ingen prompt-tuner --port 5000 --host 127.0.0.1
-```
+The command exists but shows an error message directing users to use `ingen serve` instead.
 
 ### `ingen help [topic]`
 Show detailed help and getting started guide.

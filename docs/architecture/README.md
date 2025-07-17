@@ -20,8 +20,8 @@ Insight Ingenious is architected as a production-ready library with enterprise-g
 ```mermaid
 graph TB
     subgraph "Client Layer"
-        UI[Web UI<br/>Chainlit Interface]
         API_CLIENT[API Clients<br/>External Applications]
+        DOCS[API Documentation<br/>Swagger/OpenAPI]
     end
 
     subgraph "API Gateway"
@@ -42,9 +42,9 @@ graph TB
     end
 
     subgraph "Storage Layer"
-        CONFIG[Configuration<br/>YAML Files]
-        HISTORY[Chat History<br/>SQLite Database]
-        FILES[File Storage<br/>Documents & Assets]
+        CONFIG[Configuration<br/>Environment Variables]
+        HISTORY[Chat History<br/>SQLite/Azure SQL]
+        FILES[File Storage<br/>Local/Azure Blob]
     end
 
     subgraph "External Services"
