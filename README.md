@@ -79,7 +79,7 @@ Get up and running in 5 minutes with Azure OpenAI!
     curl http://localhost:8000/api/v1/health
     ```
 
-6. **Test with Core Workflow**:
+6. **Test with Core Workflows**:
     ```bash
     # Test classification agent (available in core library)
     curl -X POST http://localhost:8000/api/v1/chat \
@@ -88,11 +88,41 @@ Get up and running in 5 minutes with Azure OpenAI!
         "user_prompt": "Analyze this customer feedback: Great product!",
         "conversation_flow": "classification-agent"
       }'
+    
+    # Test knowledge-base agent (searches local ChromaDB)
+    curl -X POST http://localhost:8000/api/v1/chat \
+      -H "Content-Type: application/json" \
+      -d '{
+        "user_prompt": "Search for documentation about setup",
+        "conversation_flow": "knowledge-base-agent"
+      }'
+    
+    # Test SQL manipulation agent (queries local SQLite)
+    curl -X POST http://localhost:8000/api/v1/chat \
+      -H "Content-Type: application/json" \
+      -d '{
+        "user_prompt": "Show me all tables in the database",
+        "conversation_flow": "sql-manipulation-agent"
+      }'
+    ```
+
+7. **Test bike-insights Workflow (After `ingen init`)**:
+    ```bash
+    # Test bike-insights with sample data (requires JSON format)
+    curl -X POST http://localhost:8000/api/v1/chat \
+      -H "Content-Type: application/json" \
+      -d '{
+        "user_prompt": "{\"revision_id\": \"test-v1\", \"identifier\": \"test-001\", \"stores\": [{\"name\": \"Test Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"MB-TREK-2021-XC\", \"quantity_sold\": 2, \"sale_date\": \"2023-04-01\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 4.5, \"comment\": \"Great bike!\"}}], \"bike_stock\": []}]}",
+        "conversation_flow": "bike-insights"
+      }'
     ```
 
 That's it! You should see a JSON response with AI analysis of the input.
 
-**Note**: Core workflows like `classification-agent`, `knowledge-base-agent`, and `sql-manipulation-agent` are included in the library. The `bike-insights` workflow is only available when you run `ingen init` as part of the project template - it demonstrates how to build custom workflows on top of the core framework.
+**Important Notes**: 
+- Core workflows like `classification-agent`, `knowledge-base-agent`, and `sql-manipulation-agent` accept simple text prompts
+- The `bike-insights` workflow requires JSON-formatted data with specific fields (`revision_id`, `identifier`, `stores`)
+- The `bike-insights` workflow is only available after running `ingen init` as part of the project template
 
 ## CLI Commands
 
