@@ -225,9 +225,15 @@ def register_commands(app: typer.Typer, console: Console) -> None:
         # Override prompt tuner setting based on CLI flag
         config.prompt_tuner.enable = enable_prompt_tuner
 
-        # Override host and port from CLI parameters
+        # Override host and port from CLI parameters only if they differ from defaults
         config.web_configuration.ip_address = host
-        config.web_configuration.port = port
+        
+        # Only override port if it was explicitly provided via CLI (different from env var default)
+        default_port_from_env = int(os.getenv("WEB_PORT", "80"))
+        if port != default_port_from_env or os.getenv("WEB_PORT") is not None:
+            # If port was explicitly set via CLI or WEB_PORT env var, use it
+            config.web_configuration.port = port
+        # Otherwise, let the configuration system use INGENIOUS_WEB_CONFIGURATION__PORT
 
         # We need to clean this up and probably separate overall system config from fast api, eg. set the config here in cli and then pass it to FastAgentAPI
         # As soon as we import FastAgentAPI, config will be loaded hence to ensure that the environment variables above are loaded first we need to import FastAgentAPI after setting the environment variables

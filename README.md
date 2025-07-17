@@ -22,6 +22,9 @@ Get up and running in 5 minutes with Azure OpenAI!
     # OR  
     uv add ingenious             # Minimal installation
     
+    # Add required dependencies for knowledge-base and SQL workflows
+    uv add chromadb aiofiles autogen-ext
+    
     # Initialize project
     uv run ingen init
     ```
@@ -51,8 +54,8 @@ Get up and running in 5 minutes with Azure OpenAI!
     INGENIOUS_MODELS__0__API_TYPE=rest
     INGENIOUS_MODELS__0__API_VERSION=2024-12-01-preview
     INGENIOUS_MODELS__0__DEPLOYMENT=gpt-4.1-nano
-    INGENIOUS_MODELS__0__API_KEY=${AZURE_OPENAI_API_KEY}
-    INGENIOUS_MODELS__0__BASE_URL=${AZURE_OPENAI_BASE_URL}
+    INGENIOUS_MODELS__0__API_KEY=your-actual-api-key-here
+    INGENIOUS_MODELS__0__BASE_URL=https://your-resource.openai.azure.com/
     
     # Basic required settings
     INGENIOUS_CHAT_SERVICE__TYPE=multi_agent
@@ -70,51 +73,43 @@ Get up and running in 5 minutes with Azure OpenAI!
 
 4. **Start the Server**:
     ```bash
-    uv run ingen serve
+    # Start server on port 8000 (override default port 80)
+    uv run ingen serve --port 8000
     ```
 
 5. **Verify Health**:
     ```bash
-    # Check server health (default port is 8000)
+    # Check server health
     curl http://localhost:8000/api/v1/health
     ```
 
 6. **Test with Core Workflows**:
+    
+    Create test files to avoid JSON escaping issues:
     ```bash
-    # Test classification agent (available in core library)
-    curl -X POST http://localhost:8000/api/v1/chat \
-      -H "Content-Type: application/json" \
-      -d '{
-        "user_prompt": "Analyze this customer feedback: Great product!",
-        "conversation_flow": "classification-agent"
-      }'
+    # Create test files for each workflow
+    echo '{"user_prompt": "Analyze this customer feedback: Great product", "conversation_flow": "classification-agent"}' > test_classification.json
+    echo '{"user_prompt": "Search for documentation about setup", "conversation_flow": "knowledge-base-agent"}' > test_knowledge.json
+    echo '{"user_prompt": "Show me all tables in the database", "conversation_flow": "sql-manipulation-agent"}' > test_sql.json
     
-    # Test knowledge-base agent (searches local ChromaDB)
-    curl -X POST http://localhost:8000/api/v1/chat \
-      -H "Content-Type: application/json" \
-      -d '{
-        "user_prompt": "Search for documentation about setup",
-        "conversation_flow": "knowledge-base-agent"
-      }'
-    
-    # Test SQL manipulation agent (queries local SQLite)
-    curl -X POST http://localhost:8000/api/v1/chat \
-      -H "Content-Type: application/json" \
-      -d '{
-        "user_prompt": "Show me all tables in the database",
-        "conversation_flow": "sql-manipulation-agent"
-      }'
+    # Test each workflow
+    curl -X POST http://localhost:8000/api/v1/chat -H "Content-Type: application/json" -d @test_classification.json
+    curl -X POST http://localhost:8000/api/v1/chat -H "Content-Type: application/json" -d @test_knowledge.json
+    curl -X POST http://localhost:8000/api/v1/chat -H "Content-Type: application/json" -d @test_sql.json
     ```
 
 7. **Test bike-insights Workflow (After `ingen init`)**:
     ```bash
-    # Test bike-insights with sample data (requires JSON format)
-    curl -X POST http://localhost:8000/api/v1/chat \
-      -H "Content-Type: application/json" \
-      -d '{
-        "user_prompt": "{\"revision_id\": \"test-v1\", \"identifier\": \"test-001\", \"stores\": [{\"name\": \"Test Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"MB-TREK-2021-XC\", \"quantity_sold\": 2, \"sale_date\": \"2023-04-01\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 4.5, \"comment\": \"Great bike!\"}}], \"bike_stock\": []}]}",
-        "conversation_flow": "bike-insights"
-      }'
+    # Create bike-insights test data file
+    cat > test_bike_insights.json << 'EOF'
+{
+  "user_prompt": "{\"revision_id\": \"test-v1\", \"identifier\": \"test-001\", \"stores\": [{\"name\": \"Test Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"MB-TREK-2021-XC\", \"quantity_sold\": 2, \"sale_date\": \"2023-04-01\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 4.5, \"comment\": \"Great bike\"}}], \"bike_stock\": []}]}",
+  "conversation_flow": "bike-insights"
+}
+EOF
+    
+    # Test bike-insights workflow
+    curl -X POST http://localhost:8000/api/v1/chat -H "Content-Type: application/json" -d @test_bike_insights.json
     ```
 
 That's it! You should see a JSON response with AI analysis of the input.

@@ -210,7 +210,7 @@ class WebSettings(BaseModel):
         "0.0.0.0",
         description="IP address to bind the web server (0.0.0.0 for all interfaces)",
     )
-    port: int = Field(8000, description="Port number for the web server")
+    port: int = Field(80, description="Port number for the web server")
     type: str = Field(
         "fastapi", description="Web framework type: 'fastapi' for FastAPI"
     )
