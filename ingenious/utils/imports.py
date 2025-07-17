@@ -203,6 +203,11 @@ class SafeImporter:
 
             # Try direct import first
             try:
+                # Check if module spec exists first (uses cache)
+                spec = self._find_module_spec(module_name)
+                if spec is None:
+                    raise ModuleNotFoundError(f"No module named '{module_name}'")
+
                 module = importlib.import_module(module_name, package)
                 self._validate_module(module, expected_attrs)
 
@@ -212,11 +217,17 @@ class SafeImporter:
                 logger.debug(f"Successfully imported module: {module_name}")
                 return module
 
-            except (ImportError, ModuleNotFoundError, ImportValidationError) as e:
+            except ImportValidationError:
+                # Re-raise validation errors immediately without wrapping
+                raise
+            except (ImportError, ModuleNotFoundError) as e:
                 original_error = e
                 attempted_paths.append(module_name)
                 logger.debug(f"Direct import failed for {module_name}: {e}")
 
+        except ImportValidationError:
+            # Re-raise validation errors without wrapping
+            raise
         except Exception as e:
             original_error = e
             logger.error(f"Unexpected error importing {module_name}: {e}")

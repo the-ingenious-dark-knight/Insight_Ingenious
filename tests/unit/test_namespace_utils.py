@@ -4,15 +4,12 @@ from unittest.mock import Mock, mock_open, patch
 import pytest
 
 from ingenious.utils.namespace_utils import (
+    _importer,
     get_dir_roots,
     get_file_from_namespace_with_fallback,
     get_inbuilt_api_routes,
     get_namespaces,
     get_path_from_namespace_with_fallback,
-    import_class_safely,
-    import_class_with_fallback,
-    import_module_safely,
-    import_module_with_fallback,
     normalize_workflow_name,
     print_namespace_modules,
 )
@@ -91,101 +88,6 @@ class TestNamespaceUtils:
             assert result is not None
             assert str(result).endswith("api/routes")
 
-    @patch("ingenious.utils.imports.import_class_safely")
-    def test_import_module_safely_success(self, mock_import_class):
-        """Test successful module import"""
-        mock_class = Mock()
-        mock_import_class.return_value = mock_class
-
-        result = import_module_safely("test.module", "TestClass")
-
-        assert result == mock_class
-        mock_import_class.assert_called_once_with("test.module", "TestClass")
-
-    @patch("ingenious.utils.imports.import_class_safely")
-    def test_import_module_safely_import_error(self, mock_import_class):
-        """Test module import with ImportError"""
-        mock_import_class.side_effect = ImportError("Module not found")
-
-        with pytest.raises(ValueError, match="Unsupported module import"):
-            import_module_safely("test.module", "TestClass")
-
-    @patch("ingenious.utils.imports.import_class_safely")
-    def test_import_module_safely_attribute_error(self, mock_import_class):
-        """Test module import with AttributeError"""
-        mock_import_class.side_effect = AttributeError("Class not found")
-
-        with pytest.raises(ValueError, match="Unsupported module import"):
-            import_module_safely("test.module", "TestClass")
-
-    @patch("ingenious.utils.namespace_utils.importlib.import_module")
-    def test_import_module_safely_cached_module(self, mock_import_module):
-        """Test module import with cached module"""
-        mock_module = Mock()
-        mock_class = Mock()
-        mock_module.TestClass = mock_class
-        mock_import_module.return_value = mock_module
-
-        with patch.dict("sys.modules", {"test.module": mock_module}):
-            result = import_module_safely("test.module", "TestClass")
-
-            assert result == mock_class
-
-    def test_import_class_safely_same_as_import_module_safely(self):
-        """Test that import_class_safely works same as import_module_safely"""
-        with patch(
-            "ingenious.utils.namespace_utils.importlib.import_module"
-        ) as mock_import_module:
-            mock_module = Mock()
-            mock_class = Mock()
-            mock_module.TestClass = mock_class
-            mock_import_module.return_value = mock_module
-
-            with patch.dict("sys.modules", {}, clear=True):
-                result = import_class_safely("test.module", "TestClass")
-
-                assert result == mock_class
-
-    @patch("ingenious.utils.namespace_utils.import_module_with_fallback")
-    def test_import_class_with_fallback_success(self, mock_import_module_fallback):
-        """Test successful class import with fallback"""
-        mock_module = Mock()
-        mock_class = Mock()
-        mock_module.TestClass = mock_class
-        mock_import_module_fallback.return_value = mock_module
-
-        result = import_class_with_fallback("test.module", "TestClass")
-
-        assert result == mock_class
-
-    @patch("ingenious.utils.namespace_utils.import_module_with_fallback")
-    def test_import_class_with_fallback_module_not_found(
-        self, mock_import_module_fallback
-    ):
-        """Test class import with fallback when module not found"""
-        mock_import_module_fallback.side_effect = ModuleNotFoundError(
-            "Module not found"
-        )
-
-        with pytest.raises(
-            ValueError, match="Module test.module not found in any namespace"
-        ):
-            import_class_with_fallback("test.module", "TestClass")
-
-    @patch("ingenious.utils.namespace_utils.import_module_with_fallback")
-    def test_import_class_with_fallback_attribute_error(
-        self, mock_import_module_fallback
-    ):
-        """Test class import with fallback when class not found"""
-        mock_module = Mock()
-        del mock_module.TestClass  # Remove attribute
-        mock_import_module_fallback.return_value = mock_module
-
-        with pytest.raises(
-            ValueError, match="Class TestClass not found in module test.module"
-        ):
-            import_class_with_fallback("test.module", "TestClass")
-
     @patch("ingenious.utils.namespace_utils.get_dir_roots")
     def test_get_file_from_namespace_with_fallback_success(self, mock_get_dir_roots):
         """Test successful file retrieval with fallback"""
@@ -195,11 +97,9 @@ class TestNamespaceUtils:
         file_content = "test file content"
 
         with (
-            patch("ingenious.utils.namespace_utils.os.path.exists") as mock_exists,
+            patch.object(Path, "exists", return_value=True),
             patch("builtins.open", mock_open(read_data=file_content)),
         ):
-            mock_exists.return_value = True
-
             result = get_file_from_namespace_with_fallback(
                 "test.module", "test_file.txt"
             )
@@ -229,9 +129,7 @@ class TestNamespaceUtils:
         mock_dir = Path("/test/dir")
         mock_get_dir_roots.return_value = [mock_dir]
 
-        with patch("ingenious.utils.namespace_utils.os.path.exists") as mock_exists:
-            mock_exists.return_value = True
-
+        with patch.object(Path, "exists", return_value=True):
             result = get_path_from_namespace_with_fallback("test/path")
 
             assert result == mock_dir / "test/path"
@@ -248,28 +146,6 @@ class TestNamespaceUtils:
             result = get_path_from_namespace_with_fallback("test/path")
 
             assert result is None
-
-    @patch("ingenious.utils.namespace_utils.get_namespaces")
-    @patch("ingenious.utils.namespace_utils.importlib.import_module")
-    @patch("ingenious.utils.namespace_utils.importlib.util.find_spec")
-    def test_import_module_with_fallback_success(
-        self, mock_find_spec, mock_import_module, mock_get_namespaces
-    ):
-        """Test successful module import with fallback"""
-        mock_get_namespaces.return_value = ["test_namespace"]
-        mock_find_spec.return_value = Mock()  # Module spec found
-        mock_module = Mock()
-        mock_import_module.return_value = mock_module
-
-        with (
-            patch("ingenious.utils.namespace_utils.Path.cwd") as mock_cwd,
-            patch("builtins.print"),
-        ):  # Mock print to avoid output
-            mock_cwd.return_value = Path("/test/dir")
-
-            result = import_module_with_fallback("test.module")
-
-            assert result == mock_module
 
     def test_print_namespace_modules_with_package(self):
         """Test printing namespace modules for a package"""
@@ -301,9 +177,7 @@ class TestNamespaceUtils:
 
     def test_print_namespace_modules_without_package(self):
         """Test printing namespace modules for a non-package"""
-        with patch(
-            "ingenious.utils.namespace_utils.importlib.import_module"
-        ) as mock_import_module:
+        with patch.object(_importer, "import_module") as mock_import_module:
             # Mock module without __path__ attribute by using spec
             mock_module_spec = Mock(spec=[])
             mock_import_module.return_value = mock_module_spec

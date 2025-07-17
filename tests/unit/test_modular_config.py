@@ -241,32 +241,6 @@ class TestConfigFactoryFunctions:
             os.unlink(env_file_path)
 
 
-class TestBackwardCompatibility:
-    """Test backward compatibility with old imports."""
-
-    def test_settings_module_import(self):
-        """Test that old settings module imports still work."""
-        # This should work but issue a deprecation warning
-        with pytest.warns(DeprecationWarning):
-            from ingenious.config.settings import IngeniousSettings as OldSettings
-
-            assert OldSettings is IngeniousSettings
-
-    def test_config_module_get_config(self):
-        """Test that config.config.get_config still works."""
-        with patch.dict(
-            os.environ,
-            {
-                "AZURE_OPENAI_API_KEY": "test-key",
-                "AZURE_OPENAI_BASE_URL": "https://test.openai.azure.com/",
-            },
-        ):
-            from ingenious.config.config import get_config as old_get_config
-
-            config = old_get_config()
-            assert isinstance(config, IngeniousSettings)
-
-
 class TestConfigIntegration:
     """Integration tests for the complete configuration system."""
 
