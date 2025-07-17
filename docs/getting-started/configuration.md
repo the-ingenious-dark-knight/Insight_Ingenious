@@ -21,15 +21,28 @@ Insight Ingenious uses **pydantic-settings** for configuration via environment v
 - **`.env` Files**: Local configuration via `.env` files (recommended for development)
 - **Environment Variable Hierarchies**: Support for nested configuration using double underscores (`__`)
 
-## Migration from YAML Configuration
+## Configuration Migration and Legacy Support
 
-> **Important**: The legacy YAML configuration system (`config.yml`, `profiles.yml`) has been replaced with environment variables. If you have existing YAML files, use the migration script:
+Ingenious has migrated from YAML-based configuration to environment variables but still supports both systems:
+
+- **Recommended**: Environment variables with `INGENIOUS_` prefixes (via `.env` files)
+- **Legacy Support**: YAML configuration files (`config.yml`, `profiles.yml`) are still supported but deprecated
+
+### Migration from YAML Configuration
+
+If you have existing YAML configuration files, use the migration script to convert them to environment variables:
 
 ```bash
 # Migrate existing YAML configuration to environment variables
 uv run python scripts/migrate_config.py --yaml-file config.yml --output .env
 uv run python scripts/migrate_config.py --yaml-file profiles.yml --output .env.profiles
 ```
+
+### Legacy YAML Support (Deprecated)
+
+While YAML files are still supported, they are deprecated in favor of environment variables:
+- `profiles.yml` - Contains sensitive data like API keys (still used for backward compatibility)
+- `config.yml` - Contains main configuration (deprecated, use environment variables instead)
 
 ## Setting Up Configuration
 
@@ -330,48 +343,48 @@ INGENIOUS_FILE_STORAGE__DATA__URL=https://your-storage.blob.core.windows.net/
 INGENIOUS_FILE_STORAGE__DATA__AUTHENTICATION_METHOD=default_credential
 ```
 
-#### Azure Blob Storage profiles.yml Configuration
+#### Azure Blob Storage Authentication
 
-Configure authentication and connection details in `profiles.yml`:
+Configure authentication using environment variables (recommended) or legacy profiles.yml:
 
+**Environment Variables (Recommended):**
+```bash
+# Connection string authentication
+INGENIOUS_FILE_STORAGE__REVISIONS__AUTHENTICATION_METHOD=token
+AZURE_STORAGE_CONNECTION_STRING="DefaultEndpointsProtocol=https;AccountName=..."
+
+# Or default credential authentication (recommended for production)
+INGENIOUS_FILE_STORAGE__REVISIONS__AUTHENTICATION_METHOD=default_credential
+```
+
+**Legacy profiles.yml Configuration (Deprecated):**
 ```yaml
 file_storage:
   revisions:
     url: "https://your-storage.blob.core.windows.net/"
-    token: "${AZURE_STORAGE_CONNECTION_STRING:}"  # Connection string
-    authentication_method: "token"  # Use connection string auth
-  data:
-    url: "https://your-storage.blob.core.windows.net/"
-    token: "${AZURE_STORAGE_CONNECTION_STRING:}"  # Connection string
-    authentication_method: "token"  # Use connection string auth
+    token: "${AZURE_STORAGE_CONNECTION_STRING:}"
+    authentication_method: "token"
 ```
 
 #### Authentication Methods
 
-Azure Blob Storage supports multiple authentication methods:
+Azure Blob Storage supports multiple authentication methods via environment variables:
 
-1. **Connection String (Development)**:
-   ```yaml
-   authentication_method: "token"
-   token: "DefaultEndpointsProtocol=https;AccountName=..."
+1. **Default Azure Credential (Recommended for Production)**:
+   ```bash
+   INGENIOUS_FILE_STORAGE__REVISIONS__AUTHENTICATION_METHOD=default_credential
    ```
 
-2. **Managed Identity (Production)**:
-   ```yaml
-   authentication_method: "msi"
-   client_id: "your-managed-identity-client-id"
+2. **Connection String (Development)**:
+   ```bash
+   INGENIOUS_FILE_STORAGE__REVISIONS__AUTHENTICATION_METHOD=token
+   AZURE_STORAGE_CONNECTION_STRING="DefaultEndpointsProtocol=https;AccountName=..."
    ```
 
-3. **Service Principal**:
-   ```yaml
-   authentication_method: "client_id_and_secret"
-   client_id: "your-app-registration-client-id"
-   token: "your-client-secret"
-   ```
-
-4. **Default Azure Credential**:
-   ```yaml
-   authentication_method: "default_credential"
+3. **Managed Identity**:
+   ```bash
+   INGENIOUS_FILE_STORAGE__REVISIONS__AUTHENTICATION_METHOD=msi
+   INGENIOUS_FILE_STORAGE__REVISIONS__CLIENT_ID=your-managed-identity-client-id
    ```
 
 #### Environment Variables for Azure Blob Storage
