@@ -142,10 +142,10 @@ class TestConfig:
 
         with (
             patch(
-                "ingenious.config.config.config_ns_models.Config.model_validate_json"
+                "ingenious.models.config.config_ns_models.Config.model_validate_json"
             ) as mock_validate,
-            patch("ingenious.config.config.Profiles") as mock_profiles,
-            patch("ingenious.config.config.config_models.Config") as mock_config_model,
+            patch("ingenious.config.profile.Profiles") as mock_profiles,
+            patch("ingenious.models.config.config_models.Config") as mock_config_model,
         ):
             mock_config = Mock()
             mock_config.profile = "test_profile"
@@ -410,10 +410,10 @@ local_sql_db:
 
         with (
             patch(
-                "ingenious.config.config.config_ns_models.Config.model_validate_json"
+                "ingenious.models.config.config_ns_models.Config.model_validate_json"
             ) as mock_validate,
-            patch("ingenious.config.config.Profiles") as mock_profiles,
-            patch("ingenious.config.config.config_models.Config") as mock_config_model,
+            patch("ingenious.config.profile.Profiles") as mock_profiles,
+            patch("ingenious.models.config.config_models.Config") as mock_config_model,
         ):
             mock_config = Mock()
             mock_config.profile = "test_profile"
