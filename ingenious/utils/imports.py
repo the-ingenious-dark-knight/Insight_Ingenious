@@ -16,7 +16,7 @@ import sys
 import warnings
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Protocol, Type, TypeVar
+from typing import Any, Dict, List, Optional, Protocol, TypeVar
 
 from ingenious.core.structured_logging import get_logger
 
@@ -85,9 +85,9 @@ class SafeImporter:
     with support for namespace extensions and proper error reporting.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._module_cache: Dict[str, Any] = {}
-        self._class_cache: Dict[str, Type] = {}
+        self._class_cache: Dict[str, type] = {}
         self._failed_imports: Dict[str, Exception] = {}
         self._namespaces = self._get_namespaces()
 
@@ -134,8 +134,8 @@ class SafeImporter:
 
     def _validate_class(
         self,
-        cls: Type,
-        expected_protocol: Optional[Type] = None,
+        cls: type,
+        expected_protocol: Optional[type] = None,
         expected_methods: Optional[List[str]] = None,
     ) -> None:
         """Validate that a class meets expected requirements."""
@@ -329,10 +329,10 @@ class SafeImporter:
         self,
         module_name: str,
         class_name: str,
-        expected_protocol: Optional[Type] = None,
+        expected_protocol: Optional[type] = None,
         expected_methods: Optional[List[str]] = None,
         use_cache: bool = True,
-    ) -> Type:
+    ) -> type:
         """
         Import a class from a module with validation.
 
@@ -392,10 +392,10 @@ class SafeImporter:
         self,
         module_name: str,
         class_name: str,
-        expected_protocol: Optional[Type] = None,
+        expected_protocol: Optional[type] = None,
         expected_methods: Optional[List[str]] = None,
         use_cache: bool = True,
-    ) -> Type:
+    ) -> type:
         """
         Import a class with namespace fallback support.
 
@@ -541,7 +541,7 @@ def import_module_safely(
 
 def import_class_safely(
     module_name: str, class_name: str, expected_methods: Optional[List[str]] = None
-) -> Type:
+) -> type:
     """Import a class safely with error handling."""
     return _global_importer.import_class(
         module_name, class_name, expected_methods=expected_methods
@@ -559,7 +559,7 @@ def import_module_with_fallback(
 
 def import_class_with_fallback(
     module_name: str, class_name: str, expected_methods: Optional[List[str]] = None
-) -> Type:
+) -> type:
     """Import a class with namespace fallback support."""
     return _global_importer.import_class_with_fallback(
         module_name, class_name, expected_methods=expected_methods

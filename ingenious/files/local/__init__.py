@@ -12,7 +12,7 @@ class local_FileStorageRepository(IFileStorage):
         self.fs_config = fs_config
         self.base_path = Path(fs_config.path)
 
-    async def write_file(self, contents: str, file_name: str, file_path: str):
+    async def write_file(self, contents: str, file_name: str, file_path: str) -> str:
         """
         Write data to a local file.
 
@@ -26,10 +26,13 @@ class local_FileStorageRepository(IFileStorage):
             async with aiofiles.open(path, "w") as f:
                 await f.write(contents)
             # print(f"Successfully wrote {path}.")
+            return f"Successfully wrote {path}"
         except Exception as e:
-            print(f"Failed to write {path}: {e}")
+            error_msg = f"Failed to write {path}: {e}"
+            print(error_msg)
+            return error_msg
 
-    async def read_file(self, file_name: str, file_path: str):
+    async def read_file(self, file_name: str, file_path: str) -> str:
         """
         Read data from a local file.
 
@@ -44,10 +47,11 @@ class local_FileStorageRepository(IFileStorage):
                 # print(f"Successfully read {path}.")
                 return contents
         except Exception as e:
-            print(f"Failed to read {path}: {e}")
-            return None
+            error_msg = f"Failed to read {path}: {e}"
+            print(error_msg)
+            return ""
 
-    async def delete_file(self, file_name: str, file_path: str):
+    async def delete_file(self, file_name: str, file_path: str) -> str:
         """
         Delete a local file.
 
@@ -58,24 +62,27 @@ class local_FileStorageRepository(IFileStorage):
             path = Path(self.fs_config.path) / Path(file_path) / Path(file_name)
             Path(path).unlink()
             # print(f"Successfully deleted {path}.")
+            return f"Successfully deleted {path}"
         except Exception as e:
-            print(f"Failed to delete {path}: {e}")
+            error_msg = f"Failed to delete {path}: {e}"
+            print(error_msg)
+            return error_msg
 
-    async def list_files(self, file_path: str):
+    async def list_files(self, file_path: str) -> str:
         """
         List files in a local directory.
 
         :param file_path: Path to the directory.
         """
-        files = []
         try:
             path = Path(self.fs_config.path) / Path(file_path)
             files = [f.name for f in path.iterdir() if f.is_file()]
             # print(f"Files in {path}: {files}")
-            return files
+            return str(files)
         except Exception as e:
-            print(f"Failed to list files in {path}: {e}")
-            return []
+            error_msg = f"Failed to list files in {path}: {e}"
+            print(error_msg)
+            return error_msg
 
     async def check_if_file_exists(self, file_path: str, file_name: str) -> bool:
         """

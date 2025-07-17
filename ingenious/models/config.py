@@ -122,7 +122,9 @@ class ReceiverConfig(profile_models.ReceiverConfig):
 
 
 class WebConfig(config_ns_models.WebConfig):
-    authentication: profile_models.WebAuthConfig = Field(default_factory=profile_models.WebAuthConfig)
+    authentication: profile_models.WebAuthConfig = Field(
+        default_factory=profile_models.WebAuthConfig
+    )
 
     def __init__(
         self, config: config_ns_models.WebConfig, profile: profile_models.WebConfig
