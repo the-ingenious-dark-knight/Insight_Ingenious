@@ -322,10 +322,10 @@ graph TB
     class BIKE_AGENT,AGENT_FLOW agent
 ```
 
-### 🔍 Core Library Workflows (Azure Search Required)
+### 🔍 Core Library Workflows (Local Implementation - Stable)
 
 #### 📚 Knowledge Base Agent
-Search and retrieve information from knowledge bases.
+Search and retrieve information from knowledge bases using local ChromaDB (stable) or Azure Search (experimental).
 
 ```mermaid
 graph TB
