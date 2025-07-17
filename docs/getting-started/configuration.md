@@ -255,17 +255,11 @@ Specifies the chat service implementation:
 INGENIOUS_CHAT_SERVICE__TYPE=multi_agent
 ```
 
-### Chainlit Configuration
+### Chainlit Configuration (Deprecated)
 
-Controls the web UI:
+> **Note**: Chainlit integration has been removed from this version. These configuration options are no longer supported.
 
-```bash
-# Chainlit UI configuration
-INGENIOUS_CHAINLIT_CONFIGURATION__ENABLE=false
-INGENIOUS_CHAINLIT_CONFIGURATION__AUTHENTICATION__ENABLE=false
-INGENIOUS_CHAINLIT_CONFIGURATION__AUTHENTICATION__GITHUB_CLIENT_ID=
-INGENIOUS_CHAINLIT_CONFIGURATION__AUTHENTICATION__GITHUB_SECRET=
-```
+~~Chainlit UI configuration~~ (removed in current version)
 
 ### Azure Search Services
 
@@ -426,15 +420,11 @@ INGENIOUS_AZURE_SQL_SERVICES__TABLE_NAME=sample_table
 INGENIOUS_AZURE_SQL_SERVICES__DATABASE_CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
 ```
 
-### Prompt Tuner
+### Prompt Tuner (Deprecated)
 
-Configures the prompt tuning interface:
+> **Note**: The standalone prompt tuner interface has been removed from this version. Use the main API server for prompt management via the `/api/v1/prompts/*` endpoints.
 
-```bash
-# Prompt tuner configuration
-INGENIOUS_PROMPT_TUNER__MODE=fast_api
-INGENIOUS_PROMPT_TUNER__ENABLE=true
-```
+~~Prompt tuner configuration~~ (removed in current version)
 
 ### Receiver Configuration
 
