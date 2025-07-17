@@ -15,7 +15,7 @@ This document provides detailed API usage examples for all available workflows i
 
 ## Base API Information
 
-- **Base URL**: `http://localhost:80` (or your configured port)
+- **Base URL**: `http://localhost:8000` (or your configured port, default is 8000)
 - **Endpoint**: `POST /api/v1/chat`
 - **Content-Type**: `application/json`
 
@@ -37,7 +37,7 @@ This document provides detailed API usage examples for all available workflows i
 
 **Hello World Example**:
 ```bash
-curl -X POST http://localhost:80/api/v1/chat \
+curl -X POST http://localhost:8000/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "{\"stores\": [{\"name\": \"Hello Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"HELLO-001\", \"quantity_sold\": 1, \"sale_date\": \"2023-04-01\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 5.0, \"comment\": \"Perfect introduction to Ingenious!\"}}], \"bike_stock\": []}], \"revision_id\": \"hello-1\", \"identifier\": \"world\"}",
@@ -113,7 +113,7 @@ curl -X POST http://localhost:80/api/v1/chat \
 
 **Example Request**:
 ```bash
-curl -X POST http://localhost:80/api/v1/chat \
+curl -X POST http://localhost:8000/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Analyze this customer feedback: The bike was excellent!",
@@ -146,7 +146,7 @@ curl -X POST http://localhost:80/api/v1/chat \
 
 **Example Request**:
 ```bash
-curl -X POST http://localhost:80/api/v1/chat \
+curl -X POST http://localhost:8000/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Find information about bike maintenance",
@@ -170,7 +170,15 @@ curl -X POST http://localhost:80/api/v1/chat \
 
 #### Quick Setup for SQLite (Recommended - Stable)
 
-1. **Configure profiles.yml** for SQLite mode:
+1. **Configure environment variables** for SQLite mode:
+```bash
+# Environment variables (recommended)
+INGENIOUS_LOCAL_SQL_DB__DATABASE_PATH=/tmp/sample_sql_db
+INGENIOUS_LOCAL_SQL_DB__SAMPLE_CSV_PATH=./data/your_data.csv
+INGENIOUS_LOCAL_SQL_DB__SAMPLE_DATABASE_NAME=sample_sql_db
+```
+
+**Or using legacy profiles.yml (deprecated):**
 ```yaml
 azure_sql_services:
   database_name: "skip"  # This enables SQLite mode
@@ -195,7 +203,7 @@ ingen serve
 
 4. **Test SQL queries**:
 ```bash
-curl -X POST http://localhost:80/api/v1/chat \
+curl -X POST http://localhost:8000/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Show me all tables in the database",
@@ -207,7 +215,15 @@ curl -X POST http://localhost:80/api/v1/chat \
 
 > **Warning**: Azure SQL integration is experimental and may contain bugs. Use SQLite for stable operation.
 
-1. **Configure profiles.yml** for Azure SQL:
+1. **Configure environment variables** for Azure SQL:
+```bash
+# Environment variables (recommended)
+INGENIOUS_AZURE_SQL_SERVICES__DATABASE_NAME=your-database-name
+INGENIOUS_AZURE_SQL_SERVICES__TABLE_NAME=your-table-name
+INGENIOUS_AZURE_SQL_SERVICES__DATABASE_CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+```
+
+**Or using legacy profiles.yml (deprecated):**
 ```yaml
 azure_sql_services:
   database_name: "your-database-name"
@@ -226,7 +242,7 @@ export AZURE_SQL_PASSWORD="your-password"
 
 **Basic table exploration**:
 ```bash
-curl -X POST http://localhost:80/api/v1/chat \
+curl -X POST http://localhost:8000/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "What tables are available?",
@@ -236,7 +252,7 @@ curl -X POST http://localhost:80/api/v1/chat \
 
 **Data analysis queries**:
 ```bash
-curl -X POST http://localhost:80/api/v1/chat \
+curl -X POST http://localhost:8000/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Show me the top 5 customers by total sales",
@@ -246,7 +262,7 @@ curl -X POST http://localhost:80/api/v1/chat \
 
 **Schema inspection**:
 ```bash
-curl -X POST http://localhost:80/api/v1/chat \
+curl -X POST http://localhost:8000/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Describe the structure of the sales table",

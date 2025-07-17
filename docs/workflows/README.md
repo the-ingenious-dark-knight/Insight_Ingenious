@@ -367,15 +367,24 @@ graph TB
     class VECTOR_SEARCH,KEYWORD_SEARCH,HYBRID_SEARCH search
 ```
 
-**Additional Configuration Required:**
+**Configuration Options:**
+
+**Recommended: Local ChromaDB (Stable - No additional configuration needed)**
 ```bash
-# Azure Search configuration (experimental)
+# No additional configuration required!
+# Uses local ChromaDB for vector storage
+# Documents stored in ./.tmp/knowledge_base/
+```
+
+**Optional: Azure Search (Experimental - May contain bugs)**
+```bash
+# Additional Azure Search configuration (experimental)
 INGENIOUS_AZURE_SEARCH_SERVICES__0__SERVICE=default
 INGENIOUS_AZURE_SEARCH_SERVICES__0__ENDPOINT=https://your-search-service.search.windows.net
 INGENIOUS_AZURE_SEARCH_SERVICES__0__KEY=your-search-api-key
 ```
 
-> **Note**: The local ChromaDB implementation is recommended and requires no additional configuration.
+> **Recommendation**: Use the local ChromaDB implementation for stable production deployments. It requires no additional configuration and works out-of-the-box.
 
 ### 📊 Core Library Workflows (Database Required)
 

@@ -103,12 +103,12 @@ That's it! You should see a JSON response with AI analysis of the input.
 **Next Steps - Test Additional Workflows**:
 
 7. **Test bike-insights Workflow (Requires `ingen init` first)**:
-    
+
     The `bike-insights` workflow is part of the project template and must be initialized first:
     ```bash
     # First initialize project to get bike-insights workflow
     ingen init
-    
+
     # Create bike-insights test data file
     cat > test_bike_insights.json << 'EOF'
 {
