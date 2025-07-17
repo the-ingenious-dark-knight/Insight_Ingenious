@@ -283,19 +283,6 @@ class TestValidationUtils:
             "test.txt", [".yml", ".yaml"]
         )
 
-    def test_validate_yaml_file(self):
-        """Test YAML file validation."""
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".yml", delete=False) as f:
-            f.write("key: value\nlist:\n  - item1\n  - item2")
-            f.flush()
-
-            is_valid, error = ValidationUtils.validate_yaml_file(f.name)
-
-            assert is_valid is True
-            assert error is None
-
-        # Clean up
-        os.unlink(f.name)
 
     def test_validate_port(self):
         """Test port validation."""

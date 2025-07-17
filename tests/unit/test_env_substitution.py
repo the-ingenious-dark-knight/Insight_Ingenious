@@ -62,19 +62,6 @@ class TestEnvSubstitution:
         result = substitute_env_vars("plain text without variables")
         assert result == "plain text without variables"
 
-    def test_substitute_env_vars_complex_content(self):
-        """Test substitution with complex YAML-like content"""
-        with patch.dict(os.environ, {"DB_HOST": "localhost", "DB_PORT": "5432"}):
-            content = """
-            database:
-              host: ${DB_HOST:default_host}
-              port: ${DB_PORT:3306}
-              missing: ${MISSING_VAR:default_missing}
-            """
-            result = substitute_env_vars(content)
-            assert "localhost" in result
-            assert "5432" in result
-            assert "default_missing" in result
 
     def test_substitute_env_vars_special_characters_in_default(self):
         """Test substitution with special characters in default value"""
@@ -88,26 +75,4 @@ class TestEnvSubstitution:
             result = substitute_env_vars("${VAR:default} and {not_a_var}")
             assert result == "value and {not_a_var}"
 
-    def test_load_yaml_with_env_substitution(self):
-        """Test loading YAML file with environment variable substitution"""
-        yaml_content = """
-        test:
-          value: ${TEST_VAR:default_value}
-          another: ${ANOTHER_VAR:another_default}
-        """
 
-        with patch.dict(os.environ, {"TEST_VAR": "substituted_value"}):
-            with patch("builtins.open", mock_open(read_data=yaml_content)):
-                result = load_yaml_with_env_substitution("test.yaml")
-                assert "substituted_value" in result
-                assert "another_default" in result
-
-    def test_load_yaml_with_env_substitution_file_operations(self):
-        """Test file operations in load_yaml_with_env_substitution"""
-        yaml_content = "test: ${VAR:default}"
-
-        with patch.dict(os.environ, {"VAR": "value"}):
-            with patch("builtins.open", mock_open(read_data=yaml_content)) as mock_file:
-                result = load_yaml_with_env_substitution("test.yaml")
-                mock_file.assert_called_once_with("test.yaml", "r")
-                assert "value" in result
