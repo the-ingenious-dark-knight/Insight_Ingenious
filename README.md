@@ -98,8 +98,17 @@ Get up and running in 5 minutes with Azure OpenAI!
     curl -X POST http://localhost:8000/api/v1/chat -H "Content-Type: application/json" -d @test_sql.json
     ```
 
-7. **Test bike-insights Workflow (After `ingen init`)**:
+That's it! You should see a JSON response with AI analysis of the input.
+
+**Next Steps - Test Additional Workflows**:
+
+7. **Test bike-insights Workflow (Requires `ingen init` first)**:
+    
+    The `bike-insights` workflow is part of the project template and must be initialized first:
     ```bash
+    # First initialize project to get bike-insights workflow
+    ingen init
+    
     # Create bike-insights test data file
     cat > test_bike_insights.json << 'EOF'
 {
@@ -112,12 +121,10 @@ EOF
     curl -X POST http://localhost:8000/api/v1/chat -H "Content-Type: application/json" -d @test_bike_insights.json
     ```
 
-That's it! You should see a JSON response with AI analysis of the input.
-
 **Important Notes**:
-- Core workflows like `classification-agent`, `knowledge-base-agent`, and `sql-manipulation-agent` accept simple text prompts
-- The `bike-insights` workflow requires JSON-formatted data with specific fields (`revision_id`, `identifier`, `stores`)
-- The `bike-insights` workflow is only available after running `ingen init` as part of the project template
+- **Core Library Workflows** (`classification-agent`, `knowledge-base-agent`, `sql-manipulation-agent`) are always available and accept simple text prompts
+- **Template Workflows** like `bike-insights` require JSON-formatted data with specific fields and are only available after running `ingen init`
+- The `bike-insights` workflow is the recommended "Hello World" example for new users
 
 ## CLI Commands
 
@@ -155,8 +162,8 @@ When the server is running, the following endpoints are available:
 - `GET /api/v1/diagnostic` - System diagnostic information
 
 **Prompt Management:**
-- `GET /api/v1/prompts/revisions/list` - List available prompt revisions
-- `GET /api/v1/prompts/workflows/list` - List workflows with prompts
+- `GET /api/v1/revisions/list` - List available prompt revisions
+- `GET /api/v1/workflows/list` - List workflows with prompts
 - `GET /api/v1/prompts/list/{revision_id}` - List prompt templates for revision
 - `GET /api/v1/prompts/view/{revision_id}/{filename}` - View prompt content
 - `POST /api/v1/prompts/update/{revision_id}/{filename}` - Update prompt template
@@ -177,17 +184,21 @@ When the server is running, the following endpoints are available:
 
 Insight Ingenious provides multiple conversation workflows with different configuration requirements:
 
-### Core Workflows (Available in library)
+### Core Library Workflows (Always Available)
+These workflows are built into the Ingenious library and available immediately:
+
 - `classification-agent` - Route input to specialized agents based on content (Azure OpenAI only)
 - `knowledge-base-agent` - Search knowledge bases using local ChromaDB (STABLE - recently fixed)
 - `sql-manipulation-agent` - Execute SQL queries using local SQLite (STABLE - recently fixed)
 
-> **Note**: Workflow names support both hyphenated (classification-agent) and underscored (classification_agent) formats for backward compatibility.
+> **Note**: Core workflows support both hyphenated (`classification-agent`) and underscored (`classification_agent`) naming formats for backward compatibility.
 
-### Extension Template Workflows (Available via project template)
-- `bike-insights` - Comprehensive bike sales analysis showcasing multi-agent coordination (**Note**: Created only when you run `ingen init` - demonstrates custom workflow development)
+### Template Workflows (Available via `ingen init`)
+These workflows are created when you initialize a new project and serve as examples for custom development:
 
-> **Note**: The `bike-insights` workflow is the recommended starting point and "Hello World" example for Ingenious.
+- `bike-insights` - Comprehensive bike sales analysis showcasing multi-agent coordination (**Created by `ingen init`** - demonstrates custom workflow development)
+
+> **Note**: The `bike-insights` workflow is the recommended starting point and "Hello World" example for new Ingenious users. It's only available after running `ingen init` to create the project template.
 
 ### Configuration Requirements by Workflow
 - **Minimal setup** (Azure OpenAI only): `classification-agent`, `bike-insights`
