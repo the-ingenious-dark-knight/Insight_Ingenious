@@ -2,8 +2,8 @@ import autogen
 import autogen.retrieve_utils
 import autogen.runtime_logging
 
-from ingenious.core.structured_logging import get_logger
 from ingenious.config import get_config
+from ingenious.core.structured_logging import get_logger
 
 logger = get_logger(__name__)
 

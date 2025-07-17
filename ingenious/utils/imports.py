@@ -106,12 +106,12 @@ class SafeImporter:
             working_dir / "ingenious_extensions",
             working_dir / "ingenious" / "ingenious_extensions_template",
         ]
-        
+
         # Add ingenious package root if available
         spec = importlib.util.find_spec("ingenious")
         if spec and spec.origin:
             roots.append(Path(spec.origin).parent)
-        
+
         return roots
 
     def _ensure_path_in_sys_path(self, path: Path) -> None:
@@ -372,7 +372,7 @@ class SafeImporter:
                 )
 
             cls = getattr(module, class_name)
-            
+
             if not isinstance(cls, type):
                 raise ImportError(
                     f"'{class_name}' is not a class in module '{module_name}'",
@@ -442,7 +442,7 @@ class SafeImporter:
                 )
 
             cls = getattr(module, class_name)
-            
+
             if not isinstance(cls, type):
                 raise ImportError(
                     f"'{class_name}' is not a class in module '{module_name}'",
