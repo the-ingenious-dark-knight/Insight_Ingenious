@@ -45,7 +45,7 @@ class local_FileStorageRepository(IFileStorage):
             async with aiofiles.open(path, "r") as f:
                 contents = await f.read()
                 # print(f"Successfully read {path}.")
-                return contents
+                return str(contents)
         except Exception as e:
             error_msg = f"Failed to read {path}: {e}"
             print(error_msg)

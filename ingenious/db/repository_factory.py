@@ -172,7 +172,7 @@ class SQLiteChatHistoryRepository(BaseSQLRepository):
         thread_id: str,
         name: Optional[str] = None,
         user_id: Optional[str] = None,
-        metadata: Optional[Dict] = None,
+        metadata: Optional[Dict[str, object]] = None,
         tags: Optional[List[str]] = None,
     ) -> str:
         """Update thread - delegates to existing SQLite implementation."""
@@ -245,7 +245,7 @@ class AzureSQLChatHistoryRepository(BaseSQLRepository):
         thread_id: str,
         name: Optional[str] = None,
         user_id: Optional[str] = None,
-        metadata: Optional[Dict] = None,
+        metadata: Optional[Dict[str, object]] = None,
         tags: Optional[List[str]] = None,
     ) -> str:
         """Update thread - delegates to existing Azure SQL implementation."""

@@ -164,7 +164,7 @@ def test_extract_happy_and_deterministic(
 # --------------------------------------------------------------------------- #
 # 2. Fail‑soft behaviour on corrupt bytes                                     #
 # --------------------------------------------------------------------------- #
-def test_extract_corrupt_bytes_returns_empty(ux) -> None:
+def test_extract_corrupt_bytes_returns_empty(ux: Any) -> None:
     """Invalid PDF bytes must yield an empty iterator and raise **no** exceptions."""
     assert list(ux.extract(_CORRUPT_PDF)) == []
 
@@ -187,9 +187,9 @@ def test_extract_corrupt_bytes_returns_empty(ux) -> None:
     ],
     ids=["None", "points", "to_dict", "fallback"],
 )
-def test_coords_to_jsonable_paths(ux, coords: Any, expected: Any) -> None:
+def test_coords_to_jsonable_paths(ux: Any, coords: Any, expected: Any) -> None:
     """Ensure *_coords_to_jsonable* normalises every coordinate shape."""
-    assert ux._coords_to_jsonable(coords) == expected  # type: ignore[attr-defined]
+    assert ux._coords_to_jsonable(coords) == expected
 
 
 # --------------------------------------------------------------------------- #
@@ -214,7 +214,7 @@ def test_supports_suffix_probe(
 # --------------------------------------------------------------------------- #
 # 5. extract rejects unknown suffix                                           #
 # --------------------------------------------------------------------------- #
-def test_extract_rejects_unknown_suffix(tmp_path: Path, ux) -> None:
+def test_extract_rejects_unknown_suffix(tmp_path: Path, ux: Any) -> None:
     """Unsupported formats must be skipped **gracefully**.
 
     Behaviour

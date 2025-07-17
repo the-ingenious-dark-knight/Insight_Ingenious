@@ -151,7 +151,7 @@ class BaseSQLRepository(IChatHistoryRepository, ABC):
         self._execute_sql(query, params, expect_results=False)
 
     async def add_user(
-        self, identifier: str, metadata: dict = None
+        self, identifier: str, metadata: dict[str, object] = None
     ) -> IChatHistoryRepository.User:
         """Add a new user."""
         if metadata is None:

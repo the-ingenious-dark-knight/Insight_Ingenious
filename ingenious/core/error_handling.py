@@ -34,7 +34,7 @@ import functools
 import random
 import time
 from contextlib import asynccontextmanager, contextmanager
-from typing import Any, Callable, Dict, Generator, Optional, Type, TypeVar
+from typing import Any, AsyncGenerator, Callable, Dict, Generator, Optional, Type, TypeVar
 from uuid import uuid4
 
 from ingenious.core.structured_logging import get_logger, get_request_id
@@ -99,7 +99,7 @@ def operation_context(
     operation: str,
     component: str = "",
     error_class: Type[IngeniousError] = IngeniousError,
-    **context_kwargs,
+    **context_kwargs: Any,
 ) -> Generator[OperationContext, None, None]:
     """Generic operation context manager with error handling.
 
@@ -308,8 +308,8 @@ def file_operation(
     except (FileNotFoundError, PermissionError, OSError) as exc:
         # Map filesystem errors to appropriate Ingenious errors
         error_context = ErrorContext(
-            operation=operation, component="filesystem", file_path=file_path
-        ).with_stack_trace()
+            operation=operation, component="filesystem"
+        ).with_stack_trace().add_metadata(file_path=file_path)
 
         if isinstance(exc, FileNotFoundError):
             error = ResourceError(
@@ -378,8 +378,8 @@ async def async_operation_context(
     operation: str,
     component: str = "",
     error_class: Type[IngeniousError] = IngeniousError,
-    **context_kwargs,
-):
+    **context_kwargs: Any,
+) -> AsyncGenerator[OperationContext, None]:
     """Async version of operation_context."""
     ctx = OperationContext(operation, component)
 
@@ -635,7 +635,7 @@ class RecoveryStrategy:
 class FallbackRecoveryStrategy(RecoveryStrategy):
     """Recovery strategy that tries fallback operations."""
 
-    def __init__(self, fallback_functions: list[Callable]):
+    def __init__(self, fallback_functions: list[Callable[..., Any]]):
         self.fallback_functions = fallback_functions
 
     def can_recover(self, error: IngeniousError) -> bool:
@@ -686,7 +686,7 @@ class CircuitBreakerRecoveryStrategy(RecoveryStrategy):
         return isinstance(error, self.expected_exception)
 
     def recover(
-        self, error: IngeniousError, operation: Callable, *args: Any, **kwargs: Any
+        self, error: IngeniousError, operation: Callable[..., Any], *args: Any, **kwargs: Any
     ) -> Any:
         """Apply circuit breaker logic."""
         current_time = time.time()
@@ -711,7 +711,7 @@ class CircuitBreakerRecoveryStrategy(RecoveryStrategy):
 
         except self.expected_exception as exc:
             self.failure_count += 1
-            self.last_failure_time = current_time
+            self.last_failure_time = int(current_time)
 
             if self.failure_count >= self.failure_threshold:
                 self.state = "open"
@@ -739,14 +739,14 @@ class RateLimitRecoveryStrategy(RecoveryStrategy):
         return isinstance(error, RateLimitError) and error.recoverable
 
     def recover(
-        self, error: IngeniousError, operation: Callable, *args: Any, **kwargs: Any
+        self, error: IngeniousError, operation: Callable[..., Any], *args: Any, **kwargs: Any
     ) -> Any:
         """Apply adaptive backoff for rate limiting."""
         self.consecutive_failures += 1
 
         # Extract retry-after header if available
         retry_after = (
-            error.context.additional_data.get("retry_after", None)
+            error.context.metadata.get("retry_after", None)
             if error.context
             else None
         )
@@ -808,7 +808,7 @@ class DeadlockRecoveryStrategy(RecoveryStrategy):
         )
 
     def recover(
-        self, error: IngeniousError, operation: Callable, *args: Any, **kwargs: Any
+        self, error: IngeniousError, operation: Callable[..., Any], *args: Any, **kwargs: Any
     ) -> Any:
         """Retry deadlock operations with randomized delay."""
         for attempt in range(self.max_retries):

@@ -60,7 +60,7 @@ class azure_FileStorageRepository(IFileStorage):
                 account_url=self.url, credential=DefaultAzureCredential()
             )
 
-    async def write_file(self, contents: str, file_name: str, file_path: str):
+    async def write_file(self, contents: str, file_name: str, file_path: str) -> str:
         """
         Asynchronously writes the given contents to a file in Azure Blob Storage.
         Args:
@@ -120,7 +120,7 @@ class azure_FileStorageRepository(IFileStorage):
             )
             return ""
 
-    async def delete_file(self, file_name: str, file_path: str):
+    async def delete_file(self, file_name: str, file_path: str) -> str:
         """
         Delete a blob from Azure Blob Storage.
 
@@ -141,7 +141,7 @@ class azure_FileStorageRepository(IFileStorage):
         except Exception as e:
             print(f"Failed to delete {path} from container {self.container_name}: {e}")
 
-    async def list_files(self, file_path: str):
+    async def list_files(self, file_path: str) -> str:
         """
         List blobs in an Azure Blob container based on a path.
 

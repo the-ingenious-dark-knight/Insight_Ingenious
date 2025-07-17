@@ -122,7 +122,7 @@ class UnstructuredExtractor(DocumentExtractor):
     @staticmethod
     def _coords_to_jsonable(
         coords: Any,  # noqa: ANN401 – vendor returns untyped objects
-    ) -> list[tuple[float, float]] | dict | str | None:
+    ) -> list[tuple[float, float]] | dict[str, object] | str | None:
         """
         Convert *unstructured* coordinate objects to JSON-serialisable data.
 

@@ -62,7 +62,7 @@ class ImportableProtocol(Protocol):
 class WorkflowProtocol(Protocol):
     """Protocol for workflow classes."""
 
-    def __init__(self, *args, **kwargs) -> None: ...
+    def __init__(self, *args: Any, **kwargs: Any) -> None: ...
 
 
 class ChatServiceProtocol(Protocol):
@@ -102,13 +102,17 @@ class SafeImporter:
     def _get_namespace_roots(self) -> List[Path]:
         """Get root directories for namespace searching."""
         working_dir = Path(os.getcwd())
-        return [
+        roots = [
             working_dir / "ingenious_extensions",
             working_dir / "ingenious" / "ingenious_extensions_template",
-            Path(importlib.util.find_spec("ingenious").origin).parent
-            if importlib.util.find_spec("ingenious")
-            else None,
         ]
+        
+        # Add ingenious package root if available
+        spec = importlib.util.find_spec("ingenious")
+        if spec and spec.origin:
+            roots.append(Path(spec.origin).parent)
+        
+        return roots
 
     def _ensure_path_in_sys_path(self, path: Path) -> None:
         """Ensure a path is in sys.path for importing."""
@@ -195,8 +199,8 @@ class SafeImporter:
         if cache_key in self._failed_imports:
             raise self._failed_imports[cache_key]
 
-        attempted_paths = []
-        original_error = None
+        attempted_paths: List[str] = []
+        original_error: Optional[Exception] = None
 
         try:
             logger.debug(f"Importing module: {module_name}")
@@ -277,8 +281,8 @@ class SafeImporter:
         if cache_key in self._failed_imports:
             raise self._failed_imports[cache_key]
 
-        attempted_paths = []
-        original_error = None
+        attempted_paths: List[str] = []
+        original_error: Optional[Exception] = None
 
         # Try each namespace in order
         for namespace in self._namespaces:
@@ -368,6 +372,13 @@ class SafeImporter:
                 )
 
             cls = getattr(module, class_name)
+            
+            if not isinstance(cls, type):
+                raise ImportError(
+                    f"'{class_name}' is not a class in module '{module_name}'",
+                    module_name=module_name,
+                    class_name=class_name,
+                )
 
             # Validate the class
             self._validate_class(cls, expected_protocol, expected_methods)
@@ -431,6 +442,13 @@ class SafeImporter:
                 )
 
             cls = getattr(module, class_name)
+            
+            if not isinstance(cls, type):
+                raise ImportError(
+                    f"'{class_name}' is not a class in module '{module_name}'",
+                    module_name=module_name,
+                    class_name=class_name,
+                )
 
             # Validate the class
             self._validate_class(cls, expected_protocol, expected_methods)
@@ -517,7 +535,7 @@ class SafeImporter:
             + (f" matching pattern: {pattern}" if pattern else "")
         )
 
-    def get_cache_stats(self) -> Dict[str, int]:
+    def get_cache_stats(self) -> Dict[str, Any]:
         """Get statistics about the import caches."""
         return {
             "modules_cached": len(self._module_cache),
@@ -576,13 +594,13 @@ def clear_import_cache(pattern: Optional[str] = None) -> None:
     _global_importer.clear_cache(pattern)
 
 
-def get_import_stats() -> Dict[str, int]:
+def get_import_stats() -> Dict[str, Any]:
     """Get import cache statistics."""
     return _global_importer.get_cache_stats()
 
 
 # Deprecation warnings for old functions
-def _deprecated_import_warning(old_func: str, new_func: str):
+def _deprecated_import_warning(old_func: str, new_func: str) -> None:
     """Issue deprecation warning for old import functions."""
     warnings.warn(
         f"{old_func} is deprecated. Use {new_func} from ingenious.utils.imports instead.",

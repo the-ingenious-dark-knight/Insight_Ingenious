@@ -10,11 +10,11 @@ class ConversationPattern:
         def __init__(self):
             pass
 
-    def __init__(self, default_llm_config: dict):
+    def __init__(self, default_llm_config: dict[str, object]):
         self.default_llm_config = default_llm_config
 
     async def get_conversation_response(
-        self, input_message: str, thread_chat_history: list = []
+        self, input_message: str, thread_chat_history: list[object] = []
     ) -> str:
         """
         This function is the main entry point for the conversation pattern. It takes a message as input and returns a

@@ -3,7 +3,7 @@ import tempfile
 from concurrent.futures import ThreadPoolExecutor, TimeoutError
 from typing import Dict
 
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt  # type: ignore
 import pandas as pd
 from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
@@ -22,7 +22,7 @@ pyodbc = None
 # Only import pyodbc if we're using Azure SQL
 if _config.azure_sql_services and _config.azure_sql_services.database_name != "skip":
     try:
-        import pyodbc
+        import pyodbc  # type: ignore
     except ImportError as e:
         logger.warning(
             "pyodbc not available for Azure SQL connections",

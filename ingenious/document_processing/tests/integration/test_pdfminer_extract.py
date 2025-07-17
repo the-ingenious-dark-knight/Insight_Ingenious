@@ -127,7 +127,7 @@ _PROBES: list[tuple[str, ProbeBuilder]] = [
 # Fixtures                                                                    #
 # --------------------------------------------------------------------------- #
 @pytest.fixture(scope="module")
-def pdfminer():
+def pdfminer() -> Any:
     """Return a *single* PDFMiner extractor instance for the whole module."""
 
     return _load(EXTRACTOR_NAME)
@@ -146,7 +146,7 @@ def test_extract_happy_paths(
     kind: str,
     probe_fn: ProbeBuilder,
     pdf_path: Path,
-    pdfminer,
+    pdfminer: Any,
     pdfminer_available: bool,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -172,7 +172,7 @@ def test_extract_happy_paths(
 # 2. Determinism across runs                                                  #
 # --------------------------------------------------------------------------- #
 def test_extract_idempotent(
-    pdfminer,
+    pdfminer: Any,
     pdf_path: Path,
     pdfminer_available: bool,
 ) -> None:
@@ -191,7 +191,7 @@ def test_extract_idempotent(
 # 3. Fail‑soft: HTTP error                                                    #
 # --------------------------------------------------------------------------- #
 def test_url_404_fail_soft(
-    pdfminer,
+    pdfminer: Any,
     pdf_path: Path,
     monkeypatch: pytest.MonkeyPatch,
     pdfminer_available: bool,
@@ -211,7 +211,7 @@ def test_url_404_fail_soft(
 # 4. Fail‑soft: oversized downloads                                          #
 # --------------------------------------------------------------------------- #
 def test_url_oversize_guard(
-    pdfminer,
+    pdfminer: Any,
     monkeypatch: pytest.MonkeyPatch,
     pdfminer_available: bool,
 ) -> None:

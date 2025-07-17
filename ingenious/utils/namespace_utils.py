@@ -16,7 +16,7 @@ import pkgutil
 import sys
 from pathlib import Path
 from sysconfig import get_paths
-from typing import Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional, Set
 
 from ingenious.core.structured_logging import get_logger
 from ingenious.utils.imports import SafeImporter, _deprecated_import_warning
@@ -180,9 +180,9 @@ def get_inbuilt_api_routes() -> Optional[Path]:
 class WorkflowDiscovery:
     """Enhanced workflow discovery with validation and caching."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._workflow_cache: Optional[List[str]] = None
-        self._metadata_cache: Dict[str, Dict] = {}
+        self._metadata_cache: Dict[str, Dict[str, Any]] = {}
 
     def discover_workflows(self, force_refresh: bool = False) -> List[str]:
         """
@@ -293,7 +293,7 @@ class WorkflowDiscovery:
             logger.debug(f"Skipping {workflow_name} - not a valid workflow: {e}")
             return False
 
-    def get_workflow_metadata(self, workflow_name: str) -> Dict:
+    def get_workflow_metadata(self, workflow_name: str) -> Dict[str, Any]:
         """
         Get metadata for a specific workflow.
 
@@ -377,7 +377,7 @@ def discover_workflows(force_refresh: bool = False) -> List[str]:
     return _workflow_discovery.discover_workflows(force_refresh)
 
 
-def get_workflow_metadata(workflow_name: str) -> Dict:
+def get_workflow_metadata(workflow_name: str) -> Dict[str, Any]:
     """Get metadata for a specific workflow."""
     return _workflow_discovery.get_workflow_metadata(workflow_name)
 
@@ -388,7 +388,7 @@ def clear_workflow_cache() -> None:
 
 
 # DEPRECATED FUNCTIONS - Issue warnings and delegate to new implementation
-def import_module_safely(module_name: str, class_name: str):
+def import_module_safely(module_name: str, class_name: str) -> Any:
     """
     DEPRECATED: Use ingenious.utils.imports.import_class_safely instead.
     """
@@ -409,7 +409,7 @@ def import_module_safely(module_name: str, class_name: str):
         return import_class_safely(module_name, class_name)
 
 
-def import_class_safely(module_name: str, class_name: str):
+def import_class_safely(module_name: str, class_name: str) -> Any:
     """
     DEPRECATED: Use ingenious.utils.imports.import_class_safely instead.
     """
@@ -422,7 +422,7 @@ def import_class_safely(module_name: str, class_name: str):
     return new_import_class_safely(module_name, class_name)
 
 
-def import_module_with_fallback(module_name: str):
+def import_module_with_fallback(module_name: str) -> Any:
     """
     DEPRECATED: Use ingenious.utils.imports.import_module_with_fallback instead.
     """
@@ -438,7 +438,7 @@ def import_module_with_fallback(module_name: str):
     return new_import_module_with_fallback(module_name)
 
 
-def import_class_with_fallback(module_name: str, class_name: str):
+def import_class_with_fallback(module_name: str, class_name: str) -> Any:
     """
     DEPRECATED: Use ingenious.utils.imports.import_class_with_fallback instead.
     """

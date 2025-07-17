@@ -382,7 +382,7 @@ class sqlite_ChatHistoryRepository(BaseSQLRepository):
         thread_id: str,
         name: Optional[str] = None,
         user_id: Optional[str] = None,
-        metadata: Optional[Dict] = None,
+        metadata: Optional[Dict[str, object]] = None,
         tags: Optional[List[str]] = None,
     ) -> str:
         logger.info(

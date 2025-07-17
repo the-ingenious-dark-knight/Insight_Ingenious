@@ -53,7 +53,7 @@ _CORRUPT_PDF: bytes = b"%PDF-1.4 broken\n%%EOF"  # deliberately invalid payload
 # Fixtures                                                                    #
 # --------------------------------------------------------------------------- #
 @pytest.fixture(scope="module")
-def pymupdf():
+def pymupdf() -> Any:
     """
     Return a shared :class:`PyMuPDFExtractor`.
 
@@ -120,7 +120,7 @@ _PROBES: List[Probe] = [
 # --------------------------------------------------------------------------- #
 @pytest.mark.parametrize(("kind", "probe_fn"), _PROBES, ids=[k for k, _ in _PROBES])
 def test_extract_happy_paths(
-    pymupdf,
+    pymupdf: Any,
     pdf_path: Path,
     pdf_bytes: bytes,
     kind: str,
@@ -145,7 +145,7 @@ def test_extract_happy_paths(
 # --------------------------------------------------------------------------- #
 @pytest.mark.parametrize(("kind", "probe_fn"), _PROBES, ids=[k for k, _ in _PROBES])
 def test_extract_idempotent(
-    pymupdf,
+    pymupdf: Any,
     pdf_path: Path,
     pdf_bytes: bytes,
     kind: str,
@@ -166,7 +166,7 @@ def test_extract_idempotent(
 # --------------------------------------------------------------------------- #
 # 3. Fail-soft contract on corrupt bytes                                      #
 # --------------------------------------------------------------------------- #
-def test_extract_corrupt_bytes_returns_empty(pymupdf) -> None:
+def test_extract_corrupt_bytes_returns_empty(pymupdf: Any) -> None:
     """
     A malformed PDF **must not** raise – it should simply return an empty list.
 
@@ -179,7 +179,7 @@ def test_extract_corrupt_bytes_returns_empty(pymupdf) -> None:
 # --------------------------------------------------------------------------- #
 # 4. Memory usage and streaming tests                                         #
 # --------------------------------------------------------------------------- #
-def test_extract_stream_memory_monitoring(pymupdf, pdf_path: Path) -> None:
+def test_extract_stream_memory_monitoring(pymupdf: Any, pdf_path: Path) -> None:
     """
     Verify that extract_stream monitors memory usage and logs appropriately.
 
@@ -202,7 +202,7 @@ def test_extract_stream_memory_monitoring(pymupdf, pdf_path: Path) -> None:
         _assert_valid_element(el)
 
 
-def test_extract_stream_progress_callback(pymupdf, pdf_path: Path) -> None:
+def test_extract_stream_progress_callback(pymupdf: Any, pdf_path: Path) -> None:
     """
     Verify that the progress callback is called correctly during extraction.
     """
@@ -232,7 +232,7 @@ def test_extract_stream_progress_callback(pymupdf, pdf_path: Path) -> None:
         )
 
 
-def test_extract_stream_backward_compatibility(pymupdf, pdf_path: Path) -> None:
+def test_extract_stream_backward_compatibility(pymupdf: Any, pdf_path: Path) -> None:
     """
     Verify that extract() and extract_stream() produce identical results.
 
@@ -248,7 +248,7 @@ def test_extract_stream_backward_compatibility(pymupdf, pdf_path: Path) -> None:
     )
 
 
-def test_extract_stream_memory_parameters(pymupdf, pdf_path: Path) -> None:
+def test_extract_stream_memory_parameters(pymupdf: Any, pdf_path: Path) -> None:
     """
     Test extract_stream with various memory limit parameters.
     """
@@ -271,7 +271,7 @@ def test_extract_stream_memory_parameters(pymupdf, pdf_path: Path) -> None:
 
 @pytest.mark.parametrize(("kind", "probe_fn"), _PROBES, ids=[k for k, _ in _PROBES])
 def test_extract_stream_all_input_types(
-    pymupdf,
+    pymupdf: Any,
     pdf_path: Path,
     pdf_bytes: bytes,
     kind: str,
@@ -290,7 +290,7 @@ def test_extract_stream_all_input_types(
         _assert_valid_element(el)
 
 
-def test_memory_usage_utility_methods(pymupdf) -> None:
+def test_memory_usage_utility_methods(pymupdf: Any) -> None:
     """
     Test the memory monitoring utility methods work correctly.
     """

@@ -174,7 +174,7 @@ class StatusCommand(BaseCommand):
         # Show recommendations if needed
         self._show_recommendations(status_items)
 
-    def _check_environment_variables(self, status_items: dict) -> None:
+    def _check_environment_variables(self, status_items: dict[str, object]) -> None:
         """Check environment variables status."""
         project_path = os.getenv("INGENIOUS_PROJECT_PATH")
         profile_path = os.getenv("INGENIOUS_PROFILE_PATH")
@@ -213,7 +213,7 @@ class StatusCommand(BaseCommand):
                 "details": "Environment variable not set",
             }
 
-    def _check_local_files(self, status_items: dict) -> None:
+    def _check_local_files(self, status_items: dict[str, object]) -> None:
         """Check local configuration files."""
         files_to_check = {
             "config.yml": Path.cwd() / "config.yml",
@@ -230,7 +230,7 @@ class StatusCommand(BaseCommand):
                     "details": "File not found in current directory",
                 }
 
-    def _show_recommendations(self, status_items: dict) -> None:
+    def _show_recommendations(self, status_items: dict[str, object]) -> None:
         """Show setup recommendations based on status."""
         has_issues = any(
             item.get("status", "").lower() in ["missing", "warning", "error"]

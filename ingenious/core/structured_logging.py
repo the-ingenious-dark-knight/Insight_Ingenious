@@ -132,7 +132,7 @@ def setup_structured_logging(
 
 def get_logger(name: str) -> structlog.BoundLogger:
     """Get a structured logger instance."""
-    return structlog.get_logger(name)
+    return structlog.get_logger(name)  # type: ignore
 
 
 def set_request_context(

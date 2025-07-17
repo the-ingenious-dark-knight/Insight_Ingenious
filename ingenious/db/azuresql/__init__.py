@@ -1,7 +1,7 @@
 import json
 from typing import Any, Dict, List, Optional
 
-import pyodbc
+import pyodbc  # type: ignore
 
 from ingenious.config.settings import IngeniousSettings
 
@@ -184,7 +184,7 @@ class azuresql_ChatHistoryRepository(BaseSQLRepository):
         thread_id: str,
         name: Optional[str] = None,
         user_id: Optional[str] = None,
-        metadata: Optional[Dict] = None,
+        metadata: Optional[Dict[str, object]] = None,
         tags: Optional[List[str]] = None,
     ) -> str:
         logger.info(

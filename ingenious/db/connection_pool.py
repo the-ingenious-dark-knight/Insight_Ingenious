@@ -6,7 +6,7 @@ from contextlib import contextmanager
 from queue import Empty, Queue
 from typing import Any, Iterator, Protocol
 
-import pyodbc
+import pyodbc  # type: ignore
 
 from ingenious.core.structured_logging import get_logger
 
@@ -112,7 +112,7 @@ class ConnectionPool:
         self.pool_size = pool_size
         self.max_retries = max_retries
         self.retry_delay = retry_delay
-        self._pool: Queue = Queue(maxsize=pool_size)
+        self._pool: Queue[Any] = Queue(maxsize=pool_size)
         self._lock = threading.Lock()
         self._created_connections = 0
 

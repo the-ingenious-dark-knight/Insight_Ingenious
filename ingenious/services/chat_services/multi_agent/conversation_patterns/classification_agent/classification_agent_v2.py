@@ -13,8 +13,8 @@ logger = get_logger(__name__)
 class ConversationPattern:
     def __init__(
         self,
-        default_llm_config: dict,
-        topics: list,
+        default_llm_config: dict[str, object],
+        topics: list[str],
         memory_record_switch: bool,
         memory_path: str,
         thread_memory: str,

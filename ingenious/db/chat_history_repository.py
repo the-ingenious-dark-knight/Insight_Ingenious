@@ -62,7 +62,7 @@ class IChatHistoryRepository(ABC):
         language: Optional[str]
         page: Optional[int]
         autoPlay: Optional[bool]
-        playerConfig: Optional[dict]
+        playerConfig: Optional[dict[str, object]]
         forId: Optional[str]
         mime: Optional[str]
 
@@ -84,7 +84,7 @@ class IChatHistoryRepository(ABC):
     class User:
         id: UUID
         identifier: str
-        metadata: dict
+        metadata: dict[str, object]
         createdAt: Optional[str]
 
     @dataclass
@@ -95,7 +95,7 @@ class IChatHistoryRepository(ABC):
         userId: UUID
         userIdentifier: Optional[str]
         tags: Optional[List[str]]
-        metadata: Optional[dict]
+        metadata: Optional[dict[str, object]]
 
     @dataclass
     class Step:
@@ -108,14 +108,14 @@ class IChatHistoryRepository(ABC):
         streaming: bool
         waitForAnswer: Optional[bool]
         isError: Optional[bool]
-        metadata: Optional[dict]
+        metadata: Optional[dict[str, object]]
         tags: Optional[List[str]]
         input: Optional[str]
         output: Optional[str]
         createdAt: Optional[str]
         start: Optional[str]
         end: Optional[str]
-        generation: Optional[dict]
+        generation: Optional[dict[str, object]]
         showInput: Optional[str]
         language: Optional[str]
         indent: Optional[int]
@@ -160,14 +160,14 @@ class IChatHistoryRepository(ABC):
         streaming: bool
         waitForAnswer: Optional[bool]
         isError: Optional[bool]
-        metadata: Dict
+        metadata: Dict[str, object]
         tags: Optional[List[str]]
         input: str
         output: str
         createdAt: Optional[str]
         start: Optional[str]
         end: Optional[str]
-        generation: Optional[Dict]
+        generation: Optional[Dict[str, object]]
         showInput: Optional[Union[bool, str]]
         language: Optional[str]
         indent: Optional[int]
@@ -180,7 +180,7 @@ class IChatHistoryRepository(ABC):
         userId: Optional[str]
         userIdentifier: Optional[str]
         tags: Optional[List[str]]
-        metadata: Optional[Dict]
+        metadata: Optional[Dict[str, object]]
         steps: List["IChatHistoryRepository.StepDict"]
         elements: Optional[List["IChatHistoryRepository.ElementDict"]]
 
@@ -196,7 +196,7 @@ class IChatHistoryRepository(ABC):
         thread_id: str,
         name: Optional[str] = None,
         user_id: Optional[str] = None,
-        metadata: Optional[Dict] = None,
+        metadata: Optional[Dict[str, object]] = None,
         tags: Optional[List[str]] = None,
     ) -> str:
         pass
@@ -268,7 +268,7 @@ class ChatHistoryRepository:
         thread_id: str,
         name: Optional[str] = None,
         user_id: Optional[str] = None,
-        metadata: Optional[Dict] = None,
+        metadata: Optional[Dict[str, object]] = None,
         tags: Optional[List[str]] = None,
     ) -> str:
         return await self.repository.update_thread(
