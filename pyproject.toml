@@ -22,9 +22,12 @@ classifiers = [
 requires-python = ">=3.13"
 # Minimal core dependencies - essential for basic library functionality
 dependencies = [
+  "aiofiles>=24.1.0",
   "autogen-agentchat>=0.5.7",
+  "autogen-ext>=0.5.7",
   "azure-identity>=1.17.1",
   "azure-keyvault-secrets>=4.10.0",
+  "chromadb>=1.0.11",
   "dependency-injector==4.48.1",
   "fastapi==0.115.9",
   "flask>=3.1.1",
