@@ -160,23 +160,25 @@ AZURE_SQL_CONNECTION_STRING=Driver={ODBC Driver 18 for SQL Server};Server=tcp:yo
 
 ## Step 4: Update Ingenious Configuration
 
-### Update config.yml
+Ingenious now uses environment variables for configuration instead of YAML files. Update your `.env` file with the Azure SQL settings:
 
-```yaml
-# config.yml
-chat_history:
-  database_type: "azuresql"
-  database_name: "your_database_name"
+### Update .env file
+
+```bash
+# .env
+
+# Change database type to Azure SQL
+INGENIOUS_CHAT_HISTORY__DATABASE_TYPE=azuresql
+
+# Configure Azure SQL connection string
+INGENIOUS_AZURE_SQL_SERVICES__DATABASE_CONNECTION_STRING=Driver={ODBC Driver 18 for SQL Server};Server=tcp:YOUR_SERVER.database.windows.net,1433;Database=YOUR_DATABASE;Uid=YOUR_USERNAME;Pwd=YOUR_PASSWORD;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;
+
+# Optional: Set database name and table name
+INGENIOUS_AZURE_SQL_SERVICES__DATABASE_NAME=your_database_name
+INGENIOUS_AZURE_SQL_SERVICES__TABLE_NAME=chat_history
 ```
 
-### Update profiles.yml
-
-```yaml
-# profiles.yml
-- name: dev
-  chat_history:
-    database_connection_string: ${AZURE_SQL_CONNECTION_STRING:REQUIRED_SET_IN_ENV}
-```
+**Note**: Replace `YOUR_SERVER`, `YOUR_DATABASE`, `YOUR_USERNAME`, and `YOUR_PASSWORD` with your actual Azure SQL credentials.
 
 ## Step 5: Test Configuration
 
@@ -208,13 +210,15 @@ Expected output:
 ### Test Database Connection
 
 ```bash
-uv run python -c "
+# Create a test script
+cat > test_azure_sql.py << 'EOF'
 import pyodbc
 import os
 
-conn_str = os.getenv('AZURE_SQL_CONNECTION_STRING')
+# Get connection string from environment
+conn_str = os.getenv('INGENIOUS_AZURE_SQL_SERVICES__DATABASE_CONNECTION_STRING')
 if not conn_str:
-    print('❌ AZURE_SQL_CONNECTION_STRING not set')
+    print('❌ INGENIOUS_AZURE_SQL_SERVICES__DATABASE_CONNECTION_STRING not set')
     exit(1)
 
 try:
@@ -227,16 +231,20 @@ try:
     conn.close()
 except Exception as e:
     print(f'❌ Connection failed: {e}')
-"
+EOF
+
+# Run the test
+uv run python test_azure_sql.py
 ```
 
 ### Test Ingenious Repository
 
 ```bash
-uv run python -c "
+# Create a repository test script
+cat > test_repository.py << 'EOF'
 import asyncio
-from ingenious.ingenious.dependencies import get_config
-from ingenious.ingenious.db.chat_history_repository import ChatHistoryRepository
+from ingenious.dependencies import get_config
+from ingenious.db.chat_history_repository import ChatHistoryRepository
 from ingenious.models.database_client import DatabaseClientType
 
 async def test_repo():
@@ -251,7 +259,10 @@ async def test_repo():
         print(f'❌ Repository error: {e}')
 
 asyncio.run(test_repo())
-"
+EOF
+
+# Run the test
+uv run python test_repository.py
 ```
 
 ## Step 6: Production Testing
@@ -280,26 +291,50 @@ curl -X POST "http://localhost:80/api/v1/chat" \
 Query the database directly to confirm messages are stored:
 
 ```bash
-uv run python -c "
+# Create verification script
+cat > verify_azure_sql_data.py << 'EOF'
 import pyodbc
 import os
 
-conn_str = os.getenv('AZURE_SQL_CONNECTION_STRING')
+# Get connection string from environment
+conn_str = os.getenv('INGENIOUS_AZURE_SQL_SERVICES__DATABASE_CONNECTION_STRING')
 conn = pyodbc.connect(conn_str)
 cursor = conn.cursor()
 
 # Check if tables were created
+cursor.execute("""
+    SELECT TABLE_NAME 
+    FROM INFORMATION_SCHEMA.TABLES 
+    WHERE TABLE_TYPE = 'BASE TABLE' 
+    AND TABLE_NAME IN ('chat_history', 'chat_history_summary', 'threads', 'steps', 'elements', 'feedbacks', 'users')
+    ORDER BY TABLE_NAME
+""")
+tables = cursor.fetchall()
+print(f"✅ Found {len(tables)} Ingenious tables:")
+for table in tables:
+    print(f"  - {table[0]}")
+
+# Check chat_history table for recent messages
 cursor.execute('SELECT COUNT(*) FROM chat_history')
 count = cursor.fetchone()[0]
-print(f'Messages in chat_history table: {count}')
+print(f'✅ Messages in chat_history table: {count}')
 
-# Show recent messages
-cursor.execute('SELECT TOP 5 thread_id, content FROM chat_history ORDER BY created_at DESC')
-for row in cursor.fetchall():
-    print(f'Thread: {row[0]}, Content: {row[1][:50]}...')
+if count > 0:
+    # Show recent messages
+    cursor.execute("""
+        SELECT TOP 3 thread_id, role, content, timestamp 
+        FROM chat_history 
+        ORDER BY timestamp DESC
+    """)
+    print("📝 Recent messages:")
+    for row in cursor.fetchall():
+        print(f"  Thread: {row[0][:8]}..., Role: {row[1]}, Content: {row[2][:50]}..., Time: {row[3]}")
 
 conn.close()
-"
+EOF
+
+# Run verification
+uv run python verify_azure_sql_data.py
 ```
 
 ## Database Schema

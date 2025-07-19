@@ -7,11 +7,14 @@ from azure.identity import (
 )
 from azure.storage.blob import BlobServiceClient
 
+from ingenious.core.structured_logging import get_logger
 from ingenious.files.files_repository import IFileStorage
 from ingenious.models.config import (
     AuthenticationMethod as file_storage_AuthenticationMethod,
 )
 from ingenious.models.config import Config, FileStorageContainer
+
+logger = get_logger(__name__)
 
 
 class azure_FileStorageRepository(IFileStorage):
@@ -34,8 +37,7 @@ class azure_FileStorageRepository(IFileStorage):
             self.blob_service_client = BlobServiceClient(
                 account_url=self.url, credential=self.token
             )
-
-        if (
+        elif (
             self.authentication_method
             == file_storage_AuthenticationMethod.CLIENT_ID_AND_SECRET
         ):
@@ -47,21 +49,25 @@ class azure_FileStorageRepository(IFileStorage):
             self.blob_service_client = BlobServiceClient(
                 account_url=self.url, credential=cred
             )
-
-        if self.authentication_method == file_storage_AuthenticationMethod.MSI:
+        elif self.authentication_method == file_storage_AuthenticationMethod.MSI:
             self.blob_service_client = BlobServiceClient(
                 account_url=self.url,
                 credential=ManagedIdentityCredential(client_id=self.client_id),
             )
             print("======")
             print(self.client_id, self.url)
-
-        if (
+        elif (
             self.authentication_method
             == file_storage_AuthenticationMethod.DEFAULT_CREDENTIAL
         ):
             self.blob_service_client = BlobServiceClient(
                 account_url=self.url, credential=DefaultAzureCredential()
+            )
+        else:
+            # If no authentication method matched, raise an error
+            raise ValueError(
+                f"Invalid authentication configuration. Token provided: {bool(self.token)}, "
+                f"Authentication method: {self.authentication_method}"
             )
 
     async def write_file(self, contents: str, file_name: str, file_path: str) -> str:
@@ -94,7 +100,8 @@ class azure_FileStorageRepository(IFileStorage):
             blob_client.upload_blob(contents, overwrite=True)
             # print(f"Successfully uploaded {path} to container {self.container_name}.")
         except Exception as e:
-            print(f"Failed to upload {path} to container {self.container_name}: {e}")
+            logger.error(f"Failed to upload {path} to container {self.container_name}: {e}")
+            raise
         return str(path)
 
     async def read_file(self, file_name: str, file_path: str) -> str:
@@ -120,10 +127,10 @@ class azure_FileStorageRepository(IFileStorage):
             # print(f"Successfully downloaded {path} from container {self.container_name}.")
             return data
         except Exception as e:
-            print(
+            logger.error(
                 f"Failed to download {path} from container {self.container_name}: {e}"
             )
-            return ""
+            raise
 
     async def delete_file(self, file_name: str, file_path: str) -> str:
         """
@@ -144,7 +151,8 @@ class azure_FileStorageRepository(IFileStorage):
             blob_client.delete_blob()
             # print(f"Successfully deleted {path} from container {self.container_name}.")
         except Exception as e:
-            print(f"Failed to delete {path} from container {self.container_name}: {e}")
+            logger.error(f"Failed to delete {path} from container {self.container_name}: {e}")
+            raise
         return str(path)
 
     async def list_files(self, file_path: str) -> str:
@@ -170,10 +178,10 @@ class azure_FileStorageRepository(IFileStorage):
             # print(f"Blobs in container {self.container_name} with prefix {prefix}: {blobs}")
             return "\n".join(blobs)
         except Exception as e:
-            print(
+            logger.error(
                 f"Failed to list blobs in container {self.container_name} with prefix {prefix}: {e}"
             )
-            return ""
+            raise
 
     async def check_if_file_exists(self, file_path: str, file_name: str) -> bool:
         """
@@ -195,10 +203,10 @@ class azure_FileStorageRepository(IFileStorage):
             # print(f"Blob {path} exists in container {self.container_name}: {exists}")
             return exists
         except Exception as e:
-            print(
+            logger.error(
                 f"Failed to check if blob {path} exists in container {self.container_name}: {e}"
             )
-            return False
+            raise
 
     async def get_base_path(self) -> str:
         """

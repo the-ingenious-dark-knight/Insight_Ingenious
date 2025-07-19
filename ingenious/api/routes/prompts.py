@@ -40,7 +40,11 @@ def list_revisions(
         # Filter to find directories (these would be the revision IDs)
         # For Azure Blob Storage, we need to look for folder prefixes
         revision_ids = set()
-        for item in revisions_raw:
+        # Handle string response from list_files (newline-separated)
+        items_list = revisions_raw.split('\n') if revisions_raw else []
+        for item in items_list:
+            if not item:
+                continue
             # Extract revision ID from the path
             # For Azure, items are full paths like "templates/prompts/submission-over-criteria-v1/file.jinja"
             # For local, items are filenames directly
@@ -179,8 +183,10 @@ def list_prompts_enhanced(
 
                 # Filter to get only template files
                 potential_files = []
-                for f in files_raw:
-                    if f.endswith((".md", ".jinja")):
+                # Handle string response from list_files (newline-separated)
+                file_list = files_raw.split('\n') if files_raw else []
+                for f in file_list:
+                    if f and f.endswith((".md", ".jinja")):
                         # For Azure Blob Storage, extract just the filename
                         if "/" in f:
                             filename = f.split("/")[-1]
