@@ -1,17 +1,24 @@
+import logging
+import uuid
 from typing import List, Optional, Tuple, Union
 
 from autogen_agentchat.agents import AssistantAgent
 from autogen_agentchat.messages import TextMessage
-from autogen_core import CancellationToken
+from autogen_core import CancellationToken, EVENT_LOGGER_NAME
 from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
 
 import ingenious.config.config as config
-from ingenious.models.chat import ChatRequest
+from ingenious.models.agent import LLMUsageTracker
+from ingenious.models.chat import ChatRequest, ChatResponse
+from ingenious.models.message import Message
 
 
 class ConversationFlow:
-    @staticmethod
-    async def get_conversation_response(chatrequest: ChatRequest) -> Tuple[str, str]:
+    def __init__(self, parent_multi_agent_chat_service=None):
+        self._config = config.get_config()
+        self._chat_service = parent_multi_agent_chat_service
+    
+    async def get_conversation_response(self, chatrequest: ChatRequest) -> ChatResponse:
         message = chatrequest.user_prompt
         topics: Optional[Union[str, List[str]]] = chatrequest.topic
 
@@ -21,8 +28,37 @@ class ConversationFlow:
         elif isinstance(topics, str):
             topics = [topics]
 
-        _config = config.get_config()
-        model_config = _config.models[0]
+        model_config = self._config.models[0]
+        
+        # Initialize LLM usage tracking
+        logger = logging.getLogger(EVENT_LOGGER_NAME)
+        logger.setLevel(logging.INFO)
+        
+        llm_logger = LLMUsageTracker(
+            agents=[],  # Simple agent, no complex agent list needed
+            config=self._config,
+            chat_history_repository=self._chat_service.chat_history_repository if self._chat_service else None,
+            revision_id=str(uuid.uuid4()),
+            identifier=str(uuid.uuid4()),
+            event_type="classification",
+        )
+        
+        logger.handlers = [llm_logger]
+
+        # Retrieve thread memory for context
+        memory_context = ""
+        if chatrequest.thread_id and self._chat_service:
+            try:
+                thread_messages = await self._chat_service.chat_history_repository.get_thread_messages(chatrequest.thread_id)
+                if thread_messages:
+                    # Build conversation context from recent messages (last 10)
+                    recent_messages = thread_messages[-10:] if len(thread_messages) > 10 else thread_messages
+                    memory_parts = []
+                    for msg in recent_messages:
+                        memory_parts.append(f"{msg.role}: {msg.content[:100]}...")
+                    memory_context = f"Previous conversation:\n" + "\n".join(memory_parts) + "\n\n"
+            except Exception as e:
+                logger.warning(f"Failed to retrieve thread memory: {e}")
 
         # Configure Azure OpenAI client for v0.4
         azure_config = {
@@ -36,18 +72,18 @@ class ConversationFlow:
         # Create the model client
         model_client = AzureOpenAIChatCompletionClient(**azure_config)
 
-        # Create classification system prompt
-        classification_system_prompt = """
-You are a classification assistant. Classify the following user message into one of these categories:
+        # Create classification system prompt with memory context
+        classification_system_prompt = f"""
+You are a classification assistant with access to conversation history. Classify the following user message into one of these categories:
 1. payload_type_1: General product inquiries, features, specifications
 2. payload_type_2: Purchase-related questions, pricing, availability
 3. payload_type_3: Support issues, problems, complaints
 4. undefined: Messages that don't fit the above categories
 
-Format your response as:
+{memory_context}Format your response as:
 Category: [category_name]
 Explanation: [brief explanation]
-Response: [helpful response to the user's message]
+Response: [helpful response to the user's message, considering conversation history]
 """
 
         # Create the classification agent
@@ -78,4 +114,12 @@ Response: [helpful response to the user's message]
             # Make sure to close the model client connection when done
             await model_client.close()
 
-        return result, memory_summary
+        # Return ChatResponse with token counting
+        return ChatResponse(
+            thread_id=chatrequest.thread_id or "",
+            message_id=str(uuid.uuid4()),
+            agent_response=result,
+            token_count=llm_logger.prompt_tokens + llm_logger.completion_tokens,
+            max_token_count=llm_logger.tokens,
+            memory_summary=memory_summary,
+        )

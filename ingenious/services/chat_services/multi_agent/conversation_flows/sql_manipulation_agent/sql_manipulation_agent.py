@@ -1,12 +1,14 @@
+import logging
 import os
 import sqlite3
 import uuid
 
 from autogen_agentchat.agents import AssistantAgent
-from autogen_core import CancellationToken
+from autogen_core import CancellationToken, EVENT_LOGGER_NAME
 from autogen_core.tools import FunctionTool
 from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
 
+from ingenious.models.agent import LLMUsageTracker
 from ingenious.models.chat import ChatRequest, ChatResponse
 from ingenious.services.chat_services.multi_agent.service import IConversationFlow
 
@@ -23,6 +25,36 @@ class ConversationFlow(IConversationFlow):
     ) -> ChatResponse:
         # Get configuration from the parent service
         model_config = self._config.models[0]
+        
+        # Initialize LLM usage tracking
+        logger = logging.getLogger(EVENT_LOGGER_NAME)
+        logger.setLevel(logging.INFO)
+        
+        llm_logger = LLMUsageTracker(
+            agents=[],  # Simple agent, no complex agent list needed
+            config=self._config,
+            chat_history_repository=self._parent_multi_agent_chat_service.chat_history_repository if self._parent_multi_agent_chat_service else None,
+            revision_id=str(uuid.uuid4()),
+            identifier=str(uuid.uuid4()),
+            event_type="sql_manipulation",
+        )
+        
+        logger.handlers = [llm_logger]
+        
+        # Retrieve thread memory for context
+        memory_context = ""
+        if chat_request.thread_id and self._parent_multi_agent_chat_service:
+            try:
+                thread_messages = await self._parent_multi_agent_chat_service.chat_history_repository.get_thread_messages(chat_request.thread_id)
+                if thread_messages:
+                    # Build conversation context from recent messages (last 10)
+                    recent_messages = thread_messages[-10:] if len(thread_messages) > 10 else thread_messages
+                    memory_parts = []
+                    for msg in recent_messages:
+                        memory_parts.append(f"{msg.role}: {msg.content[:100]}...")
+                    memory_context = f"Previous conversation:\n" + "\n".join(memory_parts) + "\n\n"
+            except Exception as e:
+                logger.warning(f"Failed to retrieve thread memory: {e}")
 
         # Configure Azure OpenAI client for v0.4
         azure_config = {
@@ -156,9 +188,10 @@ class ConversationFlow(IConversationFlow):
 
         system_message = f"""You are a SQL expert that helps write and execute SQL queries on data stored in {database_type}.
 
-Tasks:
+{memory_context}Tasks:
 - Write SQL queries to answer user questions about the data
 - Use the 'execute_sql_tool' to run queries
+- Consider previous conversation context when generating responses
 - Format your response based on the number of rows:
   - Single Row: Use the format {{column_name: value, column_name: value}}
   - Multiple Rows: Use a list format with each row as a dictionary
@@ -170,9 +203,9 @@ When composing summary statistics, use functions like AVG(), COUNT(), etc.
 When the user asks what columns are available, just list them without running a query.
 
 Example queries:
-- SELECT * FROM students_performance LIMIT 5
-- SELECT AVG(math_score) FROM students_performance
-- SELECT COUNT(*) FROM students_performance WHERE lunch = 'free/reduced'
+- SELECT * FROM {table_name} LIMIT 5
+- SELECT AVG(salary) FROM {table_name}
+- SELECT COUNT(*) FROM {table_name} WHERE department = 'Engineering'
 """
 
         # Set up the agent team with the SQL assistant and a user proxy
@@ -216,12 +249,12 @@ Example queries:
         # Make sure to close the model client connection when done
         await model_client.close()
 
-        # Return the response
+        # Return the response with token counting
         return ChatResponse(
             thread_id=chat_request.thread_id or "",
             message_id=str(uuid.uuid4()),
             agent_response=final_message,
-            token_count=0,
-            max_token_count=0,
+            token_count=llm_logger.prompt_tokens + llm_logger.completion_tokens,
+            max_token_count=llm_logger.tokens,
             memory_summary=final_message,
         )
