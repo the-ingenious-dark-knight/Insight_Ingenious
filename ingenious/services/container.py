@@ -1,16 +1,16 @@
 """Dependency injection container for Ingenious services."""
 
+from typing import Any
 from dependency_injector import containers, providers
 from dotenv import load_dotenv
 
 from ingenious.config.config import get_config as _get_config
+from ingenious.config.settings import IngeniousSettings
 
 # Legacy profile import removed - now using new config system
 from ingenious.core.structured_logging import get_logger
-from ingenious.db.chat_history_repository import (
-    ChatHistoryRepository,
-    DatabaseClientType,
-)
+from ingenious.db.chat_history_repository import ChatHistoryRepository
+from ingenious.models.database_client import DatabaseClientType
 from ingenious.errors import ConfigurationError
 from ingenious.external_services.openai_service import OpenAIService
 from ingenious.files.files_repository import FileStorage
@@ -18,7 +18,7 @@ from ingenious.services.chat_service import ChatService
 from ingenious.services.message_feedback_service import MessageFeedbackService
 
 
-def _get_database_type(config) -> DatabaseClientType:
+def _get_database_type(config: IngeniousSettings) -> DatabaseClientType:
     """Get database type from config with proper error handling."""
     db_type_val = config.chat_history.database_type.lower()
     try:
@@ -36,7 +36,7 @@ def _get_database_type(config) -> DatabaseClientType:
 
 
 def _create_chat_service(
-    config,
+    config: IngeniousSettings,
     chat_history_repository: ChatHistoryRepository,
     conversation_flow: str = "",
 ) -> ChatService:
@@ -50,7 +50,7 @@ def _create_chat_service(
     )
 
 
-def _create_security_service(config):
+def _create_security_service(config: IngeniousSettings) -> dict[str, Any]:
     """Factory function for security service configuration."""
     return {
         "config": config,
@@ -138,38 +138,6 @@ class Container(containers.DeclarativeContainer):
     )
 
 
-def _get_database_type(config) -> DatabaseClientType:
-    """Get database type from config with proper error handling."""
-    db_type_val = config.chat_history.database_type.lower()
-    try:
-        return DatabaseClientType(db_type_val)
-    except ValueError as e:
-        raise ConfigurationError(
-            f"Unknown database type: {db_type_val}",
-            context={
-                "database_type": db_type_val,
-                "available_types": [t.value for t in DatabaseClientType],
-            },
-            cause=e,
-            recovery_suggestion="Check the database_type configuration in config.yml",
-        ) from e
-
-
-def _create_chat_service(
-    config,
-    chat_history_repository: ChatHistoryRepository,
-    conversation_flow: str = "",
-) -> ChatService:
-    """Factory function to create ChatService with proper dependencies."""
-    cs_type = config.chat_service.type
-    return ChatService(
-        chat_service_type=cs_type,
-        chat_history_repository=chat_history_repository,
-        conversation_flow=conversation_flow,
-        config=config,
-    )
-
-
 # Global container instance
 _container: Container | None = None
 
@@ -212,7 +180,7 @@ def init_container() -> Container:
     return _container
 
 
-def configure_for_testing():
+def configure_for_testing() -> Any:
     """Configure container for testing environment."""
     # Override with test configurations
     from unittest.mock import Mock
@@ -230,19 +198,19 @@ def configure_for_testing():
     return container
 
 
-def configure_for_development():
+def configure_for_development() -> Any:
     """Configure container for development environment."""
     # Development-specific configurations
     return get_container()
 
 
-def configure_for_production():
+def configure_for_production() -> Any:
     """Configure container for production environment."""
     # Production-specific configurations
     return get_container()
 
 
-def override_for_testing(**overrides):
+def override_for_testing(**overrides: Any) -> None:
     """Override container providers for testing."""
     container = get_container()
     for provider_name, override_value in overrides.items():
@@ -251,7 +219,7 @@ def override_for_testing(**overrides):
             provider.override(override_value)
 
 
-def reset_overrides():
+def reset_overrides() -> None:
     """Reset all container overrides."""
     container = get_container()
     container.reset_override()

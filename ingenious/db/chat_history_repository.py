@@ -356,4 +356,4 @@ class ChatHistoryRepository:
         return None
 
     async def delete_user_memory(self, user_id: str) -> None:
-        return await self.repository.delete_user_memory(user_id)
+        await self.repository.delete_user_memory(user_id)

@@ -3,6 +3,7 @@ import uuid
 from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Any, List
+from uuid import UUID
 
 from ingenious.config.settings import IngeniousSettings
 from ingenious.db.chat_history_repository import IChatHistoryRepository
@@ -151,7 +152,7 @@ class BaseSQLRepository(IChatHistoryRepository, ABC):
         self._execute_sql(query, params, expect_results=False)
 
     async def add_user(
-        self, identifier: str, metadata: dict[str, object] = None
+        self, identifier: str, metadata: dict[str, object] | None = None
     ) -> IChatHistoryRepository.User:
         """Add a new user."""
         if metadata is None:
@@ -256,16 +257,16 @@ class BaseSQLRepository(IChatHistoryRepository, ABC):
         """Convert database row to User object."""
         if isinstance(row, dict):
             return IChatHistoryRepository.User(
-                id=row.get("id"),
-                identifier=row.get("identifier"),
-                metadata=row.get("metadata"),
+                id=UUID(row.get("id", "")),
+                identifier=str(row.get("identifier", "")),
+                metadata=dict(row.get("metadata", {})),
                 createdAt=row.get("createdAt"),
             )
         else:
             # Assume row is tuple/list with positional values
             return IChatHistoryRepository.User(
-                id=row[0],
-                identifier=row[1],
-                metadata=row[2],
+                id=UUID(row[0]) if row[0] else UUID("00000000-0000-0000-0000-000000000000"),
+                identifier=str(row[1]) if row[1] else "",
+                metadata=dict(row[2]) if row[2] else {},
                 createdAt=row[3],
             )

@@ -159,7 +159,7 @@ def write_env_file(
             )
 
         # Group related settings together
-        sections: dict[str, list[str]] = {
+        sections: dict[str, list[tuple[str, str]]] = {
             "Profile Settings": [],
             "Model Configuration": [],
             "Chat History": [],

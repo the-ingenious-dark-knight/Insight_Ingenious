@@ -87,13 +87,13 @@ class AgentChats(BaseModel):
 
     _agent_chats: List[AgentChat] = []
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
-    def add_agent_chat(self, agent_chat: AgentChat):
+    def add_agent_chat(self, agent_chat: AgentChat) -> None:
         self._agent_chats.append(agent_chat)
 
-    def get_agent_chats(self):
+    def get_agent_chats(self) -> List[AgentChat]:
         return self._agent_chats
 
     def get_agent_chat_by_name(self, agent_name: str) -> AgentChat:
@@ -383,14 +383,14 @@ class LLMUsageTracker(logging.Handler):
                                 add_chat = False
 
                         system_input = "\n\n".join(
-                            [r.content for r in kwargs.messages if r and r.role == "system" and r.content]
+                            [r.content for r in (kwargs.messages or []) if r and r.role == "system" and r.content]
                         )
                         user_input = "\n\n".join(
-                            [r.content for r in kwargs.messages if r and r.role == "user" and r.content]
+                            [r.content for r in (kwargs.messages or []) if r and r.role == "user" and r.content]
                         )
 
                         # Get all messages with role 'tool'
-                        tool_messages = [m for m in kwargs.messages if m and m.role == "tool"]
+                        tool_messages = [m for m in (kwargs.messages or []) if m and m.role == "tool"]
                         if tool_messages:
                             user_input += "\n\n---\n\n"
                             user_input += "# Tool Messages\n\n"
@@ -418,7 +418,7 @@ class LLMUsageTracker(logging.Handler):
 
 
 class IProjectAgents(ABC):
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
     @abstractmethod

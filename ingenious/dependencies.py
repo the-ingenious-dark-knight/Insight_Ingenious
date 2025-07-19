@@ -20,11 +20,11 @@ from typing_extensions import Annotated
 
 from ingenious.auth.jwt import get_username_from_token
 from ingenious.config.config import get_config as _get_config
+from ingenious.config.profile import Profiles
+from ingenious.config.settings import IngeniousSettings
 from ingenious.core.structured_logging import get_logger
-from ingenious.db.chat_history_repository import (
-    ChatHistoryRepository,
-    DatabaseClientType,
-)
+from ingenious.db.chat_history_repository import ChatHistoryRepository
+from ingenious.models.database_client import DatabaseClientType
 from ingenious.errors import ConfigurationError
 from ingenious.external_services.openai_service import OpenAIService
 from ingenious.files.files_repository import FileStorage
@@ -46,19 +46,17 @@ security = HTTPBasic()
 bearer_security = HTTPBearer()
 
 
-def get_config():
+def get_config() -> IngeniousSettings:
     """Get config dynamically to ensure environment variables are loaded"""
     return _get_config()
 
 
-def get_profile():
+def get_profile() -> Profiles:
     """Get profile dynamically to ensure environment variables are loaded"""
-    import ingenious.config.profile as Profile
-
-    return Profile.Profiles(os.getenv("INGENIOUS_PROFILE_PATH", ""))
+    return Profiles(os.getenv("INGENIOUS_PROFILE_PATH", ""))
 
 
-def get_openai_service():
+def get_openai_service() -> OpenAIService:
     config = get_config()
     model = config.models[0]
     return OpenAIService(
@@ -69,7 +67,7 @@ def get_openai_service():
     )
 
 
-def get_chat_history_repository():
+def get_chat_history_repository() -> ChatHistoryRepository:
     config = get_config()
     db_type_val = config.chat_history.database_type.lower()
     try:
@@ -92,9 +90,9 @@ def get_chat_history_repository():
 
 
 def get_security_service(
-    token: Annotated[str, Depends(bearer_security)] = None,
-    credentials: Annotated[HTTPBasicCredentials, Depends(security)] = None,
-):
+    token: Annotated[str, Depends(bearer_security)] | None = None,
+    credentials: Annotated[HTTPBasicCredentials, Depends(security)] | None = None,
+) -> str:
     config = get_config()
     if not config.web_configuration.authentication.enable:
         # Authentication is disabled, allow access without checking credentials
@@ -104,9 +102,9 @@ def get_security_service(
         return "anonymous"  # Return something that indicates no auth
 
     # Try JWT token first (preferred method)
-    if token and token.credentials:
+    if token:
         try:
-            username = get_username_from_token(token.credentials)
+            username = get_username_from_token(token)
             return username
         except HTTPException:
             # JWT token validation failed, fall back to basic auth if available
@@ -145,7 +143,7 @@ def get_security_service(
 
 def get_security_service_optional(
     credentials: Optional[HTTPBasicCredentials] = None,
-):
+) -> Optional[str]:
     """Optional security service that doesn't require credentials when auth is disabled"""
     config = get_config()
     if not config.web_configuration.authentication.enable:
@@ -191,7 +189,7 @@ def get_chat_service(
         ChatHistoryRepository, Depends(get_chat_history_repository)
     ],
     conversation_flow: str = "",
-):
+) -> ChatService:
     config = get_config()
     cs_type = config.chat_service.type
     return ChatService(
@@ -206,13 +204,13 @@ def get_message_feedback_service(
     chat_history_repository: Annotated[
         ChatHistoryRepository, Depends(get_chat_history_repository)
     ],
-):
+) -> MessageFeedbackService:
     return MessageFeedbackService(chat_history_repository)
 
 
-def sync_templates():
+def sync_templates() -> None:
     config = get_config()
-    if config.file_storage.storage_type == "local":
+    if config.file_storage.revisions.storage_type == "local":
         return
     else:
         fs = FileStorage(config)
@@ -237,7 +235,7 @@ def get_file_storage_revisions() -> FileStorage:
     return FileStorage(config, Category="revisions")
 
 
-def get_project_config():
+def get_project_config() -> IngeniousSettings:
     return get_config()
 
 

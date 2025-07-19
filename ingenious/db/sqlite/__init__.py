@@ -59,7 +59,7 @@ class sqlite_ChatHistoryRepository(BaseSQLRepository):
         pass
 
     def _execute_sql(
-        self, sql: str, params: List[Any] = None, expect_results: bool = True
+        self, sql: str, params: list[Any] | None = None, expect_results: bool = True
     ) -> Any:
         if params is None:
             params = []
@@ -100,11 +100,11 @@ class sqlite_ChatHistoryRepository(BaseSQLRepository):
                 cause=e,
             ) from e
 
-    def execute_sql(self, sql, params=[], expect_results=True):
+    def execute_sql(self, sql: str, params: list[Any] | None = None, expect_results: bool = True) -> Any:
         """Legacy method for backward compatibility."""
         return self._execute_sql(sql, params, expect_results)
 
-    def _create_table(self):
+    def _create_table(self) -> None:
         """Legacy method for backward compatibility. Tables are now created via base class."""
         pass
 
@@ -343,7 +343,7 @@ class sqlite_ChatHistoryRepository(BaseSQLRepository):
                 for row in rows
             ]
 
-    async def add_step(self, step_dict: IChatHistoryRepository.StepDict):
+    async def add_step(self, step_dict: IChatHistoryRepository.StepDict) -> IChatHistoryRepository.Step:
         logger.info(
             "Creating step in SQLite database",
             step_id=step_dict.get("id"),
