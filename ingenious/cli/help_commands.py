@@ -29,7 +29,7 @@ def register_commands(app: typer.Typer, console: Console) -> None:
             Optional[str],
             typer.Argument(help="Specific topic: setup, workflows, config, deployment"),
         ] = None,
-    ):
+    ) -> None:
         """
         📚 Show comprehensive help for getting started with Insight Ingenious.
 
@@ -43,7 +43,7 @@ def register_commands(app: typer.Typer, console: Console) -> None:
         cmd.run(topic=topic)
 
     @app.command(name="status", help="Check system status and configuration")
-    def status():
+    def status() -> None:
         """
         🔍 Check the status of your Insight Ingenious configuration.
 
@@ -57,7 +57,7 @@ def register_commands(app: typer.Typer, console: Console) -> None:
         cmd.run()
 
     @app.command(name="version", help="Show version information")
-    def version():
+    def version() -> None:
         """
         📦 Display version information for Insight Ingenious.
         """
@@ -65,7 +65,7 @@ def register_commands(app: typer.Typer, console: Console) -> None:
         cmd.run()
 
     @app.command(name="validate", help="Validate system configuration and requirements")
-    def validate():
+    def validate() -> None:
         """
         ✅ Comprehensive validation of your Insight Ingenious setup.
 

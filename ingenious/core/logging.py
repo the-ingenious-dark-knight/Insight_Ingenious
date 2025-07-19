@@ -3,7 +3,7 @@ import logging.handlers
 import os
 import sys
 
-import colorlog  # type: ignore
+import colorlog
 
 from .structured_logging import setup_structured_logging
 

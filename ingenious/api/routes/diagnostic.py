@@ -39,7 +39,7 @@ async def workflow_status(
     and what external services or configuration might be missing.
     """
     try:
-        config = igen_deps.get_config()  # type: ignore
+        config = igen_deps.get_config()
 
         # Normalize workflow name to handle both hyphenated and underscored formats
         normalized_workflow_name = normalize_workflow_name(workflow_name)
@@ -233,28 +233,22 @@ async def diagnostic(
         diagnostic = {}
 
         prompt_dir = Path(
-            await igen_deps.get_file_storage_revisions().get_base_path()  # type: ignore
+            await igen_deps.get_file_storage_revisions().get_base_path()
         ) / Path(
-            await igen_deps.get_file_storage_revisions().get_prompt_template_path()  # type: ignore
+            await igen_deps.get_file_storage_revisions().get_prompt_template_path()
         )
 
-        data_dir = Path(
-            await igen_deps.get_file_storage_data().get_base_path()  # type: ignore
-        ) / Path(
-            await igen_deps.get_file_storage_data().get_data_path()  # type: ignore
+        data_dir = Path(await igen_deps.get_file_storage_data().get_base_path()) / Path(
+            await igen_deps.get_file_storage_data().get_data_path()
         )
 
         output_dir = Path(
-            await igen_deps.get_file_storage_revisions().get_base_path()  # type: ignore
-        ) / Path(
-            await igen_deps.get_file_storage_revisions().get_output_path()  # type: ignore
-        )
+            await igen_deps.get_file_storage_revisions().get_base_path()
+        ) / Path(await igen_deps.get_file_storage_revisions().get_output_path())
 
         events_dir = Path(
-            await igen_deps.get_file_storage_revisions().get_base_path()  # type: ignore
-        ) / Path(
-            await igen_deps.get_file_storage_revisions().get_events_path()  # type: ignore
-        )
+            await igen_deps.get_file_storage_revisions().get_base_path()
+        ) / Path(await igen_deps.get_file_storage_revisions().get_events_path())
 
         diagnostic["Prompt Directory"] = prompt_dir
         diagnostic["Data Directory"] = data_dir
@@ -287,7 +281,7 @@ async def health_check() -> Dict[str, Any]:
 
         # Check basic configuration availability
         try:
-            _ = igen_deps.get_config()  # type: ignore
+            _ = igen_deps.get_config()
             config_status = "ok"
         except Exception as e:
             logger.warning("Configuration check failed", error=str(e))
@@ -295,7 +289,7 @@ async def health_check() -> Dict[str, Any]:
 
         # Check profile availability
         try:
-            _ = igen_deps.get_profile()  # type: ignore
+            _ = igen_deps.get_profile()
             profile_status = "ok"
         except Exception as e:
             logger.warning("Profile check failed", error=str(e))

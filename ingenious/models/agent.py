@@ -3,7 +3,7 @@ import json
 import logging
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import List, Optional
+from typing import Any, List, Optional, Type
 
 from autogen_agentchat.base import Response
 from autogen_agentchat.messages import TextMessage
@@ -19,7 +19,7 @@ from autogen_core.models import FunctionExecutionResult
 from autogen_core.tools import Tool
 from pydantic import BaseModel
 
-import ingenious.config.config as ig_config
+from ingenious.config import settings as ig_config
 from ingenious.db.chat_history_repository import ChatHistoryRepository
 from ingenious.files.files_repository import FileStorage
 from ingenious.models.config import Config, ModelConfig
@@ -56,6 +56,8 @@ class AgentChat(BaseModel):
     end_time: Optional[float] = None
 
     def get_execution_time(self) -> float:
+        if self.end_time is None or self.start_time is None:
+            return 0.0
         return self.end_time - self.start_time
 
     def get_execution_time_formatted(self) -> str:
@@ -63,6 +65,8 @@ class AgentChat(BaseModel):
         return f"{int(execution_time // 60)}:{int(execution_time % 60):02d}"
 
     def get_start_time_formatted(self) -> str:
+        if self.start_time is None:
+            return "00:00:00"
         return datetime.fromtimestamp(self.start_time).strftime("%H:%M:%S")
 
     def get_associated_agent_response_file_name(
@@ -83,25 +87,31 @@ class AgentChats(BaseModel):
 
     _agent_chats: List[AgentChat] = []
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
-    def add_agent_chat(self, agent_chat: AgentChat):
+    def add_agent_chat(self, agent_chat: AgentChat) -> None:
         self._agent_chats.append(agent_chat)
 
-    def get_agent_chats(self):
+    def get_agent_chats(self) -> List[AgentChat]:
         return self._agent_chats
 
     def get_agent_chat_by_name(self, agent_name: str) -> AgentChat:
         for agent_chat in self._agent_chats:
-            if agent_chat.agent_name == agent_name:
+            if (
+                agent_chat.source_agent_name == agent_name
+                or agent_chat.target_agent_name == agent_name
+            ):
                 return agent_chat
         raise ValueError(f"AgentChat with name {agent_name} not found")
 
     def get_agent_chats_by_name(self, agent_name: str) -> List[AgentChat]:
         agent_chats = []
         for agent_chat in self._agent_chats:
-            if agent_chat.agent_name == agent_name:
+            if (
+                agent_chat.source_agent_name == agent_name
+                or agent_chat.target_agent_name == agent_name
+            ):
                 agent_chats.append(agent_chat)
         return agent_chats
 
@@ -137,9 +147,13 @@ class Agent(BaseModel):
     agent_chats: list[AgentChat] = []
 
     def add_agent_chat(
-        self, content: str, identifier: str, ctx: MessageContext = None, source=None
+        self,
+        content: str,
+        identifier: str,
+        ctx: Optional[MessageContext] = None,
+        source: Optional[str] = None,
     ) -> AgentChat:
-        if ctx:
+        if ctx and ctx.topic_id:
             source = ctx.topic_id.source
 
         agent_chat: AgentChat = AgentChat(
@@ -164,7 +178,7 @@ class Agent(BaseModel):
                 return agent_chat
         raise ValueError(f"AgentChat with source {source} not found")
 
-    async def log(self, agent_chat: AgentChat, queue: asyncio.Queue[AgentChat]):
+    async def log(self, agent_chat: AgentChat, queue: asyncio.Queue[AgentChat]) -> None:
         if self.log_to_prompt_tuner or self.return_in_response:
             await queue.put(agent_chat)
 
@@ -219,10 +233,10 @@ class Agents(BaseModel):
                     f"Model {agent.agent_model_name} not found in config.yml"
                 )
 
-    def get_agents(self):
+    def get_agents(self) -> List[Agent]:
         return self._agents
 
-    def get_agents_for_prompt_tuner(self):
+    def get_agents_for_prompt_tuner(self) -> List[Agent]:
         return [agent for agent in self._agents if agent.log_to_prompt_tuner]
 
     def get_agent_by_name(self, agent_name: str) -> Agent:
@@ -233,13 +247,13 @@ class Agents(BaseModel):
 
     async def register_agent(
         self,
-        ag_class,
+        ag_class: Type[Any],
         runtime: SingleThreadedAgentRuntime,
         agent_name: str,
         data_identifier: str,
         next_agent_topic: str,
         tools: List[Tool] = [],
-    ):
+    ) -> None:
         agent = self.get_agent_by_name(agent_name=agent_name)
         reg_agent = await ag_class.register(
             runtime=runtime,
@@ -298,7 +312,7 @@ class LLMUsageTracker(logging.Handler):
         self._prompt_tokens = 0
         self._completion_tokens = 0
 
-    async def write_llm_responses_to_file(self, file_prefixes: List[str] = []):
+    async def write_llm_responses_to_file(self, file_prefixes: List[str] = []) -> None:
         for agent_chat in self._queue:
             agent = self._agents.get_agent_by_name(agent_chat.target_agent_name)
             if agent.log_to_prompt_tuner:
@@ -318,7 +332,7 @@ class LLMUsageTracker(logging.Handler):
     # TODO: Implement this function
     async def write_llm_responses_to_repository(
         self, user_id: str, thread_id: str, message_id: str
-    ):
+    ) -> None:
         for agent_chat in self._queue:
             agent = self._agents.get_agent_by_name(agent_chat.target_agent_name)
             if agent.log_to_prompt_tuner:
@@ -346,7 +360,7 @@ class LLMUsageTracker(logging.Handler):
 
                 await self._chat_history_database.add_message(message=message)
 
-    async def post_chats_to_queue(self, target_queue: asyncio.Queue[AgentChat]):
+    async def post_chats_to_queue(self, target_queue: asyncio.Queue[AgentChat]) -> None:
         for agent_chat in self._queue:
             agent = self._agents.get_agent_by_name(agent_chat.target_agent_name)
             await agent.log(agent_chat, target_queue)
@@ -360,32 +374,49 @@ class LLMUsageTracker(logging.Handler):
                 event: LLMCallEvent = record.msg
                 kwargs: LLMEventKwargs = LLMEventKwargs.model_validate(event.kwargs)
 
-                agent_name = kwargs.agent_id.split("/")[0]
-                source_name = kwargs.agent_id.split("/")[1]
+                if kwargs.agent_id:
+                    agent_name = kwargs.agent_id.split("/")[0]
+                    source_name = kwargs.agent_id.split("/")[1]
+                else:
+                    return
                 agent = self._agents.get_agent_by_name(agent_name)
                 response = ""
-                for r in kwargs.response.choices:
-                    content = r.message.content
-                    if content:
-                        response += r.message.content + "\n\n"
-                    if r.message.tool_calls:
-                        for tool_call in r.message.tool_calls:
-                            add_chat = False
+                system_input = ""
+                user_input = ""
+                if kwargs.response and kwargs.response.choices:
+                    for r in kwargs.response.choices:
+                        content = r.message.content if r.message else None
+                        if content:
+                            response += content + "\n\n"
+                        if r.message and r.message.tool_calls:
+                            for tool_call in r.message.tool_calls:
+                                add_chat = False
 
-                    system_input = "\n\n".join(
-                        [r.content for r in kwargs.messages if r.role == "system"]
-                    )
-                    user_input = "\n\n".join(
-                        [r.content for r in kwargs.messages if r.role == "user"]
-                    )
+                        system_input = "\n\n".join(
+                            [
+                                r.content
+                                for r in (kwargs.messages or [])
+                                if r and r.role == "system" and r.content
+                            ]
+                        )
+                        user_input = "\n\n".join(
+                            [
+                                r.content
+                                for r in (kwargs.messages or [])
+                                if r and r.role == "user" and r.content
+                            ]
+                        )
 
-                    # Get all messages with role 'tool'
-                    tool_messages = [m for m in kwargs.messages if m.role == "tool"]
-                    if tool_messages:
-                        user_input += "\n\n---\n\n"
-                        user_input += "# Tool Messages\n\n"
-                        for m in tool_messages:
-                            user_input += f"{m.content}\n\n"
+                        # Get all messages with role 'tool'
+                        tool_messages = [
+                            m for m in (kwargs.messages or []) if m and m.role == "tool"
+                        ]
+                        if tool_messages:
+                            user_input += "\n\n---\n\n"
+                            user_input += "# Tool Messages\n\n"
+                            for m in tool_messages:
+                                if m.content:
+                                    user_input += f"{m.content}\n\n"
 
                 chat = agent.get_agent_chat_by_source(source=source_name)
                 chat.chat_response = Response(
@@ -407,7 +438,7 @@ class LLMUsageTracker(logging.Handler):
 
 
 class IProjectAgents(ABC):
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
     @abstractmethod

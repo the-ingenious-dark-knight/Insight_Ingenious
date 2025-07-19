@@ -38,7 +38,7 @@ def register_commands(app: typer.Typer, console: Console) -> None:
                 help="Additional test arguments: '--test-name=MyTest --test-type=Unit'",
             ),
         ] = "",
-    ):
+    ) -> None:
         """
         🧪 Run all agent workflow tests in the project.
 
@@ -67,11 +67,13 @@ def register_commands(app: typer.Typer, console: Console) -> None:
                 help="Key value pairs to pass to the test runner. For example, `--run_args='--test_name=TestName --test_type=TestType'`",
             ),
         ] = "",
-    ):
+    ) -> None:
         """
         This command will run all the tests in the project
         """
-        _log_level: LogLevel = LogLevel.from_string(log_level)
+        _log_level: int = (
+            LogLevel.from_string(log_level or "WARNING") or LogLevel.WARNING
+        )
 
         se: stage_executor_module.stage_executor = stage_executor_module.stage_executor(
             log_level=_log_level, console=console

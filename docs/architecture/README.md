@@ -11,7 +11,7 @@ toc_icon: "sitemap"
 
 # Architecture Overview
 
-This document describes the high-level architecture of Insight Ingenious, an enterprise-grade Python library designed for rapid deployment of AI agent         CHAT_INTERFACE[💬 IChatService Interface]PIs with tight Microsoft Azure integrations and comprehensive debugging capabilities.
+This document describes the high-level architecture of Insight Ingenious, an enterprise-grade Python library designed for rapid deployment of AI agent APIs with tight Microsoft Azure integrations and comprehensive debugging capabilities.
 
 ## System Architecture
 
@@ -157,21 +157,21 @@ sequenceDiagram
     FastAPI-->>Client: JSON Response
 ```
 
-### Web UI Integration
+### Web Interface Integration
 
-The Chainlit integration provides an intuitive user experience:
+The system provides web interfaces through FastAPI:
 
 ```mermaid
 graph TD
     subgraph "🖥️ Frontend"
-        CHAINLIT[🎨 Chainlit UI]
-        COMPONENTS[🧩 UI Components]
-        CHAT[💬 Chat Interface]
+        DOCS[📄 API Documentation]
+        SWAGGER[🎨 Swagger UI]
+        REDOC[📋 ReDoc UI]
     end
 
-    subgraph "🔄 WebSocket Layer"
-        WS[🌐 WebSocket Handler]
-        SESSION[📋 Session Manager]
+    subgraph "🔄 HTTP Layer"
+        FASTAPI[🌐 FastAPI Handler]
+        MIDDLEWARE[📋 Middleware Stack]
     end
 
     subgraph "🤖 Backend Services"
@@ -180,20 +180,20 @@ graph TD
         AUTH_SERVICE[🔐 Auth Service]
     end
 
-    CHAINLIT --> COMPONENTS
-    COMPONENTS --> CHAT
-    CHAT --> WS
-    WS --> SESSION
-    SESSION --> CHAT_SERVICE
-    SESSION --> FILE_SERVICE
-    SESSION --> AUTH_SERVICE
+    DOCS --> SWAGGER
+    SWAGGER --> REDOC
+    REDOC --> FASTAPI
+    FASTAPI --> MIDDLEWARE
+    MIDDLEWARE --> CHAT_SERVICE
+    MIDDLEWARE --> FILE_SERVICE
+    MIDDLEWARE --> AUTH_SERVICE
 
     classDef frontend fill:#e8eaf6
-    classDef websocket fill:#f3e5f5
+    classDef http fill:#f3e5f5
     classDef backend fill:#e8f5e8
 
-    class CHAINLIT,COMPONENTS,CHAT frontend
-    class WS,SESSION websocket
+    class DOCS,SWAGGER,REDOC frontend
+    class FASTAPI,MIDDLEWARE http
     class CHAT_SERVICE,FILE_SERVICE,AUTH_SERVICE backend
 ```
 
@@ -204,9 +204,9 @@ The storage layer provides flexible, cloud-aware persistence and configuration m
 ```mermaid
 graph TB
     subgraph "⚙️ Configuration"
-        CONFIG_YML[📄 config.yml<br/>Project Settings]
-        PROFILES_YML[🔐 profiles.yml<br/>API Keys & Secrets]
         ENV_VARS[🌐 Environment Variables<br/>Runtime Configuration]
+        ENV_FILE[📄 .env file<br/>Local Development]
+        SYSTEM_ENV[🖥️ System Environment<br/>Production Settings]
     end
 
     subgraph "📚 Chat Storage"
@@ -237,9 +237,9 @@ graph TB
         CACHE[⚡ Caching Layer<br/>Performance Optimization]
     end
 
-    CONFIG_YML --> STORAGE_INTERFACE
-    PROFILES_YML --> STORAGE_INTERFACE
     ENV_VARS --> STORAGE_INTERFACE
+    ENV_FILE --> STORAGE_INTERFACE
+    SYSTEM_ENV --> STORAGE_INTERFACE
 
     STORAGE_INTERFACE --> LOCAL_STORAGE
     STORAGE_INTERFACE --> AZURE_BLOB
@@ -282,7 +282,7 @@ graph TB
     classDef categories fill:#f3e5f5
     classDef operations fill:#e1f5fe
 
-    class CONFIG_YML,PROFILES_YML,ENV_VARS config
+    class ENV_VARS,ENV_FILE,SYSTEM_ENV config
     class HISTORY_SQLITE,HISTORY_AZURE,SESSIONS,MEMORY_MGR chat
     class STORAGE_INTERFACE,LOCAL_STORAGE,AZURE_BLOB storage
     class PROMPTS,DATA_FILES,UPLOADS,MEMORY_FILES categories
@@ -538,10 +538,10 @@ classDiagram
 ```mermaid
 graph TB
     subgraph "📁 Configuration Sources"
-        CONFIG_FILE[📄 config.yml<br/>Project Configuration]
-        PROFILES_FILE[🔐 profiles.yml<br/>Environment Secrets]
+        ENV_FILE[📄 .env file<br/>Local Configuration]
         ENV_VARS[🌍 Environment Variables]
         CLI_ARGS[⌨️ Command Line Args]
+        DEFAULTS[📋 Default Values<br/>Pydantic Models]
     end
 
     subgraph "🔄 Configuration Processing"
@@ -556,10 +556,10 @@ graph TB
         SERVICE_CONFIG[🔧 Service Settings]
     end
 
-    CONFIG_FILE --> LOADER
-    PROFILES_FILE --> LOADER
+    ENV_FILE --> LOADER
     ENV_VARS --> LOADER
     CLI_ARGS --> LOADER
+    DEFAULTS --> LOADER
 
     LOADER --> VALIDATOR
     VALIDATOR --> MERGER
@@ -571,7 +571,7 @@ graph TB
     classDef process fill:#fff3e0
     classDef runtime fill:#e3f2fd
 
-    class CONFIG_FILE,PROFILES_FILE,ENV_VARS,CLI_ARGS source
+    class ENV_FILE,ENV_VARS,CLI_ARGS,DEFAULTS source
     class LOADER,VALIDATOR,MERGER process
     class APP_CONFIG,AGENT_CONFIG,SERVICE_CONFIG runtime
 ```
@@ -584,7 +584,7 @@ graph TB
 graph TB
     subgraph "🖥️ Local Development"
         LOCAL_API[🔧 FastAPI Dev Server]
-        LOCAL_UI[🎨 Chainlit Dev UI]
+        LOCAL_DOCS[📄 API Documentation]
         LOCAL_DB[💾 SQLite Database]
     end
 
@@ -608,7 +608,7 @@ graph TB
         LOGGING[📝 Centralized Logging]
     end
 
-    LOCAL_API --> LOCAL_UI
+    LOCAL_API --> LOCAL_DOCS
     LOCAL_API --> LOCAL_DB
 
     DOCKER_COMPOSE --> DOCKER_API
@@ -631,7 +631,7 @@ graph TB
     classDef cloud fill:#fff3e0
     classDef external fill:#fce4ec
 
-    class LOCAL_API,LOCAL_UI,LOCAL_DB local
+    class LOCAL_API,LOCAL_DOCS,LOCAL_DB local
     class DOCKER_API,DOCKER_UI,DOCKER_DB,DOCKER_COMPOSE docker
     class CLOUD_API,CLOUD_UI,CLOUD_DB,CLOUD_STORAGE cloud
     class AZURE_OPENAI,MONITORING,LOGGING external

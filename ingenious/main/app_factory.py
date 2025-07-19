@@ -43,10 +43,9 @@ class FastAgentAPI:
         self._setup_root_redirect()
 
     def _setup_dependency_injection(self) -> None:
-        """Initialize dependency injection container."""
-        from ingenious.services.container import init_container
-
-        self.container = init_container()
+        """Initialize dependency injection - no longer needed with FastAPI DI."""
+        # FastAPI handles dependency injection natively
+        pass
 
     def _setup_working_directory(self) -> None:
         """Set the working directory."""

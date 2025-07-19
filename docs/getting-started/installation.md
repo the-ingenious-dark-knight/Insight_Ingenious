@@ -80,7 +80,7 @@ For extracting content from various document formats:
 uv pip install -e ".[document-processing]"
 
 # With additional engines and testing
-uv pip install -e ".[document-processing,pdfminer,unstructured,tests]"
+uv pip install -e ".[document-processing,document-advanced,tests]"
 ```
 
 **Supported formats:**
@@ -93,8 +93,7 @@ uv pip install -e ".[document-processing,pdfminer,unstructured,tests]"
 | Extra name            | Purpose                                       | Packages                                   |
 | --------------------- | --------------------------------------------- | ------------------------------------------ |
 | `document-processing` | PyMuPDF extractor, Azure DI client & CLI     | `pymupdf`, `azure-ai-documentintelligence` |
-| `pdfminer`            | Pure-Python PDF extractor (no native libs)   | `pdfminer.six`                             |
-| `unstructured`        | DOCX/PPTX/rich-text extractor                | `unstructured[all-docs]`                   |
+| `document-advanced`   | PDFMiner + Unstructured extractors            | `pdfminer.six`, `unstructured[all-docs]`   |
 
 **Documentation:** [Document Processing Guide](../guides/document-processing/)
 
@@ -151,7 +150,7 @@ Download and install the ODBC Driver 18 for SQL Server from the [Microsoft websi
 To install all optional dependencies:
 
 ```bash
-uv pip install -e ".[dataprep,document-processing,pdfminer,unstructured,tests]"
+uv pip install -e ".[dataprep,document-processing,document-advanced,tests]"
 ```
 
 ## Verification
@@ -197,7 +196,7 @@ If you plan to contribute to Insight Ingenious:
 
 ```bash
 # Install in development mode with all dependencies
-uv pip install -e ".[dataprep,document-processing,pdfminer,unstructured,tests,dev]"
+uv pip install -e ".[dataprep,document-processing,document-advanced,tests,dev]"
 
 # Install pre-commit hooks
 pre-commit install

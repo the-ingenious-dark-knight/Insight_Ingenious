@@ -45,7 +45,9 @@ Get up and running in 5 minutes with Azure OpenAI!
 
     **Required configuration (add to .env file)**:
     ```bash
-    # Azure OpenAI Configuration
+    # Azure OpenAI Configuration (these are example variables you can reference)
+    # Note: These AZURE_OPENAI_* variables are conventions for your reference,
+    # not directly used by the config system. Use them to set INGENIOUS_MODELS__* values.
     AZURE_OPENAI_API_KEY=your-api-key-here
     AZURE_OPENAI_BASE_URL=https://your-resource.openai.azure.com/
 
@@ -137,10 +139,12 @@ That's it! You should see a JSON response with AI analysis of the input.
 - `ingen help [topic]` - Show detailed help and getting started guide
 - `ingen status` - Check system status and configuration
 - `ingen version` - Show version information
+- `ingen prompt-tuner` - (DEPRECATED) This command has been removed
 
 **Data processing commands:**
 - `ingen document-processing extract <path>` - Extract text from documents (PDF, DOCX, images)
-- `ingen dataprep crawl <url>` - Web scraping utilities using Scrapfly
+- `ingen dataprep crawl <url>` - Fetch single web page using Scrapfly
+- `ingen dataprep batch <urls...>` - Fetch multiple web pages using Scrapfly
 
 **Help and information:**
 - `ingen --help` - Show comprehensive help

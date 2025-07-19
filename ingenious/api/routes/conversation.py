@@ -7,7 +7,7 @@ from ingenious.core.structured_logging import get_logger
 from ingenious.db.chat_history_repository import ChatHistoryRepository
 from ingenious.models.http_error import HTTPError
 from ingenious.models.message import Message
-from ingenious.services.dependencies import get_chat_history_repository
+from ingenious.services.fastapi_dependencies import get_chat_history_repository
 
 logger = get_logger(__name__)
 router = APIRouter()

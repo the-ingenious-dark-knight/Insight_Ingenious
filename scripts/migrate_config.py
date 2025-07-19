@@ -39,7 +39,7 @@ def flatten_dict(
     Returns:
         Flattened dictionary
     """
-    items = []
+    items: list[tuple[str, Any]] = []
     for key, value in data.items():
         new_key = f"{parent_key}{separator}{key}" if parent_key else key
 
@@ -159,7 +159,7 @@ def write_env_file(
             )
 
         # Group related settings together
-        sections = {
+        sections: dict[str, list[tuple[str, str]]] = {
             "Profile Settings": [],
             "Model Configuration": [],
             "Chat History": [],
@@ -251,7 +251,7 @@ def validate_migration(env_file: Path) -> bool:
         return False
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Migrate YAML configuration to environment variables",
         formatter_class=argparse.RawDescriptionHelpFormatter,

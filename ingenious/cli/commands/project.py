@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import shutil
 from pathlib import Path
+from typing import Any
 
 from ingenious.cli.base import BaseCommand, CommandError, ExitCode
 from ingenious.cli.utilities import FileOperations, OutputFormatters
@@ -16,7 +17,7 @@ from ingenious.cli.utilities import FileOperations, OutputFormatters
 class InitCommand(BaseCommand):
     """Initialize a new Insight Ingenious project."""
 
-    def execute(self) -> None:
+    def execute(self, **kwargs: Any) -> None:
         """
         Initialize a new Insight Ingenious project in the current directory.
 
@@ -302,11 +303,11 @@ coverage.xml
 
 
 # Backward compatibility functions
-def register_commands(app, console) -> None:
+def register_commands(app: Any, console: Any) -> None:
     """Register project-related commands with the typer app."""
 
-    @app.command(name="init", help="Initialize a new Insight Ingenious project")
-    def init():
+    @app.command(name="init", help="Initialize a new Insight Ingenious project")  # type: ignore[misc]
+    def init() -> None:
         """
         🏗️  Initialize a new Insight Ingenious project in the current directory.
 
@@ -332,8 +333,8 @@ def register_commands(app, console) -> None:
         cmd.run()
 
     # Keep old command for backward compatibility
-    @app.command(hidden=True)
-    def initialize_new_project():
+    @app.command(hidden=True)  # type: ignore[misc]
+    def initialize_new_project() -> None:
         """Legacy command that delegates to the new init command."""
         cmd = InitCommand(console)
         cmd.run()

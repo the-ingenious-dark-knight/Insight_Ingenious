@@ -85,11 +85,11 @@ chmod 600 profiles.yml
 2. Use exact workflow names in API calls:
    ```bash
    # ✅ Correct
-   curl -X POST http://localhost:80/api/v1/chat \
+   curl -X POST http://localhost:8000/api/v1/chat \
      -d '{"user_prompt": "Hello", "conversation_flow": "classification-agent"}'
 
    # ❌ Wrong
-   curl -X POST http://localhost:80/api/v1/chat \
+   curl -X POST http://localhost:8000/api/v1/chat \
      -d '{"user_prompt": "Hello", "conversation_flow": "classify"}'
    ```
 
@@ -192,7 +192,7 @@ azure_sql_services:
 
 2. Use basic auth in requests:
    ```bash
-   curl -X POST http://localhost:80/api/v1/chat \
+   curl -X POST http://localhost:8000/api/v1/chat \
      -H "Authorization: Basic $(echo -n username:password | base64)" \
      -d '{"user_prompt": "Hello", "conversation_flow": "classification-agent"}'
    ```
@@ -213,7 +213,7 @@ azure_sql_services:
 Ensure correct JSON format:
 ```bash
 # ✅ Correct format
-curl -X POST http://localhost:80/api/v1/chat \
+curl -X POST http://localhost:8000/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "Your message here",
@@ -236,13 +236,13 @@ Optional fields:
 
 ```bash
 # 1. Check all workflow configurations
-curl http://localhost:80/api/v1/workflows
+curl http://localhost:8000/api/v1/workflows
 
 # 2. Check specific workflow
-curl http://localhost:80/api/v1/workflow-status/classification-agent
+curl http://localhost:8000/api/v1/workflow-status/classification-agent
 
 # 3. Check system diagnostics
-curl http://localhost:80/api/v1/diagnostic
+curl http://localhost:8000/api/v1/diagnostic
 ```
 
 ### Enable Debug Logging
@@ -306,7 +306,7 @@ uv run ingen workflows
 
 # 4. Test minimal workflow first
 uv run ingen serve
-curl -X POST http://localhost:80/api/v1/chat \
+curl -X POST http://localhost:8000/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{"user_prompt": "Hello", "conversation_flow": "classification-agent"}'
 ```
@@ -347,7 +347,7 @@ echo "=== Configuration Status ==="
 uv run ingen workflows
 
 echo "=== Workflow Status ==="
-curl -s http://localhost:80/api/v1/workflows || echo "Server not running"
+curl -s http://localhost:8000/api/v1/workflows || echo "Server not running"
 ```
 
 ---

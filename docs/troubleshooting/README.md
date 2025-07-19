@@ -46,14 +46,14 @@ curl -X POST http://localhost:8000/api/v1/chat \
 
 **Symptoms**:
 ```
-ValidationError: 9 validation errors for Profiles
-0.chat_history.database_connection_string
+ValidationError: validation error for IngeniousSettings
+models.0.api_key
   Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]
 ```
 
 **Causes**:
 - Environment variables not set or empty
-- Missing required fields in profiles.yml
+- Missing required INGENIOUS_ prefixed variables
 - Incorrect environment variable syntax
 
 **Solutions**:
@@ -65,20 +65,31 @@ ValidationError: 9 validation errors for Profiles
    ```
    Should contain:
    ```env
-   AZURE_OPENAI_API_KEY=your-actual-key
-   AZURE_OPENAI_BASE_URL=https://your-endpoint.cognitiveservices.azure.com/
+   # Model configuration (required)
+   INGENIOUS_MODELS__0__MODEL=gpt-4o-mini
+   INGENIOUS_MODELS__0__API_TYPE=rest
+   INGENIOUS_MODELS__0__API_VERSION=2024-12-01-preview
+   INGENIOUS_MODELS__0__DEPLOYMENT=gpt-4o-mini
+   INGENIOUS_MODELS__0__API_KEY=your-actual-key
+   INGENIOUS_MODELS__0__BASE_URL=https://your-resource.openai.azure.com/
+   INGENIOUS_CHAT_SERVICE__TYPE=multi_agent
    ```
 
-2. **Use minimal profiles.yml**:
+2. **Create minimal .env file**:
    ```bash
-   # Copy the minimal template
-   cp ingenious/ingenious/ingenious_extensions_template/profiles.minimal.yml ./profiles.yml
+   # Create .env with minimal configuration
+   cat > .env << 'EOF'
+   INGENIOUS_MODELS__0__API_KEY=your-api-key
+   INGENIOUS_MODELS__0__BASE_URL=https://your-resource.openai.azure.com/
+   INGENIOUS_MODELS__0__MODEL=gpt-4o-mini
+   INGENIOUS_CHAT_SERVICE__TYPE=multi_agent
+   EOF
    ```
 
-3. **Set environment variables**:
+3. **Load environment variables**:
    ```bash
-   export INGENIOUS_PROJECT_PATH=$(pwd)/config.yml
-   export INGENIOUS_PROFILE_PATH=$(pwd)/profiles.yml
+   # Source the .env file or export variables
+   export $(grep -v '^#' .env | xargs)
    ```
 
 ---
@@ -104,14 +115,13 @@ ValidationError: 9 validation errors for Profiles
 
 2. **Set port in environment variables**:
    ```bash
-   export WEB_PORT=8080
+   export INGENIOUS_WEB_CONFIGURATION__PORT=8080
    uv run ingen serve
    ```
 
-3. **Or set in config.yml**:
-   ```yaml
-   web_configuration:
-     port: 8080
+3. **Or set in .env file**:
+   ```bash
+   INGENIOUS_WEB_CONFIGURATION__PORT=8080
    ```
 
 4. **Check if port is available**:
@@ -701,11 +711,11 @@ uv run ingen workflows
 | Issue | Quick Fix |
 |-------|-----------|
 | Import errors | `uv add ingenious` |
-| Profile validation | Use `profiles.minimal.yml` template |
-| Port not working | Set `WEB_PORT` environment variable |
+| Configuration validation | Check INGENIOUS_ prefixed env vars |
+| Port not working | Set `INGENIOUS_WEB_CONFIGURATION__PORT` |
 | Workflow not found | Use `bike-insights` (preferred) or `bike_insights` (legacy) |
 | JSON parse error | Escape quotes in `user_prompt` for bike-insights |
-| Server won't start | Check port availability and config.yml |
+| Server won't start | Check port availability and .env file |
 
 ### Still Need Help?
 

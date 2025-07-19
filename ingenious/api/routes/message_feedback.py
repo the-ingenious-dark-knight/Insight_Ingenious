@@ -7,7 +7,7 @@ from ingenious.models.message_feedback import (
     MessageFeedbackRequest,
     MessageFeedbackResponse,
 )
-from ingenious.services.dependencies import get_message_feedback_service
+from ingenious.services.fastapi_dependencies import get_message_feedback_service
 from ingenious.services.message_feedback_service import MessageFeedbackService
 
 logger = get_logger(__name__)

@@ -23,10 +23,10 @@ Insight Ingenious uses **pydantic-settings** for configuration via environment v
 
 ## Configuration Migration and Legacy Support
 
-Ingenious has migrated from YAML-based configuration to environment variables but still supports both systems:
+Ingenious has migrated from YAML-based configuration to environment variables:
 
-- **Recommended**: Environment variables with `INGENIOUS_` prefixes (via `.env` files)
-- **Legacy Support**: YAML configuration files (`config.yml`, `profiles.yml`) are still supported but deprecated
+- **Current System**: Environment variables with `INGENIOUS_` prefixes (via `.env` files)
+- **Legacy System**: YAML configuration files (`config.yml`, `profiles.yml`) are no longer supported
 
 ### Migration from YAML Configuration
 
@@ -38,11 +38,11 @@ uv run python scripts/migrate_config.py --yaml-file config.yml --output .env
 uv run python scripts/migrate_config.py --yaml-file profiles.yml --output .env.profiles
 ```
 
-### Legacy YAML Support (Deprecated)
+### Legacy YAML Configuration (No Longer Supported)
 
-While YAML files are still supported, they are deprecated in favor of environment variables:
-- `profiles.yml` - Contains sensitive data like API keys (still used for backward compatibility)
-- `config.yml` - Contains main configuration (deprecated, use environment variables instead)
+YAML configuration files are no longer supported. You must migrate to environment variables:
+- `profiles.yml` - Previously contained sensitive data like API keys
+- `config.yml` - Previously contained main configuration
 
 ## Setting Up Configuration
 
@@ -301,7 +301,7 @@ INGENIOUS_WEB_CONFIGURATION__AUTHENTICATION__USERNAME=admin
 INGENIOUS_WEB_CONFIGURATION__AUTHENTICATION__PASSWORD=your-secure-password
 ```
 
-> **Note**: The default port in configuration is 8000. The CLI command `ingen serve` also defaults to port 8000, but can be overridden with `--port` or the `WEB_PORT` environment variable.
+> **Note**: The default port in configuration is 80. The CLI command `ingen serve` defaults to port 80, but can be overridden with `--port` or the `WEB_PORT` environment variable. For local development, it's common to use port 8000.
 
 ### File Storage
 

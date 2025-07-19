@@ -279,9 +279,10 @@ graph LR
 INGENIOUS_PROFILE=dev
 INGENIOUS_MODELS__0__MODEL=gpt-4o-mini
 INGENIOUS_MODELS__0__API_TYPE=rest
-INGENIOUS_MODELS__0__API_VERSION=2024-08-01-preview
+INGENIOUS_MODELS__0__API_VERSION=2024-12-01-preview
+INGENIOUS_MODELS__0__DEPLOYMENT=gpt-4o-mini
 INGENIOUS_MODELS__0__API_KEY=your-api-key
-INGENIOUS_MODELS__0__BASE_URL=https://your-resource.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-08-01-preview
+INGENIOUS_MODELS__0__BASE_URL=https://your-resource.openai.azure.com/
 INGENIOUS_CHAT_SERVICE__TYPE=multi_agent
 ```
 
@@ -326,6 +327,8 @@ graph TB
 
 #### 📚 Knowledge Base Agent
 Search and retrieve information from knowledge bases using local ChromaDB (stable) or Azure Search (experimental).
+
+> **Important**: The local ChromaDB implementation is stable and recommended. Azure Search integration is experimental and may contain bugs.
 
 ```mermaid
 graph TB
@@ -374,6 +377,9 @@ graph TB
 # No additional configuration required!
 # Uses local ChromaDB for vector storage
 # Documents stored in ./.tmp/knowledge_base/
+
+# To use knowledge-base-agent, ensure these dependencies are installed:
+uv add chromadb aiofiles autogen-ext
 ```
 
 **Optional: Azure Search (Experimental - May contain bugs)**
@@ -429,20 +435,23 @@ graph TB
 
 **Additional Configuration Required:**
 
-**Local SQLite (Recommended):**
+**Local SQLite (Recommended - Stable):**
 ```bash
 # Local SQLite configuration
 INGENIOUS_LOCAL_SQL_DB__DATABASE_PATH=/tmp/sample_sql_db
 INGENIOUS_LOCAL_SQL_DB__SAMPLE_CSV_PATH=./data/your_data.csv
 INGENIOUS_LOCAL_SQL_DB__SAMPLE_DATABASE_NAME=sample_sql_db
+
+# To use sql-manipulation-agent, ensure these dependencies are installed:
+uv add aiofiles
 ```
 
-**Azure SQL (Experimental):**
+**Azure SQL (Experimental - May contain bugs):**
 ```bash
 # Azure SQL configuration
 INGENIOUS_AZURE_SQL_SERVICES__DATABASE_NAME=your-database-name
 INGENIOUS_AZURE_SQL_SERVICES__TABLE_NAME=your-table-name
-INGENIOUS_AZURE_SQL_SERVICES__DATABASE_CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+INGENIOUS_AZURE_SQL_SERVICES__CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
 ```
 
 > **Note**: The local SQLite implementation is recommended for stability.

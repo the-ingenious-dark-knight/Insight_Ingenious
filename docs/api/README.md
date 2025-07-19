@@ -137,6 +137,7 @@ graph LR
         PROMPTS_LIST[GET /api/v1/prompts/list/{revision_id}\nList Prompts]
         PROMPTS_UPDATE[POST /api/v1/prompts/update/{revision_id}/{filename}\nUpdate Prompt]
         FEEDBACK[PUT /api/v1/messages/{message_id}/feedback\nMessage Feedback]
+        CONVERSATIONS[GET /api/v1/conversations/{thread_id}\nGet Conversation History]
     end
 
     classDef chat fill:#e8f5e8
@@ -147,7 +148,7 @@ graph LR
     class CHAT_POST chat
     class WORKFLOW_STATUS,WORKFLOWS_LIST,DIAGNOSTIC workflow
     class HEALTH system
-    class PROMPTS_VIEW,PROMPTS_LIST,PROMPTS_UPDATE,FEEDBACK management
+    class PROMPTS_VIEW,PROMPTS_LIST,PROMPTS_UPDATE,FEEDBACK,CONVERSATIONS management
 ```
 
 ### Chat API Flow
@@ -287,7 +288,7 @@ graph TB
 The Insight Ingenious API provides powerful endpoints for creating and managing AI-powered conversation workflows programmatically.
 
 ### Base API Information
-- **Base URL**: `http://localhost:80` (default) or your configured port
+- **Base URL**: `http://localhost:8000` (when using `ingen serve --port 8000`)
 - **Content-Type**: `application/json`
 - **Authentication**: HTTP Basic Authentication (configurable)
 
@@ -312,6 +313,53 @@ GET /api/v1/workflows
 ```
 Returns a list of all available workflow types and their configurations.
 
+#### Get Conversation History
+```bash
+GET /api/v1/conversations/{thread_id}
+```
+Retrieves all messages from a specific conversation thread.
+
+**Parameters:**
+- `thread_id` (path): The unique identifier of the conversation thread
+
+**Response:**
+```json
+[
+  {
+    "message_id": "msg-123",
+    "thread_id": "thread-456",
+    "content": "User message or agent response",
+    "role": "user|assistant",
+    "timestamp": "2025-07-04T12:00:00Z"
+  }
+]
+```
+
+#### Submit Message Feedback
+```bash
+PUT /api/v1/messages/{message_id}/feedback
+```
+Submit feedback for a specific message.
+
+**Parameters:**
+- `message_id` (path): The unique identifier of the message
+
+**Request Body:**
+```json
+{
+  "feedback_type": "positive|negative",
+  "feedback_text": "Optional feedback comment"
+}
+```
+
+**Response:**
+```json
+{
+  "message": "Feedback submitted successfully",
+  "feedback_id": "feedback-789"
+}
+```
+
 ### Workflow Naming Conventions
 
 Insight Ingenious supports both hyphenated and underscored workflow names for backward compatibility:
@@ -328,7 +376,7 @@ Insight Ingenious supports both hyphenated and underscored workflow names for ba
 All API requests should include appropriate headers:
 
 ```bash
-curl -X POST http://localhost:80/api/v1/chat \
+curl -X POST http://localhost:8000/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{"user_prompt": "Hello", "conversation_flow": "classification-agent"}'
 ```
@@ -365,7 +413,7 @@ def call_chat_api(user_prompt, conversation_flow, username=None, password=None):
     auth = (username, password) if username and password else None
 
     response = requests.post(
-        "http://localhost:80/api/v1/chat",
+        "http://localhost:8000/api/v1/chat",
         json={
             "user_prompt": user_prompt,
             "conversation_flow": conversation_flow
@@ -387,7 +435,7 @@ async function callChatAPI(userPrompt, conversationFlow, username, password) {
     const auth = username && password ?
         'Basic ' + btoa(username + ':' + password) : undefined;
 
-    const response = await fetch('http://localhost:80/api/v1/chat', {
+    const response = await fetch('http://localhost:8000/api/v1/chat', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -441,7 +489,7 @@ Lists all prompt template files for a specific revision.
 
 **Example:**
 ```bash
-curl "http://localhost:8080/api/v1/prompts/list/v1.0"
+curl "http://localhost:8000/api/v1/prompts/list/v1.0"
 ```
 
 #### View Prompt Content
@@ -459,7 +507,7 @@ Retrieves the content of a specific prompt template file.
 
 **Example:**
 ```bash
-curl "http://localhost:8080/api/v1/prompts/view/v1.0/user_prompt.md"
+curl "http://localhost:8000/api/v1/prompts/view/v1.0/user_prompt.md"
 ```
 
 #### Update Prompt Content
@@ -489,7 +537,7 @@ Updates or creates a prompt template file with new content.
 
 **Example:**
 ```bash
-curl -X POST "http://localhost:8080/api/v1/prompts/update/v1.0/user_prompt.md" \
+curl -X POST "http://localhost:8000/api/v1/prompts/update/v1.0/user_prompt.md" \
   -H "Content-Type: application/json" \
   -d '{"content": "# My Updated Prompt\n\nContext: {{ context }}\nQuestion: {{ question }}"}'
 ```
@@ -532,19 +580,19 @@ The API supports various template formats:
 1. **Create a new prompt revision:**
    ```bash
    # Create user prompt
-   curl -X POST "http://localhost:8080/api/v1/prompts/update/v2.0/user_prompt.md" \
+   curl -X POST "http://localhost:8000/api/v1/prompts/update/v2.0/user_prompt.md" \
      -H "Content-Type: application/json" \
      -d '{"content": "# Enhanced User Prompt\n\nContext: {{ context }}\nUser Input: {{ user_question }}\n\nProvide a comprehensive response."}'
    ```
 
 2. **List available prompts:**
    ```bash
-   curl "http://localhost:8080/api/v1/prompts/list/v2.0"
+   curl "http://localhost:8000/api/v1/prompts/list/v2.0"
    ```
 
 3. **View the prompt content:**
    ```bash
-   curl "http://localhost:8080/api/v1/prompts/view/v2.0/user_prompt.md"
+   curl "http://localhost:8000/api/v1/prompts/view/v2.0/user_prompt.md"
    ```
 
 4. **Update configuration to use new revision:**
@@ -559,7 +607,7 @@ The API supports various template formats:
 import requests
 
 class PromptsAPIClient:
-    def __init__(self, base_url="http://localhost:8080"):
+    def __init__(self, base_url="http://localhost:8000"):
         self.base_url = base_url
 
     def list_prompts(self, revision_id):

@@ -219,7 +219,7 @@ class Profiles:
 
     def get_profile_by_name(self, name: str) -> Optional[Any]:
         for profile in self.profiles:
-            if hasattr(profile, "name") and profile.name == name:
+            if hasattr(profile, "name") and getattr(profile, "name") == name:
                 return profile
         return None
 

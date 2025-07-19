@@ -15,7 +15,7 @@ This document provides detailed API usage examples for all available workflows i
 
 ## Base API Information
 
-- **Base URL**: `http://localhost:8000` (or your configured port, default is 8000)
+- **Base URL**: `http://localhost:8000` (default when using `ingen serve --port 8000`)
 - **Endpoint**: `POST /api/v1/chat`
 - **Content-Type**: `application/json`
 
@@ -172,18 +172,10 @@ curl -X POST http://localhost:8000/api/v1/chat \
 
 1. **Configure environment variables** for SQLite mode:
 ```bash
-# Environment variables (recommended)
+# Environment variables for SQLite mode
 INGENIOUS_LOCAL_SQL_DB__DATABASE_PATH=/tmp/sample_sql_db
 INGENIOUS_LOCAL_SQL_DB__SAMPLE_CSV_PATH=./data/your_data.csv
 INGENIOUS_LOCAL_SQL_DB__SAMPLE_DATABASE_NAME=sample_sql_db
-```
-
-**Or using legacy profiles.yml (deprecated):**
-```yaml
-azure_sql_services:
-  database_name: "skip"  # This enables SQLite mode
-local_sql_db:
-  database_path: "/tmp/sample_sql.db"
 ```
 
 2. **Test with sample data**:
@@ -217,19 +209,10 @@ curl -X POST http://localhost:8000/api/v1/chat \
 
 1. **Configure environment variables** for Azure SQL:
 ```bash
-# Environment variables (recommended)
+# Environment variables for Azure SQL mode
 INGENIOUS_AZURE_SQL_SERVICES__DATABASE_NAME=your-database-name
 INGENIOUS_AZURE_SQL_SERVICES__TABLE_NAME=your-table-name
-INGENIOUS_AZURE_SQL_SERVICES__DATABASE_CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
-```
-
-**Or using legacy profiles.yml (deprecated):**
-```yaml
-azure_sql_services:
-  database_name: "your-database-name"
-  server_name: "your-server.database.windows.net"
-  driver: "ODBC Driver 18 for SQL Server"
-  connection_string: "Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+INGENIOUS_AZURE_SQL_SERVICES__CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
 ```
 
 2. **Set environment variables**:
@@ -275,7 +258,7 @@ curl -X POST http://localhost:8000/api/v1/chat \
 **Common Issues**:
 
 1. **"Database connection failed"**
-   - For SQLite: Ensure `database_name: "skip"` is set in profiles.yml
+   - For SQLite: Ensure `INGENIOUS_LOCAL_SQL_DB__DATABASE_PATH` is set
    - For Azure SQL: Verify connection string and credentials
 
 2. **"No tables found"**
@@ -290,10 +273,10 @@ curl -X POST http://localhost:8000/api/v1/chat \
 ```bash
 # Check configuration
 uv run python -c "
-from ingenious.config.config import load_app_config
-config = load_app_config()
-print('SQL Config:', config.azure_sql_services)
-print('Local DB Config:', config.local_sql_db)
+from ingenious.config.main_settings import IngeniousSettings
+settings = IngeniousSettings()
+print('SQL Config:', settings.azure_sql_services)
+print('Local DB Config:', settings.local_sql_db)
 "
 ```
 
@@ -312,7 +295,7 @@ echo "Testing Ingenious Workflows..."
 
 # Test 1: bike-insights (Hello World)
 echo "Testing bike-insights workflow (Hello World)..."
-curl -s -X POST http://localhost:80/api/v1/chat \
+curl -s -X POST http://localhost:8000/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "{\"stores\": [{\"name\": \"Hello Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"HELLO-001\", \"quantity_sold\": 1, \"sale_date\": \"2023-04-01\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 5.0, \"comment\": \"Perfect introduction to Ingenious!\"}}], \"bike_stock\": []}], \"revision_id\": \"hello-1\", \"identifier\": \"world\"}",
@@ -321,7 +304,7 @@ curl -s -X POST http://localhost:80/api/v1/chat \
 
 # Test 2: classification-agent (Simple Alternative)
 echo "Testing classification-agent workflow (Simple Alternative)..."
-curl -s -X POST http://localhost:80/api/v1/chat \
+curl -s -X POST http://localhost:8000/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "This is a test message for classification",
@@ -347,11 +330,11 @@ Make it executable: `chmod +x test_workflows.sh`
 
 ### 3. "Validation error in field"
 **Problem**: Missing or invalid configuration
-**Solution**: Check profiles.yml and .env files for required values
+**Solution**: Check .env file for required INGENIOUS_ prefixed environment variables
 
 ### 4. Server runs on wrong port
 **Problem**: Port parameter not working
-**Solution**: Check WEB_PORT environment variable or config.yml
+**Solution**: Use `ingen serve --port 8000` or set INGENIOUS_WEB_CONFIGURATION__PORT environment variable
 
 ---
 
@@ -359,10 +342,14 @@ Make it executable: `chmod +x test_workflows.sh`
 
 ### Hello World Setup (bike-insights + classification-agent)
 ```env
-AZURE_OPENAI_API_KEY=your-key
-AZURE_OPENAI_BASE_URL=your-endpoint
-INGENIOUS_PROJECT_PATH=./config.yml
-INGENIOUS_PROFILE_PATH=./profiles.yml
+# Core model configuration
+INGENIOUS_MODELS__0__MODEL=gpt-4o-mini
+INGENIOUS_MODELS__0__API_TYPE=rest
+INGENIOUS_MODELS__0__API_VERSION=2024-12-01-preview
+INGENIOUS_MODELS__0__DEPLOYMENT=gpt-4o-mini
+INGENIOUS_MODELS__0__API_KEY=your-api-key
+INGENIOUS_MODELS__0__BASE_URL=https://your-resource.openai.azure.com/
+INGENIOUS_CHAT_SERVICE__TYPE=multi_agent
 ```
 
 ### Advanced Setup (all workflows)

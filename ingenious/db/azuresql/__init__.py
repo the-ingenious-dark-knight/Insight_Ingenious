@@ -1,7 +1,7 @@
 import json
 from typing import Any, Dict, List, Optional
 
-import pyodbc  # type: ignore
+import pyodbc
 
 from ingenious.config.settings import IngeniousSettings
 
@@ -42,7 +42,7 @@ class azuresql_ChatHistoryRepository(BaseSQLRepository):
         self.connection.autocommit = True
 
     def _execute_sql(
-        self, sql: str, params: List[Any] = None, expect_results: bool = True
+        self, sql: str, params: list[Any] | None = None, expect_results: bool = True
     ) -> Any:
         """Execute SQL with Azure SQL connection handling."""
         if params is None:
@@ -85,7 +85,7 @@ class azuresql_ChatHistoryRepository(BaseSQLRepository):
                 cursor.close()
 
     def execute_sql(
-        self, sql: str, params: List[Any] = None, expect_results: bool = True
+        self, sql: str, params: list[Any] | None = None, expect_results: bool = True
     ) -> Any:
         """Legacy method for backward compatibility."""
         if params is None:
@@ -174,7 +174,7 @@ class azuresql_ChatHistoryRepository(BaseSQLRepository):
             VALUES ({values});
         """
         self.execute_sql(
-            sql=query, params=tuple(parameters.values()), expect_results=False
+            sql=query, params=list(parameters.values()), expect_results=False
         )
 
     async def update_thread(

@@ -68,7 +68,7 @@ def register_commands(app: typer.Typer, console: Console) -> None:
                 "--no-prompt-tuner", help="Disable the prompt tuner interface"
             ),
         ] = False,
-    ):
+    ) -> None:
         """
         🚀 Start the Insight Ingenious API server with web interface.
 
@@ -138,7 +138,7 @@ def register_commands(app: typer.Typer, console: Console) -> None:
             bool,
             typer.Option(help="Enable the prompt tuner interface. Default is True."),
         ] = True,
-    ):
+    ) -> None:
         """
         Run a FastAPI server that presents your agent workflows via REST endpoints.
 
@@ -183,40 +183,35 @@ def register_commands(app: typer.Typer, console: Console) -> None:
                     operation="config_discovery",
                 )
 
-        if profile_dir is None:
-            # Check if environment variable is set
-            if os.getenv("INGENIOUS_PROFILE_PATH") is None:
-                # Try project directory first
-                project_profile_path = Path.cwd() / "profiles.yml"
-                if project_profile_path.exists():
-                    profile_dir = project_profile_path
-                    logger.info(
-                        "Using profiles.yml from project directory",
-                        profile_path=str(profile_dir),
-                        operation="profile_discovery",
-                    )
-                else:
-                    # Fall back to home directory
-                    home_dir = os.path.expanduser("~")
-                    profile_dir = (
-                        Path(home_dir) / Path(".ingenious") / Path("profiles.yml")
-                    )
-                    logger.info(
-                        "Using profiles.yml from home directory",
-                        profile_path=str(profile_dir),
-                        operation="profile_discovery",
-                    )
-            else:
-                profile_dir = Path(os.getenv("INGENIOUS_PROFILE_PATH"))
-        else:
+        # Profiles.yml is deprecated - prioritize .env configuration
+        # Only use profiles.yml if explicitly provided via CLI argument
+        if profile_dir is not None:
+            # Explicit profile path provided via CLI
             profile_dir = str(Path(profile_dir))
-
-        logger.info(
-            "Profile configuration loaded",
-            profile_path=str(profile_dir),
-            operation="profile_setup",
-        )
-        os.environ["INGENIOUS_PROFILE_PATH"] = str(profile_dir).replace("\\", "/")
+            if os.path.exists(profile_dir):
+                logger.info(
+                    "Using explicitly provided profiles.yml",
+                    profile_path=str(profile_dir),
+                    operation="profile_setup",
+                )
+                os.environ["INGENIOUS_PROFILE_PATH"] = str(profile_dir).replace(
+                    "\\", "/"
+                )
+            else:
+                logger.warning(
+                    "Specified profiles.yml not found, using .env configuration only",
+                    profile_path=str(profile_dir),
+                    operation="profile_setup",
+                )
+        else:
+            # No explicit profile specified - skip profiles.yml and use .env only
+            logger.info(
+                "Profiles.yml is deprecated. Using .env configuration only.",
+                operation="profile_setup",
+            )
+            # Ensure INGENIOUS_PROFILE_PATH is not set to avoid legacy loading
+            if "INGENIOUS_PROFILE_PATH" in os.environ:
+                del os.environ["INGENIOUS_PROFILE_PATH"]
         import ingenious.config.config as ingen_config
 
         config = ingen_config.get_config()
@@ -310,7 +305,7 @@ def register_commands(app: typer.Typer, console: Console) -> None:
                 help="Host to bind the prompt tuner (default: 127.0.0.1)",
             ),
         ] = "127.0.0.1",
-    ):
+    ) -> None:
         """
         🎯 Start the standalone prompt tuning web interface.
 

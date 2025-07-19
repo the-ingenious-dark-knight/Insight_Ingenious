@@ -1,19 +1,30 @@
-from typing import List, Optional, Tuple, Union
+import logging
+import uuid
 
 from autogen_agentchat.agents import AssistantAgent
 from autogen_agentchat.messages import TextMessage
-from autogen_core import CancellationToken
+from autogen_core import EVENT_LOGGER_NAME, CancellationToken
 from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
 
 import ingenious.config.config as config
+from ingenious.models.agent import LLMUsageTracker
 from ingenious.models.chat import ChatRequest
 
 
 class ConversationFlow:
     @staticmethod
-    async def get_conversation_response(chatrequest: ChatRequest) -> Tuple[str, str]:
-        message = chatrequest.user_prompt
-        topics: Optional[Union[str, List[str]]] = chatrequest.topic
+    async def get_conversation_response(
+        message: str,
+        topics=None,
+        thread_memory: str = "",
+        memory_record_switch: bool = True,
+        thread_chat_history=None,
+        chatrequest: ChatRequest = None,  # For backward compatibility
+    ) -> tuple[str, str]:
+        # Use provided message or extract from chatrequest
+        if chatrequest:
+            message = chatrequest.user_prompt
+            topics = chatrequest.topic
 
         # Ensure topics is always a list
         if topics is None:
@@ -23,6 +34,37 @@ class ConversationFlow:
 
         _config = config.get_config()
         model_config = _config.models[0]
+
+        # Initialize LLM usage tracking
+        logger = logging.getLogger(EVENT_LOGGER_NAME)
+        logger.setLevel(logging.INFO)
+
+        llm_logger = LLMUsageTracker(
+            agents=[],  # Simple agent, no complex agent list needed
+            config=_config,
+            chat_history_repository=None,  # Not available in static context
+            revision_id=str(uuid.uuid4()),
+            identifier=str(uuid.uuid4()),
+            event_type="classification",
+        )
+
+        logger.handlers = [llm_logger]
+
+        # Use provided thread memory context
+        memory_context = ""
+        if thread_memory:
+            memory_context = f"Previous conversation:\n{thread_memory}\n\n"
+        elif thread_chat_history:
+            # Build context from thread chat history
+            memory_parts = []
+            for hist in thread_chat_history[-10:]:  # Last 10 messages
+                memory_parts.append(
+                    f"{hist.get('role', 'unknown')}: {hist.get('content', '')[:100]}..."
+                )
+            if memory_parts:
+                memory_context = (
+                    "Previous conversation:\n" + "\n".join(memory_parts) + "\n\n"
+                )
 
         # Configure Azure OpenAI client for v0.4
         azure_config = {
@@ -36,18 +78,18 @@ class ConversationFlow:
         # Create the model client
         model_client = AzureOpenAIChatCompletionClient(**azure_config)
 
-        # Create classification system prompt
-        classification_system_prompt = """
-You are a classification assistant. Classify the following user message into one of these categories:
+        # Create classification system prompt with memory context
+        classification_system_prompt = f"""
+You are a classification assistant with access to conversation history. Classify the following user message into one of these categories:
 1. payload_type_1: General product inquiries, features, specifications
 2. payload_type_2: Purchase-related questions, pricing, availability
 3. payload_type_3: Support issues, problems, complaints
 4. undefined: Messages that don't fit the above categories
 
-Format your response as:
+{memory_context}Format your response as:
 Category: [category_name]
 Explanation: [brief explanation]
-Response: [helpful response to the user's message]
+Response: [helpful response to the user's message, considering conversation history]
 """
 
         # Create the classification agent
@@ -78,4 +120,5 @@ Response: [helpful response to the user's message]
             # Make sure to close the model client connection when done
             await model_client.close()
 
+        # Return tuple as expected by the service layer
         return result, memory_summary

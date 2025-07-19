@@ -16,7 +16,7 @@ def register_commands(app: typer.Typer, console: Console) -> None:
     """Register project-related commands with the typer app."""
 
     @app.command(name="init", help="Initialize a new Insight Ingenious project")
-    def init():
+    def init() -> None:
         """
         🏗️  Initialize a new Insight Ingenious project in the current directory.
 
@@ -43,7 +43,7 @@ def register_commands(app: typer.Typer, console: Console) -> None:
 
     # Keep old command for backward compatibility
     @app.command(hidden=True)
-    def initialize_new_project():
+    def initialize_new_project() -> None:
         """
         Generate template folders for a new project using the Ingenious framework.
 

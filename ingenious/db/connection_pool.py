@@ -6,7 +6,7 @@ from contextlib import contextmanager
 from queue import Empty, Queue
 from typing import Any, Iterator, Protocol
 
-import pyodbc  # type: ignore
+import pyodbc
 
 from ingenious.core.structured_logging import get_logger
 
@@ -26,6 +26,10 @@ class DatabaseConnection(Protocol):
 
     def close(self) -> None:
         """Close connection."""
+        ...
+
+    def cursor(self) -> Any:
+        """Get cursor for executing queries."""
         ...
 
 

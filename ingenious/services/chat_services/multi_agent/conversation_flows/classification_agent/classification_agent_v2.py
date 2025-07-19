@@ -24,7 +24,7 @@ class ConversationFlow:
         # thread_chat_history = chatrequest.thread_chat_history
 
         _config = config.get_config()
-        llm_config = {
+        llm_config: dict[str, object] = {
             "model": _config.models[0].model,
             "api_key": _config.models[0].api_key,
             "azure_endpoint": _config.models[0].base_url,
@@ -52,10 +52,13 @@ class ConversationFlow:
             feed_id = "-"
             overBall = "-"
 
+        # Convert topic string to list for ConversationPattern
+        topics_list: list[str] = [topics] if topics else []
+
         # Initialize the new conversation pattern
         _classification_agent_pattern = ConversationPattern(
             default_llm_config=llm_config,
-            topics=topics or [],
+            topics=topics_list,
             memory_record_switch=memory_record_switch or False,
             memory_path=memory_path,
             thread_memory=thread_memory or "",

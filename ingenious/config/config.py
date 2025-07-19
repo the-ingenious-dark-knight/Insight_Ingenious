@@ -17,7 +17,7 @@ def get_kv_secret(secretName: str) -> str:
         credential = DefaultAzureCredential()
         client = SecretClient(vault_url=KVUri, credential=credential)
         secret = client.get_secret(secretName)
-        return secret.value
+        return secret.value or ""
     else:
         raise ValueError("KEY_VAULT_NAME environment variable not set")
 
