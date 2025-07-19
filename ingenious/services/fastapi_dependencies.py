@@ -1,7 +1,6 @@
 """FastAPI dependency injection without dependency-injector library."""
 
 from functools import lru_cache
-from typing import Any, Optional
 
 from fastapi import Depends, Request
 
@@ -25,7 +24,9 @@ def get_config() -> IngeniousSettings:
     return _get_config()
 
 
-def get_openai_service(config: IngeniousSettings = Depends(get_config)) -> OpenAIService:
+def get_openai_service(
+    config: IngeniousSettings = Depends(get_config),
+) -> OpenAIService:
     """Get OpenAI service instance."""
     return OpenAIService(
         azure_endpoint=str(config.models[0].base_url),
@@ -35,7 +36,9 @@ def get_openai_service(config: IngeniousSettings = Depends(get_config)) -> OpenA
     )
 
 
-def get_database_type(config: IngeniousSettings = Depends(get_config)) -> DatabaseClientType:
+def get_database_type(
+    config: IngeniousSettings = Depends(get_config),
+) -> DatabaseClientType:
     """Get database type from config."""
     db_type_val = config.chat_history.database_type.lower()
     try:
@@ -46,7 +49,7 @@ def get_database_type(config: IngeniousSettings = Depends(get_config)) -> Databa
 
 def get_chat_history_repository(
     config: IngeniousSettings = Depends(get_config),
-    db_type: DatabaseClientType = Depends(get_database_type)
+    db_type: DatabaseClientType = Depends(get_database_type),
 ) -> ChatHistoryRepository:
     """Get chat history repository."""
     return ChatHistoryRepository(db_type=db_type, config=config)
@@ -54,23 +57,25 @@ def get_chat_history_repository(
 
 def get_chat_service(
     config: IngeniousSettings = Depends(get_config),
-    chat_history_repository: ChatHistoryRepository = Depends(get_chat_history_repository),
-    openai_service: OpenAIService = Depends(get_openai_service)
+    chat_history_repository: ChatHistoryRepository = Depends(
+        get_chat_history_repository
+    ),
+    openai_service: OpenAIService = Depends(get_openai_service),
 ) -> ChatService:
     """Get chat service instance."""
     cs_type = config.chat_service.type
-    
+
     # Create a wrapper that includes the openai_service
     class ConfigWrapper:
         def __init__(self, config: IngeniousSettings, openai_service: OpenAIService):
             self._config = config
             self.openai_service_instance = openai_service
-            
+
         def __getattr__(self, name):
             return getattr(self._config, name)
-    
+
     wrapped_config = ConfigWrapper(config, openai_service)
-    
+
     return ChatService(
         chat_service_type=cs_type,
         chat_history_repository=chat_history_repository,
@@ -80,34 +85,37 @@ def get_chat_service(
 
 
 def get_message_feedback_service(
-    chat_history_repository: ChatHistoryRepository = Depends(get_chat_history_repository)
+    chat_history_repository: ChatHistoryRepository = Depends(
+        get_chat_history_repository
+    ),
 ) -> MessageFeedbackService:
     """Get message feedback service."""
     return MessageFeedbackService(chat_history_repository=chat_history_repository)
 
 
 def get_file_storage_data(
-    config: IngeniousSettings = Depends(get_config)
+    config: IngeniousSettings = Depends(get_config),
 ) -> FileStorage:
     """Get file storage for data."""
     return FileStorage(config=config, Category="data")
 
 
 def get_file_storage_revisions(
-    config: IngeniousSettings = Depends(get_config)
+    config: IngeniousSettings = Depends(get_config),
 ) -> FileStorage:
     """Get file storage for revisions."""
     return FileStorage(config=config, Category="revisions")
 
 
 def get_conditional_security(
-    request: Request,
-    config: IngeniousSettings = Depends(get_config)
+    request: Request, config: IngeniousSettings = Depends(get_config)
 ) -> str:
     """Get authenticated user - returns 'anonymous' when auth is disabled."""
     if not config.web_configuration.authentication.enable:
-        logger.warning("Authentication is disabled. This is not recommended for production use.")
+        logger.warning(
+            "Authentication is disabled. This is not recommended for production use."
+        )
         return "anonymous"
-    
+
     # For now, just return anonymous - full auth implementation would go here
     return "anonymous"

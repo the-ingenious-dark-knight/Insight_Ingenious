@@ -39,11 +39,13 @@ class multi_agent_chat_service:
         self.chat_history_repository = chat_history_repository
         self.conversation_flow = conversation_flow
         # Get openai_service from config if available
-        if hasattr(config, 'openai_service_instance'):
+        if hasattr(config, "openai_service_instance"):
             self.openai_service = config.openai_service_instance  # type: ignore
         else:
             # OpenAI service should be injected via config
-            raise RuntimeError("OpenAI service not properly configured. Please ensure the service is initialized with proper dependencies.")
+            raise RuntimeError(
+                "OpenAI service not properly configured. Please ensure the service is initialized with proper dependencies."
+            )
 
     async def get_chat_response(self, chat_request: IChatRequest) -> IChatResponse:
         if not chat_request.conversation_flow:

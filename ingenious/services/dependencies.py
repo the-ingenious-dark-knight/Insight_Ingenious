@@ -18,7 +18,7 @@ from ingenious.core.structured_logging import get_logger
 from ingenious.db.chat_history_repository import ChatHistoryRepository
 from ingenious.files.files_repository import FileStorage
 from ingenious.services.chat_service import ChatService
-from ingenious.services.container import get_container, Container
+from ingenious.services.container import Container, get_container
 from ingenious.services.message_feedback_service import MessageFeedbackService
 
 logger = get_logger(__name__)
@@ -46,15 +46,13 @@ def get_openai_service(container: Container = Depends(get_di_container)) -> Any:
 
 
 def get_chat_history_repository(
-    container: Container = Depends(get_di_container)
+    container: Container = Depends(get_di_container),
 ) -> ChatHistoryRepository:
     """Get chat history repository from container."""
     return container.chat_history_repository()
 
 
-def get_chat_service(
-    container: Container = Depends(get_di_container)
-) -> ChatService:
+def get_chat_service(container: Container = Depends(get_di_container)) -> ChatService:
     """Get chat service from container with conversation flow."""
     # The chat_service_factory is already a factory function
     # We need to call it with the conversation_flow parameter
@@ -62,28 +60,28 @@ def get_chat_service(
 
 
 def get_message_feedback_service(
-    container: Container = Depends(get_di_container)
+    container: Container = Depends(get_di_container),
 ) -> MessageFeedbackService:
     """Get message feedback service from container."""
     return container.message_feedback_service()
 
 
 def get_file_storage_data(
-    container: Container = Depends(get_di_container)
+    container: Container = Depends(get_di_container),
 ) -> FileStorage:
     """Get file storage for data from container."""
     return container.file_storage_data()
 
 
 def get_file_storage_revisions(
-    container: Container = Depends(get_di_container)
+    container: Container = Depends(get_di_container),
 ) -> FileStorage:
     """Get file storage for revisions from container."""
     return container.file_storage_revisions()
 
 
 def get_project_config(
-    container: Container = Depends(get_di_container)
+    container: Container = Depends(get_di_container),
 ) -> IngeniousSettings:
     """Get project config from container."""
     return container.config()

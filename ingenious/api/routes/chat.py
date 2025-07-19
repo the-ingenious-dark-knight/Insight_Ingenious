@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.security import HTTPBasicCredentials
 from typing_extensions import Annotated
 
 import ingenious.utils.namespace_utils as ns_utils
@@ -9,7 +8,10 @@ from ingenious.errors.token_limit_exceeded_error import TokenLimitExceededError
 from ingenious.models.chat import ChatRequest, ChatResponse
 from ingenious.models.http_error import HTTPError
 from ingenious.services.chat_service import ChatService
-from ingenious.services.fastapi_dependencies import get_chat_service, get_conditional_security
+from ingenious.services.fastapi_dependencies import (
+    get_chat_service,
+    get_conditional_security,
+)
 
 logger = get_logger(__name__)
 router = APIRouter()
