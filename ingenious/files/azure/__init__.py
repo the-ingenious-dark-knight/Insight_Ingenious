@@ -100,7 +100,9 @@ class azure_FileStorageRepository(IFileStorage):
             blob_client.upload_blob(contents, overwrite=True)
             # print(f"Successfully uploaded {path} to container {self.container_name}.")
         except Exception as e:
-            logger.error(f"Failed to upload {path} to container {self.container_name}: {e}")
+            logger.error(
+                f"Failed to upload {path} to container {self.container_name}: {e}"
+            )
             raise
         return str(path)
 
@@ -151,7 +153,9 @@ class azure_FileStorageRepository(IFileStorage):
             blob_client.delete_blob()
             # print(f"Successfully deleted {path} from container {self.container_name}.")
         except Exception as e:
-            logger.error(f"Failed to delete {path} from container {self.container_name}: {e}")
+            logger.error(
+                f"Failed to delete {path} from container {self.container_name}: {e}"
+            )
             raise
         return str(path)
 

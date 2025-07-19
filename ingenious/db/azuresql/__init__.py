@@ -26,11 +26,16 @@ class azuresql_ChatHistoryRepository(BaseSQLRepository):
     def __init__(self, config: IngeniousSettings) -> None:
         # Try to get connection string from azure_sql_services first, then fallback to chat_history
         self.connection_string = None
-        if config.azure_sql_services and config.azure_sql_services.database_connection_string:
-            self.connection_string = config.azure_sql_services.database_connection_string
+        if (
+            config.azure_sql_services
+            and config.azure_sql_services.database_connection_string
+        ):
+            self.connection_string = (
+                config.azure_sql_services.database_connection_string
+            )
         elif config.chat_history.database_connection_string:
             self.connection_string = config.chat_history.database_connection_string
-            
+
         if not self.connection_string:
             raise ValueError(
                 "Azure SQL connection string is required for azuresql chat history repository. "
@@ -47,12 +52,15 @@ class azuresql_ChatHistoryRepository(BaseSQLRepository):
     def _init_connection(self) -> None:
         """Initialize Azure SQL connection with retry logic."""
         import time
+
         max_retries = 3
         retry_delay = 2
-        
+
         for attempt in range(max_retries):
             try:
-                logger.info(f"Attempting Azure SQL connection (attempt {attempt + 1}/{max_retries})")
+                logger.info(
+                    f"Attempting Azure SQL connection (attempt {attempt + 1}/{max_retries})"
+                )
                 self.connection = pyodbc.connect(self.connection_string)
                 self.connection.autocommit = True
                 logger.info("Azure SQL connection established successfully")

@@ -303,9 +303,9 @@ cursor = conn.cursor()
 
 # Check if tables were created
 cursor.execute("""
-    SELECT TABLE_NAME 
-    FROM INFORMATION_SCHEMA.TABLES 
-    WHERE TABLE_TYPE = 'BASE TABLE' 
+    SELECT TABLE_NAME
+    FROM INFORMATION_SCHEMA.TABLES
+    WHERE TABLE_TYPE = 'BASE TABLE'
     AND TABLE_NAME IN ('chat_history', 'chat_history_summary', 'threads', 'steps', 'elements', 'feedbacks', 'users')
     ORDER BY TABLE_NAME
 """)
@@ -322,8 +322,8 @@ print(f'✅ Messages in chat_history table: {count}')
 if count > 0:
     # Show recent messages
     cursor.execute("""
-        SELECT TOP 3 thread_id, role, content, timestamp 
-        FROM chat_history 
+        SELECT TOP 3 thread_id, role, content, timestamp
+        FROM chat_history
         ORDER BY timestamp DESC
     """)
     print("📝 Recent messages:")
