@@ -1,13 +1,12 @@
-from typing import Tuple
+from typing import Tuple, cast
 
 from autogen_agentchat.agents import AssistantAgent, UserProxyAgent
 from autogen_agentchat.teams import RoundRobinGroupChat
 from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
 
 from ingenious.config import get_config
-from typing import cast
-from ingenious.models.config import Config
 from ingenious.core.structured_logging import get_logger
+from ingenious.models.config import Config
 
 logger = get_logger(__name__)
 
@@ -50,7 +49,9 @@ class ConversationPattern:
             run_async_memory_operation,
         )
 
-        self.memory_manager = get_memory_manager(cast(Config, get_config()), memory_path)
+        self.memory_manager = get_memory_manager(
+            cast(Config, get_config()), memory_path
+        )
 
         # Initialize context file
         if not self.thread_memory:

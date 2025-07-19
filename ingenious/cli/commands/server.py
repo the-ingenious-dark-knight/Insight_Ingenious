@@ -50,7 +50,7 @@ class ServeCommand(BaseCommand):
 
         # Validate configuration paths
         try:
-            config_paths = self.validate_config_paths(config, profile)
+            self.validate_config_paths(config, profile)
         except CommandError:
             self.print_error("Configuration validation failed")
             self._show_config_help()
@@ -62,8 +62,8 @@ class ServeCommand(BaseCommand):
             # Import and start the server
             import uvicorn
 
-            from ingenious.main import create_app
             from ingenious.config.main_settings import IngeniousSettings
+            from ingenious.main import create_app
 
             # Load settings
             settings = IngeniousSettings()

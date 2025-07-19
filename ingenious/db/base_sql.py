@@ -265,7 +265,9 @@ class BaseSQLRepository(IChatHistoryRepository, ABC):
         else:
             # Assume row is tuple/list with positional values
             return IChatHistoryRepository.User(
-                id=UUID(row[0]) if row[0] else UUID("00000000-0000-0000-0000-000000000000"),
+                id=UUID(row[0])
+                if row[0]
+                else UUID("00000000-0000-0000-0000-000000000000"),
                 identifier=str(row[1]) if row[1] else "",
                 metadata=dict(row[2]) if row[2] else {},
                 createdAt=row[3],

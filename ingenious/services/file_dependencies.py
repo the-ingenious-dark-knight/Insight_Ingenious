@@ -6,19 +6,19 @@ for file storage services and template synchronization.
 """
 
 import os
-from typing import Any
-
-from ingenious.config.main_settings import IngeniousSettings
 
 from dependency_injector.wiring import Provide, inject
 from fastapi import Depends
 
+from ingenious.config.main_settings import IngeniousSettings
 from ingenious.files.files_repository import FileStorage
 from ingenious.services.container import Container
 
 
 @inject
-def get_config(config: IngeniousSettings = Provide[Container.config]) -> IngeniousSettings:
+def get_config(
+    config: IngeniousSettings = Provide[Container.config],
+) -> IngeniousSettings:
     """Get config from container."""
     return config
 

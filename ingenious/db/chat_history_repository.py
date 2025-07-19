@@ -272,21 +272,28 @@ class ChatHistoryRepository:
         metadata: Optional[Dict[str, object]] = None,
         tags: Optional[List[str]] = None,
     ) -> str:
-        return str(await self.repository.update_thread(
-            thread_id=thread_id,
-            name=name,
-            user_id=user_id,
-            metadata=metadata,
-        ))
+        return str(
+            await self.repository.update_thread(
+                thread_id=thread_id,
+                name=name,
+                user_id=user_id,
+                metadata=metadata,
+            )
+        )
 
     async def add_user(self, identifier: str) -> IChatHistoryRepository.User:
-        return cast(IChatHistoryRepository.User, await self.repository.add_user(identifier))
+        return cast(
+            IChatHistoryRepository.User, await self.repository.add_user(identifier)
+        )
 
     async def add_step(self, step_dict: IChatHistoryRepository.StepDict) -> str:
         return str(await self.repository.add_step(step_dict))
 
     async def get_user(self, identifier: str) -> IChatHistoryRepository.User | None:
-        return cast(IChatHistoryRepository.User | None, await self.repository.get_user(identifier))
+        return cast(
+            IChatHistoryRepository.User | None,
+            await self.repository.get_user(identifier),
+        )
 
     async def add_message(self, message: Message) -> str:
         return str(await self.repository.add_message(message))
@@ -295,25 +302,37 @@ class ChatHistoryRepository:
         return str(await self.repository.add_memory(memory))
 
     async def get_message(self, message_id: str, thread_id: str) -> Message | None:
-        return cast(Message | None, await self.repository.get_message(message_id, thread_id))
+        return cast(
+            Message | None, await self.repository.get_message(message_id, thread_id)
+        )
 
     async def get_memory(self, message_id: str, thread_id: str) -> Message | None:
-        return cast(Message | None, await self.repository.get_memory(message_id, thread_id))
+        return cast(
+            Message | None, await self.repository.get_memory(message_id, thread_id)
+        )
 
     async def update_memory(self) -> None:
-        result = await self.repository.update_memory()
+        await self.repository.update_memory()
         return None
 
     async def get_thread_messages(self, thread_id: str) -> Optional[List[Message]]:
-        return cast(Optional[List[Message]], await self.repository.get_thread_messages(thread_id))
+        return cast(
+            Optional[List[Message]],
+            await self.repository.get_thread_messages(thread_id),
+        )
 
     async def get_thread_memory(self, thread_id: str) -> Optional[List[Message]]:
-        return cast(Optional[List[Message]], await self.repository.get_thread_memory(thread_id))
+        return cast(
+            Optional[List[Message]], await self.repository.get_thread_memory(thread_id)
+        )
 
     async def get_threads_for_user(
         self, identifier: str, thread_id: Optional[str]
     ) -> Optional[List[IChatHistoryRepository.ThreadDict]]:
-        return cast(Optional[List[IChatHistoryRepository.ThreadDict]], await self.repository.get_threads_for_user(identifier, thread_id))
+        return cast(
+            Optional[List[IChatHistoryRepository.ThreadDict]],
+            await self.repository.get_threads_for_user(identifier, thread_id),
+        )
 
     async def update_message_feedback(
         self, message_id: str, thread_id: str, positive_feedback: bool | None

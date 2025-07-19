@@ -71,7 +71,9 @@ def register_commands(app: typer.Typer, console: Console) -> None:
         """
         This command will run all the tests in the project
         """
-        _log_level: int = LogLevel.from_string(log_level or "WARNING") or LogLevel.WARNING
+        _log_level: int = (
+            LogLevel.from_string(log_level or "WARNING") or LogLevel.WARNING
+        )
 
         se: stage_executor_module.stage_executor = stage_executor_module.stage_executor(
             log_level=_log_level, console=console

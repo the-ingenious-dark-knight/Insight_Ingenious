@@ -42,7 +42,7 @@ class azure_FileStorageRepository(IFileStorage):
             cred = ClientSecretCredential(
                 tenant_id="",  # TODO: Add proper tenant_id from config
                 client_id=self.client_id,
-                client_secret=self.token
+                client_secret=self.token,
             )
             self.blob_service_client = BlobServiceClient(
                 account_url=self.url, credential=cred

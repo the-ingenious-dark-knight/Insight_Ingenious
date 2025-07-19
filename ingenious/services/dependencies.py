@@ -5,17 +5,22 @@ from typing import Any, Optional
 
 from dependency_injector.wiring import Provide, inject
 from fastapi import Depends, HTTPException, Request, status
-from fastapi.security import HTTPBasic, HTTPBasicCredentials, HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import (
+    HTTPAuthorizationCredentials,
+    HTTPBasic,
+    HTTPBasicCredentials,
+    HTTPBearer,
+)
 from typing_extensions import Annotated
 
 from ingenious.auth.jwt import get_username_from_token
+from ingenious.config.main_settings import IngeniousSettings
 from ingenious.core.structured_logging import get_logger
 from ingenious.db.chat_history_repository import ChatHistoryRepository
 from ingenious.files.files_repository import FileStorage
 from ingenious.services.chat_service import ChatService
 from ingenious.services.container import Container
 from ingenious.services.message_feedback_service import MessageFeedbackService
-from ingenious.config.main_settings import IngeniousSettings
 
 logger = get_logger(__name__)
 security = HTTPBasic()
@@ -23,7 +28,9 @@ bearer_security = HTTPBearer()
 
 
 @inject
-def get_config(config: IngeniousSettings = Provide[Container.config]) -> IngeniousSettings:
+def get_config(
+    config: IngeniousSettings = Provide[Container.config],
+) -> IngeniousSettings:
     """Get config from container."""
     return config
 
@@ -39,7 +46,9 @@ def get_openai_service(openai_service: Any = Provide[Container.openai_service]) 
 
 @inject
 def get_chat_history_repository(
-    chat_history_repository: ChatHistoryRepository = Provide[Container.chat_history_repository],
+    chat_history_repository: ChatHistoryRepository = Provide[
+        Container.chat_history_repository
+    ],
 ) -> ChatHistoryRepository:
     """Get chat history repository from container."""
     return chat_history_repository
@@ -49,7 +58,9 @@ def get_chat_history_repository(
 def get_chat_service(
     conversation_flow: str = "",
     config: IngeniousSettings = Provide[Container.config],
-    chat_history_repository: ChatHistoryRepository = Provide[Container.chat_history_repository],
+    chat_history_repository: ChatHistoryRepository = Provide[
+        Container.chat_history_repository
+    ],
 ) -> ChatService:
     """Get chat service from container with conversation flow."""
     cs_type = config.chat_service.type
@@ -63,7 +74,9 @@ def get_chat_service(
 
 @inject
 def get_message_feedback_service(
-    feedback_service: MessageFeedbackService = Provide[Container.message_feedback_service],
+    feedback_service: MessageFeedbackService = Provide[
+        Container.message_feedback_service
+    ],
 ) -> MessageFeedbackService:
     """Get message feedback service from container."""
     return feedback_service
@@ -86,13 +99,16 @@ def get_file_storage_revisions(
 
 
 @inject
-def get_project_config(config: IngeniousSettings = Provide[Container.config]) -> IngeniousSettings:
+def get_project_config(
+    config: IngeniousSettings = Provide[Container.config],
+) -> IngeniousSettings:
     """Get project config from container."""
     return config
 
 
 def get_security_service(
-    token: Annotated[HTTPAuthorizationCredentials, Depends(bearer_security)] | None = None,
+    token: Annotated[HTTPAuthorizationCredentials, Depends(bearer_security)]
+    | None = None,
     credentials: Annotated[HTTPBasicCredentials, Depends(security)] | None = None,
     config: IngeniousSettings = Depends(get_config),
 ) -> str:
@@ -183,7 +199,9 @@ def get_security_service_optional(
     return credentials.username
 
 
-def get_auth_user(request: Request, config: IngeniousSettings = Depends(get_config)) -> str:
+def get_auth_user(
+    request: Request, config: IngeniousSettings = Depends(get_config)
+) -> str:
     """Get authenticated user - supports both JWT and Basic Auth."""
     if not config.web_configuration.authentication.enable:
         logger.warning(
@@ -250,7 +268,9 @@ def get_auth_user(request: Request, config: IngeniousSettings = Depends(get_conf
     )
 
 
-def get_conditional_security(request: Request, config: IngeniousSettings = Depends(get_config)) -> str:
+def get_conditional_security(
+    request: Request, config: IngeniousSettings = Depends(get_config)
+) -> str:
     """Get authenticated user - wrapper around get_auth_user for compatibility."""
     return get_auth_user(request, config)
 
@@ -260,13 +280,13 @@ def sync_templates(config: IngeniousSettings = Depends(get_config)) -> None:
     if config.file_storage.revisions.storage_type == "local":
         return
     else:
-        import os
         import asyncio
+        import os
 
         fs = FileStorage(config)
         working_dir = os.getcwd()
         template_path = os.path.join(working_dir, "ingenious", "templates")
-        
+
         async def sync_files() -> None:
             template_files = await fs.list_files(file_path=template_path)
             for file in template_files:
@@ -279,5 +299,5 @@ def sync_templates(config: IngeniousSettings = Depends(get_config)) -> None:
                 )
                 with open(file_path, "w") as f:
                     f.write(file_contents)
-        
+
         asyncio.run(sync_files())

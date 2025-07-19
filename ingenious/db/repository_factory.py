@@ -128,7 +128,9 @@ class SQLiteChatHistoryRepository(BaseSQLRepository):
         """Connection already initialized via connection pool."""
         pass
 
-    def _execute_sql(self, sql: str, params: list[Any] | None = None, expect_results: bool = True) -> Any:
+    def _execute_sql(
+        self, sql: str, params: list[Any] | None = None, expect_results: bool = True
+    ) -> Any:
         """Execute SQL using the connection pool."""
         if params is None:
             params = []
@@ -197,7 +199,9 @@ class AzureSQLChatHistoryRepository(BaseSQLRepository):
         """Connection already initialized via connection pool."""
         pass
 
-    def _execute_sql(self, sql: str, params: list[Any] | None = None, expect_results: bool = True) -> Any:
+    def _execute_sql(
+        self, sql: str, params: list[Any] | None = None, expect_results: bool = True
+    ) -> Any:
         """Execute SQL using the connection pool."""
         if params is None:
             params = []

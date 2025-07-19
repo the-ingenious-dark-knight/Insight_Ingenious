@@ -98,14 +98,20 @@ class AgentChats(BaseModel):
 
     def get_agent_chat_by_name(self, agent_name: str) -> AgentChat:
         for agent_chat in self._agent_chats:
-            if agent_chat.source_agent_name == agent_name or agent_chat.target_agent_name == agent_name:
+            if (
+                agent_chat.source_agent_name == agent_name
+                or agent_chat.target_agent_name == agent_name
+            ):
                 return agent_chat
         raise ValueError(f"AgentChat with name {agent_name} not found")
 
     def get_agent_chats_by_name(self, agent_name: str) -> List[AgentChat]:
         agent_chats = []
         for agent_chat in self._agent_chats:
-            if agent_chat.source_agent_name == agent_name or agent_chat.target_agent_name == agent_name:
+            if (
+                agent_chat.source_agent_name == agent_name
+                or agent_chat.target_agent_name == agent_name
+            ):
                 agent_chats.append(agent_chat)
         return agent_chats
 
@@ -141,7 +147,11 @@ class Agent(BaseModel):
     agent_chats: list[AgentChat] = []
 
     def add_agent_chat(
-        self, content: str, identifier: str, ctx: Optional[MessageContext] = None, source: Optional[str] = None
+        self,
+        content: str,
+        identifier: str,
+        ctx: Optional[MessageContext] = None,
+        source: Optional[str] = None,
     ) -> AgentChat:
         if ctx and ctx.topic_id:
             source = ctx.topic_id.source
@@ -383,14 +393,24 @@ class LLMUsageTracker(logging.Handler):
                                 add_chat = False
 
                         system_input = "\n\n".join(
-                            [r.content for r in (kwargs.messages or []) if r and r.role == "system" and r.content]
+                            [
+                                r.content
+                                for r in (kwargs.messages or [])
+                                if r and r.role == "system" and r.content
+                            ]
                         )
                         user_input = "\n\n".join(
-                            [r.content for r in (kwargs.messages or []) if r and r.role == "user" and r.content]
+                            [
+                                r.content
+                                for r in (kwargs.messages or [])
+                                if r and r.role == "user" and r.content
+                            ]
                         )
 
                         # Get all messages with role 'tool'
-                        tool_messages = [m for m in (kwargs.messages or []) if m and m.role == "tool"]
+                        tool_messages = [
+                            m for m in (kwargs.messages or []) if m and m.role == "tool"
+                        ]
                         if tool_messages:
                             user_input += "\n\n---\n\n"
                             user_input += "# Tool Messages\n\n"

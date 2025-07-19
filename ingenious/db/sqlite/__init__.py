@@ -100,7 +100,9 @@ class sqlite_ChatHistoryRepository(BaseSQLRepository):
                 cause=e,
             ) from e
 
-    def execute_sql(self, sql: str, params: list[Any] | None = None, expect_results: bool = True) -> Any:
+    def execute_sql(
+        self, sql: str, params: list[Any] | None = None, expect_results: bool = True
+    ) -> Any:
         """Legacy method for backward compatibility."""
         return self._execute_sql(sql, params, expect_results)
 
@@ -343,7 +345,9 @@ class sqlite_ChatHistoryRepository(BaseSQLRepository):
                 for row in rows
             ]
 
-    async def add_step(self, step_dict: IChatHistoryRepository.StepDict) -> IChatHistoryRepository.Step:
+    async def add_step(
+        self, step_dict: IChatHistoryRepository.StepDict
+    ) -> IChatHistoryRepository.Step:
         logger.info(
             "Creating step in SQLite database",
             step_id=step_dict.get("id"),
@@ -376,15 +380,20 @@ class sqlite_ChatHistoryRepository(BaseSQLRepository):
         self.execute_sql(
             sql=query, params=list(parameters.values()), expect_results=False
         )
-        
+
         # Return the created step
         from uuid import UUID
+
         return IChatHistoryRepository.Step(
             id=UUID(step_dict.get("id", "00000000-0000-0000-0000-000000000000")),
             name=step_dict.get("name", ""),
             type=step_dict.get("type", ""),
-            threadId=UUID(step_dict.get("threadId", "00000000-0000-0000-0000-000000000000")),
-            parentId=UUID(step_dict.get("parentId")) if step_dict.get("parentId") else None,
+            threadId=UUID(
+                step_dict.get("threadId", "00000000-0000-0000-0000-000000000000")
+            ),
+            parentId=UUID(step_dict.get("parentId"))
+            if step_dict.get("parentId")
+            else None,
             disableFeedback=step_dict.get("disableFeedback", False),
             streaming=step_dict.get("streaming", False),
             waitForAnswer=step_dict.get("waitForAnswer"),
@@ -397,7 +406,9 @@ class sqlite_ChatHistoryRepository(BaseSQLRepository):
             start=step_dict.get("start"),
             end=step_dict.get("end"),
             generation=step_dict.get("generation"),
-            showInput=str(step_dict.get("showInput")) if step_dict.get("showInput") is not None else None,
+            showInput=str(step_dict.get("showInput"))
+            if step_dict.get("showInput") is not None
+            else None,
             language=step_dict.get("language"),
             indent=step_dict.get("indent"),
         )

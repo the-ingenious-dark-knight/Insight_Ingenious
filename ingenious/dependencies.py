@@ -24,10 +24,10 @@ from ingenious.config.profile import Profiles
 from ingenious.config.settings import IngeniousSettings
 from ingenious.core.structured_logging import get_logger
 from ingenious.db.chat_history_repository import ChatHistoryRepository
-from ingenious.models.database_client import DatabaseClientType
 from ingenious.errors import ConfigurationError
 from ingenious.external_services.openai_service import OpenAIService
 from ingenious.files.files_repository import FileStorage
+from ingenious.models.database_client import DatabaseClientType
 from ingenious.services.chat_service import ChatService
 from ingenious.services.message_feedback_service import MessageFeedbackService
 
@@ -219,7 +219,9 @@ async def sync_templates() -> None:
         template_files = await fs.list_files(file_path=template_path)
         for file in template_files:
             file_name = os.path.basename(file)
-            file_contents = await fs.read_file(file_name=file_name, file_path=template_path)
+            file_contents = await fs.read_file(
+                file_name=file_name, file_path=template_path
+            )
             file_path = os.path.join(working_dir, "ingenious", "templates", file_name)
             with open(file_path, "w") as f:
                 f.write(file_contents)

@@ -7,7 +7,6 @@ from typing import Any, List, Optional
 
 import yaml
 from pydantic import BaseModel
-from rich import progress
 
 import ingenious.dependencies as ig_dependencies
 import ingenious.utils.model_utils as model_utils
@@ -194,13 +193,17 @@ class RootModel_Players_Careerstats_Bowlers(BaseModel):
     MaidensBowled: Optional[Any] = None
     Games: Optional[Any] = None
 
-    def __init__(self, careerstats: RootModel_Players_Careerstats, RootModelInstance: Any) -> None:
+    def __init__(
+        self, careerstats: RootModel_Players_Careerstats, RootModelInstance: Any
+    ) -> None:
         super().__init__(**careerstats.__dict__)
         player = RootModelInstance.Get_Player_By_Id(player_id=careerstats.PlayerId)
         self.PlayerName = player.DisplayName
         self.TeamName = player.TeamName
         self.BowlingStrikeRate = (
-            self.TotalBallsBowled / self.WicketsTaken if self.WicketsTaken and self.TotalBallsBowled and self.WicketsTaken > 0 else 0
+            self.TotalBallsBowled / self.WicketsTaken
+            if self.WicketsTaken and self.TotalBallsBowled and self.WicketsTaken > 0
+            else 0
         )
 
 
@@ -220,7 +223,9 @@ class RootModel_Players_Careerstats_Batsmen(BaseModel):
     HundredScored: Optional[Any] = None
     Games: Optional[Any] = None
 
-    def __init__(self, careerstats: RootModel_Players_Careerstats, RootModelInstance: Any) -> None:
+    def __init__(
+        self, careerstats: RootModel_Players_Careerstats, RootModelInstance: Any
+    ) -> None:
         super().__init__(**careerstats.__dict__)
         player = RootModelInstance.Get_Player_By_Id(player_id=careerstats.PlayerId)
         self.PlayerName = player.DisplayName
@@ -369,7 +374,9 @@ class RootModel_Innings_Bowlers_Extended(BaseModel):
     IsNonStrike: Optional[Any] = None
     Economy: Optional[Any] = None
 
-    def __init__(self, bowler: RootModel_Innings_Bowlers, RootModelInstance: Any) -> None:
+    def __init__(
+        self, bowler: RootModel_Innings_Bowlers, RootModelInstance: Any
+    ) -> None:
         # Add the player name and team name to the bowler object
         super().__init__(**bowler.__dict__)
         player: RootModel_Players_Curated = RootModelInstance.Get_Player_By_Id(
@@ -378,11 +385,15 @@ class RootModel_Innings_Bowlers_Extended(BaseModel):
         self.PlayerName = player.DisplayName
         self.TeamName = player.TeamName
         self.BowlingAverage = (
-            self.RunsConceded / self.WicketsTaken if self.RunsConceded and self.WicketsTaken and self.WicketsTaken > 0 else 0
+            self.RunsConceded / self.WicketsTaken
+            if self.RunsConceded and self.WicketsTaken and self.WicketsTaken > 0
+            else 0
         )
         self.EconomyRate = self.Economy
         self.StrikeRate = (
-            self.TotalBallsBowled / self.WicketsTaken if self.TotalBallsBowled and self.WicketsTaken and self.WicketsTaken > 0 else 0
+            self.TotalBallsBowled / self.WicketsTaken
+            if self.TotalBallsBowled and self.WicketsTaken and self.WicketsTaken > 0
+            else 0
         )
 
 
@@ -407,7 +418,9 @@ class RootModel_Innings_Batsmen_Extended(BaseModel):
     IsOut: Optional[Any] = None
     StrikeRate: Optional[Any] = None
 
-    def __init__(self, batsman: RootModel_Innings_Batsmen, RootModelInstance: Any) -> None:
+    def __init__(
+        self, batsman: RootModel_Innings_Batsmen, RootModelInstance: Any
+    ) -> None:
         # Add the player name and team name to the batsman object
         super().__init__(**batsman.__dict__)
         player: RootModel_Players_Curated = RootModelInstance.Get_Player_By_Id(
@@ -811,9 +824,13 @@ class RootModel(BaseModel):
                 if k == "AwayTeamId"
                 else k
             ): (
-                self.Fixture.HomeTeam.Name if self.Fixture.HomeTeam else "N/A"
+                self.Fixture.HomeTeam.Name
+                if self.Fixture.HomeTeam
+                else "N/A"
                 if k == "HomeTeamId"
-                else self.Fixture.AwayTeam.Name if self.Fixture.AwayTeam else "N/A"
+                else self.Fixture.AwayTeam.Name
+                if self.Fixture.AwayTeam
+                else "N/A"
                 if k == "AwayTeamId"
                 else v
             )
@@ -1515,7 +1532,9 @@ class RootModel(BaseModel):
         RUNS = "Runs"
         WICKETS = "Wickets"
 
-    def Get_Overs_Summary(self, measure: Measure = Measure.RUNS, as_csv: bool = False) -> Any:
+    def Get_Overs_Summary(
+        self, measure: Measure = Measure.RUNS, as_csv: bool = False
+    ) -> Any:
         overs = self.Get_Overs()
         summary = dict()
         teams = self.Get_Teams()
@@ -1897,8 +1916,8 @@ class RootModel(BaseModel):
         ):
             if self._progress:
                 self._progress.progress.print(
-                f"[bold red]❓ Missing shot length category: {ball}[/bold red]"
-            )
+                    f"[bold red]❓ Missing shot length category: {ball}[/bold red]"
+                )
 
         return ret
 
@@ -1926,8 +1945,8 @@ class RootModel(BaseModel):
         ):
             if self._progress:
                 self._progress.progress.print(
-                f"[bold red]❓ Missing shot line category: {line}[/bold red]"
-            )
+                    f"[bold red]❓ Missing shot line category: {line}[/bold red]"
+                )
 
         return ret
 
@@ -1963,8 +1982,8 @@ class RootModel(BaseModel):
         if ret == "Unknown":
             if self._progress:
                 self._progress.progress.print(
-                f"[bold red]❓ Missing shot category: {shot}[/bold red]"
-            )
+                    f"[bold red]❓ Missing shot category: {shot}[/bold red]"
+                )
 
         return ret
 
@@ -2011,8 +2030,8 @@ class RootModel(BaseModel):
         if ret == "Unknown":
             if self._progress:
                 self._progress.progress.print(
-                f"[bold red]❓ Missing shot contact category: {contact}[/bold red]"
-            )
+                    f"[bold red]❓ Missing shot contact category: {contact}[/bold red]"
+                )
 
         return ret
 

@@ -54,7 +54,7 @@ class ConversationFlow:
 
         # Convert topic string to list for ConversationPattern
         topics_list: list[str] = [topics] if topics else []
-        
+
         # Initialize the new conversation pattern
         _classification_agent_pattern = ConversationPattern(
             default_llm_config=llm_config,

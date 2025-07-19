@@ -1,6 +1,7 @@
 """Dependency injection container for Ingenious services."""
 
 from typing import Any
+
 from dependency_injector import containers, providers
 from dotenv import load_dotenv
 
@@ -10,10 +11,10 @@ from ingenious.config.main_settings import IngeniousSettings
 # Legacy profile import removed - now using new config system
 from ingenious.core.structured_logging import get_logger
 from ingenious.db.chat_history_repository import ChatHistoryRepository
-from ingenious.models.database_client import DatabaseClientType
 from ingenious.errors import ConfigurationError
 from ingenious.external_services.openai_service import OpenAIService
 from ingenious.files.files_repository import FileStorage
+from ingenious.models.database_client import DatabaseClientType
 from ingenious.services.chat_service import ChatService
 from ingenious.services.message_feedback_service import MessageFeedbackService
 
