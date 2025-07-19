@@ -160,3 +160,4 @@ CLAUDE.md
 test_dir/
 
 azure_integration_test/
+server_log.txt
