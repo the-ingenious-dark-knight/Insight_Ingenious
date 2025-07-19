@@ -287,13 +287,8 @@ async def health_check() -> Dict[str, Any]:
             logger.warning("Configuration check failed", error=str(e))
             config_status = "error"
 
-        # Check profile availability
-        try:
-            _ = igen_deps.get_profile()
-            profile_status = "ok"
-        except Exception as e:
-            logger.warning("Profile check failed", error=str(e))
-            profile_status = "error"
+        # Profile system is deprecated - no longer check for profiles
+        profile_status = "ok"  # Always OK since profiles are no longer used
 
         response_time = round((time.time() - start_time) * 1000, 2)  # ms
 

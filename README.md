@@ -15,7 +15,10 @@ Get up and running in 5 minutes with Azure OpenAI!
 
 1. **Install and Initialize**:
     ```bash
-    # From your project directory - choose installation based on features needed
+    # Navigate to your desired project directory first
+    cd /path/to/your/project
+
+    # Choose installation based on features needed
     uv add ingenious[standard]    # Most common: includes SQL agent support
     # OR
     uv add ingenious[azure-full]  # Full Azure integration
@@ -25,7 +28,7 @@ Get up and running in 5 minutes with Azure OpenAI!
     # Add required dependencies for knowledge-base and SQL workflows
     uv add chromadb aiofiles autogen-ext
 
-    # Initialize project
+    # Initialize project in the current directory
     uv run ingen init
     ```
 
@@ -112,6 +115,7 @@ That's it! You should see a JSON response with AI analysis of the input.
     ingen init
 
     # Create bike-insights test data file
+    # Note: bike-insights requires JSON data in the user_prompt field (double-encoded JSON)
     cat > test_bike_insights.json << 'EOF'
     {
       "user_prompt": "{\"revision_id\": \"test-v1\", \"identifier\": \"test-001\", \"stores\": [{\"name\": \"Test Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"MB-TREK-2021-XC\", \"quantity_sold\": 2, \"sale_date\": \"2023-04-01\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 4.5, \"comment\": \"Great bike\"}}], \"bike_stock\": []}]}",

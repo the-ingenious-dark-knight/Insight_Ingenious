@@ -16,4 +16,4 @@ model: Claude Sonnet 4
 
 4. Re-run the command until no errors are reported.
 
-you can ignore issues with external dependencies by modifying pyproject.toml         
+you can ignore issues with external dependencies by modifying pyproject.toml
