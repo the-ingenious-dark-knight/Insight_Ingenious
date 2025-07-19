@@ -7,7 +7,9 @@ from ingenious.errors import (
     ChatServiceError,
 )
 from ingenious.models.chat import ChatRequest, ChatResponse
+from typing import Union
 from ingenious.models.config import Config
+from ingenious.config.main_settings import IngeniousSettings
 from ingenious.utils.imports import import_class_with_fallback
 
 logger = get_logger(__name__)
@@ -27,7 +29,7 @@ class ChatService(IChatService):
         chat_service_type: str,
         chat_history_repository: ChatHistoryRepository,
         conversation_flow: str,
-        config: Config,
+        config: Union[Config, IngeniousSettings],
         revision: str = "dfe19b62-07f1-4cb5-ae9a-561a253e4b04",
     ):
         class_name = f"{chat_service_type.lower()}_chat_service"

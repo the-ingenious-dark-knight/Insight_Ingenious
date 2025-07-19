@@ -208,7 +208,7 @@ def get_message_feedback_service(
     return MessageFeedbackService(chat_history_repository)
 
 
-def sync_templates() -> None:
+async def sync_templates() -> None:
     config = get_config()
     if config.file_storage.revisions.storage_type == "local":
         return
@@ -216,10 +216,10 @@ def sync_templates() -> None:
         fs = FileStorage(config)
         working_dir = os.getcwd()
         template_path = os.path.join(working_dir, "ingenious", "templates")
-        template_files = fs.list_files(file_path=template_path)
+        template_files = await fs.list_files(file_path=template_path)
         for file in template_files:
             file_name = os.path.basename(file)
-            file_contents = fs.read_file(file_name=file_name, file_path=template_path)
+            file_contents = await fs.read_file(file_name=file_name, file_path=template_path)
             file_path = os.path.join(working_dir, "ingenious", "templates", file_name)
             with open(file_path, "w") as f:
                 f.write(file_contents)

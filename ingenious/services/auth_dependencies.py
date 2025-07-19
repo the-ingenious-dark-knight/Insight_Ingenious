@@ -6,11 +6,13 @@ for authentication and authorization services.
 """
 
 import secrets
-from typing import Optional
+from typing import Any, Optional
+
+from ingenious.config.main_settings import IngeniousSettings
 
 from dependency_injector.wiring import Provide, inject
 from fastapi import Depends, HTTPException, Request, status
-from fastapi.security import HTTPBasic, HTTPBasicCredentials, HTTPBearer
+from fastapi.security import HTTPBasic, HTTPBasicCredentials, HTTPBearer, HTTPAuthorizationCredentials
 from typing_extensions import Annotated
 
 from ingenious.auth.jwt import get_username_from_token
@@ -19,7 +21,7 @@ from ingenious.services.container import Container
 
 
 @inject
-def get_config(config=Provide[Container.config]):
+def get_config(config: IngeniousSettings = Provide[Container.config]) -> IngeniousSettings:
     """Get config from container."""
     return config
 
@@ -30,10 +32,10 @@ bearer_security = HTTPBearer()
 
 
 def get_security_service(
-    token: Annotated[str, Depends(bearer_security)] = None,
-    credentials: Annotated[HTTPBasicCredentials, Depends(security)] = None,
-    config=Depends(get_config),
-):
+    token: Annotated[HTTPAuthorizationCredentials, Depends(bearer_security)] | None = None,
+    credentials: Annotated[HTTPBasicCredentials, Depends(security)] | None = None,
+    config: IngeniousSettings = Depends(get_config),
+) -> str:
     """Security service with JWT and Basic Auth support."""
     if not config.web_configuration.authentication.enable:
         logger.warning(
@@ -62,8 +64,8 @@ def get_security_service(
 
 def get_security_service_optional(
     credentials: Optional[HTTPBasicCredentials] = None,
-    config=Depends(get_config),
-):
+    config: IngeniousSettings = Depends(get_config),
+) -> Optional[str]:
     """Optional security service that doesn't require credentials when auth is disabled."""
     if not config.web_configuration.authentication.enable:
         logger.warning(
@@ -81,7 +83,7 @@ def get_security_service_optional(
     return _validate_basic_auth_credentials(credentials, config)
 
 
-def get_auth_user(request: Request, config=Depends(get_config)) -> str:
+def get_auth_user(request: Request, config: IngeniousSettings = Depends(get_config)) -> str:
     """Get authenticated user - supports both JWT and Basic Auth."""
     if not config.web_configuration.authentication.enable:
         logger.warning(
@@ -117,7 +119,7 @@ def get_conditional_security(request: Request) -> str:
     return get_auth_user(request)
 
 
-def _validate_basic_auth_credentials(credentials: HTTPBasicCredentials, config) -> str:
+def _validate_basic_auth_credentials(credentials: HTTPBasicCredentials, config: IngeniousSettings) -> str:
     """Validate basic auth credentials against configuration."""
     current_username_bytes = credentials.username.encode("utf8")
     correct_username_bytes = config.web_configuration.authentication.username.encode(
@@ -142,7 +144,7 @@ def _validate_basic_auth_credentials(credentials: HTTPBasicCredentials, config) 
     return credentials.username
 
 
-def _handle_basic_auth_header(auth_header: str, config) -> str:
+def _handle_basic_auth_header(auth_header: str, config: IngeniousSettings) -> str:
     """Handle Basic Auth header parsing and validation."""
     import base64
 

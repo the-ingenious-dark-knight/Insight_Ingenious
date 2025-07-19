@@ -37,7 +37,7 @@ class RefreshRequest(BaseModel):
 @router.post("/login", response_model=TokenResponse)
 async def login(login_data: LoginRequest) -> TokenResponse:
     """Login endpoint that returns JWT tokens"""
-    config = get_config()  # type: ignore
+    config = get_config()
 
     # Check if authentication is disabled
     if not config.web_configuration.authentication.enable:

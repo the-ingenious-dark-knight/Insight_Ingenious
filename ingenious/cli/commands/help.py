@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 from rich.panel import Panel
 
@@ -19,7 +19,7 @@ from ingenious.cli.utilities import OutputFormatters, ValidationUtils
 class HelpCommand(BaseCommand):
     """Show detailed help and getting started guide."""
 
-    def execute(self, topic: Optional[str] = None) -> None:
+    def execute(self, topic: Optional[str] = None, **kwargs: Any) -> None:
         """
         Show comprehensive help for getting started with Insight Ingenious.
 
@@ -145,7 +145,7 @@ class HelpCommand(BaseCommand):
 class StatusCommand(BaseCommand):
     """Check system status and configuration."""
 
-    def execute(self) -> None:
+    def execute(self, **kwargs: Any) -> None:
         """
         Check the status of Insight Ingenious configuration.
 
@@ -159,7 +159,7 @@ class StatusCommand(BaseCommand):
             "[bold blue]🔍 Insight Ingenious System Status[/bold blue]\n"
         )
 
-        status_items = {}
+        status_items: dict[str, Any] = {}
 
         # Check environment variables
         self._check_environment_variables(status_items)
@@ -259,7 +259,7 @@ class StatusCommand(BaseCommand):
 class VersionCommand(BaseCommand):
     """Show version information."""
 
-    def execute(self) -> None:
+    def execute(self, **kwargs: Any) -> None:
         """Display version information for Insight Ingenious."""
         try:
             from importlib.metadata import version as get_version
@@ -282,7 +282,7 @@ class VersionCommand(BaseCommand):
 class ValidateCommand(BaseCommand):
     """Validate system configuration and requirements."""
 
-    def execute(self) -> None:
+    def execute(self, **kwargs: Any) -> None:
         """
         Comprehensive validation of Insight Ingenious setup.
 
@@ -344,7 +344,7 @@ class ValidateCommand(BaseCommand):
 
     def _validate_environment_variables(self) -> tuple[bool, list[str]]:
         """Validate environment variables for pydantic-settings configuration."""
-        issues = []
+        issues: list[str] = []
         try:
             # Check for .env file
             from pathlib import Path
@@ -706,15 +706,15 @@ class ValidateCommand(BaseCommand):
 
                         if hasattr(subprocess, "run"):
                             # Try lsof command on Unix-like systems
-                            result = subprocess.run(
+                            proc_result = subprocess.run(
                                 ["lsof", "-i", f":{port}"],
                                 capture_output=True,
                                 text=True,
                                 timeout=5,
                             )
-                            if result.stdout:
+                            if proc_result.stdout:
                                 self.print_info(f"Process using port {port}:")
-                                self.console.print(f"    {result.stdout.strip()}")
+                                self.console.print(f"    {proc_result.stdout.strip()}")
                     except (
                         subprocess.TimeoutExpired,
                         FileNotFoundError,
@@ -829,37 +829,37 @@ class ValidateCommand(BaseCommand):
 
 
 # Command registration functions for backward compatibility
-def register_commands(app, console) -> None:
+def register_commands(app: Any, console: Any) -> None:
     """Register help commands with the typer app."""
 
     import typer
     from typing_extensions import Annotated
 
-    @app.command(name="help", help="Show detailed help and getting started guide")
+    @app.command(name="help", help="Show detailed help and getting started guide")  # type: ignore[misc]
     def help_command(
         topic: Annotated[
             Optional[str],
             typer.Argument(help="Specific topic: setup, workflows, config, deployment"),
         ] = None,
-    ):
+    ) -> None:
         """Show comprehensive help for getting started with Insight Ingenious."""
         cmd = HelpCommand(console)
         cmd.run(topic=topic)
 
-    @app.command(name="status", help="Check system status and configuration")
-    def status():
+    @app.command(name="status", help="Check system status and configuration")  # type: ignore[misc]
+    def status() -> None:
         """Check the status of your Insight Ingenious configuration."""
         cmd = StatusCommand(console)
         cmd.run()
 
-    @app.command(name="version", help="Show version information")
-    def version():
+    @app.command(name="version", help="Show version information")  # type: ignore[misc]
+    def version() -> None:
         """Display version information for Insight Ingenious."""
         cmd = VersionCommand(console)
         cmd.run()
 
-    @app.command(name="validate", help="Validate system configuration and requirements")
-    def validate():
+    @app.command(name="validate", help="Validate system configuration and requirements")  # type: ignore[misc]
+    def validate() -> None:
         """Comprehensive validation of your Insight Ingenious setup."""
         cmd = ValidateCommand(console)
         cmd.run()

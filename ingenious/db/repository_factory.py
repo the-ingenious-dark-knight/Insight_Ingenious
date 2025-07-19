@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from ingenious.config.settings import IngeniousSettings
 from ingenious.db.base_sql import BaseSQLRepository
@@ -112,14 +112,14 @@ class SQLiteChatHistoryRepository(BaseSQLRepository):
         self.pool = connection_pool
         super().__init__(config, query_builder)
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Destructor to ensure connections are properly closed."""
         try:
             self.close()
         except Exception:
             pass
 
-    def close(self):
+    def close(self) -> None:
         """Close all connections in the pool."""
         if hasattr(self, "pool"):
             self.pool.close_all()
@@ -128,7 +128,7 @@ class SQLiteChatHistoryRepository(BaseSQLRepository):
         """Connection already initialized via connection pool."""
         pass
 
-    def _execute_sql(self, sql: str, params=None, expect_results: bool = True):
+    def _execute_sql(self, sql: str, params: list[Any] | None = None, expect_results: bool = True) -> Any:
         """Execute SQL using the connection pool."""
         if params is None:
             params = []
@@ -161,7 +161,7 @@ class SQLiteChatHistoryRepository(BaseSQLRepository):
 
     async def get_threads_for_user(
         self, identifier: str, thread_id: Optional[str] = None
-    ):
+    ) -> Any:
         """Get threads for user - delegates to existing SQLite implementation."""
         # This would be implemented by copying the existing implementation
         # from the SQLite repository class
@@ -197,7 +197,7 @@ class AzureSQLChatHistoryRepository(BaseSQLRepository):
         """Connection already initialized via connection pool."""
         pass
 
-    def _execute_sql(self, sql: str, params=None, expect_results: bool = True):
+    def _execute_sql(self, sql: str, params: list[Any] | None = None, expect_results: bool = True) -> Any:
         """Execute SQL using the connection pool."""
         if params is None:
             params = []
@@ -234,7 +234,7 @@ class AzureSQLChatHistoryRepository(BaseSQLRepository):
 
     async def get_threads_for_user(
         self, identifier: str, thread_id: Optional[str] = None
-    ):
+    ) -> Any:
         """Get threads for user - delegates to existing Azure SQL implementation."""
         # This would be implemented by copying the existing implementation
         # from the Azure SQL repository class

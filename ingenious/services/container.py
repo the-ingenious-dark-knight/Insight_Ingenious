@@ -5,7 +5,7 @@ from dependency_injector import containers, providers
 from dotenv import load_dotenv
 
 from ingenious.config.config import get_config as _get_config
-from ingenious.config.settings import IngeniousSettings
+from ingenious.config.main_settings import IngeniousSettings
 
 # Legacy profile import removed - now using new config system
 from ingenious.core.structured_logging import get_logger

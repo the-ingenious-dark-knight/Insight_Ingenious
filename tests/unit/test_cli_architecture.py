@@ -8,6 +8,7 @@ to ensure the refactored CLI architecture works correctly.
 import os
 import tempfile
 from pathlib import Path
+from typing import Any
 from unittest.mock import Mock, patch
 
 import pytest
@@ -26,7 +27,7 @@ from ingenious.cli.utilities import (
 class TestCommand(BaseCommand):
     """Test command implementation for testing BaseCommand."""
 
-    def execute(self, test_arg: str = "default") -> str:
+    def execute(self, test_arg: str = "default", **kwargs: Any) -> str:
         """Test execute method."""
         return f"executed with {test_arg}"
 
@@ -34,7 +35,7 @@ class TestCommand(BaseCommand):
 class FailingCommand(BaseCommand):
     """Test command that raises exceptions."""
 
-    def execute(self, should_fail: bool = True) -> None:
+    def execute(self, should_fail: bool = True, **kwargs: Any) -> None:
         """Test execute method that fails."""
         if should_fail:
             raise CommandError("Test error", ExitCode.VALIDATION_ERROR)

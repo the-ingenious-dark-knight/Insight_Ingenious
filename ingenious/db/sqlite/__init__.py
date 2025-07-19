@@ -142,7 +142,7 @@ class sqlite_ChatHistoryRepository(BaseSQLRepository):
                 LIMIT ?
             """
 
-            user_threads = self.execute_sql(user_threads_query, (identifier, 100))
+            user_threads = self.execute_sql(user_threads_query, [identifier, 100])
         else:
             user_threads_query = """
                 SELECT
@@ -160,7 +160,7 @@ class sqlite_ChatHistoryRepository(BaseSQLRepository):
             """
 
             user_threads = self.execute_sql(
-                user_threads_query, (identifier, thread_id, 100)
+                user_threads_query, [identifier, thread_id, 100]
             )
 
         if not isinstance(user_threads, list):
@@ -374,7 +374,32 @@ class sqlite_ChatHistoryRepository(BaseSQLRepository):
             VALUES ({values});
         """
         self.execute_sql(
-            sql=query, params=tuple(parameters.values()), expect_results=False
+            sql=query, params=list(parameters.values()), expect_results=False
+        )
+        
+        # Return the created step
+        from uuid import UUID
+        return IChatHistoryRepository.Step(
+            id=UUID(step_dict.get("id", "00000000-0000-0000-0000-000000000000")),
+            name=step_dict.get("name", ""),
+            type=step_dict.get("type", ""),
+            threadId=UUID(step_dict.get("threadId", "00000000-0000-0000-0000-000000000000")),
+            parentId=UUID(step_dict.get("parentId")) if step_dict.get("parentId") else None,
+            disableFeedback=step_dict.get("disableFeedback", False),
+            streaming=step_dict.get("streaming", False),
+            waitForAnswer=step_dict.get("waitForAnswer"),
+            isError=step_dict.get("isError"),
+            metadata=step_dict.get("metadata"),
+            tags=step_dict.get("tags"),
+            input=step_dict.get("input"),
+            output=step_dict.get("output"),
+            createdAt=step_dict.get("createdAt"),
+            start=step_dict.get("start"),
+            end=step_dict.get("end"),
+            generation=step_dict.get("generation"),
+            showInput=str(step_dict.get("showInput")) if step_dict.get("showInput") is not None else None,
+            language=step_dict.get("language"),
+            indent=step_dict.get("indent"),
         )
 
     async def update_thread(
@@ -432,7 +457,7 @@ class sqlite_ChatHistoryRepository(BaseSQLRepository):
             SET {updates};
         """
         self.execute_sql(
-            sql=query, params=tuple(parameters.values()), expect_results=False
+            sql=query, params=list(parameters.values()), expect_results=False
         )
 
         return ""

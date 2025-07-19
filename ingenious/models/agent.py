@@ -3,7 +3,7 @@ import json
 import logging
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import List, Optional
+from typing import Any, List, Optional, Type
 
 from autogen_agentchat.base import Response
 from autogen_agentchat.messages import TextMessage
@@ -237,7 +237,7 @@ class Agents(BaseModel):
 
     async def register_agent(
         self,
-        ag_class: type,
+        ag_class: Type[Any],
         runtime: SingleThreadedAgentRuntime,
         agent_name: str,
         data_identifier: str,

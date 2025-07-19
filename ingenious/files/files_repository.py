@@ -1,13 +1,15 @@
 import importlib
 from abc import ABC, abstractmethod
 from pathlib import Path
+from typing import Union
 
 from ingenious.models.config import Config, FileStorageContainer
+from ingenious.config.main_settings import IngeniousSettings
 
 
 class IFileStorage(ABC):
-    def __init__(self, config: Config, fs_config: FileStorageContainer):
-        self.config: Config = config
+    def __init__(self, config: Union[Config, IngeniousSettings], fs_config: FileStorageContainer):
+        self.config: Union[Config, IngeniousSettings] = config
         self.fs_config: FileStorageContainer = fs_config
 
     @abstractmethod
@@ -42,7 +44,7 @@ class IFileStorage(ABC):
 
 
 class FileStorage:
-    def __init__(self, config: Config, Category: str = "revisions"):
+    def __init__(self, config: Union[Config, IngeniousSettings], Category: str = "revisions"):
         self.config = config
         self.add_sub_folders = getattr(
             self.config.file_storage, Category

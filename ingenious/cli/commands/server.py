@@ -27,6 +27,7 @@ class ServeCommand(BaseCommand):
         host: str = "0.0.0.0",
         port: Optional[int] = None,
         no_prompt_tuner: bool = False,
+        **kwargs: object,
     ) -> None:
         """
         Start the Insight Ingenious API server with web interface.
@@ -62,10 +63,10 @@ class ServeCommand(BaseCommand):
             import uvicorn
 
             from ingenious.main import create_app
-            from ingenious.config.settings import IngeniousSettings
+            from ingenious.config.main_settings import IngeniousSettings
 
-            # Load settings from config path
-            settings = IngeniousSettings.from_config_file(config_paths["config"])
+            # Load settings
+            settings = IngeniousSettings()
             app = create_app(settings)
 
             self.stop_progress()
