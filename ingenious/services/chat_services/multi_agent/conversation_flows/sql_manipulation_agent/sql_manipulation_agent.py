@@ -115,26 +115,34 @@ class ConversationFlow(IConversationFlow):
 
         # Create SQL tool as function
         async def execute_sql_tool(query: str) -> str:
-            """Execute SQL query on local SQLite database"""
+            """Execute SQL query on configured database (Azure SQL or SQLite)"""
             try:
-                with sqlite3.connect(db_path) as conn:
-                    # Execute query and fetch results
-                    cursor = conn.execute(query)
-                    results = cursor.fetchall()
-                    columns = [description[0] for description in cursor.description]
+                if use_azure_sql:
+                    # Execute on Azure SQL
+                    with pyodbc.connect(connection_string) as conn:
+                        cursor = conn.cursor()
+                        cursor.execute(query)
+                        results = cursor.fetchall()
+                        columns = [column[0] for column in cursor.description]
+                else:
+                    # Execute on SQLite
+                    with sqlite3.connect(db_path) as conn:
+                        cursor = conn.execute(query)
+                        results = cursor.fetchall()
+                        columns = [description[0] for description in cursor.description]
 
-                    if not results:
-                        return "No results found."
+                if not results:
+                    return "No results found."
 
-                    # Format results
-                    if len(results) == 1:
-                        # Single row: return as dictionary
-                        result_dict = dict(zip(columns, results[0]))
-                        return str(result_dict)
-                    else:
-                        # Multiple rows: return as list of dictionaries
-                        result_list = [dict(zip(columns, row)) for row in results]
-                        return str(result_list[:10])  # Limit to first 10 rows
+                # Format results
+                if len(results) == 1:
+                    # Single row: return as dictionary
+                    result_dict = dict(zip(columns, results[0]))
+                    return str(result_dict)
+                else:
+                    # Multiple rows: return as list of dictionaries
+                    result_list = [dict(zip(columns, row)) for row in results]
+                    return str(result_list[:10])  # Limit to first 10 rows
             except Exception as e:
                 return f"SQL Error: {str(e)}"
 
