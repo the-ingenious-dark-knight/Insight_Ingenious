@@ -146,15 +146,17 @@ class ConversationFlow(IConversationFlow):
             except Exception as e:
                 return f"SQL Error: {str(e)}"
 
+        database_type = "Azure SQL Database" if use_azure_sql else "SQLite database"
+        
         sql_tool = FunctionTool(
             execute_sql_tool,
-            description=f"Execute SQL query on local SQLite database with table '{table_name}' and columns: {', '.join(column_names)}",
+            description=f"Execute SQL query on {database_type} with table '{table_name}' and columns: {', '.join(column_names)}",
         )
 
-        system_message = f"""You are a SQL expert that helps write and execute SQL queries on student performance data.
+        system_message = f"""You are a SQL expert that helps write and execute SQL queries on data stored in {database_type}.
 
 Tasks:
-- Write SQL queries to answer user questions about student performance data
+- Write SQL queries to answer user questions about the data
 - Use the 'execute_sql_tool' to run queries
 - Format your response based on the number of rows:
   - Single Row: Use the format {{column_name: value, column_name: value}}
