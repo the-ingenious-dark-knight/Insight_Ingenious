@@ -15,7 +15,6 @@ from ingenious.db.chat_history_repository import ChatHistoryRepository
 from ingenious.errors.content_filter_error import ContentFilterError
 from ingenious.files.files_repository import FileStorage
 from ingenious.models.chat import IChatRequest, IChatResponse
-from ingenious.services.dependencies import get_openai_service
 from ingenious.utils.namespace_utils import (
     import_class_with_fallback,
     normalize_workflow_name,
@@ -39,7 +38,12 @@ class multi_agent_chat_service:
         self.config = config
         self.chat_history_repository = chat_history_repository
         self.conversation_flow = conversation_flow
-        self.openai_service = get_openai_service()  # type: ignore
+        # Get openai_service from config if available
+        if hasattr(config, 'openai_service_instance'):
+            self.openai_service = config.openai_service_instance  # type: ignore
+        else:
+            # OpenAI service should be injected via config
+            raise RuntimeError("OpenAI service not properly configured. Please ensure the service is initialized with proper dependencies.")
 
     async def get_chat_response(self, chat_request: IChatRequest) -> IChatResponse:
         if not chat_request.conversation_flow:

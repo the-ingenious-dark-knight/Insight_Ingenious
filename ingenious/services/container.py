@@ -39,10 +39,14 @@ def _get_database_type(config: IngeniousSettings) -> DatabaseClientType:
 def _create_chat_service(
     config: IngeniousSettings,
     chat_history_repository: ChatHistoryRepository,
+    openai_service: Any,
     conversation_flow: str = "",
 ) -> ChatService:
     """Factory function to create ChatService with proper dependencies."""
     cs_type = config.chat_service.type
+    # Store the openai_service in config so it can be accessed by services
+    # This is a temporary workaround until we refactor the service dependencies
+    config.openai_service_instance = openai_service  # type: ignore
     return ChatService(
         chat_service_type=cs_type,
         chat_history_repository=chat_history_repository,
@@ -64,21 +68,7 @@ def _create_security_service(config: IngeniousSettings) -> dict[str, Any]:
 class Container(containers.DeclarativeContainer):
     """Dependency injection container for Ingenious application."""
 
-    # Ensure environment variables are loaded
-    wiring_config = containers.WiringConfiguration(
-        modules=[
-            "ingenious.api.routes.chat",
-            "ingenious.api.routes.message_feedback",
-            "ingenious.api.routes.auth",
-            "ingenious.api.routes.prompts",
-            "ingenious.api.routes.diagnostic",
-            "ingenious.services.dependencies",
-            "ingenious.services.auth_dependencies",
-            "ingenious.services.chat_dependencies",
-            "ingenious.services.file_dependencies",
-            "ingenious.main",
-        ]
-    )
+    # Wiring config no longer needed since we're using FastAPI's dependency injection
 
     # Core configuration
     config = providers.Singleton(lambda: _get_config())
@@ -125,6 +115,7 @@ class Container(containers.DeclarativeContainer):
         _create_chat_service,
         config=config,
         chat_history_repository=chat_history_repository,
+        openai_service=openai_service,
     )
 
     message_feedback_service = providers.Factory(
@@ -162,21 +153,7 @@ def init_container() -> Container:
     if _container is None:
         _container = Container()
 
-    # Wire the container
-    _container.wire(
-        modules=[
-            "ingenious.api.routes.chat",
-            "ingenious.api.routes.message_feedback",
-            "ingenious.api.routes.auth",
-            "ingenious.api.routes.prompts",
-            "ingenious.api.routes.diagnostic",
-            "ingenious.services.dependencies",
-            "ingenious.services.auth_dependencies",
-            "ingenious.services.chat_dependencies",
-            "ingenious.services.file_dependencies",
-            "ingenious.main",
-        ]
-    )
+    # No need to wire the container anymore - FastAPI handles dependency injection
 
     return _container
 

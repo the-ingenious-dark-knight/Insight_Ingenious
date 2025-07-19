@@ -3,7 +3,6 @@
 import secrets
 from typing import Any, Optional
 
-from dependency_injector.wiring import Provide, inject
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import (
     HTTPAuthorizationCredentials,
@@ -19,7 +18,7 @@ from ingenious.core.structured_logging import get_logger
 from ingenious.db.chat_history_repository import ChatHistoryRepository
 from ingenious.files.files_repository import FileStorage
 from ingenious.services.chat_service import ChatService
-from ingenious.services.container import Container
+from ingenious.services.container import get_container, Container
 from ingenious.services.message_feedback_service import MessageFeedbackService
 
 logger = get_logger(__name__)
@@ -27,83 +26,67 @@ security = HTTPBasic()
 bearer_security = HTTPBearer()
 
 
-@inject
-def get_config(
-    config: IngeniousSettings = Provide[Container.config],
-) -> IngeniousSettings:
-    """Get config from container."""
-    return config
+# FastAPI dependency to get the container
+def get_di_container() -> Container:
+    """Get the dependency injection container."""
+    return get_container()
+
+
+def get_config(container: Container = Depends(get_di_container)) -> IngeniousSettings:
+    """Get config from container using FastAPI dependency injection."""
+    return container.config()
 
 
 # Legacy profile system removed - all configuration now in the main config object
 
 
-@inject
-def get_openai_service(openai_service: Any = Provide[Container.openai_service]) -> Any:
+def get_openai_service(container: Container = Depends(get_di_container)) -> Any:
     """Get OpenAI service from container."""
-    return openai_service
+    return container.openai_service()
 
 
-@inject
 def get_chat_history_repository(
-    chat_history_repository: ChatHistoryRepository = Provide[
-        Container.chat_history_repository
-    ],
+    container: Container = Depends(get_di_container)
 ) -> ChatHistoryRepository:
     """Get chat history repository from container."""
-    return chat_history_repository
+    return container.chat_history_repository()
 
 
-@inject
 def get_chat_service(
-    conversation_flow: str = "",
-    config: IngeniousSettings = Provide[Container.config],
-    chat_history_repository: ChatHistoryRepository = Provide[
-        Container.chat_history_repository
-    ],
+    container: Container = Depends(get_di_container)
 ) -> ChatService:
     """Get chat service from container with conversation flow."""
-    cs_type = config.chat_service.type
-    return ChatService(
-        chat_service_type=cs_type,
-        chat_history_repository=chat_history_repository,
-        conversation_flow=conversation_flow,
-        config=config,
-    )
+    # The chat_service_factory is already a factory function
+    # We need to call it with the conversation_flow parameter
+    return container.chat_service_factory(conversation_flow="")
 
 
-@inject
 def get_message_feedback_service(
-    feedback_service: MessageFeedbackService = Provide[
-        Container.message_feedback_service
-    ],
+    container: Container = Depends(get_di_container)
 ) -> MessageFeedbackService:
     """Get message feedback service from container."""
-    return feedback_service
+    return container.message_feedback_service()
 
 
-@inject
 def get_file_storage_data(
-    file_storage: FileStorage = Provide[Container.file_storage_data],
+    container: Container = Depends(get_di_container)
 ) -> FileStorage:
     """Get file storage for data from container."""
-    return file_storage
+    return container.file_storage_data()
 
 
-@inject
 def get_file_storage_revisions(
-    file_storage: FileStorage = Provide[Container.file_storage_revisions],
+    container: Container = Depends(get_di_container)
 ) -> FileStorage:
     """Get file storage for revisions from container."""
-    return file_storage
+    return container.file_storage_revisions()
 
 
-@inject
 def get_project_config(
-    config: IngeniousSettings = Provide[Container.config],
+    container: Container = Depends(get_di_container)
 ) -> IngeniousSettings:
     """Get project config from container."""
-    return config
+    return container.config()
 
 
 def get_security_service(

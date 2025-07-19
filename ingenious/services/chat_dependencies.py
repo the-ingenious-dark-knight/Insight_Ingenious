@@ -5,49 +5,38 @@ This module provides FastAPI dependency injection functions
 for chat services and related repositories.
 """
 
-from typing import Any
-
-from dependency_injector.wiring import Provide, inject
+from fastapi import Depends
 
 from ingenious.db.chat_history_repository import ChatHistoryRepository
 from ingenious.services.chat_service import ChatService
-from ingenious.services.container import Container
+from ingenious.services.container import get_container, Container
 from ingenious.services.message_feedback_service import MessageFeedbackService
 
 
-@inject
+# FastAPI dependency to get the container
+def get_di_container() -> Container:
+    """Get the dependency injection container."""
+    return get_container()
+
+
 def get_chat_history_repository(
-    chat_history_repository: ChatHistoryRepository = Provide[
-        Container.chat_history_repository
-    ],
+    container: Container = Depends(get_di_container)
 ) -> ChatHistoryRepository:
     """Get chat history repository from container."""
-    return chat_history_repository
+    return container.chat_history_repository()
 
 
-@inject
 def get_chat_service(
-    conversation_flow: str = "",
-    config: Any = Provide[Container.config],
-    chat_history_repository: ChatHistoryRepository = Provide[
-        Container.chat_history_repository
-    ],
+    container: Container = Depends(get_di_container)
 ) -> ChatService:
     """Get chat service from container with conversation flow."""
-    cs_type = config.chat_service.type
-    return ChatService(
-        chat_service_type=cs_type,
-        chat_history_repository=chat_history_repository,
-        conversation_flow=conversation_flow,
-        config=config,
-    )
+    # The chat_service_factory is already a factory function
+    # We need to call it with the conversation_flow parameter
+    return container.chat_service_factory(conversation_flow="")
 
 
-@inject
 def get_message_feedback_service(
-    feedback_service: MessageFeedbackService = Provide[
-        Container.message_feedback_service
-    ],
+    container: Container = Depends(get_di_container)
 ) -> MessageFeedbackService:
     """Get message feedback service from container."""
-    return feedback_service
+    return container.message_feedback_service()

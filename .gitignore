@@ -158,3 +158,5 @@ CLAUDE.md
 
 #AI Testing
 test_dir/
+
+azure_integration_test/
