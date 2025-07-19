@@ -92,9 +92,7 @@ class azuresql_ChatHistoryRepository(BaseSQLRepository):
             params = []
         return self._execute_sql(sql, params, expect_results)
 
-    def _create_tables(self):
-        """Legacy method for backward compatibility. Tables are now created via base class."""
-        pass
+    # Removed empty _create_tables override - using base class implementation
 
     async def _get_user_by_id(self, user_id: str) -> IChatHistoryRepository.User | None:
         cursor = self.connection.cursor()

@@ -332,11 +332,11 @@ class WorkflowDiscovery:
                 "external_services": ["Azure OpenAI"],
             },
             "knowledge_base_agent": {
-                "description": "Search and retrieve information from knowledge bases",
-                "category": "Azure Search Required",
-                "required_config": ["models", "chat_service", "azure_search_services"],
-                "optional_config": [],
-                "external_services": ["Azure OpenAI", "Azure Cognitive Search"],
+                "description": "Search and retrieve information from knowledge bases using ChromaDB",
+                "category": "Minimal Configuration",
+                "required_config": ["models", "chat_service"],
+                "optional_config": ["azure_search_services"],
+                "external_services": ["Azure OpenAI"],
             },
             "sql_manipulation_agent": {
                 "description": "Execute SQL queries based on natural language",
