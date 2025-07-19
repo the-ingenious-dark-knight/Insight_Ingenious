@@ -3,7 +3,7 @@ import os
 import uuid
 
 from autogen_agentchat.agents import AssistantAgent
-from autogen_core import CancellationToken, EVENT_LOGGER_NAME
+from autogen_core import EVENT_LOGGER_NAME, CancellationToken
 from autogen_core.tools import FunctionTool
 from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
 
@@ -12,8 +12,9 @@ from ingenious.models.chat import ChatRequest, ChatResponse
 from ingenious.services.chat_services.multi_agent.service import IConversationFlow
 
 try:
-    from azure.search.documents import SearchClient
     from azure.core.credentials import AzureKeyCredential
+    from azure.search.documents import SearchClient
+
     AZURE_SEARCH_AVAILABLE = True
 except ImportError:
     AZURE_SEARCH_AVAILABLE = False
@@ -25,34 +26,44 @@ class ConversationFlow(IConversationFlow):
     ) -> ChatResponse:
         # Get configuration from the parent service
         model_config = self._config.models[0]
-        
+
         # Initialize LLM usage tracking
         logger = logging.getLogger(EVENT_LOGGER_NAME)
         logger.setLevel(logging.INFO)
-        
+
         llm_logger = LLMUsageTracker(
             agents=[],  # Simple agent, no complex agent list needed
             config=self._config,
-            chat_history_repository=self._chat_service.chat_history_repository if self._chat_service else None,
+            chat_history_repository=self._chat_service.chat_history_repository
+            if self._chat_service
+            else None,
             revision_id=str(uuid.uuid4()),
             identifier=str(uuid.uuid4()),
             event_type="knowledge_base",
         )
-        
+
         logger.handlers = [llm_logger]
-        
+
         # Retrieve thread memory for context
         memory_context = ""
         if chat_request.thread_id and self._chat_service:
             try:
-                thread_messages = await self._chat_service.chat_history_repository.get_thread_messages(chat_request.thread_id)
+                thread_messages = await self._chat_service.chat_history_repository.get_thread_messages(
+                    chat_request.thread_id
+                )
                 if thread_messages:
                     # Build conversation context from recent messages (last 10)
-                    recent_messages = thread_messages[-10:] if len(thread_messages) > 10 else thread_messages
+                    recent_messages = (
+                        thread_messages[-10:]
+                        if len(thread_messages) > 10
+                        else thread_messages
+                    )
                     memory_parts = []
                     for msg in recent_messages:
                         memory_parts.append(f"{msg.role}: {msg.content[:100]}...")
-                    memory_context = f"Previous conversation:\n" + "\n".join(memory_parts) + "\n\n"
+                    memory_context = (
+                        "Previous conversation:\n" + "\n".join(memory_parts) + "\n\n"
+                    )
             except Exception as e:
                 logger.warning(f"Failed to retrieve thread memory: {e}")
 
@@ -70,13 +81,13 @@ class ConversationFlow(IConversationFlow):
 
         # Check if Azure Search is configured
         use_azure_search = (
-            hasattr(self._config, 'azure_search_services') and 
-            self._config.azure_search_services and
-            len(self._config.azure_search_services) > 0 and
-            AZURE_SEARCH_AVAILABLE and
-            self._config.azure_search_services[0].endpoint and
-            self._config.azure_search_services[0].key and
-            self._config.azure_search_services[0].key != "mock-search-key-12345"
+            hasattr(self._config, "azure_search_services")
+            and self._config.azure_search_services
+            and len(self._config.azure_search_services) > 0
+            and AZURE_SEARCH_AVAILABLE
+            and self._config.azure_search_services[0].endpoint
+            and self._config.azure_search_services[0].key
+            and self._config.azure_search_services[0].key != "mock-search-key-12345"
         )
 
         if use_azure_search:
@@ -99,31 +110,32 @@ class ConversationFlow(IConversationFlow):
                         search_client = SearchClient(
                             endpoint=search_config.endpoint,
                             index_name="test-index",  # Use default index for now
-                            credential=AzureKeyCredential(search_config.key)
+                            credential=AzureKeyCredential(search_config.key),
                         )
-                        
+
                         # Perform search
                         search_results = search_client.search(
-                            search_text=search_query,
-                            top=3,
-                            include_total_count=True
+                            search_text=search_query, top=3, include_total_count=True
                         )
-                        
+
                         results = []
                         for result in search_results:
                             # Extract content from search result
-                            content = result.get('content', '') or str(result)
+                            content = result.get("content", "") or str(result)
                             if content:
                                 results.append(content)
-                        
+
                         if results:
-                            return f"Found relevant information from Azure AI Search:\n\n" + "\n\n".join(results)
+                            return (
+                                "Found relevant information from Azure AI Search:\n\n"
+                                + "\n\n".join(results)
+                            )
                         else:
                             return f"No relevant information found in Azure AI Search for query: {search_query}"
-                            
+
                     except Exception as e:
                         return f"Azure Search error: {str(e)}. Ensure the search index exists and contains documents."
-                
+
                 else:
                     # Use local ChromaDB
                     try:
@@ -132,7 +144,9 @@ class ConversationFlow(IConversationFlow):
                         return "Error: ChromaDB not installed. Please install with: uv add chromadb"
 
                     # Initialize ChromaDB client
-                    knowledge_base_path = os.path.join(self._memory_path, "knowledge_base")
+                    knowledge_base_path = os.path.join(
+                        self._memory_path, "knowledge_base"
+                    )
                     chroma_path = os.path.join(self._memory_path, "chroma_db")
 
                     # Ensure knowledge base directory exists
@@ -170,7 +184,9 @@ class ConversationFlow(IConversationFlow):
                         if documents:
                             collection.add(documents=documents, ids=document_ids)
                         else:
-                            return "Error: No documents found in knowledge base directory"
+                            return (
+                                "Error: No documents found in knowledge base directory"
+                            )
 
                     # Search the collection
                     results = collection.query(query_texts=[search_query], n_results=3)
@@ -194,7 +210,7 @@ class ConversationFlow(IConversationFlow):
 
 {memory_context}Tasks:
 - Help users find information by searching the knowledge base
-- Use the search_tool to look up information 
+- Use the search_tool to look up information
 - Always base your responses on search results from the knowledge base
 - Consider previous conversation context when generating responses
 - If no information is found, clearly state that and suggest rephrasing the query
@@ -254,16 +270,20 @@ TERMINATE your response when the task is complete.
 
         # Calculate token usage manually since LLMUsageTracker doesn't work with simple flows
         from ingenious.utils.token_counter import num_tokens_from_messages
-        
+
         try:
             # Estimate tokens from the conversation
             messages_for_counting = [
                 {"role": "system", "content": search_system_message},
                 {"role": "user", "content": user_msg},
-                {"role": "assistant", "content": final_message}
+                {"role": "assistant", "content": final_message},
             ]
-            total_tokens = num_tokens_from_messages(messages_for_counting, model_config.model)
-            prompt_tokens = num_tokens_from_messages(messages_for_counting[:-1], model_config.model)
+            total_tokens = num_tokens_from_messages(
+                messages_for_counting, model_config.model
+            )
+            prompt_tokens = num_tokens_from_messages(
+                messages_for_counting[:-1], model_config.model
+            )
             completion_tokens = total_tokens - prompt_tokens
         except Exception as e:
             logger.warning(f"Token counting failed: {e}")

@@ -1,16 +1,14 @@
 import logging
 import uuid
-from typing import List, Optional, Tuple, Union
 
 from autogen_agentchat.agents import AssistantAgent
 from autogen_agentchat.messages import TextMessage
-from autogen_core import CancellationToken, EVENT_LOGGER_NAME
+from autogen_core import EVENT_LOGGER_NAME, CancellationToken
 from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
 
 import ingenious.config.config as config
 from ingenious.models.agent import LLMUsageTracker
-from ingenious.models.chat import ChatRequest, ChatResponse
-from ingenious.models.message import Message
+from ingenious.models.chat import ChatRequest
 
 
 class ConversationFlow:
@@ -21,7 +19,7 @@ class ConversationFlow:
         thread_memory: str = "",
         memory_record_switch: bool = True,
         thread_chat_history=None,
-        chatrequest: ChatRequest = None  # For backward compatibility
+        chatrequest: ChatRequest = None,  # For backward compatibility
     ) -> tuple[str, str]:
         # Use provided message or extract from chatrequest
         if chatrequest:
@@ -36,11 +34,11 @@ class ConversationFlow:
 
         _config = config.get_config()
         model_config = _config.models[0]
-        
+
         # Initialize LLM usage tracking
         logger = logging.getLogger(EVENT_LOGGER_NAME)
         logger.setLevel(logging.INFO)
-        
+
         llm_logger = LLMUsageTracker(
             agents=[],  # Simple agent, no complex agent list needed
             config=_config,
@@ -49,7 +47,7 @@ class ConversationFlow:
             identifier=str(uuid.uuid4()),
             event_type="classification",
         )
-        
+
         logger.handlers = [llm_logger]
 
         # Use provided thread memory context
@@ -60,9 +58,13 @@ class ConversationFlow:
             # Build context from thread chat history
             memory_parts = []
             for hist in thread_chat_history[-10:]:  # Last 10 messages
-                memory_parts.append(f"{hist.get('role', 'unknown')}: {hist.get('content', '')[:100]}...")
+                memory_parts.append(
+                    f"{hist.get('role', 'unknown')}: {hist.get('content', '')[:100]}..."
+                )
             if memory_parts:
-                memory_context = f"Previous conversation:\n" + "\n".join(memory_parts) + "\n\n"
+                memory_context = (
+                    "Previous conversation:\n" + "\n".join(memory_parts) + "\n\n"
+                )
 
         # Configure Azure OpenAI client for v0.4
         azure_config = {

@@ -4,7 +4,7 @@ import sqlite3
 import uuid
 
 from autogen_agentchat.agents import AssistantAgent
-from autogen_core import CancellationToken, EVENT_LOGGER_NAME
+from autogen_core import EVENT_LOGGER_NAME, CancellationToken
 from autogen_core.tools import FunctionTool
 from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
 
@@ -14,6 +14,7 @@ from ingenious.services.chat_services.multi_agent.service import IConversationFl
 
 try:
     import pyodbc
+
     PYODBC_AVAILABLE = True
 except ImportError:
     PYODBC_AVAILABLE = False
@@ -25,34 +26,44 @@ class ConversationFlow(IConversationFlow):
     ) -> ChatResponse:
         # Get configuration from the parent service
         model_config = self._config.models[0]
-        
+
         # Initialize LLM usage tracking
         logger = logging.getLogger(EVENT_LOGGER_NAME)
         logger.setLevel(logging.INFO)
-        
+
         llm_logger = LLMUsageTracker(
             agents=[],  # Simple agent, no complex agent list needed
             config=self._config,
-            chat_history_repository=self._chat_service.chat_history_repository if self._chat_service else None,
+            chat_history_repository=self._chat_service.chat_history_repository
+            if self._chat_service
+            else None,
             revision_id=str(uuid.uuid4()),
             identifier=str(uuid.uuid4()),
             event_type="sql_manipulation",
         )
-        
+
         logger.handlers = [llm_logger]
-        
+
         # Retrieve thread memory for context
         memory_context = ""
         if chat_request.thread_id and self._chat_service:
             try:
-                thread_messages = await self._chat_service.chat_history_repository.get_thread_messages(chat_request.thread_id)
+                thread_messages = await self._chat_service.chat_history_repository.get_thread_messages(
+                    chat_request.thread_id
+                )
                 if thread_messages:
                     # Build conversation context from recent messages (last 10)
-                    recent_messages = thread_messages[-10:] if len(thread_messages) > 10 else thread_messages
+                    recent_messages = (
+                        thread_messages[-10:]
+                        if len(thread_messages) > 10
+                        else thread_messages
+                    )
                     memory_parts = []
                     for msg in recent_messages:
                         memory_parts.append(f"{msg.role}: {msg.content[:100]}...")
-                    memory_context = f"Previous conversation:\n" + "\n".join(memory_parts) + "\n\n"
+                    memory_context = (
+                        "Previous conversation:\n" + "\n".join(memory_parts) + "\n\n"
+                    )
             except Exception as e:
                 logger.warning(f"Failed to retrieve thread memory: {e}")
 
@@ -73,35 +84,38 @@ class ConversationFlow(IConversationFlow):
 
         # Check if Azure SQL is configured
         use_azure_sql = (
-            hasattr(self._config, 'azure_sql_services') and 
-            self._config.azure_sql_services and
-            PYODBC_AVAILABLE and
-            self._config.azure_sql_services.database_connection_string and
-            self._config.azure_sql_services.database_connection_string != "mock-connection-string"
+            hasattr(self._config, "azure_sql_services")
+            and self._config.azure_sql_services
+            and PYODBC_AVAILABLE
+            and self._config.azure_sql_services.database_connection_string
+            and self._config.azure_sql_services.database_connection_string
+            != "mock-connection-string"
         )
 
         if use_azure_sql:
             # Use Azure SQL configuration
-            connection_string = self._config.azure_sql_services.database_connection_string
+            connection_string = (
+                self._config.azure_sql_services.database_connection_string
+            )
             table_name = self._config.azure_sql_services.table_name or "sample_table"
-            
+
             # Get table schema from Azure SQL
             try:
                 with pyodbc.connect(connection_string) as conn:
                     cursor = conn.cursor()
                     # Get column information
                     cursor.execute(f"""
-                        SELECT COLUMN_NAME 
-                        FROM INFORMATION_SCHEMA.COLUMNS 
+                        SELECT COLUMN_NAME
+                        FROM INFORMATION_SCHEMA.COLUMNS
                         WHERE TABLE_NAME = '{table_name}'
                         ORDER BY ORDINAL_POSITION
                     """)
                     column_names = [row[0] for row in cursor.fetchall()]
-                    
+
                     if not column_names:
                         # Table doesn't exist, fallback to SQLite
                         use_azure_sql = False
-                        
+
             except Exception as e:
                 print(f"Azure SQL connection failed, falling back to SQLite: {e}")
                 use_azure_sql = False
@@ -113,7 +127,7 @@ class ConversationFlow(IConversationFlow):
             table_name = "students_performance"
             column_names = [
                 "parental_education",
-                "lunch", 
+                "lunch",
                 "test_prep_course",
                 "math_score",
                 "reading_score",
@@ -180,7 +194,7 @@ class ConversationFlow(IConversationFlow):
                 return f"SQL Error: {str(e)}"
 
         database_type = "Azure SQL Database" if use_azure_sql else "SQLite database"
-        
+
         sql_tool = FunctionTool(
             execute_sql_tool,
             description=f"Execute SQL query on {database_type} with table '{table_name}' and columns: {', '.join(column_names)}",
@@ -242,19 +256,23 @@ Example queries:
             if response.chat_message
             else "No response generated"
         )
-        
+
         # Calculate token usage manually since LLMUsageTracker doesn't work with simple flows
         from ingenious.utils.token_counter import num_tokens_from_messages
-        
+
         try:
             # Estimate tokens from the conversation
             messages_for_counting = [
                 {"role": "system", "content": system_message},
                 {"role": "user", "content": user_msg},
-                {"role": "assistant", "content": final_message}
+                {"role": "assistant", "content": final_message},
             ]
-            total_tokens = num_tokens_from_messages(messages_for_counting, model_config.model)
-            prompt_tokens = num_tokens_from_messages(messages_for_counting[:-1], model_config.model)
+            total_tokens = num_tokens_from_messages(
+                messages_for_counting, model_config.model
+            )
+            prompt_tokens = num_tokens_from_messages(
+                messages_for_counting[:-1], model_config.model
+            )
             completion_tokens = total_tokens - prompt_tokens
         except Exception as e:
             logger.warning(f"Token counting failed: {e}")

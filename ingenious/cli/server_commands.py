@@ -194,7 +194,9 @@ def register_commands(app: typer.Typer, console: Console) -> None:
                     profile_path=str(profile_dir),
                     operation="profile_setup",
                 )
-                os.environ["INGENIOUS_PROFILE_PATH"] = str(profile_dir).replace("\\", "/")
+                os.environ["INGENIOUS_PROFILE_PATH"] = str(profile_dir).replace(
+                    "\\", "/"
+                )
             else:
                 logger.warning(
                     "Specified profiles.yml not found, using .env configuration only",

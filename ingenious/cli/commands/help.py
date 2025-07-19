@@ -569,7 +569,12 @@ class ValidateCommand(BaseCommand):
 
                 # Simple connectivity test with timeout
                 response = requests.get(test_url, timeout=10)
-                if response.status_code in [200, 401, 403, 404]:  # Service is responding
+                if response.status_code in [
+                    200,
+                    401,
+                    403,
+                    404,
+                ]:  # Service is responding
                     self.print_success("Azure OpenAI service is reachable")
                 else:
                     self.print_warning(
