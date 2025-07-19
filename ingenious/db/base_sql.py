@@ -30,7 +30,7 @@ class BaseSQLRepository(IChatHistoryRepository, ABC):
 
     @abstractmethod
     def _execute_sql(
-        self, sql: str, params: List[Any] = None, expect_results: bool = True
+        self, sql: str, params: List[Any] | None = None, expect_results: bool = True
     ) -> Any:
         """Execute SQL with database-specific connection handling."""
         pass

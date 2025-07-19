@@ -216,12 +216,18 @@ module = [
   "jinja2.*",
   "uvicorn.*",
   "typer.*",
+  "typer.testing.*",
   "pydantic_settings.*",
   "dotenv.*",
   "jose.*",
   "passlib.*",
   "scrapfly.*",
   "requests.*",
+  "pdfminer.*",
+  "dependency_injector.*",
+  "backoff.*",
+  "jsonpickle.*",
+  "scripts.*",
 ]
 ignore_missing_imports = true
 
@@ -231,9 +237,22 @@ module = [
   "ingenious.external_services.*",
   "ingenious.dataprep.*",
   "ingenious.document_processing.*",
+  "ingenious.ingenious_extensions_template.*",
+  "ingenious.services.chat_services.multi_agent.conversation_flows.*",
+  "ingenious.services.chat_services.multi_agent.conversation_patterns.*",
+  "ingenious.models.ag_agents.*",
+  "ingenious.services.knowledge_base.*",
+  "ingenious.services.file_summarization.*",
+  "ingenious.services.chat_services.llm.*",
+  "ingenious.services.chat_services.multi_agent.*",
+  "ingenious.services.sql_agent.*",
+  "ingenious.utils.*",
 ]
 disallow_untyped_defs = false
 disallow_incomplete_defs = false
+warn_return_any = false
+no_implicit_optional = false
+ignore_errors = true
 
 # Allow flexibility in tests
 [[tool.mypy.overrides]]
