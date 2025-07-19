@@ -29,7 +29,7 @@ def register_commands(app: typer.Typer, console: Console) -> None:
             Optional[str],
             typer.Argument(help="Specific topic: setup, workflows, config, deployment"),
         ] = None,
-    ) -> str:
+    ) -> None:
         """
         📚 Show comprehensive help for getting started with Insight Ingenious.
 

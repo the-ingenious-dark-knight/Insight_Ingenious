@@ -228,6 +228,8 @@ module = [
   "backoff.*",
   "jsonpickle.*",
   "scripts.*",
+  "pyodbc.*",
+  "colorlog.*",
 ]
 ignore_missing_imports = true
 
@@ -247,6 +249,7 @@ module = [
   "ingenious.services.chat_services.multi_agent.*",
   "ingenious.services.sql_agent.*",
   "ingenious.utils.*",
+  "ingenious.models.ca_raw_fixture_data.*",
 ]
 disallow_untyped_defs = false
 disallow_incomplete_defs = false
