@@ -39,6 +39,10 @@ async def chat(
     username: Annotated[str, Depends(get_conditional_security)],
 ) -> ChatResponse:
     try:
+        # Set user_id to "unspecified_user" if not provided
+        if not chat_request.user_id:
+            chat_request.user_id = "unspecified_user"
+
         ns_utils.print_namespace_modules(
             "ingenious.services.chat_services.multi_agent.conversation_flows"
         )

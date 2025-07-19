@@ -1,6 +1,7 @@
 """FastAPI dependency injection without dependency-injector library."""
 
 from functools import lru_cache
+from typing import Any
 
 from fastapi import Depends, Request
 
@@ -71,7 +72,7 @@ def get_chat_service(
             self._config = config
             self.openai_service_instance = openai_service
 
-        def __getattr__(self, name):
+        def __getattr__(self, name: str) -> Any:
             return getattr(self._config, name)
 
     wrapped_config = ConfigWrapper(config, openai_service)

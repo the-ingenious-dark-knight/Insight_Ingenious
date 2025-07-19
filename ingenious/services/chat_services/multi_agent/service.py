@@ -332,11 +332,15 @@ class multi_agent_chat_service:
                         )
 
             except Exception as e:
-                logger.warning(
+                logger.error(
                     "Failed to save chat history",
                     thread_id=chat_request.thread_id,
+                    user_id=chat_request.user_id,
                     error=str(e),
+                    exc_info=True,
                 )
+                # Continue execution even if database save fails
+                # This ensures the chat response is still returned to the user
 
         return agent_response  # type: ignore
 

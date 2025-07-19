@@ -165,6 +165,8 @@ INGENIOUS_MODELS__0__MODEL=gpt-4o-mini
 INGENIOUS_MODELS__0__API_VERSION=2024-02-01
 # Azure OpenAI deployment name (usually same as model)
 INGENIOUS_MODELS__0__DEPLOYMENT=gpt-4o-mini
+# API type for Azure OpenAI
+INGENIOUS_MODELS__0__API_TYPE=rest
 
 # Web Server Configuration (OPTIONAL)
 # Port for the web server (default: 80)
@@ -182,13 +184,20 @@ INGENIOUS_CHAT_HISTORY__DATABASE_PATH=./.tmp/chat_history.db
 # Memory storage path
 INGENIOUS_CHAT_HISTORY__MEMORY_PATH=./.tmp
 
+# Chat Service Configuration (REQUIRED)
+# Chat service type for multi-agent workflows
+INGENIOUS_CHAT_SERVICE__TYPE=multi_agent
+
 # Logging Configuration (OPTIONAL)
 # Log levels: debug, info, warning, error
 INGENIOUS_LOGGING__ROOT_LOG_LEVEL=info
 INGENIOUS_LOGGING__LOG_LEVEL=info
 
 # Optional: Azure SQL Database (for Azure SQL workflows)
-# INGENIOUS_AZURE_SQL_SERVICES__CONNECTION_STRING=Driver={ODBC Driver 17 for SQL Server};Server=...
+# Change INGENIOUS_CHAT_HISTORY__DATABASE_TYPE to 'azuresql' to enable Azure SQL
+# INGENIOUS_AZURE_SQL_SERVICES__DATABASE_CONNECTION_STRING=Driver={ODBC Driver 18 for SQL Server};Server=tcp:YOUR_SERVER.database.windows.net,1433;Database=YOUR_DATABASE;Uid=YOUR_USERNAME;Pwd=YOUR_PASSWORD;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;
+# INGENIOUS_AZURE_SQL_SERVICES__DATABASE_NAME=your_database_name
+# INGENIOUS_AZURE_SQL_SERVICES__TABLE_NAME=chat_history
 
 # Optional: Azure Search (for knowledge-base workflows)
 # INGENIOUS_AZURE_SEARCH_SERVICES__0__KEY=your-search-api-key
@@ -199,6 +208,15 @@ INGENIOUS_LOGGING__LOG_LEVEL=info
 
 # Optional: Scrapfly API for dataprep commands
 # SCRAPFLY_API_KEY=your-scrapfly-api-key
+
+# Optional: Azure Blob Storage (for cloud-based file storage)
+# Change INGENIOUS_FILE_STORAGE__REVISIONS__STORAGE_TYPE to 'azure' to enable
+# INGENIOUS_FILE_STORAGE__REVISIONS__ENABLE=true
+# INGENIOUS_FILE_STORAGE__REVISIONS__STORAGE_TYPE=azure
+# INGENIOUS_FILE_STORAGE__REVISIONS__CONTAINER_NAME=prompts
+# INGENIOUS_FILE_STORAGE__REVISIONS__PATH=./
+# INGENIOUS_FILE_STORAGE__REVISIONS__URL=https://YOUR_STORAGE_ACCOUNT.blob.core.windows.net
+# INGENIOUS_FILE_STORAGE__REVISIONS__TOKEN=DefaultEndpointsProtocol=https;AccountName=YOUR_ACCOUNT;AccountKey=YOUR_KEY;EndpointSuffix=core.windows.net
 
 # Legacy Configuration Migration
 # If you have existing config.yml and profiles.yml files, you can migrate them using:

@@ -53,18 +53,16 @@ class FileStorage:
         self.add_sub_folders = getattr(
             self.config.file_storage, Category
         ).add_sub_folders
-        module_name = (
-            f"ingenious.files.{self.config.file_storage.revisions.storage_type.lower()}"
-        )
+
+        # Get the file storage config for the specified category
+        fs_config = getattr(self.config.file_storage, Category)
+        storage_type = fs_config.storage_type
+
+        # Build module name based on the category's storage type
+        module_name = f"ingenious.files.{storage_type.lower()}"
 
         # Dynamically import the module based on the storage type
-
-        class_name0 = f"{Category}"
-        class_name1 = getattr(self.config.file_storage, class_name0)
-        class_name2 = getattr(class_name1, "storage_type")
-        fs_config = class_name1
-
-        class_name = f"{class_name2}_FileStorageRepository"
+        class_name = f"{storage_type}_FileStorageRepository"
 
         try:
             module = importlib.import_module(module_name)
