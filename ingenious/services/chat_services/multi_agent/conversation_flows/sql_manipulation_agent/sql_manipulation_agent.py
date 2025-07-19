@@ -9,6 +9,12 @@ from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
 from ingenious.models.chat import ChatRequest, ChatResponse
 from ingenious.services.chat_services.multi_agent.service import IConversationFlow
 
+try:
+    import pyodbc
+    PYODBC_AVAILABLE = True
+except ImportError:
+    PYODBC_AVAILABLE = False
+
 
 class ConversationFlow(IConversationFlow):
     async def get_conversation_response(
@@ -32,45 +38,80 @@ class ConversationFlow(IConversationFlow):
         # Set up context for conversation
         context = "SQL Expert Assistant for analyzing data."
 
-        # Set up local SQLite database with student performance data
+        # Check if Azure SQL is configured
+        use_azure_sql = (
+            hasattr(self._config, 'azure_sql_services') and 
+            self._config.azure_sql_services and
+            PYODBC_AVAILABLE and
+            self._config.azure_sql_services.database_connection_string and
+            self._config.azure_sql_services.database_connection_string != "mock-connection-string"
+        )
 
-        # Create SQLite database with sample data
-        db_path = os.path.join(self._memory_path, "students_performance.db")
+        if use_azure_sql:
+            # Use Azure SQL configuration
+            connection_string = self._config.azure_sql_services.database_connection_string
+            table_name = self._config.azure_sql_services.table_name or "sample_table"
+            
+            # Get table schema from Azure SQL
+            try:
+                with pyodbc.connect(connection_string) as conn:
+                    cursor = conn.cursor()
+                    # Get column information
+                    cursor.execute(f"""
+                        SELECT COLUMN_NAME 
+                        FROM INFORMATION_SCHEMA.COLUMNS 
+                        WHERE TABLE_NAME = '{table_name}'
+                        ORDER BY ORDINAL_POSITION
+                    """)
+                    column_names = [row[0] for row in cursor.fetchall()]
+                    
+                    if not column_names:
+                        # Table doesn't exist, fallback to SQLite
+                        use_azure_sql = False
+                        
+            except Exception as e:
+                print(f"Azure SQL connection failed, falling back to SQLite: {e}")
+                use_azure_sql = False
 
-        # Create a simple test table with dummy data
-        with sqlite3.connect(db_path) as conn:
-            conn.execute("""CREATE TABLE IF NOT EXISTS students_performance (
-                parental_education TEXT,
-                lunch TEXT,
-                test_prep_course TEXT,
-                math_score INTEGER,
-                reading_score INTEGER,
-                writing_score INTEGER
-            )""")
-            # Insert some sample data if table is empty
-            count = conn.execute(
-                "SELECT COUNT(*) FROM students_performance"
-            ).fetchone()[0]
-            if count == 0:
-                conn.execute("""INSERT INTO students_performance VALUES
-                    ('bachelor''s degree', 'standard', 'none', 72, 72, 74),
-                    ('some college', 'standard', 'completed', 69, 90, 88),
-                    ('master''s degree', 'standard', 'none', 90, 95, 93),
-                    ('associate''s degree', 'free/reduced', 'none', 47, 57, 44),
-                    ('some college', 'standard', 'none', 76, 78, 75),
-                    ('high school', 'free/reduced', 'completed', 64, 64, 67),
-                    ('high school', 'free/reduced', 'none', 38, 60, 50)
-                """)
+        if not use_azure_sql:
+            # Set up local SQLite database with student performance data
+            # Create SQLite database with sample data
+            db_path = os.path.join(self._memory_path, "students_performance.db")
+            table_name = "students_performance"
+            column_names = [
+                "parental_education",
+                "lunch", 
+                "test_prep_course",
+                "math_score",
+                "reading_score",
+                "writing_score",
+            ]
 
-        table_name = "students_performance"
-        column_names = [
-            "parental_education",
-            "lunch",
-            "test_prep_course",
-            "math_score",
-            "reading_score",
-            "writing_score",
-        ]
+        if not use_azure_sql:
+            # Create a simple test table with dummy data for SQLite
+            with sqlite3.connect(db_path) as conn:
+                conn.execute("""CREATE TABLE IF NOT EXISTS students_performance (
+                    parental_education TEXT,
+                    lunch TEXT,
+                    test_prep_course TEXT,
+                    math_score INTEGER,
+                    reading_score INTEGER,
+                    writing_score INTEGER
+                )""")
+                # Insert some sample data if table is empty
+                count = conn.execute(
+                    "SELECT COUNT(*) FROM students_performance"
+                ).fetchone()[0]
+                if count == 0:
+                    conn.execute("""INSERT INTO students_performance VALUES
+                        ('bachelor''s degree', 'standard', 'none', 72, 72, 74),
+                        ('some college', 'standard', 'completed', 69, 90, 88),
+                        ('master''s degree', 'standard', 'none', 90, 95, 93),
+                        ('associate''s degree', 'free/reduced', 'none', 47, 57, 44),
+                        ('some college', 'standard', 'none', 76, 78, 75),
+                        ('high school', 'free/reduced', 'completed', 64, 64, 67),
+                        ('high school', 'free/reduced', 'none', 38, 60, 50)
+                    """)
 
         # Create SQL tool as function
         async def execute_sql_tool(query: str) -> str:

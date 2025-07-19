@@ -128,6 +128,29 @@ class IngeniousSettings(BaseSettings):
 
         return v
 
+    @field_validator("azure_search_services", mode="before")
+    @classmethod
+    def parse_azure_search_services_field(cls, v: Any) -> Any:
+        """Parse azure_search_services from JSON string or nested environment variables."""
+        # Handle JSON string format (e.g., INGENIOUS_AZURE_SEARCH_SERVICES='[{...}]')
+        if isinstance(v, str):
+            try:
+                return json.loads(v)
+            except json.JSONDecodeError:
+                # If not valid JSON, let pydantic handle the error
+                return v
+
+        # Handle dictionary format from nested env vars (e.g., INGENIOUS_AZURE_SEARCH_SERVICES__0__*)
+        if isinstance(v, dict):
+            # Convert {'0': {...}, '1': {...}} to [{...}, {...}]
+            result = []
+            for key in sorted(v.keys()):
+                if key.isdigit():
+                    result.append(v[key])
+            return result
+
+        return v
+
     @field_validator("models")
     @classmethod
     def validate_models_not_empty_field(
