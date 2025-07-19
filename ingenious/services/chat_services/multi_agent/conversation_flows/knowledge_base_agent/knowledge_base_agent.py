@@ -1,11 +1,13 @@
+import logging
 import os
 import uuid
 
 from autogen_agentchat.agents import AssistantAgent
-from autogen_core import CancellationToken
+from autogen_core import CancellationToken, EVENT_LOGGER_NAME
 from autogen_core.tools import FunctionTool
 from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
 
+from ingenious.models.agent import LLMUsageTracker
 from ingenious.models.chat import ChatRequest, ChatResponse
 from ingenious.services.chat_services.multi_agent.service import IConversationFlow
 
@@ -23,6 +25,36 @@ class ConversationFlow(IConversationFlow):
     ) -> ChatResponse:
         # Get configuration from the parent service
         model_config = self._config.models[0]
+        
+        # Initialize LLM usage tracking
+        logger = logging.getLogger(EVENT_LOGGER_NAME)
+        logger.setLevel(logging.INFO)
+        
+        llm_logger = LLMUsageTracker(
+            agents=[],  # Simple agent, no complex agent list needed
+            config=self._config,
+            chat_history_repository=self._chat_service.chat_history_repository if self._chat_service else None,
+            revision_id=str(uuid.uuid4()),
+            identifier=str(uuid.uuid4()),
+            event_type="knowledge_base",
+        )
+        
+        logger.handlers = [llm_logger]
+        
+        # Retrieve thread memory for context
+        memory_context = ""
+        if chat_request.thread_id and self._chat_service:
+            try:
+                thread_messages = await self._chat_service.chat_history_repository.get_thread_messages(chat_request.thread_id)
+                if thread_messages:
+                    # Build conversation context from recent messages (last 10)
+                    recent_messages = thread_messages[-10:] if len(thread_messages) > 10 else thread_messages
+                    memory_parts = []
+                    for msg in recent_messages:
+                        memory_parts.append(f"{msg.role}: {msg.content[:100]}...")
+                    memory_context = f"Previous conversation:\n" + "\n".join(memory_parts) + "\n\n"
+            except Exception as e:
+                logger.warning(f"Failed to retrieve thread memory: {e}")
 
         # Configure Azure OpenAI client for v0.4
         azure_config = {
@@ -157,13 +189,14 @@ class ConversationFlow(IConversationFlow):
             description=f"Search for information using {search_backend}. Use relevant keywords to find relevant information.",
         )
 
-        # Create the search assistant agent
-        search_system_message = """You are a knowledge base search assistant using local ChromaDB storage.
+        # Create the search assistant agent with memory context
+        search_system_message = f"""You are a knowledge base search assistant that can use both Azure AI Search and local ChromaDB storage.
 
-Tasks:
-- Help users find information by searching the local knowledge base
-- Use the search_tool to look up information stored in ChromaDB
+{memory_context}Tasks:
+- Help users find information by searching the knowledge base
+- Use the search_tool to look up information 
 - Always base your responses on search results from the knowledge base
+- Consider previous conversation context when generating responses
 - If no information is found, clearly state that and suggest rephrasing the query
 
 Guidelines for search queries:
@@ -172,6 +205,7 @@ Guidelines for search queries:
 - Focus on topics that are relevant to the knowledge base content
 
 Knowledge base contains documents about:
+- Azure configuration and setup
 - Workplace safety guidelines
 - Health information and nutrition
 - Emergency procedures
@@ -218,18 +252,37 @@ TERMINATE your response when the task is complete.
             else "No response generated"
         )
 
+        # Calculate token usage manually since LLMUsageTracker doesn't work with simple flows
+        from ingenious.utils.token_counter import num_tokens_from_messages
+        
+        try:
+            # Estimate tokens from the conversation
+            messages_for_counting = [
+                {"role": "system", "content": search_system_message},
+                {"role": "user", "content": user_msg},
+                {"role": "assistant", "content": final_message}
+            ]
+            total_tokens = num_tokens_from_messages(messages_for_counting, model_config.model)
+            prompt_tokens = num_tokens_from_messages(messages_for_counting[:-1], model_config.model)
+            completion_tokens = total_tokens - prompt_tokens
+        except Exception as e:
+            logger.warning(f"Token counting failed: {e}")
+            total_tokens = 0
+            prompt_tokens = 0
+            completion_tokens = 0
+
         # Update memory for future conversations (simplified for local testing)
         # In production, this would use the memory manager
 
         # Make sure to close the model client connection when done
         await model_client.close()
 
-        # Return the response
+        # Return the response with proper token counting
         return ChatResponse(
             thread_id=chat_request.thread_id or "",
             message_id=str(uuid.uuid4()),
             agent_response=final_message,
-            token_count=0,
-            max_token_count=0,
+            token_count=total_tokens,
+            max_token_count=completion_tokens,
             memory_summary=final_message,
         )

@@ -14,13 +14,19 @@ from ingenious.models.message import Message
 
 
 class ConversationFlow:
-    def __init__(self, parent_multi_agent_chat_service=None):
-        self._config = config.get_config()
-        self._chat_service = parent_multi_agent_chat_service
-    
-    async def get_conversation_response(self, chatrequest: ChatRequest) -> ChatResponse:
-        message = chatrequest.user_prompt
-        topics: Optional[Union[str, List[str]]] = chatrequest.topic
+    @staticmethod
+    async def get_conversation_response(
+        message: str,
+        topics=None,
+        thread_memory: str = "",
+        memory_record_switch: bool = True,
+        thread_chat_history=None,
+        chatrequest: ChatRequest = None  # For backward compatibility
+    ) -> tuple[str, str]:
+        # Use provided message or extract from chatrequest
+        if chatrequest:
+            message = chatrequest.user_prompt
+            topics = chatrequest.topic
 
         # Ensure topics is always a list
         if topics is None:
@@ -28,7 +34,8 @@ class ConversationFlow:
         elif isinstance(topics, str):
             topics = [topics]
 
-        model_config = self._config.models[0]
+        _config = config.get_config()
+        model_config = _config.models[0]
         
         # Initialize LLM usage tracking
         logger = logging.getLogger(EVENT_LOGGER_NAME)
@@ -36,8 +43,8 @@ class ConversationFlow:
         
         llm_logger = LLMUsageTracker(
             agents=[],  # Simple agent, no complex agent list needed
-            config=self._config,
-            chat_history_repository=self._chat_service.chat_history_repository if self._chat_service else None,
+            config=_config,
+            chat_history_repository=None,  # Not available in static context
             revision_id=str(uuid.uuid4()),
             identifier=str(uuid.uuid4()),
             event_type="classification",
@@ -45,20 +52,17 @@ class ConversationFlow:
         
         logger.handlers = [llm_logger]
 
-        # Retrieve thread memory for context
+        # Use provided thread memory context
         memory_context = ""
-        if chatrequest.thread_id and self._chat_service:
-            try:
-                thread_messages = await self._chat_service.chat_history_repository.get_thread_messages(chatrequest.thread_id)
-                if thread_messages:
-                    # Build conversation context from recent messages (last 10)
-                    recent_messages = thread_messages[-10:] if len(thread_messages) > 10 else thread_messages
-                    memory_parts = []
-                    for msg in recent_messages:
-                        memory_parts.append(f"{msg.role}: {msg.content[:100]}...")
-                    memory_context = f"Previous conversation:\n" + "\n".join(memory_parts) + "\n\n"
-            except Exception as e:
-                logger.warning(f"Failed to retrieve thread memory: {e}")
+        if thread_memory:
+            memory_context = f"Previous conversation:\n{thread_memory}\n\n"
+        elif thread_chat_history:
+            # Build context from thread chat history
+            memory_parts = []
+            for hist in thread_chat_history[-10:]:  # Last 10 messages
+                memory_parts.append(f"{hist.get('role', 'unknown')}: {hist.get('content', '')[:100]}...")
+            if memory_parts:
+                memory_context = f"Previous conversation:\n" + "\n".join(memory_parts) + "\n\n"
 
         # Configure Azure OpenAI client for v0.4
         azure_config = {
@@ -114,12 +118,5 @@ Response: [helpful response to the user's message, considering conversation hist
             # Make sure to close the model client connection when done
             await model_client.close()
 
-        # Return ChatResponse with token counting
-        return ChatResponse(
-            thread_id=chatrequest.thread_id or "",
-            message_id=str(uuid.uuid4()),
-            agent_response=result,
-            token_count=llm_logger.prompt_tokens + llm_logger.completion_tokens,
-            max_token_count=llm_logger.tokens,
-            memory_summary=memory_summary,
-        )
+        # Return tuple as expected by the service layer
+        return result, memory_summary

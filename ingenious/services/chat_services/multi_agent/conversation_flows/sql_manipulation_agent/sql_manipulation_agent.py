@@ -33,7 +33,7 @@ class ConversationFlow(IConversationFlow):
         llm_logger = LLMUsageTracker(
             agents=[],  # Simple agent, no complex agent list needed
             config=self._config,
-            chat_history_repository=self._parent_multi_agent_chat_service.chat_history_repository if self._parent_multi_agent_chat_service else None,
+            chat_history_repository=self._chat_service.chat_history_repository if self._chat_service else None,
             revision_id=str(uuid.uuid4()),
             identifier=str(uuid.uuid4()),
             event_type="sql_manipulation",
@@ -43,9 +43,9 @@ class ConversationFlow(IConversationFlow):
         
         # Retrieve thread memory for context
         memory_context = ""
-        if chat_request.thread_id and self._parent_multi_agent_chat_service:
+        if chat_request.thread_id and self._chat_service:
             try:
-                thread_messages = await self._parent_multi_agent_chat_service.chat_history_repository.get_thread_messages(chat_request.thread_id)
+                thread_messages = await self._chat_service.chat_history_repository.get_thread_messages(chat_request.thread_id)
                 if thread_messages:
                     # Build conversation context from recent messages (last 10)
                     recent_messages = thread_messages[-10:] if len(thread_messages) > 10 else thread_messages
@@ -242,6 +242,25 @@ Example queries:
             if response.chat_message
             else "No response generated"
         )
+        
+        # Calculate token usage manually since LLMUsageTracker doesn't work with simple flows
+        from ingenious.utils.token_counter import num_tokens_from_messages
+        
+        try:
+            # Estimate tokens from the conversation
+            messages_for_counting = [
+                {"role": "system", "content": system_message},
+                {"role": "user", "content": user_msg},
+                {"role": "assistant", "content": final_message}
+            ]
+            total_tokens = num_tokens_from_messages(messages_for_counting, model_config.model)
+            prompt_tokens = num_tokens_from_messages(messages_for_counting[:-1], model_config.model)
+            completion_tokens = total_tokens - prompt_tokens
+        except Exception as e:
+            logger.warning(f"Token counting failed: {e}")
+            total_tokens = 0
+            prompt_tokens = 0
+            completion_tokens = 0
 
         # Update memory for future conversations (simplified for local testing)
         # In production, this would use the memory manager
@@ -249,12 +268,12 @@ Example queries:
         # Make sure to close the model client connection when done
         await model_client.close()
 
-        # Return the response with token counting
+        # Return the response with proper token counting
         return ChatResponse(
             thread_id=chat_request.thread_id or "",
             message_id=str(uuid.uuid4()),
             agent_response=final_message,
-            token_count=llm_logger.prompt_tokens + llm_logger.completion_tokens,
-            max_token_count=llm_logger.tokens,
+            token_count=total_tokens,
+            max_token_count=completion_tokens,
             memory_summary=final_message,
         )
