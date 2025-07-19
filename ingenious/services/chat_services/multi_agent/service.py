@@ -339,9 +339,8 @@ class multi_agent_chat_service:
                     error=str(e),
                     exc_info=True,
                 )
-                # Re-raise to make the error visible during testing
-                # Comment out the raise if you want to continue despite DB errors
-                raise
+                # Continue execution even if database save fails
+                # This ensures the chat response is still returned to the user
 
         return agent_response  # type: ignore
 
