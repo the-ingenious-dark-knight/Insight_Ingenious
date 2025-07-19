@@ -1,5 +1,6 @@
 import os
 import sqlite3
+import uuid
 
 from autogen_agentchat.agents import AssistantAgent
 from autogen_core import CancellationToken
@@ -218,7 +219,7 @@ Example queries:
         # Return the response
         return ChatResponse(
             thread_id=chat_request.thread_id or "",
-            message_id="",
+            message_id=str(uuid.uuid4()),
             agent_response=final_message,
             token_count=0,
             max_token_count=0,
