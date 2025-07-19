@@ -62,8 +62,11 @@ class ServeCommand(BaseCommand):
             import uvicorn
 
             from ingenious.main import create_app
+            from ingenious.config.settings import IngeniousSettings
 
-            app = create_app(config_paths["config"])
+            # Load settings from config path
+            settings = IngeniousSettings.from_config_file(config_paths["config"])
+            app = create_app(settings)
 
             self.stop_progress()
             self.print_success(f"Starting server on {host}:{port}")
@@ -135,7 +138,7 @@ def register_commands(app: typer.Typer, console: Console) -> None:
                 "--no-prompt-tuner", help="Disable the prompt tuner interface"
             ),
         ] = False,
-    ):
+    ) -> None:
         """Start the Insight Ingenious API server with web interface."""
         cmd = ServeCommand(console)
         cmd.run(

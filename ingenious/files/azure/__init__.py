@@ -39,7 +39,11 @@ class azure_FileStorageRepository(IFileStorage):
             self.authentication_method
             == file_storage_AuthenticationMethod.CLIENT_ID_AND_SECRET
         ):
-            cred = ClientSecretCredential(self.client_id, self.token)
+            cred = ClientSecretCredential(
+                tenant_id="",  # TODO: Add proper tenant_id from config
+                client_id=self.client_id,
+                client_secret=self.token
+            )
             self.blob_service_client = BlobServiceClient(
                 account_url=self.url, credential=cred
             )
@@ -91,6 +95,7 @@ class azure_FileStorageRepository(IFileStorage):
             # print(f"Successfully uploaded {path} to container {self.container_name}.")
         except Exception as e:
             print(f"Failed to upload {path} to container {self.container_name}: {e}")
+        return str(path)
 
     async def read_file(self, file_name: str, file_path: str) -> str:
         """
@@ -140,6 +145,7 @@ class azure_FileStorageRepository(IFileStorage):
             # print(f"Successfully deleted {path} from container {self.container_name}.")
         except Exception as e:
             print(f"Failed to delete {path} from container {self.container_name}: {e}")
+        return str(path)
 
     async def list_files(self, file_path: str) -> str:
         """
@@ -162,12 +168,12 @@ class azure_FileStorageRepository(IFileStorage):
                 for blob in container_client.list_blobs(name_starts_with=prefix)
             ]
             # print(f"Blobs in container {self.container_name} with prefix {prefix}: {blobs}")
-            return blobs
+            return "\n".join(blobs)
         except Exception as e:
             print(
                 f"Failed to list blobs in container {self.container_name} with prefix {prefix}: {e}"
             )
-            return []
+            return ""
 
     async def check_if_file_exists(self, file_path: str, file_name: str) -> bool:
         """

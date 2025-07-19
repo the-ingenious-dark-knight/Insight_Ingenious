@@ -34,7 +34,7 @@ def create_access_token(
 
     to_encode.update({"exp": expire, "type": "access"})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
+    return str(encoded_jwt)
 
 
 def create_refresh_token(data: Dict[str, Any]) -> str:
@@ -43,7 +43,7 @@ def create_refresh_token(data: Dict[str, Any]) -> str:
     expire = datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
     to_encode.update({"exp": expire, "type": "refresh"})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
+    return str(encoded_jwt)
 
 
 def verify_token(token: str, token_type: str = "access") -> Dict[str, Any]:
@@ -75,7 +75,7 @@ def verify_token(token: str, token_type: str = "access") -> Dict[str, Any]:
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
-        return payload
+        return dict(payload)
 
     except JWTError as e:
         logger.debug("JWT verification failed", error=str(e), token_type=token_type)
@@ -96,14 +96,14 @@ def get_username_from_token(token: str) -> str:
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    return username
+    return str(username)
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a password against its hash"""
-    return pwd_context.verify(plain_password, hashed_password)
+    return bool(pwd_context.verify(plain_password, hashed_password))
 
 
 def get_password_hash(password: str) -> str:
     """Hash a password"""
-    return pwd_context.hash(password)
+    return str(pwd_context.hash(password))

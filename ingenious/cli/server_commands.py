@@ -68,7 +68,7 @@ def register_commands(app: typer.Typer, console: Console) -> None:
                 "--no-prompt-tuner", help="Disable the prompt tuner interface"
             ),
         ] = False,
-    ):
+    ) -> None:
         """
         🚀 Start the Insight Ingenious API server with web interface.
 
@@ -138,7 +138,7 @@ def register_commands(app: typer.Typer, console: Console) -> None:
             bool,
             typer.Option(help="Enable the prompt tuner interface. Default is True."),
         ] = True,
-    ):
+    ) -> None:
         """
         Run a FastAPI server that presents your agent workflows via REST endpoints.
 
@@ -305,7 +305,7 @@ def register_commands(app: typer.Typer, console: Console) -> None:
                 help="Host to bind the prompt tuner (default: 127.0.0.1)",
             ),
         ] = "127.0.0.1",
-    ):
+    ) -> None:
         """
         🎯 Start the standalone prompt tuning web interface.
 
