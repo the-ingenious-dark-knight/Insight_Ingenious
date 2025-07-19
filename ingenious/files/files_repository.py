@@ -53,11 +53,11 @@ class FileStorage:
         self.add_sub_folders = getattr(
             self.config.file_storage, Category
         ).add_sub_folders
-        
+
         # Get the file storage config for the specified category
         fs_config = getattr(self.config.file_storage, Category)
         storage_type = fs_config.storage_type
-        
+
         # Build module name based on the category's storage type
         module_name = f"ingenious.files.{storage_type.lower()}"
 
