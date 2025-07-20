@@ -379,10 +379,10 @@ class LLMUsageTracker(logging.Handler):
                     source_name = kwargs.agent_id.split("/")[1]
                 else:
                     return
-                
+
                 # Handle both Agents object and list
                 agent = None
-                if hasattr(self._agents, 'get_agent_by_name'):
+                if hasattr(self._agents, "get_agent_by_name"):
                     try:
                         agent = self._agents.get_agent_by_name(agent_name)
                     except ValueError:
@@ -429,7 +429,7 @@ class LLMUsageTracker(logging.Handler):
                 # Update token counts regardless of agent availability
                 self._prompt_tokens += event.prompt_tokens
                 self._completion_tokens += event.completion_tokens
-                
+
                 # Only update agent-specific data if agent is available
                 if agent:
                     chat = agent.get_agent_chat_by_source(source=source_name)

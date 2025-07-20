@@ -47,7 +47,7 @@ class ConversationFlow:
             identifier=str(uuid.uuid4()),
             event_type="classification",
         )
-        
+
         logger.handlers = [llm_logger]
 
         # Use provided thread memory context
