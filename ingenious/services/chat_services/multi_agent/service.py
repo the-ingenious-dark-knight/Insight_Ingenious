@@ -68,7 +68,14 @@ class multi_agent_chat_service:
         thread_messages = await self.chat_history_repository.get_thread_messages(
             chat_request.thread_id
         )
-        chat_request.thread_memory = "no existing context."
+        # Build thread memory from messages
+        if thread_messages:
+            memory_parts = []
+            for msg in thread_messages[-10:]:  # Use last 10 messages
+                memory_parts.append(f"{msg.role}: {msg.content[:200]}...")
+            chat_request.thread_memory = "\n".join(memory_parts)
+        else:
+            chat_request.thread_memory = "no existing context."
 
         logger.info(
             "Current memory state",

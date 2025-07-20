@@ -202,10 +202,16 @@ class ConversationFlow(IConversationFlow):
 
         system_message = f"""You are a SQL expert that helps write and execute SQL queries on data stored in {database_type}.
 
-{memory_context}Tasks:
+{memory_context}IMPORTANT: If there is previous conversation context above, you MUST:
+- Reference it when answering follow-up questions
+- Use information from previous queries to inform new queries
+- Maintain context about what data has already been discussed
+- Answer questions that refer to "it", "that", "those" etc. based on previous context
+
+Tasks:
 - Write SQL queries to answer user questions about the data
 - Use the 'execute_sql_tool' to run queries
-- Consider previous conversation context when generating responses
+- Always consider and reference previous conversation when relevant
 - Format your response based on the number of rows:
   - Single Row: Use the format {{column_name: value, column_name: value}}
   - Multiple Rows: Use a list format with each row as a dictionary

@@ -40,14 +40,14 @@ class ConversationFlow:
         logger.setLevel(logging.INFO)
 
         llm_logger = LLMUsageTracker(
-            agents=[],  # Simple agent, no complex agent list needed
+            agents=["classification_agent"],  # Track classification agent
             config=_config,
             chat_history_repository=None,  # Not available in static context
             revision_id=str(uuid.uuid4()),
             identifier=str(uuid.uuid4()),
             event_type="classification",
         )
-
+        
         logger.handlers = [llm_logger]
 
         # Use provided thread memory context

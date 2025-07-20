@@ -379,7 +379,15 @@ class LLMUsageTracker(logging.Handler):
                     source_name = kwargs.agent_id.split("/")[1]
                 else:
                     return
-                agent = self._agents.get_agent_by_name(agent_name)
+                
+                # Handle both Agents object and list
+                agent = None
+                if hasattr(self._agents, 'get_agent_by_name'):
+                    try:
+                        agent = self._agents.get_agent_by_name(agent_name)
+                    except ValueError:
+                        # Agent not found in the list
+                        pass
                 response = ""
                 system_input = ""
                 user_input = ""
@@ -418,19 +426,23 @@ class LLMUsageTracker(logging.Handler):
                                 if m.content:
                                     user_input += f"{m.content}\n\n"
 
-                chat = agent.get_agent_chat_by_source(source=source_name)
-                chat.chat_response = Response(
-                    chat_message=TextMessage(content=response, source=source_name)
-                )
+                # Update token counts regardless of agent availability
                 self._prompt_tokens += event.prompt_tokens
                 self._completion_tokens += event.completion_tokens
-                chat.prompt_tokens = event.prompt_tokens
-                chat.completion_tokens = event.completion_tokens
-                chat.system_prompt = system_input
-                chat.user_message = user_input
-                chat.end_time = datetime.now().timestamp()
-                if add_chat:
-                    self._queue.append(chat)
+                
+                # Only update agent-specific data if agent is available
+                if agent:
+                    chat = agent.get_agent_chat_by_source(source=source_name)
+                    chat.chat_response = Response(
+                        chat_message=TextMessage(content=response, source=source_name)
+                    )
+                    chat.prompt_tokens = event.prompt_tokens
+                    chat.completion_tokens = event.completion_tokens
+                    chat.system_prompt = system_input
+                    chat.user_message = user_input
+                    chat.end_time = datetime.now().timestamp()
+                    if add_chat:
+                        self._queue.append(chat)
 
         except Exception as e:
             print(f"Failed to emit log record :{e}")
