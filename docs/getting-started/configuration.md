@@ -301,7 +301,7 @@ INGENIOUS_WEB_CONFIGURATION__AUTHENTICATION__USERNAME=admin
 INGENIOUS_WEB_CONFIGURATION__AUTHENTICATION__PASSWORD=your-secure-password
 ```
 
-> **Note**: The default port in configuration is 80. The CLI command `ingen serve` defaults to port 80, but can be overridden with `--port` or the `WEB_PORT` environment variable. For local development, it's common to use port 8000.
+> **Note**: The default port in configuration is 80. The CLI command `ingen serve` defaults to port 80, but can be overridden with `--port` flag. For local development, it's recommended to use port 8000 by running `ingen serve --port 8000`.
 
 ### File Storage
 
@@ -345,9 +345,9 @@ INGENIOUS_FILE_STORAGE__DATA__AUTHENTICATION_METHOD=default_credential
 
 #### Azure Blob Storage Authentication
 
-Configure authentication using environment variables (recommended) or legacy profiles.yml:
+Configure authentication using environment variables:
 
-**Environment Variables (Recommended):**
+**Environment Variables:**
 ```bash
 # Connection string authentication
 INGENIOUS_FILE_STORAGE__REVISIONS__AUTHENTICATION_METHOD=token
@@ -355,15 +355,6 @@ AZURE_STORAGE_CONNECTION_STRING="DefaultEndpointsProtocol=https;AccountName=..."
 
 # Or default credential authentication (recommended for production)
 INGENIOUS_FILE_STORAGE__REVISIONS__AUTHENTICATION_METHOD=default_credential
-```
-
-**Legacy profiles.yml Configuration (Deprecated):**
-```yaml
-file_storage:
-  revisions:
-    url: "https://your-storage.blob.core.windows.net/"
-    token: "${AZURE_STORAGE_CONNECTION_STRING:}"
-    authentication_method: "token"
 ```
 
 #### Authentication Methods

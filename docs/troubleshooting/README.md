@@ -188,7 +188,7 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
    # ✅ Correct (preferred)
    "conversation_flow": "bike-insights"
 
-   # ✅ Also supported (legacy)
+   # ✅ Also supported (underscore format)
    "conversation_flow": "bike_insights"
    ```
 
@@ -261,16 +261,12 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
    LOCAL_SQL_CSV_PATH=./sample_data.csv
    ```
 
-4. **Verify configuration files**:
-   ```yaml
-   # config.yml
-   chat_history:
-     database_type: "azuresql"
-     database_name: "your_database_name"
-
-   # profiles.yml
-   chat_history:
-     database_connection_string: ${AZURE_SQL_CONNECTION_STRING}
+4. **Verify environment variables**:
+   ```bash
+   # Check .env file or environment variables
+   INGENIOUS_CHAT_HISTORY__DATABASE_TYPE=azuresql
+   INGENIOUS_CHAT_HISTORY__DATABASE_NAME=your_database_name
+   INGENIOUS_CHAT_HISTORY__DATABASE_CONNECTION_STRING=$AZURE_SQL_CONNECTION_STRING
    ```
 
    **Note**: Remove `:REQUIRED_SET_IN_ENV` suffix - it can cause issues with environment variable substitution.
@@ -312,8 +308,8 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
    ```bash
    uv run python -c "
    import asyncio
-   from ingenious.ingenious.dependencies import get_config
-   from ingenious.ingenious.db.chat_history_repository import ChatHistoryRepository
+   from ingenious.config import get_config
+   from ingenious.db.chat_history_repository import ChatHistoryRepository
    from ingenious.models.database_client import DatabaseClientType
 
    async def test():
@@ -381,19 +377,15 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
    AZURE_STORAGE_ACCOUNT_KEY="your_account_key"
    ```
 
-3. **Update configuration files**:
-   ```yaml
-   # config.yml
-   storage:
-     type: "azure_blob"
-     container_data: "ingenious-data"
-     container_revisions: "ingenious-revisions"
-
-   # profiles.yml
-   storage:
-     type: "azure_blob"
-     container_data: "ingenious-data-dev"  # Environment-specific
-     container_revisions: "ingenious-revisions-dev"
+3. **Update environment variables**:
+   ```bash
+   # .env file or environment variables
+   INGENIOUS_FILE_STORAGE__REVISIONS__STORAGE_TYPE=azure
+   INGENIOUS_FILE_STORAGE__REVISIONS__URL=https://your-storage.blob.core.windows.net/
+   INGENIOUS_FILE_STORAGE__REVISIONS__AUTHENTICATION_METHOD=default_credential
+   INGENIOUS_FILE_STORAGE__DATA__STORAGE_TYPE=azure
+   INGENIOUS_FILE_STORAGE__DATA__URL=https://your-storage.blob.core.windows.net/
+   INGENIOUS_FILE_STORAGE__DATA__AUTHENTICATION_METHOD=default_credential
    ```
 
 4. **Test environment variable loading**:
@@ -433,8 +425,8 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
 6. **Test through Ingenious FileStorage**:
    ```bash
    uv run python -c "
-   from ingenious.ingenious.files import get_file_storage
-   from ingenious.ingenious.dependencies import get_config
+   from ingenious.files import get_file_storage
+   from ingenious.config import get_config
 
    try:
        config = get_config()
@@ -459,7 +451,7 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
 7. **Test Memory and Prompts Integration**:
    ```bash
    uv run python -c "
-   from ingenious.ingenious.services.memory_manager import MemoryManager
+   from ingenious.services.memory_manager import MemoryManager
    import json
 
    try:
@@ -524,16 +516,16 @@ If you're switching from local to Azure Blob Storage:
    ```
 
 2. **Verify configuration precedence**:
-   - `profiles.yml` overrides `config.yml`
-   - Environment variables override both
+   - Environment variables with `INGENIOUS_` prefix are the primary configuration method
+   - `.env` files are loaded automatically for local development
 
 3. **Test with minimal configuration**:
-   ```yaml
-   # Minimal profiles.yml for testing
-   storage:
-     type: "azure_blob"
-     container_data: "test-data"
-     container_revisions: "test-revisions"
+   ```bash
+   # Minimal .env for testing
+   INGENIOUS_FILE_STORAGE__REVISIONS__STORAGE_TYPE=azure
+   INGENIOUS_FILE_STORAGE__REVISIONS__URL=https://your-storage.blob.core.windows.net/
+   INGENIOUS_FILE_STORAGE__DATA__STORAGE_TYPE=azure
+   INGENIOUS_FILE_STORAGE__DATA__URL=https://your-storage.blob.core.windows.net/
    ```
 
 ---
@@ -562,15 +554,14 @@ uv run python -c "import ingenious; print('✅ Ingenious imported successfully')
 
 ### Check Configuration Loading
 ```bash
-export INGENIOUS_PROJECT_PATH=$(pwd)/config.yml
-export INGENIOUS_PROFILE_PATH=$(pwd)/profiles.yml
+# Check environment variables are loaded
 uv run python -c "
-import ingenious.config.config as config
+from ingenious.config import get_config
 try:
-    cfg = config.get_config()
+    cfg = get_config()
     print('✅ Configuration loaded successfully')
     print(f'Models: {len(cfg.models)}')
-    print(f'Profile: {cfg.chat_history.database_type}')
+    print(f'Database type: {cfg.chat_history.database_type}')
 except Exception as e:
     print(f'❌ Configuration error: {e}')
 "
@@ -582,11 +573,10 @@ except Exception as e:
 
 ### Enable Debug Logging
 
-1. **In config.yml**:
-   ```yaml
-   logging:
-     root_log_level: debug
-     log_level: debug
+1. **In .env file**:
+   ```bash
+   INGENIOUS_LOGGING__ROOT_LOG_LEVEL=debug
+   INGENIOUS_LOGGING__LOG_LEVEL=debug
    ```
 
 2. **Or via environment**:
@@ -607,7 +597,7 @@ INFO:     Uvicorn running on http://0.0.0.0:80
 
 **⚠️ Warning Signs**:
 ```
-Profile not found at /path/to/profiles.yml
+Environment variables not found or .env file missing
 Template directory not found. Skipping...
 Validation error in field
 ```
@@ -647,8 +637,7 @@ echo "🧪 Running full integration test..."
 # 1. Check environment
 echo "1. Checking environment..."
 [ -n "$AZURE_OPENAI_API_KEY" ] || { echo "❌ AZURE_OPENAI_API_KEY not set"; exit 1; }
-[ -f "config.yml" ] || { echo "❌ config.yml not found"; exit 1; }
-[ -f "profiles.yml" ] || { echo "❌ profiles.yml not found"; exit 1; }
+[ -f ".env" ] || { echo "❌ .env not found"; exit 1; }
 
 # 2. Test import
 echo "2. Testing Python import..."
@@ -656,8 +645,7 @@ uv run python -c "import ingenious; print('✅ Import OK')"
 
 # 3. Test configuration
 echo "3. Testing configuration..."
-export INGENIOUS_PROJECT_PATH=$(pwd)/config.yml
-export INGENIOUS_PROFILE_PATH=$(pwd)/profiles.yml
+# Environment variables are loaded from .env automatically
 uv run ingen status
 
 # 4. Test workflows
@@ -679,10 +667,9 @@ Before running Ingenious, ensure:
 - [ ] Project initialized: `uv run ingen init`
 - [ ] .env file created with Azure OpenAI credentials
 - [ ] Environment variables set:
-  - [ ] `AZURE_OPENAI_API_KEY`
-  - [ ] `AZURE_OPENAI_BASE_URL`
-  - [ ] `INGENIOUS_PROJECT_PATH`
-  - [ ] `INGENIOUS_PROFILE_PATH`
+  - [ ] `INGENIOUS_MODELS__0__API_KEY`
+  - [ ] `INGENIOUS_MODELS__0__BASE_URL`
+  - [ ] `INGENIOUS_CHAT_SERVICE__TYPE`
 - [ ] Port available (default 80)
 - [ ] Network access to Azure OpenAI endpoint
 
@@ -733,7 +720,7 @@ If everything is broken, start fresh:
 
 ```bash
 # 1. Clean slate
-rm -rf ingenious_extensions/ tmp/ config.yml profiles.yml .env
+rm -rf ingenious_extensions/ tmp/ .env
 
 # 2. Reinstall
 uv add ingenious
@@ -745,9 +732,12 @@ uv run ingen init
 cp .env.example .env
 # Edit .env with your Azure OpenAI credentials
 
-# 5. Set environment
-export INGENIOUS_PROJECT_PATH=$(pwd)/config.yml
-export INGENIOUS_PROFILE_PATH=$(pwd)/profiles.yml
+# 5. Create minimal .env
+cat > .env << 'EOF'
+INGENIOUS_MODELS__0__API_KEY=your-api-key
+INGENIOUS_MODELS__0__BASE_URL=https://your-resource.openai.azure.com/
+INGENIOUS_CHAT_SERVICE__TYPE=multi_agent
+EOF
 
 # 6. Test
 uv run ingen status

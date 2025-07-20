@@ -29,24 +29,19 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 
 ## Basic Installation
 
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/Insight-Services-APAC/ingenious.git
-cd ingenious
-```
-
-### 2. Install Core Framework
+### Install from PyPI
 
 ```bash
 # Using uv (recommended)
-uv pip install -e .
+uv add ingenious
 
-# Or using pip
-pip install -e .
+# Or choose an installation profile based on your needs:
+uv add ingenious[standard]    # Most common: includes SQL agent support
+uv add ingenious[azure-full]  # Full Azure integration
+uv add ingenious[full]        # All features including document processing
 ```
 
-This installs the core Insight Ingenious framework with basic functionality.
+This installs the Insight Ingenious framework from PyPI with the selected features.
 
 ## Optional Dependencies
 
@@ -57,11 +52,11 @@ Some advanced features require additional dependencies. Install these extras bas
 For web scraping and data collection capabilities:
 
 ```bash
-# Basic dataprep functionality
-uv pip install -e ".[dataprep]"
+# Install with dataprep functionality
+uv add ingenious[dataprep]
 
-# With testing capabilities
-uv pip install -e ".[dataprep,tests]"
+# Or as part of full installation
+uv add ingenious[full]
 ```
 
 **Use cases:**
@@ -76,11 +71,11 @@ uv pip install -e ".[dataprep,tests]"
 For extracting content from various document formats:
 
 ```bash
-# Core document processing (PyMuPDF + Azure Document Intelligence)
-uv pip install -e ".[document-processing]"
+# Core document processing
+uv add ingenious[document-processing]
 
-# With additional engines and testing
-uv pip install -e ".[document-processing,document-advanced,tests]"
+# Or as part of full installation
+uv add ingenious[full]
 ```
 
 **Supported formats:**
@@ -102,11 +97,11 @@ uv pip install -e ".[document-processing,document-advanced,tests]"
 For production deployments using Azure SQL Database for chat history storage:
 
 ```bash
-# Core Azure SQL support (pyodbc is included in base installation)
-uv pip install -e .
+# Azure SQL support is included in standard installation
+uv add ingenious[standard]
 
-# Required dependency for environment variable loading
-uv add python-dotenv
+# Or with full Azure integration
+uv add ingenious[azure-full]
 ```
 
 **System Dependencies Required:**
@@ -147,10 +142,12 @@ Download and install the ODBC Driver 18 for SQL Server from the [Microsoft websi
 
 ### Complete Installation
 
+### Complete Installation
+
 To install all optional dependencies:
 
 ```bash
-uv pip install -e ".[dataprep,document-processing,document-advanced,tests]"
+uv add ingenious[full]
 ```
 
 ## Verification
@@ -195,8 +192,12 @@ For more troubleshooting help, see the [Troubleshooting Guide](/troubleshooting/
 If you plan to contribute to Insight Ingenious:
 
 ```bash
+# Clone the repository
+git clone https://github.com/Insight-Services-APAC/ingenious.git
+cd ingenious
+
 # Install in development mode with all dependencies
-uv pip install -e ".[dataprep,document-processing,document-advanced,tests,dev]"
+uv pip install -e ".[dev]"
 
 # Install pre-commit hooks
 pre-commit install
