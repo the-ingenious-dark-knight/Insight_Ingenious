@@ -69,7 +69,8 @@ Get up and running in 5 minutes with Azure OpenAI!
 
     > **⚠️ BREAKING CHANGE**: Ingenious now uses **pydantic-settings** for configuration via environment variables. Legacy YAML configuration files (`config.yml`, `profiles.yml`) are **no longer supported** and must be migrated to environment variables with `INGENIOUS_` prefixes. Use the migration script:
     > ```bash
-    > python scripts/migrate_config.py --config config.yml --profile profiles.yml --output .env
+    > uv run python scripts/migrate_config.py --yaml-file config.yml --output .env
+    > uv run python scripts/migrate_config.py --yaml-file profiles.yml --output .env.profiles
     > ```
 
 4. **Start the Server**:

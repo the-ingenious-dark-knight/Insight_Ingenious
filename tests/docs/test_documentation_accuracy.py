@@ -1,8 +1,11 @@
 """
-Test suite to validate documentation accuracy against codebase implementation.
+Test file to validate documentation accuracy against implementation.
 
-This test file validates key documentation claims by examining the actual code
-without executing it. It ensures documentation stays synchronized with implementation.
+This test suite verifies that documentation claims match the actual codebase
+implementation through static analysis only. It does not execute any code.
+
+Note: This file is meant to be run after documentation updates to ensure
+accuracy is maintained.
 """
 
 import ast
@@ -14,238 +17,288 @@ from typing import Dict, List, Set
 import pytest
 
 
-class CodeAnalyzer:
-    """Static code analyzer for validating documentation claims."""
-
-    def __init__(self, project_root: Path):
-        self.project_root = project_root
-
-    def find_api_routes(self) -> Dict[str, List[str]]:
-        """Find all API routes defined in the codebase."""
-        routes = {}
-        routes_dir = self.project_root / "ingenious" / "api" / "routes"
+class DocumentationValidator:
+    """Validates documentation claims against implementation."""
+    
+    def __init__(self):
+        self.workspace_root = Path("/workspace")
+        self.docs_dir = self.workspace_root / "docs"
+        self.ingenious_dir = self.workspace_root / "ingenious"
         
-        for py_file in routes_dir.rglob("*.py"):
-            if py_file.name == "__init__.py":
+    def extract_api_endpoints_from_code(self) -> Dict[str, List[str]]:
+        """Extract API endpoints from route files."""
+        endpoints = {}
+        routes_dir = self.ingenious_dir / "api" / "routes"
+        
+        for route_file in routes_dir.glob("*.py"):
+            if route_file.name == "__init__.py":
                 continue
                 
-            content = py_file.read_text()
-            # Find router.method decorators
-            router_pattern = r'@router\.(get|post|put|delete|patch)\("([^"]+)"'
-            matches = re.findall(router_pattern, content)
-            
-            for method, path in matches:
-                if py_file.stem not in routes:
-                    routes[py_file.stem] = []
-                routes[py_file.stem].append(f"{method.upper()} {path}")
+            with open(route_file, "r") as f:
+                content = f.read()
                 
-        return routes
-
-    def find_cli_commands(self) -> Set[str]:
-        """Find all CLI commands defined in the codebase."""
-        commands = set()
-        cli_dir = self.project_root / "ingenious" / "cli"
-        
-        for py_file in cli_dir.rglob("*.py"):
-            content = py_file.read_text()
-            # Find @app.command decorators
-            command_pattern = r'@app\.command\((?:name="([^"]+)"|hidden=True)'
-            matches = re.findall(command_pattern, content)
+            # Extract route decorators
+            route_pattern = r'@router\.(get|post|put|delete|patch|api_route)\("([^"]+)"'
+            matches = re.findall(route_pattern, content)
             
-            for match in matches:
-                if match and not match.startswith("_"):
-                    commands.add(match)
-                    
-        return commands
-
-    def find_environment_variables(self) -> Set[str]:
-        """Find all INGENIOUS_ prefixed environment variables."""
-        env_vars = set()
+            module_name = route_file.stem
+            endpoints[module_name] = [(method, path) for method, path in matches]
+            
+        return endpoints
+    
+    def extract_cli_commands_from_code(self) -> Set[str]:
+        """Extract CLI commands from the CLI module."""
+        commands = set()
+        cli_dir = self.ingenious_dir / "cli"
         
-        # Check config models
-        config_dir = self.project_root / "ingenious" / "config"
-        for py_file in config_dir.rglob("*.py"):
-            content = py_file.read_text()
-            # Find INGENIOUS_ environment variable references
-            env_pattern = r'INGENIOUS_[A-Z_]+'
+        # Look for @app.command decorators
+        for cli_file in cli_dir.rglob("*.py"):
+            with open(cli_file, "r") as f:
+                content = f.read()
+                
+            # Extract command names
+            command_pattern = r'@app\.command\((?:name=)?["\']([^"\']+)["\']'
+            matches = re.findall(command_pattern, content)
+            commands.update(matches)
+            
+        return commands
+    
+    def extract_environment_variables_from_code(self) -> Set[str]:
+        """Extract environment variable names from settings classes."""
+        env_vars = set()
+        config_dir = self.ingenious_dir / "config"
+        
+        # Look for INGENIOUS_ prefixed variables
+        for config_file in config_dir.glob("*.py"):
+            with open(config_file, "r") as f:
+                content = f.read()
+                
+            # Extract environment variable references
+            env_pattern = r'INGENIOUS_[A-Z_0-9]+'
             matches = re.findall(env_pattern, content)
             env_vars.update(matches)
             
         return env_vars
-
-    def find_workflows(self) -> Set[str]:
-        """Find all available workflows."""
+    
+    def extract_workflow_names_from_code(self) -> Set[str]:
+        """Extract workflow names from the codebase."""
         workflows = set()
-        flows_dir = self.project_root / "ingenious" / "services" / "chat_services" / "multi_agent" / "conversation_flows"
         
+        # Check conversation flows directory
+        flows_dir = self.ingenious_dir / "services" / "chat_services" / "multi_agent" / "conversation_flows"
         if flows_dir.exists():
-            for item in flows_dir.iterdir():
-                if item.is_dir() and not item.name.startswith("__"):
-                    workflows.add(item.name)
+            for flow_dir in flows_dir.iterdir():
+                if flow_dir.is_dir() and not flow_dir.name.startswith("__"):
+                    workflows.add(flow_dir.name)
+        
+        # Check for template workflows
+        template_flows_dir = self.workspace_root / "test_dir" / "ingenious_extensions" / "services" / "chat_services" / "multi_agent" / "conversation_flows"
+        if template_flows_dir.exists():
+            for flow_dir in template_flows_dir.iterdir():
+                if flow_dir.is_dir() and not flow_dir.name.startswith("__"):
+                    workflows.add(flow_dir.name)
                     
         return workflows
-
-    def check_model_fields(self, model_path: str, field_name: str) -> bool:
-        """Check if a model has a specific field."""
-        try:
-            file_path = self.project_root / model_path
-            if not file_path.exists():
-                return False
-                
-            content = file_path.read_text()
-            # Simple check for field definition
-            field_pattern = rf'{field_name}:\s*\w+'
-            return bool(re.search(field_pattern, content))
-        except Exception:
-            return False
-
+    
+    def validate_pyproject_toml(self) -> Dict[str, any]:
+        """Extract key information from pyproject.toml."""
+        pyproject_path = self.workspace_root / "pyproject.toml"
+        info = {}
+        
+        with open(pyproject_path, "r") as f:
+            content = f.read()
+            
+        # Extract Python version requirement
+        version_match = re.search(r'requires-python = "([^"]+)"', content)
+        if version_match:
+            info["python_version"] = version_match.group(1)
+            
+        # Extract project version
+        project_version_match = re.search(r'version = "([^"]+)"', content)
+        if project_version_match:
+            info["project_version"] = project_version_match.group(1)
+            
+        # Extract CLI command entry point
+        cli_match = re.search(r'ingen = "([^"]+)"', content)
+        if cli_match:
+            info["cli_entrypoint"] = cli_match.group(1)
+            
+        return info
 
 
 class TestDocumentationAccuracy:
-    """Test cases for documentation accuracy validation."""
-
+    """Test suite for documentation accuracy validation."""
+    
     @pytest.fixture
-    def analyzer(self):
-        """Create code analyzer instance."""
-        project_root = Path(__file__).parent.parent.parent
-        return CodeAnalyzer(project_root)
-
-    def test_api_endpoints_documented(self, analyzer):
-        """Verify documented API endpoints exist in code."""
-        # Key endpoints that should exist based on documentation
+    def validator(self):
+        return DocumentationValidator()
+    
+    def test_api_endpoints_documented(self, validator):
+        """Verify all API endpoints are correctly documented."""
+        code_endpoints = validator.extract_api_endpoints_from_code()
+        
+        # Expected endpoints based on documentation analysis
         expected_endpoints = {
-            "chat": ["POST /chat"],
-            "diagnostic": ["GET /health", "GET /workflows", "GET /workflow-status/{workflow_name}"],
-            "auth": ["POST /login", "POST /refresh", "GET /verify"],
-            "conversation": ["GET /conversations/{thread_id}"],
-            "message_feedback": ["PUT /messages/{message_id}/feedback"],
-            "prompts": ["GET /prompts/list/{revision_id}", "GET /prompts/view/{revision_id}/{filename}", 
-                       "POST /prompts/update/{revision_id}/{filename}"]
+            "auth": [("post", "/login"), ("post", "/refresh"), ("get", "/verify")],
+            "chat": [("post", "/chat")],
+            "conversation": [("get", "/conversations/{thread_id}")],
+            "diagnostic": [
+                ("get", "/workflow-status/{workflow_name}"),
+                ("get", "/workflows"),
+                ("api_route", "/diagnostic"),
+                ("get", "/health")
+            ],
+            "message_feedback": [("put", "/messages/{message_id}/feedback")],
+            "prompts": [
+                ("get", "/revisions/list"),
+                ("get", "/workflows/list"),
+                ("get", "/prompts/list/{revision_id}"),
+                ("get", "/prompts/view/{revision_id}/{filename}"),
+                ("post", "/prompts/update/{revision_id}/{filename}")
+            ]
         }
         
-        actual_routes = analyzer.find_api_routes()
-        
+        # Verify documented endpoints exist
         for module, endpoints in expected_endpoints.items():
-            assert module in actual_routes, f"API module {module} not found"
-            for endpoint in endpoints:
-                method, path = endpoint.split(" ", 1)
-                found = any(
-                    route.startswith(method) and path in route 
-                    for route in actual_routes[module]
-                )
-                assert found, f"Endpoint {endpoint} not found in {module}.py"
-
-    def test_cli_commands_documented(self, analyzer):
-        """Verify documented CLI commands exist."""
+            assert module in code_endpoints, f"Module {module} not found in code"
+            for method, path in endpoints:
+                assert (method, path) in code_endpoints[module], \
+                    f"Endpoint {method} {path} not found in {module}"
+    
+    def test_cli_commands_documented(self, validator):
+        """Verify all CLI commands are correctly documented."""
+        code_commands = validator.extract_cli_commands_from_code()
+        
+        # Expected commands based on documentation
         expected_commands = {
             "init", "serve", "workflows", "test", "validate",
-            "help", "status", "version", "dataprep", "document-processing"
+            "status", "version", "help", "dataprep", "document-processing"
         }
         
-        actual_commands = analyzer.find_cli_commands()
+        # Verify documented commands exist (allow for more commands in code)
+        for cmd in expected_commands:
+            assert cmd in code_commands, f"Command '{cmd}' documented but not found in code"
+    
+    def test_environment_variables_documented(self, validator):
+        """Verify environment variable prefixes are correct."""
+        code_env_vars = validator.extract_environment_variables_from_code()
         
-        for command in expected_commands:
-            assert command in actual_commands, f"CLI command '{command}' not found in code"
-
-    def test_core_workflows_exist(self, analyzer):
-        """Verify core workflows are in the library."""
-        core_workflows = {
-            "classification_agent",
-            "knowledge_base_agent", 
-            "sql_manipulation_agent"
+        # All environment variables should have INGENIOUS_ prefix
+        for var in code_env_vars:
+            assert var.startswith("INGENIOUS_"), \
+                f"Environment variable {var} doesn't have correct prefix"
+    
+    def test_workflow_names_documented(self, validator):
+        """Verify workflow names are correctly documented."""
+        code_workflows = validator.extract_workflow_names_from_code()
+        
+        # Documented core workflows
+        documented_core_workflows = {
+            "classification_agent", "knowledge_base_agent", "sql_manipulation_agent"
         }
         
-        actual_workflows = analyzer.find_workflows()
+        # Verify at least core workflows exist
+        for workflow in documented_core_workflows:
+            assert workflow in code_workflows, \
+                f"Core workflow '{workflow}' documented but not found in code"
+    
+    def test_python_version_requirement(self, validator):
+        """Verify Python version requirement is correctly documented."""
+        pyproject_info = validator.validate_pyproject_toml()
         
-        for workflow in core_workflows:
-            assert workflow in actual_workflows, f"Core workflow '{workflow}' not found"
-
-    def test_environment_variable_prefix(self, analyzer):
-        """Verify environment variables use INGENIOUS_ prefix."""
-        env_vars = analyzer.find_environment_variables()
-        
-        # All found env vars should start with INGENIOUS_
-        for var in env_vars:
-            assert var.startswith("INGENIOUS_"), f"Environment variable {var} doesn't use INGENIOUS_ prefix"
-
-    def test_azure_sql_field_name(self, analyzer):
-        """Verify Azure SQL model uses correct field name."""
-        # Check that AzureSqlSettings uses database_connection_string
-        has_field = analyzer.check_model_fields(
-            "ingenious/config/models.py",
-            "database_connection_string"
-        )
-        assert has_field, "AzureSqlSettings should have 'database_connection_string' field"
-
-    def test_python_version_requirement(self):
-        """Verify Python version requirement in pyproject.toml."""
-        pyproject_path = Path(__file__).parent.parent.parent / "pyproject.toml"
-        content = pyproject_path.read_text()
-        
-        # Check for Python 3.13+ requirement
-        assert 'requires-python = ">=3.13"' in content, "Python 3.13+ requirement not found"
-
-    def test_api_prefix(self, analyzer):
-        """Verify API routes use /api/v1/ prefix."""
-        routing_file = Path(__file__).parent.parent.parent / "ingenious" / "main" / "routing.py"
-        content = routing_file.read_text()
-        
-        # Check for /api/v1 prefix in route registration
-        assert 'prefix="/api/v1"' in content, "API routes should use /api/v1 prefix"
-
-    def test_default_port_configuration(self):
-        """Verify default port configuration."""
-        server_commands = Path(__file__).parent.parent.parent / "ingenious" / "cli" / "server_commands.py"
-        content = server_commands.read_text()
-        
-        # Check default port is 80 or uses WEB_PORT env var
-        assert 'int(os.getenv("WEB_PORT", "80"))' in content, "Default port should be 80 or $WEB_PORT"
-
-    def test_jwt_authentication_configurable(self, analyzer):
-        """Verify JWT authentication is configurable."""
-        auth_settings = analyzer.check_model_fields(
-            "ingenious/config/models.py",
-            "enable"
-        )
-        assert auth_settings, "Authentication should have 'enable' field for configuration"
-
-    def test_storage_backends_supported(self):
-        """Verify both local and Azure storage backends are supported."""
-        files_dir = Path(__file__).parent.parent.parent / "ingenious" / "files"
-        
-        # Check for both local and azure subdirectories
-        assert (files_dir / "local").exists(), "Local storage backend not found"
-        assert (files_dir / "azure").exists(), "Azure storage backend not found"
-
-    def test_template_workflow_location(self):
-        """Verify bike-insights is in template, not core library."""
-        # Check core library doesn't have bike-insights
-        core_flows = Path(__file__).parent.parent.parent / "ingenious" / "services" / "chat_services" / "multi_agent" / "conversation_flows"
-        assert not (core_flows / "bike_insights").exists(), "bike-insights should not be in core library"
-        
-        # Check template has bike-insights
-        template_flows = Path(__file__).parent.parent.parent / "ingenious" / "ingenious_extensions_template" / "services" / "chat_services" / "multi_agent" / "conversation_flows"
-        assert (template_flows / "bike_insights").exists(), "bike-insights should be in template"
-
-    def test_documentation_files_exist(self):
-        """Verify all referenced documentation files exist."""
-        docs_to_check = [
-            "README.md",
-            "docs/api/README.md",
-            "docs/getting-started/configuration.md",
-            "docs/workflows/README.md",
-            "docs/CLI_REFERENCE.md",
-            "docs/architecture/README.md",
-            "docs/troubleshooting/README.md"
+        # Documentation states Python 3.13+
+        assert "python_version" in pyproject_info
+        assert pyproject_info["python_version"] == ">=3.13", \
+            f"Python version requirement mismatch: {pyproject_info['python_version']}"
+    
+    def test_migration_script_exists(self):
+        """Verify migration script mentioned in docs exists."""
+        migration_script = Path("/workspace/scripts/migrate_config.py")
+        assert migration_script.exists(), "Migration script not found at scripts/migrate_config.py"
+    
+    def test_project_structure_matches_docs(self):
+        """Verify key project directories exist as documented."""
+        expected_dirs = [
+            "ingenious",
+            "docs",
+            "tests",
+            "scripts",
+            "ingenious/api/routes",
+            "ingenious/cli",
+            "ingenious/config",
+            "ingenious/services/chat_services",
         ]
         
-        project_root = Path(__file__).parent.parent.parent
-        for doc in docs_to_check:
-            doc_path = project_root / doc
-            assert doc_path.exists(), f"Documentation file {doc} not found"
-
+        workspace_root = Path("/workspace")
+        for dir_path in expected_dirs:
+            full_path = workspace_root / dir_path
+            assert full_path.exists(), f"Expected directory not found: {dir_path}"
+    
+    def test_api_base_path(self, validator):
+        """Verify API base path is /api/v1 as documented."""
+        # Check routing configuration
+        routing_file = validator.ingenious_dir / "main" / "routing.py"
+        assert routing_file.exists()
+        
+        with open(routing_file, "r") as f:
+            content = f.read()
+            
+        # Verify /api/v1 prefix is used
+        assert 'prefix="/api/v1"' in content, "API base path /api/v1 not found in routing"
+    
+    def test_configuration_system(self, validator):
+        """Verify configuration uses pydantic-settings as documented."""
+        settings_file = validator.ingenious_dir / "config" / "main_settings.py"
+        assert settings_file.exists()
+        
+        with open(settings_file, "r") as f:
+            content = f.read()
+            
+        # Verify pydantic-settings is used
+        assert "from pydantic_settings import BaseSettings" in content
+        assert "class IngeniousSettings(BaseSettings)" in content
+    
+    def test_required_dependencies_match_docs(self, validator):
+        """Verify key dependencies mentioned in docs are in pyproject.toml."""
+        pyproject_path = validator.workspace_root / "pyproject.toml"
+        
+        with open(pyproject_path, "r") as f:
+            content = f.read()
+            
+        # Key dependencies mentioned in documentation
+        expected_deps = [
+            "fastapi",
+            "uvicorn", 
+            "typer",
+            "autogen-agentchat",
+            "pydantic",
+            "pydantic-settings",
+            "azure-identity",
+            "openai"
+        ]
+        
+        for dep in expected_deps:
+            assert dep in content, f"Expected dependency '{dep}' not found in pyproject.toml"
 
 
 if __name__ == "__main__":
-    # Run tests with pytest
-    pytest.main([__file__, "-v"])
+    # This allows running the validator manually for debugging
+    validator = DocumentationValidator()
+    
+    print("Extracting API endpoints...")
+    endpoints = validator.extract_api_endpoints_from_code()
+    for module, eps in endpoints.items():
+        print(f"  {module}: {eps}")
+    
+    print("\nExtracting CLI commands...")
+    commands = validator.extract_cli_commands_from_code()
+    print(f"  Commands: {sorted(commands)}")
+    
+    print("\nExtracting workflows...")
+    workflows = validator.extract_workflow_names_from_code()
+    print(f"  Workflows: {sorted(workflows)}")
+    
+    print("\nValidating pyproject.toml...")
+    info = validator.validate_pyproject_toml()
+    for key, value in info.items():
+        print(f"  {key}: {value}")

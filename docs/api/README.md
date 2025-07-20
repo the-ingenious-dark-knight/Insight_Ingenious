@@ -331,7 +331,7 @@ Complete documentation for all available workflow endpoints, including:
 - Knowledge base search and retrieval
 - SQL query generation and execution
 
-###  Authentication API Endpoints
+### Authentication API Endpoints
 
 #### JWT Login
 ```bash
@@ -397,7 +397,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-###  Core API Endpoints
+### Core API Endpoints
 
 #### Health Check
 ```bash
@@ -624,7 +624,7 @@ if (await client.login('user@example.com', 'password123')) {
 }
 ```
 
-## � Prompts API
+## Prompts API
 
 The Prompts API provides endpoints for managing prompt templates used by conversation workflows. These templates are stored in the configured file storage backend (local or Azure Blob Storage).
 
@@ -882,7 +882,7 @@ Example error response:
 }
 ```
 
-## � Error Handling
+## Error Handling
 
 The API uses standard HTTP status codes and provides detailed error messages:
 
@@ -902,7 +902,7 @@ Example error response:
 }
 ```
 
-##  Additional Resources
+## Additional Resources
 
 - [Workflow API Documentation](/api/workflows/)
 - [Configuration Guide](/getting-started/configuration/)
