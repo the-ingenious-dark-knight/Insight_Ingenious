@@ -11,7 +11,7 @@ toc_icon: "sitemap"
 
 # Architecture Overview
 
-This document describes the high-level architecture of Insight Ingenious, an enterprise-grade Python library designed for rapid deployment of AI agent APIs with tight Microsoft Azure integrations and comprehensive debugging capabilities.
+This document describes the high-level architecture of Insight Ingenious, an enterprise-grade Python library designed for quickly setting up APIs to interact with AI Agents with comprehensive Azure service integrations and debugging capabilities.
 
 ## System Architecture
 
@@ -326,14 +326,14 @@ flowchart TD
 
     LOAD_CONTEXT --> SELECT_WORKFLOW{Select Workflow}
     SELECT_WORKFLOW --> CLASSIFICATION_WORKFLOW[Classification Agent]
-    SELECT_WORKFLOW --> EDUCATION_WORKFLOW[Education Expert]
     SELECT_WORKFLOW --> KNOWLEDGE_WORKFLOW[Knowledge Base Agent]
     SELECT_WORKFLOW --> SQL_WORKFLOW[SQL Manipulation Agent]
+    SELECT_WORKFLOW --> BIKE_INSIGHTS_WORKFLOW[Bike Insights (Template)]
 
     CLASSIFICATION_WORKFLOW --> AGENT_COORDINATION[Agent Coordination]
-    EDUCATION_WORKFLOW --> AGENT_COORDINATION
     KNOWLEDGE_WORKFLOW --> AGENT_COORDINATION
     SQL_WORKFLOW --> AGENT_COORDINATION
+    BIKE_INSIGHTS_WORKFLOW --> AGENT_COORDINATION
 
     AGENT_COORDINATION --> LLM_PROCESSING[LLM Processing]
     LLM_PROCESSING --> RESPONSE_FORMATTING[Format Response]
@@ -352,7 +352,7 @@ flowchart TD
     class START,END startEnd
     class LOAD_CONTEXT,AGENT_COORDINATION,LLM_PROCESSING,RESPONSE_FORMATTING,SAVE_HISTORY,SEND_RESPONSE process
     class INPUT_VALIDATION,SELECT_WORKFLOW decision
-    class CLASSIFICATION_WORKFLOW,EDUCATION_WORKFLOW,KNOWLEDGE_WORKFLOW,SQL_WORKFLOW workflow
+    class CLASSIFICATION_WORKFLOW,KNOWLEDGE_WORKFLOW,SQL_WORKFLOW,BIKE_INSIGHTS_WORKFLOW workflow
     class ERROR_RESPONSE error
 ```
 
@@ -637,6 +637,7 @@ graph TB
 ```mermaid
 graph TB
     subgraph "Authentication Layer"
+        JWT_AUTH[JWT Bearer Authentication]
         BASIC_AUTH[HTTP Basic Authentication]
         CONFIG_AUTH[Configurable Authentication]
         NO_AUTH[Anonymous Access Option]
@@ -660,6 +661,7 @@ graph TB
         SQL_AUTH[Database Authentication]
     end
 
+    JWT_AUTH --> CONFIG_AUTH
     BASIC_AUTH --> CONFIG_AUTH
     CONFIG_AUTH --> NO_AUTH
     AZURE_SECRETS --> CONFIG_SECRETS
@@ -676,7 +678,7 @@ graph TB
     classDef network fill:#e3f2fd
     classDef external fill:#fce4ec
 
-    class BASIC_AUTH,CONFIG_AUTH,NO_AUTH auth
+    class JWT_AUTH,BASIC_AUTH,CONFIG_AUTH,NO_AUTH auth
     class AZURE_SECRETS,CONFIG_SECRETS,ENV_VARS data
     class HTTPS,CORS,FASTAPI_SEC network
     class AZURE_AUTH,SEARCH_AUTH,SQL_AUTH external

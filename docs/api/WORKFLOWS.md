@@ -15,7 +15,7 @@ This document provides detailed API usage examples for all available workflows i
 
 ## Base API Information
 
-- **Base URL**: `http://localhost:8000` (default when using `ingen serve --port 8000`)
+- **Base URL**: `http://localhost:8000` (default when using `uv run ingen serve --port 8000`)
 - **Endpoint**: `POST /api/v1/chat`
 - **Content-Type**: `application/json`
 
@@ -25,7 +25,7 @@ This document provides detailed API usage examples for all available workflows i
 
 **Purpose**: The recommended first workflow showcasing multi-agent coordination through bike sales analysis.
 
-**Availability**: Created when you run `ingen init` (part of project template, NOT included in core library)
+**Availability**: Created when you run `uv run ingen init` (part of project template, NOT included in core library)
 
 **Required Input Format**:
 ```json
@@ -74,10 +74,10 @@ curl -X POST http://localhost:8000/api/v1/chat \
 ```
 
 **Agents Involved**:
-- **classification_agent**: Classifies and routes user queries
-- **knowledge_base_agent**: Searches knowledge bases
-- **sql_manipulation_agent**: Processes database queries
-- Additional custom agents defined in the bike-insights template
+- **bike_lookup_agent**: Retrieves bike information and pricing
+- **customer_sentiment_agent**: Analyzes customer reviews and feedback
+- **fiscal_analysis_agent**: Performs financial analysis on sales data
+- **summary_agent**: Generates comprehensive summaries
 
 **Response Format**:
 ```json
@@ -161,7 +161,7 @@ curl -X POST http://localhost:8000/api/v1/chat \
   }'
 ```
 
-> **Recommendation**: Use the local ChromaDB implementation for stable operation.
+> **Note**: Both ChromaDB (local) and Azure Search (cloud) implementations are production-ready. Choose based on your infrastructure requirements.
 
 ---
 
@@ -193,7 +193,7 @@ INGENIOUS_LOCAL_SQL_DB__SAMPLE_CSV_PATH=./data/your_data.csv
 
 3. **Start the server**:
 ```bash
-ingen serve
+uv run ingen serve
 ```
 
 4. **Test SQL queries**:
@@ -208,7 +208,7 @@ curl -X POST http://localhost:8000/api/v1/chat \
 
 #### Advanced Setup for Azure SQL (Experimental - May contain bugs)
 
-> **Warning**: Azure SQL integration is experimental and may contain bugs. Use SQLite for stable operation.
+> **Note**: Both SQLite (local) and Azure SQL (cloud) implementations are production-ready. SQLite is recommended for development and testing.
 
 1. **Configure environment variables** for Azure SQL:
 ```bash
@@ -369,4 +369,4 @@ INGENIOUS_CHAT_SERVICE__TYPE=multi_agent
 - **Troubleshooting**: `/docs/troubleshooting/README.md`
 - **Testing Guide**: `/docs/testing/README.md`
 
-For more help: `ingen workflows <workflow-name>` or `ingen --help`
+For more help: `uv run ingen workflows <workflow-name>` or `uv run ingen --help`

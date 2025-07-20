@@ -11,7 +11,7 @@ toc_icon: "cogs"
 
 # Configuration Guide
 
-This guide explains how to configure Insight Ingenious - an enterprise-grade Python library for AI agent APIs - for your specific deployment and Microsoft Azure service integrations. The library provides comprehensive configuration options for enterprise environments, debugging tools, and customization requirements.
+This guide explains how to configure Insight Ingenious - an enterprise-grade Python library for quickly setting up APIs to interact with AI Agents. The library provides comprehensive configuration options for enterprise environments, debugging tools, and customization requirements.
 
 ## Configuration Overview
 
@@ -212,9 +212,8 @@ INGENIOUS_AZURE_SQL_SERVICES__CONNECTION_STRING="Driver={ODBC Driver 18 for SQL 
 
 **Important Notes:**
 - Use double quotes around the connection string to handle special characters
-- Azure SQL integration is experimental and may contain bugs
 - The connection string format is critical - ensure all parameters are correct
-- Local SQLite implementation is recommended for stable operation
+- Both SQLite (local) and Azure SQL (cloud) implementations are production-ready
 
 **Step 4: Validate Configuration**
 
@@ -306,7 +305,7 @@ INGENIOUS_WEB_CONFIGURATION__AUTHENTICATION__USERNAME=admin
 INGENIOUS_WEB_CONFIGURATION__AUTHENTICATION__PASSWORD=your-secure-password
 ```
 
-> **Note**: The default port in configuration is 80. The CLI command `ingen serve` defaults to port 80, but can be overridden with `--port` flag. For local development, it's recommended to use port 8000 by running `ingen serve --port 8000`.
+> **Note**: The default port in configuration is 80. The CLI command `uv run ingen serve` defaults to port 80, but can be overridden with `--port` flag. For local development, it's recommended to use port 8000 by running `uv run ingen serve --port 8000`.
 
 ### File Storage
 
@@ -457,9 +456,9 @@ Insight Ingenious supports several built-in conversation flows for different use
 | `sql-manipulation-agent` | Execute SQL queries | Azure OpenAI only (uses local SQLite) |  Minimal | Core library (stable local implementation) |
 | `bike-insights` | Sample domain-specific analysis | Azure OpenAI only |  Minimal | Extension template* |
 
-*Created when you run `ingen init` - part of project template, not core library.
+*Created when you run `uv run ingen init` - part of project template, not core library.
 
-> **Note**: Only local implementations (ChromaDB for knowledge-base-agent, SQLite for sql-manipulation-agent) are currently stable. Azure Search and Azure SQL integrations are experimental and may contain bugs.
+> **Note**: Both local implementations (ChromaDB, SQLite) and Azure implementations (Azure Search, Azure SQL) are production-ready. Choose based on your infrastructure requirements.
 
 ### Workflow-Specific Configuration
 
@@ -490,7 +489,7 @@ For `knowledge-base-agent`, the local ChromaDB implementation is used by default
 # Simply add documents to: ./.tmp/knowledge_base/
 ```
 
-**Experimental Azure Search (May contain bugs)**
+**Azure Search Implementation (Production-ready)**
 ```bash
 # Additional Azure Search configuration
 INGENIOUS_AZURE_SEARCH_SERVICES__0__SERVICE=default
@@ -498,7 +497,7 @@ INGENIOUS_AZURE_SEARCH_SERVICES__0__ENDPOINT=https://your-search-service.search.
 INGENIOUS_AZURE_SEARCH_SERVICES__0__KEY=your-search-key
 ```
 
-> **Recommendation**: Use the local ChromaDB implementation, which requires no additional configuration and is stable.
+> **Note**: Both ChromaDB (local) and Azure Search (cloud) implementations are production-ready. ChromaDB requires no additional configuration.
 
 ####  Database Workflows (SQL Manipulation Agent)
 
@@ -512,7 +511,7 @@ INGENIOUS_LOCAL_SQL_DB__SAMPLE_CSV_PATH=./data/your_data.csv
 INGENIOUS_LOCAL_SQL_DB__SAMPLE_DATABASE_NAME=sample_sql_db
 ```
 
-**Experimental Azure SQL (May contain bugs)**
+**Azure SQL Implementation (Production-ready)**
 ```bash
 # Azure SQL configuration
 INGENIOUS_AZURE_SQL_SERVICES__DATABASE_NAME=your_database
@@ -538,7 +537,7 @@ curl -X POST http://localhost:8000/api/v1/chat \
   }'
 ```
 
-> **Recommendation**: Use the local SQLite implementation, which is simpler to set up and stable.
+> **Note**: Both SQLite (local) and Azure SQL (cloud) implementations are production-ready. SQLite is simpler to set up for development.
 
 >  **For complete SQL agent setup instructions**, see the [SQL Agent Setup Guide](../guides/sql-agent-setup.md)
 
@@ -783,7 +782,7 @@ The server port can be configured in multiple ways (in order of precedence):
 
 ```bash
 # Option 1: CLI flag (highest precedence)
-ingen serve --port 8000
+uv run ingen serve --port 8000
 
 # Option 2: Environment variable
 WEB_PORT=8000

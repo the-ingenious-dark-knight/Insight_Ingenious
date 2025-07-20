@@ -11,7 +11,7 @@ toc_icon: "project-diagram"
 
 # Workflow Configuration Requirements
 
-This guide outlines the configuration requirements for each conversation workflow in Insight Ingenious - an enterprise-grade Python library for AI agent APIs. Understanding these requirements will help you determine what Microsoft Azure services and configurations are needed for each workflow, along with available debugging and customization options.
+This guide outlines the configuration requirements for each conversation workflow in Insight Ingenious - an enterprise-grade Python library for quickly setting up APIs to interact with AI Agents. Understanding these requirements will help you determine what Azure services and configurations are needed for each workflow, along with available debugging and customization options.
 
 ## Workflow Architecture Overview
 
@@ -73,23 +73,21 @@ These workflows are built into the Insight Ingenious core library and are always
 - **sql-manipulation-agent** - Executes SQL queries based on natural language
 
 ### Template Workflows
-These workflows are provided as examples in the `ingenious_extensions_template` when you run `ingen init`:
+These workflows are provided as examples in the `ingenious_extensions_template` when you run `uv run ingen init`:
 - **bike-insights** - Multi-agent bike sales analysis (the "Hello World" example)
 
-**Important**: Template workflows like `bike-insights` are only available in projects created with `ingen init`, not in the core library.
+**Important**: Template workflows like `bike-insights` are only available in projects created with `uv run ingen init`, not in the core library.
 
 ## Implementation Stability Guide
 
-###  Stable & Recommended
-- **Local ChromaDB** (knowledge-base-agent): Stable vector database for knowledge search
-- **Local SQLite** (sql-manipulation-agent): Stable database for SQL queries
-- **Azure OpenAI**: Stable across all workflows
+###  Production-Ready Implementations
+- **Local ChromaDB** (knowledge-base-agent): Vector database for knowledge search
+- **Local SQLite** (sql-manipulation-agent): Database for SQL queries
+- **Azure OpenAI**: Required across all workflows
+- **Azure Cognitive Search** (knowledge-base-agent): Cloud-based knowledge search
+- **Azure SQL Database** (sql-manipulation-agent): Cloud-based database
 
-###  Experimental (May contain bugs)
-- **Azure Cognitive Search** (knowledge-base-agent): Experimental alternative to ChromaDB
-- **Azure SQL Database** (sql-manipulation-agent): Experimental alternative to SQLite
-
-**Recommendation**: Use local implementations (ChromaDB + SQLite) for stable production deployments.
+**Note**: Both local (ChromaDB + SQLite) and Azure (Azure Search + Azure SQL) implementations are production-ready. Choose based on your infrastructure requirements.
 
 ## Detailed Workflow Flows
 
@@ -294,7 +292,7 @@ INGENIOUS_CHAT_SERVICE__TYPE=multi_agent
 #### Bike Insights ("Hello World" Template)
 Sample domain-specific workflow for bike sales analysis. Available in the `ingenious_extensions_template` when you run `ingen init`.
 
-> **Note:** This workflow exists as a template example in `ingenious_extensions_template/`, not as a core workflow. It demonstrates how to build custom domain-specific workflows.
+> **Note:** This workflow exists as a template example in `ingenious_extensions_template/`, not as a core workflow. It demonstrates how to build custom domain-specific workflows and is the recommended "Hello World" example for new users.
 
 ```mermaid
 graph TB
@@ -331,7 +329,7 @@ graph TB
 #### Knowledge Base Agent
 Search and retrieve information from knowledge bases using local ChromaDB (stable) or Azure Search (experimental).
 
-> **Important**: The local ChromaDB implementation is stable and recommended. Azure Search integration is experimental and may contain bugs.
+> **Note**: Both local ChromaDB and Azure Search implementations are production-ready. ChromaDB requires no additional configuration and is ideal for development.
 
 ```mermaid
 graph TB
@@ -385,7 +383,7 @@ graph TB
 uv add chromadb aiofiles autogen-ext
 ```
 
-**Optional: Azure Search (Experimental - May contain bugs)**
+**Alternative: Azure Search (Production-ready)**
 ```bash
 # Additional Azure Search configuration (experimental)
 INGENIOUS_AZURE_SEARCH_SERVICES__0__SERVICE=default
@@ -393,7 +391,7 @@ INGENIOUS_AZURE_SEARCH_SERVICES__0__ENDPOINT=https://your-search-service.search.
 INGENIOUS_AZURE_SEARCH_SERVICES__0__KEY=your-search-api-key
 ```
 
-> **Recommendation**: Use the local ChromaDB implementation for stable production deployments. It requires no additional configuration and works out-of-the-box.
+> **Note**: Both implementations are production-ready. ChromaDB is ideal for development and smaller deployments, while Azure Search provides enterprise-scale capabilities.
 
 ### Core Library Workflows (Database Required)
 
@@ -449,7 +447,7 @@ INGENIOUS_LOCAL_SQL_DB__SAMPLE_DATABASE_NAME=sample_sql_db
 uv add aiofiles
 ```
 
-**Azure SQL (Experimental - May contain bugs):**
+**Azure SQL (Production-ready):**
 ```bash
 # Azure SQL configuration
 INGENIOUS_AZURE_SQL_SERVICES__DATABASE_NAME=your-database-name
@@ -457,7 +455,7 @@ INGENIOUS_AZURE_SQL_SERVICES__TABLE_NAME=your-table-name
 INGENIOUS_AZURE_SQL_SERVICES__CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
 ```
 
-> **Note**: The local SQLite implementation is recommended for stability.
+> **Note**: Both SQLite and Azure SQL implementations are production-ready. SQLite is ideal for development and testing.
 
 ## Workflow Selection Guide
 
