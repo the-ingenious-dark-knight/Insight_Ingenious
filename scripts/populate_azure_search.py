@@ -47,7 +47,7 @@ search_client = SearchClient(
 
 
 # Define the index schema
-def create_index():
+def create_index() -> None:
     """Create the search index if it doesn't exist."""
     fields = [
         SimpleField(name="id", type="Edm.String", key=True),
@@ -144,7 +144,7 @@ documents = [
 ]
 
 
-def upload_documents():
+def upload_documents() -> None:
     """Upload documents to Azure Search."""
     try:
         result = search_client.upload_documents(documents=documents)
@@ -161,7 +161,7 @@ def upload_documents():
         sys.exit(1)
 
 
-def verify_upload():
+def verify_upload() -> None:
     """Verify documents were uploaded by performing a search."""
     try:
         results = search_client.search(
