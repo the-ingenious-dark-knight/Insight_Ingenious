@@ -99,6 +99,11 @@ INGENIOUS_WEB_CONFIGURATION__AUTHENTICATION__ENABLE=false
 # Tool Services
 INGENIOUS_TOOL_SERVICE__ENABLE=false
 
+# JWT Authentication (if authentication is enabled)
+JWT_SECRET_KEY=your-secret-key-here
+JWT_ACCESS_TOKEN_EXPIRE_MINUTES=15
+JWT_REFRESH_TOKEN_EXPIRE_DAYS=7
+
 # File Storage (Local)
 INGENIOUS_FILE_STORAGE__REVISIONS__ENABLE=true
 INGENIOUS_FILE_STORAGE__REVISIONS__STORAGE_TYPE=local
@@ -693,6 +698,134 @@ WEB_PORT=8000  # Alternative port setting
 ```bash
 # Profile Selection (optional)
 INGENIOUS_PROFILE=dev  # or "prod", "staging"
+```
+
+### Environment Variable Best Practices
+
+1. **Use `.env` files for local development** - Never commit these to version control
+2. **Use proper quoting** - Complex values (connection strings) should be quoted
+3. **Follow naming conventions** - Always use `INGENIOUS_` prefix for Ingenious-specific settings
+4. **Secure sensitive values** - Use secret management tools in production
+
+## Complete Environment Variables Reference
+
+This section documents ALL environment variables used by Ingenious, including those not part of the main configuration models.
+
+### Authentication & Security Variables
+
+```bash
+# JWT Authentication
+JWT_SECRET_KEY=your-secret-key-here  # Required for JWT authentication
+JWT_ACCESS_TOKEN_EXPIRE_MINUTES=15   # Access token expiry (default: 15)
+JWT_REFRESH_TOKEN_EXPIRE_DAYS=7      # Refresh token expiry (default: 7)
+
+# Azure Key Vault (for secret management)
+KEY_VAULT_NAME=your-key-vault-name   # Azure Key Vault name for retrieving secrets
+```
+
+### Document Processing Variables
+
+```bash
+# Document Processing Limits
+INGEN_MAX_DOWNLOAD_MB=20            # Max file size for downloads (default: 20)
+INGEN_URL_TIMEOUT_SEC=30            # Timeout for URL fetching (default: 30)
+
+# Azure Document Intelligence
+AZURE_DOC_INTEL_ENDPOINT=https://your-doc-intel.cognitiveservices.azure.com/
+AZURE_DOC_INTEL_KEY=your-doc-intel-api-key
+AZDOCINT_MAX_POLLS=300              # Max polling attempts (default: 300)
+AZDOCINT_MAX_SECS=600               # Max processing time (default: 600)
+```
+
+### Data Preparation Variables
+
+```bash
+# Web Scraping (Scrapfly)
+SCRAPFLY_API_KEY=your-scrapfly-api-key  # Required for web scraping features
+```
+
+### Azure OpenAI Variables
+
+These are used by the Azure OpenAI SDK directly:
+
+```bash
+# Azure OpenAI SDK Variables
+AZURE_OPENAI_API_KEY=your-api-key
+AZURE_OPENAI_BASE_URL=https://your-resource.openai.azure.com/
+AZURE_OPENAI_DEPLOYMENT=your-deployment-name
+AZURE_OPENAI_API_VERSION=2024-08-01-preview
+AZURE_OPENAI_MODEL_NAME=gpt-4
+```
+
+### Profile and Path Variables
+
+```bash
+# Configuration File Paths
+INGENIOUS_PROFILE_PATH=path/to/profiles  # Directory containing profile configs
+APPSETTING_INGENIOUS_PROFILE=dev         # Active profile selection
+INGENIOUS_PROJECT_PATH=/path/to/project  # Project root directory
+INGENIOUS_WORKING_DIR=/path/to/workdir   # Working directory
+LOADENV=true                            # Whether to load .env files
+```
+
+### Azure SQL Connection Variables
+
+Note: The model uses `connection_string` field, not `database_connection_string`:
+
+```bash
+# Correct field name for Azure SQL
+INGENIOUS_AZURE_SQL_SERVICES__CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};..."
+# NOT: INGENIOUS_AZURE_SQL_SERVICES__DATABASE_CONNECTION_STRING
+```
+
+### Server Port Configuration
+
+The server port can be configured in multiple ways (in order of precedence):
+
+```bash
+# Option 1: CLI flag (highest precedence)
+ingen serve --port 8000
+
+# Option 2: Environment variable
+WEB_PORT=8000
+
+# Option 3: Ingenious configuration
+INGENIOUS_WEB_CONFIGURATION__PORT=8000
+
+# Default: 80
+```
+
+### Azure SDK Environment Variables
+
+These variables are used by Azure SDK libraries, not directly by Ingenious:
+
+```bash
+# Azure Storage SDK
+AZURE_STORAGE_CONNECTION_STRING="DefaultEndpointsProtocol=https;..."
+AZURE_STORAGE_ACCOUNT_NAME=yourstorageaccount
+AZURE_STORAGE_ACCOUNT_KEY=yourstoragekey
+
+# Azure Default Credential Chain
+AZURE_CLIENT_ID=your-service-principal-id
+AZURE_TENANT_ID=your-tenant-id
+AZURE_CLIENT_SECRET=your-service-principal-secret
+```
+
+### Docker & Container Variables
+
+```bash
+# Container Environment
+APPSETTING_WEBSITE_SITE_NAME=your-app-service-name  # Azure App Service name
+```
+
+### Legacy Variables (Deprecated)
+
+These variables are no longer used but may appear in old configurations:
+
+```bash
+# YAML Configuration (No longer supported)
+PROFILES_PATH=./profiles.yml  # Deprecated - use environment variables
+CONFIG_PATH=./config.yml      # Deprecated - use environment variables
 ```
 
 ### Environment Variable Best Practices
