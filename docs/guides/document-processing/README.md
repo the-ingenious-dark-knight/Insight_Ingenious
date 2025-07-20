@@ -17,7 +17,7 @@ The *document-processing* extra equips Insight Ingenious with a unified API and 
 
 The *document‑processing* extra equips Insight Ingenious with a unified API and CLI for tu---
 
-Happy extracting!ng **born‑digital** documents into structured text blocks.
+Happy extracting!!ng **born‑digital** documents into structured text blocks.
 It is ideal for:
 
 * RAG pipelines that need paragraph‑level text with coordinates
@@ -151,4 +151,4 @@ uv run pytest ingenious/document_processing/tests
 
 ---
 
-Happy extracting 📑
+Happy extracting! 

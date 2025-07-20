@@ -361,7 +361,7 @@ INGENIOUS_CHAT_SERVICE__TYPE=multi_agent
 
 ## Additional Resources
 
-- **Configuration Guide**: `/docs/configuration/README.md`
+- **Configuration Guide**: `/docs/getting-started/configuration/`
 - **Custom Workflows**: `/docs/extensions/README.md`
 - **Troubleshooting**: `/docs/troubleshooting/README.md`
 - **Testing Guide**: `/docs/testing/README.md`

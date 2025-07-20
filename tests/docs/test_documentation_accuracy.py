@@ -7,8 +7,9 @@ DO NOT RUN this test - it's for static analysis only to validate documentation c
 
 import os
 import sys
+import re
 from pathlib import Path
-from typing import List, Dict, Set, Optional
+from typing import List, Dict, Set, Optional, Tuple
 
 
 class DocumentationValidator:
@@ -28,6 +29,8 @@ class DocumentationValidator:
             self.validate_configuration(),
             self.validate_dependencies(),
             self.validate_file_structure(),
+            self.validate_architecture_claims(),
+            self.validate_troubleshooting_guide(),
         ]
         return all(validations)
     
@@ -205,6 +208,83 @@ class DocumentationValidator:
             full_path = self.project_root / path
             if not full_path.exists():
                 self.warnings.append(f"Expected path {path} ({description}) not found")
+                
+        return len(self.errors) == 0
+    
+    def validate_architecture_claims(self) -> bool:
+        """Validate architecture documentation claims"""
+        # Check for interfaces mentioned in architecture docs
+        interfaces = {
+            'IConversationFlow': 'Conversation flow interface',
+            'IConversationPattern': 'Conversation pattern interface',
+            'IChatService': 'Chat service interface',
+            'IFileStorage': 'File storage interface',
+        }
+        
+        for interface, desc in interfaces.items():
+            found = False
+            for py_file in (self.project_root / 'ingenious').rglob('*.py'):
+                if py_file.is_file():
+                    content = py_file.read_text()
+                    if f'class {interface}' in content:
+                        found = True
+                        break
+            if not found:
+                self.warnings.append(f"Interface {interface} ({desc}) not found in codebase")
+        
+        # Check for classes that architecture docs say don't exist
+        non_existent_classes = ['AgentMarkdownDefinition', 'ConversationManager', 'AgentCoordinator']
+        for class_name in non_existent_classes:
+            for py_file in (self.project_root / 'ingenious').rglob('*.py'):
+                if py_file.is_file():
+                    content = py_file.read_text()
+                    if f'class {class_name}' in content:
+                        self.errors.append(f"Class {class_name} exists but architecture docs say it doesn't")
+                        break
+        
+        # Verify classification agent doesn't inherit from IConversationFlow
+        classification_path = self.project_root / 'ingenious' / 'services' / 'chat_services' / 'multi_agent' / 'conversation_flows' / 'classification_agent' / 'classification_agent.py'
+        if classification_path.exists():
+            content = classification_path.read_text()
+            if 'IConversationFlow' in content and 'class' in content:
+                if re.search(r'class\s+\w+.*\(.*IConversationFlow.*\)', content):
+                    self.errors.append("Classification agent inherits from IConversationFlow but shouldn't according to findings")
+                    
+        return len(self.errors) == 0
+    
+    def validate_troubleshooting_guide(self) -> bool:
+        """Validate troubleshooting guide accuracy"""
+        # Check if error messages in troubleshooting guide match actual code
+        error_patterns = [
+            ('ValidationError.*IngeniousSettings', 'Validation error pattern'),
+            ('ModuleNotFoundError.*ingenious_extensions', 'Module not found pattern'),
+            ('Class.*ConversationFlow.*not found', 'Class not found pattern'),
+        ]
+        
+        # Check if default port is 80
+        config_path = self.project_root / 'ingenious' / 'models' / 'config_ns.py'
+        if config_path.exists():
+            content = config_path.read_text()
+            if 'port: int = Field(80' not in content and 'port = 80' not in content:
+                self.warnings.append("Default port might not be 80 as documented")
+                
+        # Check if WEB_PORT env var is used
+        server_path = self.project_root / 'ingenious' / 'cli' / 'commands' / 'server.py'
+        if server_path.exists():
+            content = server_path.read_text()
+            if 'WEB_PORT' not in content:
+                self.warnings.append("WEB_PORT environment variable not found in server command")
+                
+        # Check Azure SQL uses pyodbc
+        azuresql_path = self.project_root / 'ingenious' / 'db' / 'azuresql'
+        if azuresql_path.exists():
+            found_pyodbc = False
+            for py_file in azuresql_path.rglob('*.py'):
+                if 'pyodbc' in py_file.read_text():
+                    found_pyodbc = True
+                    break
+            if not found_pyodbc:
+                self.warnings.append("pyodbc import not found in Azure SQL implementation")
                 
         return len(self.errors) == 0
     

@@ -61,7 +61,7 @@ Get up and running in 5 minutes with Azure OpenAI!
       }'
     ```
 
-🎉 **That's it!** You should see a comprehensive JSON response with insights from multiple AI agents analyzing the bike sales data.
+**That's it!** You should see a comprehensive JSON response with insights from multiple AI agents analyzing the bike sales data.
 
 **Note**: The `bike-insights` workflow is created when you run `ingen init` - it's part of the project template setup, not included in the core library. You can now build on `bike-insights` as a template for your specific use case.
 
@@ -86,8 +86,8 @@ Insight Ingenious provides multiple conversation workflows with different config
 For production deployments with persistent chat history storage in Azure SQL Database:
 
 ### Prerequisites
--  Azure SQL Database instance with credentials
--  ODBC Driver 18 for SQL Server installed
+- Azure SQL Database instance with credentials
+- ODBC Driver 18 for SQL Server installed
 
 ### Setup Steps
 
@@ -132,12 +132,12 @@ For production deployments with persistent chat history storage in Azure SQL Dat
     ```
 
 **Benefits of Azure SQL:**
--  Production-grade chat history persistence
--  Multi-user conversation management
--  Enterprise security and compliance
--  Automatic table creation and management
+- Production-grade chat history persistence
+- Multi-user conversation management
+- Enterprise security and compliance
+- Automatic table creation and management
 
-##  Data Format Examples
+## Data Format Examples
 
 ### Simple bike-insights Request (Basic)
 ```json
@@ -195,7 +195,7 @@ If you want to try database queries with natural language:
 uv run python -c "
 from ingenious.utils.load_sample_data import sqlite_sample_db
 sqlite_sample_db()
-print(' Sample database created')
+print('Sample database created')
 "
 
 # Test SQL queries

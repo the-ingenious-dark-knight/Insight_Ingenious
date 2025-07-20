@@ -9,11 +9,11 @@ toc_label: "API Integration"
 toc_icon: "plug"
 ---
 
-#  API Integration Guide
+# API Integration Guide
 
 Complete guide to using the Insight Ingenious REST API for integrating conversation workflows into your applications.
 
-##  Quick Start
+## Quick Start
 
 ### Basic API Call
 
@@ -38,9 +38,9 @@ curl -X POST http://localhost:80/api/v1/chat \
 }
 ```
 
-##  Workflow Categories
+## Workflow Categories
 
-###  Minimal Configuration Workflows
+### Minimal Configuration Workflows
 
 These work with just Azure OpenAI setup:
 
@@ -68,7 +68,7 @@ curl -X POST http://localhost:80/api/v1/chat \
   }'
 ```
 
-###  Local Knowledge Base (Stable Implementation)
+### Local Knowledge Base (Stable Implementation)
 
 #### Knowledge Base Agent
 Search and retrieve information using local ChromaDB storage:
@@ -86,7 +86,7 @@ curl -X POST http://localhost:80/api/v1/chat \
 - None! Uses local ChromaDB automatically
 - Simply add documents to `./.tmp/knowledge_base/`
 
-###  Local Database (Stable Implementation)
+### Local Database (Stable Implementation)
 
 #### SQL Manipulation Agent
 Execute SQL queries using local SQLite database:
@@ -104,7 +104,7 @@ curl -X POST http://localhost:80/api/v1/chat \
 - Set `database_name: "skip"` in profiles.yml for SQLite mode
 - Local SQLite database automatically created
 
-### 🚧 Experimental Azure Integrations (May contain bugs)
+### Experimental Azure Integrations (May contain bugs)
 
 #### Azure Search (Experimental)
 - Requires Azure Cognitive Search service
@@ -114,7 +114,7 @@ curl -X POST http://localhost:80/api/v1/chat \
 - Requires Azure SQL Database
 - May contain bugs - use local SQLite instead
 
-##  Configuration Management
+## Configuration Management
 
 ### Check Workflow Status
 
@@ -144,7 +144,7 @@ Example response:
 }
 ```
 
-##  Authentication
+## Authentication
 
 ### Basic Authentication
 
@@ -171,7 +171,7 @@ web_configuration:
     enable: false
 ```
 
-##  Conversation Management
+## Conversation Management
 
 ### Thread Continuity
 
@@ -203,7 +203,7 @@ curl -X POST http://localhost:80/api/v1/chat \
 curl http://localhost:80/api/v1/conversations/user-john-session-1
 ```
 
-##  Request & Response Reference
+## Request & Response Reference
 
 ### Chat Request
 
@@ -236,7 +236,7 @@ curl http://localhost:80/api/v1/conversations/user-john-session-1
 }
 ```
 
-##  Error Handling
+## Error Handling
 
 ### Common Error Responses
 
@@ -337,7 +337,7 @@ call_ingenious_api("Hello", "classification-agent")
 call_ingenious_api("Search for safety info", "knowledge-base-agent")
 ```
 
-##  Integration Patterns
+## Integration Patterns
 
 ### Webhook Integration
 
@@ -432,7 +432,7 @@ messages = [
 results = asyncio.run(process_batch(messages))
 ```
 
-##  Best Practices
+## Best Practices
 
 ### 1. Choose the Right Workflow
 
@@ -526,13 +526,13 @@ def monitor_api_call(prompt, workflow):
         logging.error(f"API call exception - Duration: {duration:.2f}s, Error: {e}")
 ```
 
-##  Additional Resources
+## Additional Resources
 
 - [Workflow Requirements](../workflows/README.md) - Understand configuration needs
-- [Configuration Guide](../configuration/README.md) - Detailed setup instructions
+- [Configuration Guide](/getting-started/configuration/) - Detailed setup instructions
 - [Custom Agents](../development/custom-agents.md) - Create your own workflows
 - [Troubleshooting](/troubleshooting/) - Common issues and solutions
 
 ---
 
-** Ready to integrate?** Start with the minimal configuration workflows and gradually add more advanced features as your needs grow.
+**Ready to integrate?** Start with the minimal configuration workflows and gradually add more advanced features as your needs grow.
