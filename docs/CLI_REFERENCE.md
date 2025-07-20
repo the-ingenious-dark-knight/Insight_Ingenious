@@ -57,13 +57,25 @@ Start the API server with web interfaces.
 
 **Options:**
 - `--host, -h` - Host to bind (default: 0.0.0.0)
-- `--port` - Port to bind (default: 80 or $WEB_PORT, CLI override default is 8000)
+- `--port` - Port to bind (default: 80 or $WEB_PORT)
+- `--config, -c` - Path to config.yml file (for legacy compatibility)
+- `--profile, -p` - Path to profiles.yml file (for legacy compatibility)
+- `--no-prompt-tuner` - Disable prompt tuner interface
 
 **Interfaces:**
-- API: `http://localhost:8000/api/v1/`
-- Health Check: `http://localhost:8000/api/v1/health`
-- API Documentation: `http://localhost:8000/docs`
+- API: `http://localhost:<port>/api/v1/` (e.g., `http://localhost:8000/api/v1/` when using `--port 8000`)
+- Health Check: `http://localhost:<port>/api/v1/health`
+- API Documentation: `http://localhost:<port>/docs`
 - Prompt Management: `/api/v1/prompts/*` endpoints
+
+**Example:**
+```bash
+# Start server on default port 80 (requires sudo on most systems)
+sudo ingen serve
+
+# Start server on port 8000 (recommended for development)
+ingen serve --port 8000
+```
 
 > **Configuration**: The server uses environment variables for configuration. Ensure your `.env` file is properly configured before starting the server.
 

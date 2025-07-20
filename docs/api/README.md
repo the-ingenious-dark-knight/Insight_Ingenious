@@ -347,8 +347,10 @@ Submit feedback for a specific message.
 **Request Body:**
 ```json
 {
-  "feedback_type": "positive|negative",
-  "feedback_text": "Optional feedback comment"
+  "thread_id": "thread-456",
+  "message_id": "msg-123",
+  "user_id": "user-789 (optional)",
+  "positive_feedback": true
 }
 ```
 
@@ -479,12 +481,19 @@ Lists all prompt template files for a specific revision.
 
 **Response:**
 ```json
-[
-  "user_prompt.md",
-  "system_prompt.md",
-  "classification_prompt.jinja",
-  "sql_generation_prompt.md"
-]
+{
+  "revision_id": "v1.0",
+  "actual_revision_used": "v1.0",
+  "normalized_revision_id": "v1.0",
+  "files": [
+    "user_prompt.md",
+    "system_prompt.md",
+    "classification_prompt.jinja",
+    "sql_generation_prompt.md"
+  ],
+  "count": 4,
+  "attempted_revisions": ["v1.0"]
+}
 ```
 
 **Example:**
@@ -613,7 +622,9 @@ class PromptsAPIClient:
     def list_prompts(self, revision_id):
         """List all prompt files for a revision"""
         response = requests.get(f"{self.base_url}/api/v1/prompts/list/{revision_id}")
-        return response.json()
+        data = response.json()
+        # Return just the files list for backward compatibility
+        return data.get("files", [])
 
     def get_prompt(self, revision_id, filename):
         """Get content of a specific prompt file"""

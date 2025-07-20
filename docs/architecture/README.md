@@ -52,8 +52,8 @@ graph TB
         EXTERNAL_API[External APIs<br/>Data Sources]
     end
 
-    UI --> API
     API_CLIENT --> API
+    DOCS --> API
     API --> AUTH
     AUTH --> AGENT_SERVICE
     AGENT_SERVICE --> PATTERN_SERVICE
@@ -74,7 +74,7 @@ graph TB
     classDef storageLayer fill:#fce4ec
     classDef externalLayer fill:#f1f8e9
 
-    class UI,API_CLIENT clientLayer
+    class API_CLIENT,DOCS clientLayer
     class API,AUTH apiLayer
     class AGENT_SERVICE,PATTERN_SERVICE,LLM_SERVICE coreLayer
     class CUSTOM_AGENTS,PATTERNS,TOOLS extensionLayer

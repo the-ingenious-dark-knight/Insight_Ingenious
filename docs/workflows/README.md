@@ -101,7 +101,7 @@ sequenceDiagram
     participant API
     participant Coordinator
     participant ClassificationAgent as  Classification Agent
-    participant EducationAgent as 🎓 Education Expert
+    participant GeneralAgent as 📋 General Classification
     participant KnowledgeAgent as  Knowledge Base Agent
     participant SQLAgent as  SQL Agent
     participant AzureOpenAI as  Azure OpenAI
@@ -129,17 +129,20 @@ sequenceDiagram
 flowchart TD
     START([👤 User Input]) --> CLASSIFY{ Classify Intent}
 
-    CLASSIFY -->|Educational Query| EDUCATION_FLOW[🎓 Education Expert Flow]
-    CLASSIFY -->|Technical Question| KNOWLEDGE_FLOW[ Knowledge Base Flow]
-    CLASSIFY -->|Data Query| SQL_FLOW[ SQL Query Flow]
-    CLASSIFY -->|General Classification| CLASSIFICATION_FLOW[ Classification Flow]
+    CLASSIFY -->|Product Inquiry| PRODUCT_FLOW[📦 Product Query Flow]
+    CLASSIFY -->|Purchase Question| PURCHASE_FLOW[💰 Purchase Query Flow]
+    CLASSIFY -->|Support Issue| SUPPORT_FLOW[🛠️ Support Query Flow]
+    CLASSIFY -->|Undefined| UNDEFINED_FLOW[❓ Undefined Query Flow]
 
-    EDUCATION_FLOW --> EDUCATION_AGENT[🎓 Education Expert]
-    KNOWLEDGE_FLOW --> KNOWLEDGE_AGENT[ Knowledge Agent]
-    SQL_FLOW --> SQL_AGENT[ SQL Agent]
-    CLASSIFICATION_FLOW --> CLASSIFICATION_AGENT[ Classification Agent]
+    PRODUCT_FLOW --> PRODUCT_AGENT[📦 Product Agent]
+    PURCHASE_FLOW --> PURCHASE_AGENT[💰 Purchase Agent]
+    SUPPORT_FLOW --> SUPPORT_AGENT[🛠️ Support Agent]
+    UNDEFINED_FLOW --> UNDEFINED_AGENT[❓ Undefined Agent]
 
-    EDUCATION_AGENT --> RESPONSE[📤 Formatted Response]
+    PRODUCT_AGENT --> RESPONSE[📤 Formatted Response]
+    PURCHASE_AGENT --> RESPONSE
+    SUPPORT_AGENT --> RESPONSE
+    UNDEFINED_AGENT --> RESPONSE
     KNOWLEDGE_AGENT --> RESPONSE
     SQL_AGENT --> RESPONSE
     CLASSIFICATION_AGENT --> RESPONSE
@@ -154,8 +157,8 @@ flowchart TD
 
     class START start
     class CLASSIFY decision
-    class EDUCATION_FLOW,KNOWLEDGE_FLOW,SQL_FLOW,CLASSIFICATION_FLOW workflow
-    class EDUCATION_AGENT,KNOWLEDGE_AGENT,SQL_AGENT,CLASSIFICATION_AGENT agent
+    class PRODUCT_FLOW,PURCHASE_FLOW,SUPPORT_FLOW,UNDEFINED_FLOW workflow
+    class PRODUCT_AGENT,PURCHASE_AGENT,SUPPORT_AGENT,UNDEFINED_AGENT agent
     class RESPONSE,FINISH finish
 ```
 
@@ -170,7 +173,7 @@ graph TB
     end
 
     subgraph " Search & Retrieval"
-        AZURE_SEARCH[ Azure Cognitive Search]
+        CHROMADB[💎 ChromaDB (Local)]
         VECTOR_SEARCH[ Vector Search]
         KEYWORD_SEARCH[🔤 Keyword Search]
         HYBRID_SEARCH[🔀 Hybrid Search]
@@ -190,11 +193,11 @@ graph TB
 
     USER_QUERY --> INTENT_ANALYSIS
     INTENT_ANALYSIS --> QUERY_ENHANCEMENT
-    QUERY_ENHANCEMENT --> AZURE_SEARCH
+    QUERY_ENHANCEMENT --> CHROMADB
 
-    AZURE_SEARCH --> VECTOR_SEARCH
-    AZURE_SEARCH --> KEYWORD_SEARCH
-    AZURE_SEARCH --> HYBRID_SEARCH
+    CHROMADB --> VECTOR_SEARCH
+    CHROMADB --> KEYWORD_SEARCH
+    CHROMADB --> HYBRID_SEARCH
 
     VECTOR_SEARCH --> RELEVANCE_SCORING
     KEYWORD_SEARCH --> RELEVANCE_SCORING
@@ -213,7 +216,7 @@ graph TB
     classDef ai fill:#fce4ec
 
     class USER_QUERY,INTENT_ANALYSIS,QUERY_ENHANCEMENT input
-    class AZURE_SEARCH,VECTOR_SEARCH,KEYWORD_SEARCH,HYBRID_SEARCH search
+    class CHROMADB,VECTOR_SEARCH,KEYWORD_SEARCH,HYBRID_SEARCH search
     class RELEVANCE_SCORING,CONTENT_RANKING,CONTEXT_EXTRACTION processing
     class AZURE_OPENAI,CONTEXT_SYNTHESIS,RESPONSE_GENERATION ai
 ```

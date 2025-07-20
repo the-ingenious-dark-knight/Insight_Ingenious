@@ -105,7 +105,7 @@ That's it! You should see a JSON response with AI analysis of the input.
     The `bike-insights` workflow is part of the project template and must be initialized first:
     ```bash
     # First initialize project to get bike-insights workflow
-    ingen init
+    uv run ingen init
 
     # Create bike-insights test data file
     # Note: bike-insights requires JSON data in the user_prompt field (double-encoded JSON)
@@ -138,9 +138,9 @@ That's it! You should see a JSON response with AI analysis of the input.
 - `ingen version` - Show version information
 
 **Data processing commands:**
-- `ingen document-processing extract <path>` - Extract text from documents (PDF, DOCX, images)
-- `ingen dataprep crawl <url>` - Fetch single web page using Scrapfly
-- `ingen dataprep batch <urls...>` - Fetch multiple web pages using Scrapfly
+- `uv run ingen document-processing extract <path>` - Extract text from documents (PDF, DOCX, images)
+- `uv run ingen dataprep crawl <url>` - Fetch single web page using Scrapfly
+- `uv run ingen dataprep batch <urls...>` - Fetch multiple web pages using Scrapfly
 
 **Help and information:**
 - `ingen --help` - Show comprehensive help
@@ -176,7 +176,7 @@ When the server is running, the following endpoints are available:
 **Web Interfaces:**
 - API documentation available at `/docs`
 
-**Additional Routes:**
+**Conversation Management:**
 - `GET /api/v1/conversations/{thread_id}` - Retrieve conversation history
 - `PUT /api/v1/messages/{message_id}/feedback` - Submit message feedback
 
@@ -193,12 +193,12 @@ These workflows are built into the Ingenious library and available immediately:
 
 > **Note**: Core workflows support both hyphenated (`classification-agent`) and underscored (`classification_agent`) naming formats for backward compatibility.
 
-### Template Workflows (Available via `ingen init`)
-These workflows are created when you initialize a new project and serve as examples for custom development:
+### Template Workflows (Created by `ingen init`)
+These workflows are provided as examples in the project template when you run `ingen init`:
 
-- `bike-insights` - Comprehensive bike sales analysis showcasing multi-agent coordination (**Created by `ingen init`** - demonstrates custom workflow development)
+- `bike-insights` - Comprehensive bike sales analysis showcasing multi-agent coordination (**ONLY available after `ingen init`** - not included in the core library)
 
-> **Note**: The `bike-insights` workflow is the recommended starting point and "Hello World" example for new Ingenious users. It's only available after running `ingen init` to create the project template.
+> **Important**: The `bike-insights` workflow is NOT part of the core library. It's a template example that's created when you initialize a new project with `ingen init`. This is the recommended "Hello World" example for learning how to build custom workflows.
 
 ### Configuration Requirements by Workflow
 - **Minimal setup** (Azure OpenAI only): `classification-agent`, `bike-insights`
@@ -218,18 +218,18 @@ The base Ingenious package includes all dependencies needed for core workflows:
 - FastAPI and uvicorn for API server
 - pandas for data manipulation
 
-Note: The base package currently includes all dependencies. Future releases will make some of these optional based on the installation profile chosen.
+Note: The base package includes all core dependencies needed for the primary workflows. Optional dependency groups provide additional features like document processing, data scraping, and visualization.
 
 ## Installation Options
 
 Choose the installation option that matches your intended use case:
 
-### Minimal Installation
+### Base Installation
 ```bash
 uv add ingenious
 ```
-**Includes**: Core chat functionality, classification-agent workflow
-**Use for**: Basic API development, testing Azure OpenAI connectivity
+**Includes**: All core dependencies including ChromaDB, SQLite support, Azure services integration, pandas, OpenAI, autogen, and FastAPI
+**Use for**: Most use cases - the base package already includes comprehensive functionality
 
 ### Standard Installation (Recommended)
 ```bash
@@ -255,11 +255,10 @@ uv add ingenious[full]
 ### Knowledge Base Features
 ```bash
 uv add ingenious[knowledge-base]
-# OR manually install dependencies
-uv add ingenious && uv add chromadb aiofiles autogen-ext
 ```
-**Includes**: Core features + ChromaDB and ML capabilities for knowledge-base-agent
-**Use for**: Local knowledge base and search functionality (STABLE)
+**Includes**: Core features + sentence-transformers for enhanced ML capabilities
+**Use for**: Enhanced knowledge base functionality with advanced embeddings
+**Note**: Basic knowledge-base-agent functionality works with the base installation (ChromaDB is already included)
 
 
 ## Project Structure
