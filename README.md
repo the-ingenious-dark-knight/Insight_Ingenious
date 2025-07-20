@@ -211,7 +211,7 @@ These workflows are created when you initialize a new project and serve as examp
 
 The base Ingenious package includes all dependencies needed for core workflows:
 - ChromaDB for knowledge-base-agent
-- SQLite support for sql-manipulation-agent  
+- SQLite support for sql-manipulation-agent
 - Autogen-ext for agent compatibility
 - Azure services integration (Azure Identity, Key Vault, Search, Storage)
 - OpenAI and autogen-agentchat for AI capabilities

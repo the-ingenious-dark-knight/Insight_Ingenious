@@ -184,7 +184,7 @@ INGENIOUS_LOCAL_SQL_DB__SAMPLE_DATABASE_NAME=sample_sql_db
 uv run python -c "
 from ingenious.utils.load_sample_data import sqlite_sample_db
 sqlite_sample_db()
-print('✅ Sample SQLite database created at /tmp/sample_sql_db')
+print(' Sample SQLite database created at /tmp/sample_sql_db')
 "
 ```
 

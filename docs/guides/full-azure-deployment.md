@@ -13,7 +13,7 @@ toc_icon: "database"
 
 This guide provides step-by-step instructions for deploying the Ingenious bike-insights workflow with full Azure integration, including Azure SQL Database for chat history and Azure Blob Storage for prompt management.
 
-## 🎯 Overview
+##  Overview
 
 This deployment includes:
 - **Bike-Insights Workflow**: Multi-agent system with 4 specialized agents
@@ -21,7 +21,7 @@ This deployment includes:
 - **Azure Blob Storage**: Cloud-based prompt template management
 - **API Integration**: Full REST API support for prompts management
 
-## 📋 Prerequisites
+##  Prerequisites
 
 ### Required Azure Resources
 - Azure subscription with sufficient permissions
@@ -34,7 +34,7 @@ This deployment includes:
 - [uv package manager](https://docs.astral.sh/uv/)
 - ODBC Driver 18 for SQL Server
 
-## 🚀 Step-by-Step Deployment
+##  Step-by-Step Deployment
 
 ### Step 1: Install Ingenious Library
 
@@ -221,10 +221,10 @@ async def setup_azure_prompts():
             file_name=template_file.name,
             file_path="templates/prompts/quickstart-1"
         )
-        print(f"✅ Uploaded {template_file.name} to Azure Blob Storage")
+        print(f" Uploaded {template_file.name} to Azure Blob Storage")
 
     files = await storage.list_files("templates/prompts/quickstart-1")
-    print(f"✅ Verified {len(files)} files in Azure Blob Storage")
+    print(f" Verified {len(files)} files in Azure Blob Storage")
 
 if __name__ == "__main__":
     asyncio.run(setup_azure_prompts())
@@ -245,12 +245,12 @@ uv run ingen validate
 
 Expected output:
 ```
-✅ Insight Ingenious Configuration Validation
-1. Environment Variables: ✅
-2. Configuration File Validation: ✅
-3. Azure OpenAI Connectivity: ✅
-4. Workflow Availability: ✅
-✅ All validations passed! Your Ingenious setup is ready.
+ Insight Ingenious Configuration Validation
+1. Environment Variables: 
+2. Configuration File Validation: 
+3. Azure OpenAI Connectivity: 
+4. Workflow Availability: 
+ All validations passed! Your Ingenious setup is ready.
 ```
 
 ### Step 9: Start the Server
@@ -292,7 +292,7 @@ curl -X POST "http://localhost:8080/api/v1/prompts/update/quickstart-1/bike_look
   -d '{"content": "### UPDATED ROLE\nYou are an updated bike lookup agent...\n"}'
 ```
 
-## 🔍 Verification
+##  Verification
 
 ### Verify Azure SQL Integration
 ```python
@@ -339,7 +339,7 @@ for blob in blobs:
     print(f"  - {blob.name}")
 ```
 
-## 🎯 Architecture Overview
+##  Architecture Overview
 
 ```mermaid
 flowchart TD
@@ -377,7 +377,7 @@ flowchart TD
   API --> BLOB
 ```
 
-## 🔧 Production Considerations
+##  Production Considerations
 
 ### Security
 - Use Azure Key Vault for sensitive credentials
@@ -397,7 +397,7 @@ flowchart TD
 - Track blob storage usage and costs
 - Configure alerts for system health
 
-## 🐛 Troubleshooting
+##  Troubleshooting
 
 ### Common Issues
 
@@ -421,7 +421,7 @@ flowchart TD
 
 For additional troubleshooting, see the [main troubleshooting guide](../troubleshooting/README.md).
 
-## 📚 Related Documentation
+##  Related Documentation
 
 - [Azure SQL Setup Guide](azure-sql-setup.md)
 - [Azure Blob Storage Setup Guide](azure-blob-storage-setup.md)

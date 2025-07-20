@@ -292,14 +292,14 @@ The Insight Ingenious API provides powerful endpoints for creating and managing 
 - **Content-Type**: `application/json`
 - **Authentication**: HTTP Basic Authentication (configurable)
 
-### [🔄 Workflow API](/api/workflows/)
+### [ Workflow API](/api/workflows/)
 Complete documentation for all available workflow endpoints, including:
 - Classification and routing workflows
 - Educational content generation
 - Knowledge base search and retrieval
 - SQL query generation and execution
 
-### 🛠️ Core API Endpoints
+###  Core API Endpoints
 
 #### Health Check
 ```bash
@@ -668,7 +668,7 @@ Example error response:
 }
 ```
 
-## �🔍 Error Handling
+## � Error Handling
 
 The API uses standard HTTP status codes and provides detailed error messages:
 
@@ -688,12 +688,12 @@ Example error response:
 }
 ```
 
-## 📖 Additional Resources
+##  Additional Resources
 
-- [🔄 Workflow API Documentation](/api/workflows/)
-- [⚙️ Configuration Guide](/configuration/)
-- [🛠️ Development Setup](/development/)
-- [📝 CLI Reference](/CLI_REFERENCE/)
+- [ Workflow API Documentation](/api/workflows/)
+- [ Configuration Guide](/configuration/)
+- [ Development Setup](/development/)
+- [ CLI Reference](/CLI_REFERENCE/)
 
 ## Need Help?
 

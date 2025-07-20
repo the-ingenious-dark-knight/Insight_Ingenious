@@ -1,5 +1,5 @@
 ---
-title: "⚙️ Configuration Guide"
+title: "Configuration Guide"
 layout: single
 permalink: /getting-started/configuration/
 sidebar:
@@ -447,10 +447,10 @@ Insight Ingenious supports several built-in conversation flows for different use
 
 | Workflow | Description | External Services Required | Configuration Complexity | Availability |
 |----------|-------------|----------------------------|--------------------------|--------------|
-| `classification-agent` | Routes input to specialized agents | Azure OpenAI only | ✅ Minimal | Core library |
-| `knowledge-base-agent` | Search knowledge bases | Azure OpenAI only (uses local ChromaDB) | ✅ Minimal | Core library (stable local implementation) |
-| `sql-manipulation-agent` | Execute SQL queries | Azure OpenAI only (uses local SQLite) | ✅ Minimal | Core library (stable local implementation) |
-| `bike-insights` | Sample domain-specific analysis | Azure OpenAI only | ✅ Minimal | Extension template* |
+| `classification-agent` | Routes input to specialized agents | Azure OpenAI only |  Minimal | Core library |
+| `knowledge-base-agent` | Search knowledge bases | Azure OpenAI only (uses local ChromaDB) |  Minimal | Core library (stable local implementation) |
+| `sql-manipulation-agent` | Execute SQL queries | Azure OpenAI only (uses local SQLite) |  Minimal | Core library (stable local implementation) |
+| `bike-insights` | Sample domain-specific analysis | Azure OpenAI only |  Minimal | Extension template* |
 
 *Created when you run `ingen init` - part of project template, not core library.
 
@@ -458,7 +458,7 @@ Insight Ingenious supports several built-in conversation flows for different use
 
 ### Workflow-Specific Configuration
 
-#### 🚀 Quick Start: Minimal Configuration Workflows
+####  Quick Start: Minimal Configuration Workflows
 
 For `classification-agent` and `bike-insights` (if created via `ingen init`), you only need basic Azure OpenAI setup:
 
@@ -474,7 +474,7 @@ INGENIOUS_MODELS__0__BASE_URL=https://your-resource.openai.azure.com/openai/depl
 INGENIOUS_CHAT_SERVICE__TYPE=multi_agent
 ```
 
-#### 🔍 Knowledge Base Workflows
+####  Knowledge Base Workflows
 
 For `knowledge-base-agent`, the local ChromaDB implementation is used by default and is stable:
 
@@ -495,7 +495,7 @@ INGENIOUS_AZURE_SEARCH_SERVICES__0__KEY=your-search-key
 
 > **Recommendation**: Use the local ChromaDB implementation, which requires no additional configuration and is stable.
 
-#### 📊 Database Workflows (SQL Manipulation Agent)
+####  Database Workflows (SQL Manipulation Agent)
 
 For `sql-manipulation-agent` workflow, you have two database options:
 
@@ -521,7 +521,7 @@ INGENIOUS_AZURE_SQL_SERVICES__DATABASE_CONNECTION_STRING="Driver={ODBC Driver 18
 uv run python -c "
 from ingenious.utils.load_sample_data import sqlite_sample_db
 sqlite_sample_db()
-print('✅ Sample SQLite database created')
+print(' Sample SQLite database created')
 "
 
 # Test SQL agent
@@ -535,7 +535,7 @@ curl -X POST http://localhost:8000/api/v1/chat \
 
 > **Recommendation**: Use the local SQLite implementation, which is simpler to set up and stable.
 
-> 📖 **For complete SQL agent setup instructions**, see the [SQL Agent Setup Guide](../guides/sql-agent-setup.md)
+>  **For complete SQL agent setup instructions**, see the [SQL Agent Setup Guide](../guides/sql-agent-setup.md)
 
 ### Testing Workflows
 

@@ -9,11 +9,11 @@ toc_label: "Troubleshooting"
 toc_icon: "wrench"
 ---
 
-# 🔧 Troubleshooting Guide
+# Troubleshooting Guide
 
 This guide helps you resolve common issues when setting up and using Insight Ingenious - an enterprise-grade Python library for AI agent APIs with Microsoft Azure integrations. The library includes comprehensive debugging utilities to help diagnose and resolve deployment issues.
 
-## � Quick Test Commands
+## Quick Test Commands
 
 ### Hello World Test (bike-insights)
 ```bash
@@ -40,7 +40,7 @@ curl -X POST http://localhost:8000/api/v1/chat \
 
 ---
 
-## �🚨 Common Setup Issues
+## Common Setup Issues
 
 ### 1. Profile Validation Errors
 
@@ -185,10 +185,10 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
 
 1. **Use correct workflow names**:
    ```bash
-   # ✅ Correct (preferred)
+   #  Correct (preferred)
    "conversation_flow": "bike-insights"
 
-   # ✅ Also supported (underscore format)
+   #  Also supported (underscore format)
    "conversation_flow": "bike_insights"
    ```
 
@@ -279,9 +279,9 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
    load_dotenv()
    conn_str = os.getenv('AZURE_SQL_CONNECTION_STRING')
    if not conn_str:
-       print('❌ AZURE_SQL_CONNECTION_STRING not set')
+       print(' AZURE_SQL_CONNECTION_STRING not set')
    else:
-       print('✅ Environment variable loaded successfully')
+       print(' Environment variable loaded successfully')
        print(f'Connection string length: {len(conn_str)} characters')
    "
    ```
@@ -293,14 +293,14 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
    import os
    conn_str = os.getenv('AZURE_SQL_CONNECTION_STRING')
    if not conn_str:
-       print('❌ AZURE_SQL_CONNECTION_STRING not set')
+       print(' AZURE_SQL_CONNECTION_STRING not set')
    else:
        try:
            conn = pyodbc.connect(conn_str)
-           print('✅ Azure SQL connection successful')
+           print(' Azure SQL connection successful')
            conn.close()
        except Exception as e:
-           print(f'❌ Connection failed: {e}')
+           print(f' Connection failed: {e}')
    "
    ```
 
@@ -318,9 +318,9 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
        repo = ChatHistoryRepository(db_type=db_type, config=config)
        try:
            messages = await repo.get_thread_messages('test-thread')
-           print(f'✅ Azure SQL repository working! (Found {len(messages)} messages)')
+           print(f' Azure SQL repository working! (Found {len(messages)} messages)')
        except Exception as e:
-           print(f'❌ Repository error: {e}')
+           print(f' Repository error: {e}')
 
    asyncio.run(test())
    "
@@ -396,9 +396,9 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
    load_dotenv()
    conn_str = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
    if not conn_str:
-       print('❌ AZURE_STORAGE_CONNECTION_STRING not set')
+       print(' AZURE_STORAGE_CONNECTION_STRING not set')
    else:
-       print('✅ Environment variable loaded successfully')
+       print(' Environment variable loaded successfully')
        print(f'Connection string length: {len(conn_str)} characters')
    "
    ```
@@ -410,15 +410,15 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
    import os
    conn_str = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
    if not conn_str:
-       print('❌ AZURE_STORAGE_CONNECTION_STRING not set')
+       print(' AZURE_STORAGE_CONNECTION_STRING not set')
    else:
        try:
            client = BlobServiceClient.from_connection_string(conn_str)
            account_info = client.get_account_information()
-           print('✅ Azure Blob Storage connection successful')
+           print(' Azure Blob Storage connection successful')
            print(f'Account kind: {account_info[\"account_kind\"]}')
        except Exception as e:
-           print(f'❌ Connection failed: {e}')
+           print(f' Connection failed: {e}')
    "
    ```
 
@@ -431,20 +431,20 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
    try:
        config = get_config()
        file_storage = get_file_storage()
-       print(f'✅ FileStorage initialized: {type(file_storage).__name__}')
+       print(f' FileStorage initialized: {type(file_storage).__name__}')
 
        # Test basic operations
        test_path = 'test/hello.txt'
        file_storage.save_text(test_path, 'Hello Azure!')
        content = file_storage.load_text(test_path)
-       print(f'✅ File operations working: {content}')
+       print(f' File operations working: {content}')
 
        # Cleanup
        if file_storage.exists(test_path):
            file_storage.delete(test_path)
-           print('✅ Cleanup successful')
+           print(' Cleanup successful')
    except Exception as e:
-       print(f'❌ FileStorage error: {e}')
+       print(f' FileStorage error: {e}')
    "
    ```
 
@@ -461,18 +461,18 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
        # Test memory operations
        memory_manager.save_memory('test_conversation', test_data)
        loaded_data = memory_manager.load_memory('test_conversation')
-       print(f'✅ Memory operations working: {loaded_data == test_data}')
+       print(f' Memory operations working: {loaded_data == test_data}')
 
        # Test prompts API
        import requests
        response = requests.get('http://localhost:8000/api/v1/prompts')
        if response.status_code == 200:
-           print('✅ Prompts API accessible')
+           print(' Prompts API accessible')
        else:
-           print(f'⚠️  Prompts API returned: {response.status_code}')
+           print(f'  Prompts API returned: {response.status_code}')
 
    except Exception as e:
-       print(f'❌ Memory/Prompts error: {e}')
+       print(f' Memory/Prompts error: {e}')
    "
    ```
 
@@ -530,7 +530,7 @@ If you're switching from local to Azure Blob Storage:
 
 ---
 
-## 🐛 Debugging Commands
+##  Debugging Commands
 
 ### Check System Status
 ```bash
@@ -549,7 +549,7 @@ uv run ingen workflows bike-insights
 
 ### Test Installation
 ```bash
-uv run python -c "import ingenious; print('✅ Ingenious imported successfully')"
+uv run python -c "import ingenious; print(' Ingenious imported successfully')"
 ```
 
 ### Check Configuration Loading
@@ -559,17 +559,17 @@ uv run python -c "
 from ingenious.config import get_config
 try:
     cfg = get_config()
-    print('✅ Configuration loaded successfully')
+    print(' Configuration loaded successfully')
     print(f'Models: {len(cfg.models)}')
     print(f'Database type: {cfg.chat_history.database_type}')
 except Exception as e:
-    print(f'❌ Configuration error: {e}')
+    print(f' Configuration error: {e}')
 "
 ```
 
 ---
 
-## 🔍 Log Analysis
+##  Log Analysis
 
 ### Enable Debug Logging
 
@@ -587,7 +587,7 @@ except Exception as e:
 
 ### Common Log Messages
 
-**✅ Good Signs**:
+** Good Signs**:
 ```
 Profile loaded from file
 Module ingenious_extensions.services.chat_services.multi_agent.conversation_flows.bike_insights.bike_insights found.
@@ -595,14 +595,14 @@ DEBUG: Successfully loaded conversation flow class
 INFO:     Uvicorn running on http://0.0.0.0:80
 ```
 
-**⚠️ Warning Signs**:
+** Warning Signs**:
 ```
 Environment variables not found or .env file missing
 Template directory not found. Skipping...
 Validation error in field
 ```
 
-**❌ Error Signs**:
+** Error Signs**:
 ```
 ModuleNotFoundError: No module named
 ValidationError: 9 validation errors
@@ -611,7 +611,7 @@ Class ConversationFlow not found in module
 
 ---
 
-## 🧪 Testing & Verification
+##  Testing & Verification
 
 ### Minimal Test
 ```bash
@@ -632,16 +632,16 @@ curl -X POST http://localhost:8000/api/v1/chat \
 #!/bin/bash
 set -e
 
-echo "🧪 Running full integration test..."
+echo " Running full integration test..."
 
 # 1. Check environment
 echo "1. Checking environment..."
-[ -n "$AZURE_OPENAI_API_KEY" ] || { echo "❌ AZURE_OPENAI_API_KEY not set"; exit 1; }
-[ -f ".env" ] || { echo "❌ .env not found"; exit 1; }
+[ -n "$AZURE_OPENAI_API_KEY" ] || { echo " AZURE_OPENAI_API_KEY not set"; exit 1; }
+[ -f ".env" ] || { echo " .env not found"; exit 1; }
 
 # 2. Test import
 echo "2. Testing Python import..."
-uv run python -c "import ingenious; print('✅ Import OK')"
+uv run python -c "import ingenious; print(' Import OK')"
 
 # 3. Test configuration
 echo "3. Testing configuration..."
@@ -650,14 +650,14 @@ uv run ingen status
 
 # 4. Test workflows
 echo "4. Testing workflows..."
-uv run ingen workflows | grep -q "bike-insights" && echo "✅ bike-insights available"
+uv run ingen workflows | grep -q "bike-insights" && echo " bike-insights available"
 
-echo "✅ All tests passed!"
+echo " All tests passed!"
 ```
 
 ---
 
-## 📋 Environment Checklist
+##  Environment Checklist
 
 Before running Ingenious, ensure:
 
@@ -714,7 +714,7 @@ uv run ingen workflows
 
 ---
 
-## 🔄 Reset Instructions
+##  Reset Instructions
 
 If everything is broken, start fresh:
 

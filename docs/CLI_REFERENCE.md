@@ -1,5 +1,5 @@
 ---
-title: "📝 CLI Reference"
+title: "CLI Reference"
 layout: single
 permalink: /CLI_REFERENCE/
 sidebar:

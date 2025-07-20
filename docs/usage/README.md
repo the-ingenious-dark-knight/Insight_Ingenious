@@ -61,7 +61,7 @@ uv run ingen help
 
 Insight Ingenious provides multiple conversation workflows, each with different capabilities and configuration requirements:
 
-### 📋 Check Workflow Requirements
+###  Check Workflow Requirements
 
 Before using any workflow, check what configuration is needed:
 
@@ -74,7 +74,7 @@ uv run ingen workflows classification-agent
 uv run ingen workflows knowledge-base-agent
 ```
 
-### 🚀 Quick Start Workflows (Minimal Configuration)
+###  Quick Start Workflows (Minimal Configuration)
 
 These workflows only need Azure OpenAI configuration:
 
@@ -88,7 +88,7 @@ curl -X POST http://localhost:80/api/v1/chat \
   -d '{"user_prompt": "Hello", "conversation_flow": "classification-agent"}'
 ```
 
-### 🔍 Advanced Workflows (External Services Required)
+###  Advanced Workflows (External Services Required)
 
 - **knowledge-base-agent**: Requires Azure Cognitive Search
 - **sql-manipulation-agent**: Requires database connection
@@ -371,7 +371,7 @@ uv run ingen workflows knowledge-base-agent
 
 You can interact with Insight Ingenious through its REST API:
 
-#### ✅ Minimal Configuration Workflows
+####  Minimal Configuration Workflows
 These work with just Azure OpenAI setup:
 
 ```bash
@@ -393,7 +393,7 @@ curl -X POST http://localhost:80/api/v1/chat \
   }'
 ```
 
-#### 🔍 Local Knowledge Base (Stable Implementation)
+####  Local Knowledge Base (Stable Implementation)
 These use local ChromaDB for vector search:
 
 ```bash
@@ -408,7 +408,7 @@ curl -X POST http://localhost:80/api/v1/chat \
 
 **Configuration needed**: None! Just add documents to `./.tmp/knowledge_base/`
 
-#### 📊 Local Database (Stable Implementation)
+####  Local Database (Stable Implementation)
 These use local SQLite database:
 
 ```bash
@@ -437,7 +437,7 @@ curl -X POST http://localhost:80/api/v1/chat \
 # May contain bugs - use local SQLite instead
 ```
 
-#### 🌐 Optional Features
+####  Optional Features
 
 ### Error Responses
 
