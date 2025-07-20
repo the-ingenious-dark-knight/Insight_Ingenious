@@ -115,7 +115,7 @@ graph TB
 
 ```mermaid
 graph LR
-    subgraph "📂 ingenious/"
+    subgraph "ingenious/"
         CORE_API[ api/]
         CORE_CHAINLIT[ chainlit/]
         CORE_CONFIG[ config/]
@@ -127,20 +127,20 @@ graph LR
         CORE_UTILS[ utils/]
     end
 
-    subgraph "🔌 ingenious_extensions_template/"
-        EXT_API[🔗 api/]
-        EXT_MODELS[📈 models/]
+    subgraph "ingenious_extensions_template/"
+        EXT_API[api/]
+        EXT_MODELS[models/]
         EXT_SAMPLE[ sample_data/]
-        EXT_SERVICES[🤖 services/]
+        EXT_SERVICES[services/]
         EXT_TEMPLATES[ templates/]
         EXT_TESTS[ tests/]
     end
 
-    subgraph "🎛️ ingenious_prompt_tuner/"
+    subgraph "ingenious_prompt_tuner/"
         TUNER_AUTH[ auth.py]
         TUNER_PROCESSOR[ event_processor.py]
         TUNER_PAYLOAD[ payload.py]
-        TUNER_WRAPPER[🎁 response_wrapper.py]
+        TUNER_WRAPPER[response_wrapper.py]
     end
 
     classDef core fill:#e3f2fd
@@ -154,7 +154,7 @@ graph LR
 
 ## Core Components
 
-### 🤖 Multi-Agent Framework
+### Multi-Agent Framework
 
 The multi-agent framework is the heart of Insight Ingenious:
 
@@ -383,11 +383,11 @@ Create focused pull requests:
 
 ## Development Workflow
 
-### 🤖 Agent Development
+### Agent Development
 
 ```mermaid
 graph TB
-    subgraph "🤖 Agent Development"
+    subgraph "Agent Development"
         AGENT_MARKDOWN[ Agent Markdown Definition]
         AGENT_FLOW[ IConversationFlow]
         CUSTOM_AGENT[ Custom Agent<br/>Implementation]
@@ -396,12 +396,12 @@ graph TB
     subgraph " Pattern Development"
         PATTERN_INTERFACE[ IConversationPattern]
         PATTERN_IMPL[ ConversationPattern]
-        CUSTOM_PATTERN[🎭 Custom Pattern<br/>Implementation]
+        CUSTOM_PATTERN[Custom Pattern<br/>Implementation]
     end
 
     subgraph " Service Integration"
         CHAT_SERVICE[ MultiAgentChatService]
-        CHAT_INTERFACE[📞 IChatService]
+        CHAT_INTERFACE[IChatService]
         CUSTOM_SERVICE[ Custom Service<br/>Implementation]
     end
 
@@ -437,11 +437,11 @@ graph TB
     class NAMESPACE_UTILS,DYNAMIC_LOADER,CONFIG_VALIDATION registry
 ```
 
-#### 🆕 Creating a New Agent
+#### Creating a New Agent
 
 ```mermaid
 sequenceDiagram
-    participant Dev as 👨‍💻 Developer
+    participant Dev as Developer
     participant Template as  Agent Template
     participant AgentMD as  Agent Markdown
     participant Registry as  Agent Registry
@@ -461,7 +461,7 @@ sequenceDiagram
     Service->>Dev: 9. Deploy to environment
 ```
 
-#### 🎭 Creating a Custom Conversation Pattern
+#### Creating a Custom Conversation Pattern
 
 ```mermaid
 flowchart TD
@@ -476,7 +476,7 @@ flowchart TD
     LOGIC --> SEQUENTIAL{Pattern Type?}
     SEQUENTIAL -->|Sequential| SEQ_LOGIC[ Sequential Logic]
     SEQUENTIAL -->|Parallel| PAR_LOGIC[ Parallel Logic]
-    SEQUENTIAL -->|Conditional| COND_LOGIC[🔀 Conditional Logic]
+    SEQUENTIAL -->|Conditional| COND_LOGIC[Conditional Logic]
     SEQUENTIAL -->|Custom| CUSTOM_LOGIC[ Custom Logic]
 
     SEQ_LOGIC --> VALIDATE
@@ -502,22 +502,22 @@ flowchart TD
 ```mermaid
 graph TB
     subgraph " Test Types"
-        UNIT[🔬 Unit Tests<br/>Individual Components]
-        INTEGRATION[🔗 Integration Tests<br/>Component Interaction]
+        UNIT[Unit Tests<br/>Individual Components]
+        INTEGRATION[Integration Tests<br/>Component Interaction]
         E2E[ End-to-End Tests<br/>Full Workflows]
         PERFORMANCE[ Performance Tests<br/>Load & Stress]
     end
 
     subgraph " Test Targets"
-        AGENTS[🤖 Agent Testing]
+        AGENTS[Agent Testing]
         PATTERNS[ Pattern Testing]
         API[ API Testing]
         UI[ UI Testing]
     end
 
     subgraph " Test Tools"
-        PYTEST[🐍 pytest<br/>Test Framework]
-        MOCK[🎭 Mock Objects<br/>Service Mocking]
+        PYTEST[pytest<br/>Test Framework]
+        MOCK[Mock Objects<br/>Service Mocking]
         FIXTURES[ Test Fixtures<br/>Sample Data]
         COVERAGE[ Coverage Reports<br/>Code Coverage]
     end
@@ -547,34 +547,34 @@ graph TB
 
 #### Testing Best Practices
 
-1. **🔬 Unit Testing**: Test individual components in isolation
-2. **🔗 Integration Testing**: Test component interactions
+1. **Unit Testing**: Test individual components in isolation
+2. **Integration Testing**: Test component interactions
 3. ** End-to-End Testing**: Test complete user workflows
 4. ** Coverage**: Maintain >80% code coverage
-5. **🎭 Mocking**: Mock external services and dependencies
+5. **Mocking**: Mock external services and dependencies
 6. ** Fixtures**: Use consistent test data
 
 ###  Deployment Pipeline
 
 ```mermaid
 flowchart LR
-    subgraph "💻 Development"
-        CODE[👨‍💻 Code Changes]
+    subgraph "Development"
+        CODE[Code Changes]
         COMMIT[ Git Commit]
-        PUSH[📤 Git Push]
+        PUSH[Git Push]
     end
 
     subgraph " CI Pipeline"
         LINT[ Code Linting]
         TEST[ Run Tests]
-        BUILD[🏗️ Build Package]
-        SECURITY[🔒 Security Scan]
+        BUILD[Build Package]
+        SECURITY[Security Scan]
     end
 
     subgraph " Staging"
-        DEPLOY_STAGE[🎭 Deploy to Staging]
-        SMOKE_TEST[💨 Smoke Tests]
-        INTEGRATION_TEST[🔗 Integration Tests]
+        DEPLOY_STAGE[Deploy to Staging]
+        SMOKE_TEST[Smoke Tests]
+        INTEGRATION_TEST[Integration Tests]
     end
 
     subgraph " Production"
@@ -618,7 +618,7 @@ graph TD
     TEMPLATE --> IMPLEMENT[ Implement Components]
 
     IMPLEMENT --> AGENT{Need Custom Agent?}
-    AGENT -->|Yes| CREATE_AGENT[🤖 Create Custom Agent]
+    AGENT -->|Yes| CREATE_AGENT[Create Custom Agent]
     AGENT -->|No| PATTERN{Need Custom Pattern?}
 
     CREATE_AGENT --> PATTERN
@@ -677,17 +677,17 @@ stateDiagram-v2
 flowchart TD
     ISSUE([ Issue Detected]) --> IDENTIFY{ Identify Type}
 
-    IDENTIFY -->|Agent Issue| AGENT_DEBUG[🤖 Agent Debugging]
+    IDENTIFY -->|Agent Issue| AGENT_DEBUG[Agent Debugging]
     IDENTIFY -->|Pattern Issue| PATTERN_DEBUG[ Pattern Debugging]
     IDENTIFY -->|API Issue| API_DEBUG[ API Debugging]
     IDENTIFY -->|Config Issue| CONFIG_DEBUG[ Config Debugging]
 
     AGENT_DEBUG --> LOGS[ Check Agent Logs]
     PATTERN_DEBUG --> FLOW[ Trace Flow Logic]
-    API_DEBUG --> REQUESTS[📡 Trace API Requests]
+    API_DEBUG --> REQUESTS[Trace API Requests]
     CONFIG_DEBUG --> SETTINGS[ Validate Settings]
 
-    LOGS --> ANALYZE[🔬 Analyze Issues]
+    LOGS --> ANALYZE[Analyze Issues]
     FLOW --> ANALYZE
     REQUESTS --> ANALYZE
     SETTINGS --> ANALYZE
@@ -710,22 +710,22 @@ flowchart TD
 
 ## Contributing Guidelines
 
-### 🤝 Contribution Process
+### Contribution Process
 
-1. **🍴 Fork the Repository**: Create your own fork
-2. **🌿 Create Feature Branch**: Use descriptive branch names
-3. **💻 Implement Changes**: Follow coding standards
+1. **Fork the Repository**: Create your own fork
+2. **Create Feature Branch**: Use descriptive branch names
+3. **Implement Changes**: Follow coding standards
 4. ** Add Tests**: Ensure proper test coverage
 5. ** Update Documentation**: Keep docs current
-6. **📤 Submit Pull Request**: Use PR template
+6. **Submit Pull Request**: Use PR template
 7. ** Code Review**: Address reviewer feedback
-8. **🎉 Merge**: Celebrate your contribution!
+8. **Merge**: Celebrate your contribution!
 
 ###  Code Style Guidelines
 
-- **🐍 Python**: Follow PEP 8 standards
-- **📏 Line Length**: Maximum 88 characters
-- **🏷️ Type Hints**: Use type annotations
+- **Python**: Follow PEP 8 standards
+- **Line Length**: Maximum 88 characters
+- **Type Hints**: Use type annotations
 - ** Docstrings**: Document all public methods
 - ** Tests**: Write tests for new features
 - ** Security**: Follow security best practices
@@ -733,7 +733,7 @@ flowchart TD
 ## Next Steps
 
 -  Read the [Architecture Guide](/architecture/) for system design
--  Check the [Configuration Guide](/configuration/) for setup
+-  Check the [Configuration Guide](/getting-started/configuration/) for setup
 -  Try the [Getting Started Guide](/getting-started/) for quick setup
-- 📡 Explore the [API Documentation](/api/) for integration
-- 📡 Explore the [API Documentation](/api/) for integration
+- Explore the [API Documentation](/api/) for integration
+- Explore the [API Documentation](/api/) for integration

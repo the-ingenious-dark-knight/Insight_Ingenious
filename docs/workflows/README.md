@@ -100,11 +100,11 @@ sequenceDiagram
     participant User
     participant API
     participant Coordinator
-    participant ClassificationAgent as  Classification Agent
-    participant EducationAgent as 🎓 Education Expert
-    participant KnowledgeAgent as  Knowledge Base Agent
-    participant SQLAgent as  SQL Agent
-    participant AzureOpenAI as  Azure OpenAI
+    participant ClassificationAgent as Classification Agent
+    participant GeneralAgent as General Classification
+    participant KnowledgeAgent as Knowledge Base Agent
+    participant SQLAgent as SQL Agent
+    participant AzureOpenAI as Azure OpenAI
 
     User->>API: "Help me with database queries"
     API->>Coordinator: Initialize classification-agent workflow
@@ -123,28 +123,31 @@ sequenceDiagram
     API-->>User: SQL solution with explanation
 ```
 
-###  Classification Agent Workflow Flow
+### Classification Agent Workflow Flow
 
 ```mermaid
 flowchart TD
-    START([👤 User Input]) --> CLASSIFY{ Classify Intent}
+    START([User Input]) --> CLASSIFY{Classify Intent}
 
-    CLASSIFY -->|Educational Query| EDUCATION_FLOW[🎓 Education Expert Flow]
-    CLASSIFY -->|Technical Question| KNOWLEDGE_FLOW[ Knowledge Base Flow]
-    CLASSIFY -->|Data Query| SQL_FLOW[ SQL Query Flow]
-    CLASSIFY -->|General Classification| CLASSIFICATION_FLOW[ Classification Flow]
+    CLASSIFY -->|Product Inquiry| PRODUCT_FLOW[Product Query Flow]
+    CLASSIFY -->|Purchase Question| PURCHASE_FLOW[Purchase Query Flow]
+    CLASSIFY -->|Support Issue| SUPPORT_FLOW[Support Query Flow]
+    CLASSIFY -->|Undefined| UNDEFINED_FLOW[Undefined Query Flow]
 
-    EDUCATION_FLOW --> EDUCATION_AGENT[🎓 Education Expert]
-    KNOWLEDGE_FLOW --> KNOWLEDGE_AGENT[ Knowledge Agent]
-    SQL_FLOW --> SQL_AGENT[ SQL Agent]
-    CLASSIFICATION_FLOW --> CLASSIFICATION_AGENT[ Classification Agent]
+    PRODUCT_FLOW --> PRODUCT_AGENT[Product Agent]
+    PURCHASE_FLOW --> PURCHASE_AGENT[Purchase Agent]
+    SUPPORT_FLOW --> SUPPORT_AGENT[Support Agent]
+    UNDEFINED_FLOW --> UNDEFINED_AGENT[Undefined Agent]
 
-    EDUCATION_AGENT --> RESPONSE[📤 Formatted Response]
+    PRODUCT_AGENT --> RESPONSE[Formatted Response]
+    PURCHASE_AGENT --> RESPONSE
+    SUPPORT_AGENT --> RESPONSE
+    UNDEFINED_AGENT --> RESPONSE
     KNOWLEDGE_AGENT --> RESPONSE
     SQL_AGENT --> RESPONSE
     CLASSIFICATION_AGENT --> RESPONSE
 
-    RESPONSE --> FINISH([🏁 End])
+    RESPONSE --> FINISH([End])
 
     classDef start fill:#c8e6c9
     classDef decision fill:#fff9c4
@@ -154,47 +157,47 @@ flowchart TD
 
     class START start
     class CLASSIFY decision
-    class EDUCATION_FLOW,KNOWLEDGE_FLOW,SQL_FLOW,CLASSIFICATION_FLOW workflow
-    class EDUCATION_AGENT,KNOWLEDGE_AGENT,SQL_AGENT,CLASSIFICATION_AGENT agent
+    class PRODUCT_FLOW,PURCHASE_FLOW,SUPPORT_FLOW,UNDEFINED_FLOW workflow
+    class PRODUCT_AGENT,PURCHASE_AGENT,SUPPORT_AGENT,UNDEFINED_AGENT agent
     class RESPONSE,FINISH finish
 ```
 
-###  Knowledge Base Workflow
+### Knowledge Base Workflow
 
 ```mermaid
 graph TB
-    subgraph " Input Processing"
-        USER_QUERY[👤 User Query]
-        INTENT_ANALYSIS[ Intent Analysis]
-        QUERY_ENHANCEMENT[✨ Query Enhancement]
+    subgraph "Input Processing"
+        USER_QUERY[User Query]
+        INTENT_ANALYSIS[Intent Analysis]
+        QUERY_ENHANCEMENT[Query Enhancement]
     end
 
-    subgraph " Search & Retrieval"
-        AZURE_SEARCH[ Azure Cognitive Search]
-        VECTOR_SEARCH[ Vector Search]
-        KEYWORD_SEARCH[🔤 Keyword Search]
-        HYBRID_SEARCH[🔀 Hybrid Search]
+    subgraph "Search & Retrieval"
+        CHROMADB[ChromaDB (Local)]
+        VECTOR_SEARCH[Vector Search]
+        KEYWORD_SEARCH[Keyword Search]
+        HYBRID_SEARCH[Hybrid Search]
     end
 
-    subgraph " Content Processing"
-        RELEVANCE_SCORING[ Relevance Scoring]
-        CONTENT_RANKING[📈 Content Ranking]
-        CONTEXT_EXTRACTION[ Context Extraction]
+    subgraph "Content Processing"
+        RELEVANCE_SCORING[Relevance Scoring]
+        CONTENT_RANKING[Content Ranking]
+        CONTEXT_EXTRACTION[Context Extraction]
     end
 
-    subgraph " AI Processing"
-        AZURE_OPENAI[ Azure OpenAI]
-        CONTEXT_SYNTHESIS[🔗 Context Synthesis]
-        RESPONSE_GENERATION[ Response Generation]
+    subgraph "AI Processing"
+        AZURE_OPENAI[Azure OpenAI]
+        CONTEXT_SYNTHESIS[Context Synthesis]
+        RESPONSE_GENERATION[Response Generation]
     end
 
     USER_QUERY --> INTENT_ANALYSIS
     INTENT_ANALYSIS --> QUERY_ENHANCEMENT
-    QUERY_ENHANCEMENT --> AZURE_SEARCH
+    QUERY_ENHANCEMENT --> CHROMADB
 
-    AZURE_SEARCH --> VECTOR_SEARCH
-    AZURE_SEARCH --> KEYWORD_SEARCH
-    AZURE_SEARCH --> HYBRID_SEARCH
+    CHROMADB --> VECTOR_SEARCH
+    CHROMADB --> KEYWORD_SEARCH
+    CHROMADB --> HYBRID_SEARCH
 
     VECTOR_SEARCH --> RELEVANCE_SCORING
     KEYWORD_SEARCH --> RELEVANCE_SCORING
@@ -213,12 +216,12 @@ graph TB
     classDef ai fill:#fce4ec
 
     class USER_QUERY,INTENT_ANALYSIS,QUERY_ENHANCEMENT input
-    class AZURE_SEARCH,VECTOR_SEARCH,KEYWORD_SEARCH,HYBRID_SEARCH search
+    class CHROMADB,VECTOR_SEARCH,KEYWORD_SEARCH,HYBRID_SEARCH search
     class RELEVANCE_SCORING,CONTENT_RANKING,CONTEXT_EXTRACTION processing
     class AZURE_OPENAI,CONTEXT_SYNTHESIS,RESPONSE_GENERATION ai
 ```
 
-###  SQL Manipulation Workflow
+### SQL Manipulation Workflow
 
 ```mermaid
 sequenceDiagram
@@ -245,22 +248,22 @@ sequenceDiagram
 
 ## Configuration Requirements by Workflow
 
-###  Core Library Workflows (Azure OpenAI only)
+### Core Library Workflows (Azure OpenAI only)
 
 These workflows are included in the core library and only require basic Azure OpenAI configuration:
 
-####  Classification Agent
+#### Classification Agent
 Routes input to specialized agents based on content analysis.
 
 ```mermaid
 graph LR
     subgraph "Required Services"
-        AZURE_OPENAI[ Azure OpenAI<br/>Intent Classification]
+        AZURE_OPENAI[Azure OpenAI<br/>Intent Classification]
     end
 
     subgraph "Configuration Method"
-        ENV_VARS[ Environment Variables<br/>INGENIOUS_ prefixed]
-        ENV_FILE[ .env file<br/>Local development]
+        ENV_VARS[Environment Variables<br/>INGENIOUS_ prefixed]
+        ENV_FILE[.env file<br/>Local development]
     end
 
     ENV_VARS --> AZURE_OPENAI
@@ -286,9 +289,9 @@ INGENIOUS_MODELS__0__BASE_URL=https://your-resource.openai.azure.com/
 INGENIOUS_CHAT_SERVICE__TYPE=multi_agent
 ```
 
-### ⭐ Template-Based Workflows (Azure OpenAI only)
+### Template-Based Workflows (Azure OpenAI only)
 
-#### 🚴 Bike Insights ("Hello World" Template)
+#### Bike Insights ("Hello World" Template)
 Sample domain-specific workflow for bike sales analysis. Available in the `ingenious_extensions_template` when you run `ingen init`.
 
 > **Note:** This workflow exists as a template example in `ingenious_extensions_template/`, not as a core workflow. It demonstrates how to build custom domain-specific workflows.
@@ -296,17 +299,17 @@ Sample domain-specific workflow for bike sales analysis. Available in the `ingen
 ```mermaid
 graph TB
     subgraph "Required Services"
-        AZURE_OPENAI[ Azure OpenAI\nMulti-Agent Processing]
+        AZURE_OPENAI[Azure OpenAI\nMulti-Agent Processing]
     end
 
     subgraph "Template Files"
-        BIKE_DATA[🚴 Bike Sales Data\nJSON Sample Files]
-        BIKE_MODELS[ Bike Data Models\nPydantic Schemas]
+        BIKE_DATA[Bike Sales Data\nJSON Sample Files]
+        BIKE_MODELS[Bike Data Models\nPydantic Schemas]
     end
 
     subgraph "Template Agents"
-        BIKE_AGENT[🚴 Bike Analysis Agent\nTemplate Example]
-        AGENT_FLOW[ Conversation Flow\nTemplate Pattern]
+        BIKE_AGENT[Bike Analysis Agent\nTemplate Example]
+        AGENT_FLOW[Conversation Flow\nTemplate Pattern]
     end
 
     AZURE_OPENAI --> BIKE_AGENT
@@ -323,9 +326,9 @@ graph TB
     class BIKE_AGENT,AGENT_FLOW agent
 ```
 
-###  Core Library Workflows (Local Implementation - Stable)
+### Core Library Workflows (Local Implementation - Stable)
 
-####  Knowledge Base Agent
+#### Knowledge Base Agent
 Search and retrieve information from knowledge bases using local ChromaDB (stable) or Azure Search (experimental).
 
 > **Important**: The local ChromaDB implementation is stable and recommended. Azure Search integration is experimental and may contain bugs.
@@ -334,19 +337,19 @@ Search and retrieve information from knowledge bases using local ChromaDB (stabl
 graph TB
     subgraph "Required Services"
         AZURE_OPENAI[ Azure OpenAI<br/>Response Generation]
-        AZURE_SEARCH[ Azure Cognitive Search<br/>Document Retrieval]
+        AZURE_SEARCH[Azure Cognitive Search<br/>Document Retrieval]
     end
 
     subgraph "Knowledge Sources"
-        DOCUMENTS[ Documents<br/>PDFs, Word, Text]
-        WEBSITES[ Web Content<br/>Scraped Pages]
-        DATABASES[ Structured Data<br/>FAQ, Knowledge Base]
+        DOCUMENTS[Documents<br/>PDFs, Word, Text]
+        WEBSITES[Web Content<br/>Scraped Pages]
+        DATABASES[Structured Data<br/>FAQ, Knowledge Base]
     end
 
     subgraph "Search Capabilities"
-        VECTOR_SEARCH[ Vector Search<br/>Semantic Similarity]
-        KEYWORD_SEARCH[🔤 Keyword Search<br/>Full-Text Search]
-        HYBRID_SEARCH[🔀 Hybrid Search<br/>Combined Approach]
+        VECTOR_SEARCH[Vector Search<br/>Semantic Similarity]
+        KEYWORD_SEARCH[Keyword Search<br/>Full-Text Search]
+        HYBRID_SEARCH[Hybrid Search<br/>Combined Approach]
     end
 
     DOCUMENTS --> AZURE_SEARCH
@@ -392,28 +395,28 @@ INGENIOUS_AZURE_SEARCH_SERVICES__0__KEY=your-search-api-key
 
 > **Recommendation**: Use the local ChromaDB implementation for stable production deployments. It requires no additional configuration and works out-of-the-box.
 
-###  Core Library Workflows (Database Required)
+### Core Library Workflows (Database Required)
 
-####  SQL Manipulation Agent
+#### SQL Manipulation Agent
 Execute SQL queries on Azure SQL or local databases.
 
 ```mermaid
 graph TB
     subgraph "Required Services"
         AZURE_OPENAI[ Azure OpenAI<br/>Query Generation & Formatting]
-        DATABASE[ Database<br/>SQL Server, PostgreSQL, MySQL]
+        DATABASE[Database<br/>SQL Server, PostgreSQL, MySQL]
     end
 
     subgraph "Security Layer"
-        QUERY_VALIDATOR[ Query Validator<br/>SQL Injection Prevention]
-        PERMISSION_CHECK[ Permission Check<br/>Table Access Control]
-        OPERATION_FILTER[🛡️ Operation Filter<br/>Read-Only Enforcement]
+        QUERY_VALIDATOR[Query Validator<br/>SQL Injection Prevention]
+        PERMISSION_CHECK[Permission Check<br/>Table Access Control]
+        OPERATION_FILTER[Operation Filter<br/>Read-Only Enforcement]
     end
 
     subgraph "Query Processing"
-        NL_TO_SQL[ Natural Language to SQL]
-        RESULT_FORMATTER[ Result Formatter]
-        ERROR_HANDLER[ Error Handler]
+        NL_TO_SQL[Natural Language to SQL]
+        RESULT_FORMATTER[Result Formatter]
+        ERROR_HANDLER[Error Handler]
     end
 
     AZURE_OPENAI --> NL_TO_SQL
@@ -458,25 +461,25 @@ INGENIOUS_AZURE_SQL_SERVICES__CONNECTION_STRING="Driver={ODBC Driver 18 for SQL 
 
 ## Workflow Selection Guide
 
-###  Choosing the Right Workflow
+### Choosing the Right Workflow
 
 ```mermaid
 flowchart TD
-    START([🤔 What do you want to do?]) --> DECISION{Choose your use case}
+    START([What do you want to do?]) --> DECISION{Choose your use case}
 
-    DECISION -->|Route user queries<br/>to different specialists| CLASSIFICATION[ Classification Agent]
-    DECISION -->|Analyze business data<br/>with multiple perspectives| BIKE_INSIGHTS[🚴 Bike Insights<br/>(Template only)]
-    DECISION -->|Search through<br/>documents and knowledge| KNOWLEDGE[ Knowledge Base Agent]
-    DECISION -->|Query databases<br/>with natural language| SQL[ SQL Manipulation]
+    DECISION -->|Route user queries<br/>to different specialists| CLASSIFICATION[Classification Agent]
+    DECISION -->|Analyze business data<br/>with multiple perspectives| BIKE_INSIGHTS[Bike Insights<br/>(Template only)]
+    DECISION -->|Search through<br/>documents and knowledge| KNOWLEDGE[Knowledge Base Agent]
+    DECISION -->|Query databases<br/>with natural language| SQL[SQL Manipulation]
 
-    CLASSIFICATION --> SETUP_MINIMAL[ Minimal Setup<br/>Azure OpenAI only]
+    CLASSIFICATION --> SETUP_MINIMAL[Minimal Setup<br/>Azure OpenAI only]
     BIKE_INSIGHTS --> SETUP_MINIMAL
 
-    KNOWLEDGE --> SETUP_SEARCH[ Search Setup<br/>+ Azure Cognitive Search]
+    KNOWLEDGE --> SETUP_SEARCH[Search Setup<br/>+ Azure Cognitive Search]
 
-    SQL --> SETUP_DATABASE[ Database Setup<br/>+ Database Connection]
+    SQL --> SETUP_DATABASE[Database Setup<br/>+ Database Connection]
 
-    SETUP_MINIMAL --> READY[ Ready to Use]
+    SETUP_MINIMAL --> READY[Ready to Use]
     SETUP_SEARCH --> READY
     SETUP_DATABASE --> READY
 
@@ -495,14 +498,14 @@ flowchart TD
 
 ## Next Steps
 
-1. ** Choose Your Workflow**: Select the workflow that best fits your use case
-2. ** Configure Services**: Set up the required Azure services and configuration
-3. ** Test Setup**: Validate your configuration with sample queries
-4. ** Deploy**: Launch your workflow in your preferred environment
-5. ** Monitor**: Track performance and optimize as needed
+1. **Choose Your Workflow**: Select the workflow that best fits your use case
+2. **Configure Services**: Set up the required Azure services and configuration
+3. **Test Setup**: Validate your configuration with sample queries
+4. **Deploy**: Launch your workflow in your preferred environment
+5. **Monitor**: Track performance and optimize as needed
 
 For detailed setup instructions, see:
-- [Configuration Guide](/configuration/) - Complete setup instructions
+- [Configuration Guide](/getting-started/configuration/) - Complete setup instructions
 - [Getting Started](/getting-started/) - Quick start tutorial
 - [Development Guide](/development/) - Advanced customization
 - [API Documentation](/api/) - Integration details

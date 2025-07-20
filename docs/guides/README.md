@@ -19,8 +19,6 @@ This section provides detailed guides for using specific features and capabiliti
 - **[Complete Azure Deployment](./full-azure-deployment.md)** - Complete enterprise deployment instructions
 - **[API Integration](./api-integration.md)** - Using the REST API programmatically
 - **[Web Interface](./web-interface.md)** - Using the web-based interface
-- **[Azure Blob Storage Setup](./azure-blob-storage-setup.md)** - Complete guide for Azure Blob Storage integration for file storage and memory management
-- **[Azure SQL Database Setup](./azure-sql-setup.md)** - Complete guide for Azure SQL chat history storage setup
 - **[SQL Agent Setup](./sql-agent-setup.md)** - Complete setup guide for SQL manipulation agent with SQLite and Azure SQL
 - **[Data Preparation](./data-preparation/)** - Preparing and processing data for analysis
 - **[Document Processing](./document-processing/)** - Working with document analysis workflows
@@ -79,5 +77,5 @@ See [CONTRIBUTING.md](../../CONTRIBUTING.md) for contribution guidelines.
 ## Need Help?
 
 - Check the [Troubleshooting Guide](../getting-started/troubleshooting.md)
-- Review the [Configuration Documentation](../configuration/README.md)
+- Review the [Configuration Documentation](/getting-started/configuration/)
 - Ask questions in the project repository

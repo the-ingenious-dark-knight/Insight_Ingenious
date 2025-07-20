@@ -398,7 +398,7 @@ AZURE_STORAGE_DATA_URL="https://ingendev.blob.core.windows.net"
 - **API Integration**: `/api/v1/prompts` routes for prompt management
 - **Multi-Environment Support**: Same codebase works with local or cloud storage
 
-For detailed setup instructions, see the [Azure Blob Storage Setup Guide](../guides/azure-blob-storage-setup.md).
+For detailed setup instructions, see the File Storage configuration section above.
 
 ### Local SQL Database
 
@@ -574,3 +574,131 @@ You can create custom conversation flows by:
 4. Registering the flow in your configuration
 
 ## Environment Variables
+
+### Complete Environment Variable Reference
+
+All Ingenious configuration uses environment variables with the `INGENIOUS_` prefix. Here's a comprehensive list:
+
+#### Core Configuration
+
+**Required for all deployments:**
+```bash
+# Model Configuration
+INGENIOUS_MODELS__0__MODEL=gpt-4o-mini
+INGENIOUS_MODELS__0__API_TYPE=rest  # or "azure" for Azure OpenAI
+INGENIOUS_MODELS__0__API_VERSION=2024-12-01-preview
+INGENIOUS_MODELS__0__DEPLOYMENT=gpt-4o-mini
+INGENIOUS_MODELS__0__API_KEY=your-api-key
+INGENIOUS_MODELS__0__BASE_URL=https://your-resource.openai.azure.com/
+
+# Chat Service
+INGENIOUS_CHAT_SERVICE__TYPE=multi_agent
+```
+
+#### Authentication Configuration
+
+**For production deployments with authentication:**
+```bash
+# JWT Authentication
+JWT_SECRET_KEY=your-secret-key-here  # Generate a secure random key
+JWT_ACCESS_TOKEN_EXPIRE_MINUTES=30
+JWT_REFRESH_TOKEN_EXPIRE_DAYS=7
+
+# Web Authentication
+INGENIOUS_WEB_CONFIGURATION__AUTHENTICATION__ENABLE=true
+INGENIOUS_WEB_CONFIGURATION__AUTHENTICATION__USERNAME=admin
+INGENIOUS_WEB_CONFIGURATION__AUTHENTICATION__PASSWORD=secure-password
+```
+
+#### Document Processing Configuration
+
+**For document extraction features:**
+```bash
+# Document Processing Limits
+INGEN_MAX_DOWNLOAD_MB=20  # Maximum file size for downloads
+INGEN_URL_TIMEOUT_SEC=30  # Timeout for URL fetching
+
+# Scrapfly API (for web scraping)
+SCRAPFLY_API_KEY=your-scrapfly-key  # Required for dataprep commands
+```
+
+#### Database Configuration
+
+**For chat history storage:**
+```bash
+# SQLite (Default - Local Development)
+INGENIOUS_CHAT_HISTORY__DATABASE_TYPE=sqlite
+INGENIOUS_CHAT_HISTORY__DATABASE_PATH=./.tmp/chat_history.db
+INGENIOUS_CHAT_HISTORY__MEMORY_PATH=./.tmp
+
+# Azure SQL (Production)
+INGENIOUS_CHAT_HISTORY__DATABASE_TYPE=azuresql
+INGENIOUS_CHAT_HISTORY__DATABASE_NAME=your_database_name
+INGENIOUS_CHAT_HISTORY__DATABASE_CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+```
+
+#### File Storage Configuration
+
+**For prompt and data storage:**
+```bash
+# Local Storage (Default)
+INGENIOUS_FILE_STORAGE__REVISIONS__STORAGE_TYPE=local
+INGENIOUS_FILE_STORAGE__DATA__STORAGE_TYPE=local
+
+# Azure Blob Storage (Production)
+INGENIOUS_FILE_STORAGE__REVISIONS__STORAGE_TYPE=azure
+INGENIOUS_FILE_STORAGE__REVISIONS__URL=https://your-storage.blob.core.windows.net/
+INGENIOUS_FILE_STORAGE__REVISIONS__AUTHENTICATION_METHOD=default_credential
+INGENIOUS_FILE_STORAGE__DATA__STORAGE_TYPE=azure
+INGENIOUS_FILE_STORAGE__DATA__URL=https://your-storage.blob.core.windows.net/
+INGENIOUS_FILE_STORAGE__DATA__AUTHENTICATION_METHOD=default_credential
+
+# Azure Storage Connection (if using connection string auth)
+AZURE_STORAGE_CONNECTION_STRING="DefaultEndpointsProtocol=https;AccountName=youraccount;AccountKey=yourkey;EndpointSuffix=core.windows.net"
+```
+
+#### Workflow-Specific Configuration
+
+**For SQL manipulation workflow:**
+```bash
+# Local SQL Database
+INGENIOUS_LOCAL_SQL_DB__DATABASE_PATH=/tmp/sample_sql_db
+INGENIOUS_LOCAL_SQL_DB__SAMPLE_CSV_PATH=./data/your_data.csv
+INGENIOUS_LOCAL_SQL_DB__SAMPLE_DATABASE_NAME=sample_sql_db
+
+# Azure SQL Services
+INGENIOUS_AZURE_SQL_SERVICES__DATABASE_NAME=your-database-name
+INGENIOUS_AZURE_SQL_SERVICES__TABLE_NAME=your-table-name
+INGENIOUS_AZURE_SQL_SERVICES__CONNECTION_STRING="your-connection-string"
+```
+
+**For knowledge base workflow:**
+```bash
+# Azure Search (Optional - Experimental)
+INGENIOUS_AZURE_SEARCH_SERVICES__0__SERVICE=default
+INGENIOUS_AZURE_SEARCH_SERVICES__0__ENDPOINT=https://your-search-service.search.windows.net
+INGENIOUS_AZURE_SEARCH_SERVICES__0__KEY=your-search-api-key
+```
+
+#### Web Server Configuration
+
+```bash
+# Server Settings
+INGENIOUS_WEB_CONFIGURATION__PORT=8000  # Default is 80
+WEB_PORT=8000  # Alternative port setting
+```
+
+#### Profile Configuration
+
+```bash
+# Profile Selection (optional)
+INGENIOUS_PROFILE=dev  # or "prod", "staging"
+```
+
+### Environment Variable Best Practices
+
+1. **Use `.env` files for local development** - Never commit these to version control
+2. **Use proper quoting** - Complex values (connection strings) should be quoted
+3. **Follow naming conventions** - Always use `INGENIOUS_` prefix for Ingenious-specific settings
+4. **Secure sensitive values** - Use secret management tools in production
+5. **Document custom variables** - Add comments in your `.env.example` file
