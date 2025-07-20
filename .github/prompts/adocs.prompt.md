@@ -91,23 +91,6 @@ Systematically audit ALL documentation in docs/ AND README.md against the actual
 3. **DELETE** or mark deprecated any documentation for removed features
 4. **GENERATE** docs/AUDIT_REPORT.md documenting all changes made
 
-**AUDIT REPORT MUST INCLUDE:**
-- Complete list of all files modified with specific changes made
-- New documentation created for previously undocumented features
-- Deprecated documentation removed or marked
-- Cross-reference validation results between README.md and docs/
-- Analysis method used (static code analysis, no execution)
-
-**YOU MUST ACTUALLY MODIFY THE FILES** - Do not just identify issues, but make the concrete changes needed to fix every discrepancy between documentation and implementation based on your analysis of the codebase.
-
-**NO CODE EXECUTION RULES:**
-- Do NOT run any Python scripts or commands
-- Do NOT execute curl commands or API calls
-- Do NOT start servers or services
-- Do NOT run tests or CLI commands
-- Perform ALL validation through reading and analyzing source code files
-- Base ALL corrections on static analysis of the codebase structure and implementation
-
 Quality validation through static analysis only:
 1. CREATE tests/docs/test_documentation_accuracy.py that could validate key documentation claims (but do not run it)
 2. VERIFY documented API examples match route definitions by reading the code
