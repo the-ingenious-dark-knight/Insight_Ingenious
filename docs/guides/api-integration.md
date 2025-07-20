@@ -530,7 +530,7 @@ def monitor_api_call(prompt, workflow):
 
 - [Workflow Requirements](../workflows/README.md) - Understand configuration needs
 - [Configuration Guide](/getting-started/configuration/) - Detailed setup instructions
-- [Custom Agents](../development/custom-agents.md) - Create your own workflows
+- [Custom Agents](../extensions/custom-agents.md) - Create your own workflows
 - [Troubleshooting](/troubleshooting/) - Common issues and solutions
 
 ---

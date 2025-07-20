@@ -91,7 +91,7 @@ ingen workflows bike-insights            # Show bike insights workflow (recommen
 
 **Available Workflows:**
 - `classification-agent` - Route input to specialized agents (core library, minimal config)
-- `bike-insights` - Sample domain-specific multi-agent analysis (project template, minimal config) ⭐ **RECOMMENDED**
+- `bike-insights` - Sample domain-specific multi-agent analysis (project template, minimal config) **RECOMMENDED**
 - `knowledge-base-agent` - Search knowledge bases using local ChromaDB (core library, stable local implementation)
 - `sql-manipulation-agent` - Execute SQL queries using local SQLite (core library, stable local implementation)
 

@@ -1,13 +1,17 @@
 # Insight Ingenious
 
-An enterprise-grade Python library for quickly setting up APIs to interact with AI Agents, featuring tight integrations with Microsoft Azure services and comprehensive utilities for debugging and customization.
+[![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)](https://github.com/Insight-Services-APAC/ingenious)
+[![Python](https://img.shields.io/badge/python-3.13+-green.svg)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/license-MIT-purple.svg)](LICENSE)
+
+An enterprise-grade Python framework for building AI agent workflows using Azure OpenAI and Microsoft's Autogen. Features multi-agent conversation flows, JWT authentication, and comprehensive Azure service integrations.
 
 ## Quick Start
 
 Get up and running in 5 minutes with Azure OpenAI!
 
 ### Prerequisites
-- Python 3.13 or higher
+- Python 3.13 or higher (Note: Python 3.13+ requirement is strict due to dependency constraints)
 - Azure OpenAI API credentials
 - [uv package manager](https://docs.astral.sh/uv/)
 
@@ -48,10 +52,10 @@ Get up and running in 5 minutes with Azure OpenAI!
     **Required configuration (add to .env file)**:
     ```bash
     # Model Configuration (only INGENIOUS_* variables are used by the system)
-    INGENIOUS_MODELS__0__MODEL=gpt-4.1-nano
+    INGENIOUS_MODELS__0__MODEL=gpt-4
     INGENIOUS_MODELS__0__API_TYPE=rest
     INGENIOUS_MODELS__0__API_VERSION=2024-12-01-preview
-    INGENIOUS_MODELS__0__DEPLOYMENT=gpt-4.1-nano
+    INGENIOUS_MODELS__0__DEPLOYMENT=your-gpt4-deployment-name
     INGENIOUS_MODELS__0__API_KEY=your-actual-api-key-here
     INGENIOUS_MODELS__0__BASE_URL=https://your-resource.openai.azure.com/
 
@@ -67,12 +71,19 @@ Get up and running in 5 minutes with Azure OpenAI!
     uv run ingen validate  # Check configuration before starting
     ```
 
-    > **Note**: Ingenious now uses **pydantic-settings** for configuration via environment variables. Legacy YAML configuration files (`config.yml`, `profiles.yml`) are no longer supported and must be migrated to environment variables with `INGENIOUS_` prefixes using the migration script at `scripts/migrate_config.py`.
+    > **⚠️ BREAKING CHANGE**: Ingenious now uses **pydantic-settings** for configuration via environment variables. Legacy YAML configuration files (`config.yml`, `profiles.yml`) are **no longer supported** and must be migrated to environment variables with `INGENIOUS_` prefixes. Use the migration script:
+    > ```bash
+    > python scripts/migrate_config.py --config config.yml --profile profiles.yml --output .env
+    > ```
 
 4. **Start the Server**:
     ```bash
-    # Start server on port 8000 (override default port 80)
+    # Start server (default port 80, use --port to override)
     uv run ingen serve --port 8000
+    
+    # Additional options:
+    # --host 0.0.0.0  # Bind host (default: 0.0.0.0)
+    # --no-prompt-tuner  # Disable prompt tuner interface
     ```
 
 5. **Verify Health**:
@@ -129,18 +140,18 @@ That's it! You should see a JSON response with AI analysis of the input.
 
 **Core commands:**
 - `ingen init` - Initialize a new project with templates and configuration
-- `ingen serve` - Start the API server with web interface
-- `ingen workflows [workflow_name]` - List available workflows and their requirements
-- `ingen test` - Run agent workflow tests
+- `ingen serve [--port PORT] [--host HOST] [--no-prompt-tuner]` - Start the API server
+- `ingen workflows [workflow_name]` - List available workflows or show specific workflow requirements
+- `ingen test [--log-level LEVEL] [--args ARGS]` - Run agent workflow tests
 - `ingen validate` - Validate system configuration and requirements
-- `ingen help [topic]` - Show detailed help and getting started guide
+- `ingen help [topic]` - Show help (topics: setup, workflows, config, deployment)
 - `ingen status` - Check system status and configuration
 - `ingen version` - Show version information
 
 **Data processing commands:**
-- `uv run ingen document-processing extract <path>` - Extract text from documents (PDF, DOCX, images)
-- `uv run ingen dataprep crawl <url>` - Fetch single web page using Scrapfly
-- `uv run ingen dataprep batch <urls...>` - Fetch multiple web pages using Scrapfly
+- `ingen document-processing extract <path> [--engine ENGINE] [--out FILE]` - Extract text from documents
+- `ingen dataprep crawl <url> [--pretty] [--api-key KEY] [--js]` - Fetch single web page
+- `ingen dataprep batch <urls...> [--out FILE] [--pretty]` - Fetch multiple web pages
 
 **Help and information:**
 - `ingen --help` - Show comprehensive help
@@ -155,6 +166,7 @@ When the server is running, the following endpoints are available:
 **Core API:**
 - `POST /api/v1/chat` - Chat with AI workflows
 - `GET /api/v1/health` - Health check endpoint
+- `GET /` - Redirects to API documentation
 
 **Diagnostics:**
 - `GET /api/v1/workflows` - List all workflows and their status
@@ -170,11 +182,12 @@ When the server is running, the following endpoints are available:
 
 **Authentication (if enabled):**
 - `POST /api/v1/auth/login` - JWT login
-- `POST /api/v1/auth/refresh` - Refresh JWT token
+- `POST /api/v1/auth/refresh` - Refresh JWT token  
 - `GET /api/v1/auth/verify` - Verify JWT token
 
 **Web Interfaces:**
-- API documentation available at `/docs`
+- API documentation (auto-generated) available at `/docs`
+- ReDoc documentation available at `/redoc`
 
 **Conversation Management:**
 - `GET /api/v1/conversations/{thread_id}` - Retrieve conversation history
@@ -263,38 +276,54 @@ uv add ingenious[knowledge-base]
 
 ## Project Structure
 
-- `ingenious/`: Core framework code
-  - `api/`: FastAPI routes and endpoints
-    - `routes/`: Individual route modules (auth, chat, diagnostic, etc.)
-  - `auth/`: JWT authentication and security
-  - `cli/`: Command-line interface modules
-    - `commands/`: Individual command implementations
-  - `config/`: Configuration management (pydantic-settings based)
-    - `main_settings.py`: Primary settings class
-    - `models.py`: Configuration model definitions
-    - `environment.py`: Environment handling
-  - `core/`: Core logging and error handling
-  - `dataprep/`: Web scraping and data preparation utilities
-  - `db/`: Database integration (SQLite and Azure SQL)
-  - `document_processing/`: PDF/document text extraction
-  - `errors/`: Custom exception classes
-  - `external_services/`: OpenAI and other service integrations
-  - `files/`: File storage (local and Azure Blob)
-  - `main/`: FastAPI application factory and middleware
-  - `models/`: Pydantic data models and schemas
-  - `services/`: Core business logic and services
-    - `chat_services/multi_agent/`: Multi-agent conversation flows
-      - `conversation_flows/`: Individual workflow implementations
-  - `templates/`: Jinja2 prompt templates and HTML
-  - `utils/`: Utility functions and helpers
-  - `ingenious_extensions_template/`: Template for custom projects
-    - `services/chat_services/multi_agent/conversation_flows/bike_insights/`: Sample workflow
+```
+ingenious/                        # Core framework code
+├── api/                         # FastAPI routes and endpoints
+│   ├── routes/                  # Individual route modules
+│   │   ├── auth.py             # JWT authentication endpoints
+│   │   ├── chat.py             # Main chat endpoint
+│   │   ├── conversations.py    # Conversation history
+│   │   ├── diagnostic.py       # System diagnostics
+│   │   ├── events.py           # Event streaming (placeholder)
+│   │   ├── message_feedback.py # Message feedback
+│   │   └── prompts.py          # Prompt management
+├── auth/                        # JWT authentication and security
+├── cli/                         # Command-line interface
+│   ├── commands/               # Individual CLI commands
+│   └── cli.py                  # Main CLI entry point
+├── config/                      # Configuration (pydantic-settings)
+│   ├── main_settings.py        # Primary settings class
+│   ├── models.py               # Configuration models
+│   └── environment.py          # Environment handling
+├── core/                        # Core logging and utilities
+├── dataprep/                    # Web scraping (Scrapfly)
+├── db/                          # Database integration
+│   ├── chromadb_connection.py  # Vector database
+│   └── database_connection.py  # SQL databases
+├── document_processing/         # Document text extraction
+├── errors/                      # Custom exceptions
+├── external_services/           # External API integrations
+├── files/                       # File storage (local/Azure)
+├── main/                        # FastAPI app factory
+├── models/                      # Pydantic data models
+├── services/                    # Core business logic
+│   └── chat_services/          # Chat service implementations
+│       └── multi_agent/        # Multi-agent workflows
+│           ├── agents/         # Agent definitions
+│           └── conversation_flows/  # Workflow implementations
+├── templates/                   # Jinja2 templates
+├── utils/                       # Utility functions
+└── ingenious_extensions_template/  # Project template
+    └── services/.../bike_insights/  # Sample workflow
 
-- `scripts/`: Utility scripts
-  - `migrate_config.py`: Migrate YAML configs to environment variables
-- `tests/`: Test suite
-  - `unit/`: Unit tests
-  - `integration/`: Integration tests
+scripts/                         # Utility scripts
+├── migrate_config.py           # YAML to env var migration
+└── ...
+
+tests/                          # Test suite
+├── unit/                       # Unit tests
+└── integration/               # Integration tests
+```
 
 ## Documentation
 

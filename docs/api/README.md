@@ -30,6 +30,7 @@ graph TB
         DIAGNOSTIC_API[Diagnostic API\n/api/v1/workflow-status/{workflow_name}\n/api/v1/workflows\n/api/v1/diagnostic\n/api/v1/health]
         PROMPTS_API[Prompts API\n/api/v1/prompts]
         FEEDBACK_API[Feedback API\n/api/v1/messages/{message_id}/feedback]
+        AUTH_API[Auth API\n/api/v1/auth]
     end
 
     subgraph "Backend Services"
@@ -54,11 +55,13 @@ graph TB
     FASTAPI --> DIAGNOSTIC_API
     FASTAPI --> PROMPTS_API
     FASTAPI --> FEEDBACK_API
+    FASTAPI --> AUTH_API
 
     CHAT_API --> CHAT_SERVICE
     DIAGNOSTIC_API --> CONFIG_SERVICE
     PROMPTS_API --> FILE_STORAGE
     FEEDBACK_API --> CHAT_SERVICE
+    AUTH_API --> CHAT_SERVICE
 
     CHAT_SERVICE --> MULTI_AGENT_SERVICE
     MULTI_AGENT_SERVICE --> FILE_STORAGE
@@ -73,7 +76,7 @@ graph TB
     classDef external fill:#fce4ec
 
     class WEB_CLIENT,MOBILE_CLIENT,API_CLIENT,CLI_CLIENT client
-    class FASTAPI,CHAT_API,DIAGNOSTIC_API,PROMPTS_API,FEEDBACK_API api
+    class FASTAPI,CHAT_API,DIAGNOSTIC_API,PROMPTS_API,FEEDBACK_API,AUTH_API api
     class CHAT_SERVICE,MULTI_AGENT_SERVICE,CONFIG_SERVICE,FILE_STORAGE service
     class AZURE_OPENAI,AZURE_SEARCH,AZURE_SQL external
 ```
@@ -136,19 +139,29 @@ graph LR
         PROMPTS_VIEW[GET /api/v1/prompts/view/{revision_id}/{filename}\nView Prompt]
         PROMPTS_LIST[GET /api/v1/prompts/list/{revision_id}\nList Prompts]
         PROMPTS_UPDATE[POST /api/v1/prompts/update/{revision_id}/{filename}\nUpdate Prompt]
+        PROMPTS_REVISIONS[GET /api/v1/revisions/list\nList All Revisions]
+        PROMPTS_WORKFLOWS[GET /api/v1/workflows/list\nList Workflows with Prompts]
         FEEDBACK[PUT /api/v1/messages/{message_id}/feedback\nMessage Feedback]
         CONVERSATIONS[GET /api/v1/conversations/{thread_id}\nGet Conversation History]
+    end
+
+    subgraph "Authentication Endpoints"
+        AUTH_LOGIN[POST /api/v1/auth/login\nJWT Login]
+        AUTH_REFRESH[POST /api/v1/auth/refresh\nRefresh Token]
+        AUTH_VERIFY[GET /api/v1/auth/verify\nVerify Token]
     end
 
     classDef chat fill:#e8f5e8
     classDef workflow fill:#fff3e0
     classDef system fill:#e3f2fd
     classDef management fill:#f3e5f5
+    classDef auth fill:#ffe0b2
 
     class CHAT_POST chat
     class WORKFLOW_STATUS,WORKFLOWS_LIST,DIAGNOSTIC workflow
     class HEALTH system
-    class PROMPTS_VIEW,PROMPTS_LIST,PROMPTS_UPDATE,FEEDBACK,CONVERSATIONS management
+    class PROMPTS_VIEW,PROMPTS_LIST,PROMPTS_UPDATE,PROMPTS_REVISIONS,PROMPTS_WORKFLOWS,FEEDBACK,CONVERSATIONS management
+    class AUTH_LOGIN,AUTH_REFRESH,AUTH_VERIFY auth
 ```
 
 ### Chat API Flow
@@ -247,40 +260,59 @@ sequenceDiagram
 ```mermaid
 graph TB
     subgraph "Authentication Methods"
-        BASIC_AUTH[HTTP Basic Authentication\nUsername/Password]
+        JWT_AUTH[JWT Authentication\nBearer Token]
         NO_AUTH[Authentication Disabled\nAnonymous Access]
     end
 
     subgraph "Security Features"
         HTTPS_TLS[HTTPS/TLS\nTransport Encryption]
         CONFIG_AUTH[Configurable Authentication\nEnable/Disable via Config]
+        TOKEN_REFRESH[Token Refresh\nAutomatic Token Renewal]
+    end
+
+    subgraph "JWT Flow"
+        LOGIN[POST /api/v1/auth/login\nUsername/Password]
+        ACCESS_TOKEN[Access Token\n15 min expiry]
+        REFRESH_TOKEN[Refresh Token\n7 days expiry]
+        VERIFY[GET /api/v1/auth/verify\nValidate Token]
+        REFRESH[POST /api/v1/auth/refresh\nRenew Access Token]
     end
 
     subgraph "Validation Steps"
-        HEADER_CHECK[Authorization Header Check]
-        CREDENTIALS_VERIFY[Credential Verification]
+        HEADER_CHECK[Authorization Header Check\nBearer Token]
+        JWT_VERIFY[JWT Token Verification]
         CONFIG_CHECK[Check Auth Config]
         ACCESS_GRANTED[Access Granted]
     end
 
-    BASIC_AUTH --> HEADER_CHECK
+    JWT_AUTH --> LOGIN
+    LOGIN --> ACCESS_TOKEN
+    LOGIN --> REFRESH_TOKEN
     NO_AUTH --> ACCESS_GRANTED
-    CONFIG_CHECK --> BASIC_AUTH
+    CONFIG_CHECK --> JWT_AUTH
     CONFIG_CHECK --> NO_AUTH
 
-    HEADER_CHECK --> CREDENTIALS_VERIFY
-    CREDENTIALS_VERIFY --> ACCESS_GRANTED
+    ACCESS_TOKEN --> HEADER_CHECK
+    HEADER_CHECK --> JWT_VERIFY
+    JWT_VERIFY --> ACCESS_GRANTED
+    JWT_VERIFY --> VERIFY
+
+    REFRESH_TOKEN --> REFRESH
+    REFRESH --> ACCESS_TOKEN
 
     HTTPS_TLS --> HEADER_CHECK
     CONFIG_AUTH --> CONFIG_CHECK
+    TOKEN_REFRESH --> REFRESH
 
     classDef auth fill:#e8f5e8
     classDef security fill:#fff3e0
     classDef validation fill:#e3f2fd
+    classDef jwt fill:#ffe0b2
 
-    class BASIC_AUTH,NO_AUTH auth
-    class HTTPS_TLS,CONFIG_AUTH security
-    class HEADER_CHECK,CREDENTIALS_VERIFY,CONFIG_CHECK,ACCESS_GRANTED validation
+    class JWT_AUTH,NO_AUTH auth
+    class HTTPS_TLS,CONFIG_AUTH,TOKEN_REFRESH security
+    class HEADER_CHECK,JWT_VERIFY,CONFIG_CHECK,ACCESS_GRANTED validation
+    class LOGIN,ACCESS_TOKEN,REFRESH_TOKEN,VERIFY,REFRESH jwt
 ```
 
 ### Getting Started with the API
@@ -290,14 +322,80 @@ The Insight Ingenious API provides powerful endpoints for creating and managing 
 ### Base API Information
 - **Base URL**: `http://localhost:8000` (when using `ingen serve --port 8000`)
 - **Content-Type**: `application/json`
-- **Authentication**: HTTP Basic Authentication (configurable)
+- **Authentication**: JWT Bearer Token (configurable)
 
-### [Workflow API](/api/WORKFLOWS)
+### [Workflow API](/api/workflows/)
 Complete documentation for all available workflow endpoints, including:
 - Classification and routing workflows
 - Educational content generation
 - Knowledge base search and retrieval
 - SQL query generation and execution
+
+###  Authentication API Endpoints
+
+#### JWT Login
+```bash
+POST /api/v1/auth/login
+```
+Authenticate a user and receive JWT tokens.
+
+**Request Body:**
+```json
+{
+  "username": "user@example.com",
+  "password": "password123"
+}
+```
+
+**Response:**
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "bearer"
+}
+```
+
+#### Refresh Token
+```bash
+POST /api/v1/auth/refresh
+```
+Refresh an expired access token using a valid refresh token.
+
+**Request Body:**
+```json
+{
+  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+**Response:**
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "bearer"
+}
+```
+
+#### Verify Token
+```bash
+GET /api/v1/auth/verify
+```
+Verify if a JWT token is valid.
+
+**Headers:**
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**Response:**
+```json
+{
+  "valid": true,
+  "username": "user@example.com",
+  "exp": 1704376800
+}
+```
 
 ###  Core API Endpoints
 
@@ -326,11 +424,17 @@ Retrieves all messages from a specific conversation thread.
 ```json
 [
   {
-    "message_id": "msg-123",
+    "id": "msg-123",
     "thread_id": "thread-456",
+    "user_id": "user-789",
+    "role": "user|assistant|system",
     "content": "User message or agent response",
-    "role": "user|assistant",
-    "timestamp": "2025-07-04T12:00:00Z"
+    "name": "Agent name (optional)",
+    "positive_feedback": null,
+    "content_filter_results": null,
+    "tool_calls": [],
+    "created_at": "2025-07-04T12:00:00Z",
+    "updated_at": "2025-07-04T12:00:00Z"
   }
 ]
 ```
@@ -357,8 +461,7 @@ Submit feedback for a specific message.
 **Response:**
 ```json
 {
-  "message": "Feedback submitted successfully",
-  "feedback_id": "feedback-789"
+  "message": "Feedback submitted successfully"
 }
 ```
 
@@ -383,25 +486,40 @@ curl -X POST http://localhost:8000/api/v1/chat \
   -d '{"user_prompt": "Hello", "conversation_flow": "classification-agent"}'
 ```
 
-With authentication enabled:
+With JWT authentication enabled:
 ```bash
-curl -X POST http://localhost:80/api/v1/chat \
+# First login to get tokens
+curl -X POST http://localhost:8000/api/v1/auth/login \
   -H "Content-Type: application/json" \
-  -u "username:password" \
+  -d '{"username": "user@example.com", "password": "password123"}'
+
+# Use the access token for requests
+curl -X POST http://localhost:8000/api/v1/chat \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
   -d '{"user_prompt": "Hello", "conversation_flow": "classification-agent"}'
 ```
 
 #### Response Format
-All API responses follow a consistent format:
+API responses are returned directly without a wrapper. For chat endpoints, the response includes:
 
 ```json
 {
-  "status": "success|error",
-  "data": {
-    // Response data
-  },
-  "message": "Human-readable message",
-  "timestamp": "2025-07-04T12:00:00Z"
+  "message_id": "msg-123",
+  "thread_id": "thread-456",
+  "agent_response": "The AI agent's response...",
+  "metadata": {
+    "model": "gpt-4",
+    "max_token_count": 1024,
+    "workflow": "classification-agent"
+  }
+}
+```
+
+Error responses follow FastAPI's standard format:
+```json
+{
+  "detail": "Error message describing what went wrong"
 }
 ```
 
@@ -411,49 +529,98 @@ All API responses follow a consistent format:
 ```python
 import requests
 
-def call_chat_api(user_prompt, conversation_flow, username=None, password=None):
-    auth = (username, password) if username and password else None
-
-    response = requests.post(
-        "http://localhost:8000/api/v1/chat",
-        json={
+class IngeniousAPIClient:
+    def __init__(self, base_url="http://localhost:8000"):
+        self.base_url = base_url
+        self.access_token = None
+        
+    def login(self, username, password):
+        """Login and store access token"""
+        response = requests.post(
+            f"{self.base_url}/api/v1/auth/login",
+            json={"username": username, "password": password}
+        )
+        if response.status_code == 200:
+            data = response.json()
+            self.access_token = data["access_token"]
+            return True
+        return False
+    
+    def call_chat_api(self, user_prompt, conversation_flow, thread_id=None):
+        """Call the chat API with authentication"""
+        headers = {"Content-Type": "application/json"}
+        if self.access_token:
+            headers["Authorization"] = f"Bearer {self.access_token}"
+            
+        payload = {
             "user_prompt": user_prompt,
             "conversation_flow": conversation_flow
-        },
-        headers={
-            "Content-Type": "application/json"
-        },
-        auth=auth
-    )
-    return response.json()
+        }
+        if thread_id:
+            payload["thread_id"] = thread_id
+            
+        response = requests.post(
+            f"{self.base_url}/api/v1/chat",
+            json=payload,
+            headers=headers
+        )
+        return response.json()
 
 # Example usage
-result = call_chat_api("Hello", "classification-agent", "username", "password")
+client = IngeniousAPIClient()
+if client.login("user@example.com", "password123"):
+    result = client.call_chat_api("Hello", "classification-agent")
 ```
 
 ### JavaScript Integration
 ```javascript
-async function callChatAPI(userPrompt, conversationFlow, username, password) {
-    const auth = username && password ?
-        'Basic ' + btoa(username + ':' + password) : undefined;
-
-    const response = await fetch('http://localhost:8000/api/v1/chat', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            ...(auth && { 'Authorization': auth })
-        },
-        body: JSON.stringify({
-            user_prompt: userPrompt,
-            conversation_flow: conversationFlow
-        })
-    });
-
-    return await response.json();
+class IngeniousAPIClient {
+    constructor(baseUrl = 'http://localhost:8000') {
+        this.baseUrl = baseUrl;
+        this.accessToken = null;
+    }
+    
+    async login(username, password) {
+        const response = await fetch(`${this.baseUrl}/api/v1/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            this.accessToken = data.access_token;
+            return true;
+        }
+        return false;
+    }
+    
+    async callChatAPI(userPrompt, conversationFlow, threadId = null) {
+        const headers = { 'Content-Type': 'application/json' };
+        if (this.accessToken) {
+            headers['Authorization'] = `Bearer ${this.accessToken}`;
+        }
+        
+        const payload = { user_prompt: userPrompt, conversation_flow: conversationFlow };
+        if (threadId) {
+            payload.thread_id = threadId;
+        }
+        
+        const response = await fetch(`${this.baseUrl}/api/v1/chat`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(payload)
+        });
+        
+        return await response.json();
+    }
 }
 
 // Example usage
-const result = await callChatAPI('Hello', 'classification-agent', 'username', 'password');
+const client = new IngeniousAPIClient();
+if (await client.login('user@example.com', 'password123')) {
+    const result = await client.callChatAPI('Hello', 'classification-agent');
+}
 ```
 
 ## � Prompts API
@@ -468,6 +635,41 @@ The Prompts API provides endpoints for managing prompt templates used by convers
 - **Real-time Updates**: Changes take effect immediately in active workflows
 
 ### Base Endpoints
+
+#### List All Revisions
+```bash
+GET /api/v1/revisions/list
+```
+
+Lists all available prompt revision IDs.
+
+**Response:**
+```json
+{
+  "revisions": ["v1.0", "v1.1", "v2.0", "development"],
+  "count": 4
+}
+```
+
+#### List Workflows with Prompts
+```bash
+GET /api/v1/workflows/list
+```
+
+Lists all workflows that have prompt templates.
+
+**Response:**
+```json
+{
+  "workflows": [
+    "classification-agent",
+    "knowledge-base-agent", 
+    "sql-manipulation-agent",
+    "bike-insights"
+  ],
+  "count": 4
+}
+```
 
 #### List Prompt Files
 ```bash
@@ -692,22 +894,19 @@ The API uses standard HTTP status codes and provides detailed error messages:
 Example error response:
 ```json
 {
-  "status": "error",
-  "message": "Invalid workflow type specified",
-  "error_code": "INVALID_WORKFLOW_TYPE",
-  "timestamp": "2025-07-04T12:00:00Z"
+  "detail": "Invalid workflow type specified: unknown-workflow"
 }
 ```
 
 ##  Additional Resources
 
-- [Workflow API Documentation](/api/WORKFLOWS)
+- [Workflow API Documentation](/api/workflows/)
 - [Configuration Guide](/getting-started/configuration/)
-- [ Development Setup](/development/)
+- [Development Setup](/development/)
 - [CLI Reference](/CLI_REFERENCE)
 
 ## Need Help?
 
 - Check the [troubleshooting guide](/troubleshooting/)
-- Review the [workflow examples](/api/WORKFLOWS)
+- Review the [workflow examples](/api/workflows/)
 - Open an issue on [GitHub](https://github.com/Insight-Services-APAC/ingenious/issues)
