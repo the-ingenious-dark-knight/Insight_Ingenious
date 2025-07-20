@@ -9,8 +9,6 @@ toc_label: "API Workflows"
 toc_icon: "api"
 ---
 
-# Ingenious API Workflow Documentation
-
 This document provides detailed API usage examples for all available workflows in the Insight Ingenious framework.
 
 ## Base API Information
@@ -364,7 +362,7 @@ INGENIOUS_CHAT_SERVICE__TYPE=multi_agent
 
 ## Additional Resources
 
-- **Configuration Guide**: `/docs/getting-started/configuration/`
+- **Configuration Guide**: `/docs/getting-started/configuration`
 - **Custom Workflows**: `/docs/extensions/README.md`
 - **Troubleshooting**: `/docs/troubleshooting/README.md`
 - **Testing Guide**: `/docs/testing/README.md`

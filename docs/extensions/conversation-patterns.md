@@ -1,6 +1,17 @@
-## Creating Custom Conversation Patterns
+---
+title: "Conversation Patterns"
+layout: single
+permalink: /extensions/conversation-patterns/
+sidebar:
+  nav: "docs"
+toc: true
+toc_label: "Pattern Guide"
+toc_icon: "comments"
+---
 
-### Pattern Structure
+This guide covers creating custom conversation patterns for multi-agent coordination in Insight Ingenious.
+
+## Pattern Structure
 
 1. Create a new pattern module in `ingenious/services/chat_services/multi_agent/conversation_patterns/your_pattern_name/`
 2. Implement the `ConversationPattern` class following the interface

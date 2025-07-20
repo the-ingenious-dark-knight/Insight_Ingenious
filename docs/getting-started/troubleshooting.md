@@ -322,7 +322,7 @@ curl -X POST http://localhost:8000/api/v1/chat \
 ### Before Opening an Issue:
 
 1. Check this troubleshooting guide
-2. Review [Configuration Guide](/getting-started/configuration/)
+2. Review [Configuration Guide](/getting-started/configuration)
 3. Test with minimal configuration
 4. Check GitHub issues for similar problems
 

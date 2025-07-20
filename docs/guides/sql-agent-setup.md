@@ -9,8 +9,6 @@ toc_label: "SQL Agent Setup"
 toc_icon: "database"
 ---
 
-# SQL Manipulation Agent Setup Guide
-
 The SQL Manipulation Agent allows you to execute SQL queries using natural language input. This guide covers both SQLite (local development) and Azure SQL (production) setups.
 
 ## Overview

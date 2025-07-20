@@ -9,8 +9,6 @@ toc_label: "CLI Commands"
 toc_icon: "terminal"
 ---
 
-# Insight Ingenious CLI Reference
-
 The `ingen` command-line interface provides intuitive commands for managing your AI agent workflows.
 
 ## Quick Start

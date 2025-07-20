@@ -9,8 +9,6 @@ toc_label: "Development Topics"
 toc_icon: "code"
 ---
 
-# Development Guide
-
 This guide provides detailed information for developers who want to extend, modify, or contribute to Insight Ingenious - an enterprise-grade Python library for building AI agent APIs with Microsoft Azure integrations. The library's architecture supports extensive customization and debugging capabilities for enterprise development teams.
 
 ## Development Environment Setup
@@ -733,7 +731,7 @@ flowchart TD
 ## Next Steps
 
 -  Read the [Architecture Guide](/architecture/) for system design
--  Check the [Configuration Guide](/getting-started/configuration/) for setup
+-  Check the [Configuration Guide](/getting-started/configuration) for setup
 -  Try the [Getting Started Guide](/getting-started/) for quick setup
 - Explore the [API Documentation](/api/) for integration
 - Explore the [API Documentation](/api/) for integration

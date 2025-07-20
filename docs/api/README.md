@@ -9,8 +9,6 @@ toc_label: "API Sections"
 toc_icon: "plug"
 ---
 
-# API Reference
-
 Complete API documentation for Insight Ingenious - an enterprise-grade Python library for quickly setting up APIs to interact with AI Agents. This reference covers REST endpoints, workflow examples, debugging utilities, and integration guides.
 
 ## API Architecture Overview
@@ -324,7 +322,7 @@ The Insight Ingenious API provides powerful endpoints for creating and managing 
 - **Content-Type**: `application/json`
 - **Authentication**: JWT Bearer Token (configurable - disabled by default)
 
-### [Workflow API](/api/workflows/)
+### [Workflow API](/api/workflows)
 Complete documentation for all available workflow endpoints, including:
 - Classification and routing workflows
 - Multi-agent bike sales analysis (template workflow)
@@ -904,13 +902,13 @@ Example error response:
 
 ## Additional Resources
 
-- [Workflow API Documentation](/api/workflows/)
-- [Configuration Guide](/getting-started/configuration/)
+- [Workflow API Documentation](/api/workflows)
+- [Configuration Guide](/getting-started/configuration)
 - [Development Setup](/development/)
 - [CLI Reference](/CLI_REFERENCE)
 
 ## Need Help?
 
 - Check the [troubleshooting guide](/troubleshooting/)
-- Review the [workflow examples](/api/workflows/)
+- Review the [workflow examples](/api/workflows)
 - Open an issue on [GitHub](https://github.com/Insight-Services-APAC/ingenious/issues)

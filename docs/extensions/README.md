@@ -9,8 +9,6 @@ toc_label: "Extensions"
 toc_icon: "puzzle-piece"
 ---
 
-# Extensions and Customization
-
 This section covers how to extend Insight Ingenious - an enterprise-grade Python library for AI agent APIs - with custom components, advanced configurations, and Azure service integrations. The library's extensive customization capabilities enable tailored solutions for specific enterprise requirements.
 
 ## Available Extension Guides

@@ -9,8 +9,6 @@ toc_label: "Configuration Options"
 toc_icon: "cogs"
 ---
 
-# Configuration Guide
-
 This guide explains how to configure Insight Ingenious - an enterprise-grade Python library for quickly setting up APIs to interact with AI Agents. The library provides comprehensive configuration options for enterprise environments, debugging tools, and customization requirements.
 
 ## Configuration Overview

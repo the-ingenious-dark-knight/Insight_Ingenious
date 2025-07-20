@@ -9,8 +9,6 @@ toc_label: "Available Guides"
 toc_icon: "book"
 ---
 
-# User Guides
-
 This section provides detailed guides for using specific features and capabilities of Insight Ingenious - an enterprise-grade Python library for building AI agent APIs with Microsoft Azure integrations, debugging utilities, and extensive customization options.
 
 ## Available Guides
@@ -77,5 +75,5 @@ See [CONTRIBUTING.md](../../CONTRIBUTING.md) for contribution guidelines.
 ## Need Help?
 
 - Check the [Troubleshooting Guide](../getting-started/troubleshooting.md)
-- Review the [Configuration Documentation](/getting-started/configuration/)
+- Review the [Configuration Documentation](/getting-started/configuration)
 - Ask questions in the project repository

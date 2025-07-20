@@ -9,8 +9,6 @@ toc_label: "Installation Steps"
 toc_icon: "download"
 ---
 
-# Installation Guide
-
 This guide covers the complete installation process for Insight Ingenious, including optional dependencies for advanced features.
 
 ## Prerequisites
@@ -138,7 +136,7 @@ Download and install the ODBC Driver 18 for SQL Server from the [Microsoft websi
 - Environment variable support via python-dotenv
 - LOCAL_SQL_CSV_PATH configuration for sample data
 
-**Documentation:** [Azure SQL Configuration Guide](/getting-started/configuration/#chat-history)
+**Documentation:** [Azure SQL Configuration Guide](/getting-started/configuration#chat-history)
 
 ### Complete Installation
 
@@ -164,7 +162,7 @@ python -c "import ingenious; print('Insight Ingenious installed successfully')"
 
 ## Next Steps
 
-1. **Configure the system** - See [Configuration Guide](/getting-started/configuration/)
+1. **Configure the system** - See [Configuration Guide](/getting-started/configuration)
 2. **Understand workflows** - See [Workflows Guide](../workflows/README.md)
 3. **Try the quick start** - See [Quick Start Guide](./README.md)
 

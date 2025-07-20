@@ -9,8 +9,6 @@ toc_label: "Data Preparation"
 toc_icon: "database"
 ---
 
-# Dataprep Crawler (Scrapfly)
-
 This optional pack lets you scrape web pages straight from the **Insight Ingenious** CLI.
 
 ---

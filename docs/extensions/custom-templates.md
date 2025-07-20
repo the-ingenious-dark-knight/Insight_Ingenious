@@ -1,6 +1,17 @@
-## Using Custom Templates
+---
+title: "Custom Templates"
+layout: single
+permalink: /extensions/custom-templates/
+sidebar:
+  nav: "docs"
+toc: true
+toc_label: "Template Guide"
+toc_icon: "file-code"
+---
 
-### Creating Custom Prompts
+This guide covers creating and using custom templates in Insight Ingenious.
+
+## Creating Custom Prompts
 
 1. Create a new template in `templates/prompts/your_prompt_name.jinja`
 2. Use Jinja2 syntax for dynamic content

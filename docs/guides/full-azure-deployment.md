@@ -9,8 +9,6 @@ toc_label: "Setup Steps"
 toc_icon: "database"
 ---
 
-# Complete Azure Deployment Guide for Bike-Insights Workflow
-
 This guide provides step-by-step instructions for deploying the Ingenious bike-insights workflow with full Azure integration, including Azure SQL Database for chat history and Azure Blob Storage for prompt management.
 
 ##  Overview

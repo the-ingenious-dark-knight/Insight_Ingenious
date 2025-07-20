@@ -9,8 +9,6 @@ toc_label: "Architecture Components"
 toc_icon: "sitemap"
 ---
 
-# Architecture Overview
-
 This document describes the high-level architecture of Insight Ingenious, an enterprise-grade Python library designed for quickly setting up APIs to interact with AI Agents with comprehensive Azure service integrations and debugging capabilities.
 
 ## System Architecture
@@ -763,5 +761,5 @@ For detailed development instructions, see the [Development Guide](/development/
 
 - Read the [Getting Started Guide](/getting-started/) to begin using the system
 - Follow the [Development Guide](/development/) to start extending the framework
-- Check the [Configuration Guide](/getting-started/configuration/) for setup details
+- Check the [Configuration Guide](/getting-started/configuration) for setup details
 - Explore the [API Documentation](/api/) for integration options
