@@ -58,9 +58,8 @@ Start the API server with web interfaces.
 **Options:**
 - `--host, -h` - Host to bind (default: 0.0.0.0)
 - `--port` - Port to bind (default: 80 or $WEB_PORT)
-- `--config, -c` - Path to config.yml file (for legacy compatibility)
-- `--profile, -p` - Path to profiles.yml file (for legacy compatibility)
-- `--no-prompt-tuner` - Disable prompt tuner interface
+- `--config, -c` - Path to config.yml file (deprecated - use environment variables)
+- `--profile, -p` - Path to profiles.yml file (deprecated - use environment variables)
 
 **Interfaces:**
 - API: `http://localhost:<port>/api/v1/` (e.g., `http://localhost:8000/api/v1/` when using `--port 8000`)
@@ -240,7 +239,7 @@ export INGENIOUS_LOCAL_SQL_DB__DATABASE_PATH=/tmp/sample_sql_db
 
 # For Azure services (experimental)
 export INGENIOUS_AZURE_SEARCH_SERVICES__0__KEY=your-search-key
-export INGENIOUS_AZURE_SQL_SERVICES__CONNECTION_STRING="Driver=..."
+export INGENIOUS_AZURE_SQL_SERVICES__DATABASE_CONNECTION_STRING="Driver=..."
 ```
 
 ## Configuration Methods

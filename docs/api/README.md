@@ -382,7 +382,7 @@ Refresh an expired access token using a valid refresh token.
 ```bash
 GET /api/v1/auth/verify
 ```
-Verify if a JWT token is valid.
+Verify if a JWT token is valid. The token must be provided in the Authorization header using Bearer scheme.
 
 **Headers:**
 ```
@@ -743,7 +743,7 @@ Updates or creates a prompt template file with new content.
 **Response:**
 ```json
 {
-  "message": "Prompt file updated successfully"
+  "message": "File updated successfully"
 }
 ```
 

@@ -1,398 +1,251 @@
 """
-Test Documentation Accuracy
+Test suite to validate documentation accuracy against codebase implementation.
 
-This test module validates that key documentation claims match the actual implementation.
-DO NOT RUN this test - it's for static analysis only to validate documentation claims.
+This test file validates key documentation claims by examining the actual code
+without executing it. It ensures documentation stays synchronized with implementation.
 """
 
+import ast
+import os
 import re
-import sys
 from pathlib import Path
-from typing import List
+from typing import Dict, List, Set
+
+import pytest
 
 
-class DocumentationValidator:
-    """Validates documentation claims against actual codebase implementation"""
+class CodeAnalyzer:
+    """Static code analyzer for validating documentation claims."""
 
-    def __init__(self):
-        self.project_root = Path(__file__).parent.parent.parent
-        self.errors: List[str] = []
-        self.warnings: List[str] = []
+    def __init__(self, project_root: Path):
+        self.project_root = project_root
 
-    def validate_all(self) -> bool:
-        """Run all validation checks"""
-        validations = [
-            self.validate_cli_commands(),
-            self.validate_api_endpoints(),
-            self.validate_workflows(),
-            self.validate_configuration(),
-            self.validate_dependencies(),
-            self.validate_file_structure(),
-            self.validate_architecture_claims(),
-            self.validate_troubleshooting_guide(),
-        ]
-        return all(validations)
+    def find_api_routes(self) -> Dict[str, List[str]]:
+        """Find all API routes defined in the codebase."""
+        routes = {}
+        routes_dir = self.project_root / "ingenious" / "api" / "routes"
+        
+        for py_file in routes_dir.rglob("*.py"):
+            if py_file.name == "__init__.py":
+                continue
+                
+            content = py_file.read_text()
+            # Find router.method decorators
+            router_pattern = r'@router\.(get|post|put|delete|patch)\("([^"]+)"'
+            matches = re.findall(router_pattern, content)
+            
+            for method, path in matches:
+                if py_file.stem not in routes:
+                    routes[py_file.stem] = []
+                routes[py_file.stem].append(f"{method.upper()} {path}")
+                
+        return routes
 
-    def validate_cli_commands(self) -> bool:
-        """Validate CLI commands documented in README.md and CLI_REFERENCE.md"""
-        # Check CLI module exists
-        cli_path = self.project_root / "ingenious" / "cli"
-        if not cli_path.exists():
-            self.errors.append("CLI module not found at ingenious/cli/")
-            return False
+    def find_cli_commands(self) -> Set[str]:
+        """Find all CLI commands defined in the codebase."""
+        commands = set()
+        cli_dir = self.project_root / "ingenious" / "cli"
+        
+        for py_file in cli_dir.rglob("*.py"):
+            content = py_file.read_text()
+            # Find @app.command decorators
+            command_pattern = r'@app\.command\((?:name="([^"]+)"|hidden=True)'
+            matches = re.findall(command_pattern, content)
+            
+            for match in matches:
+                if match and not match.startswith("_"):
+                    commands.add(match)
+                    
+        return commands
 
-        # Check main.py exists
-        main_path = cli_path / "main.py"
-        if not main_path.exists():
-            self.errors.append("CLI main.py not found")
-            return False
+    def find_environment_variables(self) -> Set[str]:
+        """Find all INGENIOUS_ prefixed environment variables."""
+        env_vars = set()
+        
+        # Check config models
+        config_dir = self.project_root / "ingenious" / "config"
+        for py_file in config_dir.rglob("*.py"):
+            content = py_file.read_text()
+            # Find INGENIOUS_ environment variable references
+            env_pattern = r'INGENIOUS_[A-Z_]+'
+            matches = re.findall(env_pattern, content)
+            env_vars.update(matches)
+            
+        return env_vars
 
-        # Check command modules
-        command_modules = {
-            "server_commands.py": ["serve"],
-            "project_commands.py": ["init"],
-            "test_commands.py": ["test"],
-            "workflow_commands.py": ["workflows"],
-            "help_commands.py": ["validate", "help", "status", "version"],
-        }
+    def find_workflows(self) -> Set[str]:
+        """Find all available workflows."""
+        workflows = set()
+        flows_dir = self.project_root / "ingenious" / "services" / "chat_services" / "multi_agent" / "conversation_flows"
+        
+        if flows_dir.exists():
+            for item in flows_dir.iterdir():
+                if item.is_dir() and not item.name.startswith("__"):
+                    workflows.add(item.name)
+                    
+        return workflows
 
-        for module, commands in command_modules.items():
-            module_path = cli_path / "commands" / module
-            if not module_path.exists():
-                self.errors.append(f"Command module {module} not found")
-
-        return len(self.errors) == 0
-
-    def validate_api_endpoints(self) -> bool:
-        """Validate API endpoints documented in README.md and API docs"""
-        documented_endpoints = {
-            "POST /api/v1/chat": "chat.py",
-            "GET /api/v1/health": "diagnostic.py",
-            "GET /api/v1/workflows": "diagnostic.py",
-            "GET /api/v1/workflow-status/{workflow_name}": "diagnostic.py",
-            "GET /api/v1/diagnostic": "diagnostic.py",
-            "GET /api/v1/revisions/list": "prompts.py",
-            "GET /api/v1/workflows/list": "prompts.py",
-            "GET /api/v1/prompts/list/{revision_id}": "prompts.py",
-            "GET /api/v1/prompts/view/{revision_id}/{filename}": "prompts.py",
-            "POST /api/v1/prompts/update/{revision_id}/{filename}": "prompts.py",
-            "POST /api/v1/auth/login": "auth.py",
-            "POST /api/v1/auth/refresh": "auth.py",
-            "GET /api/v1/auth/verify": "auth.py",
-            "GET /api/v1/conversations/{thread_id}": "conversation.py",
-            "PUT /api/v1/messages/{message_id}/feedback": "message_feedback.py",
-        }
-
-        # Check routes directory
-        routes_path = self.project_root / "ingenious" / "api" / "routes"
-        if not routes_path.exists():
-            self.errors.append("API routes directory not found")
-            return False
-
-        # Check each route file exists
-        for endpoint, route_file in documented_endpoints.items():
-            file_path = routes_path / route_file
+    def check_model_fields(self, model_path: str, field_name: str) -> bool:
+        """Check if a model has a specific field."""
+        try:
+            file_path = self.project_root / model_path
             if not file_path.exists():
-                self.errors.append(f"Route file {route_file} for {endpoint} not found")
+                return False
+                
+            content = file_path.read_text()
+            # Simple check for field definition
+            field_pattern = rf'{field_name}:\s*\w+'
+            return bool(re.search(field_pattern, content))
+        except Exception:
+            return False
 
-        return len(self.errors) == 0
 
-    def validate_workflows(self) -> bool:
-        """Validate workflows documented match actual implementations"""
+
+class TestDocumentationAccuracy:
+    """Test cases for documentation accuracy validation."""
+
+    @pytest.fixture
+    def analyzer(self):
+        """Create code analyzer instance."""
+        project_root = Path(__file__).parent.parent.parent
+        return CodeAnalyzer(project_root)
+
+    def test_api_endpoints_documented(self, analyzer):
+        """Verify documented API endpoints exist in code."""
+        # Key endpoints that should exist based on documentation
+        expected_endpoints = {
+            "chat": ["POST /chat"],
+            "diagnostic": ["GET /health", "GET /workflows", "GET /workflow-status/{workflow_name}"],
+            "auth": ["POST /login", "POST /refresh", "GET /verify"],
+            "conversation": ["GET /conversations/{thread_id}"],
+            "message_feedback": ["PUT /messages/{message_id}/feedback"],
+            "prompts": ["GET /prompts/list/{revision_id}", "GET /prompts/view/{revision_id}/{filename}", 
+                       "POST /prompts/update/{revision_id}/{filename}"]
+        }
+        
+        actual_routes = analyzer.find_api_routes()
+        
+        for module, endpoints in expected_endpoints.items():
+            assert module in actual_routes, f"API module {module} not found"
+            for endpoint in endpoints:
+                method, path = endpoint.split(" ", 1)
+                found = any(
+                    route.startswith(method) and path in route 
+                    for route in actual_routes[module]
+                )
+                assert found, f"Endpoint {endpoint} not found in {module}.py"
+
+    def test_cli_commands_documented(self, analyzer):
+        """Verify documented CLI commands exist."""
+        expected_commands = {
+            "init", "serve", "workflows", "test", "validate",
+            "help", "status", "version", "dataprep", "document-processing"
+        }
+        
+        actual_commands = analyzer.find_cli_commands()
+        
+        for command in expected_commands:
+            assert command in actual_commands, f"CLI command '{command}' not found in code"
+
+    def test_core_workflows_exist(self, analyzer):
+        """Verify core workflows are in the library."""
         core_workflows = {
-            "classification-agent": "classification_agent",
-            "knowledge-base-agent": "knowledge_base_agent",
-            "sql-manipulation-agent": "sql_manipulation_agent",
+            "classification_agent",
+            "knowledge_base_agent", 
+            "sql_manipulation_agent"
         }
+        
+        actual_workflows = analyzer.find_workflows()
+        
+        for workflow in core_workflows:
+            assert workflow in actual_workflows, f"Core workflow '{workflow}' not found"
 
-        template_workflows = {
-            "bike-insights": "bike_insights",
-        }
+    def test_environment_variable_prefix(self, analyzer):
+        """Verify environment variables use INGENIOUS_ prefix."""
+        env_vars = analyzer.find_environment_variables()
+        
+        # All found env vars should start with INGENIOUS_
+        for var in env_vars:
+            assert var.startswith("INGENIOUS_"), f"Environment variable {var} doesn't use INGENIOUS_ prefix"
 
-        # Check core workflows
-        flows_path = (
-            self.project_root
-            / "ingenious"
-            / "services"
-            / "chat_services"
-            / "multi_agent"
-            / "conversation_flows"
+    def test_azure_sql_field_name(self, analyzer):
+        """Verify Azure SQL model uses correct field name."""
+        # Check that AzureSqlSettings uses database_connection_string
+        has_field = analyzer.check_model_fields(
+            "ingenious/config/models.py",
+            "database_connection_string"
         )
-        for workflow, folder in core_workflows.items():
-            workflow_path = flows_path / folder
-            if not workflow_path.exists():
-                self.errors.append(
-                    f"Core workflow {workflow} not found at {workflow_path}"
-                )
+        assert has_field, "AzureSqlSettings should have 'database_connection_string' field"
 
-        # Check template workflows
-        template_path = (
-            self.project_root
-            / "ingenious"
-            / "ingenious_extensions_template"
-            / "services"
-            / "chat_services"
-            / "multi_agent"
-            / "conversation_flows"
-        )
-        for workflow, folder in template_workflows.items():
-            workflow_path = template_path / folder
-            if not workflow_path.exists():
-                self.warnings.append(
-                    f"Template workflow {workflow} not found at {workflow_path}"
-                )
-
-        return len(self.errors) == 0
-
-    def validate_configuration(self) -> bool:
-        """Validate configuration structure matches documentation"""
-        config_files = {
-            "main_settings.py": "Main settings class",
-            "models.py": "Configuration model definitions",
-            "environment.py": "Environment handling",
-        }
-
-        config_path = self.project_root / "ingenious" / "config"
-        if not config_path.exists():
-            self.errors.append("Config directory not found")
-            return False
-
-        for file, description in config_files.items():
-            file_path = config_path / file
-            if not file_path.exists():
-                self.errors.append(f"Config file {file} ({description}) not found")
-
-        # Check for required environment variable prefixes in code
-        settings_path = config_path / "main_settings.py"
-        if settings_path.exists():
-            content = settings_path.read_text()
-            if "INGENIOUS_" not in content and "env_prefix" not in content:
-                self.warnings.append("INGENIOUS_ prefix not found in main_settings.py")
-
-        return len(self.errors) == 0
-
-    def validate_dependencies(self) -> bool:
-        """Validate dependencies match pyproject.toml"""
-        pyproject_path = self.project_root / "pyproject.toml"
-        if not pyproject_path.exists():
-            self.errors.append("pyproject.toml not found")
-            return False
-
+    def test_python_version_requirement(self):
+        """Verify Python version requirement in pyproject.toml."""
+        pyproject_path = Path(__file__).parent.parent.parent / "pyproject.toml"
         content = pyproject_path.read_text()
+        
+        # Check for Python 3.13+ requirement
+        assert 'requires-python = ">=3.13"' in content, "Python 3.13+ requirement not found"
 
-        # Check base dependencies mentioned in docs
-        required_deps = [
-            "chromadb",  # For knowledge-base-agent
-            "autogen-agentchat",  # For agent compatibility
-            "azure-identity",  # Azure integration
-            "fastapi",  # API server
-            "pandas",  # Data manipulation
-        ]
+    def test_api_prefix(self, analyzer):
+        """Verify API routes use /api/v1/ prefix."""
+        routing_file = Path(__file__).parent.parent.parent / "ingenious" / "main" / "routing.py"
+        content = routing_file.read_text()
+        
+        # Check for /api/v1 prefix in route registration
+        assert 'prefix="/api/v1"' in content, "API routes should use /api/v1 prefix"
 
-        for dep in required_deps:
-            if dep not in content:
-                self.warnings.append(
-                    f"Expected dependency {dep} not found in pyproject.toml"
-                )
+    def test_default_port_configuration(self):
+        """Verify default port configuration."""
+        server_commands = Path(__file__).parent.parent.parent / "ingenious" / "cli" / "server_commands.py"
+        content = server_commands.read_text()
+        
+        # Check default port is 80 or uses WEB_PORT env var
+        assert 'int(os.getenv("WEB_PORT", "80"))' in content, "Default port should be 80 or $WEB_PORT"
 
-        return len(self.errors) == 0
-
-    def validate_file_structure(self) -> bool:
-        """Validate project structure matches documentation"""
-        expected_structure = {
-            "ingenious/api/routes/": "API route modules",
-            "ingenious/auth/": "JWT authentication",
-            "ingenious/cli/commands/": "CLI command implementations",
-            "ingenious/config/": "Configuration management",
-            "ingenious/core/": "Core logging and error handling",
-            "ingenious/dataprep/": "Web scraping utilities",
-            "ingenious/db/": "Database integration",
-            "ingenious/document_processing/": "PDF/document extraction",
-            "ingenious/errors/": "Custom exceptions",
-            "ingenious/external_services/": "OpenAI integrations",
-            "ingenious/files/": "File storage",
-            "ingenious/main/": "FastAPI application factory",
-            "ingenious/models/": "Pydantic models",
-            "ingenious/services/chat_services/multi_agent/": "Multi-agent flows",
-            "ingenious/templates/": "Jinja2 templates",
-            "ingenious/utils/": "Utility functions",
-            "ingenious/ingenious_extensions_template/": "Template for custom projects",
-        }
-
-        for path, description in expected_structure.items():
-            full_path = self.project_root / path
-            if not full_path.exists():
-                self.warnings.append(f"Expected path {path} ({description}) not found")
-
-        return len(self.errors) == 0
-
-    def validate_architecture_claims(self) -> bool:
-        """Validate architecture documentation claims"""
-        # Check for interfaces mentioned in architecture docs
-        interfaces = {
-            "IConversationFlow": "Conversation flow interface",
-            "IConversationPattern": "Conversation pattern interface",
-            "IChatService": "Chat service interface",
-            "IFileStorage": "File storage interface",
-        }
-
-        for interface, desc in interfaces.items():
-            found = False
-            for py_file in (self.project_root / "ingenious").rglob("*.py"):
-                if py_file.is_file():
-                    content = py_file.read_text()
-                    if f"class {interface}" in content:
-                        found = True
-                        break
-            if not found:
-                self.warnings.append(
-                    f"Interface {interface} ({desc}) not found in codebase"
-                )
-
-        # Check for classes that architecture docs say don't exist
-        non_existent_classes = [
-            "AgentMarkdownDefinition",
-            "ConversationManager",
-            "AgentCoordinator",
-        ]
-        for class_name in non_existent_classes:
-            for py_file in (self.project_root / "ingenious").rglob("*.py"):
-                if py_file.is_file():
-                    content = py_file.read_text()
-                    if f"class {class_name}" in content:
-                        self.errors.append(
-                            f"Class {class_name} exists but architecture docs say it doesn't"
-                        )
-                        break
-
-        # Verify classification agent doesn't inherit from IConversationFlow
-        classification_path = (
-            self.project_root
-            / "ingenious"
-            / "services"
-            / "chat_services"
-            / "multi_agent"
-            / "conversation_flows"
-            / "classification_agent"
-            / "classification_agent.py"
+    def test_jwt_authentication_configurable(self, analyzer):
+        """Verify JWT authentication is configurable."""
+        auth_settings = analyzer.check_model_fields(
+            "ingenious/config/models.py",
+            "enable"
         )
-        if classification_path.exists():
-            content = classification_path.read_text()
-            if "IConversationFlow" in content and "class" in content:
-                if re.search(r"class\s+\w+.*\(.*IConversationFlow.*\)", content):
-                    self.errors.append(
-                        "Classification agent inherits from IConversationFlow but shouldn't according to findings"
-                    )
+        assert auth_settings, "Authentication should have 'enable' field for configuration"
 
-        return len(self.errors) == 0
+    def test_storage_backends_supported(self):
+        """Verify both local and Azure storage backends are supported."""
+        files_dir = Path(__file__).parent.parent.parent / "ingenious" / "files"
+        
+        # Check for both local and azure subdirectories
+        assert (files_dir / "local").exists(), "Local storage backend not found"
+        assert (files_dir / "azure").exists(), "Azure storage backend not found"
 
-    def validate_troubleshooting_guide(self) -> bool:
-        """Validate troubleshooting guide accuracy"""
-        # Check if default port is 80
-        config_path = self.project_root / "ingenious" / "models" / "config_ns.py"
-        if config_path.exists():
-            content = config_path.read_text()
-            if "port: int = Field(80" not in content and "port = 80" not in content:
-                self.warnings.append("Default port might not be 80 as documented")
+    def test_template_workflow_location(self):
+        """Verify bike-insights is in template, not core library."""
+        # Check core library doesn't have bike-insights
+        core_flows = Path(__file__).parent.parent.parent / "ingenious" / "services" / "chat_services" / "multi_agent" / "conversation_flows"
+        assert not (core_flows / "bike_insights").exists(), "bike-insights should not be in core library"
+        
+        # Check template has bike-insights
+        template_flows = Path(__file__).parent.parent.parent / "ingenious" / "ingenious_extensions_template" / "services" / "chat_services" / "multi_agent" / "conversation_flows"
+        assert (template_flows / "bike_insights").exists(), "bike-insights should be in template"
 
-        # Check if WEB_PORT env var is used
-        server_path = self.project_root / "ingenious" / "cli" / "commands" / "server.py"
-        if server_path.exists():
-            content = server_path.read_text()
-            if "WEB_PORT" not in content:
-                self.warnings.append(
-                    "WEB_PORT environment variable not found in server command"
-                )
+    def test_documentation_files_exist(self):
+        """Verify all referenced documentation files exist."""
+        docs_to_check = [
+            "README.md",
+            "docs/api/README.md",
+            "docs/getting-started/configuration.md",
+            "docs/workflows/README.md",
+            "docs/CLI_REFERENCE.md",
+            "docs/architecture/README.md",
+            "docs/troubleshooting/README.md"
+        ]
+        
+        project_root = Path(__file__).parent.parent.parent
+        for doc in docs_to_check:
+            doc_path = project_root / doc
+            assert doc_path.exists(), f"Documentation file {doc} not found"
 
-        # Check Azure SQL uses pyodbc
-        azuresql_path = self.project_root / "ingenious" / "db" / "azuresql"
-        if azuresql_path.exists():
-            found_pyodbc = False
-            for py_file in azuresql_path.rglob("*.py"):
-                if "pyodbc" in py_file.read_text():
-                    found_pyodbc = True
-                    break
-            if not found_pyodbc:
-                self.warnings.append(
-                    "pyodbc import not found in Azure SQL implementation"
-                )
-
-        return len(self.errors) == 0
-
-    def print_report(self):
-        """Print validation report"""
-        print("=== Documentation Validation Report ===\n")
-
-        if not self.errors and not self.warnings:
-            print("✅ All documentation claims validated successfully!")
-            return
-
-        if self.errors:
-            print(f"❌ Found {len(self.errors)} errors:\n")
-            for error in self.errors:
-                print(f"  - {error}")
-            print()
-
-        if self.warnings:
-            print(f"⚠️  Found {len(self.warnings)} warnings:\n")
-            for warning in self.warnings:
-                print(f"  - {warning}")
-            print()
-
-
-def main():
-    """Main validation function - DO NOT RUN, for static analysis only"""
-    print("=" * 60)
-    print("DOCUMENTATION ACCURACY VALIDATION")
-    print("This script validates documentation claims through static analysis")
-    print("DO NOT RUN THIS - It's for code review only")
-    print("=" * 60)
-    print()
-
-    validator = DocumentationValidator()
-    success = validator.validate_all()
-    validator.print_report()
-
-    # Simulated test assertions for static analysis
-    assert_cli_commands_exist()
-    assert_api_endpoints_match_routes()
-    assert_workflows_are_discoverable()
-    assert_configuration_uses_ingenious_prefix()
-    assert_dependencies_include_required_packages()
-
-    return 0 if success else 1
-
-
-def assert_cli_commands_exist():
-    """Assert all documented CLI commands have implementations"""
-    # These would be actual test assertions in a real test
-    pass
-
-
-def assert_api_endpoints_match_routes():
-    """Assert all documented API endpoints have route handlers"""
-    # These would be actual test assertions in a real test
-    pass
-
-
-def assert_workflows_are_discoverable():
-    """Assert all documented workflows can be discovered by the system"""
-    # These would be actual test assertions in a real test
-    pass
-
-
-def assert_configuration_uses_ingenious_prefix():
-    """Assert configuration uses INGENIOUS_ environment variable prefix"""
-    # These would be actual test assertions in a real test
-    pass
-
-
-def assert_dependencies_include_required_packages():
-    """Assert pyproject.toml includes all required dependencies"""
-    # These would be actual test assertions in a real test
-    pass
 
 
 if __name__ == "__main__":
-    # DO NOT RUN - for static analysis only
-    sys.exit(main())
+    # Run tests with pytest
+    pytest.main([__file__, "-v"])

@@ -34,15 +34,11 @@ Get up and running in 5 minutes with Azure OpenAI!
     ```
 
 2. **Configure Credentials**:
-    Copy the example template and add your Azure OpenAI credentials:
+    Create a `.env` file with your Azure OpenAI credentials:
     ```bash
-    # Copy environment template (choose based on your needs)
-    cp .env.example .env # Full configuration options
-    # OR
-    cp .env.development .env # Minimal development setup
-    # OR
-    cp .env.azure-full .env # Full Azure integration
-
+    # Create .env file in current directory
+    touch .env
+    
     # Edit .env file with your actual credentials
     ```
 
@@ -86,7 +82,6 @@ Get up and running in 5 minutes with Azure OpenAI!
     # --port                 # Port to bind (default: 80 or $WEB_PORT env var)
     # --config config.yml    # Legacy config file (deprecated - use environment variables)
     # --profile production   # Legacy profile (deprecated - use environment variables)
-    # --no-prompt-tuner      # Disable prompt tuner UI (deprecated - removed)
     ```
 
 5. **Verify Health**:
@@ -147,8 +142,8 @@ Insight Ingenious provides multiple conversation workflows with different config
 These workflows are built into the Ingenious library and available immediately:
 
 - `classification-agent` - Simple text classification and routing to categories (minimal config required)
-- `knowledge-base-agent` - Search and retrieve information from knowledge bases (uses local ChromaDB by default, no additional config needed)
-- `sql-manipulation-agent` - Execute SQL queries based on natural language (uses local SQLite by default, no additional config needed)
+- `knowledge-base-agent` - Search and retrieve information from knowledge bases (requires Azure Search or uses local ChromaDB by default)
+- `sql-manipulation-agent` - Execute SQL queries based on natural language (requires Azure SQL or uses local SQLite by default)
 
 > **Note**: Core workflows support both hyphenated (`classification-agent`) and underscored (`classification_agent`) naming formats for backward compatibility.
 

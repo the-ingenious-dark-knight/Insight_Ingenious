@@ -452,7 +452,7 @@ uv add aiofiles
 # Azure SQL configuration
 INGENIOUS_AZURE_SQL_SERVICES__DATABASE_NAME=your-database-name
 INGENIOUS_AZURE_SQL_SERVICES__TABLE_NAME=your-table-name
-INGENIOUS_AZURE_SQL_SERVICES__CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+INGENIOUS_AZURE_SQL_SERVICES__DATABASE_CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
 ```
 
 > **Note**: Both SQLite and Azure SQL implementations are production-ready. SQLite is ideal for development and testing.
