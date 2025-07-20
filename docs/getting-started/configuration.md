@@ -128,9 +128,9 @@ INGENIOUS_MODELS__0__MODEL=gpt-4o-mini
 INGENIOUS_MODELS__0__API_KEY=your-api-key
 INGENIOUS_MODELS__0__BASE_URL=https://your-resource.openai.azure.com/...
 
-# Azure SQL Configuration (experimental)
+# Azure SQL Configuration
 INGENIOUS_AZURE_SQL_SERVICES__DATABASE_NAME=your-database
-INGENIOUS_AZURE_SQL_SERVICES__CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=..."
+INGENIOUS_AZURE_SQL_SERVICES__DATABASE_CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=..."
 
 # Azure Search Configuration (experimental)
 INGENIOUS_AZURE_SEARCH_SERVICES__0__SERVICE=default
@@ -207,7 +207,7 @@ INGENIOUS_CHAT_HISTORY__DATABASE_CONNECTION_STRING="Driver={ODBC Driver 18 for S
 
 # Azure SQL Services Configuration
 INGENIOUS_AZURE_SQL_SERVICES__DATABASE_NAME=your_database_name
-INGENIOUS_AZURE_SQL_SERVICES__CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+INGENIOUS_AZURE_SQL_SERVICES__DATABASE_CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
 ```
 
 **Important Notes:**
@@ -270,11 +270,9 @@ Specifies the chat service implementation:
 INGENIOUS_CHAT_SERVICE__TYPE=multi_agent
 ```
 
-### Chainlit Configuration (Deprecated)
+### Chainlit Configuration (Removed)
 
-> **Note**: Chainlit integration has been removed from this version. These configuration options are no longer supported.
-
-~~Chainlit UI configuration~~ (removed in current version)
+> **Note**: Chainlit integration has been removed from this version. These configuration options are no longer used and will be ignored if set.
 
 ### Azure Search Services
 
@@ -423,14 +421,12 @@ Configures Azure SQL Database:
 # Azure SQL configuration
 INGENIOUS_AZURE_SQL_SERVICES__DATABASE_NAME=your_database
 INGENIOUS_AZURE_SQL_SERVICES__TABLE_NAME=sample_table
-INGENIOUS_AZURE_SQL_SERVICES__CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+INGENIOUS_AZURE_SQL_SERVICES__DATABASE_CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
 ```
 
-### Prompt Tuner (Deprecated)
+### Prompt Tuner (Removed)
 
-> **Note**: The standalone prompt tuner interface has been removed from this version. Use the main API server for prompt management via the `/api/v1/prompts/*` endpoints.
-
-~~Prompt tuner configuration~~ (removed in current version)
+> **Note**: The standalone prompt tuner interface has been removed from this version. Use the main API server for prompt management via the `/api/v1/prompts/*` endpoints. The `ingen prompt-tuner` command will show an error directing users to use `ingen serve` instead.
 
 ### Receiver Configuration
 
@@ -673,7 +669,7 @@ INGENIOUS_LOCAL_SQL_DB__SAMPLE_DATABASE_NAME=sample_sql_db
 # Azure SQL Services
 INGENIOUS_AZURE_SQL_SERVICES__DATABASE_NAME=your-database-name
 INGENIOUS_AZURE_SQL_SERVICES__TABLE_NAME=your-table-name
-INGENIOUS_AZURE_SQL_SERVICES__CONNECTION_STRING="your-connection-string"
+INGENIOUS_AZURE_SQL_SERVICES__DATABASE_CONNECTION_STRING="your-connection-string"
 ```
 
 **For knowledge base workflow:**

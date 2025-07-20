@@ -177,7 +177,7 @@ flowchart TD
 
     LOAD_CONTEXT --> SELECT_WORKFLOW{Select Workflow}
     SELECT_WORKFLOW --> CLASSIFICATION[classification-agent]
-    SELECT_WORKFLOW --> BIKE_INSIGHTS[bike-insights - template only]
+    SELECT_WORKFLOW --> BIKE_INSIGHTS[bike-insights<br/>Template workflow only]
     SELECT_WORKFLOW --> KNOWLEDGE_BASE[knowledge-base-agent]
     SELECT_WORKFLOW --> SQL_AGENT[sql-manipulation-agent]
 
@@ -322,7 +322,7 @@ The Insight Ingenious API provides powerful endpoints for creating and managing 
 ### Base API Information
 - **Base URL**: `http://localhost:8000` (when using `ingen serve --port 8000`)
 - **Content-Type**: `application/json`
-- **Authentication**: JWT Bearer Token (configurable)
+- **Authentication**: JWT Bearer Token (configurable - disabled by default)
 
 ### [Workflow API](/api/workflows/)
 Complete documentation for all available workflow endpoints, including:

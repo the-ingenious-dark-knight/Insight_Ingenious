@@ -37,8 +37,8 @@ graph TB
         AZURE_OPENAI[Azure OpenAI]
         CHROMADB[ChromaDB<br/>Local Vector DB]
         SQLITE[SQLite<br/>Local Database]
-        AZURE_SEARCH[Azure Cognitive Search<br/>Experimental]
-        AZURE_SQL[Azure SQL Database<br/>Experimental]
+        AZURE_SEARCH[Azure Cognitive Search<br/>Production-ready]
+        AZURE_SQL[Azure SQL Database<br/>Production-ready]
     end
 
     CLASSIFICATION --> MINIMAL

@@ -509,12 +509,11 @@ classDiagram
         +handle_dependencies()
     }
 
-    class ClassificationAgent {
-        +classify_intent() $
-        +route_to_agent() $
-        +handle_routing() $
+    class ClassificationAgentFlow {
+        +classify_intent()
+        +route_to_agent()
+        +handle_routing()
     }
-    note right of ClassificationAgent : Static methods only\n Does not inherit from IConversationFlow
     IConversationFlow <|.. CustomExtensionFlow
     IConversationFlow <|.. KnowledgeBaseAgentFlow
     IConversationFlow <|.. SqlManipulationAgentFlow
@@ -583,9 +582,8 @@ graph TB
 
     subgraph "Docker Deployment"
         DOCKER_API[API Container]
-        DOCKER_UI[UI Container]
         DOCKER_DB[Database Container]
-        DOCKER_COMPOSE[Docker Compose]
+        DOCKERFILE[Dockerfile]
     end
 
     subgraph "Cloud Deployment"
@@ -604,9 +602,8 @@ graph TB
     LOCAL_API --> LOCAL_DOCS
     LOCAL_API --> LOCAL_DB
 
-    DOCKER_COMPOSE --> DOCKER_API
-    DOCKER_COMPOSE --> DOCKER_UI
-    DOCKER_COMPOSE --> DOCKER_DB
+    DOCKERFILE --> DOCKER_API
+    DOCKER_API --> DOCKER_DB
 
     CLOUD_API --> CLOUD_UI
     CLOUD_API --> CLOUD_DB
@@ -625,7 +622,7 @@ graph TB
     classDef external fill:#fce4ec
 
     class LOCAL_API,LOCAL_DOCS,LOCAL_DB local
-    class DOCKER_API,DOCKER_UI,DOCKER_DB,DOCKER_COMPOSE docker
+    class DOCKER_API,DOCKER_DB,DOCKERFILE docker
     class CLOUD_API,CLOUD_UI,CLOUD_DB,CLOUD_STORAGE cloud
     class AZURE_OPENAI,MONITORING,LOGGING external
 ```
@@ -692,7 +689,7 @@ graph TB
     subgraph "Caching Strategy"
         MEMORY[In-Memory Cache]
         FILE_CACHE[File-based Cache]
-        CDN[CDN Cache]
+        DISTRIBUTED[Distributed Cache (Future)]
     end
 
     subgraph "Load Balancing"
@@ -714,7 +711,7 @@ graph TB
     end
 
     MEMORY --> FILE_CACHE
-    FILE_CACHE --> CDN
+    FILE_CACHE --> DISTRIBUTED
 
     LOAD_BALANCER --> API_INSTANCES
     LOAD_BALANCER --> HEALTH_CHECK
@@ -734,7 +731,7 @@ graph TB
     classDef async fill:#e3f2fd
     classDef monitor fill:#fce4ec
 
-    class MEMORY,FILE_CACHE,CDN cache
+    class MEMORY,FILE_CACHE,DISTRIBUTED cache
     class LOAD_BALANCER,API_INSTANCES,HEALTH_CHECK balance
     class ASYNC_HANDLERS,BACKGROUND_TASKS,SCHEDULER async
     class METRICS,ALERTS,DASHBOARDS monitor

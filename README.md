@@ -11,7 +11,7 @@ An enterprise-grade Python library for quickly setting up APIs to interact with 
 Get up and running in 5 minutes with Azure OpenAI!
 
 ### Prerequisites
-- Python 3.13 or higher (strict requirement due to dependency constraints)
+- Python 3.13 or higher (required - earlier versions are not supported)
 - Azure OpenAI API credentials
 - [uv package manager](https://docs.astral.sh/uv/)
 
@@ -78,14 +78,15 @@ Get up and running in 5 minutes with Azure OpenAI!
 
 4. **Start the Server**:
     ```bash
-    # Start server (default port 80, use --port to override)
+    # Start server on port 8000 (recommended for development)
     uv run ingen serve --port 8000
 
     # Additional options:
     # --host 0.0.0.0         # Bind host (default: 0.0.0.0)
-    # --config config.yml    # Legacy config file (deprecated)
-    # --profile production   # Legacy profile (deprecated)
-    # --no-prompt-tuner      # Disable prompt tuner UI (deprecated)
+    # --port                 # Port to bind (default: 80 or $WEB_PORT env var)
+    # --config config.yml    # Legacy config file (deprecated - use environment variables)
+    # --profile production   # Legacy profile (deprecated - use environment variables)
+    # --no-prompt-tuner      # Disable prompt tuner UI (deprecated - removed)
     ```
 
 5. **Verify Health**:
@@ -145,9 +146,9 @@ Insight Ingenious provides multiple conversation workflows with different config
 ### Core Library Workflows (Always Available)
 These workflows are built into the Ingenious library and available immediately:
 
-- `classification-agent` - Simple text classification and routing to categories (Azure OpenAI only)
-- `knowledge-base-agent` - Search and retrieve information from knowledge bases (Azure OpenAI + ChromaDB or Azure Search)
-- `sql-manipulation-agent` - Execute SQL queries based on natural language (Azure OpenAI + SQLite or Azure SQL)
+- `classification-agent` - Simple text classification and routing to categories (minimal config required)
+- `knowledge-base-agent` - Search and retrieve information from knowledge bases (uses local ChromaDB by default, no additional config needed)
+- `sql-manipulation-agent` - Execute SQL queries based on natural language (uses local SQLite by default, no additional config needed)
 
 > **Note**: Core workflows support both hyphenated (`classification-agent`) and underscored (`classification_agent`) naming formats for backward compatibility.
 

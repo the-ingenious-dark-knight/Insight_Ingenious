@@ -130,11 +130,9 @@ uv run ingen validate
 
 ## Utility Commands
 
-### ~~`ingen prompt-tuner`~~ (Deprecated)
+### `ingen prompt-tuner` (Removed)
 
-> **Note**: The standalone prompt tuner has been removed. Use the main API server's prompt management endpoints instead (`/api/v1/prompts/*`).
-
-The command exists but shows an error message directing users to use `uv run ingen serve` instead.
+> **Note**: The standalone prompt tuner has been removed. This command now shows an error message directing users to use `uv run ingen serve` instead. Use the main API server's prompt management endpoints (`/api/v1/prompts/*`).
 
 ### `ingen help [topic]`
 Show detailed help and getting started guide.
