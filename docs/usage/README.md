@@ -40,7 +40,7 @@ uv run ingen init
     INGENIOUS_MODELS__0__MODEL=gpt-4o-mini
     INGENIOUS_MODELS__0__API_KEY=your-api-key
     INGENIOUS_MODELS__0__BASE_URL=https://your-resource.openai.azure.com/
-    
+
     # Chat service
     INGENIOUS_CHAT_SERVICE__TYPE=multi_agent
     ```
