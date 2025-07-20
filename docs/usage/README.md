@@ -32,19 +32,17 @@ uv run ingen init
 
 ### Basic Configuration
 
-1. Edit `config.yml` in your project directory
-2. Create or edit `profiles.yml` in your project directory
-3. Set environment variables:
-   #### For Linux-based Environments
+1. Create a `.env` file in your project directory
+2. Add your configuration using environment variables with `INGENIOUS_` prefix
+3. Example `.env` file:
     ```bash
-    export INGENIOUS_PROJECT_PATH=$(pwd)/config.yml
-    export INGENIOUS_PROFILE_PATH=$(pwd)/profiles.yml
-    ```
-
-    #### For Windows-based Environments
-    ```bash
-    $env:INGENIOUS_PROJECT_PATH = "{your_project_folder}/config.yml"
-    $env:INGENIOUS_PROFILE_PATH = "{profile_folder_location}/profiles.yml"
+    # Model configuration
+    INGENIOUS_MODELS__0__MODEL=gpt-4o-mini
+    INGENIOUS_MODELS__0__API_KEY=your-api-key
+    INGENIOUS_MODELS__0__BASE_URL=https://your-resource.openai.azure.com/
+    
+    # Chat service
+    INGENIOUS_CHAT_SERVICE__TYPE=multi_agent
     ```
 
 ### Quick Setup Check
@@ -172,18 +170,25 @@ Data-preparation utilities including the Scrapfly crawler façade. Use `uv run i
 
 ### Accessing the UI
 
-Once the application is running, access the web UI at:
-- http://localhost:80 - Main application (or the port specified in your config)
-- http://localhost:80/chainlit - Chainlit chat interface
-- http://localhost:80/prompt-tuner - Prompt tuning interface
+Once the application is running, access the API at:
+- http://localhost:8000 - Main API server (when using `--port 8000`)
+- http://localhost:8000/docs - Interactive API documentation (Swagger UI)
 
-Note: Default port is 80 as specified in config.yml. For local development, you may want to use a different port like 8000.
+Note: The default port is 80, but for local development it's recommended to use port 8000 with `ingen serve --port 8000`.
 
-### Chatting with Agents
+### Chatting with Agents via API
 
-1. Navigate to http://localhost:80/chainlit (or your configured port)
-2. Start a new conversation
-3. Type your message
+1. Use the REST API endpoint at `http://localhost:8000/api/v1/chat`
+2. Send a POST request with your message and conversation flow
+3. Example using curl:
+   ```bash
+   curl -X POST http://localhost:8000/api/v1/chat \
+     -H "Content-Type: application/json" \
+     -d '{
+       "user_prompt": "Hello",
+       "conversation_flow": "classification-agent"
+     }'
+   ```
 4. The appropriate agents will process your request and respond
 
 ### Tuning Prompts

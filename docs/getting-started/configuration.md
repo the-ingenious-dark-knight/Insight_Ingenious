@@ -424,7 +424,7 @@ Configures Azure SQL Database:
 # Azure SQL configuration
 INGENIOUS_AZURE_SQL_SERVICES__DATABASE_NAME=your_database
 INGENIOUS_AZURE_SQL_SERVICES__TABLE_NAME=sample_table
-INGENIOUS_AZURE_SQL_SERVICES__DATABASE_CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+INGENIOUS_AZURE_SQL_SERVICES__CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
 ```
 
 ### Prompt Tuner (Deprecated)
@@ -775,7 +775,6 @@ Note: The model uses `connection_string` field, not `database_connection_string`
 ```bash
 # Correct field name for Azure SQL
 INGENIOUS_AZURE_SQL_SERVICES__CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};..."
-# NOT: INGENIOUS_AZURE_SQL_SERVICES__DATABASE_CONNECTION_STRING
 ```
 
 ### Server Port Configuration

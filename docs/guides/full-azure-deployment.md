@@ -423,8 +423,7 @@ For additional troubleshooting, see the [main troubleshooting guide](../troubles
 
 ##  Related Documentation
 
-- [Azure SQL Setup Guide](azure-sql-setup.md)
-- [Azure Blob Storage Setup Guide](azure-blob-storage-setup.md)
+- [SQL Agent Setup Guide](sql-agent-setup.md)
 - [API Integration Guide](api-integration.md)
 - [Bike-Insights Workflow Details](../workflows/README.md)
 
