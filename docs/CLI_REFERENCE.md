@@ -1,5 +1,5 @@
 ---
-title: "📝 CLI Reference"
+title: "CLI Reference"
 layout: single
 permalink: /CLI_REFERENCE/
 sidebar:
@@ -182,7 +182,7 @@ ingen dataprep crawl https://example.com
 ingen dataprep batch https://example.com/page1 https://example.com/page2
 ```
 
-> **Note**: Requires `scrapfly-sdk` optional dependency. Install with `uv add scrapfly-sdk`.
+> **Note**: Requires `scrapfly-sdk` optional dependency. Install with `uv add ingenious[dataprep]` or `uv add ingenious[full]`.
 
 ### `ingen document-processing extract <path>`
 Extract text from documents (PDF, DOCX, images).

@@ -208,11 +208,17 @@ class ConversationFlow(IConversationFlow):
         # Create the search assistant agent with memory context
         search_system_message = f"""You are a knowledge base search assistant that can use both Azure AI Search and local ChromaDB storage.
 
-{memory_context}Tasks:
+{memory_context}IMPORTANT: If there is previous conversation context above, you MUST:
+- Reference it when answering follow-up questions
+- Use information from previous searches to inform new searches
+- Maintain context about what information has already been discussed
+- Answer questions that refer to "it", "that", "those" etc. based on previous context
+
+Tasks:
 - Help users find information by searching the knowledge base
 - Use the search_tool to look up information
 - Always base your responses on search results from the knowledge base
-- Consider previous conversation context when generating responses
+- Always consider and reference previous conversation when relevant
 - If no information is found, clearly state that and suggest rephrasing the query
 
 Guidelines for search queries:

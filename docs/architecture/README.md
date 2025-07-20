@@ -146,7 +146,7 @@ sequenceDiagram
 
     Client->>FastAPI: POST /api/chat
     FastAPI->>Auth: Check Authentication
-    Auth-->>FastAPI: ✅ Authorized
+    Auth-->>FastAPI:  Authorized
     FastAPI->>AgentService: Process Request
     AgentService->>Storage: Load Chat History
     Storage-->>AgentService: Previous Context
@@ -164,20 +164,20 @@ The system provides web interfaces through FastAPI:
 ```mermaid
 graph TD
     subgraph "🖥️ Frontend"
-        DOCS[📄 API Documentation]
-        SWAGGER[🎨 Swagger UI]
-        REDOC[📋 ReDoc UI]
+        DOCS[ API Documentation]
+        SWAGGER[ Swagger UI]
+        REDOC[ ReDoc UI]
     end
 
-    subgraph "🔄 HTTP Layer"
-        FASTAPI[🌐 FastAPI Handler]
-        MIDDLEWARE[📋 Middleware Stack]
+    subgraph " HTTP Layer"
+        FASTAPI[ FastAPI Handler]
+        MIDDLEWARE[ Middleware Stack]
     end
 
     subgraph "🤖 Backend Services"
-        CHAT_SERVICE[💬 Chat Service]
-        FILE_SERVICE[📁 File Service]
-        AUTH_SERVICE[🔐 Auth Service]
+        CHAT_SERVICE[ Chat Service]
+        FILE_SERVICE[ File Service]
+        AUTH_SERVICE[ Auth Service]
     end
 
     DOCS --> SWAGGER
@@ -203,38 +203,38 @@ The storage layer provides flexible, cloud-aware persistence and configuration m
 
 ```mermaid
 graph TB
-    subgraph "⚙️ Configuration"
-        ENV_VARS[🌐 Environment Variables<br/>Runtime Configuration]
-        ENV_FILE[📄 .env file<br/>Local Development]
+    subgraph " Configuration"
+        ENV_VARS[ Environment Variables<br/>Runtime Configuration]
+        ENV_FILE[ .env file<br/>Local Development]
         SYSTEM_ENV[🖥️ System Environment<br/>Production Settings]
     end
 
-    subgraph "📚 Chat Storage"
-        HISTORY_SQLITE[💬 Chat History<br/>SQLite Database]
-        HISTORY_AZURE[💬 Chat History<br/>Azure SQL Database]
+    subgraph " Chat Storage"
+        HISTORY_SQLITE[ Chat History<br/>SQLite Database]
+        HISTORY_AZURE[ Chat History<br/>Azure SQL Database]
         SESSIONS[👤 User Sessions<br/>In-Memory Storage]
-        MEMORY_MGR[🧠 Memory Manager<br/>Conversation Context]
+        MEMORY_MGR[ Memory Manager<br/>Conversation Context]
     end
 
-    subgraph "📁 File Storage Abstraction"
+    subgraph " File Storage Abstraction"
         STORAGE_INTERFACE[🔌 IFileStorage Interface]
         LOCAL_STORAGE[💾 Local Storage<br/>Development & Testing]
         AZURE_BLOB[☁️ Azure Blob Storage<br/>Production & Scale]
     end
 
-    subgraph "📋 Storage Categories"
+    subgraph " Storage Categories"
         PROMPTS[� Prompt Templates<br/>Revision Management]
-        DATA_FILES[📊 Data Files<br/>Analysis Results]
+        DATA_FILES[ Data Files<br/>Analysis Results]
         UPLOADS[⬆️ File Uploads<br/>User Content]
-        MEMORY_FILES[🧠 Memory Context<br/>Thread-Specific Data]
+        MEMORY_FILES[ Memory Context<br/>Thread-Specific Data]
     end
 
-    subgraph "🔄 Data Operations"
-        READ[📖 Read Operations<br/>Async/Sync Support]
+    subgraph " Data Operations"
+        READ[ Read Operations<br/>Async/Sync Support]
         WRITE[✍️ Write Operations<br/>Cloud Persistence]
         DELETE[🗑️ Delete Operations<br/>Cleanup Management]
-        LIST[📋 List Operations<br/>Directory Browsing]
-        CACHE[⚡ Caching Layer<br/>Performance Optimization]
+        LIST[ List Operations<br/>Directory Browsing]
+        CACHE[ Caching Layer<br/>Performance Optimization]
     end
 
     ENV_VARS --> STORAGE_INTERFACE
@@ -320,23 +320,23 @@ graph TB
 
 ```mermaid
 flowchart TD
-    START([🚀 User Request]) --> INPUT_VALIDATION{📋 Validate Input}
-    INPUT_VALIDATION -->|✅ Valid| LOAD_CONTEXT[📚 Load Context]
-    INPUT_VALIDATION -->|❌ Invalid| ERROR_RESPONSE[❌ Error Response]
+    START([ User Request]) --> INPUT_VALIDATION{ Validate Input}
+    INPUT_VALIDATION -->| Valid| LOAD_CONTEXT[ Load Context]
+    INPUT_VALIDATION -->| Invalid| ERROR_RESPONSE[ Error Response]
 
-    LOAD_CONTEXT --> SELECT_WORKFLOW{🎯 Select Workflow}
-    SELECT_WORKFLOW --> CLASSIFICATION_WORKFLOW[🔍 Classification Agent]
+    LOAD_CONTEXT --> SELECT_WORKFLOW{ Select Workflow}
+    SELECT_WORKFLOW --> CLASSIFICATION_WORKFLOW[ Classification Agent]
     SELECT_WORKFLOW --> EDUCATION_WORKFLOW[🎓 Education Expert]
-    SELECT_WORKFLOW --> KNOWLEDGE_WORKFLOW[🔍 Knowledge Base Agent]
-    SELECT_WORKFLOW --> SQL_WORKFLOW[🗄️ SQL Manipulation Agent]
+    SELECT_WORKFLOW --> KNOWLEDGE_WORKFLOW[ Knowledge Base Agent]
+    SELECT_WORKFLOW --> SQL_WORKFLOW[ SQL Manipulation Agent]
 
     CLASSIFICATION_WORKFLOW --> AGENT_COORDINATION[👥 Agent Coordination]
     EDUCATION_WORKFLOW --> AGENT_COORDINATION
     KNOWLEDGE_WORKFLOW --> AGENT_COORDINATION
     SQL_WORKFLOW --> AGENT_COORDINATION
 
-    AGENT_COORDINATION --> LLM_PROCESSING[🧠 LLM Processing]
-    LLM_PROCESSING --> RESPONSE_FORMATTING[📝 Format Response]
+    AGENT_COORDINATION --> LLM_PROCESSING[ LLM Processing]
+    LLM_PROCESSING --> RESPONSE_FORMATTING[ Format Response]
     RESPONSE_FORMATTING --> SAVE_HISTORY[💾 Save to History]
     SAVE_HISTORY --> SEND_RESPONSE[📤 Send Response]
 
@@ -363,10 +363,10 @@ sequenceDiagram
     participant User
     participant API
     participant Manager
-    participant Agent1 as 🔍 Classification Agent
-    participant Agent2 as 🔍 Knowledge Agent
-    participant Agent3 as 🗄️ SQL Agent
-    participant LLM as 🧠 Azure OpenAI
+    participant Agent1 as  Classification Agent
+    participant Agent2 as  Knowledge Agent
+    participant Agent3 as  SQL Agent
+    participant LLM as  Azure OpenAI
 
     User->>API: "Help me understand database design"
     API->>Manager: Route to classification-agent workflow
@@ -402,27 +402,27 @@ sequenceDiagram
 ```mermaid
 graph TB
     subgraph "🏭 Core Framework"
-        CORE_API[🔧 Core API]
+        CORE_API[ Core API]
         CORE_FLOWS[👤 Base Conversation Flows]
-        CORE_PATTERNS[📋 Base Patterns]
+        CORE_PATTERNS[ Base Patterns]
     end
 
-    subgraph "🎯 Extension Interface"
+    subgraph " Extension Interface"
         FLOW_INTERFACE[🤖 IConversationFlow Interface]
-        PATTERN_INTERFACE[🔄 IConversationPattern Interface]
+        PATTERN_INTERFACE[ IConversationPattern Interface]
         CHAT_INTERFACE[� IChatService Interface]
     end
 
     subgraph "🔌 Custom Extensions"
         CUSTOM_FLOW[👥 Custom Flow<br/>Domain Expert]
         CUSTOM_PATTERN[🎭 Custom Pattern<br/>Workflow Logic]
-        CUSTOM_TOOLS[⚙️ Custom Tools<br/>External Integration]
+        CUSTOM_TOOLS[ Custom Tools<br/>External Integration]
     end
 
-    subgraph "📦 Extension Registry"
-        NAMESPACE_LOADER[📋 Namespace Utils]
-        DYNAMIC_LOADER[⚡ Dynamic Loader]
-        CONFIG_VALIDATOR[✅ Config Validation]
+    subgraph " Extension Registry"
+        NAMESPACE_LOADER[ Namespace Utils]
+        DYNAMIC_LOADER[ Dynamic Loader]
+        CONFIG_VALIDATOR[ Config Validation]
     end
 
     CORE_API --> FLOW_INTERFACE
@@ -537,23 +537,23 @@ classDiagram
 
 ```mermaid
 graph TB
-    subgraph "📁 Configuration Sources"
-        ENV_FILE[📄 .env file<br/>Local Configuration]
+    subgraph " Configuration Sources"
+        ENV_FILE[ .env file<br/>Local Configuration]
         ENV_VARS[🌍 Environment Variables]
         CLI_ARGS[⌨️ Command Line Args]
-        DEFAULTS[📋 Default Values<br/>Pydantic Models]
+        DEFAULTS[ Default Values<br/>Pydantic Models]
     end
 
-    subgraph "🔄 Configuration Processing"
-        LOADER[📖 Configuration Loader]
-        VALIDATOR[✅ Schema Validator]
+    subgraph " Configuration Processing"
+        LOADER[ Configuration Loader]
+        VALIDATOR[ Schema Validator]
         MERGER[🔀 Configuration Merger]
     end
 
     subgraph "💾 Runtime Configuration"
-        APP_CONFIG[⚙️ Application Config]
+        APP_CONFIG[ Application Config]
         AGENT_CONFIG[🤖 Agent Configurations]
-        SERVICE_CONFIG[🔧 Service Settings]
+        SERVICE_CONFIG[ Service Settings]
     end
 
     ENV_FILE --> LOADER
@@ -583,29 +583,29 @@ graph TB
 ```mermaid
 graph TB
     subgraph "🖥️ Local Development"
-        LOCAL_API[🔧 FastAPI Dev Server]
-        LOCAL_DOCS[📄 API Documentation]
+        LOCAL_API[ FastAPI Dev Server]
+        LOCAL_DOCS[ API Documentation]
         LOCAL_DB[💾 SQLite Database]
     end
 
     subgraph "🐳 Docker Deployment"
-        DOCKER_API[📦 API Container]
-        DOCKER_UI[📦 UI Container]
-        DOCKER_DB[📦 Database Container]
-        DOCKER_COMPOSE[🔧 Docker Compose]
+        DOCKER_API[ API Container]
+        DOCKER_UI[ UI Container]
+        DOCKER_DB[ Database Container]
+        DOCKER_COMPOSE[ Docker Compose]
     end
 
     subgraph "☁️ Cloud Deployment"
-        CLOUD_API[🌐 API Service]
-        CLOUD_UI[🎨 Web App]
+        CLOUD_API[ API Service]
+        CLOUD_UI[ Web App]
         CLOUD_DB[💾 Managed Database]
-        CLOUD_STORAGE[📁 Object Storage]
+        CLOUD_STORAGE[ Object Storage]
     end
 
-    subgraph "🔧 External Services"
-        AZURE_OPENAI[🧠 Azure OpenAI]
-        MONITORING[📊 Application Insights]
-        LOGGING[📝 Centralized Logging]
+    subgraph " External Services"
+        AZURE_OPENAI[ Azure OpenAI]
+        MONITORING[ Application Insights]
+        LOGGING[ Centralized Logging]
     end
 
     LOCAL_API --> LOCAL_DOCS
@@ -645,26 +645,26 @@ graph TB
 graph TB
     subgraph "🛡️ Authentication Layer"
         BASIC_AUTH[� HTTP Basic Authentication]
-        CONFIG_AUTH[⚙️ Configurable Authentication]
+        CONFIG_AUTH[ Configurable Authentication]
         NO_AUTH[� Anonymous Access Option]
     end
 
     subgraph "� Data Protection"
         AZURE_SECRETS[�️ Azure Service Keys]
         CONFIG_SECRETS[� Profile Configuration]
-        ENV_VARS[🌐 Environment Variables]
+        ENV_VARS[ Environment Variables]
     end
 
-    subgraph "🌐 Network Security"
-        HTTPS[🔐 HTTPS/TLS]
+    subgraph " Network Security"
+        HTTPS[ HTTPS/TLS]
         CORS[🌍 CORS Policy]
-        FASTAPI_SEC[⚡ FastAPI Security]
+        FASTAPI_SEC[ FastAPI Security]
     end
 
     subgraph "🔒 External Service Security"
-        AZURE_AUTH[🧠 Azure OpenAI Authentication]
+        AZURE_AUTH[ Azure OpenAI Authentication]
         SEARCH_AUTH[� Azure Search Authentication]
-        SQL_AUTH[🗄️ Database Authentication]
+        SQL_AUTH[ Database Authentication]
     end
 
     BASIC_AUTH --> CONFIG_AUTH
@@ -694,27 +694,27 @@ graph TB
 
 ```mermaid
 graph TB
-    subgraph "⚡ Caching Strategy"
+    subgraph " Caching Strategy"
         MEMORY[� In-Memory Cache]
         FILE_CACHE[� File-based Cache]
-        CDN[🌐 CDN Cache]
+        CDN[ CDN Cache]
     end
 
-    subgraph "📊 Load Balancing"
+    subgraph " Load Balancing"
         LOAD_BALANCER[⚖️ Load Balancer]
-        API_INSTANCES[🔧 API Instances]
+        API_INSTANCES[ API Instances]
         HEALTH_CHECK[❤️ Health Checks]
     end
 
-    subgraph "🔄 Async Processing"
-        ASYNC_HANDLERS[📋 Async Request Handlers]
+    subgraph " Async Processing"
+        ASYNC_HANDLERS[ Async Request Handlers]
         BACKGROUND_TASKS[👷 Background Tasks]
         SCHEDULER[⏰ Task Scheduler]
     end
 
     subgraph "📈 Monitoring"
-        METRICS[📊 Performance Metrics]
-        ALERTS[🚨 Alert System]
+        METRICS[ Performance Metrics]
+        ALERTS[ Alert System]
         DASHBOARDS[📈 Monitoring Dashboard]
     end
 
@@ -750,26 +750,26 @@ graph TB
 The system is designed for extensibility at several key points:
 
 - **🤖 Custom Agents**: Create specialized agents for specific domains
-- **📋 Conversation Patterns**: Define new ways agents can interact
-- **🔄 Conversation Flows**: Implement domain-specific conversation flows
+- ** Conversation Patterns**: Define new ways agents can interact
+- ** Conversation Flows**: Implement domain-specific conversation flows
 - **🔌 Custom API Routes**: Add new API endpoints
-- **📊 Custom Models**: Define domain-specific data models
-- **🛠️ Custom Tools**: Integrate with external systems and APIs
+- ** Custom Models**: Define domain-specific data models
+- ** Custom Tools**: Integrate with external systems and APIs
 
 ### Development Best Practices
 
 1. **🏗️ Modular Design**: Keep components loosely coupled
-2. **🧪 Test Coverage**: Maintain comprehensive test suites
-3. **📝 Documentation**: Document all public APIs and interfaces
-4. **🔐 Security**: Follow security best practices for all extensions
-5. **⚡ Performance**: Consider performance implications of custom code
-6. **🔄 Compatibility**: Ensure backward compatibility when possible
+2. ** Test Coverage**: Maintain comprehensive test suites
+3. ** Documentation**: Document all public APIs and interfaces
+4. ** Security**: Follow security best practices for all extensions
+5. ** Performance**: Consider performance implications of custom code
+6. ** Compatibility**: Ensure backward compatibility when possible
 
 For detailed development instructions, see the [Development Guide](/development/).
 
 ## Next Steps
 
-- 📖 Read the [Getting Started Guide](/getting-started/) to begin using the system
-- 🛠️ Follow the [Development Guide](/development/) to start extending the framework
-- 🔧 Check the [Configuration Guide](/configuration/) for setup details
+-  Read the [Getting Started Guide](/getting-started/) to begin using the system
+-  Follow the [Development Guide](/development/) to start extending the framework
+-  Check the [Configuration Guide](/configuration/) for setup details
 - 📡 Explore the [API Documentation](/api/) for integration options

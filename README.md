@@ -25,8 +25,7 @@ Get up and running in 5 minutes with Azure OpenAI!
     # OR
     uv add ingenious             # Minimal installation
 
-    # Add required dependencies for knowledge-base and SQL workflows
-    uv add chromadb aiofiles autogen-ext
+    # Dependencies are already included in the base package
 
     # Initialize project in the current directory
     uv run ingen init
@@ -48,13 +47,7 @@ Get up and running in 5 minutes with Azure OpenAI!
 
     **Required configuration (add to .env file)**:
     ```bash
-    # Azure OpenAI Configuration (these are example variables you can reference)
-    # Note: These AZURE_OPENAI_* variables are conventions for your reference,
-    # not directly used by the config system. Use them to set INGENIOUS_MODELS__* values.
-    AZURE_OPENAI_API_KEY=your-api-key-here
-    AZURE_OPENAI_BASE_URL=https://your-resource.openai.azure.com/
-
-    # Model Configuration (pydantic-settings format)
+    # Model Configuration (only INGENIOUS_* variables are used by the system)
     INGENIOUS_MODELS__0__MODEL=gpt-4.1-nano
     INGENIOUS_MODELS__0__API_TYPE=rest
     INGENIOUS_MODELS__0__API_VERSION=2024-12-01-preview
@@ -143,7 +136,6 @@ That's it! You should see a JSON response with AI analysis of the input.
 - `ingen help [topic]` - Show detailed help and getting started guide
 - `ingen status` - Check system status and configuration
 - `ingen version` - Show version information
-- `ingen prompt-tuner` - (DEPRECATED) This command has been removed
 
 **Data processing commands:**
 - `ingen document-processing extract <path>` - Extract text from documents (PDF, DOCX, images)
@@ -215,20 +207,18 @@ These workflows are created when you initialize a new project and serve as examp
 
 > **Important**: Local implementations (ChromaDB, SQLite) are stable and work out-of-the-box. Azure integrations are experimental and contain known bugs. For production use, stick with local implementations. Use `ingen workflows` to check configuration requirements for each workflow.
 
-### Required Dependencies
+### Base Package Dependencies
 
-Some workflows require additional dependencies:
+The base Ingenious package includes all dependencies needed for core workflows:
+- ChromaDB for knowledge-base-agent
+- SQLite support for sql-manipulation-agent
+- Autogen-ext for agent compatibility
+- Azure services integration (Azure Identity, Key Vault, Search, Storage)
+- OpenAI and autogen-agentchat for AI capabilities
+- FastAPI and uvicorn for API server
+- pandas for data manipulation
 
-```bash
-# For knowledge-base-agent (ChromaDB)
-uv add chromadb
-
-# For sql-manipulation-agent (SQLite support)
-uv add aiofiles
-
-# For updated autogen compatibility
-uv add autogen-ext
-```
+Note: The base package currently includes all dependencies. Future releases will make some of these optional based on the installation profile chosen.
 
 ## Installation Options
 

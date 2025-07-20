@@ -184,7 +184,7 @@ INGENIOUS_LOCAL_SQL_DB__SAMPLE_DATABASE_NAME=sample_sql_db
 uv run python -c "
 from ingenious.utils.load_sample_data import sqlite_sample_db
 sqlite_sample_db()
-print('✅ Sample SQLite database created at /tmp/sample_sql.db')
+print(' Sample SQLite database created at /tmp/sample_sql_db')
 "
 ```
 
@@ -273,8 +273,8 @@ curl -X POST http://localhost:8000/api/v1/chat \
 ```bash
 # Check configuration
 uv run python -c "
-from ingenious.config.main_settings import IngeniousSettings
-settings = IngeniousSettings()
+from ingenious.config import get_config
+settings = get_config()
 print('SQL Config:', settings.azure_sql_services)
 print('Local DB Config:', settings.local_sql_db)
 "

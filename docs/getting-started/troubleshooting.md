@@ -13,11 +13,11 @@ toc_icon: "tools"
 
 Common issues and solutions when working with Insight Ingenious.
 
-## 🔧 Configuration Issues
+##  Configuration Issues
 
 ### Azure OpenAI Problems
 
-**❌ Error: "Azure OpenAI API key not found"**
+** Error: "Azure OpenAI API key not found"**
 
 **Solution:**
 1. Check your `profiles.yml` file:
@@ -40,7 +40,7 @@ Common issues and solutions when working with Insight Ingenious.
    uv run python -c "import ingenious.config.config as config; print(config.get_config().models[0].api_key)"
    ```
 
-**❌ Error: "Invalid Azure OpenAI deployment"**
+** Error: "Invalid Azure OpenAI deployment"**
 
 **Solution:**
 - Ensure `config.yml` model name matches your Azure deployment name
@@ -49,7 +49,7 @@ Common issues and solutions when working with Insight Ingenious.
 
 ### Environment Variables
 
-**❌ Error: "Config file not found"**
+** Error: "Config file not found"**
 
 **Solution:**
 ```bash
@@ -62,7 +62,7 @@ ls -la config.yml
 ls -la profiles.yml
 ```
 
-**❌ Error: "Permission denied accessing profiles.yml"**
+** Error: "Permission denied accessing profiles.yml"**
 
 **Solution:**
 ```bash
@@ -70,11 +70,11 @@ ls -la profiles.yml
 chmod 600 profiles.yml
 ```
 
-## 🚀 Workflow Issues
+##  Workflow Issues
 
 ### Workflow Not Available
 
-**❌ Error: "conversation_flow not set" or "Unknown workflow"**
+** Error: "conversation_flow not set" or "Unknown workflow"**
 
 **Solution:**
 1. Check available workflows:
@@ -84,18 +84,18 @@ chmod 600 profiles.yml
 
 2. Use exact workflow names in API calls:
    ```bash
-   # ✅ Correct
+   #  Correct
    curl -X POST http://localhost:8000/api/v1/chat \
      -d '{"user_prompt": "Hello", "conversation_flow": "classification-agent"}'
 
-   # ❌ Wrong
+   #  Wrong
    curl -X POST http://localhost:8000/api/v1/chat \
      -d '{"user_prompt": "Hello", "conversation_flow": "classify"}'
    ```
 
 ### Workflow Configuration Missing
 
-**❌ Error: "Search service not configured"**
+** Error: "Search service not configured"**
 
 **Solution for `knowledge-base-agent` (Recommended - Local ChromaDB):**
 No configuration needed! The knowledge-base-agent uses local ChromaDB by default.
@@ -119,7 +119,7 @@ No configuration needed! The knowledge-base-agent uses local ChromaDB by default
        key: "your-search-api-key"
    ```
 
-**❌ Error: "Database connection failed"**
+** Error: "Database connection failed"**
 
 **Solution for `sql-manipulation-agent` (Recommended - Local SQLite):**
 ```yaml
@@ -138,11 +138,11 @@ azure_sql_services:
   database_connection_string: "Server=tcp:yourserver.database.windows.net,1433;Database=yourdatabase;..."
 ```
 
-## 🌐 Server Issues
+##  Server Issues
 
 ### Port Conflicts
 
-**❌ Error: "Port already in use"**
+** Error: "Port already in use"**
 
 **Solution:**
 1. Find what's using the port:
@@ -164,7 +164,7 @@ azure_sql_services:
 
 ### Server Won't Start
 
-**❌ Error: "FastAPI startup failed"**
+** Error: "FastAPI startup failed"**
 
 **Solution:**
 1. Check configuration syntax:
@@ -180,7 +180,7 @@ azure_sql_services:
 
 ### Authentication Problems
 
-**❌ Error: "401 Unauthorized"**
+** Error: "401 Unauthorized"**
 
 **Solution:**
 1. Check if authentication is enabled in `config.yml`:
@@ -207,12 +207,12 @@ azure_sql_services:
 
 ### Request Format Issues
 
-**❌ Error: "422 Validation Error"**
+** Error: "422 Validation Error"**
 
 **Solution:**
 Ensure correct JSON format:
 ```bash
-# ✅ Correct format
+#  Correct format
 curl -X POST http://localhost:8000/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
@@ -230,7 +230,7 @@ Optional fields:
 - `thread_id`: For conversation continuity
 - `topic`: Additional context
 
-## 🧪 Testing & Debugging
+##  Testing & Debugging
 
 ### Check System Status
 
@@ -268,7 +268,7 @@ print('OpenAI service created successfully')
 "
 ```
 
-## 📊 Performance Issues
+##  Performance Issues
 
 ### Slow Response Times
 
@@ -289,7 +289,7 @@ print('OpenAI service created successfully')
 2. Restart the server periodically
 3. Monitor memory usage
 
-## 🔄 Common Workflow Fixes
+##  Common Workflow Fixes
 
 ### Start Fresh
 
@@ -352,4 +352,4 @@ curl -s http://localhost:8000/api/v1/workflows || echo "Server not running"
 
 ---
 
-**🎯 Still stuck?** Join our community or open an issue on GitHub with the diagnostic information above.
+** Still stuck?** Join our community or open an issue on GitHub with the diagnostic information above.

@@ -1,5 +1,5 @@
 ---
-title: "⚙️ Configuration Guide"
+title: "Configuration Guide"
 layout: single
 permalink: /getting-started/configuration/
 sidebar:
@@ -301,7 +301,7 @@ INGENIOUS_WEB_CONFIGURATION__AUTHENTICATION__USERNAME=admin
 INGENIOUS_WEB_CONFIGURATION__AUTHENTICATION__PASSWORD=your-secure-password
 ```
 
-> **Note**: The default port in configuration is 80. The CLI command `ingen serve` defaults to port 80, but can be overridden with `--port` or the `WEB_PORT` environment variable. For local development, it's common to use port 8000.
+> **Note**: The default port in configuration is 80. The CLI command `ingen serve` defaults to port 80, but can be overridden with `--port` flag. For local development, it's recommended to use port 8000 by running `ingen serve --port 8000`.
 
 ### File Storage
 
@@ -345,9 +345,9 @@ INGENIOUS_FILE_STORAGE__DATA__AUTHENTICATION_METHOD=default_credential
 
 #### Azure Blob Storage Authentication
 
-Configure authentication using environment variables (recommended) or legacy profiles.yml:
+Configure authentication using environment variables:
 
-**Environment Variables (Recommended):**
+**Environment Variables:**
 ```bash
 # Connection string authentication
 INGENIOUS_FILE_STORAGE__REVISIONS__AUTHENTICATION_METHOD=token
@@ -355,15 +355,6 @@ AZURE_STORAGE_CONNECTION_STRING="DefaultEndpointsProtocol=https;AccountName=..."
 
 # Or default credential authentication (recommended for production)
 INGENIOUS_FILE_STORAGE__REVISIONS__AUTHENTICATION_METHOD=default_credential
-```
-
-**Legacy profiles.yml Configuration (Deprecated):**
-```yaml
-file_storage:
-  revisions:
-    url: "https://your-storage.blob.core.windows.net/"
-    token: "${AZURE_STORAGE_CONNECTION_STRING:}"
-    authentication_method: "token"
 ```
 
 #### Authentication Methods
@@ -456,10 +447,10 @@ Insight Ingenious supports several built-in conversation flows for different use
 
 | Workflow | Description | External Services Required | Configuration Complexity | Availability |
 |----------|-------------|----------------------------|--------------------------|--------------|
-| `classification-agent` | Routes input to specialized agents | Azure OpenAI only | ✅ Minimal | Core library |
-| `knowledge-base-agent` | Search knowledge bases | Azure OpenAI only (uses local ChromaDB) | ✅ Minimal | Core library (stable local implementation) |
-| `sql-manipulation-agent` | Execute SQL queries | Azure OpenAI only (uses local SQLite) | ✅ Minimal | Core library (stable local implementation) |
-| `bike-insights` | Sample domain-specific analysis | Azure OpenAI only | ✅ Minimal | Extension template* |
+| `classification-agent` | Routes input to specialized agents | Azure OpenAI only |  Minimal | Core library |
+| `knowledge-base-agent` | Search knowledge bases | Azure OpenAI only (uses local ChromaDB) |  Minimal | Core library (stable local implementation) |
+| `sql-manipulation-agent` | Execute SQL queries | Azure OpenAI only (uses local SQLite) |  Minimal | Core library (stable local implementation) |
+| `bike-insights` | Sample domain-specific analysis | Azure OpenAI only |  Minimal | Extension template* |
 
 *Created when you run `ingen init` - part of project template, not core library.
 
@@ -467,7 +458,7 @@ Insight Ingenious supports several built-in conversation flows for different use
 
 ### Workflow-Specific Configuration
 
-#### 🚀 Quick Start: Minimal Configuration Workflows
+####  Quick Start: Minimal Configuration Workflows
 
 For `classification-agent` and `bike-insights` (if created via `ingen init`), you only need basic Azure OpenAI setup:
 
@@ -483,7 +474,7 @@ INGENIOUS_MODELS__0__BASE_URL=https://your-resource.openai.azure.com/openai/depl
 INGENIOUS_CHAT_SERVICE__TYPE=multi_agent
 ```
 
-#### 🔍 Knowledge Base Workflows
+####  Knowledge Base Workflows
 
 For `knowledge-base-agent`, the local ChromaDB implementation is used by default and is stable:
 
@@ -504,7 +495,7 @@ INGENIOUS_AZURE_SEARCH_SERVICES__0__KEY=your-search-key
 
 > **Recommendation**: Use the local ChromaDB implementation, which requires no additional configuration and is stable.
 
-#### 📊 Database Workflows (SQL Manipulation Agent)
+####  Database Workflows (SQL Manipulation Agent)
 
 For `sql-manipulation-agent` workflow, you have two database options:
 
@@ -530,7 +521,7 @@ INGENIOUS_AZURE_SQL_SERVICES__DATABASE_CONNECTION_STRING="Driver={ODBC Driver 18
 uv run python -c "
 from ingenious.utils.load_sample_data import sqlite_sample_db
 sqlite_sample_db()
-print('✅ Sample SQLite database created')
+print(' Sample SQLite database created')
 "
 
 # Test SQL agent
@@ -544,7 +535,7 @@ curl -X POST http://localhost:8000/api/v1/chat \
 
 > **Recommendation**: Use the local SQLite implementation, which is simpler to set up and stable.
 
-> 📖 **For complete SQL agent setup instructions**, see the [SQL Agent Setup Guide](../guides/sql-agent-setup.md)
+>  **For complete SQL agent setup instructions**, see the [SQL Agent Setup Guide](../guides/sql-agent-setup.md)
 
 ### Testing Workflows
 

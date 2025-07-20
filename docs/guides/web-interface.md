@@ -9,7 +9,7 @@ toc_label: "Web Interface"
 toc_icon: "globe"
 ---
 
-# 🎨 Web Interface Guide
+#  Web Interface Guide
 
 ## API Integration
 

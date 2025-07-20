@@ -70,7 +70,7 @@ AZURE_OPENAI_API_VERSION=2024-12-01-preview
 uv run python -c "
 from ingenious.utils.load_sample_data import sqlite_sample_db
 sqlite_sample_db()
-print('✅ Sample SQLite database created at /tmp/sample_sql.db')
+print(' Sample SQLite database created at /tmp/sample_sql.db')
 "
 ```
 
@@ -140,9 +140,9 @@ from ingenious.config.config import load_app_config
 config = load_app_config()
 print('Azure SQL Config:', config.azure_sql_services)
 if config.azure_sql_services and config.azure_sql_services.database_name != 'skip':
-    print('✅ Azure SQL mode enabled')
+    print(' Azure SQL mode enabled')
 else:
-    print('✅ SQLite mode enabled')
+    print(' SQLite mode enabled')
 "
 ```
 
@@ -218,10 +218,10 @@ Create a test script to validate your SQL agent setup:
 #!/bin/bash
 # test_sql_agent.sh
 
-echo "🧪 Testing SQL Manipulation Agent..."
+echo " Testing SQL Manipulation Agent..."
 
 # Test 1: Basic connectivity
-echo "📊 Test 1: Database connectivity"
+echo " Test 1: Database connectivity"
 curl -s -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
@@ -232,7 +232,7 @@ curl -s -X POST http://localhost:80/api/v1/chat \
 echo ""
 
 # Test 2: Schema exploration
-echo "🔍 Test 2: Schema exploration"
+echo " Test 2: Schema exploration"
 curl -s -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
@@ -252,7 +252,7 @@ curl -s -X POST http://localhost:80/api/v1/chat \
   }' | jq -r '.response // .error'
 
 echo ""
-echo "✅ SQL Agent tests completed!"
+echo " SQL Agent tests completed!"
 ```
 
 Make it executable and run:
