@@ -23,11 +23,11 @@ Get up and running in 5 minutes with Azure OpenAI!
     cd /path/to/your/project
 
     # Choose installation based on features needed
-    uv add ingenious[standard]    # Most common: includes SQL agent support
+    uv add ingenious[standard] # Most common: includes SQL agent support
     # OR
-    uv add ingenious[azure-full]  # Full Azure integration
+    uv add ingenious[azure-full] # Full Azure integration
     # OR
-    uv add ingenious             # Minimal installation
+    uv add ingenious # Minimal installation
 
     # Dependencies are already included in the base package
 
@@ -39,14 +39,13 @@ Get up and running in 5 minutes with Azure OpenAI!
     Copy the example template and add your Azure OpenAI credentials:
     ```bash
     # Copy environment template (choose based on your needs)
-    cp .env.example .env          # Full configuration options
+    cp .env.example .env # Full configuration options
     # OR
-    cp .env.development .env      # Minimal development setup
+    cp .env.development .env # Minimal development setup
     # OR
-    cp .env.azure-full .env       # Full Azure integration
+    cp .env.azure-full .env # Full Azure integration
 
     # Edit .env file with your actual credentials
-    nano .env
     ```
 
     **Required configuration (add to .env file)**:
@@ -83,7 +82,6 @@ Get up and running in 5 minutes with Azure OpenAI!
 
     # Additional options:
     # --host 0.0.0.0  # Bind host (default: 0.0.0.0)
-    # --no-prompt-tuner  # Disable prompt tuner interface
     ```
 
 5. **Verify Health**:
@@ -136,63 +134,6 @@ That's it! You should see a JSON response with AI analysis of the input.
 - **Template Workflows** like `bike-insights` require JSON-formatted data with specific fields and are only available after running `ingen init`
 - The `bike-insights` workflow is the recommended "Hello World" example for new users
 
-## CLI Commands
-
-**Core commands:**
-- `ingen init` - Initialize a new project with templates and configuration
-- `ingen serve [--port PORT] [--host HOST] [--no-prompt-tuner]` - Start the API server
-- `ingen workflows [workflow_name]` - List available workflows or show specific workflow requirements
-- `ingen test [--log-level LEVEL] [--args ARGS]` - Run agent workflow tests
-- `ingen validate` - Validate system configuration and requirements
-- `ingen help [topic]` - Show help (topics: setup, workflows, config, deployment)
-- `ingen status` - Check system status and configuration
-- `ingen version` - Show version information
-
-**Data processing commands:**
-- `ingen document-processing extract <path> [--engine ENGINE] [--out FILE]` - Extract text from documents
-- `ingen dataprep crawl <url> [--pretty] [--api-key KEY] [--js]` - Fetch single web page
-- `ingen dataprep batch <urls...> [--out FILE] [--pretty]` - Fetch multiple web pages
-
-**Help and information:**
-- `ingen --help` - Show comprehensive help
-- `ingen <command> --help` - Get help for specific commands
-
-For complete CLI reference, see [docs/CLI_REFERENCE.md](docs/CLI_REFERENCE.md).
-
-## API Endpoints
-
-When the server is running, the following endpoints are available:
-
-**Core API:**
-- `POST /api/v1/chat` - Chat with AI workflows
-- `GET /api/v1/health` - Health check endpoint
-- `GET /` - Redirects to API documentation
-
-**Diagnostics:**
-- `GET /api/v1/workflows` - List all workflows and their status
-- `GET /api/v1/workflow-status/{workflow_name}` - Check specific workflow configuration
-- `GET /api/v1/diagnostic` - System diagnostic information
-
-**Prompt Management:**
-- `GET /api/v1/revisions/list` - List available prompt revisions
-- `GET /api/v1/workflows/list` - List workflows with prompts
-- `GET /api/v1/prompts/list/{revision_id}` - List prompt templates for revision
-- `GET /api/v1/prompts/view/{revision_id}/{filename}` - View prompt content
-- `POST /api/v1/prompts/update/{revision_id}/{filename}` - Update prompt template
-
-**Authentication (if enabled):**
-- `POST /api/v1/auth/login` - JWT login
-- `POST /api/v1/auth/refresh` - Refresh JWT token
-- `GET /api/v1/auth/verify` - Verify JWT token
-
-**Web Interfaces:**
-- API documentation (auto-generated) available at `/docs`
-- ReDoc documentation available at `/redoc`
-
-**Conversation Management:**
-- `GET /api/v1/conversations/{thread_id}` - Retrieve conversation history
-- `PUT /api/v1/messages/{message_id}/feedback` - Submit message feedback
-
 ## Workflow Categories
 
 Insight Ingenious provides multiple conversation workflows with different configuration requirements:
@@ -220,114 +161,9 @@ These workflows are provided as examples in the project template when you run `i
 
 > **Important**: Local implementations (ChromaDB, SQLite) are stable and work out-of-the-box. Azure integrations are experimental and contain known bugs. For production use, stick with local implementations. Use `ingen workflows` to check configuration requirements for each workflow.
 
-### Base Package Dependencies
-
-The base Ingenious package includes all dependencies needed for core workflows:
-- ChromaDB for knowledge-base-agent
-- SQLite support for sql-manipulation-agent
-- Autogen-ext for agent compatibility
-- Azure services integration (Azure Identity, Key Vault, Search, Storage)
-- OpenAI and autogen-agentchat for AI capabilities
-- FastAPI and uvicorn for API server
-- pandas for data manipulation
-
-Note: The base package includes all core dependencies needed for the primary workflows. Optional dependency groups provide additional features like document processing, data scraping, and visualization.
-
-## Installation Options
-
-Choose the installation option that matches your intended use case:
-
-### Base Installation
-```bash
-uv add ingenious
-```
-**Includes**: All core dependencies including ChromaDB, SQLite support, Azure services integration, pandas, OpenAI, autogen, and FastAPI
-**Use for**: Most use cases - the base package already includes comprehensive functionality
-
-### Standard Installation (Recommended)
-```bash
-uv add ingenious[standard]
-```
-**Includes**: Core features + SQL agent support (pandas, database connectivity)
-**Use for**: Most production deployments with local database features
-
-### Azure Full Integration
-```bash
-uv add ingenious[azure-full]
-```
-**Includes**: Standard features + Azure services (Azure SQL, Blob Storage, Search)
-**Use for**: Full cloud deployment with Azure integrations
-
-### Complete Feature Set
-```bash
-uv add ingenious[full]
-```
-**Includes**: All features including document processing, ML capabilities, data preparation
-**Use for**: Advanced use cases requiring all available features
-
-### Knowledge Base Features
-```bash
-uv add ingenious[knowledge-base]
-```
-**Includes**: Core features + sentence-transformers for enhanced ML capabilities
-**Use for**: Enhanced knowledge base functionality with advanced embeddings
-**Note**: Basic knowledge-base-agent functionality works with the base installation (ChromaDB is already included)
-
-
-## Project Structure
-
-```
-ingenious/                        # Core framework code
-├── api/                         # FastAPI routes and endpoints
-│   ├── routes/                  # Individual route modules
-│   │   ├── auth.py             # JWT authentication endpoints
-│   │   ├── chat.py             # Main chat endpoint
-│   │   ├── conversations.py    # Conversation history
-│   │   ├── diagnostic.py       # System diagnostics
-│   │   ├── events.py           # Event streaming (placeholder)
-│   │   ├── message_feedback.py # Message feedback
-│   │   └── prompts.py          # Prompt management
-├── auth/                        # JWT authentication and security
-├── cli/                         # Command-line interface
-│   ├── commands/               # Individual CLI commands
-│   └── cli.py                  # Main CLI entry point
-├── config/                      # Configuration (pydantic-settings)
-│   ├── main_settings.py        # Primary settings class
-│   ├── models.py               # Configuration models
-│   └── environment.py          # Environment handling
-├── core/                        # Core logging and utilities
-├── dataprep/                    # Web scraping (Scrapfly)
-├── db/                          # Database integration
-│   ├── chromadb_connection.py  # Vector database
-│   └── database_connection.py  # SQL databases
-├── document_processing/         # Document text extraction
-├── errors/                      # Custom exceptions
-├── external_services/           # External API integrations
-├── files/                       # File storage (local/Azure)
-├── main/                        # FastAPI app factory
-├── models/                      # Pydantic data models
-├── services/                    # Core business logic
-│   └── chat_services/          # Chat service implementations
-│       └── multi_agent/        # Multi-agent workflows
-│           ├── agents/         # Agent definitions
-│           └── conversation_flows/  # Workflow implementations
-├── templates/                   # Jinja2 templates
-├── utils/                       # Utility functions
-└── ingenious_extensions_template/  # Project template
-    └── services/.../bike_insights/  # Sample workflow
-
-scripts/                         # Utility scripts
-├── migrate_config.py           # YAML to env var migration
-└── ...
-
-tests/                          # Test suite
-├── unit/                       # Unit tests
-└── integration/               # Integration tests
-```
-
 ## Documentation
 
-For detailed documentation, see the [docs](https://insight-services-apac.github.io/ingenious/) or view locally in the `docs/` directory.
+For detailed documentation, see the [docs](https://insight-services-apac.github.io/ingenious/).
 
 ## Contributing
 
