@@ -1,6 +1,7 @@
+````prompt
 ---
 mode: agent
-tools: ['changes', 'codebase', 'editFiles', 'extensions', 'fetch', 'findTestFiles', 'githubRepo', 'new', 'openSimpleBrowser', 'problems', 'runCommands', 'runNotebooks', 'runTasks', 'runTests', 'search', 'searchResults', 'terminalLastCommand', 'terminalSelection', 'testFailure', 'usages', 'vscodeAPI', 'websearch']
+tools: ['runCommands', 'problems', 'editFiles']
 model: Claude Sonnet 4
 ---
 # Find and Fix mypy Errors

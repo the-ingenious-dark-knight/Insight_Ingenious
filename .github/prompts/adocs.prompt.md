@@ -1,6 +1,7 @@
+```prompt
 ---
 mode: agent
-tools: ['changes', 'codebase', 'editFiles', 'extensions', 'fetch', 'findTestFiles', 'githubRepo', 'new', 'openSimpleBrowser', 'problems', 'runCommands', 'runNotebooks', 'runTasks', 'runTests', 'search', 'searchResults', 'terminalLastCommand', 'terminalSelection', 'testFailure', 'usages', 'vscodeAPI', 'websearch']
+tools: ['codebase', 'editFiles', 'search']
 model: Claude Sonnet 4
 ---
 Systematically audit ALL documentation in docs/ AND README.md against the actual codebase implementation through STATIC ANALYSIS ONLY, then MAKE ALL NECESSARY CHANGES to ensure 100% accuracy. DO NOT EXECUTE ANY CODE - perform all validation by reading and analyzing the codebase.
