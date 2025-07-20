@@ -246,10 +246,10 @@ uv run ingen validate
 Expected output:
 ```
  Insight Ingenious Configuration Validation
-1. Environment Variables: 
-2. Configuration File Validation: 
-3. Azure OpenAI Connectivity: 
-4. Workflow Availability: 
+1. Environment Variables:
+2. Configuration File Validation:
+3. Azure OpenAI Connectivity:
+4. Workflow Availability:
  All validations passed! Your Ingenious setup is ready.
 ```
 
@@ -423,8 +423,7 @@ For additional troubleshooting, see the [main troubleshooting guide](../troubles
 
 ##  Related Documentation
 
-- [Azure SQL Setup Guide](azure-sql-setup.md)
-- [Azure Blob Storage Setup Guide](azure-blob-storage-setup.md)
+- [SQL Agent Setup Guide](sql-agent-setup.md)
 - [API Integration Guide](api-integration.md)
 - [Bike-Insights Workflow Details](../workflows/README.md)
 

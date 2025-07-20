@@ -1,4 +1,4 @@
-# Byte-compiled / optimized / DLL files
+# Python Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
@@ -6,7 +6,7 @@ __pycache__/
 # C extensions
 *.so
 
-# Distribution / packaging
+# Distribution / Packaging
 .Python
 build/
 develop-eggs/
@@ -28,8 +28,6 @@ share/python-wheels/
 MANIFEST
 
 # PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
 
@@ -37,7 +35,7 @@ MANIFEST
 pip-log.txt
 pip-delete-this-directory.txt
 
-# Unit test / coverage reports
+# Unit Test / Coverage Reports
 htmlcov/
 .tox/
 .nox/
@@ -55,20 +53,20 @@ pytestdebug.log
 *.mo
 *.pot
 
-# Django stuff:
+# Django
 *.log
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
 
-# Flask stuff:
+# Flask
 instance/
 .webassets-cache
 
-# Scrapy stuff:
+# Scrapy
 .scrapy
 
-# Sphinx documentation
+# Sphinx Documentation
 docs/_build/
 build/
 tmp/
@@ -120,7 +118,7 @@ ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 
-# Environments
+# Python Environments
 .env
 .venv/
 venv/
@@ -135,29 +133,27 @@ venv.bak/
 # Node
 node_modules/
 
-# Others
+# Miscellaneous / Others
 *.bak
 *.swp
 *.swo
 *.orig
-
-# Local files
 *.local
 
-# Test output
+# Test Output
 test-output/
 
-#ruff
+# ruff
 .ruff_cache/
 
+# chainlit
 .chainlit/
 
-#AI
+# AI
 CLAUDE.md
 .claude/
 
-#AI Testing
+# AI Testing
 test_dir/
-
 azure_integration_test/
 server_log.txt

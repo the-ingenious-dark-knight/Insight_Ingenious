@@ -40,9 +40,9 @@ docs:
       - title: "API Reference"
         url: /api/
       - title: "Workflow API"
-        url: /api/workflows/
+        url: /api/workflows
       - title: "CLI Reference"
-        url: /CLI_REFERENCE/
+        url: /CLI_REFERENCE
       - title: "Complete Configuration Reference"
         url: /getting-started/configuration/
       - title: "Workflow Requirements"

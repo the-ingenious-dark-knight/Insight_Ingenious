@@ -75,17 +75,17 @@ curl -X POST http://localhost:8000/api/v1/chat \
 
 **Agents Involved**:
 - **classification_agent**: Classifies and routes user queries
-- **education_expert**: Handles educational content queries
 - **knowledge_base_agent**: Searches knowledge bases
 - **sql_manipulation_agent**: Processes database queries
+- Additional custom agents defined in the bike-insights template
 
 **Response Format**:
 ```json
 {
-  "thread_id": "uuid",
-  "message_id": "identifier",
-  "agent_response": "[{agent1_response}, {agent2_response}, ...]",
-  "token_count": 1234,
+  "thread_id": "uuid-string",
+  "message_id": "identifier-string",
+  "agent_response": "The formatted response from the AI agents",
+  "max_token_count": 1024,
   "followup_questions": {},
   "topic": null,
   "memory_summary": "",
@@ -101,13 +101,20 @@ curl -X POST http://localhost:8000/api/v1/chat \
 
 **Availability**: Core library workflow
 
-**Required Configuration**: Azure OpenAI only
+**Required Configuration**: Azure OpenAI configured in environment variables
 
-**Required Input Format**:
+**Request Schema**:
 ```json
 {
   "user_prompt": "Your question or input text here",
-  "conversation_flow": "classification-agent"
+  "conversation_flow": "classification-agent",
+  "thread_id": "optional-thread-id",
+  "user_id": "optional-user-id",
+  "user_name": "optional-user-name",
+  "topic": "optional-topic",
+  "memory_record": true,  // defaults to true
+  "thread_chat_history": [],  // optional array of previous messages
+  "thread_memory": ""  // optional memory context
 }
 ```
 
@@ -138,7 +145,7 @@ curl -X POST http://localhost:8000/api/v1/chat \
 **Local Implementation (Stable)**:
 - Uses ChromaDB for local vector storage
 - No additional configuration required
-- Documents stored in `./.tmp/knowledge_base/`
+- Documents stored in configured memory path (default: `./.tmp/knowledge_base/`)
 
 **Experimental Azure Search Implementation**:
 - Requires Azure Search Service configured
@@ -173,19 +180,15 @@ curl -X POST http://localhost:8000/api/v1/chat \
 1. **Configure environment variables** for SQLite mode:
 ```bash
 # Environment variables for SQLite mode
-INGENIOUS_LOCAL_SQL_DB__DATABASE_PATH=/tmp/sample_sql_db
+INGENIOUS_CHAT_HISTORY__MEMORY_PATH=./.tmp  # Database will be created here
+# Optional: Configure sample data path
 INGENIOUS_LOCAL_SQL_DB__SAMPLE_CSV_PATH=./data/your_data.csv
-INGENIOUS_LOCAL_SQL_DB__SAMPLE_DATABASE_NAME=sample_sql_db
 ```
 
 2. **Test with sample data**:
 ```bash
-# Create sample SQLite database with test data
-uv run python -c "
-from ingenious.utils.load_sample_data import sqlite_sample_db
-sqlite_sample_db()
-print(' Sample SQLite database created at /tmp/sample_sql_db')
-"
+# The SQL agent automatically creates a sample database on first use
+# No manual setup required - just start using SQL queries!
 ```
 
 3. **Start the server**:

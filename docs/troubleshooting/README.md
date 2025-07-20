@@ -709,7 +709,7 @@ uv run ingen workflows
 1. Check the logs for specific error messages
 2. Review configuration files against templates
 3. Test with minimal configuration first
-4. Check the API documentation: `/docs/api/WORKFLOWS.md`
+4. Check the API documentation: `/docs/api/workflows.md`
 5. Verify environment variables are loaded correctly
 
 ---

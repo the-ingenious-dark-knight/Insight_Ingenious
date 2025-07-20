@@ -1,4 +1,15 @@
-## Creating Custom Agents
+---
+title: "Creating Custom Agents"
+layout: single
+permalink: /extensions/custom-agents/
+sidebar:
+  nav: "docs"
+toc: true
+toc_label: "Custom Agents"
+toc_icon: "robot"
+---
+
+# Creating Custom Agents
 
 The next step in working with the Ingenious library is working with the creation of agents for orchestration.
 This is done by defining the agent's persona, existing/prior knowledge/experience, the explicit instruction and set of examples that the model can follow for the output.
@@ -13,7 +24,7 @@ This is done by defining the agent's persona, existing/prior knowledge/experienc
 ### Agent Definition Example
 
 
-```markdown
+```md
 # Your Agent Name
 
 ## Name and Persona
@@ -36,4 +47,4 @@ This is done by defining the agent's persona, existing/prior knowledge/experienc
 [Example interactions or outputs]
 ```
 
-**_Note: LLMs work best with a more precise syntax and information provided. It does not need to be always quite verbose, but always be mindful of the language that you use with the commands/prompt that you make._**
+> **Note**: LLMs work best with a more precise syntax and information provided. It does not need to be always quite verbose, but always be mindful of the language that you use with the commands/prompt that you make.
