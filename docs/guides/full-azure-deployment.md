@@ -246,10 +246,10 @@ uv run ingen validate
 Expected output:
 ```
  Insight Ingenious Configuration Validation
-1. Environment Variables: 
-2. Configuration File Validation: 
-3. Azure OpenAI Connectivity: 
-4. Workflow Availability: 
+1. Environment Variables:
+2. Configuration File Validation:
+3. Azure OpenAI Connectivity:
+4. Workflow Availability:
  All validations passed! Your Ingenious setup is ready.
 ```
 

@@ -1,6 +1,6 @@
 # Insight Ingenious
 
-[![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)](https://github.com/Insight-Services-APAC/ingenious)
+[![Version](https://img.shields.io/badge/version-0.2.1-blue.svg)](https://github.com/Insight-Services-APAC/ingenious)
 [![Python](https://img.shields.io/badge/python-3.13+-green.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-purple.svg)](LICENSE)
 
@@ -80,7 +80,7 @@ Get up and running in 5 minutes with Azure OpenAI!
     ```bash
     # Start server (default port 80, use --port to override)
     uv run ingen serve --port 8000
-    
+
     # Additional options:
     # --host 0.0.0.0  # Bind host (default: 0.0.0.0)
     # --no-prompt-tuner  # Disable prompt tuner interface
@@ -182,7 +182,7 @@ When the server is running, the following endpoints are available:
 
 **Authentication (if enabled):**
 - `POST /api/v1/auth/login` - JWT login
-- `POST /api/v1/auth/refresh` - Refresh JWT token  
+- `POST /api/v1/auth/refresh` - Refresh JWT token
 - `GET /api/v1/auth/verify` - Verify JWT token
 
 **Web Interfaces:**

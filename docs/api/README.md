@@ -533,7 +533,7 @@ class IngeniousAPIClient:
     def __init__(self, base_url="http://localhost:8000"):
         self.base_url = base_url
         self.access_token = None
-        
+
     def login(self, username, password):
         """Login and store access token"""
         response = requests.post(
@@ -545,20 +545,20 @@ class IngeniousAPIClient:
             self.access_token = data["access_token"]
             return True
         return False
-    
+
     def call_chat_api(self, user_prompt, conversation_flow, thread_id=None):
         """Call the chat API with authentication"""
         headers = {"Content-Type": "application/json"}
         if self.access_token:
             headers["Authorization"] = f"Bearer {self.access_token}"
-            
+
         payload = {
             "user_prompt": user_prompt,
             "conversation_flow": conversation_flow
         }
         if thread_id:
             payload["thread_id"] = thread_id
-            
+
         response = requests.post(
             f"{self.base_url}/api/v1/chat",
             json=payload,
@@ -579,14 +579,14 @@ class IngeniousAPIClient {
         this.baseUrl = baseUrl;
         this.accessToken = null;
     }
-    
+
     async login(username, password) {
         const response = await fetch(`${this.baseUrl}/api/v1/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password })
         });
-        
+
         if (response.ok) {
             const data = await response.json();
             this.accessToken = data.access_token;
@@ -594,24 +594,24 @@ class IngeniousAPIClient {
         }
         return false;
     }
-    
+
     async callChatAPI(userPrompt, conversationFlow, threadId = null) {
         const headers = { 'Content-Type': 'application/json' };
         if (this.accessToken) {
             headers['Authorization'] = `Bearer ${this.accessToken}`;
         }
-        
+
         const payload = { user_prompt: userPrompt, conversation_flow: conversationFlow };
         if (threadId) {
             payload.thread_id = threadId;
         }
-        
+
         const response = await fetch(`${this.baseUrl}/api/v1/chat`, {
             method: 'POST',
             headers,
             body: JSON.stringify(payload)
         });
-        
+
         return await response.json();
     }
 }
@@ -663,7 +663,7 @@ Lists all workflows that have prompt templates.
 {
   "workflows": [
     "classification-agent",
-    "knowledge-base-agent", 
+    "knowledge-base-agent",
     "sql-manipulation-agent",
     "bike-insights"
   ],
