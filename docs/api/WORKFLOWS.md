@@ -21,11 +21,11 @@ This document provides detailed API usage examples for all available workflows i
 
 ## Available Workflows
 
-### 1. bike-insights - Hello World Workflow
+### 1. bike-insights - Hello World Workflow (Template - NOT Core Library)
 
 **Purpose**: The recommended first workflow showcasing multi-agent coordination through bike sales analysis.
 
-**Availability**: Created when you run `uv run ingen init` (part of project template, NOT included in core library)
+**Availability**: ⚠️ **TEMPLATE WORKFLOW** - Created when you run `uv run ingen init` (part of project template, NOT included in core library)
 
 **Required Input Format**:
 ```json
@@ -329,7 +329,7 @@ Make it executable: `chmod +x test_workflows.sh`
 
 ### 2. "Class ConversationFlow not found"
 **Problem**: Workflow name incorrect or workflow not available
-**Solution**: Use correct workflow names (prefer hyphens: `bike-insights`, `classification-agent`)
+**Solution**: Use correct workflow names (prefer hyphens: `bike-insights`, `classification-agent`). Note: bike-insights requires `ingen init` first
 
 ### 3. "Validation error in field"
 **Problem**: Missing or invalid configuration

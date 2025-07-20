@@ -130,7 +130,7 @@ INGENIOUS_MODELS__0__BASE_URL=https://your-resource.openai.azure.com/...
 
 # Azure SQL Configuration
 INGENIOUS_AZURE_SQL_SERVICES__DATABASE_NAME=your-database
-INGENIOUS_AZURE_SQL_SERVICES__DATABASE_CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=..."
+INGENIOUS_AZURE_SQL_SERVICES__CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=..."
 
 # Azure Search Configuration (experimental)
 INGENIOUS_AZURE_SEARCH_SERVICES__0__SERVICE=default
@@ -203,11 +203,11 @@ Add the Azure SQL configuration to your `.env` file:
 # Azure SQL Configuration (experimental)
 INGENIOUS_CHAT_HISTORY__DATABASE_TYPE=azuresql
 INGENIOUS_CHAT_HISTORY__DATABASE_NAME=your_database_name
-INGENIOUS_CHAT_HISTORY__DATABASE_CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+INGENIOUS_CHAT_HISTORY__CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
 
 # Azure SQL Services Configuration
 INGENIOUS_AZURE_SQL_SERVICES__DATABASE_NAME=your_database_name
-INGENIOUS_AZURE_SQL_SERVICES__DATABASE_CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+INGENIOUS_AZURE_SQL_SERVICES__CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
 ```
 
 **Important Notes:**
@@ -421,7 +421,7 @@ Configures Azure SQL Database:
 # Azure SQL configuration
 INGENIOUS_AZURE_SQL_SERVICES__DATABASE_NAME=your_database
 INGENIOUS_AZURE_SQL_SERVICES__TABLE_NAME=sample_table
-INGENIOUS_AZURE_SQL_SERVICES__DATABASE_CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+INGENIOUS_AZURE_SQL_SERVICES__CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
 ```
 
 ### Prompt Tuner (Removed)
@@ -512,7 +512,7 @@ INGENIOUS_LOCAL_SQL_DB__SAMPLE_DATABASE_NAME=sample_sql_db
 # Azure SQL configuration
 INGENIOUS_AZURE_SQL_SERVICES__DATABASE_NAME=your_database
 INGENIOUS_AZURE_SQL_SERVICES__TABLE_NAME=your_table
-INGENIOUS_AZURE_SQL_SERVICES__DATABASE_CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:yourserver.database.windows.net,1433;Database=your_database;Uid=your_username;Pwd=your_password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+INGENIOUS_AZURE_SQL_SERVICES__CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:yourserver.database.windows.net,1433;Database=your_database;Uid=your_username;Pwd=your_password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
 ```
 
 **Quick SQLite Setup:**
@@ -634,7 +634,7 @@ INGENIOUS_CHAT_HISTORY__MEMORY_PATH=./.tmp
 # Azure SQL (Production)
 INGENIOUS_CHAT_HISTORY__DATABASE_TYPE=azuresql
 INGENIOUS_CHAT_HISTORY__DATABASE_NAME=your_database_name
-INGENIOUS_CHAT_HISTORY__DATABASE_CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+INGENIOUS_CHAT_HISTORY__CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
 ```
 
 #### File Storage Configuration
@@ -669,7 +669,7 @@ INGENIOUS_LOCAL_SQL_DB__SAMPLE_DATABASE_NAME=sample_sql_db
 # Azure SQL Services
 INGENIOUS_AZURE_SQL_SERVICES__DATABASE_NAME=your-database-name
 INGENIOUS_AZURE_SQL_SERVICES__TABLE_NAME=your-table-name
-INGENIOUS_AZURE_SQL_SERVICES__DATABASE_CONNECTION_STRING="your-connection-string"
+INGENIOUS_AZURE_SQL_SERVICES__CONNECTION_STRING="your-connection-string"
 ```
 
 **For knowledge base workflow:**
