@@ -40,17 +40,20 @@ flowchart TD
 ```
 
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/Insight-Services-APAC/ingenious.git
    cd ingenious
    ```
 
 2. **Install dependencies and set up development environment:**
+
    ```bash
-   uv sync --extra dev
+   uv sync --group dev
    ```
 
 3. **Set up pre-commit hooks:**
+
    ```bash
    uv run pre-commit install
    ```
@@ -111,7 +114,7 @@ graph TB
     class PROMPT_TUNER,CLI,DOCS tools
 ```
 
-###  Directory Structure
+### Directory Structure
 
 ```mermaid
 graph LR
@@ -187,6 +190,7 @@ Conversation flows implement specific use cases:
   - `sql_manipulation_agent/`: Flow for SQL queries (API: `sql-manipulation-agent`)
 
 Note:
+
 - `education_expert` exists as a pattern but does not have a corresponding flow implementation
 - Folder names use underscores for historical reasons, but API calls should use hyphens (e.g., `classification-agent`)
 
@@ -227,6 +231,7 @@ Models:
    __path__ = extend_path(__path__, __name__)
    ```
 3. Create the pattern implementation:
+
    ```python
    # your_pattern_name.py
    import autogen
@@ -249,6 +254,7 @@ Models:
    __path__ = extend_path(__path__, __name__)
    ```
 3. Create the flow implementation:
+
    ```python
    # your_flow_name.py
    import ingenious.config.config as config
@@ -265,6 +271,7 @@ Models:
 
 1. Create a module in `ingenious_extensions_template/api/routes/custom.py`
 2. Implement the `Api_Routes` class:
+
    ```python
    from fastapi import APIRouter, Depends, FastAPI
    from ingenious.models.api_routes import IApiRoutes
@@ -495,7 +502,7 @@ flowchart TD
     class SEQ_LOGIC,PAR_LOGIC,COND_LOGIC,CUSTOM_LOGIC pattern
 ```
 
-###  Testing Framework
+### Testing Framework
 
 #### Test Architecture
 
@@ -554,7 +561,7 @@ graph TB
 5. **Mocking**: Mock external services and dependencies
 6. ** Fixtures**: Use consistent test data
 
-###  Deployment Pipeline
+### Deployment Pipeline
 
 ```mermaid
 flowchart LR
@@ -607,7 +614,7 @@ flowchart LR
     class DEPLOY_PROD,MONITOR,ROLLBACK prod
 ```
 
-###  Extension Development Guide
+### Extension Development Guide
 
 #### Step-by-Step Extension Creation
 
@@ -646,7 +653,7 @@ graph TD
     class CREATE_AGENT,CREATE_PATTERN,CREATE_API create
 ```
 
-###  Key Development Concepts
+### Key Development Concepts
 
 #### Agent Lifecycle
 
@@ -669,7 +676,7 @@ stateDiagram-v2
     Error --> Ready: Handle Error
 ```
 
-###  Debugging and Troubleshooting
+### Debugging and Troubleshooting
 
 #### Debug Flow
 
@@ -721,7 +728,7 @@ flowchart TD
 7. ** Code Review**: Address reviewer feedback
 8. **Merge**: Celebrate your contribution!
 
-###  Code Style Guidelines
+### Code Style Guidelines
 
 - **Python**: Follow PEP 8 standards
 - **Line Length**: Maximum 88 characters
@@ -732,8 +739,8 @@ flowchart TD
 
 ## Next Steps
 
--  Read the [Architecture Guide](/architecture/) for system design
--  Check the [Configuration Guide](/getting-started/configuration/) for setup
--  Try the [Getting Started Guide](/getting-started/) for quick setup
+- Read the [Architecture Guide](/architecture/) for system design
+- Check the [Configuration Guide](/getting-started/configuration/) for setup
+- Try the [Getting Started Guide](/getting-started/) for quick setup
 - Explore the [API Documentation](/api/) for integration
 - Explore the [API Documentation](/api/) for integration
