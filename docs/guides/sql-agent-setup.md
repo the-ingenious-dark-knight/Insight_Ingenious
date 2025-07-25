@@ -105,6 +105,8 @@ curl -X POST http://localhost:80/api/v1/chat \
 
 For production deployments, you can connect to Azure SQL Database.
 
+> **Important:** When configuring Azure SQL, always use the connection string from the **ODBC** tab in the Azure Portal. Do **not** use ADO.NET or JDBC connection strings, as these formats are incompatible and will cause connection errors.
+
 ### Prerequisites
 
 - Azure SQL Database instance
