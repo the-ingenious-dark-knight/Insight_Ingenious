@@ -1,4 +1,3 @@
-```prompt
 ---
 mode: agent
 tools: ['codebase', 'editFiles', 'search']

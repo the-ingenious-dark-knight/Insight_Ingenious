@@ -1,5 +1,3 @@
-````prompt
-```prompt
 ---
 mode: agent
 tools: ['runCommands', 'changes', 'codebase', 'editFiles']
@@ -108,6 +106,3 @@ uv run pytest
 
 # Push updated branch
 git push origin feature/my-feature
-```
-
-````
