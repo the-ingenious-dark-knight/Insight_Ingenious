@@ -173,7 +173,7 @@ graph TB
     end
 
     subgraph "Search & Retrieval"
-        CHROMADB[ChromaDB (Local)]
+        CHROMADB["ChromaDB (Local)"]
         VECTOR_SEARCH[Vector Search]
         KEYWORD_SEARCH[Keyword Search]
         HYBRID_SEARCH[Hybrid Search]
