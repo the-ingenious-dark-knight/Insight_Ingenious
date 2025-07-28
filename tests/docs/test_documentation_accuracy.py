@@ -10,7 +10,7 @@ accuracy is maintained.
 
 import re
 from pathlib import Path
-from typing import Dict, List, Set
+from typing import Any, Dict, List, Set, Tuple
 
 import pytest
 
@@ -18,14 +18,14 @@ import pytest
 class DocumentationValidator:
     """Validates documentation claims against implementation."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.workspace_root = Path(
             __file__
         ).parent.parent.parent  # Go up from tests/docs/ to root
         self.docs_dir = self.workspace_root / "docs"
         self.ingenious_dir = self.workspace_root / "ingenious"
 
-    def extract_api_endpoints_from_code(self) -> Dict[str, List[str]]:
+    def extract_api_endpoints_from_code(self) -> Dict[str, List[Tuple[str, str]]]:
         """Extract API endpoints from route files."""
         endpoints = {}
         routes_dir = self.ingenious_dir / "api" / "routes"
@@ -125,7 +125,7 @@ class DocumentationValidator:
 
         return workflows
 
-    def validate_pyproject_toml(self) -> Dict[str, any]:
+    def validate_pyproject_toml(self) -> Dict[str, Any]:
         """Extract key information from pyproject.toml."""
         pyproject_path = self.workspace_root / "pyproject.toml"
         info = {}
