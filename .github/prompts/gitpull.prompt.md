@@ -27,12 +27,12 @@ model: Claude Sonnet 4
 
 4. **Merge or rebase main into current branch**
     Choose one of the following strategies:
-    
+
     **Option A: Merge (preserves commit history)**
     ```sh
     git merge main
     ```
-    
+
     **Option B: Rebase (cleaner linear history)**
     ```sh
     git rebase main
