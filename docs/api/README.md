@@ -18,63 +18,63 @@ Complete API documentation for Insight Ingenious - an enterprise-grade Python li
 ```mermaid
 graph TB
     subgraph "Client Applications"
-        WEB_CLIENT[Web Applications]
-        MOBILE_CLIENT[Mobile Apps]
-        API_CLIENT[API Integrations]
-        CLI_CLIENT[CLI Tools]
+        WEB_CLIENT["Web Applications"]
+        MOBILE_CLIENT["Mobile Apps"]
+        API_CLIENT["API Integrations"]
+        CLI_CLIENT["CLI Tools"]
     end
-
+  
     subgraph "API Layer"
-        FASTAPI[FastAPI Application]
-        CHAT_API[Chat API\n/api/v1/chat]
-        DIAGNOSTIC_API[Diagnostic API\n/api/v1/workflow-status/{workflow_name}\n/api/v1/workflows\n/api/v1/diagnostic\n/api/v1/health]
-        PROMPTS_API[Prompts API\n/api/v1/prompts]
-        FEEDBACK_API[Feedback API\n/api/v1/messages/{message_id}/feedback]
-        AUTH_API[Auth API\n/api/v1/auth]
+        FASTAPI["FastAPI Application"]
+        CHAT_API["Chat API\n/api/v1/chat"]
+        DIAGNOSTIC_API["Diagnostic API\n/api/v1/workflow-status/{workflow_name}\n/api/v1/workflows\n/api/v1/diagnostic\n/api/v1/health"]
+        PROMPTS_API["Prompts API\n/api/v1/prompts"]
+        FEEDBACK_API["Feedback API\n/api/v1/messages/{message_id}/feedback"]
+        AUTH_API["Auth API\n/api/v1/auth"]
     end
-
+  
     subgraph "Backend Services"
-        CHAT_SERVICE[Chat Service]
-        MULTI_AGENT_SERVICE[Multi-Agent Service]
-        CONFIG_SERVICE[Config Service]
-        FILE_STORAGE[File Storage]
+        CHAT_SERVICE["Chat Service"]
+        MULTI_AGENT_SERVICE["Multi-Agent Service"]
+        CONFIG_SERVICE["Config Service"]
+        FILE_STORAGE["File Storage"]
     end
-
+  
     subgraph "External Services"
-        AZURE_OPENAI[Azure OpenAI]
-        AZURE_SEARCH[Azure Search]
-        AZURE_SQL[Azure SQL]
+        AZURE_OPENAI["Azure OpenAI"]
+        AZURE_SEARCH["Azure Search"]
+        AZURE_SQL["Azure SQL"]
     end
-
+  
     WEB_CLIENT --> FASTAPI
     MOBILE_CLIENT --> FASTAPI
     API_CLIENT --> FASTAPI
     CLI_CLIENT --> FASTAPI
-
+  
     FASTAPI --> CHAT_API
     FASTAPI --> DIAGNOSTIC_API
     FASTAPI --> PROMPTS_API
     FASTAPI --> FEEDBACK_API
     FASTAPI --> AUTH_API
-
+  
     CHAT_API --> CHAT_SERVICE
     DIAGNOSTIC_API --> CONFIG_SERVICE
     PROMPTS_API --> FILE_STORAGE
     FEEDBACK_API --> CHAT_SERVICE
     AUTH_API --> CHAT_SERVICE
-
+  
     CHAT_SERVICE --> MULTI_AGENT_SERVICE
     MULTI_AGENT_SERVICE --> FILE_STORAGE
     MULTI_AGENT_SERVICE --> AZURE_OPENAI
-
-    CONFIG_SERVICE --> AZURE_SEARCH
+  
+    CONFIG_SERVICE --> AZURE_SEARCH 
     CONFIG_SERVICE --> AZURE_SQL
-
-    classDef client fill:#e8f5e8
+  
+    classDef client fill:#e8f5e8 
     classDef api fill:#fff3e0
     classDef service fill:#e3f2fd
     classDef external fill:#fce4ec
-
+  
     class WEB_CLIENT,MOBILE_CLIENT,API_CLIENT,CLI_CLIENT client
     class FASTAPI,CHAT_API,DIAGNOSTIC_API,PROMPTS_API,FEEDBACK_API,AUTH_API api
     class CHAT_SERVICE,MULTI_AGENT_SERVICE,CONFIG_SERVICE,FILE_STORAGE service
