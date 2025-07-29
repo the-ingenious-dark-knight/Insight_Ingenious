@@ -72,13 +72,13 @@ Update `.env` with your Azure credentials:
 # =============================================================================
 # REQUIRED: Azure OpenAI Configuration
 # =============================================================================
-# Option 1: Direct configuration (not recommended for production)
-INGENIOUS_MODELS='[{"model": "gpt-4", "api_type": "rest", "api_version": "2024-12-01-preview", "deployment": "your-gpt4-deployment-name", "api_key": "your-actual-api-key-here", "base_url": "https://your-resource.openai.azure.com/"}]'
-
-# Option 2: Using environment variables (recommended)
-AZURE_OPENAI_API_KEY=your-azure-openai-api-key-here
-AZURE_OPENAI_BASE_URL=https://your-resource.openai.azure.com/
-INGENIOUS_MODELS='[{"model": "gpt-4", "api_type": "rest", "api_version": "2024-12-01-preview", "deployment": "your-gpt4-deployment-name", "api_key": "${AZURE_OPENAI_API_KEY}", "base_url": "${AZURE_OPENAI_BASE_URL}"}]'
+# Using nested environment variables format (recommended)
+INGENIOUS_MODELS__0__MODEL=gpt-4
+INGENIOUS_MODELS__0__API_TYPE=rest
+INGENIOUS_MODELS__0__API_VERSION=2024-12-01-preview
+INGENIOUS_MODELS__0__DEPLOYMENT=your-gpt4-deployment-name
+INGENIOUS_MODELS__0__API_KEY=your-azure-openai-api-key-here
+INGENIOUS_MODELS__0__BASE_URL=https://your-resource.openai.azure.com/
 
 # =============================================================================
 # REQUIRED: Azure SQL Database Configuration

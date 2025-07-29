@@ -53,10 +53,13 @@ Create a `.env` file with your Azure OpenAI credentials:
 
 ```bash
 # .env
-# Configure AI model
-AZURE_OPENAI_API_KEY=your-api-key-here
-AZURE_OPENAI_BASE_URL=https://your-resource.openai.azure.com/
-INGENIOUS_MODELS='[{"model": "gpt-4", "api_type": "rest", "api_version": "2024-12-01-preview", "deployment": "your-gpt4-deployment-name", "api_key": "${AZURE_OPENAI_API_KEY}", "base_url": "${AZURE_OPENAI_BASE_URL}"}]'
+# Configure AI model using nested environment variables format
+INGENIOUS_MODELS__0__MODEL=gpt-4
+INGENIOUS_MODELS__0__API_TYPE=rest
+INGENIOUS_MODELS__0__API_VERSION=2024-12-01-preview
+INGENIOUS_MODELS__0__DEPLOYMENT=your-gpt4-deployment-name
+INGENIOUS_MODELS__0__API_KEY=your-api-key-here
+INGENIOUS_MODELS__0__BASE_URL=https://your-resource.openai.azure.com/
 
 # Chat service type
 INGENIOUS_CHAT_SERVICE__TYPE=multi_agent
