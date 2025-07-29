@@ -16,69 +16,67 @@ Complete API documentation for Insight Ingenious - an enterprise-grade Python li
 ## API Architecture Overview
 
 ```mermaid
-graph TB
-    subgraph "Client Applications"
-        WEB_CLIENT[Web Applications]
-        MOBILE_CLIENT[Mobile Apps]
-        API_CLIENT[API Integrations]
-        CLI_CLIENT[CLI Tools]
-    end
-
-    subgraph "API Layer"
-        FASTAPI[FastAPI Application]
-        CHAT_API[Chat API\n/api/v1/chat]
-        DIAGNOSTIC_API[Diagnostic API\n/api/v1/workflow-status/{workflow_name}\n/api/v1/workflows\n/api/v1/diagnostic\n/api/v1/health]
-        PROMPTS_API[Prompts API\n/api/v1/prompts]
-        FEEDBACK_API[Feedback API\n/api/v1/messages/{message_id}/feedback]
-        AUTH_API[Auth API\n/api/v1/auth]
-    end
-
-    subgraph "Backend Services"
-        CHAT_SERVICE[Chat Service]
-        MULTI_AGENT_SERVICE[Multi-Agent Service]
-        CONFIG_SERVICE[Config Service]
-        FILE_STORAGE[File Storage]
-    end
-
-    subgraph "External Services"
-        AZURE_OPENAI[Azure OpenAI]
-        AZURE_SEARCH[Azure Search]
-        AZURE_SQL[Azure SQL]
-    end
-
+flowchart TB
+ subgraph subGraph0["Client Applications"]
+        WEB_CLIENT["Web Applications"]
+        MOBILE_CLIENT["Mobile Apps"]
+        API_CLIENT["API Integrations"]
+        CLI_CLIENT["CLI Tools"]
+  end
+ subgraph subGraph1["API Layer"]
+        FASTAPI["FastAPI Application"]
+        CHAT_API["Chat API - <br>/api/v1/chat"]
+        DIAGNOSTIC_API["Diagnostic API - /api/v1/workflow-status/{workflow_name}"]
+        PROMPTS_API["Prompts API -<br>/api/v1/prompts"]
+        FEEDBACK_API["Feedback API - /api/v1/messages/{message_id}/feedback"]
+        AUTH_API["Auth API - <br>/api/v1/auth"]
+  end
+ subgraph subGraph2["Backend Services"]
+        CHAT_SERVICE["Chat Service"]
+        MULTI_AGENT_SERVICE["Multi-Agent Service"]
+        CONFIG_SERVICE["Config Service"]
+        FILE_STORAGE["File Storage"]
+  end
+ subgraph subGraph3["External Services"]
+        AZURE_OPENAI["Azure OpenAI"]
+        AZURE_SEARCH["Azure Search"]
+        AZURE_SQL["Azure SQL"]
+  end
     WEB_CLIENT --> FASTAPI
     MOBILE_CLIENT --> FASTAPI
     API_CLIENT --> FASTAPI
     CLI_CLIENT --> FASTAPI
-
-    FASTAPI --> CHAT_API
-    FASTAPI --> DIAGNOSTIC_API
-    FASTAPI --> PROMPTS_API
-    FASTAPI --> FEEDBACK_API
-    FASTAPI --> AUTH_API
-
+    FASTAPI --> CHAT_API & DIAGNOSTIC_API & PROMPTS_API & FEEDBACK_API & AUTH_API
     CHAT_API --> CHAT_SERVICE
     DIAGNOSTIC_API --> CONFIG_SERVICE
     PROMPTS_API --> FILE_STORAGE
     FEEDBACK_API --> CHAT_SERVICE
     AUTH_API --> CHAT_SERVICE
-
     CHAT_SERVICE --> MULTI_AGENT_SERVICE
-    MULTI_AGENT_SERVICE --> FILE_STORAGE
-    MULTI_AGENT_SERVICE --> AZURE_OPENAI
+    MULTI_AGENT_SERVICE --> FILE_STORAGE & AZURE_OPENAI
+    CONFIG_SERVICE --> AZURE_SEARCH & AZURE_SQL
 
-    CONFIG_SERVICE --> AZURE_SEARCH
-    CONFIG_SERVICE --> AZURE_SQL
-
+     WEB_CLIENT:::client
+     MOBILE_CLIENT:::client
+     API_CLIENT:::client
+     CLI_CLIENT:::client
+     FASTAPI:::api
+     CHAT_API:::api
+     DIAGNOSTIC_API:::api
+     PROMPTS_API:::api
+     FEEDBACK_API:::api
+     AUTH_API:::api
+     CHAT_SERVICE:::service
+     MULTI_AGENT_SERVICE:::service
+     CONFIG_SERVICE:::service
+     FILE_STORAGE:::service
+     AZURE_OPENAI:::external
+     AZURE_SEARCH:::external
+     AZURE_SQL:::external
     classDef client fill:#e8f5e8
     classDef api fill:#fff3e0
     classDef service fill:#e3f2fd
     classDef external fill:#fce4ec
-
-    class WEB_CLIENT,MOBILE_CLIENT,API_CLIENT,CLI_CLIENT client
-    class FASTAPI,CHAT_API,DIAGNOSTIC_API,PROMPTS_API,FEEDBACK_API,AUTH_API api
-    class CHAT_SERVICE,MULTI_AGENT_SERVICE,CONFIG_SERVICE,FILE_STORAGE service
-    class AZURE_OPENAI,AZURE_SEARCH,AZURE_SQL external
 ```
 
 ## API Request Flow
