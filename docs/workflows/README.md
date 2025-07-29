@@ -58,8 +58,8 @@ graph TB
     classDef external fill:#fff3e0
 
     class CLASSIFICATION,KNOWLEDGE,SQL,BIKE_INSIGHTS workflow
-    class MINIMAL,SEARCH,DATABASE config
-    class AZURE_OPENAI,AZURE_SEARCH,AZURE_SQL external
+    class MINIMAL,LOCAL_IMPL,AZURE_EXPERIMENTAL config
+    class AZURE_OPENAI,CHROMADB,SQLITE,AZURE_SEARCH,AZURE_SQL external
 ```
 
 ## Core vs Template Workflows
@@ -383,8 +383,7 @@ uv add chromadb aiofiles autogen-ext
 
 **Alternative: Azure Search (Production-ready)**
 ```bash
-# Additional Azure Search configuration (experimental)
-INGENIOUS_AZURE_SEARCH_SERVICES__0__SERVICE=default
+# Additional Azure Search configuration
 INGENIOUS_AZURE_SEARCH_SERVICES__0__ENDPOINT=https://your-search-service.search.windows.net
 INGENIOUS_AZURE_SEARCH_SERVICES__0__KEY=your-search-api-key
 ```
@@ -437,12 +436,9 @@ graph TB
 **Local SQLite (Recommended - Stable):**
 ```bash
 # Local SQLite configuration
-INGENIOUS_LOCAL_SQL_DB__DATABASE_PATH=/tmp/sample_sql_db
-INGENIOUS_LOCAL_SQL_DB__SAMPLE_CSV_PATH=./data/your_data.csv
-INGENIOUS_LOCAL_SQL_DB__SAMPLE_DATABASE_NAME=sample_sql_db
+INGENIOUS_LOCAL_SQL_DB__DATABASE_PATH=/tmp/sample_sql.db
 
-# To use sql-manipulation-agent, ensure these dependencies are installed:
-uv add aiofiles
+# No additional dependencies required - SQLite support is built-in
 ```
 
 **Azure SQL (Production-ready):**

@@ -16,8 +16,8 @@ This is done by defining the agent's persona, existing/prior knowledge/experienc
 
 1. Create a new agent folder in `ingenious/services/chat_services/multi_agent/agents/your_agent_name/`
 2. Create these files:
-   - `agent.md`: Agent definition and persona
-   - `tasks/task.md`: Task description for the agent
+   - `agent.md`: Agent definition and persona (required)
+   - `tasks/task.md`: Task description for the agent (optional, used for agents with specific task flows)
 
 ### Agent Definition Example
 
@@ -36,13 +36,15 @@ This is done by defining the agent's persona, existing/prior knowledge/experienc
 
 [Background information about the agent's role and knowledge]
 
-### Instructions
+### [Additional sections as needed, e.g., Curriculum, Cohort Considerations, etc.]
 
-[Detailed instructions on how the agent should operate]
+[Content specific to your agent's domain]
 
-### Examples
+## Role
 
-[Example interactions or outputs]
+[Detailed description of the agent's specific role and responsibilities]
+
+Reply TERMINATE in the end when everything is done.
 ```
 
 > **Note**: LLMs work best with a more precise syntax and information provided. It does not need to be always quite verbose, but always be mindful of the language that you use with the commands/prompt that you make.

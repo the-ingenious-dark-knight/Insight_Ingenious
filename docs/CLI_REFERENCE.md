@@ -58,6 +58,7 @@ Start the API server with web interfaces.
 - `--port` - Port to bind (default: 80 or $WEB_PORT)
 - `--config, -c` - Path to config.yml file (deprecated - use environment variables)
 - `--profile, -p` - Path to profiles.yml file (deprecated - use environment variables)
+- `--no-prompt-tuner` - Disable the prompt tuner interface
 
 **Interfaces:**
 - API: `http://localhost:<port>/api/v1/` (e.g., `http://localhost:8000/api/v1/` when using `--port 8000`)
@@ -130,6 +131,10 @@ uv run ingen validate
 ### `ingen prompt-tuner` (Removed)
 
 > **Note**: The standalone prompt tuner has been removed. This command now shows an error message directing users to use `uv run ingen serve` instead. Use the main API server's prompt management endpoints (`/api/v1/prompts/*`).
+
+**Options (before removal):**
+- `--port, -p` - Port for the prompt tuner (default: 5000)
+- `--host, -h` - Host to bind the prompt tuner (default: 127.0.0.1)
 
 ### `ingen help [topic]`
 Show detailed help and getting started guide.
@@ -253,10 +258,7 @@ Create a `.env` file in your project directory with your configuration:
 Export variables directly in your shell or deployment environment.
 
 ### Migration from YAML
-If you have legacy `config.yml` and `profiles.yml` files:
-```bash
-uv run python scripts/migrate_config.py --yaml-file config.yml --output .env
-```
+If you have legacy `config.yml` and `profiles.yml` files, use the migration script template that's created with `uv run ingen init`.
 
 ## Backward Compatibility
 

@@ -25,10 +25,14 @@ It is ideal for:
 
 ```bash
 # minimal feature set (PyMuPDF + Azure Document Intelligence wrapper + CLI)
+uv add ingenious[document-processing]
+# OR for development from source:
 uv pip install -e ".[document-processing]"
 
 # include pure-Python PDFMiner and rich-text Unstructured engines
-uv pip install -e ".[document-processing,pdfminer,unstructured]"
+uv add ingenious[document-processing,document-advanced]
+# OR for development from source:
+uv pip install -e ".[document-processing,document-advanced]"
 ```
 
 > **Why separate extras?**
@@ -121,13 +125,10 @@ If the folder or any file is missing, the tests are auto-skipped, so the rest of
 
 ```bash
 # Core engines only
-uv pip install -e ".[document-processing,tests]"
-```
+uv pip install -e ".[document-processing]"
 
-Add `pdfminer` and `unstructured` extras to expand coverage:
-
-```bash
-uv pip install -e ".[document-processing,pdfminer,unstructured,tests]"
+# Add advanced document processing (PDFMiner + Unstructured) to expand coverage:
+uv pip install -e ".[document-processing,document-advanced]"
 
 # Run all tests
 uv run pytest ingenious/document_processing/tests

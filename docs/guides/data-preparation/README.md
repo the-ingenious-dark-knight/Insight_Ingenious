@@ -16,7 +16,9 @@ This optional pack lets you scrape web pages straight from the **Insight Ingen
 ## Installation (extras)
 
 ```bash
-uv pip install -e ".[dataprep,tests]"  # crawler + its test suite
+uv add ingenious[dataprep]  # Add dataprep capabilities to your project
+# OR for development from source:
+uv pip install -e ".[dataprep]"  # Install with dataprep extra
 ```
 
 Requires a Scrapfly key (`SCRAPFLY_API_KEY`). Add it to your environment or a `.env` file.
@@ -65,7 +67,7 @@ Run `ingen dataprep crawl --help` to see the full Typer‑generated help screen.
 # 1️⃣  Build an isolated virtual‑env and install extras
 uv venv                # creates .venv/ and writes .python-version
 source .venv/bin/activate
-uv pip install --python .venv/bin/python -e ".[dataprep,tests]"
+uv pip install --python .venv/bin/python -e ".[dataprep]"
 
 # 2️⃣  Supply your Scrapfly key (required for live tests / CLI)
 export SCRAPFLY_API_KEY="sk_live_your_real_key_here"
