@@ -332,7 +332,7 @@ flowchart TD
     SELECT_WORKFLOW --> CLASSIFICATION_WORKFLOW[Classification Agent]
     SELECT_WORKFLOW --> KNOWLEDGE_WORKFLOW[Knowledge Base Agent]
     SELECT_WORKFLOW --> SQL_WORKFLOW[SQL Manipulation Agent]
-    SELECT_WORKFLOW --> BIKE_INSIGHTS_WORKFLOW[Bike Insights (Template)]
+    SELECT_WORKFLOW --> BIKE_INSIGHTS_WORKFLOW["Bike Insights Template"]
 
     CLASSIFICATION_WORKFLOW --> AGENT_COORDINATION[Agent Coordination]
     KNOWLEDGE_WORKFLOW --> AGENT_COORDINATION
@@ -466,7 +466,7 @@ classDiagram
     note for ClassificationAgentFlow "Uses static method pattern
     Does not inherit from IConversationFlow
     Located in conversation_flows directory"
-    
+
     class IConversationFlow {
         <<abstract>>
         +_config: Config
@@ -700,7 +700,7 @@ graph TB
     subgraph "Caching Strategy"
         MEMORY[In-Memory Cache]
         FILE_CACHE[File-based Cache]
-        DISTRIBUTED[Distributed Cache (Future)]
+        DISTRIBUTED[Distributed Cache Future]
     end
 
     subgraph "Load Balancing"

@@ -183,15 +183,15 @@ Current implementations:
 - **Classification Agent** (`classification_agent/`): Classifies inputs and routes to specialized agents
   - Pattern: Implements classification logic and routing mechanics
   - Flow: Exposes via API endpoint (`classification-agent`)
-  
+
 - **Knowledge Base Agent** (`knowledge_base_agent/`): Handles knowledge retrieval and question answering
   - Pattern: Implements RAG (Retrieval-Augmented Generation) logic
   - Flow: Exposes via API endpoint (`knowledge-base-agent`)
-  
+
 - **SQL Manipulation Agent** (`sql_manipulation_agent/`): Generates and executes SQL queries
   - Pattern: Implements SQL generation and execution logic
   - Flow: Exposes via API endpoint (`sql-manipulation-agent`)
-  
+
 - **Education Expert** (`education_expert/`): Educational content generation
   - Pattern: Implements educational content generation logic
   - Flow: Not implemented (pattern only, no API endpoint)
