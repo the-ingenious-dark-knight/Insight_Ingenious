@@ -86,8 +86,8 @@ curl -X POST http://localhost:80/api/v1/chat \
 
 ### Advanced Workflows (External Services Required)
 
-- **knowledge-base-agent**: Requires Azure Cognitive Search
-- **sql-manipulation-agent**: Requires database connection
+- **knowledge-base-agent**: Requires Azure Cognitive Search or uses local ChromaDB (stable)
+- **sql-manipulation-agent**: Requires database connection or uses local SQLite (stable)
 
 For detailed setup instructions, see [Workflow Configuration Requirements](../workflows/README.md).
 
@@ -146,15 +146,21 @@ uv run ingen prompt-tuner --port 5000
 
 ### Prompt Tuner (Integrated with FastAPI)
 
-The prompt tuner is now integrated with the main FastAPI application and accessible at `/prompt-tuner/`.
+The prompt tuner is integrated with the main FastAPI application and accessible at `/prompt-tuner/`. It is enabled by default.
 
-To run the application with the prompt tuner enabled:
+To run the application with the prompt tuner:
 
 ```bash
-uv run ingen serve --enable-prompt-tuner
+uv run ingen serve  # Prompt tuner is enabled by default
 ```
 
-The prompt tuner will be accessible at `http://localhost:{port}/prompt-tuner/` where `{port}` is the port configured in your configuration file.
+To disable the prompt tuner:
+
+```bash
+uv run ingen serve --no-prompt-tuner
+```
+
+The prompt tuner will be accessible at `http://localhost:{port}/prompt-tuner/` where `{port}` is the port you specified (default is 80).
 
 ### Data Preparation
 
@@ -191,8 +197,8 @@ Note: The default port is 80, but for local development it's recommended to use 
 
 ### Tuning Prompts
 
-1. Navigate to http://localhost:80/prompt-tuner (or your configured port)
-2. Log in with credentials from your environment configuration
+1. Navigate to http://localhost:{port}/prompt-tuner/ (where {port} is your configured port, default 80)
+2. The prompt tuner interface is enabled by default (disable with `--no-prompt-tuner` flag)
 3. Select the prompt template you want to edit
 4. Make changes and test with sample data
 5. Save revisions for version control
@@ -396,11 +402,11 @@ curl -X POST http://localhost:80/api/v1/chat \
   }'
 ```
 
-#### Local Knowledge Base (Stable Implementation)
-These use local ChromaDB for vector search:
+#### Local Knowledge Base (Default Implementation)
+Uses local ChromaDB for vector search when Azure Search is not configured:
 
 ```bash
-# Knowledge base search using local ChromaDB (stable)
+# Knowledge base search using local ChromaDB
 curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
@@ -411,11 +417,11 @@ curl -X POST http://localhost:80/api/v1/chat \
 
 **Configuration needed**: None! Just add documents to `./.tmp/knowledge_base/`
 
-#### Local Database (Stable Implementation)
-These use local SQLite database:
+#### Local Database (Default Implementation)
+Uses local SQLite database when Azure SQL is not configured:
 
 ```bash
-# SQL queries using local SQLite (stable)
+# SQL queries using local SQLite
 curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
@@ -426,21 +432,17 @@ curl -X POST http://localhost:80/api/v1/chat \
 
 **Configuration needed**: Set `INGENIOUS_AZURE_SQL_SERVICES__DATABASE_NAME=skip` in environment to enable SQLite mode
 
-#### Experimental Azure Integrations (May contain bugs)
+#### Azure Service Integrations
 
-**Azure Search workflows** (experimental):
-```bash
-# Requires Azure Search service configuration
-# May contain bugs - use local ChromaDB instead
-```
+When configured with Azure services, the workflows can use:
 
-**Azure SQL workflows** (experimental):
-```bash
-# Requires Azure SQL database connection
-# May contain bugs - use local SQLite instead
-```
+**Azure Cognitive Search** for knowledge-base-agent:
+- Configure with environment variables: `INGENIOUS_AZURE_SEARCH_SERVICES__ENDPOINT` and `INGENIOUS_AZURE_SEARCH_SERVICES__KEY`
+- Provides enterprise-scale search capabilities
 
-#### Optional Features
+**Azure SQL Database** for sql-manipulation-agent:
+- Configure with full Azure SQL connection details
+- Supports production database workloads
 
 ### Error Responses
 

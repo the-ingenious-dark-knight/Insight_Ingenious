@@ -9,7 +9,7 @@ toc_label: "Available Guides"
 toc_icon: "book"
 ---
 
-This section provides detailed guides for using specific features and capabilities of Insight Ingenious - an enterprise-grade Python library for building AI agent APIs with Microsoft Azure integrations, debugging utilities, and extensive customization options.
+This section provides detailed guides for using specific features and capabilities of Insight Ingenious - an enterprise-grade Python library for quickly setting up APIs to interact with AI Agents.
 
 ## Available Guides
 

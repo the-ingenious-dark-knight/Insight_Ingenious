@@ -72,11 +72,13 @@ Update `.env` with your Azure credentials:
 # =============================================================================
 # REQUIRED: Azure OpenAI Configuration
 # =============================================================================
+# Option 1: Direct configuration (not recommended for production)
+INGENIOUS_MODELS='[{"model": "gpt-4", "api_type": "rest", "api_version": "2024-12-01-preview", "deployment": "your-gpt4-deployment-name", "api_key": "your-actual-api-key-here", "base_url": "https://your-resource.openai.azure.com/"}]'
+
+# Option 2: Using environment variables (recommended)
 AZURE_OPENAI_API_KEY=your-azure-openai-api-key-here
-AZURE_OPENAI_BASE_URL=https://your-endpoint.cognitiveservices.azure.com/
-AZURE_OPENAI_MODEL_NAME=gpt-4.1-nano
-AZURE_OPENAI_DEPLOYMENT=gpt-4.1-nano
-AZURE_OPENAI_API_VERSION=2024-12-01-preview
+AZURE_OPENAI_BASE_URL=https://your-resource.openai.azure.com/
+INGENIOUS_MODELS='[{"model": "gpt-4", "api_type": "rest", "api_version": "2024-12-01-preview", "deployment": "your-gpt4-deployment-name", "api_key": "${AZURE_OPENAI_API_KEY}", "base_url": "${AZURE_OPENAI_BASE_URL}"}]'
 
 # =============================================================================
 # REQUIRED: Azure SQL Database Configuration
@@ -100,8 +102,8 @@ AZURE_STORAGE_DATA_URL=https://your-account.blob.core.windows.net/
 # =============================================================================
 # OPTIONAL: Web Server Configuration
 # =============================================================================
-WEB_IP_ADDRESS=0.0.0.0
-WEB_PORT=8080
+INGENIOUS_WEB_CONFIGURATION__IP_ADDRESS=0.0.0.0
+INGENIOUS_WEB_CONFIGURATION__PORT=8080
 ```
 
 ### Step 4: Configure Azure SQL Integration
@@ -109,7 +111,7 @@ WEB_PORT=8080
 Add these environment variables to your `.env` file:
 
 ```bash
-# Azure SQL configuration
+# Azure SQL configuration for chat history
 INGENIOUS_CHAT_HISTORY__DATABASE_TYPE=azuresql
 INGENIOUS_CHAT_HISTORY__DATABASE_NAME=ChatHistory
 INGENIOUS_CHAT_HISTORY__DATABASE_CONNECTION_STRING=${AZURE_SQL_CONNECTION_STRING}

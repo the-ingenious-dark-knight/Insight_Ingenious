@@ -401,6 +401,12 @@ GET /api/v1/health
 ```
 Returns the health status of the API service.
 
+#### System Diagnostic
+```bash
+GET /api/v1/diagnostic
+```
+Returns diagnostic information about the system including directory paths for prompts, data, output, and events.
+
 #### List Available Workflows
 ```bash
 GET /api/v1/workflows

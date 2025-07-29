@@ -53,10 +53,13 @@ Create a `.env` file with your Azure OpenAI credentials:
 
 ```bash
 # .env
-AZURE_OPENAI_API_KEY=your-api-key
-AZURE_OPENAI_BASE_URL=your-endpoint
-AZURE_OPENAI_DEPLOYMENT=your-deployment-name
-AZURE_OPENAI_API_VERSION=2024-12-01-preview
+# Configure AI model
+AZURE_OPENAI_API_KEY=your-api-key-here
+AZURE_OPENAI_BASE_URL=https://your-resource.openai.azure.com/
+INGENIOUS_MODELS='[{"model": "gpt-4", "api_type": "rest", "api_version": "2024-12-01-preview", "deployment": "your-gpt4-deployment-name", "api_key": "${AZURE_OPENAI_API_KEY}", "base_url": "${AZURE_OPENAI_BASE_URL}"}]'
+
+# Chat service type
+INGENIOUS_CHAT_SERVICE__TYPE=multi_agent
 ```
 
 ### Step 5: Create Sample Database
@@ -74,7 +77,7 @@ print('Sample SQLite database created at /tmp/sample_sql.db')
 
 ```bash
 # Start the Ingenious API server
-ingen serve
+uv run ingen serve
 ```
 
 ### Step 7: Test SQL Queries
@@ -133,8 +136,8 @@ export AZURE_SQL_PASSWORD="your-password"
 ```bash
 # Validate configuration
 uv run python -c "
-from ingenious.config.config import load_app_config
-config = load_app_config()
+from ingenious.config import get_config
+config = get_config()
 print('Azure SQL Config:', config.azure_sql_services)
 if config.azure_sql_services and config.azure_sql_services.database_name != 'skip':
     print('Azure SQL mode enabled')
@@ -224,7 +227,7 @@ curl -s -X POST http://localhost:80/api/v1/chat \
   -d '{
     "user_prompt": "List all tables in the database",
     "conversation_flow": "sql-manipulation-agent"
-  }' | jq -r '.response // .error'
+  }' | jq -r '.agent_response // .error'
 
 echo ""
 
@@ -235,7 +238,7 @@ curl -s -X POST http://localhost:80/api/v1/chat \
   -d '{
     "user_prompt": "Describe the columns in the first table",
     "conversation_flow": "sql-manipulation-agent"
-  }' | jq -r '.response // .error'
+  }' | jq -r '.agent_response // .error'
 
 echo ""
 
@@ -246,7 +249,7 @@ curl -s -X POST http://localhost:80/api/v1/chat \
   -d '{
     "user_prompt": "Show me 3 sample rows from any table",
     "conversation_flow": "sql-manipulation-agent"
-  }' | jq -r '.response // .error'
+  }' | jq -r '.agent_response // .error'
 
 echo ""
 echo "SQL Agent tests completed!"
@@ -297,8 +300,8 @@ print('Sample data created')
 ```bash
 # Check configuration
 uv run python -c "
-from ingenious.config.config import load_app_config
-config = load_app_config()
+from ingenious.config import get_config
+config = get_config()
 print('Config valid:', config is not None)
 print('SQL config:', getattr(config, 'azure_sql_services', 'Not found'))
 "
@@ -323,7 +326,7 @@ Enable detailed logging for troubleshooting:
 
 ```bash
 # Set debug environment
-export INGENIOUS_LOG_LEVEL=DEBUG
+export INGENIOUS_LOGGING__LOG_LEVEL=debug
 
 # Check SQL tool functions
 uv run python -c "
@@ -340,22 +343,16 @@ Validate your complete setup:
 ```bash
 # Complete configuration check
 uv run python -c "
-from ingenious.config.config import load_app_config
-from ingenious.config.profile import load_profile_config
+from ingenious.config import get_config
 
-config = load_app_config()
-profile = load_profile_config()
+config = get_config()
 
 print('=== Configuration Check ===')
 print('Config loaded:', config is not None)
-print('Profile loaded:', profile is not None)
 
 if config:
     print('Azure SQL Services:', getattr(config, 'azure_sql_services', 'Not configured'))
     print('Local SQL DB:', getattr(config, 'local_sql_db', 'Not configured'))
-
-if profile:
-    print('Profile Azure SQL:', getattr(profile, 'azure_sql_services', 'Not configured'))
 
 print('=== End Check ===')
 "

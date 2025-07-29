@@ -21,11 +21,21 @@ This guide covers creating custom conversation patterns for multi-agent coordina
 
 ```python
 # conversation_patterns/your_pattern_name/your_pattern_name.py
+from typing import Any, Dict, List, Tuple
 import autogen
-import logging
+from ingenious.core.structured_logging import get_logger
+
+logger = get_logger(__name__)
 
 class ConversationPattern:
-    def __init__(self, default_llm_config: dict, topics: list, memory_record_switch: bool, memory_path: str, thread_memory: str):
+    def __init__(
+        self,
+        default_llm_config: Dict[str, Any],
+        topics: List[str],
+        memory_record_switch: bool,
+        memory_path: str,
+        thread_memory: str,
+    ) -> None:
         self.default_llm_config = default_llm_config
         self.topics = topics
         self.memory_record_switch = memory_record_switch
@@ -36,7 +46,8 @@ class ConversationPattern:
         self.user_proxy = autogen.UserProxyAgent(
             name="user_proxy",
             human_input_mode="NEVER",
-            system_message="I represent the user's request"
+            system_message="I represent the user's request",
+            code_execution_config=False,
         )
 
         self.your_agent = autogen.AssistantAgent(
@@ -45,7 +56,7 @@ class ConversationPattern:
             llm_config=self.default_llm_config
         )
 
-    async def get_conversation_response(self, input_message: str) -> [str, str]:
+    async def get_conversation_response(self, input_message: str) -> Tuple[str, str]:
         # Set up agent interactions
         result = await self.user_proxy.a_initiate_chat(
             self.your_agent,

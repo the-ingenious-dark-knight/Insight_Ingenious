@@ -69,8 +69,10 @@ flowchart TD
 graph TB
     subgraph "Core Framework"
         API[API Layer<br/>FastAPI Routes]
-        CHAINLIT[Chainlit UI<br/>Web Interface]
+        AUTH[Authentication<br/>JWT & Security]
+        CLI[CLI Interface<br/>Management Tools]
         CONFIG[Configuration<br/>Management]
+        CORE[Core Utilities<br/>Logging & Errors]
         DB[Database<br/>Integration]
         FILES[File Storage<br/>Utilities]
         MODELS[Data Models<br/>& Schemas]
@@ -89,8 +91,8 @@ graph TB
     end
 
     subgraph "Development Tools"
-        PROMPT_TUNER[Prompt Tuner<br/>Testing Tool]
-        CLI[CLI Tools<br/>Management]
+        DATAPREP[Data Preparation<br/>Crawl & Process]
+        DOCPROC[Document Processing<br/>Extract & Parse]
         DOCS[Documentation<br/>Jekyll Site]
     end
 
@@ -99,17 +101,18 @@ graph TB
     SERVICES --> EXT_SERVICES
     TEMPLATES --> EXT_TEMPLATES
 
-    SERVICES --> PROMPT_TUNER
     CLI --> CONFIG
+    DATAPREP --> FILES
+    DOCPROC --> FILES
     DOCS --> TEMPLATES
 
     classDef core fill:#e3f2fd
     classDef extensions fill:#f1f8e9
     classDef tools fill:#fff3e0
 
-    class API,CHAINLIT,CONFIG,DB,FILES,MODELS,SERVICES,TEMPLATES,UTILS core
+    class API,AUTH,CLI,CONFIG,CORE,DB,FILES,MODELS,SERVICES,TEMPLATES,UTILS core
     class EXT_API,EXT_MODELS,EXT_SERVICES,EXT_TEMPLATES,SAMPLE_DATA,TESTS extensions
-    class PROMPT_TUNER,CLI,DOCS tools
+    class DATAPREP,DOCPROC,DOCS tools
 ```
 
 ### Directory Structure
@@ -118,10 +121,17 @@ graph TB
 graph LR
     subgraph "ingenious/"
         CORE_API[ api/]
-        CORE_CHAINLIT[ chainlit/]
+        CORE_AUTH[ auth/]
+        CORE_CLI[ cli/]
         CORE_CONFIG[ config/]
+        CORE_CORE[ core/]
+        CORE_DATAPREP[ dataprep/]
         CORE_DB[ db/]
+        CORE_DOCPROC[ document_processing/]
+        CORE_ERRORS[ errors/]
+        CORE_EXTSERV[ external_services/]
         CORE_FILES[ files/]
+        CORE_MAIN[ main/]
         CORE_MODELS[ models/]
         CORE_SERVICES[ services/]
         CORE_TEMPLATES[ templates/]
@@ -137,20 +147,12 @@ graph LR
         EXT_TESTS[ tests/]
     end
 
-    subgraph "ingenious_prompt_tuner/"
-        TUNER_AUTH[ auth.py]
-        TUNER_PROCESSOR[ event_processor.py]
-        TUNER_PAYLOAD[ payload.py]
-        TUNER_WRAPPER[response_wrapper.py]
-    end
 
     classDef core fill:#e3f2fd
     classDef extensions fill:#f1f8e9
-    classDef tuner fill:#fff3e0
 
-    class CORE_API,CORE_CHAINLIT,CORE_CONFIG,CORE_DB,CORE_FILES,CORE_MODELS,CORE_SERVICES,CORE_TEMPLATES,CORE_UTILS core
+    class CORE_API,CORE_AUTH,CORE_CLI,CORE_CONFIG,CORE_CORE,CORE_DATAPREP,CORE_DB,CORE_DOCPROC,CORE_ERRORS,CORE_EXTSERV,CORE_FILES,CORE_MAIN,CORE_MODELS,CORE_SERVICES,CORE_TEMPLATES,CORE_UTILS core
     class EXT_API,EXT_MODELS,EXT_SAMPLE,EXT_SERVICES,EXT_TEMPLATES,EXT_TESTS extensions
-    class TUNER_AUTH,TUNER_PROCESSOR,TUNER_PAYLOAD,TUNER_WRAPPER tuner
 ```
 
 ## Core Components
@@ -168,29 +170,33 @@ The multi-agent framework is the heart of Insight Ingenious:
 
 - `multi_agent_chat_service`: Service managing agent conversations
 
-#### Patterns
+#### Patterns and Flows
 
-Conversation patterns define how agents interact:
+The multi-agent framework uses a two-layer architecture:
 
-- `conversation_patterns/`: Contains different conversation pattern implementations
-  - `classification_agent/`: Pattern for classifying inputs and routing to specialized agents (API: `classification-agent`)
-  - `knowledge_base_agent/`: Pattern for knowledge retrieval and question answering (API: `knowledge-base-agent`)
-  - `sql_manipulation_agent/`: Pattern for SQL query generation and execution (API: `sql-manipulation-agent`)
-  - `education_expert/`: Pattern for educational content generation (pattern only, no direct API)
+**Conversation Patterns** (`conversation_patterns/`): Define the core logic for how agents interact and process messages. Each pattern implements the conversation mechanics and agent orchestration.
 
-#### Flows
+**Conversation Flows** (`conversation_flows/`): Provide the entry points for API integration. Flows instantiate and configure patterns, then expose them through standardized interfaces.
 
-Conversation flows implement specific use cases:
+Current implementations:
 
-- `conversation_flows/`: Contains flow implementations that use the patterns
-  - `classification_agent/`: Flow for classification and routing (API: `classification-agent`)
-  - `knowledge_base_agent/`: Flow for knowledge base interactions (API: `knowledge-base-agent`)
-  - `sql_manipulation_agent/`: Flow for SQL queries (API: `sql-manipulation-agent`)
+- **Classification Agent** (`classification_agent/`): Classifies inputs and routes to specialized agents
+  - Pattern: Implements classification logic and routing mechanics
+  - Flow: Exposes via API endpoint (`classification-agent`)
+  
+- **Knowledge Base Agent** (`knowledge_base_agent/`): Handles knowledge retrieval and question answering
+  - Pattern: Implements RAG (Retrieval-Augmented Generation) logic
+  - Flow: Exposes via API endpoint (`knowledge-base-agent`)
+  
+- **SQL Manipulation Agent** (`sql_manipulation_agent/`): Generates and executes SQL queries
+  - Pattern: Implements SQL generation and execution logic
+  - Flow: Exposes via API endpoint (`sql-manipulation-agent`)
+  
+- **Education Expert** (`education_expert/`): Educational content generation
+  - Pattern: Implements educational content generation logic
+  - Flow: Not implemented (pattern only, no API endpoint)
 
-Note:
-
-- `education_expert` exists as a pattern but does not have a corresponding flow implementation
-- Folder names use underscores for historical reasons, but API calls should use hyphens (e.g., `classification-agent`)
+Note: Folder names use underscores, but API endpoints use hyphens (e.g., `classification-agent`)
 
 ### Configuration System
 
@@ -300,17 +306,6 @@ Use the test harness to test agent behavior:
 uv run ingen test
 ```
 
-### Testing Prompts
-
-Use the prompt tuner for interactive testing:
-
-1. Start the server:
-   ```bash
-   uv run ingen serve
-   ```
-2. Navigate to http://localhost:80/prompt-tuner (or your configured port)
-3. Select a prompt to test
-4. Provide sample inputs and evaluate responses
 
 ## Debugging
 
@@ -330,7 +325,6 @@ Logs are printed to the console and can be redirected to files.
 When running in development mode, you can access:
 
 - http://localhost:80/docs - API documentation (or your configured port)
-- http://localhost:80/prompt-tuner - Prompt tuning interface
 
 ### Common Issues
 

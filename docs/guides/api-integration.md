@@ -54,14 +54,15 @@ curl -X POST http://localhost:80/api/v1/chat \
   }'
 ```
 
-#### Bike Insights
-Sample domain-specific workflow for business analysis:
+#### Bike Insights (Template Workflow - Requires `ingen init`)
+Sample domain-specific workflow for business analysis (only available after running `ingen init`):
 
 ```bash
+# Note: bike-insights requires JSON data in the user_prompt field
 curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
-    "user_prompt": "Show me bike sales trends for April 2023",
+    "user_prompt": "{\"revision_id\": \"test-v1\", \"identifier\": \"test-001\", \"stores\": [{\"name\": \"Test Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"MB-TREK-2021-XC\", \"quantity_sold\": 2, \"sale_date\": \"2023-04-01\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 4.5, \"comment\": \"Great bike\"}}], \"bike_stock\": []}]}",
     "conversation_flow": "bike-insights"
   }'
 ```
