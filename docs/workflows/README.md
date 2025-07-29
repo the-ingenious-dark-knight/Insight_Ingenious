@@ -461,21 +461,21 @@ INGENIOUS_AZURE_SQL_SERVICES__DATABASE_CONNECTION_STRING="Driver={ODBC Driver 18
 
 ```mermaid
 flowchart TD
-    START([What do you want to do?]) --> DECISION{Choose your use case}
+    START(["What do you want to do?"]) --> DECISION{"Choose your use case"}
 
-    DECISION -->|Route user queries<br/>to different specialists| CLASSIFICATION[Classification Agent]
-    DECISION -->|Analyze business data<br/>with multiple perspectives| BIKE_INSIGHTS[Bike Insights<br/>(Template only)]
-    DECISION -->|Search through<br/>documents and knowledge| KNOWLEDGE[Knowledge Base Agent]
-    DECISION -->|Query databases<br/>with natural language| SQL[SQL Manipulation]
+    DECISION -->|Route user queries to different specialists| CLASSIFICATION["Classification Agent"]
+    DECISION -->|Analyze business data with multiple perspectives| BIKE_INSIGHTS["Bike Insights (Template only)"]
+    DECISION -->|Search through documents and knowledge| KNOWLEDGE["Knowledge Base Agent"]
+    DECISION -->|Query databases with natural language| SQL["SQL Manipulation"]
 
-    CLASSIFICATION --> SETUP_MINIMAL[Minimal Setup<br/>Azure OpenAI only]
+    CLASSIFICATION --> SETUP_MINIMAL["Minimal Setup Azure OpenAI only"]
     BIKE_INSIGHTS --> SETUP_MINIMAL
 
-    KNOWLEDGE --> SETUP_SEARCH[Search Setup<br/>+ Azure Cognitive Search]
+    KNOWLEDGE --> SETUP_SEARCH["Search Setup + Azure Cognitive Search"]
 
-    SQL --> SETUP_DATABASE[Database Setup<br/>+ Database Connection]
+    SQL --> SETUP_DATABASE["Database Setup + Database Connection"]
 
-    SETUP_MINIMAL --> READY[Ready to Use]
+    SETUP_MINIMAL --> READY["Ready to Use"]
     SETUP_SEARCH --> READY
     SETUP_DATABASE --> READY
 

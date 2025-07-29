@@ -118,33 +118,33 @@ sequenceDiagram
 ```mermaid
 graph LR
     subgraph "Chat Endpoints"
-        CHAT_POST[POST /api/v1/chat\nSend Message]
+        CHAT_POST[POST <br>/api/v1/chat<br>Send Message]
     end
 
     subgraph "Diagnostic Endpoints"
-        WORKFLOW_STATUS[GET /api/v1/workflow-status/{workflow_name}\nCheck Workflow Status]
-        WORKFLOWS_LIST[GET /api/v1/workflows\nList All Workflows]
-        DIAGNOSTIC[GET /api/v1/diagnostic\nSystem Diagnostic]
+        WORKFLOW_STATUS["GET <br>/api/v1/workflow-status/{workflow_name}<br>Check Workflow Status"]
+        WORKFLOWS_LIST[GET <br>/api/v1/workflows<br>List All Workflows]
+        DIAGNOSTIC[GET <br>/api/v1/diagnostic<br>System Diagnostic]
     end
 
     subgraph "System Endpoints"
-        HEALTH[GET /api/v1/health\nHealth Check]
+        HEALTH[GET <br>/api/v1/health<br>Health Check]
     end
 
     subgraph "Management Endpoints"
-        PROMPTS_VIEW[GET /api/v1/prompts/view/{revision_id}/{filename}\nView Prompt]
-        PROMPTS_LIST[GET /api/v1/prompts/list/{revision_id}\nList Prompts]
-        PROMPTS_UPDATE[POST /api/v1/prompts/update/{revision_id}/{filename}\nUpdate Prompt]
-        PROMPTS_REVISIONS[GET /api/v1/revisions/list\nList All Revisions]
-        PROMPTS_WORKFLOWS[GET /api/v1/workflows/list\nList Workflows with Prompts]
-        FEEDBACK[PUT /api/v1/messages/{message_id}/feedback\nMessage Feedback]
-        CONVERSATIONS[GET /api/v1/conversations/{thread_id}\nGet Conversation History]
+        PROMPTS_VIEW["GET <br>/api/v1/prompts/view/{revision_id}/{filename}<br>View Prompt"]
+        PROMPTS_LIST["GET <br>/api/v1/prompts/list/{revision_id}<br>List Prompts"]
+        PROMPTS_UPDATE["POST <br>/api/v1/prompts/update/{revision_id}/{filename}<br>Update Prompt"]
+        PROMPTS_REVISIONS[GET <br>/api/v1/revisions/list <br>List All Revisions]
+        PROMPTS_WORKFLOWS["GET <br>/api/v1/workflows/list<br>List Workflows with Prompts"]
+        FEEDBACK["PUT <br>/api/v1/messages/{message_id}/feedback<br>Message Feedback"]
+        CONVERSATIONS["GET /api/v1/conversations/{thread_id}<br>Get Conversation History"]
     end
 
     subgraph "Authentication Endpoints"
-        AUTH_LOGIN[POST /api/v1/auth/login\nJWT Login]
-        AUTH_REFRESH[POST /api/v1/auth/refresh\nRefresh Token]
-        AUTH_VERIFY[GET /api/v1/auth/verify\nVerify Token]
+        AUTH_LOGIN[POST <br>/api/v1/auth/login <br>JWT Login]
+        AUTH_REFRESH[POST <br>/api/v1/auth/refresh<br>Refresh Token]
+        AUTH_VERIFY[GET <br>/api/v1/auth/verify<br>Verify Token]
     end
 
     classDef chat fill:#e8f5e8
