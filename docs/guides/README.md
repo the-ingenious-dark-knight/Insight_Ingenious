@@ -16,7 +16,7 @@ This section provides detailed guides for using specific features and capabiliti
 ## Available Guides
 
 ### Integration and Interfaces
-- **[Complete Azure Deployment](./full-azure-deployment.md)** - Complete enterprise deployment instructions
+- **[Complete Azure Deployment](./complete-azure-deployment.md)** - Complete enterprise deployment instructions
 - **[API Integration](./api-integration.md)** - Using the REST API programmatically
 - **[Web Interface](./web-interface.md)** - Using the web-based interface
 - **[SQL Agent Setup](./sql-agent-setup.md)** - Complete setup guide for SQL manipulation agent with SQLite and Azure SQL
