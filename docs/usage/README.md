@@ -123,8 +123,8 @@ uv run ingen help
 # Start server with default settings
 uv run ingen serve
 
-# Start with custom configuration
-uv run ingen serve --config ./my-config.yml --port 8080
+# Start with custom port
+uv run ingen serve --port 8080
 
 # Start without prompt tuner
 uv run ingen serve --no-prompt-tuner
@@ -192,7 +192,7 @@ Note: The default port is 80, but for local development it's recommended to use 
 ### Tuning Prompts
 
 1. Navigate to http://localhost:80/prompt-tuner (or your configured port)
-2. Log in with credentials from your `profiles.yml`
+2. Log in with credentials from your environment configuration
 3. Select the prompt template you want to edit
 4. Make changes and test with sample data
 5. Save revisions for version control
@@ -424,7 +424,7 @@ curl -X POST http://localhost:80/api/v1/chat \
   }'
 ```
 
-**Configuration needed**: Set `database_name: "skip"` in profiles.yml to enable SQLite mode
+**Configuration needed**: Set `INGENIOUS_AZURE_SQL_SERVICES__DATABASE_NAME=skip` in environment to enable SQLite mode
 
 #### Experimental Azure Integrations (May contain bugs)
 

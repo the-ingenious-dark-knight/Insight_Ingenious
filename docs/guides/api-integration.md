@@ -99,7 +99,7 @@ curl -X POST http://localhost:80/api/v1/chat \
 ```
 
 **Requirements:**
-- Set `database_name: "skip"` in profiles.yml for SQLite mode
+- Set `INGENIOUS_AZURE_SQL_SERVICES__DATABASE_NAME=skip` in environment for SQLite mode
 - Local SQLite database automatically created
 
 ### Experimental Azure Integrations (May contain bugs)
@@ -132,7 +132,7 @@ Example response:
   "workflow": "knowledge-base-agent",
   "configured": false,
   "missing_config": [
-    "azure_search_services.key: Missing in profiles.yml"
+    "azure_search_services.key: Missing in environment variables"
   ],
   "required_config": ["models", "chat_service", "azure_search_services"],
   "external_services": ["Azure OpenAI", "Azure Cognitive Search"],
@@ -161,12 +161,11 @@ curl -X POST http://localhost:80/api/v1/chat \
 
 ### Disable Authentication
 
-For development, disable in `profiles.yml`:
+For development, disable with environment variables:
 
-```yaml
-web_configuration:
-  authentication:
-    enable: false
+```bash
+# .env
+INGENIOUS_WEB_CONFIGURATION__AUTHENTICATION__ENABLE=false
 ```
 
 ## Conversation Management

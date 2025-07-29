@@ -194,10 +194,7 @@ Note:
 
 ### Configuration System
 
-The configuration system uses:
-
-- `config.yml`: Project-specific, non-sensitive configuration
-- `profiles.yml`: Environment-specific, sensitive configuration
+The configuration system uses environment variables with `INGENIOUS_` prefixes.
 
 Configuration is handled by:
 
@@ -319,12 +316,11 @@ Use the prompt tuner for interactive testing:
 
 ### Logging
 
-Configure logging in `config.yml`:
+Configure logging with environment variables:
 
-```yaml
-logging:
-  root_log_level: "DEBUG"
-  log_level: "DEBUG"
+```bash
+export INGENIOUS_LOGGING__ROOT_LOG_LEVEL="DEBUG"
+export INGENIOUS_LOGGING__LOG_LEVEL="DEBUG"
 ```
 
 Logs are printed to the console and can be redirected to files.
@@ -341,7 +337,7 @@ When running in development mode, you can access:
 - **Missing Configuration**: Ensure environment variables are set correctly
 - **Agent Not Found**: Check module naming and imports
 - **Pattern Registration**: Ensure conversation patterns are properly registered
-- **API Key Issues**: Verify profiles.yml contains valid API keys
+- **API Key Issues**: Verify environment variables contain valid API keys
 
 ## Best Practices
 
