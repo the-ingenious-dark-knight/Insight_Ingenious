@@ -455,6 +455,8 @@ graph TB
 
 ```mermaid
 classDiagram
+    note for ClassificationAgent "Static methods only 
+    Does not inherit from IConversationFlow"
     class IConversationPattern {
         <<interface>>
         +execute(context: ConversationContext)
@@ -512,6 +514,7 @@ classDiagram
         +route_to_agent()
         +handle_routing()
     }
+ 
     IConversationFlow <|.. CustomExtensionFlow
     IConversationFlow <|.. KnowledgeBaseAgentFlow
     IConversationFlow <|.. SqlManipulationAgentFlow

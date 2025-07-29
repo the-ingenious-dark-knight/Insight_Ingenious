@@ -638,12 +638,11 @@ graph TD
     TEST_EXT --> REGISTER[ Register Extension]
     REGISTER --> DEPLOY[ Deploy Extension]
     DEPLOY --> MONITOR[ Monitor Performance]
-
+    
     classDef start fill:#c8e6c9
     classDef process fill:#e1f5fe
     classDef decision fill:#fff9c4
     classDef create fill:#f3e5f5
-    classDef end fill:#dcedc8
 
     class START start
     class PLAN,TEMPLATE,IMPLEMENT,TEST_EXT,REGISTER,DEPLOY,MONITOR process
