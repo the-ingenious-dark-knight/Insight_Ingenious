@@ -11,9 +11,9 @@ model: Claude Sonnet 4
     ```sh
     gh pr list --state open
     ```
-    
+
     After showing the available PRs, **pause and ask the user which PR number they want to merge for this session.**
-    
+
     Wait for the user's response before proceeding with any merge operations.
 
 2. **View details of the selected pull request**
@@ -78,7 +78,7 @@ model: Claude Sonnet 4
     ```sh
     # Delete the local PR branch if no longer needed
     git branch -d <pr-branch-name>
-    
+
     # If the PR was merged successfully, you can close it on GitHub
     gh pr close <pr-number>
     ```
@@ -124,10 +124,10 @@ model: Claude Sonnet 4
     ```sh
     # Merge with merge commit
     gh pr merge <pr-number> --merge
-    
+
     # Squash and merge
     gh pr merge <pr-number> --squash
-    
+
     # Rebase and merge
     gh pr merge <pr-number> --rebase
     ```
