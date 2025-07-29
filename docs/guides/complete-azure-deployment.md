@@ -54,8 +54,6 @@ uv run ingen init
 ```
 
 This creates:
-- `config.yml` - Main configuration file
-- `profiles.yml` - Environment-specific settings
 - `.env.example` - Environment variable template
 - `ingenious_extensions/` - Bike-insights workflow
 - `templates/prompts/quickstart-1/` - Prompt templates
@@ -81,10 +79,11 @@ AZURE_OPENAI_DEPLOYMENT=gpt-4.1-nano
 AZURE_OPENAI_API_VERSION=2024-12-01-preview
 
 # =============================================================================
-# REQUIRED: Ingenious Configuration Paths
+# REQUIRED: Azure SQL Database Configuration
 # =============================================================================
-INGENIOUS_PROJECT_PATH=./config.yml
-INGENIOUS_PROFILE_PATH=./profiles.yml
+INGENIOUS_CHAT_HISTORY__DATABASE_TYPE=azuresql
+INGENIOUS_CHAT_HISTORY__DATABASE_NAME=ChatHistory
+INGENIOUS_CHAT_HISTORY__DATABASE_CONNECTION_STRING=${AZURE_SQL_CONNECTION_STRING}
 
 # =============================================================================
 # REQUIRED: Azure SQL Database Configuration
@@ -107,67 +106,38 @@ WEB_PORT=8080
 
 ### Step 4: Configure Azure SQL Integration
 
-#### Update config.yml
+Add these environment variables to your `.env` file:
 
-Edit `config.yml` to enable Azure SQL:
-
-```yaml
-chat_history:
-  database_type: azuresql  # Changed from 'sqlite'
-  database_path: ./.tmp/chat_history.db
-  database_name: ChatHistory
-  memory_path: ./.tmp
-```
-
-#### Update profiles.yml
-
-Edit `profiles.yml` to use Azure SQL connection:
-
-```yaml
-- name: dev
-  # ... other configuration ...
-  chat_history:
-    database_connection_string: ${AZURE_SQL_CONNECTION_STRING:REQUIRED_SET_IN_ENV}
+```bash
+# Azure SQL configuration
+INGENIOUS_CHAT_HISTORY__DATABASE_TYPE=azuresql
+INGENIOUS_CHAT_HISTORY__DATABASE_NAME=ChatHistory
+INGENIOUS_CHAT_HISTORY__DATABASE_CONNECTION_STRING=${AZURE_SQL_CONNECTION_STRING}
 ```
 
 ### Step 5: Configure Azure Blob Storage Integration
 
-#### Update config.yml
+Add these environment variables to your `.env` file:
 
-Edit `config.yml` to enable Azure Blob Storage:
+```bash
+# Azure Blob Storage configuration
+INGENIOUS_FILE_STORAGE__REVISIONS__ENABLE=true
+INGENIOUS_FILE_STORAGE__REVISIONS__STORAGE_TYPE=azure
+INGENIOUS_FILE_STORAGE__REVISIONS__CONTAINER_NAME=revisions
+INGENIOUS_FILE_STORAGE__REVISIONS__PATH=ingenious-files
+INGENIOUS_FILE_STORAGE__REVISIONS__ADD_SUB_FOLDERS=true
+INGENIOUS_FILE_STORAGE__REVISIONS__URL=${AZURE_STORAGE_REVISIONS_URL}
+INGENIOUS_FILE_STORAGE__REVISIONS__TOKEN=${AZURE_STORAGE_CONNECTION_STRING}
+INGENIOUS_FILE_STORAGE__REVISIONS__AUTHENTICATION_METHOD=token
 
-```yaml
-file_storage:
-  revisions:
-    enable: true
-    storage_type: azure  # Changed from 'local'
-    container_name: revisions
-    path: ingenious-files
-    add_sub_folders: true
-  data:
-    enable: true
-    storage_type: azure  # Changed from 'local'
-    container_name: data
-    path: ingenious-files
-    add_sub_folders: true
-```
-
-#### Update profiles.yml
-
-Edit `profiles.yml` to use Azure Blob Storage:
-
-```yaml
-- name: dev
-  # ... other configuration ...
-  file_storage:
-    revisions:
-      url: ${AZURE_STORAGE_REVISIONS_URL:https://your-account.blob.core.windows.net}
-      token: ${AZURE_STORAGE_CONNECTION_STRING:REQUIRED_SET_IN_ENV}
-      authentication_method: "token"
-    data:
-      url: ${AZURE_STORAGE_DATA_URL:https://your-account.blob.core.windows.net}
-      token: ${AZURE_STORAGE_CONNECTION_STRING:REQUIRED_SET_IN_ENV}
-      authentication_method: "token"
+INGENIOUS_FILE_STORAGE__DATA__ENABLE=true
+INGENIOUS_FILE_STORAGE__DATA__STORAGE_TYPE=azure
+INGENIOUS_FILE_STORAGE__DATA__CONTAINER_NAME=data
+INGENIOUS_FILE_STORAGE__DATA__PATH=ingenious-files
+INGENIOUS_FILE_STORAGE__DATA__ADD_SUB_FOLDERS=true
+INGENIOUS_FILE_STORAGE__DATA__URL=${AZURE_STORAGE_DATA_URL}
+INGENIOUS_FILE_STORAGE__DATA__TOKEN=${AZURE_STORAGE_CONNECTION_STRING}
+INGENIOUS_FILE_STORAGE__DATA__AUTHENTICATION_METHOD=token
 ```
 
 ### Step 6: Install ODBC Driver (if not already installed)
@@ -202,8 +172,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-os.environ['INGENIOUS_PROJECT_PATH'] = os.path.join(os.getcwd(), 'config.yml')
-os.environ['INGENIOUS_PROFILE_PATH'] = os.path.join(os.getcwd(), 'profiles.yml')
+# Environment variables are loaded from .env file
 
 async def setup_azure_prompts():
     from ingenious.dependencies import get_config
@@ -238,8 +207,7 @@ uv run python setup_azure_prompts.py
 ### Step 8: Validate Configuration
 
 ```bash
-export INGENIOUS_PROJECT_PATH=$(pwd)/config.yml
-export INGENIOUS_PROFILE_PATH=$(pwd)/profiles.yml
+# Environment variables are loaded from .env file
 uv run ingen validate
 ```
 
@@ -256,8 +224,7 @@ Expected output:
 ### Step 9: Start the Server
 
 ```bash
-export INGENIOUS_PROJECT_PATH=$(pwd)/config.yml
-export INGENIOUS_PROFILE_PATH=$(pwd)/profiles.yml
+# Environment variables are loaded from .env file
 uv run ingen serve --port 8080
 ```
 

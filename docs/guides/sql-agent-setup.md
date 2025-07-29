@@ -34,19 +34,17 @@ uv add ingenious
 # Initialize a new Ingenious project
 ingen init
 
-# This creates config.yml and profiles.yml files
+# This creates a .env.example file
 ```
 
 ### Step 3: Configure SQLite Mode
 
-Edit your `profiles.yml` file to enable SQLite mode:
+Add these environment variables to enable SQLite mode:
 
-```yaml
-# profiles.yml
-azure_sql_services:
-  database_name: "skip"  # This enables SQLite mode
-local_sql_db:
-  database_path: "/tmp/sample_sql.db"
+```bash
+# .env
+INGENIOUS_AZURE_SQL_SERVICES__DATABASE_NAME=skip  # This enables SQLite mode
+INGENIOUS_LOCAL_SQL_DB__DATABASE_PATH=/tmp/sample_sql.db
 ```
 
 ### Step 4: Set Environment Variables
@@ -113,15 +111,14 @@ For production deployments, you can connect to Azure SQL Database.
 
 ### Configuration
 
-1. **Configure profiles.yml** for Azure SQL:
+1. **Configure environment variables** for Azure SQL:
 
-```yaml
-# profiles.yml
-azure_sql_services:
-  database_name: "your-database-name"
-  server_name: "your-server.database.windows.net"
-  driver: "ODBC Driver 18 for SQL Server"
-  connection_string: "Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+```bash
+# .env
+INGENIOUS_AZURE_SQL_SERVICES__DATABASE_NAME=your-database-name
+INGENIOUS_AZURE_SQL_SERVICES__SERVER_NAME=your-server.database.windows.net
+INGENIOUS_AZURE_SQL_SERVICES__DRIVER="ODBC Driver 18 for SQL Server"
+INGENIOUS_AZURE_SQL_SERVICES__CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
 ```
 
 2. **Set environment variables**:
@@ -269,7 +266,7 @@ chmod +x test_sql_agent.sh
 #### 1. "Database connection failed"
 
 **For SQLite mode:**
-- Ensure `database_name: "skip"` is set in profiles.yml
+- Ensure `INGENIOUS_AZURE_SQL_SERVICES__DATABASE_NAME=skip` is set in environment
 - Check that the database file path is writable
 - Run the sample data creation script
 

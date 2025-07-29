@@ -20,19 +20,17 @@ Common issues and solutions when working with Insight Ingenious.
 **Error: "Azure OpenAI API key not found"**
 
 **Solution:**
-1. Check your `profiles.yml` file:
-   ```yaml
-   - name: "dev"
-     models:
-       - model: "gpt-4.1-nano"
-         api_key: "your-actual-api-key"  # ← Make sure this is set
-         base_url: "https://your-endpoint.openai.azure.com/..."
+1. Check your environment variables:
+   ```bash
+   # Make sure these are set in your .env file or environment
+   echo $AZURE_OPENAI_API_KEY
+   echo $AZURE_OPENAI_BASE_URL
+   echo $AZURE_OPENAI_DEPLOYMENT
    ```
 
-2. Verify environment variables:
+2. Verify configuration is loaded:
    ```bash
-   echo $INGENIOUS_PROFILE_PATH
-   # Should show: <pwd>/profiles.yml
+   uv run python -c "from ingenious.config.config import get_config; print(get_config())"
    ```
 
 3. Test configuration loading:
@@ -43,7 +41,7 @@ Common issues and solutions when working with Insight Ingenious.
 **Error: "Invalid Azure OpenAI deployment"**
 
 **Solution:**
-- Ensure `config.yml` model name matches your Azure deployment name
+- Ensure `AZURE_OPENAI_DEPLOYMENT` environment variable matches your Azure deployment name
 - Verify API version is supported (use `2024-08-01-preview` or newer)
 - Check your Azure OpenAI resource has the model deployed
 
@@ -53,21 +51,14 @@ Common issues and solutions when working with Insight Ingenious.
 
 **Solution:**
 ```bash
-# Set correct paths
-export INGENIOUS_PROJECT_PATH="$(pwd)/config.yml"
-export INGENIOUS_PROFILE_PATH="$(pwd)/profiles.yml"
+# Make sure .env file exists and is loaded
+ls -la .env
 
-# Verify files exist
-ls -la config.yml
-ls -la profiles.yml
-```
+# Source the .env file if needed
+source .env
 
-**Error: "Permission denied accessing profiles.yml"**
-
-**Solution:**
-```bash
-# Fix permissions
-chmod 600 profiles.yml
+# Verify key environment variables are set
+env | grep INGENIOUS_
 ```
 
 ## Workflow Issues
@@ -105,37 +96,28 @@ No configuration needed! The knowledge-base-agent uses local ChromaDB by default
 3. Works immediately without external services
 
 **Alternative: Azure Search (Experimental - May contain bugs):**
-1. Add Azure Search to `config.yml`:
-   ```yaml
-   azure_search_services:
-     - service: "default"
-       endpoint: "https://your-search-service.search.windows.net"
-   ```
-
-2. Add API key to `profiles.yml`:
-   ```yaml
-   azure_search_services:
-     - service: "default"
-       key: "your-search-api-key"
+1. Add Azure Search environment variables:
+   ```bash
+   # .env
+   INGENIOUS_AZURE_SEARCH_SERVICES__0__SERVICE=default
+   INGENIOUS_AZURE_SEARCH_SERVICES__0__ENDPOINT=https://your-search-service.search.windows.net
+   INGENIOUS_AZURE_SEARCH_SERVICES__0__KEY=your-search-api-key
    ```
 
 **Error: "Database connection failed"**
 
 **Solution for `sql-manipulation-agent` (Recommended - Local SQLite):**
-```yaml
-# config.yml
-azure_sql_services:
-  database_name: "skip"  # This enables local mode
-local_sql_db:
-  database_path: "/tmp/sample_sql.db"
-  sample_csv_path: "./data/your_data.csv"
+```bash
+# .env
+INGENIOUS_AZURE_SQL_SERVICES__DATABASE_NAME=skip  # This enables local mode
+INGENIOUS_LOCAL_SQL_DB__DATABASE_PATH=/tmp/sample_sql.db
+INGENIOUS_LOCAL_SQL_DB__SAMPLE_CSV_PATH=./data/your_data.csv
 ```
 
 **Alternative: Azure SQL (Experimental - May contain bugs):**
-```yaml
-# profiles.yml
-azure_sql_services:
-  database_connection_string: "Server=tcp:yourserver.database.windows.net,1433;Database=yourdatabase;..."
+```bash
+# .env
+INGENIOUS_AZURE_SQL_SERVICES__DATABASE_CONNECTION_STRING="Server=tcp:yourserver.database.windows.net,1433;Database=yourdatabase;..."
 ```
 
 ## Server Issues
@@ -156,10 +138,10 @@ azure_sql_services:
    uv run ingen serve --port 8082
    ```
 
-3. Or change the port in `config.yml`:
-   ```yaml
-   web_configuration:
-     port: 8082
+3. Or change the port with environment variable:
+   ```bash
+   # .env
+   INGENIOUS_WEB_CONFIGURATION__PORT=8082
    ```
 
 ### Server Won't Start
@@ -169,8 +151,8 @@ azure_sql_services:
 **Solution:**
 1. Check configuration syntax:
    ```bash
-   # Test YAML syntax
-   python -c "import yaml; yaml.safe_load(open('config.yml'))"
+   # Test environment configuration
+   uv run python -c "from ingenious.config.config import get_config; print(get_config())"
    ```
 
 2. Check logs for specific errors
@@ -183,11 +165,10 @@ azure_sql_services:
 **Error: "401 Unauthorized"**
 
 **Solution:**
-1. Check if authentication is enabled in `config.yml`:
-   ```yaml
-   web_configuration:
-     authentication:
-       enable: true  # ← If true, you need credentials
+1. Check if authentication is enabled:
+   ```bash
+   # Check environment variable
+   echo $INGENIOUS_WEB_CONFIGURATION__AUTHENTICATION__ENABLE
    ```
 
 2. Use basic auth in requests:
@@ -198,11 +179,9 @@ azure_sql_services:
    ```
 
 3. Or disable authentication for testing:
-   ```yaml
-   # profiles.yml
-   web_configuration:
-     authentication:
-       enable: false
+   ```bash
+   # .env
+   INGENIOUS_WEB_CONFIGURATION__AUTHENTICATION__ENABLE=false
    ```
 
 ### Request Format Issues
@@ -247,11 +226,10 @@ curl http://localhost:8000/api/v1/diagnostic
 
 ### Enable Debug Logging
 
-```yaml
-# config.yml
-logging:
-  root_log_level: debug
-  log_level: debug
+```bash
+# .env
+INGENIOUS_LOGGING__ROOT_LOG_LEVEL=debug
+INGENIOUS_LOGGING__LOG_LEVEL=debug
 ```
 
 ### Test Individual Components
@@ -329,7 +307,7 @@ curl -X POST http://localhost:8000/api/v1/chat \
 ### When Opening an Issue:
 
 Include:
-- Your `config.yml` (redact sensitive data)
+- Your environment variables (redact sensitive data)
 - Error messages and logs
 - Steps to reproduce
 - Operating system and Python version

@@ -283,7 +283,7 @@ Example response:
 {
   "workflow": "knowledge-base-agent",
   "configured": false,
-  "missing_config": ["azure_search_services.key: Missing in profiles.yml"],
+  "missing_config": ["azure_search_services.key: Missing in environment variables"],
   "required_config": ["models", "chat_service", "azure_search_services"],
   "external_services": ["Azure OpenAI", "Azure Cognitive Search"],
   "ready": false,
