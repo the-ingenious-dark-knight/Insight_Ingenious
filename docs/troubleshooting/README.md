@@ -9,9 +9,7 @@ toc_label: "Troubleshooting"
 toc_icon: "wrench"
 ---
 
-# Troubleshooting Guide
-
-This guide helps you resolve common issues when setting up and using Insight Ingenious - an enterprise-grade Python library for AI agent APIs with Microsoft Azure integrations. The library includes comprehensive debugging utilities to help diagnose and resolve deployment issues.
+This guide helps you resolve common issues when setting up and using Insight Ingenious - an enterprise-grade Python library for quickly setting up APIs to interact with AI Agents. The library includes comprehensive debugging utilities to help diagnose and resolve deployment issues.
 
 ## Quick Test Commands
 
@@ -106,11 +104,11 @@ models.0.api_key
 
 1. **Use alternative port (Recommended for development)**:
    ```bash
-   # Use port 8080 instead of 80 (no admin privileges required)
-   uv run ingen serve --port 8080
+   # Use port 8000 instead of 80 (no admin privileges required)
+   uv run ingen serve --port 8000
 
    # Update your test commands to use the new port
-   curl http://localhost:8080/api/v1/health
+   curl http://localhost:8000/api/v1/health
    ```
 
 2. **Set port in environment variables**:

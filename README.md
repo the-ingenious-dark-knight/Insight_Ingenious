@@ -4,14 +4,14 @@
 [![Python](https://img.shields.io/badge/python-3.13+-green.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-purple.svg)](LICENSE)
 
-An enterprise-grade Python framework for building AI agent workflows using Azure OpenAI and Microsoft's Autogen. Features multi-agent conversation flows, JWT authentication, and comprehensive Azure service integrations.
+An enterprise-grade Python library for quickly setting up APIs to interact with AI Agents. Features multi-agent conversation flows using Microsoft's AutoGen, JWT authentication, and comprehensive Azure service integrations with support for both cloud and local implementations.
 
 ## Quick Start
 
 Get up and running in 5 minutes with Azure OpenAI!
 
 ### Prerequisites
-- Python 3.13 or higher (Note: Python 3.13+ requirement is strict due to dependency constraints)
+- Python 3.13 or higher (required - earlier versions are not supported)
 - Azure OpenAI API credentials
 - [uv package manager](https://docs.astral.sh/uv/)
 
@@ -23,27 +23,21 @@ Get up and running in 5 minutes with Azure OpenAI!
     cd /path/to/your/project
 
     # Choose installation based on features needed
-    uv add ingenious[standard] # Most common: includes SQL agent support
+    uv add ingenious[standard] # Most common: includes SQL agent support (core, auth, ai, database)
     # OR
-    uv add ingenious[azure-full] # Full Azure integration
+    uv add ingenious[azure-full] # Full Azure integration (core, auth, azure, ai, database, ui)
     # OR
-    uv add ingenious # Minimal installation
-
-    # Dependencies are already included in the base package
+    uv add ingenious # Minimal installation (base dependencies only)
 
     # Initialize project in the current directory
     uv run ingen init
     ```
 
 2. **Configure Credentials**:
-    Copy the example template and add your Azure OpenAI credentials:
+    Create a `.env` file with your Azure OpenAI credentials:
     ```bash
-    # Copy environment template (choose based on your needs)
-    cp .env.example .env # Full configuration options
-    # OR
-    cp .env.development .env # Minimal development setup
-    # OR
-    cp .env.azure-full .env # Full Azure integration
+    # Create .env file in current directory
+    touch .env
 
     # Edit .env file with your actual credentials
     ```
@@ -63,6 +57,9 @@ Get up and running in 5 minutes with Azure OpenAI!
     INGENIOUS_CHAT_HISTORY__DATABASE_TYPE=sqlite
     INGENIOUS_CHAT_HISTORY__DATABASE_PATH=./.tmp/chat_history.db
     INGENIOUS_CHAT_HISTORY__MEMORY_PATH=./.tmp
+
+    # Optional: Authentication settings (enabled by default)
+    # INGENIOUS_WEB_CONFIGURATION__ENABLE_AUTHENTICATION=false  # To disable auth
     ```
 
 3. **Validate Configuration**:
@@ -72,16 +69,20 @@ Get up and running in 5 minutes with Azure OpenAI!
 
     > **⚠️ BREAKING CHANGE**: Ingenious now uses **pydantic-settings** for configuration via environment variables. Legacy YAML configuration files (`config.yml`, `profiles.yml`) are **no longer supported** and must be migrated to environment variables with `INGENIOUS_` prefixes. Use the migration script:
     > ```bash
-    > python scripts/migrate_config.py --config config.yml --profile profiles.yml --output .env
+    > uv run python scripts/migrate_config.py --yaml-file config.yml --output .env
+    > uv run python scripts/migrate_config.py --yaml-file profiles.yml --output .env.profiles
     > ```
 
 4. **Start the Server**:
     ```bash
-    # Start server (default port 80, use --port to override)
+    # Start server on port 8000 (recommended for development)
     uv run ingen serve --port 8000
 
     # Additional options:
-    # --host 0.0.0.0  # Bind host (default: 0.0.0.0)
+    # --host 0.0.0.0         # Bind host (default: 0.0.0.0)
+    # --port                 # Port to bind (default: 80 or $WEB_PORT env var)
+    # --config config.yml    # Legacy config file (deprecated - use environment variables)
+    # --profile production   # Legacy profile (deprecated - use environment variables)
     ```
 
 5. **Verify Health**:
@@ -141,9 +142,9 @@ Insight Ingenious provides multiple conversation workflows with different config
 ### Core Library Workflows (Always Available)
 These workflows are built into the Ingenious library and available immediately:
 
-- `classification-agent` - Route input to specialized agents based on content (Azure OpenAI only)
-- `knowledge-base-agent` - Search knowledge bases using local ChromaDB (STABLE - recently fixed)
-- `sql-manipulation-agent` - Execute SQL queries using local SQLite (STABLE - recently fixed)
+- `classification-agent` - Simple text classification and routing to categories (minimal config required)
+- `knowledge-base-agent` - Search and retrieve information from knowledge bases (requires Azure Search or uses local ChromaDB by default)
+- `sql-manipulation-agent` - Execute SQL queries based on natural language (requires Azure SQL or uses local SQLite by default)
 
 > **Note**: Core workflows support both hyphenated (`classification-agent`) and underscored (`classification_agent`) naming formats for backward compatibility.
 
@@ -155,11 +156,11 @@ These workflows are provided as examples in the project template when you run `i
 > **Important**: The `bike-insights` workflow is NOT part of the core library. It's a template example that's created when you initialize a new project with `ingen init`. This is the recommended "Hello World" example for learning how to build custom workflows.
 
 ### Configuration Requirements by Workflow
-- **Minimal setup** (Azure OpenAI only): `classification-agent`, `bike-insights`
-- **Local implementations** (STABLE): `knowledge-base-agent` (ChromaDB), `sql-manipulation-agent` (SQLite)
-- **Azure integrations** (EXPERIMENTAL): Azure Search for knowledge base, Azure SQL for database queries
+- **Minimal setup** (Azure OpenAI only): `classification-agent`, `bike-insights` (after `ingen init`)
+- **Local implementations**: `knowledge-base-agent` (ChromaDB), `sql-manipulation-agent` (SQLite) - stable and work out-of-the-box
+- **Azure integrations**: Azure Search for knowledge base, Azure SQL for database queries - fully supported with proper configuration
 
-> **Important**: Local implementations (ChromaDB, SQLite) are stable and work out-of-the-box. Azure integrations are experimental and contain known bugs. For production use, stick with local implementations. Use `ingen workflows` to check configuration requirements for each workflow.
+> **Note**: Both local (ChromaDB, SQLite) and Azure (Azure Search, Azure SQL) implementations are production-ready. Choose based on your infrastructure requirements. Use `uv run ingen workflows` to check configuration requirements for each workflow.
 
 ## Documentation
 

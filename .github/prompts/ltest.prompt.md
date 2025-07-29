@@ -1,4 +1,3 @@
-```prompt
 ---
 mode: agent
 tools: ['runCommands', 'problems', 'testFailure', 'runTests', 'editFiles']

@@ -9,9 +9,7 @@ toc_label: "API Sections"
 toc_icon: "plug"
 ---
 
-# API Reference
-
-Complete API documentation for Insight Ingenious - an enterprise-grade Python library for building AI agent APIs with Microsoft Azure integrations. This reference covers REST endpoints, workflow examples, debugging utilities, and integration guides.
+Complete API documentation for Insight Ingenious - an enterprise-grade Python library for quickly setting up APIs to interact with AI Agents. This reference covers REST endpoints, workflow examples, debugging utilities, and integration guides.
 
 ## API Architecture Overview
 
@@ -175,7 +173,7 @@ flowchart TD
 
     LOAD_CONTEXT --> SELECT_WORKFLOW{Select Workflow}
     SELECT_WORKFLOW --> CLASSIFICATION[classification-agent]
-    SELECT_WORKFLOW --> BIKE_INSIGHTS[bike-insights - template only]
+    SELECT_WORKFLOW --> BIKE_INSIGHTS[bike-insights<br/>Template workflow only]
     SELECT_WORKFLOW --> KNOWLEDGE_BASE[knowledge-base-agent]
     SELECT_WORKFLOW --> SQL_AGENT[sql-manipulation-agent]
 
@@ -320,16 +318,16 @@ The Insight Ingenious API provides powerful endpoints for creating and managing 
 ### Base API Information
 - **Base URL**: `http://localhost:8000` (when using `ingen serve --port 8000`)
 - **Content-Type**: `application/json`
-- **Authentication**: JWT Bearer Token (configurable)
+- **Authentication**: JWT Bearer Token (configurable - disabled by default)
 
-### [Workflow API](/api/workflows/)
+### [Workflow API](/api/workflows)
 Complete documentation for all available workflow endpoints, including:
 - Classification and routing workflows
-- Educational content generation
+- Multi-agent bike sales analysis (template workflow)
 - Knowledge base search and retrieval
 - SQL query generation and execution
 
-###  Authentication API Endpoints
+### Authentication API Endpoints
 
 #### JWT Login
 ```bash
@@ -371,6 +369,7 @@ Refresh an expired access token using a valid refresh token.
 ```json
 {
   "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "token_type": "bearer"
 }
 ```
@@ -379,7 +378,7 @@ Refresh an expired access token using a valid refresh token.
 ```bash
 GET /api/v1/auth/verify
 ```
-Verify if a JWT token is valid.
+Verify if a JWT token is valid. The token must be provided in the Authorization header using Bearer scheme.
 
 **Headers:**
 ```
@@ -389,13 +388,12 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 **Response:**
 ```json
 {
-  "valid": true,
   "username": "user@example.com",
-  "exp": 1704376800
+  "valid": true
 }
 ```
 
-###  Core API Endpoints
+### Core API Endpoints
 
 #### Health Check
 ```bash
@@ -471,7 +469,7 @@ Insight Ingenious supports both hyphenated and underscored workflow names for ba
 - `knowledge-base-agent` or `knowledge_base_agent`
 - `sql-manipulation-agent` or `sql_manipulation_agent`
 
-**Note**: `bike-insights` is only available in projects created with `ingen init`, not in the core library.
+**Note**: `bike-insights` is only available in projects created with `uv run ingen init`, not in the core library.
 
 ### Common API Patterns
 
@@ -503,14 +501,15 @@ API responses are returned directly without a wrapper. For chat endpoints, the r
 
 ```json
 {
-  "message_id": "msg-123",
   "thread_id": "thread-456",
+  "message_id": "msg-123",
   "agent_response": "The AI agent's response...",
-  "metadata": {
-    "model": "gpt-4",
-    "max_token_count": 1024,
-    "workflow": "classification-agent"
-  }
+  "followup_questions": {},
+  "token_count": 245,
+  "max_token_count": 1024,
+  "topic": "General",
+  "memory_summary": "Conversation summary",
+  "event_type": "chat"
 }
 ```
 
@@ -621,7 +620,7 @@ if (await client.login('user@example.com', 'password123')) {
 }
 ```
 
-## � Prompts API
+## Prompts API
 
 The Prompts API provides endpoints for managing prompt templates used by conversation workflows. These templates are stored in the configured file storage backend (local or Azure Blob Storage).
 
@@ -740,7 +739,7 @@ Updates or creates a prompt template file with new content.
 **Response:**
 ```json
 {
-  "message": "Prompt file updated successfully"
+  "message": "File updated successfully"
 }
 ```
 
@@ -879,15 +878,18 @@ Example error response:
 }
 ```
 
-## � Error Handling
+## Error Handling
 
 The API uses standard HTTP status codes and provides detailed error messages:
 
 - `200 OK` - Successful request
 - `400 Bad Request` - Invalid request parameters
-- `401 Unauthorized` - Missing or invalid API key
+- `401 Unauthorized` - Missing or invalid authentication
 - `404 Not Found` - Endpoint or resource not found
+- `406 Not Acceptable` - Content filter error
+- `413 Request Entity Too Large` - Token limit exceeded
 - `500 Internal Server Error` - Server-side error
+- `503 Service Unavailable` - System degraded
 
 Example error response:
 ```json
@@ -896,15 +898,15 @@ Example error response:
 }
 ```
 
-##  Additional Resources
+## Additional Resources
 
-- [Workflow API Documentation](/api/workflows/)
-- [Configuration Guide](/getting-started/configuration/)
+- [Workflow API Documentation](/api/workflows)
+- [Configuration Guide](/getting-started/configuration)
 - [Development Setup](/development/)
 - [CLI Reference](/CLI_REFERENCE)
 
 ## Need Help?
 
 - Check the [troubleshooting guide](/troubleshooting/)
-- Review the [workflow examples](/api/workflows/)
+- Review the [workflow examples](/api/workflows)
 - Open an issue on [GitHub](https://github.com/Insight-Services-APAC/ingenious/issues)

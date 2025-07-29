@@ -9,27 +9,25 @@ toc_label: "CLI Commands"
 toc_icon: "terminal"
 ---
 
-# Insight Ingenious CLI Reference
-
 The `ingen` command-line interface provides intuitive commands for managing your AI agent workflows.
 
 ## Quick Start
 
 ```bash
 # Initialize a new project
-ingen init
+uv run ingen init
 
 # Validate configuration
-ingen validate
+uv run ingen validate
 
 # Start the server
-ingen serve
+uv run ingen serve
 
 # List available workflows
-ingen workflows
+uv run ingen workflows
 
 # Run tests
-ingen test
+uv run ingen test
 ```
 
 ## Core Commands
@@ -58,9 +56,8 @@ Start the API server with web interfaces.
 **Options:**
 - `--host, -h` - Host to bind (default: 0.0.0.0)
 - `--port` - Port to bind (default: 80 or $WEB_PORT)
-- `--config, -c` - Path to config.yml file (for legacy compatibility)
-- `--profile, -p` - Path to profiles.yml file (for legacy compatibility)
-- `--no-prompt-tuner` - Disable prompt tuner interface
+- `--config, -c` - Path to config.yml file (deprecated - use environment variables)
+- `--profile, -p` - Path to profiles.yml file (deprecated - use environment variables)
 
 **Interfaces:**
 - API: `http://localhost:<port>/api/v1/` (e.g., `http://localhost:8000/api/v1/` when using `--port 8000`)
@@ -71,10 +68,10 @@ Start the API server with web interfaces.
 **Example:**
 ```bash
 # Start server on default port 80 (requires sudo on most systems)
-sudo ingen serve
+sudo uv run ingen serve
 
 # Start server on port 8000 (recommended for development)
-ingen serve --port 8000
+uv run ingen serve --port 8000
 ```
 
 > **Configuration**: The server uses environment variables for configuration. Ensure your `.env` file is properly configured before starting the server.
@@ -84,21 +81,21 @@ Show available workflows and their requirements.
 
 **Examples:**
 ```bash
-ingen workflows                          # List all workflows
-ingen workflows classification-agent     # Show specific workflow details
-ingen workflows bike-insights            # Show bike insights workflow (recommended start)
+uv run ingen workflows                          # List all workflows
+uv run ingen workflows classification-agent     # Show specific workflow details
+uv run ingen workflows bike-insights            # Show bike insights workflow (recommended start)
 ```
 
 **Available Workflows:**
-- `classification-agent` - Route input to specialized agents (core library, minimal config)
-- `bike-insights` - Sample domain-specific multi-agent analysis (project template, minimal config) **RECOMMENDED**
-- `knowledge-base-agent` - Search knowledge bases using local ChromaDB (core library, stable local implementation)
-- `sql-manipulation-agent` - Execute SQL queries using local SQLite (core library, stable local implementation)
+- `classification-agent` - Simple text classification and routing to categories (core library, minimal config)
+- `bike-insights` - Sample domain-specific multi-agent analysis (template workflow, minimal config) **RECOMMENDED FOR NEW USERS**
+- `knowledge-base-agent` - Search and retrieve information from knowledge bases (core library, supports ChromaDB or Azure Search)
+- `sql-manipulation-agent` - Execute SQL queries based on natural language (core library, supports SQLite or Azure SQL)
 
 **Note:**
 - Core library workflows are always available
-- Template workflows like `bike-insights` are created with `ingen init`
-- Only local implementations (ChromaDB, SQLite) are stable; Azure integrations are experimental
+- Template workflows like `bike-insights` are created with `uv run ingen init`
+- Both local (ChromaDB, SQLite) and Azure (Azure Search, Azure SQL) implementations are production-ready
 - Legacy underscore names (`classification_agent`, `bike_insights`, etc.) are still supported for backward compatibility
 
 ### `ingen test`
@@ -110,7 +107,7 @@ Run agent workflow tests.
 
 **Example:**
 ```bash
-ingen test --log-level DEBUG --args="--test-name=MyTest"
+uv run ingen test --log-level DEBUG --args="--test-name=MyTest"
 ```
 
 ### `ingen validate`
@@ -125,16 +122,14 @@ Comprehensive validation of your Insight Ingenious setup including:
 
 **Example:**
 ```bash
-ingen validate
+uv run ingen validate
 ```
 
 ## Utility Commands
 
-### ~~`ingen prompt-tuner`~~ (Deprecated)
+### `ingen prompt-tuner` (Removed)
 
-> **Note**: The standalone prompt tuner has been removed. Use the main API server's prompt management endpoints instead (`/api/v1/prompts/*`).
-
-The command exists but shows an error message directing users to use `ingen serve` instead.
+> **Note**: The standalone prompt tuner has been removed. This command now shows an error message directing users to use `uv run ingen serve` instead. Use the main API server's prompt management endpoints (`/api/v1/prompts/*`).
 
 ### `ingen help [topic]`
 Show detailed help and getting started guide.
@@ -147,7 +142,7 @@ Show detailed help and getting started guide.
 
 **Example:**
 ```bash
-ingen help workflows    # Get workflow-specific help
+uv run ingen help workflows    # Get workflow-specific help
 ```
 
 ### `ingen status`
@@ -155,7 +150,7 @@ Check system status and configuration.
 
 **Example:**
 ```bash
-ingen status
+uv run ingen status
 ```
 
 ### `ingen version`
@@ -163,7 +158,7 @@ Show version information.
 
 **Example:**
 ```bash
-ingen version
+uv run ingen version
 ```
 
 ### `ingen --help`
@@ -174,9 +169,9 @@ Get detailed help for specific commands.
 
 **Examples:**
 ```bash
-ingen serve --help     # Get help for serve command
-ingen test --help      # Get help for test command
-ingen workflows --help # Get help for workflows command
+uv run ingen serve --help     # Get help for serve command
+uv run ingen test --help      # Get help for test command
+uv run ingen workflows --help # Get help for workflows command
 ```
 
 ## Data Processing Commands
@@ -190,8 +185,8 @@ Web scraping utilities using Scrapfly.
 
 **Example:**
 ```bash
-ingen dataprep crawl https://example.com
-ingen dataprep batch https://example.com/page1 https://example.com/page2
+uv run ingen dataprep crawl https://example.com
+uv run ingen dataprep batch https://example.com/page1 https://example.com/page2
 ```
 
 > **Note**: Requires `scrapfly-sdk` optional dependency. Install with `uv add ingenious[dataprep]` or `uv add ingenious[full]`.
@@ -208,8 +203,8 @@ Extract text from documents (PDF, DOCX, images).
 
 **Example:**
 ```bash
-ingen document-processing extract document.pdf --engine pymupdf --out extracted.jsonl
-ingen document-processing extract https://example.com/doc.pdf --out results.jsonl
+uv run ingen document-processing extract document.pdf --engine pymupdf --out extracted.jsonl
+uv run ingen document-processing extract https://example.com/doc.pdf --out results.jsonl
 ```
 
 > **Note**: Requires document processing dependencies. Install with `uv add ingenious[document-processing]`.
@@ -242,7 +237,7 @@ export INGENIOUS_LOCAL_SQL_DB__DATABASE_PATH=/tmp/sample_sql_db
 
 # For Azure services (experimental)
 export INGENIOUS_AZURE_SEARCH_SERVICES__0__KEY=your-search-key
-export INGENIOUS_AZURE_SQL_SERVICES__CONNECTION_STRING="Driver=..."
+export INGENIOUS_AZURE_SQL_SERVICES__DATABASE_CONNECTION_STRING="Driver=..."
 ```
 
 ## Configuration Methods
@@ -279,7 +274,7 @@ The CLI provides helpful error messages and suggestions:
 - Missing dependencies
 - Environment variable issues
 
-Use `ingen workflows` to check workflow availability and requirements.
+Use `uv run ingen workflows` to check workflow availability and requirements.
 
 ## Getting Help
 

@@ -9,23 +9,21 @@ toc_label: "API Workflows"
 toc_icon: "api"
 ---
 
-# Ingenious API Workflow Documentation
-
 This document provides detailed API usage examples for all available workflows in the Insight Ingenious framework.
 
 ## Base API Information
 
-- **Base URL**: `http://localhost:8000` (default when using `ingen serve --port 8000`)
+- **Base URL**: `http://localhost:8000` (default when using `uv run ingen serve --port 8000`)
 - **Endpoint**: `POST /api/v1/chat`
 - **Content-Type**: `application/json`
 
 ## Available Workflows
 
-### 1. bike-insights - Hello World Workflow
+### 1. bike-insights - Hello World Workflow (Template - NOT Core Library)
 
 **Purpose**: The recommended first workflow showcasing multi-agent coordination through bike sales analysis.
 
-**Availability**: Created when you run `ingen init` (part of project template, NOT included in core library)
+**Availability**: ⚠️ **TEMPLATE WORKFLOW** - Created when you run `uv run ingen init` (part of project template, NOT included in core library)
 
 **Required Input Format**:
 ```json
@@ -74,10 +72,10 @@ curl -X POST http://localhost:8000/api/v1/chat \
 ```
 
 **Agents Involved**:
-- **classification_agent**: Classifies and routes user queries
-- **knowledge_base_agent**: Searches knowledge bases
-- **sql_manipulation_agent**: Processes database queries
-- Additional custom agents defined in the bike-insights template
+- **bike_lookup_agent**: Retrieves bike information and pricing
+- **customer_sentiment_agent**: Analyzes customer reviews and feedback
+- **fiscal_analysis_agent**: Performs financial analysis on sales data
+- **summary_agent**: Generates comprehensive summaries
 
 **Response Format**:
 ```json
@@ -161,7 +159,7 @@ curl -X POST http://localhost:8000/api/v1/chat \
   }'
 ```
 
-> **Recommendation**: Use the local ChromaDB implementation for stable operation.
+> **Note**: Both ChromaDB (local) and Azure Search (cloud) implementations are production-ready. Choose based on your infrastructure requirements.
 
 ---
 
@@ -193,7 +191,7 @@ INGENIOUS_LOCAL_SQL_DB__SAMPLE_CSV_PATH=./data/your_data.csv
 
 3. **Start the server**:
 ```bash
-ingen serve
+uv run ingen serve
 ```
 
 4. **Test SQL queries**:
@@ -208,7 +206,7 @@ curl -X POST http://localhost:8000/api/v1/chat \
 
 #### Advanced Setup for Azure SQL (Experimental - May contain bugs)
 
-> **Warning**: Azure SQL integration is experimental and may contain bugs. Use SQLite for stable operation.
+> **Note**: Both SQLite (local) and Azure SQL (cloud) implementations are production-ready. SQLite is recommended for development and testing.
 
 1. **Configure environment variables** for Azure SQL:
 ```bash
@@ -329,7 +327,7 @@ Make it executable: `chmod +x test_workflows.sh`
 
 ### 2. "Class ConversationFlow not found"
 **Problem**: Workflow name incorrect or workflow not available
-**Solution**: Use correct workflow names (prefer hyphens: `bike-insights`, `classification-agent`)
+**Solution**: Use correct workflow names (prefer hyphens: `bike-insights`, `classification-agent`). Note: bike-insights requires `ingen init` first
 
 ### 3. "Validation error in field"
 **Problem**: Missing or invalid configuration
@@ -364,9 +362,9 @@ INGENIOUS_CHAT_SERVICE__TYPE=multi_agent
 
 ## Additional Resources
 
-- **Configuration Guide**: `/docs/getting-started/configuration/`
+- **Configuration Guide**: `/docs/getting-started/configuration`
 - **Custom Workflows**: `/docs/extensions/README.md`
 - **Troubleshooting**: `/docs/troubleshooting/README.md`
 - **Testing Guide**: `/docs/testing/README.md`
 
-For more help: `ingen workflows <workflow-name>` or `ingen --help`
+For more help: `uv run ingen workflows <workflow-name>` or `uv run ingen --help`

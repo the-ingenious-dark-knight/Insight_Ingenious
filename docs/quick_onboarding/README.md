@@ -9,8 +9,6 @@ toc_label: "Quick Onboarding"
 toc_icon: "rocket"
 ---
 
-# Quick Onboarding Guide
-
 This guide provides a fast-track introduction to Insight Ingenious for new users who want to get up and running quickly.
 
 ## What is Insight Ingenious?
@@ -68,7 +66,7 @@ Insight Ingenious is an enterprise-grade Python library for building AI agent AP
 ## Next Steps
 
 - [Detailed Getting Started Guide](../getting-started/)
-- [Configuration Guide](/getting-started/configuration/)
+- [Configuration Guide](/getting-started/configuration)
 - [API Integration Guide](../guides/api-integration/)
 - [Development Guide](../development/)
 

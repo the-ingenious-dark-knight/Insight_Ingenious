@@ -1,5 +1,17 @@
+---
+title: "Flow Implementation"
+layout: single
+permalink: /extensions/flow-implementation/
+sidebar:
+  nav: "docs"
+toc: true
+toc_label: "Flow Guide"
+toc_icon: "stream"
+---
 
-### Flow Implementation Example
+This guide covers implementing custom conversation flows for AI agent orchestration in Insight Ingenious.
+
+## Flow Implementation Example
 
 Conversation flow enables us to setup how data is passed and responded to with our chatbots. To create:
 

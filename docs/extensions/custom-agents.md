@@ -9,8 +9,6 @@ toc_label: "Custom Agents"
 toc_icon: "robot"
 ---
 
-# Creating Custom Agents
-
 The next step in working with the Ingenious library is working with the creation of agents for orchestration.
 This is done by defining the agent's persona, existing/prior knowledge/experience, the explicit instruction and set of examples that the model can follow for the output.
 

@@ -9,9 +9,7 @@ toc_label: "Architecture Components"
 toc_icon: "sitemap"
 ---
 
-# Architecture Overview
-
-This document describes the high-level architecture of Insight Ingenious, an enterprise-grade Python library designed for rapid deployment of AI agent APIs with tight Microsoft Azure integrations and comprehensive debugging capabilities.
+This document describes the high-level architecture of Insight Ingenious, an enterprise-grade Python library designed for quickly setting up APIs to interact with AI Agents with comprehensive Azure service integrations and debugging capabilities.
 
 ## System Architecture
 
@@ -326,14 +324,14 @@ flowchart TD
 
     LOAD_CONTEXT --> SELECT_WORKFLOW{Select Workflow}
     SELECT_WORKFLOW --> CLASSIFICATION_WORKFLOW[Classification Agent]
-    SELECT_WORKFLOW --> EDUCATION_WORKFLOW[Education Expert]
     SELECT_WORKFLOW --> KNOWLEDGE_WORKFLOW[Knowledge Base Agent]
     SELECT_WORKFLOW --> SQL_WORKFLOW[SQL Manipulation Agent]
+    SELECT_WORKFLOW --> BIKE_INSIGHTS_WORKFLOW[Bike Insights (Template)]
 
     CLASSIFICATION_WORKFLOW --> AGENT_COORDINATION[Agent Coordination]
-    EDUCATION_WORKFLOW --> AGENT_COORDINATION
     KNOWLEDGE_WORKFLOW --> AGENT_COORDINATION
     SQL_WORKFLOW --> AGENT_COORDINATION
+    BIKE_INSIGHTS_WORKFLOW --> AGENT_COORDINATION
 
     AGENT_COORDINATION --> LLM_PROCESSING[LLM Processing]
     LLM_PROCESSING --> RESPONSE_FORMATTING[Format Response]
@@ -352,7 +350,7 @@ flowchart TD
     class START,END startEnd
     class LOAD_CONTEXT,AGENT_COORDINATION,LLM_PROCESSING,RESPONSE_FORMATTING,SAVE_HISTORY,SEND_RESPONSE process
     class INPUT_VALIDATION,SELECT_WORKFLOW decision
-    class CLASSIFICATION_WORKFLOW,EDUCATION_WORKFLOW,KNOWLEDGE_WORKFLOW,SQL_WORKFLOW workflow
+    class CLASSIFICATION_WORKFLOW,KNOWLEDGE_WORKFLOW,SQL_WORKFLOW,BIKE_INSIGHTS_WORKFLOW workflow
     class ERROR_RESPONSE error
 ```
 
@@ -457,7 +455,7 @@ graph TB
 
 ```mermaid
 classDiagram
-    note for ClassificationAgent "Static methods only 
+    note for ClassificationAgent "Static methods only
     Does not inherit from IConversationFlow"
     class IConversationPattern {
         <<interface>>
@@ -511,12 +509,12 @@ classDiagram
         +handle_dependencies()
     }
 
-    class ClassificationAgent {
-        +classify_intent() $
-        +route_to_agent() $
-        +handle_routing() $
+    class ClassificationAgentFlow {
+        +classify_intent()
+        +route_to_agent()
+        +handle_routing()
     }
- 
+
     IConversationFlow <|.. CustomExtensionFlow
     IConversationFlow <|.. KnowledgeBaseAgentFlow
     IConversationFlow <|.. SqlManipulationAgentFlow
@@ -585,9 +583,8 @@ graph TB
 
     subgraph "Docker Deployment"
         DOCKER_API[API Container]
-        DOCKER_UI[UI Container]
         DOCKER_DB[Database Container]
-        DOCKER_COMPOSE[Docker Compose]
+        DOCKERFILE[Dockerfile]
     end
 
     subgraph "Cloud Deployment"
@@ -606,9 +603,8 @@ graph TB
     LOCAL_API --> LOCAL_DOCS
     LOCAL_API --> LOCAL_DB
 
-    DOCKER_COMPOSE --> DOCKER_API
-    DOCKER_COMPOSE --> DOCKER_UI
-    DOCKER_COMPOSE --> DOCKER_DB
+    DOCKERFILE --> DOCKER_API
+    DOCKER_API --> DOCKER_DB
 
     CLOUD_API --> CLOUD_UI
     CLOUD_API --> CLOUD_DB
@@ -627,7 +623,7 @@ graph TB
     classDef external fill:#fce4ec
 
     class LOCAL_API,LOCAL_DOCS,LOCAL_DB local
-    class DOCKER_API,DOCKER_UI,DOCKER_DB,DOCKER_COMPOSE docker
+    class DOCKER_API,DOCKER_DB,DOCKERFILE docker
     class CLOUD_API,CLOUD_UI,CLOUD_DB,CLOUD_STORAGE cloud
     class AZURE_OPENAI,MONITORING,LOGGING external
 ```
@@ -639,6 +635,7 @@ graph TB
 ```mermaid
 graph TB
     subgraph "Authentication Layer"
+        JWT_AUTH[JWT Bearer Authentication]
         BASIC_AUTH[HTTP Basic Authentication]
         CONFIG_AUTH[Configurable Authentication]
         NO_AUTH[Anonymous Access Option]
@@ -662,6 +659,7 @@ graph TB
         SQL_AUTH[Database Authentication]
     end
 
+    JWT_AUTH --> CONFIG_AUTH
     BASIC_AUTH --> CONFIG_AUTH
     CONFIG_AUTH --> NO_AUTH
     AZURE_SECRETS --> CONFIG_SECRETS
@@ -678,7 +676,7 @@ graph TB
     classDef network fill:#e3f2fd
     classDef external fill:#fce4ec
 
-    class BASIC_AUTH,CONFIG_AUTH,NO_AUTH auth
+    class JWT_AUTH,BASIC_AUTH,CONFIG_AUTH,NO_AUTH auth
     class AZURE_SECRETS,CONFIG_SECRETS,ENV_VARS data
     class HTTPS,CORS,FASTAPI_SEC network
     class AZURE_AUTH,SEARCH_AUTH,SQL_AUTH external
@@ -692,7 +690,7 @@ graph TB
     subgraph "Caching Strategy"
         MEMORY[In-Memory Cache]
         FILE_CACHE[File-based Cache]
-        CDN[CDN Cache]
+        DISTRIBUTED[Distributed Cache (Future)]
     end
 
     subgraph "Load Balancing"
@@ -714,7 +712,7 @@ graph TB
     end
 
     MEMORY --> FILE_CACHE
-    FILE_CACHE --> CDN
+    FILE_CACHE --> DISTRIBUTED
 
     LOAD_BALANCER --> API_INSTANCES
     LOAD_BALANCER --> HEALTH_CHECK
@@ -734,7 +732,7 @@ graph TB
     classDef async fill:#e3f2fd
     classDef monitor fill:#fce4ec
 
-    class MEMORY,FILE_CACHE,CDN cache
+    class MEMORY,FILE_CACHE,DISTRIBUTED cache
     class LOAD_BALANCER,API_INSTANCES,HEALTH_CHECK balance
     class ASYNC_HANDLERS,BACKGROUND_TASKS,SCHEDULER async
     class METRICS,ALERTS,DASHBOARDS monitor
@@ -766,5 +764,5 @@ For detailed development instructions, see the [Development Guide](/development/
 
 - Read the [Getting Started Guide](/getting-started/) to begin using the system
 - Follow the [Development Guide](/development/) to start extending the framework
-- Check the [Configuration Guide](/getting-started/configuration/) for setup details
+- Check the [Configuration Guide](/getting-started/configuration) for setup details
 - Explore the [API Documentation](/api/) for integration options
