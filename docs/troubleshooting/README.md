@@ -98,7 +98,7 @@ models.0.api_key
    # Source the .env file or export variables
    # For bash/zsh
    export $(grep -v '^#' .env | xargs)
-   
+
    # Or use dotenv to load .env automatically
    # The .env file is loaded automatically by Ingenious
    ```
@@ -272,7 +272,7 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
    # Method 1: Using AZURE_SQL_CONNECTION_STRING environment variable
    # Add to .env file (NO SPACES around = and use quotes for complex values)
    AZURE_SQL_CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
-   
+
    # Method 2: Using INGENIOUS_ prefixed variables
    INGENIOUS_CHAT_HISTORY__DATABASE_TYPE=azuresql
    INGENIOUS_CHAT_HISTORY__DATABASE_CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
@@ -284,7 +284,7 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
    # Check if environment variables are set correctly
    echo $INGENIOUS_CHAT_HISTORY__DATABASE_TYPE
    # Should output: azuresql
-   
+
    echo $INGENIOUS_CHAT_HISTORY__DATABASE_CONNECTION_STRING
    # Should output your connection string
    ```
@@ -396,13 +396,13 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
    INGENIOUS_FILE_STORAGE__REVISIONS__URL=https://yourstorageaccount.blob.core.windows.net/
    INGENIOUS_FILE_STORAGE__REVISIONS__CONTAINER_NAME=ingenious-revisions
    INGENIOUS_FILE_STORAGE__REVISIONS__TOKEN="DefaultEndpointsProtocol=https;AccountName=yourstorageaccount;AccountKey=your_key;EndpointSuffix=core.windows.net"
-   
+
    # Method 2: Using DefaultAzureCredential (for production)
    INGENIOUS_FILE_STORAGE__REVISIONS__STORAGE_TYPE=azure
    INGENIOUS_FILE_STORAGE__REVISIONS__URL=https://yourstorageaccount.blob.core.windows.net/
    INGENIOUS_FILE_STORAGE__REVISIONS__AUTHENTICATION_METHOD=default_credential
    INGENIOUS_FILE_STORAGE__REVISIONS__CONTAINER_NAME=ingenious-revisions
-   
+
    # Also configure DATA storage similarly
    INGENIOUS_FILE_STORAGE__DATA__STORAGE_TYPE=azure
    INGENIOUS_FILE_STORAGE__DATA__URL=https://yourstorageaccount.blob.core.windows.net/
@@ -439,7 +439,7 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
    import os
    from dotenv import load_dotenv
    load_dotenv()
-   
+
    # Try to get connection string from environment
    conn_str = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
    if not conn_str:
@@ -447,7 +447,7 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
        token = os.getenv('INGENIOUS_FILE_STORAGE__REVISIONS__TOKEN')
        if token and 'DefaultEndpointsProtocol' in token:
            conn_str = token
-   
+
    if not conn_str:
        print(' Azure Storage connection string not found')
        print(' Set either AZURE_STORAGE_CONNECTION_STRING or')
