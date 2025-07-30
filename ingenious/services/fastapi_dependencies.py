@@ -34,6 +34,8 @@ def get_openai_service(
         api_key=str(config.models[0].api_key),
         api_version=str(config.models[0].api_version),
         open_ai_model=str(config.models[0].model),
+        deployment=str(config.models[0].deployment),
+        authentication_mode=config.models[0].authentication_mode,
     )
 
 

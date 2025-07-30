@@ -1,5 +1,6 @@
 import re
 
+from azure.identity import DefaultAzureCredential
 from openai import NOT_GIVEN, AzureOpenAI, BadRequestError
 from openai.types.chat import (
     ChatCompletionMessage,
@@ -10,17 +11,66 @@ from openai.types.chat import (
 from ingenious.core.structured_logging import get_logger
 from ingenious.errors.content_filter_error import ContentFilterError
 from ingenious.errors.token_limit_exceeded_error import TokenLimitExceededError
+from ingenious.models.config import AuthenticationMethod
 
 logger = get_logger(__name__)
 
 
 class OpenAIService:
     def __init__(
-        self, azure_endpoint: str, api_key: str, api_version: str, open_ai_model: str
+        self,
+        azure_endpoint: str,
+        api_key: str,
+        api_version: str,
+        open_ai_model: str,
+        deployment: str,
+        authentication_mode: AuthenticationMethod = AuthenticationMethod.DEFAULT_CREDENTIAL,
     ):
-        self.client = AzureOpenAI(
-            azure_endpoint=azure_endpoint, api_key=api_key, api_version=api_version
-        )
+        if authentication_mode == AuthenticationMethod.DEFAULT_CREDENTIAL:
+            try:
+                credential = DefaultAzureCredential()
+                token = credential.get_token(
+                    "https://cognitiveservices.azure.com/.default"
+                ).token
+
+                self.client = AzureOpenAI(
+                    azure_endpoint=azure_endpoint,
+                    api_version=api_version,
+                    azure_ad_token=token,
+                    azure_deployment=deployment,
+                )
+                logger.info(
+                    "AzureOpenAI client initialized successfully with custom token provider"
+                )
+            except Exception as e:
+                logger.error(
+                    f"Failed to initialize AzureOpenAI with DefaultAzureCredential: {e}"
+                )
+                logger.error(
+                    "Available authentication methods: Azure CLI, Managed Identity, Environment Variables"
+                )
+                logger.error(
+                    "Make sure you're logged in with 'az login' or have proper environment variables set"
+                )
+                raise ValueError(f"Azure authentication failed: {e}")
+        elif authentication_mode == AuthenticationMethod.TOKEN:
+            self.client = AzureOpenAI(
+                azure_endpoint=azure_endpoint,
+                api_key=api_key,
+                api_version=api_version,
+                azure_deployment=deployment,
+            )
+        elif authentication_mode == AuthenticationMethod.CLIENT_ID_AND_SECRET:
+            # TODO: Implement CLIENT_ID_AND_SECRET authentication
+            raise NotImplementedError(
+                "CLIENT_ID_AND_SECRET authentication not yet implemented"
+            )
+        elif authentication_mode == AuthenticationMethod.MSI:
+            # TODO: Implement MSI authentication
+            raise NotImplementedError("MSI authentication not yet implemented")
+        else:
+            raise ValueError(f"Unsupported authentication mode: {authentication_mode}")
+
         self.model = open_ai_model
 
     async def generate_response(

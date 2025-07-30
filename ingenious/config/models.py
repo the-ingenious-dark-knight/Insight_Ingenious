@@ -49,16 +49,32 @@ class ModelSettings(BaseModel):
     deployment: str = Field("", description="Azure OpenAI deployment name (optional)")
     api_key: str = Field("", description="API key for the model service")
     base_url: str = Field("", description="Base URL for the API endpoint")
+    authentication_mode: str = Field(
+        "default_credential", description="Authentication mode"
+    )
 
     @field_validator("api_key")
     @classmethod
-    def validate_api_key(cls, v: str) -> str:
-        """Validate that API key is provided for production use."""
+    def validate_api_key(cls, v: str, info) -> str:
+        """Validate that API key is provided when using token authentication."""
+        # Get authentication_mode from the values being validated
+        auth_mode = info.data.get("authentication_mode", "default_credential")
+
+        # Check for placeholder values
         if v and "placeholder" in v.lower():
             raise ValueError(
                 "API key is required. Set the appropriate environment variable "
                 "(e.g., AZURE_OPENAI_API_KEY) or provide a valid key."
             )
+
+        # If authentication mode is token, api_key is required
+        if auth_mode == "token" and not v:
+            raise ValueError(
+                "API key is required when authentication_mode is 'token'. "
+                "Set the appropriate environment variable (e.g., AZURE_OPENAI_API_KEY) "
+                "or provide a valid key."
+            )
+
         return v
 
     @field_validator("base_url")

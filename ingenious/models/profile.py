@@ -10,6 +10,8 @@ class ModelConfig(BaseModel):
     base_url: str
     deployment: str = ""
     api_version: str = ""
+    deployment: str = ""
+    authentication_mode: str = "default_credential"
 
 
 class ChatHistoryConfig(BaseModel):

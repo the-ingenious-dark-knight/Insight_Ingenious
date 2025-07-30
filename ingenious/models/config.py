@@ -31,6 +31,7 @@ class ModelConfig(config_ns_models.ModelConfig):
     api_key: str
     base_url: str
     deployment: str = ""
+    authentication_mode: str = "default_credential"
 
     def __init__(
         self, config: config_ns_models.ModelConfig, profile: profile_models.ModelConfig
@@ -50,6 +51,7 @@ class ModelConfig(config_ns_models.ModelConfig):
             deployment=deployment,
             base_url=profile.base_url,
             api_key=profile.api_key,
+            authentication_mode=profile.authentication_mode,
         )
 
 
