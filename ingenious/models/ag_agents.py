@@ -14,6 +14,7 @@ from autogen_core.models import (
     UserMessage,
 )
 from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
+from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 
 from ingenious.models.agent import (
     Agent,
@@ -28,14 +29,27 @@ class RoutedAssistantAgent(RoutedAgent, ABC):
     ) -> None:
         super().__init__(agent.agent_name)
 
-        # Map model config parameters to AzureOpenAIChatCompletionClient parameters
-        azure_config = {
-            "model": agent.model.model,
-            "api_key": agent.model.api_key,
-            "azure_endpoint": agent.model.base_url,
-            "azure_deployment": agent.model.deployment or agent.model.model,
-            "api_version": agent.model.api_version,
-        }
+        azure_config = {}
+        if agent.model.authentication_mode == "default_credential":
+            # %%
+            token_provider = get_bearer_token_provider(
+                DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default"
+            )
+            azure_config = {
+                "model": agent.model.model,
+                "azure_endpoint": agent.model.base_url,
+                "azure_deployment": agent.model.deployment or agent.model.model,
+                "api_version": agent.model.api_version,
+                "azure_ad_token_provider": token_provider,
+            }
+        else:
+            azure_config = {
+                "model": agent.model.model,
+                "api_key": agent.model.api_key,
+                "azure_endpoint": agent.model.base_url,
+                "azure_deployment": agent.model.deployment or agent.model.model,
+                "api_version": agent.model.api_version,
+            }
 
         self._model_client = AzureOpenAIChatCompletionClient(**azure_config)
         assistant_agent = AssistantAgent(
@@ -187,14 +201,27 @@ class RoutedResponseOutputAgent(RoutedAgent, ABC):
         super().__init__(agent.agent_name)
         self._next_agent_topic = next_agent_topic
 
-        # Map model config parameters to AzureOpenAIChatCompletionClient parameters
-        azure_config = {
-            "model": agent.model.model,
-            "api_key": agent.model.api_key,
-            "azure_endpoint": agent.model.base_url,
-            "azure_deployment": agent.model.deployment or agent.model.model,
-            "api_version": agent.model.api_version,
-        }
+        azure_config = {}
+        if agent.model.authentication_mode == "default_credential":
+            # %%
+            token_provider = get_bearer_token_provider(
+                DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default"
+            )
+            azure_config = {
+                "model": agent.model.model,
+                "azure_endpoint": agent.model.base_url,
+                "azure_deployment": agent.model.deployment or agent.model.model,
+                "api_version": agent.model.api_version,
+                "azure_ad_token_provider": token_provider,
+            }
+        else:
+            azure_config = {
+                "model": agent.model.model,
+                "api_key": agent.model.api_key,
+                "azure_endpoint": agent.model.base_url,
+                "azure_deployment": agent.model.deployment or agent.model.model,
+                "api_version": agent.model.api_version,
+            }
 
         model_client = AzureOpenAIChatCompletionClient(**azure_config)
         assistant_agent = AssistantAgent(
