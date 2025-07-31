@@ -18,7 +18,7 @@ from pathlib import Path
 import requests
 
 # Configuration
-API_BASE = "http://localhost:8001"
+API_BASE = "http://localhost:8000"
 REVISION_ID = "test-v1"
 
 # Templates needed for bike-insights workflow
