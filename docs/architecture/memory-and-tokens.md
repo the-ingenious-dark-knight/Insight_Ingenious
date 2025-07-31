@@ -152,14 +152,14 @@ sequenceDiagram
     API->>MemoryManager: Read existing memory
     MemoryManager->>Storage: Load memory file
     Storage-->>MemoryManager: Current context
-    
+
     Note over API: Process conversation
-    
+
     API->>MemoryManager: Update memory
     MemoryManager->>MemoryManager: Maintain word limit
     MemoryManager->>Storage: Save updated memory
     MemoryManager->>DB: Save memory summary
-    
+
     API-->>User: Response with context
 ```
 
@@ -228,7 +228,7 @@ All chat responses include comprehensive memory and token information:
 ```python
 class IChatResponse(BaseModel):
     thread_id: Optional[str]                    # Conversation thread identifier
-    message_id: Optional[str]                   # Unique message identifier  
+    message_id: Optional[str]                   # Unique message identifier
     agent_response: Optional[str]               # Generated response content
     followup_questions: Optional[dict[str, str]] = {} # Suggested follow-ups
     token_count: Optional[int]                  # Current request token usage
@@ -277,7 +277,7 @@ await chat_history_repository.add_message(
 # Memory persistence with automatic summarization
 await chat_history_repository.add_memory(
     user_id="user123",
-    thread_id="conversation-456", 
+    thread_id="conversation-456",
     memory_content="Conversation summary and context",
     memory_type="summary"
 )
@@ -319,7 +319,7 @@ CREATE INDEX idx_memory_summary_thread ON chat_history_summary(thread_id);
 #### TokenLimitExceededError
 ```python
 class TokenLimitExceededError(Exception):
-    def __init__(self, 
+    def __init__(self,
                  message: str = "This chat has exceeded the token limit, please start a new conversation.",
                  max_context_length: int = 0,
                  requested_tokens: int = 0,
@@ -391,13 +391,13 @@ The system provides comprehensive logging for memory and token operations:
 
 ```python
 # Memory operations logging
-logger.info("Memory updated", 
+logger.info("Memory updated",
            thread_id="conversation-123",
            memory_length=150,
            word_count=145,
            operation="memory_update")
 
-# Token usage logging  
+# Token usage logging
 logger.info("Token usage tracked",
            total_tokens=1247,
            prompt_tokens=900,
@@ -407,7 +407,7 @@ logger.info("Token usage tracked",
 
 # Database operations logging
 logger.info("Message saved",
-           message_id="msg-456", 
+           message_id="msg-456",
            thread_id="conversation-123",
            user_id="user789",
            operation="save_message")
@@ -455,7 +455,7 @@ GET /api/v1/health
 - **Encryption in Transit**: Use TLS/SSL for all database connections
 - **Access Control**: Implement least-privilege access for database accounts
 
-#### Memory Security  
+#### Memory Security
 - **Content Filtering**: Sensitive information filtering before memory storage
 - **Retention Policies**: Implement data retention and deletion policies
 - **Audit Logging**: Comprehensive audit trails for memory access and modifications
@@ -471,15 +471,15 @@ class CustomMemoryManager(MemoryManager):
     async def write_memory(self, memory_content: str, thread_id: str = None):
         # Add custom preprocessing
         processed_content = await self.preprocess_memory(memory_content)
-        
+
         # Call parent implementation
         result = await super().write_memory(processed_content, thread_id)
-        
+
         # Add custom post-processing
         await self.log_memory_update(thread_id, len(processed_content))
-        
+
         return result
-    
+
     async def preprocess_memory(self, content: str) -> str:
         # Custom logic: remove sensitive information, format content, etc.
         return content
@@ -494,13 +494,13 @@ class CustomTokenManager:
     def __init__(self, model: str, custom_limits: dict = None):
         self.model = model
         self.limits = custom_limits or self.get_default_limits()
-    
+
     def check_token_limit(self, messages: list) -> tuple[bool, int]:
         token_count = count_tokens_for_messages(messages, self.model)
         limit = self.limits.get(self.model, 4096)
-        
+
         return token_count <= limit, token_count
-    
+
     def truncate_conversation(self, messages: list, target_tokens: int) -> list:
         # Custom truncation logic while preserving important messages
         return self.smart_truncate(messages, target_tokens)

@@ -31,6 +31,8 @@ docs:
         url: /architecture/
       - title: "Memory & Token Architecture"
         url: /architecture/memory-and-tokens/
+      - title: "Streaming Responses Architecture"
+        url: /architecture/streaming-responses/
       - title: "Development Setup"
         url: /development/
       - title: "Extensions & Customization"

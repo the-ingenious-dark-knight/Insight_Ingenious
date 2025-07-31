@@ -1,7 +1,7 @@
 import logging
 import uuid as uuid_module
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, AsyncIterator, Dict, List, Optional
 
 from jinja2 import Environment
 from openai.types.chat import ChatCompletionMessageParam
@@ -14,7 +14,7 @@ from ingenious.core.structured_logging import get_logger
 from ingenious.db.chat_history_repository import ChatHistoryRepository
 from ingenious.errors.content_filter_error import ContentFilterError
 from ingenious.files.files_repository import FileStorage
-from ingenious.models.chat import IChatRequest, IChatResponse
+from ingenious.models.chat import ChatResponseChunk, IChatRequest, IChatResponse
 from ingenious.utils.namespace_utils import (
     import_class_with_fallback,
     normalize_workflow_name,
@@ -351,6 +351,136 @@ class multi_agent_chat_service:
 
         return agent_response  # type: ignore
 
+    async def get_streaming_chat_response(
+        self, chat_request: IChatRequest
+    ) -> AsyncIterator[ChatResponseChunk]:
+        """Stream chat response chunks in real-time."""
+        logger.debug(
+            "Starting streaming chat response",
+            conversation_flow=self.conversation_flow,
+            thread_id=chat_request.thread_id,
+        )
+
+        normalized_flow = normalize_workflow_name(self.conversation_flow)
+
+        try:
+            # Import the conversation flow class dynamically
+            conversation_flow_service_class = import_class_with_fallback(
+                f"services.chat_services.multi_agent.conversation_flows.{normalized_flow}",
+                "ConversationFlow",
+                fallback_module="ingenious_extensions_template.services.chat_services.multi_agent",
+            )
+
+            # Check if the conversation flow supports streaming
+            if hasattr(
+                conversation_flow_service_class, "get_streaming_conversation_response"
+            ):
+                # New streaming pattern - instantiate and call streaming method
+                if (
+                    hasattr(conversation_flow_service_class, "__init__")
+                    and len(
+                        conversation_flow_service_class.__init__.__code__.co_varnames
+                    )
+                    > 1
+                ):
+                    conversation_flow_service_class_instance = (
+                        conversation_flow_service_class(
+                            parent_multi_agent_chat_service=self
+                        )
+                    )
+                    async for chunk in conversation_flow_service_class_instance.get_streaming_conversation_response(
+                        chat_request
+                    ):
+                        yield chunk
+                else:
+                    # Static method streaming pattern
+                    async for chunk in conversation_flow_service_class.get_streaming_conversation_response(
+                        chat_request.user_prompt,
+                        [],  # topics placeholder
+                        chat_request.thread_memory or "",
+                        chat_request.memory_record or True,
+                        chat_request.thread_chat_history or {},
+                        chat_request,
+                    ):
+                        yield chunk
+            else:
+                # Fallback: convert regular response to streaming chunks
+                logger.info(
+                    "Conversation flow does not support streaming, falling back to chunked response",
+                    conversation_flow=self.conversation_flow,
+                )
+
+                # Get regular response and convert to chunks
+                response = await self.get_chat_response(chat_request)
+
+                if response.agent_response:
+                    chunk_size = 100  # Default chunk size
+                    if hasattr(self.config, "web") and hasattr(
+                        self.config.web, "streaming_chunk_size"
+                    ):
+                        chunk_size = self.config.web.streaming_chunk_size
+
+                    content = response.agent_response
+
+                    # Stream content in chunks
+                    for i in range(0, len(content), chunk_size):
+                        chunk_content = content[i : i + chunk_size]
+                        yield ChatResponseChunk(
+                            thread_id=response.thread_id,
+                            message_id=response.message_id,
+                            chunk_type="content",
+                            content=chunk_content,
+                            event_type=response.event_type,
+                            is_final=False,
+                        )
+
+                # Send final chunk with metadata
+                yield ChatResponseChunk(
+                    thread_id=response.thread_id,
+                    message_id=response.message_id,
+                    chunk_type="final",
+                    token_count=response.token_count,
+                    max_token_count=response.max_token_count,
+                    topic=response.topic,
+                    memory_summary=response.memory_summary,
+                    followup_questions=response.followup_questions,
+                    event_type=response.event_type,
+                    is_final=True,
+                )
+
+        except ImportError as e:
+            logger.error(
+                "Failed to import conversation flow for streaming",
+                conversation_flow=self.conversation_flow,
+                normalized_flow=normalized_flow,
+                error=str(e),
+                exc_info=True,
+            )
+            error_chunk = ChatResponseChunk(
+                thread_id=chat_request.thread_id,
+                message_id=str(uuid_module.uuid4()),
+                chunk_type="error",
+                content=f"Conversation flow not found: {self.conversation_flow}",
+                is_final=True,
+            )
+            yield error_chunk
+
+        except Exception as e:
+            logger.error(
+                "Error in streaming chat response",
+                conversation_flow=self.conversation_flow,
+                error=str(e),
+                exc_info=True,
+            )
+            error_chunk = ChatResponseChunk(
+                thread_id=chat_request.thread_id,
+                message_id=str(uuid_module.uuid4()),
+                chunk_type="error",
+                content=f"An error occurred: {str(e)}",
+                is_final=True,
+            )
+            yield error_chunk
+
 
 class IConversationPattern(ABC):
     _config: "Config"
@@ -483,6 +613,57 @@ class IConversationFlow(ABC):
     async def get_conversation_response(
         self, chat_request: IChatRequest
     ) -> IChatResponse:
+        pass
+
+    async def get_streaming_conversation_response(
+        self, chat_request: IChatRequest
+    ) -> AsyncIterator[ChatResponseChunk]:
+        """Optional streaming method. Override in subclasses to support streaming.
+
+        Default implementation falls back to chunking the regular response.
+        """
+        logger.debug(
+            "Streaming not implemented, falling back to chunked response",
+            conversation_flow=self.__class__.__name__,
+        )
+
+        # Get regular response and convert to chunks
+        response = await self.get_conversation_response(chat_request)
+
+        if response.agent_response:
+            chunk_size = 100  # Default chunk size
+            if hasattr(self._config, "web") and hasattr(
+                self._config.web, "streaming_chunk_size"
+            ):
+                chunk_size = self._config.web.streaming_chunk_size
+
+            content = response.agent_response
+
+            # Stream content in chunks
+            for i in range(0, len(content), chunk_size):
+                chunk_content = content[i : i + chunk_size]
+                yield ChatResponseChunk(
+                    thread_id=response.thread_id,
+                    message_id=response.message_id,
+                    chunk_type="content",
+                    content=chunk_content,
+                    event_type=response.event_type,
+                    is_final=False,
+                )
+
+        # Send final chunk with metadata
+        yield ChatResponseChunk(
+            thread_id=response.thread_id,
+            message_id=response.message_id,
+            chunk_type="final",
+            token_count=response.token_count,
+            max_token_count=response.max_token_count,
+            topic=response.topic,
+            memory_summary=response.memory_summary,
+            followup_questions=response.followup_questions,
+            event_type=response.event_type,
+            is_final=True,
+        )
         pass
 
 
