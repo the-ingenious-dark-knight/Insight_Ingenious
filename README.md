@@ -101,7 +101,7 @@ Get up and running in 5 minutes with Azure OpenAI!
 5. **Verify Health**:
     ```bash
     # Check server health
-    curl http://localhost:8001/api/v1/health
+    curl http://localhost:8000/api/v1/health
     ```
 
 ### Common Issues
@@ -143,9 +143,9 @@ If you encounter "Address already in use" or validation fails with port conflict
     echo '{"user_prompt": "Show me all tables in the database", "conversation_flow": "sql-manipulation-agent"}' > test_sql.json
 
     # Test each workflow
-    curl -X POST http://localhost:8001/api/v1/chat -H "Content-Type: application/json" -d @test_classification.json
-    curl -X POST http://localhost:8001/api/v1/chat -H "Content-Type: application/json" -d @test_knowledge.json
-    curl -X POST http://localhost:8001/api/v1/chat -H "Content-Type: application/json" -d @test_sql.json
+    curl -X POST http://localhost:8000/api/v1/chat -H "Content-Type: application/json" -d @test_classification.json
+    curl -X POST http://localhost:8000/api/v1/chat -H "Content-Type: application/json" -d @test_knowledge.json
+    curl -X POST http://localhost:8000/api/v1/chat -H "Content-Type: application/json" -d @test_sql.json
     ```
 
 **Expected Responses**:
@@ -189,7 +189,7 @@ That's it! You should see a JSON response with AI analysis of the input.
     EOF
 
     # Test bike-insights workflow
-    curl -X POST http://localhost:8001/api/v1/chat -H "Content-Type: application/json" -d @test_bike_insights.json
+    curl -X POST http://localhost:8000/api/v1/chat -H "Content-Type: application/json" -d @test_bike_insights.json
     ```
 
     **Expected bike-insights response**: JSON with comprehensive bike sales analysis from multiple agents (fiscal analysis, customer sentiment, summary, and bike lookup).
