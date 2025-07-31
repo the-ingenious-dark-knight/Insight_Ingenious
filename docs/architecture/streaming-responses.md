@@ -39,10 +39,10 @@ sequenceDiagram
     FastAPI->>ChatService: get_streaming_chat_response()
     ChatService->>MultiAgent: get_streaming_chat_response()
     MultiAgent->>ConversationFlow: get_streaming_conversation_response()
-    
+
     ConversationFlow->>AutoGen: run_stream()
     AutoGen->>OpenAI: Streaming API call
-    
+
     loop Streaming Chunks
         OpenAI-->>AutoGen: Content chunk
         AutoGen-->>ConversationFlow: BaseAgentEvent/BaseChatMessage
@@ -51,7 +51,7 @@ sequenceDiagram
         ChatService-->>FastAPI: ChatResponseChunk
         FastAPI-->>Client: SSE: data: {...}
     end
-    
+
     ConversationFlow-->>MultiAgent: Final ChatResponseChunk
     MultiAgent-->>ChatService: Final chunk with metadata
     ChatService-->>FastAPI: Final chunk
@@ -276,7 +276,7 @@ async def generate_streaming_response(
         stream=True,  # Enable streaming
         **kwargs
     )
-    
+
     for chunk in response:
         if chunk.choices and chunk.choices[0].delta and chunk.choices[0].delta.content:
             yield chunk.choices[0].delta.content
@@ -301,18 +301,18 @@ async function streamChat(request) {
 
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
-    
+
     while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        
+
         const chunk = decoder.decode(value);
         const lines = chunk.split('\n');
-        
+
         for (const line of lines) {
             if (line.startsWith('data: ')) {
                 const data = JSON.parse(line.slice(6));
-                
+
                 if (data.event === 'data') {
                     handleStreamChunk(data.data);
                 } else if (data.event === 'done') {
@@ -355,11 +355,11 @@ def stream_chat(request_data):
         json={**request_data, 'stream': True},
         stream=True
     )
-    
+
     for line in response.iter_lines():
         if line.startswith(b'data: '):
             data = json.loads(line[6:].decode('utf-8'))
-            
+
             if data['event'] == 'data':
                 chunk = data['data']
                 if chunk['chunk_type'] == 'content':
@@ -479,13 +479,13 @@ curl -s http://localhost/chat/stream -X POST \
 def validate_streaming_config(config):
     if not config.web.enable_streaming:
         return "Streaming disabled in configuration"
-    
+
     if config.web.streaming_chunk_size < 10:
         return "Chunk size too small"
-    
+
     if config.web.streaming_delay_ms > 1000:
         return "Streaming delay too high"
-    
+
     return "Configuration valid"
 ```
 
