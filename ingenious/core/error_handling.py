@@ -738,12 +738,6 @@ class CircuitBreakerRecoveryStrategy(RecoveryStrategy):
             raise exc
 
 
-
-
-
-
-
-
 # ─────────────────────────────────────────────────────────────────────────────
 # Correlation ID Management
 # ─────────────────────────────────────────────────────────────────────────────

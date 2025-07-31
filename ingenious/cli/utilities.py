@@ -13,13 +13,7 @@ from pathlib import Path
 from sysconfig import get_paths
 from typing import Any, Dict, List, Optional, Union
 
-from rich.console import Console
 from rich.panel import Panel
-from rich.progress import (
-    Progress,
-    SpinnerColumn,
-    TextColumn,
-)
 from rich.table import Table
 
 import ingenious.utils.stage_executor as stage_executor_module
@@ -56,7 +50,6 @@ class CliFunctions:
         """Check if the ingenious package exists in site-packages."""
         ChkPath = Path(get_paths()["purelib"]) / Path("ingenious/")
         return os.path.exists(ChkPath)
-
 
     @staticmethod
     def copy_ingenious_folder(src: Union[str, Path], dst: Union[str, Path]) -> None:
@@ -214,7 +207,6 @@ class ValidationUtils:
         path = Path(file_path)
         return path.suffix.lower() in [ext.lower() for ext in expected_extensions]
 
-
     @staticmethod
     def validate_port(port: Union[str, int]) -> tuple[bool, Optional[str]]:
         """
@@ -318,9 +310,6 @@ class OutputFormatters:
             Rich Panel object
         """
         return Panel(content, title=title, border_style=style)
-
-
-
 
 
 class ConfigUtils:

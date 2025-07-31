@@ -26,4 +26,3 @@ Use `uv run vulture . --exclude .venv`  to analyze this codebase for dead or unu
    ```
 
 Repeat this process for all remaining vulture reports. Do not batch deletions—handle one item at a time to maintain traceability and safety.
-

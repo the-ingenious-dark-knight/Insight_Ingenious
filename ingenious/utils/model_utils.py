@@ -1,13 +1,10 @@
 import csv
 import io
-from enum import Enum
 from typing import Any, Dict, List
 
 import jsonpickle  # type: ignore
 import yaml
 from pydantic import BaseModel
-
-
 
 
 # Checks if a field is a non-complex field using the value

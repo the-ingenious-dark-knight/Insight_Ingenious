@@ -66,12 +66,12 @@ Get up and running in 5 minutes with Azure OpenAI!
     ```bash
     uv run ingen validate  # Check configuration before starting
     ```
-    
+
     **If validation fails with port conflicts**:
     ```bash
     # Check if validation passes with different port
     INGENIOUS_WEB_CONFIGURATION__PORT=8001 uv run ingen validate
-    
+
     # Or update your .env file before validating:
     echo "INGENIOUS_WEB_CONFIGURATION__PORT=8001" >> .env
     uv run ingen validate
@@ -126,7 +126,7 @@ If you encounter "Address already in use" or validation fails with port conflict
    ```bash
    # Update health check
    curl http://localhost:8001/api/v1/health
-   
+
    # Update workflow tests (use the new port in all examples below)
    ```
 

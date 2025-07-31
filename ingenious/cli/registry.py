@@ -252,8 +252,6 @@ class CommandRegistry:
         return errors
 
 
-
-
 # Global registry instance
 _registry: Optional[CommandRegistry] = None
 
