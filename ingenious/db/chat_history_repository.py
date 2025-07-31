@@ -28,6 +28,9 @@ class IChatHistoryRepository(ABC):
 
     MessageStepType = Literal["user_message", "assistant_message", "system_message"]
 
+    # Alias for compatibility
+    StepType = Union[TrueStepType, MessageStepType]
+
     ElementType = Literal[
         "image",
         "text",

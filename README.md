@@ -22,6 +22,9 @@ Get up and running in 5 minutes with Azure OpenAI!
     # Navigate to your desired project directory first
     cd /path/to/your/project
 
+    # Set up the uv project
+    uv init
+
     # Choose installation based on features needed
     uv add ingenious[standard] # Most common: includes SQL agent support (core, auth, ai, database)
     # OR
@@ -165,13 +168,25 @@ That's it! You should see a JSON response with AI analysis of the input.
 
     # Create bike-insights test data file
     # IMPORTANT: bike-insights requires JSON data in the user_prompt field (double-encoded JSON)
-    # The escaping can be error-prone, so we use a heredoc to avoid issues
-    cat > test_bike_insights.json << 'EOF'
-    {
+    # Method 1: Use printf for precise formatting (recommended)
+    printf '%s\n' '{
       "user_prompt": "{\"revision_id\": \"test-v1\", \"identifier\": \"test-001\", \"stores\": [{\"name\": \"Test Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"MB-TREK-2021-XC\", \"quantity_sold\": 2, \"sale_date\": \"2023-04-01\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 4.5, \"comment\": \"Great bike\"}}], \"bike_stock\": []}]}",
       "conversation_flow": "bike-insights"
-    }
-    EOF
+    }' > test_bike_insights.json
+
+    # Method 2: Alternative using echo (simpler but watch for shell differences)
+    echo '{
+      "user_prompt": "{\"revision_id\": \"test-v1\", \"identifier\": \"test-001\", \"stores\": [{\"name\": \"Test Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"MB-TREK-2021-XC\", \"quantity_sold\": 2, \"sale_date\": \"2023-04-01\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 4.5, \"comment\": \"Great bike\"}}], \"bike_stock\": []}]}",
+      "conversation_flow": "bike-insights"
+    }' > test_bike_insights.json
+
+    # Method 3: If heredoc is preferred, ensure proper EOF placement
+    cat > test_bike_insights.json << 'EOF'
+{
+  "user_prompt": "{\"revision_id\": \"test-v1\", \"identifier\": \"test-001\", \"stores\": [{\"name\": \"Test Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"MB-TREK-2021-XC\", \"quantity_sold\": 2, \"sale_date\": \"2023-04-01\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 4.5, \"comment\": \"Great bike\"}}], \"bike_stock\": []}]}",
+  "conversation_flow": "bike-insights"
+}
+EOF
 
     # Test bike-insights workflow
     curl -X POST http://localhost:8001/api/v1/chat -H "Content-Type: application/json" -d @test_bike_insights.json

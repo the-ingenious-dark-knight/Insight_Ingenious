@@ -29,12 +29,13 @@ Insight Ingenious is an enterprise-grade Python library for building AI agent AP
 
 ## Quick Start Steps
 
-1. **Install Ingenious**
+1. **Initialize new uv project and install Ingenious**
    ```bash
+   uv init
    uv add ingenious
    ```
 
-2. **Initialize a new project**
+2. **Initialize a new Ingenious project**
    ```bash
    uv run ingen init
    ```

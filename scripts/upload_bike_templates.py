@@ -31,7 +31,7 @@ TEMPLATE_FILES = [
 ]
 
 
-def read_local_template(filename):
+def read_local_template(filename: str) -> str | None:
     """Read template content from local installation"""
     template_path = (
         Path("ingenious/ingenious_extensions_template/templates/prompts") / filename
@@ -41,7 +41,7 @@ def read_local_template(filename):
     return None
 
 
-def upload_template(filename, content):
+def upload_template(filename: str, content: str) -> bool:
     """Upload template to Azure Blob Storage via API"""
     url = f"{API_BASE}/api/v1/prompts/update/{REVISION_ID}/{filename}"
     payload = {"content": content}
@@ -61,7 +61,7 @@ def upload_template(filename, content):
         return False
 
 
-def main():
+def main() -> None:
     print(f"Uploading bike-insights templates to revision: {REVISION_ID}")
     print("-" * 60)
 

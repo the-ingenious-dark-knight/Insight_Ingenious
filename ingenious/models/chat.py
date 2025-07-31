@@ -14,6 +14,7 @@ class IChatRequest(BaseModel):
     conversation_flow: str
     thread_chat_history: Optional[dict[str, str]] = {}
     thread_memory: Optional[str] = None
+    stream: Optional[bool] = False
 
 
 class IChatResponse(BaseModel):
@@ -51,3 +52,27 @@ class Product(BaseModel):
     name: str
     description: Optional[str] = None
     price: Optional[float] = None
+
+
+class ChatResponseChunk(BaseModel):
+    thread_id: Optional[str]
+    message_id: Optional[str]
+    chunk_type: (
+        str  # "content", "token_count", "memory_summary", "followup_questions", "final"
+    )
+    content: Optional[str] = None
+    token_count: Optional[int] = None
+    max_token_count: Optional[int] = None
+    topic: Optional[str] = None
+    memory_summary: Optional[str] = None
+    followup_questions: Optional[dict[str, str]] = None
+    event_type: Optional[str] = None
+    is_final: bool = False
+
+
+class StreamingChatResponse(BaseModel):
+    """Response model for streaming chat endpoints"""
+
+    event: str  # "data", "error", "done"
+    data: Optional[ChatResponseChunk] = None
+    error: Optional[str] = None

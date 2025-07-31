@@ -56,7 +56,6 @@ uv run ingen init
 This creates:
 - `.env.example` - Environment variable template
 - `ingenious_extensions/` - Bike-insights workflow
-- `templates/prompts/quickstart-1/` - Prompt templates
 
 ### Step 3: Configure Environment Variables
 
@@ -125,7 +124,7 @@ Add these environment variables to your `.env` file:
 # Azure Blob Storage configuration
 INGENIOUS_FILE_STORAGE__REVISIONS__ENABLE=true
 INGENIOUS_FILE_STORAGE__REVISIONS__STORAGE_TYPE=azure
-INGENIOUS_FILE_STORAGE__REVISIONS__CONTAINER_NAME=revisions
+INGENIOUS_FILE_STORAGE__REVISIONS__CONTAINER_NAME=prompts
 INGENIOUS_FILE_STORAGE__REVISIONS__PATH=ingenious-files
 INGENIOUS_FILE_STORAGE__REVISIONS__ADD_SUB_FOLDERS=true
 INGENIOUS_FILE_STORAGE__REVISIONS__URL=${AZURE_STORAGE_REVISIONS_URL}
@@ -196,7 +195,7 @@ async def setup_azure_prompts():
     from ingenious.files.files_repository import FileStorage
 
     config = get_config()
-    storage = FileStorage(config, "revisions")
+    storage = FileStorage(config, "prompts")
 
     source_templates = Path("templates/prompts/quickstart-1")
 
