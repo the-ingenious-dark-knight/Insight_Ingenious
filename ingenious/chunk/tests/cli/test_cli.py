@@ -1,4 +1,3 @@
-# Insight_Ingenious/ingenious/chunk/tests/test_cli.py
 from typer.testing import CliRunner
 from ingenious.chunk.cli import cli
 

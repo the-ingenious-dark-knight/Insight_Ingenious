@@ -1,4 +1,3 @@
-# tests/test_cli_global_id_uniqueness.py
 from collections import Counter
 import jsonlines
 from typer.testing import CliRunner

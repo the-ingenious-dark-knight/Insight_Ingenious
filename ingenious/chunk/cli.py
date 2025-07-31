@@ -7,7 +7,7 @@ Ingenious Chunking CLI
 Usage example::
 
     ingen chunk run test_files/pages_azdocint_pdf_scanned.jsonl \
-        --strategy recursive --chunk-size 64 --chunk-overlap 32 \
+        --strategy recursive --chunk-size 64 --chunk-overlap 24 \
         --output azdocint_chunks.jsonl
 """
 
@@ -20,6 +20,7 @@ from typing import Iterable
 import jsonlines
 import typer
 
+from ingenious.chunk.utils.id_path import _norm_source 
 from .config import ChunkConfig
 from .factory import build_splitter
 from .loader import load_documents
@@ -44,6 +45,39 @@ _CONTRACT = (
     "               'text' | 'page_content' | 'body' key containing the page text\n"
     "• .jsonl / .ndjson – **one object per line** with the same keys above"
 )
+
+
+def _safe_load(pattern: str):
+    """
+    Wrapper around `load_documents` that converts loader-level errors
+    into a consistent, user-friendly CLI failure.
+
+    Parameters
+    ----------
+    pattern : str
+        File path, directory, or glob pattern passed from the CLI.
+
+    Returns
+    -------
+    list[Document]
+        Parsed LangChain `Document` objects on success.
+
+    Raises
+    ------
+    typer.Exit
+        Always exits with code 1 after echoing a coloured ❌ banner when:
+          • `ValueError`   – unsupported file type (e.g., PDF passed directly)
+          • `FileNotFoundError` – pattern matches zero parseable files
+    """
+    try:
+        # Attempt to expand the pattern and parse every matched file.
+        return load_documents(pattern)
+
+    except (ValueError, FileNotFoundError) as exc:
+        # Uniform UX: red ❌ prefix + graceful exit for both error classes.
+        typer.secho(f"❌  {exc}", fg=typer.colors.RED)
+        raise typer.Exit(code=1) from exc
+
 
 # --------------------------------------------------------------------------- #
 # Typer app                                                                   #
@@ -110,6 +144,19 @@ def run(  # noqa: PLR0913 – many CLI knobs by design
     azure_deployment: str = typer.Option(
         "", help="Azure OpenAI deployment for semantic splitter"
     ),
+    # -------------- ID‑path handling ------------------------------------
+    id_path_mode: str = typer.Option(
+        "rel",
+        "--id-path-mode",
+        help="Encode source paths inside chunk IDs: abs | rel | hash",
+        rich_help_panel="Output",
+    ),
+    id_base: str = typer.Option(
+        "",
+        "--id-base",
+        help="Base directory for --id-path-mode=rel (defaults to CWD)",
+        rich_help_panel="Output",
+    ),
     # -------------- output ----------------------------------------------
     output: str = typer.Option(
         "chunks.jsonl", "--output", "-o", help="Output JSONL filepath"
@@ -129,13 +176,15 @@ def run(  # noqa: PLR0913 – many CLI knobs by design
         encoding_name=encoding_name,
         embed_model=embed_model or None,
         azure_openai_deployment=azure_deployment or None,
+        id_path_mode=id_path_mode,
+        id_base=pathlib.Path(id_base) if id_base else None,
     )
     splitter = build_splitter(cfg)
 
     # ------------------------------------------------------------------ #
     # Load documents                                                     #
     # ------------------------------------------------------------------ #
-    docs = load_documents(path)
+    docs = _safe_load(path)
 
     # ------------------------------------------------------------------ #
     # Prepare output path                                                #
@@ -156,7 +205,7 @@ def run(  # noqa: PLR0913 – many CLI knobs by design
     # Write                                                              #
     # ------------------------------------------------------------------ #
     try:
-        _write_chunks_jsonl(chunks, out_path)
+        _write_chunks_jsonl(chunks, out_path, cfg)
         typer.secho(
             f"✅ Wrote {len(chunks)} chunks → {out_path}",
             fg=typer.colors.GREEN,
@@ -172,7 +221,11 @@ def run(  # noqa: PLR0913 – many CLI knobs by design
 # --------------------------------------------------------------------------- #
 # Helper – separated for isolated testing & mutation‑testing                  #
 # --------------------------------------------------------------------------- #
-def _write_chunks_jsonl(chunks: Iterable, out_path: pathlib.Path) -> None:
+def _write_chunks_jsonl(
+    chunks: Iterable,
+    out_path: pathlib.Path,
+    cfg: ChunkConfig,
+) -> None:
     """
     Persist *chunks* to *out_path* in deterministic‑ID JSONL format.
 
@@ -191,11 +244,7 @@ def _write_chunks_jsonl(chunks: Iterable, out_path: pathlib.Path) -> None:
     with jsonlines.open(out_path, mode="w") as writer:
         for chunk in chunks:
             # 1️⃣ Normalised source path (portable, repeatable)
-            src_path = (
-                pathlib.Path(chunk.metadata.get("source", ""))
-                .resolve()
-                .as_posix()
-            )
+            src_path = _norm_source(chunk.metadata.get("source", ""), cfg)
 
             # 2️⃣ Page number – default 0 when missing
             page = int(chunk.metadata.get("page", 0))

@@ -1,4 +1,3 @@
-# ingenious/chunk/tests/test_cli_failures.py
 from typer.testing import CliRunner
 from pydantic import ValidationError
 

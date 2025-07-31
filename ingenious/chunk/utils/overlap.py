@@ -18,6 +18,7 @@ from __future__ import annotations
 
 from typing import List, Sequence, TypeVar, overload
 
+from copy import deepcopy 
 from langchain_core.documents import Document  # type: ignore
 
 from .token_len import _enc
@@ -105,8 +106,11 @@ def inject_overlap(
         if isinstance(chunk, str):
             out.append(content)  # type: ignore[arg-type]
         else:  # Document
+            # ⚠️  NEVER pass the original dict – downstream mutation would
+            #     couple siblings.  deep‐copy for full isolation.
             out.append(
-                Document(page_content=content, metadata=chunk.metadata)
+                Document(page_content=content,
+                         metadata=deepcopy(chunk.metadata))
             )  # type: ignore[arg-type]
 
     return out

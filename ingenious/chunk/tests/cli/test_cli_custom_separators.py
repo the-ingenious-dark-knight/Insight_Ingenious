@@ -1,4 +1,3 @@
-# ingenious/chunk/tests/test_cli_custom_separators.py
 from pathlib import Path
 from typer.testing import CliRunner
 import jsonlines

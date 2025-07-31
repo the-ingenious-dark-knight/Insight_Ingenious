@@ -1,6 +1,6 @@
 # ingenious/chunk/config.py
 from typing import List, Literal
-
+from pathlib import Path
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
@@ -22,6 +22,11 @@ class ChunkConfig(BaseModel):
     # Strategy selector
     # ------------------------------------------------------------------
     strategy: Literal["recursive", "markdown", "token", "semantic"] = "recursive"
+
+    id_path_mode: Literal["abs", "rel", "hash"] = "rel"
+    id_base: Path | None = Field(
+        default=None, description="Base dir for relative ID paths"
+    )
 
     # ------------------------------------------------------------------
     # Shared knobs
@@ -55,6 +60,20 @@ class ChunkConfig(BaseModel):
     # ------------------------------------------------------------------
     # Validators
     # ------------------------------------------------------------------
+    @model_validator(mode="after")
+    def _validate_id_mode(self):
+        if self.id_path_mode == "rel":
+            # Default base to CWD if not supplied
+            object.__setattr__(self, "id_base", self.id_base or Path.cwd())
+        else:
+            # In abs/hash mode, id_base must not be set
+            if self.id_base is not None:
+                raise ValueError(
+                    "id_base is only applicable when id_path_mode == 'rel'"
+                )
+        return self
+
+
     @model_validator(mode="after")
     def _validate_overlap(self):
         """

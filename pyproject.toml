@@ -152,7 +152,8 @@ chunk = [
   "langchain-openai==0.3.0",
   "langchain-text-splitters==0.3.0",
   "regex==2024.11.6",
-  "xxhash==3.5.0"
+  "xxhash==3.5.0",
+  "ijson==3.2.3",
 ]
 
 # ML and embeddings

@@ -1,5 +1,3 @@
-# ingenious/chunk/tests/test_cli_writer_failure.py
-from unittest.mock import patch, MagicMock
 import jsonlines
 from typer.testing import CliRunner
 from ingenious.chunk.cli import cli

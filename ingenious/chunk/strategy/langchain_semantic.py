@@ -32,7 +32,7 @@ Embedding backend
 """
 from __future__ import annotations
 
-from typing import Iterable, List
+from typing import Iterable, List, Union
 
 from langchain_core.documents import Document
 from langchain_experimental.text_splitter import SemanticChunker
@@ -91,9 +91,34 @@ class SemanticOverlapChunker:
             enc_name=self._enc_name,
         )
 
-    def split_text(self, text: str) -> List[str]:
-        tmp_docs = [Document(page_content=text)]
-        return [c.page_content for c in self.split_documents(tmp_docs)]
+    def split_text(                    # type: ignore[override]
+        self,
+        text: str,
+        *,
+        metadata: dict | None = None,
+        return_docs: bool = False,
+    ) -> Union[List[str], List[Document]]:
+        """
+        Split *text* while **preserving metadata**.
+
+        Parameters
+        ----------
+        text :
+            Raw input string to be chunked.
+        metadata :
+            Optional metadata to attach to every emitted chunk.  Ignored
+            when *return_docs* is ``False``.
+        return_docs :
+            • ``False`` (default) – return ``List[str]`` for drop‑in
+              LangChain compatibility.  
+            • ``True`` – return fully‑formed
+              ``List[langchain_core.documents.Document]`` so callers keep
+              the metadata round‑trip parity guaranteed by
+              :py:meth:`split_documents`.
+        """
+        tmp_doc = Document(page_content=text, metadata=metadata or {})
+        docs = self.split_documents([tmp_doc])
+        return docs if return_docs else [d.page_content for d in docs]
 
     def __getattr__(self, item):  # pragma: no cover
         return getattr(self._base, item)

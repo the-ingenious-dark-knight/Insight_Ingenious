@@ -65,6 +65,6 @@ def build_splitter(cfg: ChunkConfig):
         return _get_strategy(cfg.strategy)(cfg)
 
     # ── 3. Cached path for pure‑Python strategies ──────────────────────────
-    cfg_dict = cfg.model_dump(exclude_none=True)
+    cfg_dict = cfg.model_dump(exclude_none=True, mode="json")
     key = json.dumps(cfg_dict, sort_keys=True, separators=(",", ":"))
     return _cached_build_splitter(key)
