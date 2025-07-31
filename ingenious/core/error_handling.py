@@ -62,7 +62,6 @@ logger = get_logger(__name__)
 
 # Type variables for generic decorators
 F = TypeVar("F", bound=Callable[..., Any])
-T = TypeVar("T")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
