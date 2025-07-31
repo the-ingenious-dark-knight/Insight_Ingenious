@@ -19,7 +19,11 @@ RUN apt update && apt install -y less \
     iproute2 \
     dnsutils \
     aggregate \
-    jq
+    jq \
+    python3 \
+    python3-pip \
+    python3-venv \
+    curl
 
 # Ensure default node user has access to /usr/local/share
 RUN mkdir -p /usr/local/share/npm-global && \
@@ -49,6 +53,10 @@ RUN ARCH=$(dpkg --print-architecture) && \
 
 # Set up non-root user
 USER node
+
+# Install uv (Python package manager)
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+ENV PATH="/home/node/.cargo/bin:$PATH"
 
 # Install global packages
 ENV NPM_CONFIG_PREFIX=/usr/local/share/npm-global
