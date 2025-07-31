@@ -248,50 +248,7 @@ class BaseCommand(ABC):
 
         return env_values
 
-    def validate_file_exists(self, file_path: str, description: str = "File") -> None:
-        """
-        Validate that a file exists.
 
-        Args:
-            file_path: Path to the file to check
-            description: Human-readable description of the file
-
-        Raises:
-            CommandError: If the file doesn't exist
-        """
-        from pathlib import Path
-
-        if not Path(file_path).exists():
-            raise CommandError(
-                f"{description} not found: {file_path}", ExitCode.VALIDATION_ERROR
-            )
-
-    def validate_directory_exists(
-        self, dir_path: str, description: str = "Directory"
-    ) -> None:
-        """
-        Validate that a directory exists.
-
-        Args:
-            dir_path: Path to the directory to check
-            description: Human-readable description of the directory
-
-        Raises:
-            CommandError: If the directory doesn't exist
-        """
-        from pathlib import Path
-
-        path = Path(dir_path)
-        if not path.exists():
-            raise CommandError(
-                f"{description} not found: {dir_path}", ExitCode.VALIDATION_ERROR
-            )
-
-        if not path.is_dir():
-            raise CommandError(
-                f"{description} is not a directory: {dir_path}",
-                ExitCode.VALIDATION_ERROR,
-            )
 
 
 def create_console() -> Console:
