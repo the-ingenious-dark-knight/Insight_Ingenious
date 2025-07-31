@@ -234,18 +234,30 @@ INGENIOUS_LOGGING__LOG_LEVEL=info
     def _create_default_docker_file(self, filename: str, destination: Path) -> None:
         """Create a default Docker file if template is missing."""
         if filename == "Dockerfile":
-            content = """FROM python:3.11-slim
+            content = """FROM python:3.13-slim
 
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies including ODBC driver for Azure SQL
 RUN apt-get update && apt-get install -y \\
     git \\
+    curl \\
+    gnupg2 \\
+    unixodbc-dev \\
+    && curl -sSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /usr/share/keyrings/microsoft-archive-keyring.gpg \\
+    && echo "deb [arch=amd64,arm64,armhf signed-by=/usr/share/keyrings/microsoft-archive-keyring.gpg] https://packages.microsoft.com/debian/12/prod bookworm main" > /etc/apt/sources.list.d/mssql-release.list \\
+    && apt-get update \\
+    && ACCEPT_EULA=Y apt-get install -y msodbcsql18 \\
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Install uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
+
+# Copy project files
+COPY pyproject.toml .
+
+# Install dependencies with uv
+RUN uv sync
 
 # Copy application code
 COPY . .
@@ -253,13 +265,15 @@ COPY . .
 # Expose port
 EXPOSE 80
 
+# Set environment variable to use port 80 for production
+ENV INGENIOUS_WEB_CONFIGURATION__PORT=80
+
 # Run the application
-CMD ["python", "-m", "ingenious.cli", "serve"]
+CMD ["uv", "run", "python", "-m", "ingenious.cli", "serve"]
 """
         elif filename == ".dockerignore":
             content = """.git
 .gitignore
-README.md
 .env
 .env.*
 __pycache__
@@ -281,6 +295,9 @@ coverage.xml
 .venv
 .pytest_cache
 .mypy_cache
+functional_test_outputs/
+tmp/
+.tmp/
 """
         else:
             content = f"# {filename} - Created by Insight Ingenious\n"
@@ -337,6 +354,12 @@ coverage.xml
             "   curl -X POST http://localhost:80/api/v1/chat \\",
             "     -H 'Content-Type: application/json' \\",
             '     -d \'{"user_prompt": "Analyze bike sales", "conversation_flow": "bike-insights"}\'',
+            "",
+            "🐳 Docker Deployment:",
+            "6. Build production container:",
+            "   docker build -t ingenious-app .",
+            "7. Run with environment:",
+            "   docker run --env-file .env -p 8080:80 ingenious-app",
         ]
 
         panel = OutputFormatters.create_info_panel(
