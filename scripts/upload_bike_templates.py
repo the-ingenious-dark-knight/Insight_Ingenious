@@ -26,7 +26,7 @@ TEMPLATE_FILES = [
     "fiscal_analysis_agent_prompt.jinja", 
     "summary_prompt.jinja",
     "bike_lookup_agent_prompt.jinja",
-    "summary_agent_prompt.jinja"  # This might be an alternative name
+    "user_proxy_prompt.jinja"
 ]
 
 def read_local_template(filename):
