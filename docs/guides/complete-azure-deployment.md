@@ -165,6 +165,19 @@ ACCEPT_EULA=Y apt-get install msodbcsql18
 
 ### Step 7: Upload Prompt Templates to Azure Blob Storage
 
+#### Option A: Use the Provided Upload Script (Recommended for bike-insights)
+
+For bike-insights workflow, use the dedicated upload script:
+```bash
+# Ensure server is running first
+uv run ingen serve --port 8080 &
+
+# Upload bike-insights templates
+uv run python scripts/upload_bike_templates.py
+```
+
+#### Option B: Create Custom Setup Script
+
 Create and run this setup script:
 
 ```python
@@ -389,6 +402,36 @@ flowchart TD
 - Verify prompt templates are uploaded
 - Review agent configuration in templates
 - Check model deployment names match
+
+**Template Missing Error: "The specified blob does not exist"**
+This is a common issue when testing the bike-insights workflow with Azure Blob Storage integration. The bike-insights workflow requires specific prompt template files for each agent:
+
+Required templates for `bike-insights` workflow:
+- `customer_sentiment_agent_prompt.jinja`
+- `fiscal_analysis_agent_prompt.jinja`
+- `summary_prompt.jinja`
+- `user_proxy_prompt.jinja` (optional, but recommended)
+- `bike_lookup_agent_prompt.jinja`
+
+**Solution**: These templates exist in the local installation at `ingenious_extensions_template/templates/prompts/` but need to be copied to Azure Blob Storage for your specific revision ID. 
+
+**Quick Fix - Use the Upload Script**:
+```bash
+# Use the provided script to upload all bike-insights templates
+uv run python scripts/upload_bike_templates.py
+```
+
+**Manual Fix - Use the prompts API**:
+```bash
+# Manually upload each template via API
+curl -X POST "http://localhost:8080/api/v1/prompts/update/your-revision-id/customer_sentiment_agent_prompt.jinja" \
+  -H "Content-Type: application/json" \
+  -d '{"content": "### ROLE\n**System Prompt:**\nYou are an AI Customer Sentiment Analyst..."}'
+
+# Repeat for each required template file
+```
+
+**Automated Setup**: Use the general setup script in Step 7 to upload all templates at once during initial deployment.
 
 For additional troubleshooting, see the [main troubleshooting guide](../troubleshooting/README.md).
 

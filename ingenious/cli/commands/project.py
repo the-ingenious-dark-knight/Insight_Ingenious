@@ -93,6 +93,9 @@ class InitCommand(BaseCommand):
 
         # Create Docker files
         self._create_docker_files(base_path)
+        
+        # Create standalone templates directory
+        self._create_templates_directory(base_path)
 
     def _create_env_files(self, base_path: Path) -> None:
         """Create environment configuration files in the project root."""
@@ -284,6 +287,35 @@ coverage.xml
 
         with open(destination, "w") as f:
             f.write(content)
+
+    def _create_templates_directory(self, base_path: Path) -> None:
+        """Create standalone templates/prompts/quickstart-1/ directory with bike-insights templates."""
+        templates_dir = Path.cwd() / "templates" / "prompts" / "quickstart-1"
+        
+        if templates_dir.exists():
+            self.print_warning("Templates directory already exists. Skipping...")
+            return
+            
+        try:
+            # Create the directory structure
+            templates_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Copy prompt template files from ingenious_extensions_template
+            source_templates = base_path / "ingenious_extensions_template" / "templates" / "prompts"
+            
+            if source_templates.exists():
+                for template_file in source_templates.glob("*.jinja"):
+                    destination_file = templates_dir / template_file.name
+                    shutil.copy2(template_file, destination_file)
+                    
+                self.print_success(f"Created 'templates/prompts/quickstart-1/' with {len(list(source_templates.glob('*.jinja')))} template files")
+            else:
+                # Create the directory but warn about missing templates
+                self.print_warning("Source templates not found, created empty templates directory")
+                
+        except Exception as e:
+            self.logger.error(f"Failed to create templates directory: {e}")
+            # Don't fail the entire operation for templates
 
     def _show_next_steps(self) -> None:
         """Show next steps after project initialization."""
