@@ -28,7 +28,6 @@ class IChatHistoryRepository(ABC):
 
     MessageStepType = Literal["user_message", "assistant_message", "system_message"]
 
-    StepType = Union[TrueStepType, MessageStepType]
 
     mime_types = {
         "text": "text/plain",
