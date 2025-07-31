@@ -27,8 +27,6 @@ class ExitCode(Enum):
     INVALID_CONFIG = 2
     MISSING_DEPENDENCY = 3
     VALIDATION_ERROR = 4
-    NETWORK_ERROR = 5
-    PERMISSION_ERROR = 6
 
 
 class CommandError(Exception):
