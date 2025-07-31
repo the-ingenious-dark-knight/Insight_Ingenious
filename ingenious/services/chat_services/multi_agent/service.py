@@ -357,7 +357,7 @@ class multi_agent_chat_service:
         """Stream chat response chunks in real-time."""
         if not chat_request.conversation_flow:
             raise ValueError(f"conversation_flow not set {chat_request}")
-            
+
         logger.debug(
             "Starting streaming chat response",
             conversation_flow=chat_request.conversation_flow,
