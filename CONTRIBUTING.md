@@ -30,7 +30,8 @@ By participating in this project, you agree to abide by our code of conduct, whi
 
 4. Configure your project:
    ```bash
-   uv run ingen initialize-new-project
+   uv init
+   uv run ingen init
    ```
 
 ## Development Workflow
@@ -38,31 +39,8 @@ By participating in this project, you agree to abide by our code of conduct, whi
 ### Branch Strategy
 
 - `main`: Stable production code
-- `develop`: Integration branch for features
 - Feature branches: Use format `feature/your-feature-name`
 - Bug fix branches: Use format `fix/issue-description`
-
-### Making Changes
-
-1. Create a new branch for your feature or bugfix:
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-
-2. Make your changes, adhering to the coding standards
-
-3. Add and commit your changes:
-   ```bash
-   git add .
-   git commit -m "Description of your changes"
-   ```
-
-4. Push your branch to your fork:
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-
-5. Create a Pull Request against the `develop` branch of the main repository
 
 ### Testing
 
@@ -72,72 +50,38 @@ Before submitting a PR, please ensure your code passes all tests:
 uv run pytest
 ```
 
-You can also use the test harness to verify agent behavior:
-
-```bash
-uv run ingen run-test-batch
-```
-
-### Code Style
+### Linting and Formatting
 
 This project uses:
-- [Ruff](https://docs.astral.sh/ruff/) for linting and formatting
 - [Pre-commit](https://pre-commit.com/) hooks to enforce standards
 
 Install pre-commit hooks:
 ```bash
-uv add pre-commit --dev
-pre-commit install
+uv run pre-commit install
 ```
 
-## Project Structure
+Occassionally run and run before submitting PR:
+```bash
+uv run pre-commit run --all-files
+```
 
-When adding new features, please follow the existing structure:
+### Type Safety
 
-- Put core framework code in `ingenious/`
-- Add extension templates to `ingenious_extensions_template/`
-- Update relevant documentation in `docs/`
+This project uses:
+- [mypy](https://mypy.readthedocs.io/) for static type checking
 
-### Adding a New Conversation Pattern
+Occassionally run and run before submitting PR:
+```bash
+uv run mypy .
+```
 
-1. Create a new module in `ingenious/services/chat_services/multi_agent/conversation_patterns/`
-2. Implement a `ConversationPattern` class that follows the interface
-3. Create a corresponding flow in `ingenious/services/chat_services/multi_agent/conversation_flows/`
-4. Add appropriate tests
+Refer to the mypy prompt in .github/prompts for a better understanding of expected type safety in a PR.
 
-### Adding a New Agent
-
-1. Create a new module in `ingenious/services/chat_services/multi_agent/agents/`
-2. Define the agent's system prompt and behavior
-3. Register the agent in the appropriate conversation pattern
-
-## Documentation
-
-Please update documentation when adding or modifying features:
-
-- Code should be well commented
-- Update relevant markdown files in `docs/`
-- Add examples for new features
-
-## Pull Request Process
-
-1. Ensure all tests pass
-2. Update documentation as needed
-3. Get at least one code review
-4. Once approved, a maintainer will merge your PR
-
-## Release Process
-
-Releases are managed by the core team using semantic versioning:
-
-- Major version: Breaking API changes
-- Minor version: New features, non-breaking changes
-- Patch version: Bug fixes and minor improvements
+### Built-in Prompts
+Please refer to the folder .github/prompts for pre-written prompts that will be helpful in developing Ingenious.
 
 ## Getting Help
 
-If you need help, you can:
-- Open an issue for questions
-- Reach out to the maintainers
+If you need help, you can reach out to the maintainers
 
 Thank you for contributing to Insight Ingenious!
