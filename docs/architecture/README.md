@@ -203,7 +203,7 @@ graph TD
 
 ### Storage Architecture
 
-The storage layer provides flexible, cloud-aware persistence and configuration management:
+The storage layer provides flexible, cloud-aware persistence and configuration management. For detailed information about chat history, memory persistence, and token counting, see the [Memory & Token Architecture](/architecture/memory-and-tokens/) documentation.
 
 ```mermaid
 graph TB
@@ -828,6 +828,7 @@ For detailed development instructions, see the [Development Guide](/development/
 ## Next Steps
 
 - Read the [Getting Started Guide](/getting-started/) to begin using the system
+- Review the [Memory & Token Architecture](/architecture/memory-and-tokens/) for detailed persistence mechanisms
 - Follow the [Development Guide](/development/) to start extending the framework
 - Check the [Configuration Guide](/getting-started/configuration) for setup details
 - Explore the [API Documentation](/api/) for integration options

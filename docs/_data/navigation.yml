@@ -29,6 +29,8 @@ docs:
     children:
       - title: "Architecture Overview"
         url: /architecture/
+      - title: "Memory & Token Architecture"
+        url: /architecture/memory-and-tokens/
       - title: "Development Setup"
         url: /development/
       - title: "Extensions & Customization"
