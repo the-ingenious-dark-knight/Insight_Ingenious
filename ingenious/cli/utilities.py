@@ -16,10 +16,8 @@ from typing import Any, Dict, List, Optional, Union
 from rich.console import Console
 from rich.panel import Panel
 from rich.progress import (
-    BarColumn,
     Progress,
     SpinnerColumn,
-    TaskProgressColumn,
     TextColumn,
 )
 from rich.table import Table
