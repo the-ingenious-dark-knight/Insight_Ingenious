@@ -380,46 +380,6 @@ class OutputFormatters:
         return table
 
 
-class ProgressUtils:
-    """Utilities for progress tracking and reporting."""
-
-    @staticmethod
-    def create_progress_bar(description: str = "Processing") -> Progress:
-        """
-        Create a standardized progress bar.
-
-        Args:
-            description: Progress description
-
-        Returns:
-            Rich Progress object
-        """
-        return Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            BarColumn(),
-            TaskProgressColumn(),
-            console=Console(),
-            transient=True,
-        )
-
-    @staticmethod
-    def create_simple_spinner(description: str = "Processing") -> Progress:
-        """
-        Create a simple spinner for indeterminate progress.
-
-        Args:
-            description: Progress description
-
-        Returns:
-            Rich Progress object
-        """
-        return Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            console=Console(),
-            transient=True,
-        )
 
 
 class ConfigUtils:
