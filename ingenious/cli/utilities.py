@@ -16,10 +16,8 @@ from typing import Any, Dict, List, Optional, Union
 from rich.console import Console
 from rich.panel import Panel
 from rich.progress import (
-    BarColumn,
     Progress,
     SpinnerColumn,
-    TaskProgressColumn,
     TextColumn,
 )
 from rich.table import Table
@@ -59,18 +57,6 @@ class CliFunctions:
         ChkPath = Path(get_paths()["purelib"]) / Path("ingenious/")
         return os.path.exists(ChkPath)
 
-    @staticmethod
-    def GetIncludeDir() -> Path:
-        """Get the include directory for the ingenious package."""
-        ChkPath = Path(get_paths()["purelib"]) / Path("ingenious/")
-        # print(ChkPath)
-        # Does Check for the path
-        if os.path.exists(ChkPath):
-            return ChkPath
-        else:
-            path = Path(os.getcwd()) / Path("ingenious/")
-            # print(str(path))
-            return path
 
     @staticmethod
     def copy_ingenious_folder(src: Union[str, Path], dst: Union[str, Path]) -> None:
@@ -228,29 +214,6 @@ class ValidationUtils:
         path = Path(file_path)
         return path.suffix.lower() in [ext.lower() for ext in expected_extensions]
 
-    @staticmethod
-    def validate_yaml_file(file_path: Union[str, Path]) -> tuple[bool, Optional[str]]:
-        """
-        Validate that a file is valid YAML.
-
-        Args:
-            file_path: Path to the YAML file
-
-        Returns:
-            Tuple of (is_valid, error_message)
-        """
-        try:
-            import yaml
-
-            with open(file_path, "r") as f:
-                yaml.safe_load(f)
-            return True, None
-        except yaml.YAMLError as e:
-            return False, f"Invalid YAML syntax: {e}"
-        except FileNotFoundError:
-            return False, "File not found"
-        except Exception as e:
-            return False, f"Unexpected error: {e}"
 
     @staticmethod
     def validate_port(port: Union[str, int]) -> tuple[bool, Optional[str]]:
@@ -356,70 +319,8 @@ class OutputFormatters:
         """
         return Panel(content, title=title, border_style=style)
 
-    @staticmethod
-    def format_command_list(
-        commands: List[Dict[str, str]], title: str = "Available Commands"
-    ) -> Table:
-        """
-        Format a list of commands as a table.
-
-        Args:
-            commands: List of command dictionaries with 'name' and 'description'
-            title: Table title
-
-        Returns:
-            Rich Table object
-        """
-        table = Table(title=title, show_header=True, header_style="bold blue")
-        table.add_column("Command", style="cyan bold", width=20)
-        table.add_column("Description", style="white")
-
-        for cmd in commands:
-            table.add_row(cmd.get("name", ""), cmd.get("description", ""))
-
-        return table
 
 
-class ProgressUtils:
-    """Utilities for progress tracking and reporting."""
-
-    @staticmethod
-    def create_progress_bar(description: str = "Processing") -> Progress:
-        """
-        Create a standardized progress bar.
-
-        Args:
-            description: Progress description
-
-        Returns:
-            Rich Progress object
-        """
-        return Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            BarColumn(),
-            TaskProgressColumn(),
-            console=Console(),
-            transient=True,
-        )
-
-    @staticmethod
-    def create_simple_spinner(description: str = "Processing") -> Progress:
-        """
-        Create a simple spinner for indeterminate progress.
-
-        Args:
-            description: Progress description
-
-        Returns:
-            Rich Progress object
-        """
-        return Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            console=Console(),
-            transient=True,
-        )
 
 
 class ConfigUtils:

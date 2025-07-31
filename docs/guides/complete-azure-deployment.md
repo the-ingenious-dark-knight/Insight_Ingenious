@@ -142,6 +142,8 @@ INGENIOUS_FILE_STORAGE__DATA__TOKEN=${AZURE_STORAGE_CONNECTION_STRING}
 INGENIOUS_FILE_STORAGE__DATA__AUTHENTICATION_METHOD=token
 ```
 
+> **⚠️ Important Configuration Gotcha**: The Azure files implementation checks for connection strings in the `TOKEN` field, not just the `AZURE_STORAGE_CONNECTION_STRING` environment variable. When using `AUTHENTICATION_METHOD=token`, you **must** set the `TOKEN` field to your Azure Storage connection string. Simply having `AZURE_STORAGE_CONNECTION_STRING` defined is not sufficient - the connection string must be explicitly passed through the `TOKEN` configuration field for each storage container.
+
 ### Step 6: Install ODBC Driver (if not already installed)
 
 #### macOS

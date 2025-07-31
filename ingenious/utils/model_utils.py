@@ -8,11 +8,6 @@ import yaml
 from pydantic import BaseModel
 
 
-class Output_Format(Enum):
-    Markdown = "Markdown"
-    Csv = "Csv"
-    Json = "Json"
-    Object = "Object"
 
 
 # Checks if a field is a non-complex field using the value

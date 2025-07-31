@@ -15,7 +15,10 @@
       "extensions": [
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
-        "eamodio.gitlens"
+        "eamodio.gitlens",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.debugpy"
       ],
       "settings": {
         "editor.formatOnSave": true,
@@ -31,6 +34,15 @@
           },
           "zsh": {
             "path": "zsh"
+          }
+        },
+        "python.defaultInterpreterPath": "/home/node/.local/share/uv/python",
+        "python.terminal.activateEnvironment": false,
+        "[python]": {
+          "editor.defaultFormatter": "ms-python.python",
+          "editor.formatOnSave": true,
+          "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
           }
         }
       }
@@ -48,5 +60,5 @@
   },
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=delegated",
   "workspaceFolder": "/workspace",
-  "postCreateCommand": "sudo /usr/local/bin/init-firewall.sh"
+  "postCreateCommand": "sudo /usr/local/bin/init-firewall.sh && uv sync --group dev"
 }

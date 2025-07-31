@@ -103,8 +103,6 @@ def register_commands(app: typer.Typer, console: Console) -> None:
             profile_dir=profile,
             host=host,
             port=port,
-            run_dir="",
-            enable_prompt_tuner=not no_prompt_tuner,
         )
 
     # Keep old command for backward compatibility
@@ -130,14 +128,6 @@ def register_commands(app: typer.Typer, console: Console) -> None:
             int,
             typer.Argument(help="The port to run the server on. Default is 80."),
         ] = 80,
-        run_dir: Annotated[
-            str,
-            typer.Argument(help="The directory in which to launch the web server."),
-        ] = "",
-        enable_prompt_tuner: Annotated[
-            bool,
-            typer.Option(help="Enable the prompt tuner interface. Default is True."),
-        ] = True,
     ) -> None:
         """
         Run a FastAPI server that presents your agent workflows via REST endpoints.

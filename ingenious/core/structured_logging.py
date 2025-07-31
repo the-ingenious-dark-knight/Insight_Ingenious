@@ -65,11 +65,6 @@ def add_performance_metrics(
     return event_dict
 
 
-def filter_by_level(logger: Any, method_name: str, event_dict: EventDict) -> EventDict:
-    """Filter logs based on configured level."""
-    return event_dict
-
-
 def setup_structured_logging(
     log_level: str = "INFO", json_output: bool = True, include_stdlib: bool = True
 ) -> None:
@@ -191,7 +186,7 @@ class PerformanceLogger:
         self.logger.info("Operation started", operation=self.operation, **self.context)
         return self
 
-    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+    def __exit__(self, exc_type: Any, exc_val: Any, _exc_tb: Any) -> None:
         if self.start_time:
             duration = time.time() - self.start_time
 
