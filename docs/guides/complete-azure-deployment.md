@@ -56,7 +56,6 @@ uv run ingen init
 This creates:
 - `.env.example` - Environment variable template
 - `ingenious_extensions/` - Bike-insights workflow
-- `templates/prompts/quickstart-1/` - Prompt templates
 
 ### Step 3: Configure Environment Variables
 
