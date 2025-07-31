@@ -195,7 +195,7 @@ async def setup_azure_prompts():
     from ingenious.files.files_repository import FileStorage
 
     config = get_config()
-    storage = FileStorage(config, "prompts")
+    storage = FileStorage(config, "revisions")
 
     source_templates = Path("templates/prompts/quickstart-1")
 
