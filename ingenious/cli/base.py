@@ -133,9 +133,6 @@ class BaseCommand(ABC):
         """Print an error message with consistent formatting."""
         self.console.print(f"❌ {message}", style="error")
 
-    def print_debug(self, message: str) -> None:
-        """Print a debug message with consistent formatting."""
-        self.console.print(f"🐛 {message}", style="debug")
 
     def start_progress(self, description: str = "Processing...") -> Progress:
         """
