@@ -28,8 +28,6 @@ class IChatHistoryRepository(ABC):
 
     MessageStepType = Literal["user_message", "assistant_message", "system_message"]
 
-
-
     ElementType = Literal[
         "image",
         "text",

@@ -413,7 +413,7 @@ Required templates for `bike-insights` workflow:
 - `user_proxy_prompt.jinja` (optional, but recommended)
 - `bike_lookup_agent_prompt.jinja`
 
-**Solution**: These templates exist in the local installation at `ingenious_extensions_template/templates/prompts/` but need to be copied to Azure Blob Storage for your specific revision ID. 
+**Solution**: These templates exist in the local installation at `ingenious_extensions_template/templates/prompts/` but need to be copied to Azure Blob Storage for your specific revision ID.
 
 **Quick Fix - Use the Upload Script**:
 ```bash

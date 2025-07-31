@@ -133,7 +133,6 @@ class BaseCommand(ABC):
         """Print an error message with consistent formatting."""
         self.console.print(f"❌ {message}", style="error")
 
-
     def start_progress(self, description: str = "Processing...") -> Progress:
         """
         Start a progress indicator.
@@ -247,8 +246,6 @@ class BaseCommand(ABC):
             )
 
         return env_values
-
-
 
 
 def create_console() -> Console:
