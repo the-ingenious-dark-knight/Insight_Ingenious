@@ -66,6 +66,16 @@ Get up and running in 5 minutes with Azure OpenAI!
     ```bash
     uv run ingen validate  # Check configuration before starting
     ```
+    
+    **If validation fails with port conflicts**:
+    ```bash
+    # Check if validation passes with different port
+    INGENIOUS_WEB_CONFIGURATION__PORT=8001 uv run ingen validate
+    
+    # Or update your .env file before validating:
+    echo "INGENIOUS_WEB_CONFIGURATION__PORT=8001" >> .env
+    uv run ingen validate
+    ```
 
     > **⚠️ BREAKING CHANGE**: Ingenious now uses **pydantic-settings** for configuration via environment variables. Legacy YAML configuration files (`config.yml`, `profiles.yml`) are **no longer supported** and must be migrated to environment variables with `INGENIOUS_` prefixes. Use the migration script:
     > ```bash
@@ -88,8 +98,37 @@ Get up and running in 5 minutes with Azure OpenAI!
 5. **Verify Health**:
     ```bash
     # Check server health
-    curl http://localhost:8000/api/v1/health
+    curl http://localhost:8001/api/v1/health
     ```
+
+### Common Issues
+
+#### Port Conflicts
+If you encounter "Address already in use" or validation fails with port conflicts:
+
+1. **Check what's using the port**:
+   ```bash
+   lsof -i :8000  # Check if port 8000 is in use
+   ```
+
+2. **Use a different port**:
+   ```bash
+   uv run ingen serve --port 8001  # Try port 8001 instead
+   ```
+
+3. **Set port via environment variable** (recommended):
+   ```bash
+   # Add to your .env file
+   INGENIOUS_WEB_CONFIGURATION__PORT=8001
+   ```
+
+4. **Update your test commands accordingly**:
+   ```bash
+   # Update health check
+   curl http://localhost:8001/api/v1/health
+   
+   # Update workflow tests (use the new port in all examples below)
+   ```
 
 6. **Test with Core Workflows**:
 
@@ -101,10 +140,17 @@ Get up and running in 5 minutes with Azure OpenAI!
     echo '{"user_prompt": "Show me all tables in the database", "conversation_flow": "sql-manipulation-agent"}' > test_sql.json
 
     # Test each workflow
-    curl -X POST http://localhost:8000/api/v1/chat -H "Content-Type: application/json" -d @test_classification.json
-    curl -X POST http://localhost:8000/api/v1/chat -H "Content-Type: application/json" -d @test_knowledge.json
-    curl -X POST http://localhost:8000/api/v1/chat -H "Content-Type: application/json" -d @test_sql.json
+    curl -X POST http://localhost:8001/api/v1/chat -H "Content-Type: application/json" -d @test_classification.json
+    curl -X POST http://localhost:8001/api/v1/chat -H "Content-Type: application/json" -d @test_knowledge.json
+    curl -X POST http://localhost:8001/api/v1/chat -H "Content-Type: application/json" -d @test_sql.json
     ```
+
+**Expected Responses**:
+- **Successful classification-agent response**: JSON with message analysis and categories
+- **Successful knowledge-base-agent response**: JSON with relevant information retrieved (may indicate empty knowledge base initially)
+- **Successful sql-manipulation-agent response**: JSON with query results or confirmation
+
+**If you see error responses**, check the troubleshooting section above or the detailed [troubleshooting guide](docs/getting-started/troubleshooting.md).
 
 That's it! You should see a JSON response with AI analysis of the input.
 
@@ -118,7 +164,8 @@ That's it! You should see a JSON response with AI analysis of the input.
     uv run ingen init
 
     # Create bike-insights test data file
-    # Note: bike-insights requires JSON data in the user_prompt field (double-encoded JSON)
+    # IMPORTANT: bike-insights requires JSON data in the user_prompt field (double-encoded JSON)
+    # The escaping can be error-prone, so we use a heredoc to avoid issues
     cat > test_bike_insights.json << 'EOF'
     {
       "user_prompt": "{\"revision_id\": \"test-v1\", \"identifier\": \"test-001\", \"stores\": [{\"name\": \"Test Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"MB-TREK-2021-XC\", \"quantity_sold\": 2, \"sale_date\": \"2023-04-01\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 4.5, \"comment\": \"Great bike\"}}], \"bike_stock\": []}]}",
@@ -127,8 +174,10 @@ That's it! You should see a JSON response with AI analysis of the input.
     EOF
 
     # Test bike-insights workflow
-    curl -X POST http://localhost:8000/api/v1/chat -H "Content-Type: application/json" -d @test_bike_insights.json
+    curl -X POST http://localhost:8001/api/v1/chat -H "Content-Type: application/json" -d @test_bike_insights.json
     ```
+
+    **Expected bike-insights response**: JSON with comprehensive bike sales analysis from multiple agents (fiscal analysis, customer sentiment, summary, and bike lookup).
 
 **Important Notes**:
 - **Core Library Workflows** (`classification-agent`, `knowledge-base-agent`, `sql-manipulation-agent`) are always available and accept simple text prompts
@@ -161,6 +210,17 @@ These workflows are provided as examples in the project template when you run `i
 - **Azure integrations**: Azure Search for knowledge base, Azure SQL for database queries - fully supported with proper configuration
 
 > **Note**: Both local (ChromaDB, SQLite) and Azure (Azure Search, Azure SQL) implementations are production-ready. Choose based on your infrastructure requirements. Use `uv run ingen workflows` to check configuration requirements for each workflow.
+
+## Troubleshooting
+
+For common issues like port conflicts, configuration errors, or workflow problems, see the [detailed troubleshooting guide](docs/getting-started/troubleshooting.md).
+
+**Quick fixes for common issues**:
+- **Port conflicts**: Use `--port 8001` or set `INGENIOUS_WEB_CONFIGURATION__PORT=8001` in .env
+- **JSON escaping errors**: Use file-based approach with heredoc as shown in bike-insights example above
+- **Validation failures**: Check the troubleshooting guide for specific error solutions
+- **Workflow not found**: Ensure you've run `uv run ingen init` for template workflows like bike-insights
+- **Azure OpenAI connection issues**: Verify your API key, endpoint, and deployment name in .env file
 
 ## Documentation
 
