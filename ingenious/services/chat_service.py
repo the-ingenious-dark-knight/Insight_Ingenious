@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import AsyncIterator, Union
+from typing import Any, AsyncIterator, Union
 
 from ingenious.config.main_settings import IngeniousSettings
 from ingenious.core.error_handling import operation_context
@@ -16,20 +16,22 @@ logger = get_logger(__name__)
 
 
 class IChatService(ABC):
-    service_class = None
+    service_class: Any = None
 
     @abstractmethod
     async def get_chat_response(self, chat_request: ChatRequest) -> ChatResponse:
         pass
 
     @abstractmethod
-    async def get_streaming_chat_response(
+    def get_streaming_chat_response(
         self, chat_request: ChatRequest
     ) -> AsyncIterator[ChatResponseChunk]:
         pass
 
 
 class ChatService(IChatService):
+    service_class: Any  # Will be set to instantiated service class
+
     def __init__(
         self,
         chat_service_type: str,

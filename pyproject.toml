@@ -193,6 +193,11 @@ strict = true
 namespace_packages = true
 explicit_package_bases = true
 
+# Exclude test_dir and its subdirectories from type checking
+exclude = [
+    "test_dir/.*",
+]
+
 # Plugins
 plugins = ["pydantic.mypy"]
 

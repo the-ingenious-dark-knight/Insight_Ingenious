@@ -124,10 +124,12 @@ class ExceptionHandlers:
     ) -> JSONResponse:
         """Handle FastAPI validation errors with structured format."""
         # Generate user-friendly error message based on the specific error
-        user_message, recovery_suggestion = ExceptionHandlers._generate_user_friendly_validation_message(
-            exc, str(request.url.path)
+        user_message, recovery_suggestion = (
+            ExceptionHandlers._generate_user_friendly_validation_message(
+                exc, str(request.url.path)
+            )
         )
-        
+
         # Create structured validation error
         validation_error = RequestValidationError(
             "Request validation failed",
@@ -171,43 +173,43 @@ class ExceptionHandlers:
     ) -> tuple[str, str]:
         """Generate user-friendly error messages for validation errors."""
         errors = exc.errors() if hasattr(exc, "errors") else []
-        
+
         # Handle bike-insights specific JSON validation errors
         if "/api/v1/chat" in request_path:
             for error in errors:
                 error_type = error.get("type", "")
                 error_msg = error.get("msg", "")
                 error_loc = error.get("loc", [])
-                
+
                 # JSON decode errors
                 if "json_invalid" in error_type or "JSON decode error" in error_msg:
                     if "Extra data" in str(error.get("ctx", {})):
                         return (
                             "Invalid JSON format detected. This commonly happens when there are extra characters or formatting issues in your JSON data.",
-                            "For bike-insights workflow: Use the corrected file creation method from the README. Avoid heredoc if it's adding extra EOF lines. Try: printf '%s\\n' '{\"user_prompt\": \"...\", \"conversation_flow\": \"bike-insights\"}' > test_file.json"
+                            'For bike-insights workflow: Use the corrected file creation method from the README. Avoid heredoc if it\'s adding extra EOF lines. Try: printf \'%s\\n\' \'{"user_prompt": "...", "conversation_flow": "bike-insights"}\' > test_file.json',
                         )
                     else:
                         return (
                             "JSON parsing failed. Your request contains malformed JSON.",
-                            "Check for: missing quotes, trailing commas, unescaped characters, or extra brackets. For bike-insights, ensure the user_prompt contains properly escaped JSON data."
+                            "Check for: missing quotes, trailing commas, unescaped characters, or extra brackets. For bike-insights, ensure the user_prompt contains properly escaped JSON data.",
                         )
-                
+
                 # Missing required fields
                 elif "missing" in error_type:
                     field_name = error_loc[-1] if error_loc else "field"
                     return (
                         f"Required field '{field_name}' is missing from your request.",
-                        f"Add the missing '{field_name}' field to your JSON request. For chat requests, ensure both 'user_prompt' and 'conversation_flow' are provided."
+                        f"Add the missing '{field_name}' field to your JSON request. For chat requests, ensure both 'user_prompt' and 'conversation_flow' are provided.",
                     )
-                
+
                 # Type validation errors
                 elif "type_error" in error_type:
                     field_name = error_loc[-1] if error_loc else "field"
                     return (
                         f"Field '{field_name}' has an incorrect data type.",
-                        f"Check that '{field_name}' matches the expected format. For conversation_flow, use a string like 'bike-insights' or 'classification-agent'."
+                        f"Check that '{field_name}' matches the expected format. For conversation_flow, use a string like 'bike-insights' or 'classification-agent'.",
                     )
-        
+
         # Handle prompts API validation errors
         elif "/api/v1/prompts/" in request_path:
             for error in errors:
@@ -215,25 +217,25 @@ class ExceptionHandlers:
                 if "missing" in error_type:
                     return (
                         "Missing required content field for prompt update.",
-                        "Include a 'content' field in your JSON request body with the new prompt content as a string."
+                        "Include a 'content' field in your JSON request body with the new prompt content as a string.",
                     )
-        
+
         # Generic fallback for other validation errors
         if errors:
             first_error = errors[0]
             error_msg = first_error.get("msg", "")
             error_loc = first_error.get("loc", [])
             field_name = error_loc[-1] if error_loc else "field"
-            
+
             return (
                 f"Validation error in '{field_name}': {error_msg}",
-                "Check the API documentation for the correct request format and ensure all required fields are provided."
+                "Check the API documentation for the correct request format and ensure all required fields are provided.",
             )
-        
+
         # Final fallback
         return (
             "Invalid request format. Please check your input data.",
-            "Verify your JSON structure matches the API requirements and all required fields are present."
+            "Verify your JSON structure matches the API requirements and all required fields are present.",
         )
 
     @staticmethod
