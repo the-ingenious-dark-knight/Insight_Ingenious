@@ -355,20 +355,22 @@ class multi_agent_chat_service:
         self, chat_request: IChatRequest
     ) -> AsyncIterator[ChatResponseChunk]:
         """Stream chat response chunks in real-time."""
+        if not chat_request.conversation_flow:
+            raise ValueError(f"conversation_flow not set {chat_request}")
+            
         logger.debug(
             "Starting streaming chat response",
-            conversation_flow=self.conversation_flow,
+            conversation_flow=chat_request.conversation_flow,
             thread_id=chat_request.thread_id,
         )
 
-        normalized_flow = normalize_workflow_name(self.conversation_flow)
+        normalized_flow = normalize_workflow_name(chat_request.conversation_flow)
 
         try:
             # Import the conversation flow class dynamically
             conversation_flow_service_class = import_class_with_fallback(
-                f"services.chat_services.multi_agent.conversation_flows.{normalized_flow}",
+                f"services.chat_services.multi_agent.conversation_flows.{normalized_flow}.{normalized_flow}",
                 "ConversationFlow",
-                fallback_module="ingenious_extensions_template.services.chat_services.multi_agent",
             )
 
             # Check if the conversation flow supports streaming
@@ -407,7 +409,7 @@ class multi_agent_chat_service:
                 # Fallback: convert regular response to streaming chunks
                 logger.info(
                     "Conversation flow does not support streaming, falling back to chunked response",
-                    conversation_flow=self.conversation_flow,
+                    conversation_flow=chat_request.conversation_flow,
                 )
 
                 # Get regular response and convert to chunks
