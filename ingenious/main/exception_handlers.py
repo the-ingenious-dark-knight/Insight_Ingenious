@@ -123,6 +123,11 @@ class ExceptionHandlers:
         request: Request, exc: FastAPIValidationError
     ) -> JSONResponse:
         """Handle FastAPI validation errors with structured format."""
+        # Generate user-friendly error message based on the specific error
+        user_message, recovery_suggestion = ExceptionHandlers._generate_user_friendly_validation_message(
+            exc, str(request.url.path)
+        )
+        
         # Create structured validation error
         validation_error = RequestValidationError(
             "Request validation failed",
@@ -132,7 +137,8 @@ class ExceptionHandlers:
                 "validation_errors": exc.errors() if hasattr(exc, "errors") else [],
                 "request_body": getattr(exc, "body", None),
             },
-            user_message="Invalid request format. Please check your input data.",
+            user_message=user_message,
+            recovery_suggestion=recovery_suggestion,
         )
 
         logger.warning(

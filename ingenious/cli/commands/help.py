@@ -645,29 +645,39 @@ class ValidateCommand(BaseCommand):
 
                     # Check core workflows import
                     import importlib.util
-                    
+
                     core_workflows = [
                         "classification_agent",
-                        "knowledge_base_agent", 
-                        "sql_manipulation_agent"
+                        "knowledge_base_agent",
+                        "sql_manipulation_agent",
                     ]
-                    
+
                     for workflow in core_workflows:
                         try:
                             spec = importlib.util.find_spec(
                                 f"ingenious.services.chat_services.multi_agent.conversation_flows.{workflow}"
                             )
                             if spec is not None:
-                                self.console.print(f"    ✅ {workflow.replace('_', '-')}: Available")
+                                self.console.print(
+                                    f"    ✅ {workflow.replace('_', '-')}: Available"
+                                )
                                 workflows_working += 1
                             else:
-                                self.console.print(f"    ❌ {workflow.replace('_', '-')}: Not found")
-                                issues.append(f"{workflow.replace('_', '-')} workflow not found")
+                                self.console.print(
+                                    f"    ❌ {workflow.replace('_', '-')}: Not found"
+                                )
+                                issues.append(
+                                    f"{workflow.replace('_', '-')} workflow not found"
+                                )
                             workflows_checked += 1
                         except ImportError as e:
-                            self.console.print(f"    ❌ {workflow.replace('_', '-')}: Import failed")
+                            self.console.print(
+                                f"    ❌ {workflow.replace('_', '-')}: Import failed"
+                            )
                             workflows_checked += 1
-                            issues.append(f"{workflow.replace('_', '-')} import failed: {e}")
+                            issues.append(
+                                f"{workflow.replace('_', '-')} import failed: {e}"
+                            )
 
                     self.console.print(
                         f"    📊 Workflows status: {workflows_working}/{workflows_checked} working"
