@@ -186,7 +186,7 @@ class PerformanceLogger:
         self.logger.info("Operation started", operation=self.operation, **self.context)
         return self
 
-    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+    def __exit__(self, exc_type: Any, exc_val: Any, _exc_tb: Any) -> None:
         if self.start_time:
             duration = time.time() - self.start_time
 
