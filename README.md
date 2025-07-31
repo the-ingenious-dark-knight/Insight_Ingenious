@@ -22,6 +22,9 @@ Get up and running in 5 minutes with Azure OpenAI!
     # Navigate to your desired project directory first
     cd /path/to/your/project
 
+    # Set up the uv project
+    uv init
+
     # Choose installation based on features needed
     uv add ingenious[standard] # Most common: includes SQL agent support (core, auth, ai, database)
     # OR

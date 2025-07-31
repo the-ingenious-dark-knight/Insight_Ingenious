@@ -30,6 +30,9 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 ### Install from PyPI
 
 ```bash
+# Initialize uv project
+uv init
+
 # Using uv (recommended)
 uv add ingenious
 
