@@ -5,6 +5,7 @@ from autogen_agentchat.agents import AssistantAgent
 from autogen_agentchat.messages import TextMessage
 from autogen_core import EVENT_LOGGER_NAME, CancellationToken
 from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
+from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 
 import ingenious.config.config as config
 from ingenious.models.agent import LLMUsageTracker
@@ -67,13 +68,27 @@ class ConversationFlow:
                 )
 
         # Configure Azure OpenAI client for v0.4
-        azure_config = {
-            "model": model_config.model,
-            "api_key": model_config.api_key,
-            "azure_endpoint": model_config.base_url,
-            "azure_deployment": model_config.deployment or model_config.model,
-            "api_version": model_config.api_version,
-        }
+        azure_config = {}
+        if model_config.authentication_mode == "default_credential":
+            # %%
+            token_provider = get_bearer_token_provider(
+                DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default"
+            )
+            azure_config = {
+                "model": model_config.model,
+                "azure_endpoint": model_config.base_url,
+                "azure_deployment": model_config.deployment or model_config.model,
+                "api_version": model_config.api_version,
+                "azure_ad_token_provider": token_provider,
+            }
+        else:
+            azure_config = {
+                "model": model_config.model,
+                "api_key": model_config.api_key,
+                "azure_endpoint": model_config.base_url,
+                "azure_deployment": model_config.deployment or model_config.model,
+                "api_version": model_config.api_version,
+            }
 
         # Create the model client
         model_client = AzureOpenAIChatCompletionClient(**azure_config)
