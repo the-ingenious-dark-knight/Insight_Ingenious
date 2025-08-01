@@ -19,3 +19,23 @@ def sample_md(tmp_path_factory):
 @pytest.fixture(scope="session")
 def unicode_text():
     return _SAMPLE_UNICODE
+
+@pytest.fixture(scope="session")
+def tiny_chunks_jsonl(tmp_path_factory):
+    from ingenious.chunk.config import ChunkConfig
+    from ingenious.chunk.factory import build_splitter
+
+    # Use a sample text and config matching the test
+    text = "A " * 1000  # or any text that will produce multiple chunks
+    cfg = ChunkConfig(strategy="token", chunk_size=20, chunk_overlap=10)
+    splitter = build_splitter(cfg)
+    chunks = splitter.split_text(text)
+
+    # Write chunks to file in the expected format
+    p = tmp_path_factory.mktemp("data for tiny chunks") / "tiny_chunks.jsonl"
+    with p.open("w", encoding="utf-8") as f:
+        for i, chunk in enumerate(chunks):
+            rec = {"text": chunk, "meta": {"page": 0}}
+            import json
+            f.write(json.dumps(rec) + "\n")
+    return p

@@ -12,8 +12,8 @@ def _load(path: Path):
     with path.open(encoding="utf-8") as fp:
         return [json.loads(line) for line in fp]
 
-def test_chunk_size_and_overlap():
-    recs = _load(Path("tiny_chunks.jsonl"))
+def test_chunk_size_and_overlap(tiny_chunks_jsonl):
+    recs = _load(tiny_chunks_jsonl)
 
     # 1️⃣ every chunk ≤ 31 tokens
     assert all(len(ENC.encode(r["text"])) <= HARD_CAP for r in recs)
