@@ -203,7 +203,7 @@ graph TD
 
 ### Storage Architecture
 
-The storage layer provides flexible, cloud-aware persistence and configuration management. For detailed information about chat history, memory persistence, and token counting, see the [Memory & Token Architecture](/architecture/memory-and-tokens/) documentation.
+The storage layer provides flexible, cloud-aware persistence and configuration management. For detailed information about chat history, memory persistence, and token counting, see the [Memory & Token Architecture](./memory-and-tokens.md) documentation.
 
 ```mermaid
 graph TB
@@ -823,13 +823,13 @@ flow_class = import_class_with_fallback(
 6. **Performance**: Consider performance implications of custom code
 7. **Compatibility**: Ensure backward compatibility when possible
 
-For detailed development instructions, see the [Development Guide](/development/).
+For detailed development instructions, see the [Development Guide](../development/README.md).
 
 ## Next Steps
 
-- Read the [Getting Started Guide](/getting-started/) to begin using the system
-- Review the [Memory & Token Architecture](/architecture/memory-and-tokens/) for detailed persistence mechanisms
-- Explore the [Streaming Responses Architecture](/architecture/streaming-responses/) for real-time response capabilities
-- Follow the [Development Guide](/development/) to start extending the framework
-- Check the [Configuration Guide](/getting-started/configuration) for setup details
-- Explore the [API Documentation](/api/) for integration options
+- Read the [Getting Started Guide](../getting-started/README.md) to begin using the system
+- Review the [Memory & Token Architecture](./memory-and-tokens.md) for detailed persistence mechanisms
+- Explore the [Streaming Responses Architecture](./streaming-responses.md) for real-time response capabilities
+- Follow the [Development Guide](../development/README.md) to start extending the framework
+- Check the [Configuration Guide](../getting-started/configuration.md) for setup details
+- Explore the [API Documentation](../api/README.md) for integration options
