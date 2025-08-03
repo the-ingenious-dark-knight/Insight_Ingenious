@@ -304,3 +304,8 @@ filterwarnings = [
   "ignore::PendingDeprecationWarning",
   "ignore:.*(SwigPy|swigvarlink).* has no __module__ attribute:DeprecationWarning",
 ]
+
+[tool.uv.workspace]
+members = [
+    "test_dir",
+]
