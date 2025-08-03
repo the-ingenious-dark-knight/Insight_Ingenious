@@ -1,6 +1,6 @@
 import re
 
-from azure.identity import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 from openai import NOT_GIVEN, AzureOpenAI, BadRequestError
 from openai.types.chat import (
     ChatCompletionMessage,
@@ -28,17 +28,18 @@ class OpenAIService:
     ):
         if authentication_mode == AuthenticationMethod.DEFAULT_CREDENTIAL:
             try:
-                credential = DefaultAzureCredential()
-                token = credential.get_token(
-                    "https://cognitiveservices.azure.com/.default"
-                ).token
+                token_provider = get_bearer_token_provider(
+                    DefaultAzureCredential(),
+                    "https://cognitiveservices.azure.com/.default",
+                )
 
                 self.client = AzureOpenAI(
                     azure_endpoint=azure_endpoint,
                     api_version=api_version,
-                    azure_ad_token=token,
+                    azure_ad_token_provider=token_provider,
                     azure_deployment=deployment,
                 )
+
                 logger.info(
                     "AzureOpenAI client initialized successfully with custom token provider"
                 )
@@ -46,9 +47,11 @@ class OpenAIService:
                 logger.error(
                     f"Failed to initialize AzureOpenAI with DefaultAzureCredential: {e}"
                 )
+
                 logger.error(
                     "Available authentication methods: Azure CLI, Managed Identity, Environment Variables"
                 )
+
                 logger.error(
                     "Make sure you're logged in with 'az login' or have proper environment variables set"
                 )
