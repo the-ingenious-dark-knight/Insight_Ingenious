@@ -1,6 +1,6 @@
 [project]
 name = "ingenious"
-version = "0.2.1"
+version = "0.2.2"
 description = "An enterprise-grade Python library for quickly setting up APIs to interact with AI Agents"
 readme = "README.md"
 license = { text = "MIT" }
@@ -194,9 +194,7 @@ namespace_packages = true
 explicit_package_bases = true
 
 # Exclude test_dir and its subdirectories from type checking
-exclude = [
-    "test_dir/.*",
-]
+exclude = ["test_dir/.*"]
 
 # Plugins
 plugins = ["pydantic.mypy"]
@@ -306,6 +304,4 @@ filterwarnings = [
 ]
 
 [tool.uv.workspace]
-members = [
-    "test_dir",
-]
+members = ["test_dir"]
