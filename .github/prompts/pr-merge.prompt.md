@@ -27,12 +27,12 @@ You are an expert GitHub repository manager and Python developer. Your task is t
    a. **Test Suite**: Run `uv run pytest`
    - If tests fail, analyze the failures and fix them
    - Re-run tests until they pass
-   
+
    b. **Linting and Formatting**: Run `uv run pre-commit run --all-files`
    - Fix any linting errors (code style, unused imports, etc.)
    - Fix any formatting issues
    - Re-run until all checks pass
-   
+
    c. **Type Safety**: Run `uv run mypy .`
    - Fix any type annotation issues
    - Add missing type hints where needed
