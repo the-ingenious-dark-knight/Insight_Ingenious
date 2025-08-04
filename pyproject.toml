@@ -38,6 +38,7 @@ dependencies = [
   "openai>=1.82.0",
   "pandas>=2.3.1",
   "passlib>=1.7.4",
+  "psutil>=7.0.0",
   "pydantic==2.11.5",
   "pydantic-settings>=2.10.1",
   "pyodbc>=5.2.0",
