@@ -2,6 +2,7 @@
 
 [![Version](https://img.shields.io/badge/version-0.2.1-blue.svg)](https://github.com/Insight-Services-APAC/ingenious)
 [![Python](https://img.shields.io/badge/python-3.13+-green.svg)](https://www.python.org/downloads/)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Insight-Services-APAC/ingenious)
 [![License](https://img.shields.io/badge/license-MIT-purple.svg)](LICENSE)
 
 An enterprise-grade Python library for quickly setting up APIs to interact with AI Agents. Features multi-agent conversation flows using Microsoft's AutoGen, JWT authentication, and comprehensive Azure service integrations with support for both cloud and local implementations.
