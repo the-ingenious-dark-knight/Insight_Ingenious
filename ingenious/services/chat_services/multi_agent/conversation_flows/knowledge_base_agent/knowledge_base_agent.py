@@ -5,9 +5,10 @@ import uuid
 from autogen_agentchat.agents import AssistantAgent
 from autogen_core import EVENT_LOGGER_NAME, CancellationToken
 from autogen_core.tools import FunctionTool
-from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
-from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 
+from ingenious.common.utils.azure_openai_client_factory import (
+    create_azure_openai_chat_completion_client_with_model_config,
+)
 from ingenious.models.agent import LLMUsageTracker
 from ingenious.models.chat import ChatRequest, ChatResponse
 from ingenious.services.chat_services.multi_agent.service import IConversationFlow
@@ -68,31 +69,10 @@ class ConversationFlow(IConversationFlow):
             except Exception as e:
                 logger.warning(f"Failed to retrieve thread memory: {e}")
 
-        # Configure Azure OpenAI client for v0.4
-        azure_config = {}
-        if model_config.authentication_mode == "default_credential":
-            # %%
-            token_provider = get_bearer_token_provider(
-                DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default"
-            )
-            azure_config = {
-                "model": model_config.model,
-                "azure_endpoint": model_config.base_url,
-                "azure_deployment": model_config.deployment or model_config.model,
-                "api_version": model_config.api_version,
-                "azure_ad_token_provider": token_provider,
-            }
-        else:
-            azure_config = {
-                "model": model_config.model,
-                "api_key": model_config.api_key,
-                "azure_endpoint": model_config.base_url,
-                "azure_deployment": model_config.deployment or model_config.model,
-                "api_version": model_config.api_version,
-            }
-
         # Create the model client
-        model_client = AzureOpenAIChatCompletionClient(**azure_config)
+        model_client = create_azure_openai_chat_completion_client_with_model_config(
+            model_config
+        )
 
         # Check if Azure Search is configured
         use_azure_search = (

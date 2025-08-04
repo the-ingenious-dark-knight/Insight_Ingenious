@@ -38,7 +38,7 @@ Get up and running in 5 minutes with Azure OpenAI!
     ```bash
     # Create .env file in current directory
     touch .env
-    
+
     # Edit .env file with your actual credentials
     ```
 

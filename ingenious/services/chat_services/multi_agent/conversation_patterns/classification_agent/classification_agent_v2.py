@@ -2,9 +2,10 @@ from typing import Tuple, cast
 
 from autogen_agentchat.agents import AssistantAgent, UserProxyAgent
 from autogen_agentchat.teams import RoundRobinGroupChat
-from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
-from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 
+from ingenious.common.utils import (
+    create_azure_openai_chat_completion_client_with_custom_config,
+)
 from ingenious.config import get_config
 from ingenious.core.structured_logging import get_logger
 from ingenious.models.config import Config
@@ -28,35 +29,21 @@ class ConversationPattern:
         self.thread_memory = thread_memory
         self.context = ""
 
-        # Configure Azure OpenAI client for v0.4
-        azure_config = {}
-        if str(default_llm_config["authentication_mode"]) == "default_credential":
-            # %%
-            token_provider = get_bearer_token_provider(
-                DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default"
-            )
-            azure_config = {
-                "model": str(default_llm_config["model"]),
-                "azure_endpoint": str(default_llm_config["base_url"]),
-                "azure_deployment": str(
-                    default_llm_config["deployment"] or default_llm_config["model"]
-                ),
-                "api_version": str(default_llm_config["api_version"]),
-                "azure_ad_token_provider": token_provider,
-            }
-        else:
-            azure_config = {
-                "model": str(default_llm_config["model"]),
-                "api_key": str(default_llm_config["api_key"]),
-                "azure_endpoint": str(default_llm_config["base_url"]),
-                "azure_deployment": str(
-                    default_llm_config["deployment"] or default_llm_config["model"]
-                ),
-                "api_version": str(default_llm_config["api_version"]),
-            }
-
         # Create Azure OpenAI model client from config
-        self.model_client = AzureOpenAIChatCompletionClient(**azure_config)
+        self.model_client = (
+            create_azure_openai_chat_completion_client_with_custom_config(
+                model=str(self.default_llm_config["model"]),
+                base_url=str(self.default_llm_config["base_url"]),
+                api_version=str(self.default_llm_config["api_version"]),
+                deployment=str(self.default_llm_config.get("deployment")),
+                authentication_mode=str(
+                    self.default_llm_config.get(
+                        "authentication_mode", "default_credential"
+                    )
+                ),
+                api_key=str(self.default_llm_config.get("api_key", "")),
+            )
+        )
 
         # Initialize memory manager for cloud storage support
         from ingenious.services.memory_manager import (

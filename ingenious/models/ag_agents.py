@@ -13,9 +13,10 @@ from autogen_core.models import (
     SystemMessage,
     UserMessage,
 )
-from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
-from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 
+from ingenious.common.utils import (
+    create_azure_openai_chat_completion_client_with_model_config,
+)
 from ingenious.models.agent import (
     Agent,
     AgentChat,
@@ -29,29 +30,11 @@ class RoutedAssistantAgent(RoutedAgent, ABC):
     ) -> None:
         super().__init__(agent.agent_name)
 
-        azure_config = {}
-        if agent.model.authentication_mode == "default_credential":
-            # %%
-            token_provider = get_bearer_token_provider(
-                DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default"
-            )
-            azure_config = {
-                "model": agent.model.model,
-                "azure_endpoint": agent.model.base_url,
-                "azure_deployment": agent.model.deployment or agent.model.model,
-                "api_version": agent.model.api_version,
-                "azure_ad_token_provider": token_provider,
-            }
-        else:
-            azure_config = {
-                "model": agent.model.model,
-                "api_key": agent.model.api_key,
-                "azure_endpoint": agent.model.base_url,
-                "azure_deployment": agent.model.deployment or agent.model.model,
-                "api_version": agent.model.api_version,
-            }
+        # Create the Azure OpenAI client using the provided model configuration
+        self._model_client = (
+            create_azure_openai_chat_completion_client_with_model_config(agent.model)
+        )
 
-        self._model_client = AzureOpenAIChatCompletionClient(**azure_config)
         assistant_agent = AssistantAgent(
             name=agent.agent_name,
             system_message=agent.system_prompt,
@@ -201,29 +184,9 @@ class RoutedResponseOutputAgent(RoutedAgent, ABC):
         super().__init__(agent.agent_name)
         self._next_agent_topic = next_agent_topic
 
-        azure_config = {}
-        if agent.model.authentication_mode == "default_credential":
-            # %%
-            token_provider = get_bearer_token_provider(
-                DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default"
-            )
-            azure_config = {
-                "model": agent.model.model,
-                "azure_endpoint": agent.model.base_url,
-                "azure_deployment": agent.model.deployment or agent.model.model,
-                "api_version": agent.model.api_version,
-                "azure_ad_token_provider": token_provider,
-            }
-        else:
-            azure_config = {
-                "model": agent.model.model,
-                "api_key": agent.model.api_key,
-                "azure_endpoint": agent.model.base_url,
-                "azure_deployment": agent.model.deployment or agent.model.model,
-                "api_version": agent.model.api_version,
-            }
-
-        model_client = AzureOpenAIChatCompletionClient(**azure_config)
+        model_client = create_azure_openai_chat_completion_client_with_model_config(
+            agent.model
+        )
         assistant_agent = AssistantAgent(
             name=agent.agent_name,
             system_message=agent.system_prompt,
