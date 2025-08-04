@@ -41,7 +41,7 @@ class ModelSettings(BaseModel):
     Supports Azure OpenAI, OpenAI, and other compatible endpoints.
     """
 
-    model: str = Field(..., description="Model name (e.g., 'gpt-4', 'gpt-3.5-turbo')")
+    model: str = Field(..., description="Model name (e.g., 'gpt-4.1-nano', 'gpt-3.5-turbo')")
     api_type: str = Field("rest", description="API type: 'rest' for HTTP APIs")
     api_version: str = Field(
         "2023-03-15-preview", description="API version for Azure OpenAI"

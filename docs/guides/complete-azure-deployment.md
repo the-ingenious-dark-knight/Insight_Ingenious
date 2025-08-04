@@ -72,7 +72,7 @@ Update `.env` with your Azure credentials:
 # REQUIRED: Azure OpenAI Configuration
 # =============================================================================
 # Using nested environment variables format (recommended)
-INGENIOUS_MODELS__0__MODEL=gpt-4
+INGENIOUS_MODELS__0__MODEL=gpt-4.1-nano
 INGENIOUS_MODELS__0__API_TYPE=rest
 INGENIOUS_MODELS__0__API_VERSION=2024-12-01-preview
 INGENIOUS_MODELS__0__DEPLOYMENT=your-gpt4-deployment-name
@@ -458,7 +458,7 @@ az containerapp create \
   --env-vars \
     "INGENIOUS_MODELS__0__API_KEY=secretref:azure-openai-key" \
     "INGENIOUS_MODELS__0__BASE_URL=https://your-openai.openai.azure.com/" \
-    "INGENIOUS_MODELS__0__MODEL=gpt-4" \
+    "INGENIOUS_MODELS__0__MODEL=gpt-4.1-nano" \
     "INGENIOUS_CHAT_HISTORY__DATABASE_TYPE=azuresql" \
     "INGENIOUS_AZURE_SQL_SERVICES__DATABASE_CONNECTION_STRING=secretref:azure-sql-connection" \
     "INGENIOUS_FILE_STORAGE__REVISIONS__STORAGE_TYPE=azure" \
@@ -500,7 +500,7 @@ properties:
           - name: INGENIOUS_MODELS__0__BASE_URL
             value: "https://your-openai.openai.azure.com/"
           - name: INGENIOUS_MODELS__0__MODEL
-            value: "gpt-4"
+            value: "gpt-4.1-nano"
           - name: INGENIOUS_MODELS__0__API_VERSION
             value: "2024-12-01-preview"
           - name: INGENIOUS_MODELS__0__DEPLOYMENT
