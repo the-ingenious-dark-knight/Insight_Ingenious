@@ -162,7 +162,9 @@ class TestModelSettings:
     def test_invalid_base_url_format(self):
         """Test that invalid URL formats are rejected."""
         with pytest.raises(ValidationError, match="Base URL must start with"):
-            ModelSettings(model="gpt-4.1-nano", api_key="valid-key", base_url="invalid-url")
+            ModelSettings(
+                model="gpt-4.1-nano", api_key="valid-key", base_url="invalid-url"
+            )
 
     def test_empty_values_allowed(self):
         """Test that empty strings are allowed for development."""
