@@ -7,7 +7,7 @@ out‑of‑memory crashes on memory‑constrained workers.
 
 Highlights
 ----------
-* Files ≤ ``_STREAM_THRESHOLD`` (10 MiB by default) still use the fast
+* Files ≤ _STREAM_THRESHOLD (10 MiB by default) still use the fast
   ``json.loads`` eager path – zero behaviour change for small inputs.
 * Larger JSON is parsed incrementally **iff** the optional `ijson`
   dependency is present (included in the ``[chunk]`` extra).
@@ -35,13 +35,13 @@ except ModuleNotFoundError:  # pragma: no cover
 # --------------------------------------------------------------------------- #
 # Loader helpers                                                              #
 # --------------------------------------------------------------------------- #
-_STREAM_THRESHOLD = int(os.getenv("INGEN_JSON_STREAM_THRESHOLD", 10 << 20))  # 10 MiB
+_STREAM_THRESHOLD = int(os.getenv("INGEN_JSON_STREAM_THRESHOLD", 10 << 20))  # 10 MiB
 
 
 class _Mode(enum.Enum):
-    SMALL = "small"      # eager json.load
-    STREAM = "stream"    # incremental parse via ijson
-    FAIL = "fail"        # large but no ijson – raise
+    SMALL = "small"  # eager json.load
+    STREAM = "stream"  # incremental parse via ijson
+    FAIL = "fail"  # large but no ijson – raise
 
 
 def _iter_files(pattern: str) -> Iterable[Path]:
@@ -98,7 +98,7 @@ def _stream_object(path: Path):
         }
 
     Each value is treated as an independent *record* and fed through the
-    standard ``_extract_text`` helper.  This keeps peak RSS bounded to
+    standard ``_extract_text`` helper. This keeps peak RSS bounded to
     roughly the size of the **largest value**, not the entire file.
     """
     if ijson is None:  # pragma: no cover – guardian; callers check earlier
@@ -115,7 +115,7 @@ def _stream_object(path: Path):
                     txt,
                     metadata={
                         "source": str(path),
-                        "page": idx,      # preserve page semantics
+                        "page": idx,  # preserve page semantics
                     },
                 )
 
@@ -123,7 +123,7 @@ def _stream_object(path: Path):
 def _root_char(path: Path) -> str:
     """Return the first non‑whitespace character of the file."""
     with path.open("rb") as fp:
-        while (b := fp.read(1)):
+        while b := fp.read(1):
             ch = chr(b[0])
             if not ch.isspace():
                 return ch
@@ -136,7 +136,7 @@ def _root_char(path: Path) -> str:
 def _parse_jsonl(path: Path) -> Iterator[Document]:
     with jsonlines.open(path) as rdr:
         for i, rec in enumerate(rdr):
-            if (txt := _extract_text(rec)):
+            if txt := _extract_text(rec):
                 yield Document(txt, metadata={"source": str(path), "page": i})
 
 
@@ -145,10 +145,21 @@ def _parse_json(path: Path) -> Iterator[Document]:
 
     # ---------- eager small‑file path ------------------------------------ #
     if mode is _Mode.SMALL:
-        payload = json.loads(path.read_text(encoding="utf‑8"))
-        records = payload if isinstance(payload, list) else [payload]
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        records: Iterable[dict]
+        if isinstance(payload, list):
+            records = payload
+        elif isinstance(payload, dict):
+            # Check if the object itself is a document, otherwise treat its values as documents
+            if _extract_text(payload):
+                records = [payload]
+            else:
+                records = payload.values()
+        else:
+            records = []  # Not a list or dict, so no documents to parse
+
         for i, rec in enumerate(records):
-            if (txt := _extract_text(rec)):
+            if isinstance(rec, dict) and (txt := _extract_text(rec)):
                 yield Document(txt, metadata={"source": str(path), "page": i})
         return
 
@@ -156,7 +167,7 @@ def _parse_json(path: Path) -> Iterator[Document]:
     if mode is _Mode.FAIL:  # pragma: no cover
         size_mb = path.stat().st_size / (1 << 20)
         raise RuntimeError(
-            f"{path} is {size_mb:,.1f} MB – install 'ingenious[chunk]' or "
+            f"{path} is {size_mb:,.1f} MB – install 'ingenious[chunk]' or "
             "'ijson' to enable streaming of large JSON files."
         )
 
@@ -166,23 +177,16 @@ def _parse_json(path: Path) -> Iterator[Document]:
     first = _root_char(path)
     if first == "[":  # top‑level array
         for i, rec in enumerate(_stream_array(path)):
-            if (txt := _extract_text(rec)):
+            if txt := _extract_text(rec):
                 yield Document(txt, metadata={"source": str(path), "page": i})
-    elif first == "{":  # top‑level *map* (possibly huge)
-        if mode is _Mode.SMALL:
-            # ↪ legacy small‑file path – keep previous eager behaviour
-            obj = json.loads(path.read_text(encoding="utf‑8"))
-            if (txt := _extract_text(obj)):
-                yield Document(txt, metadata={"source": str(path), "page": 0})
-        else:
-            # ↪ **new** streaming path – one sub‑record at a time
-            yield from _stream_object(path)
+    elif first == "{":  # top‑level *map* (always streamed as a map of documents)
+        yield from _stream_object(path)
     else:  # malformed or exotic JSON
         raise json.JSONDecodeError("Unsupported JSON structure", doc="", pos=0)
 
 
 def _parse_text(path: Path) -> Iterator[Document]:
-    txt = path.read_text(encoding="utf‑8", errors="ignore")
+    txt = path.read_text(encoding="utf-8", errors="replace")
     if txt.strip():
         yield Document(txt, metadata={"source": str(path.resolve())})
 
@@ -198,6 +202,7 @@ _PARSERS: dict[str, Callable[[Path], Iterator[Document]]] = {
 }
 
 _ALLOWED_EXTS = ", ".join(sorted(_PARSERS))
+
 
 # --------------------------------------------------------------------------- #
 # Public API                                                                  #
@@ -226,9 +231,15 @@ def load_documents(pattern: str) -> List[Document]:
 
         try:
             docs.extend(parser(file_path))
-        except (OSError, json.JSONDecodeError, jsonlines.Error, RuntimeError) as exc:
-            # RuntimeError covers the "large JSON but no ijson" path
+        except (OSError, json.JSONDecodeError, jsonlines.Error) as exc:
+            # Non‑fatal I/O or parse error – skip file but keep going.
             print(f"[load_documents] Warning: {file_path} skipped ({exc})")
+        except RuntimeError as exc:
+            # 🔴  Fatal: large JSON requires streaming but ijson is missing.
+            #     Print the same actionable hint as before **then** propagate
+            #     so the CLI exits with code 1 (caught by _safe_load).
+            print(f"[load_documents] {exc}")
+            raise
 
     if not docs:
         raise FileNotFoundError(f"No parsable documents found for {pattern!r}")

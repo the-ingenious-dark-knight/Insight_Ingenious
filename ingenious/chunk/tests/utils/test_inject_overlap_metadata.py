@@ -1,5 +1,6 @@
 # ingenious/chunk/tests/utils/test_inject_overlap_metadata.py
 from langchain_core.documents import Document
+
 from ingenious.chunk.utils.overlap import inject_overlap
 
 
@@ -12,5 +13,5 @@ def test_metadata_isolated():
 
     c0, c1 = inject_overlap([base, base], k=3, unit="characters")
 
-    c0.metadata["tags"].append("mutated")      # mutate in‑place
-    assert c1.metadata["tags"] == ["x"]        # isolation verified
+    c0.metadata["tags"].append("mutated")  # mutate in‑place
+    assert c1.metadata["tags"] == ["x"]  # isolation verified

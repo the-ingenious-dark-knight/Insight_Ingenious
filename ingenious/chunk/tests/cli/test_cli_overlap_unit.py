@@ -1,6 +1,7 @@
 """
 End‑to‑end test: CLI honours --overlap-unit characters.
 """
+
 import jsonlines
 from typer.testing import CliRunner
 
@@ -11,7 +12,7 @@ K = 5  # overlap window
 
 def test_cli_character_overlap(tmp_path):
     # -------------- prepare a tiny text file ---------------------------- #
-    text = "abcde " * 40                     # ~240 chars, will give many chunks
+    text = "abcde " * 40  # ~240 chars, will give many chunks
     source_file = tmp_path / "document.txt"
     source_file.write_text(text, encoding="utf-8")
 

@@ -1,5 +1,4 @@
 from typer.testing import CliRunner
-from pydantic import ValidationError
 
 from ingenious.chunk.cli import cli
 
@@ -17,6 +16,7 @@ def test_cli_invalid_overlap(tmp_path):
     )
 
     # --- assertions ---------------------------------------------------- #
-    assert result.exit_code != 0
-    # Typer wraps the raised ValidationError into Result.exception
-    assert isinstance(result.exception, ValidationError)
+    # The CLI should exit 1 with the red ❌ banner and *no* traceback.
+    assert result.exit_code == 1
+    assert isinstance(result.exception, SystemExit)
+    assert "❌" in result.output

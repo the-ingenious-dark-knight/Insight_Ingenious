@@ -1,5 +1,6 @@
 # ingenious/chunk/tests/utils/test_overlap_edgecases.py
 import pytest
+
 from ingenious.chunk.utils.overlap import inject_overlap
 
 

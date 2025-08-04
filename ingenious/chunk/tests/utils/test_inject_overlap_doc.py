@@ -1,6 +1,8 @@
 # ingenious/chunk/tests/utils/test_inject_overlap_doc.py
 from langchain_core.documents import Document
+
 from ingenious.chunk.utils.overlap import inject_overlap
+
 
 def test_inject_overlap_documents_preserve_metadata():
     """Every output Document keeps its original metadata and overlap invariant."""

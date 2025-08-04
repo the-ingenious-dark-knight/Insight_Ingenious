@@ -70,10 +70,10 @@ def test_split_text_preserves_metadata(_patched_embed) -> None:
     -----
     1. Build a splitter with `strategy="semantic"`.
     2. Call :py:meth:`split_text` with:
-       • ``metadata`` – dictionary expected to propagate unchanged.  
+       • ``metadata`` – dictionary expected to propagate unchanged.
        • ``return_docs=True`` – request ``List[Document]`` output.
     3. Verify:
-       • All outputs are :class:`Document` instances.  
+       • All outputs are :class:`Document` instances.
        • Every ``Document.metadata`` equals *exactly* the original dict.
     """
     cfg = ChunkConfig(strategy="semantic", chunk_size=32, chunk_overlap=8)

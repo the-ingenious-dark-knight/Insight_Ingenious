@@ -1,8 +1,8 @@
 from pathlib import Path
-from unittest.mock import patch, MagicMock
-from tiktoken import get_encoding
+from unittest.mock import MagicMock, patch
 
 import jsonlines
+from tiktoken import get_encoding
 from typer.testing import CliRunner
 
 from ingenious.chunk.cli import cli
@@ -21,12 +21,15 @@ def _run_cli(tmp_path: Path, strategy: str):
     src.write_text("hello world " * 60, encoding="utf-8")
     out = tmp_path / f"out_{strategy}.jsonl"
 
-    with patch(
-        "ingenious.chunk.strategy.langchain_semantic.OpenAIEmbeddings",
-        return_value=_fake_embedder(),
-    ), patch(
-        "ingenious.chunk.strategy.langchain_semantic.AzureOpenAIEmbeddings",
-        return_value=_fake_embedder(),
+    with (
+        patch(
+            "ingenious.chunk.strategy.langchain_semantic.OpenAIEmbeddings",
+            return_value=_fake_embedder(),
+        ),
+        patch(
+            "ingenious.chunk.strategy.langchain_semantic.AzureOpenAIEmbeddings",
+            return_value=_fake_embedder(),
+        ),
     ):
         result = CliRunner().invoke(
             cli,
@@ -56,6 +59,7 @@ def _run_cli(tmp_path: Path, strategy: str):
         # allow one extra leading‑space token in the head (same pattern as other tests)
         head_text = chunks[i][: len(tail_text) + 2]
         assert head_text.lstrip().startswith(tail_text.lstrip())
+
 
 def test_cli_all_strategies(tmp_path):
     for s in STRATEGIES:

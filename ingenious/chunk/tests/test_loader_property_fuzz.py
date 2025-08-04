@@ -1,9 +1,11 @@
 """
 Quick Hypothesis check: arbitrary UTF‑8 text survives the TXT loader path.
 """
+
 from __future__ import annotations
 
-from hypothesis import given, settings, HealthCheck, strategies as st, assume
+from hypothesis import HealthCheck, assume, given, settings
+from hypothesis import strategies as st
 
 from ingenious.chunk.loader import load_documents
 
@@ -18,7 +20,7 @@ def test_loader_random_txt(tmp_path, payload: str):
     f = tmp_path / "rand.txt"
     f.write_text(payload, encoding="utf-8")
 
-    assume(not payload.isspace())          # loader skips blank/white‑only pages
+    assume(not payload.isspace())  # loader skips blank/white‑only pages
     docs = load_documents(str(f))
 
     assert _norm(docs[0].page_content) == _norm(payload)

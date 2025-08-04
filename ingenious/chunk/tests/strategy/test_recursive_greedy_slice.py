@@ -1,6 +1,7 @@
 """
 Validate the *greedy slice* branch of `RecursiveTokenSplitter`.
 """
+
 from tiktoken import get_encoding
 
 from ingenious.chunk.config import ChunkConfig
@@ -8,7 +9,7 @@ from ingenious.chunk.factory import build_splitter
 
 
 def test_recursive_greedy_slice():
-    text = "A" * 500            # one extremely long “paragraph”
+    text = "A" * 500  # one extremely long “paragraph”
     cfg = ChunkConfig(strategy="recursive", chunk_size=50, chunk_overlap=5)
     splitter = build_splitter(cfg)
     chunks = splitter.split_text(text)

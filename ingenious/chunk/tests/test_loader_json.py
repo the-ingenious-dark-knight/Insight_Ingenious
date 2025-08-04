@@ -1,4 +1,7 @@
-import json, jsonlines
+import json
+
+import jsonlines
+
 from ingenious.chunk.loader import load_documents
 
 

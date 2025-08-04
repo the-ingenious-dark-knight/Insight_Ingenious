@@ -7,8 +7,8 @@ from __future__ import annotations
 
 import json
 import sys
-from types import ModuleType
 from pathlib import Path
+from types import ModuleType
 
 import pytest
 
@@ -19,9 +19,7 @@ from ingenious.chunk.loader import load_documents
 # --------------------------------------------------------------------------- #
 # 1. Happy‑path: large JSON array streamed via ijson                           #
 # --------------------------------------------------------------------------- #
-@pytest.mark.skipif(
-    loader.ijson is None, reason="ijson extra not installed"
-)
+@pytest.mark.skipif(loader.ijson is None, reason="ijson extra not installed")
 def test_stream_large_json(tmp_path: Path, monkeypatch):
     """5 000‑record array must be parsed without OOM and with correct count."""
 
@@ -57,20 +55,22 @@ def test_stream_without_ijson(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(loader, "ijson", None)
     monkeypatch.setattr(loader, "_select_mode", lambda *_: loader._Mode.FAIL)
 
-    with pytest.raises(FileNotFoundError):
+    # After the change the loader now propagates RuntimeError instead of
+    # downgrading it to FileNotFoundError.
+    with pytest.raises(RuntimeError):
         list(load_documents(str(p)))
 
     # The warning still needs to mention ijson → capture stdout
     captured = capsys.readouterr().out
     assert "install 'ingenious[chunk]' or 'ijson'" in captured
 
+
 # --------------------------------------------------------------------------- #
 # 3.  Huge *single‑object* JSON streamed via kvitems                           #
 # --------------------------------------------------------------------------- #
 
-@pytest.mark.skipif(
-    loader.ijson is None, reason="ijson extra not installed"
-)
+
+@pytest.mark.skipif(loader.ijson is None, reason="ijson extra not installed")
 def test_stream_huge_single_object(tmp_path, monkeypatch):
     """Top‑level object with 10 000 entries must stream without OOM."""
     big = {str(i): {"text": f"row-{i}"} for i in range(10_000)}
@@ -83,4 +83,4 @@ def test_stream_huge_single_object(tmp_path, monkeypatch):
     docs = list(load_documents(str(p)))
     assert len(docs) == 10_000
     assert docs[0].page_content == "row-0"
-    assert docs[-1].page_content == "row-9999"    
+    assert docs[-1].page_content == "row-9999"

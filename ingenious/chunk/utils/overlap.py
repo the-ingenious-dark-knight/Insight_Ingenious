@@ -14,16 +14,18 @@ When two chunks are joined and **both** the last character of the left part
 upstream splitter (traditionally ``MarkdownTextSplitter``) has trimmed
 surrounding blanks.
 """
+
 from __future__ import annotations
 
+from copy import deepcopy
 from typing import List, Sequence, TypeVar, overload
 
-from copy import deepcopy 
 from langchain_core.documents import Document  # type: ignore
 
 from .token_len import _enc
 
 T = TypeVar("T", str, Document)
+
 
 # --------------------------------------------------------------------------- #
 # Public overloads                                                            #
@@ -68,9 +70,7 @@ def inject_overlap(
         return list(chunks)
 
     if unit not in {"tokens", "characters"}:
-        raise ValueError(
-            f"unit must be 'tokens' or 'characters' (got {unit!r})"
-        )
+        raise ValueError(f"unit must be 'tokens' or 'characters' (got {unit!r})")
 
     enc = _enc(enc_name)
 
@@ -90,9 +90,7 @@ def inject_overlap(
     # ---------------------------------------------------------------------- #
     out: List[T] = []
     for chunk in chunks:
-        content: str = (
-            chunk if isinstance(chunk, str) else chunk.page_content
-        )
+        content: str = chunk if isinstance(chunk, str) else chunk.page_content
 
         # Prepend tail from the **last output** chunk, not the raw input.
         if out:
@@ -109,8 +107,7 @@ def inject_overlap(
             # ⚠️  NEVER pass the original dict – downstream mutation would
             #     couple siblings.  deep‐copy for full isolation.
             out.append(
-                Document(page_content=content,
-                         metadata=deepcopy(chunk.metadata))
+                Document(page_content=content, metadata=deepcopy(chunk.metadata))
             )  # type: ignore[arg-type]
 
     return out

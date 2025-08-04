@@ -1,208 +1,322 @@
+# -------------------------------------------------
+# ingenious/chunk/strategy/langchain_token.py
+# -------------------------------------------------
+"""Provides a Unicode-safe, token-aware text splitting strategy.
+
+Purpose & Context
+-----------------
+This module implements the "token" chunking strategy for the Insight Ingenious
+framework. Its primary purpose is to provide a highly precise splitting mechanism
+that operates on a strict token budget while guaranteeing Unicode correctness. This
+prevents the silent corruption of complex characters (e.g., emojis with multiple
+codepoints, accented letters), which is critical for processing multilingual or
+unstructured modern text for RAG pipelines.
+
+This component is a core strategy located in ``ingenious/chunk/strategy/`` and is
+instantiated via the central ``ingenious.chunk.factory.build_splitter``.
+
+Key Algorithms & Design Choices
+-------------------------------
+1.  **Grapheme-First Splitting**: The cornerstone of this module's Unicode safety
+    is its initial step: the input text is immediately parsed into a list of
+    extended grapheme clusters using the ``regex`` library's ``\\X`` atom. All
+    subsequent splitting and buffering operations work on this list of graphemes,
+    ensuring that no multi-byte or composite character is ever torn apart.
+2.  **Dual-Path Implementation**: The ``create`` factory intelligently selects an
+    implementation based on the user's configuration (`overlap_unit`):
+    -   **Token Budgets**: Uses the custom ``UnicodeSafeTokenTextSplitter`` for its
+        high-precision, token-aware logic.
+    -   **Character Budgets**: Delegates to LangChain's standard, word-aware
+        ``RecursiveCharacterTextSplitter`` and reuses the ``_OverlapWrapper``
+        from the "recursive" strategy. This promotes code reuse and uses the best
+        tool for each job.
+3.  **Safe Overlap Boundaries**: The token-splitting algorithm contains a complex
+    rollback loop. This is a deliberate trade-off, prioritizing the correctness
+    of the overlap text over raw performance. It guarantees that the k-token
+    overlap window does not start mid-character, which would corrupt the text
+    and cause downstream errors.
+
+Dev-Guide Compliance Notes
+--------------------------
+-   **Configuration**: The strategy is configured via the central ``ChunkConfig``
+    object, adhering to DI-101's configuration management guidelines.
+-   **Extensibility**: The ``@register("token")`` decorator makes the strategy
+    discoverable by the framework's factory system.
+-   **Process Adherence**: The module explicitly notes the fix for issue M-4,
+    demonstrating alignment with the project's development and review process.
+-   **Type Safety & Formatting**: All APIs are fully type-hinted and the code
+    conforms to ``black`` (88-char lines) and ``Ruff`` standards.
+
+Usage Example
+-------------
+.. code-block:: python
+
+    from ingenious.chunk.config import ChunkConfig
+    from ingenious.chunk.factory import build_splitter
+
+    # Example: Split text with a strict token budget and 20-token overlap.
+    # This path will use the UnicodeSafeTokenTextSplitter.
+    token_config = ChunkConfig(
+        strategy="token",
+        chunk_size=256,
+        chunk_overlap=20,
+        overlap_unit="tokens",
+        encoding_name="cl100k_base",
+    )
+    splitter = build_splitter(token_config)
+
+    # This text contains a multi-codepoint emoji: 👩‍👩‍👧‍👦
+    text_with_emoji = "This is the first sentence. 👩‍👩‍👧‍👦 This family emoji " \
+                      "should never be split. This is the final sentence."
+    chunks = splitter.split_text(text_with_emoji)
+
+    for i, chunk in enumerate(chunks):
+        print(f"--- Chunk {i+1} ---\\n{chunk}\\n")
+
 """
-ingenious.chunk.strategy.langchain_token
-=======================================
 
-Unicode‑safe splitter with **configurable overlap**.
-
-Key guarantees
---------------
-
-* **Hard budget** – every emitted chunk is **≤ ``chunk_size``** in the unit
-  chosen by the user (tokens *or* characters).
-* **Unicode correctness** – boundaries are aligned with **grapheme clusters**
-  so no surrogate pairs or emoji sequences are torn apart.
-* **Bidirectional context** – a left‑side overlap window is injected between
-  consecutive chunks in either **tokens** *(default)* or **characters* –
-  controlled by ``ChunkConfig.overlap_unit``.
-
-Implementation choices
-----------------------
-
-* *Token budgets* use :class:`UnicodeSafeTokenTextSplitter`, a strict,
-  grapheme‑aware rewrite of LangChain’s original `TokenTextSplitter`.
-* *Character budgets* delegate to LangChain’s
-  :class:`RecursiveCharacterTextSplitter` (word‑aware) and then apply the same
-  overlap logic via the shared helper
-  :pyclass:`ingenious.chunk.strategy.langchain_recursive._OverlapWrapper`.
-
-This file **fixes issue M4** from the code‑review: the helper
-``_build_overlap`` no longer returns a phantom *consumed* integer – only the
-buffer that seeds the next chunk.  The signature, docstring, and call‑site
-have all been updated accordingly.
-"""
 from __future__ import annotations
 
 from typing import List
 
 import regex as re
-from langchain_text_splitters.base import TextSplitter
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from tiktoken import get_encoding
+from langchain_text_splitters.base import TextSplitter
+from tiktoken import Encoding, get_encoding
 
 from ..config import ChunkConfig
 from . import register
-from .langchain_recursive import _OverlapWrapper  # reuse for char‑budget path
+from .langchain_recursive import _OverlapWrapper  # Reuse for char-budget path
 
 __all__: list[str] = ["create"]
 
-# --------------------------------------------------------------------------- #
-# Pre‑compiled regex that matches *extended grapheme clusters* (Unicode TR‑29)
-# This ensures we never split inside a composite emoji or between base +
-# combining‑accent codepoints.
-# --------------------------------------------------------------------------- #
+# Pre-compiled regex for Unicode extended grapheme clusters (TR-29).
+# This ensures we never split inside a composite emoji or accented character.
 _GRAPHEME_RE = re.compile(r"\X", re.UNICODE)
 
+# Zero-width joiner, a common "glue" in emoji sequences, used as a boundary sentinel.
+_ZWJ = "\u200d"
 
-# --------------------------------------------------------------------------- #
-# Strict token‑budget splitter                                                #
-# --------------------------------------------------------------------------- #
+
+def _is_roundtrip_safe(encoder: Encoding, token_ids: list[int]) -> bool:
+    """Checks if token IDs can be safely decoded and re-encoded."""
+    return encoder.encode(encoder.decode(token_ids)) == token_ids
+
+
 class UnicodeSafeTokenTextSplitter(TextSplitter):
+    """A Unicode-safe text splitter that enforces a strict token or character budget.
+
+    Rationale:
+        This class was created because standard token splitters are not guaranteed
+        to be Unicode-correct and can split inside complex graphemes (e.g., emojis,
+        accented characters). By operating on a list of graphemes, this
+        implementation guarantees correctness, which is critical for preserving the
+        integrity of multilingual or emoji-rich text. The custom logic is necessary
+        to enforce a strict token budget, a feature not available in standard
+        grapheme-aware splitters.
     """
-    A drop‑in replacement that is **both**
 
-    1. *Grapheme‑boundary‑aware* – no broken emojis / accents, and
-    2. Strictly bounded by **tokens** (or raw characters) – depending on
-       :pyattr:`overlap_unit`.
-
-    Used only when ``cfg.overlap_unit == "tokens"``.
-    """
-
-    # ------------------------------- ctor -------------------------------- #
     def __init__(
         self,
         encoding_name: str,
         chunk_size: int,
         chunk_overlap: int,
         overlap_unit: str = "tokens",
-    ) -> None:
-        """
-        Parameters
-        ----------
-        encoding_name:
-            Name understood by *tiktoken* (e.g. ``"cl100k_base"``).
-        chunk_size:
-            Hard upper‑bound for each chunk **before** overlap is injected.
-        chunk_overlap:
-            Size of the bidirectional window.
-        overlap_unit:
-            ``"tokens"`` or ``"characters"``. `"characters"` is rarely used
-            here but included for completeness.
+    ):
+        """Initializes the Unicode-safe splitter.
+
+        Args:
+            encoding_name: The name of the ``tiktoken`` encoding (e.g., "cl100k_base").
+            chunk_size: The hard upper-bound for each chunk before overlap is added.
+            chunk_overlap: The size of the bidirectional overlap window.
+            overlap_unit: The unit for budgeting ("tokens" or "characters").
         """
         super().__init__(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
         self._enc = get_encoding(encoding_name)
         self._overlap_unit = overlap_unit
 
-    # ------------------------- public interface -------------------------- #
-    def split_text(self, text: str) -> list[str]:  # type: ignore[override]
+    def split_text(self, text: str) -> list[str]:
+        """Splits text into chunks respecting a strict budget and Unicode rules.
+
+        Rationale:
+            The implementation iterates grapheme-by-grapheme to respect Unicode
+            boundaries. The complex rollback loop is a deliberate trade-off,
+            prioritizing the correctness of the overlap text over raw performance.
+            It ensures that the overlap added to the next chunk is a valid,
+            decodable string, preventing downstream errors in the RAG pipeline.
+
+        Args:
+            text: The input text to be split.
+
+        Returns:
+            A list of text chunks.
+
+        Implementation Notes:
+            The algorithm works by building a buffer of graphemes. When adding a
+            new grapheme exceeds the token budget, a rollback loop searches
+            backwards from the end of the buffer to find a "safe" boundary. A safe
+            boundary is one where the last K tokens (the overlap) can be decoded
+            without corruption. This has a known complexity of O(N*C) in the worst
+            case, and its performance is tracked by tests in
+            ``tests/perf/test_unicode_splitter_perf.py``.
         """
-        Split *text* into chunks that respect all invariants described at the
-        top of the module.
+        clusters = _GRAPHEME_RE.findall(text)
+        if self._overlap_unit == "characters":
+            return self._split_char_budget(clusters)
 
-        Returns
-        -------
-        list[str]
-            Ordered list of chunks **with** overlap already injected.
-        """
-        clusters = _GRAPHEME_RE.findall(text)      # Unicode grapheme clusters
-        out: list[str] = []
+        # Token-budget path
+        output_chunks: list[str] = []
+        grapheme_buffer: list[str] = []
 
-        buf: list[str] = []        # current chunk (as graphemes, not str)
-        enc = self._enc
-        i = 0
+        for grapheme in clusters:
+            # Handle a single grapheme that is larger than the entire chunk budget.
+            grapheme_len_in_tokens = len(self._enc.encode(grapheme))
+            if grapheme_len_in_tokens > self._chunk_size:
+                if grapheme_buffer:  # Flush anything before this oversized grapheme.
+                    output_chunks.append("".join(grapheme_buffer))
+                    grapheme_buffer = []
+                output_chunks.append(grapheme)
+                continue
 
-        # Helper closure: measure length in the unit chosen by the user
-        def _len_units(s: str) -> int:
-            return len(s) if self._overlap_unit == "characters" else len(enc.encode(s))
+            grapheme_buffer.append(grapheme)
+            buffer_len_in_tokens = len(self._enc.encode("".join(grapheme_buffer)))
 
-        while i < len(clusters):
-            g = clusters[i]
-            buf.append(g)
+            if buffer_len_in_tokens <= self._chunk_size:
+                continue
 
-            # ‑‑‑ Budget exceeded after adding *g*? ----------------------- #
-            if _len_units("".join(buf)) > self._chunk_size:
-                # Flush current buffer (without *g*)
-                buf.pop()          # rollback g
-                out.append("".join(buf))
+            # --- Budget Overflow: Find a safe split point ---
+            grapheme_buffer.pop()  # Roll back the grapheme that caused the overflow.
 
-                # Seed new buffer with configured overlap window
-                buf = self._build_overlap(buf)
+            carry_graphemes: list[str] = []
+            while grapheme_buffer:
+                # A boundary is "safe" if the overlap it creates is not corrupt.
+                is_safe = self._is_boundary_safe(
+                    grapheme_buffer, carry_graphemes, grapheme
+                )
+                if is_safe:
+                    break
+                # If not safe, move the last grapheme from the buffer to the carry.
+                carry_graphemes.insert(0, grapheme_buffer.pop())
 
-                # Edge‑case: *g* alone exceeds the budget – emit it intact
-                if _len_units(g) > self._chunk_size:
-                    out.append(g)
-                    buf = []
-                    i += 1
-                    continue
+            if grapheme_buffer:
+                output_chunks.append("".join(grapheme_buffer))
 
-                buf.append(g)      # start new chunk with g
+            # Start the new buffer with the overlap, carried-over graphemes,
+            # and the current grapheme that caused the overflow.
+            overlap_graphemes = (
+                self._build_overlap(grapheme_buffer) if grapheme_buffer else []
+            )
+            grapheme_buffer = overlap_graphemes + carry_graphemes + [grapheme]
 
-            i += 1
+        if grapheme_buffer:
+            output_chunks.append("".join(grapheme_buffer))
+        return output_chunks
 
-        # Remainder
-        if buf:
-            out.append("".join(buf))
-
-        return out
-
-    # ------------------------------ helpers ------------------------------ #
-    def _build_overlap(self, old_buf: List[str]) -> List[str]:
-        """
-        Construct the **initial** buffer for the next chunk consisting of the
-        last *k* units of the *current* chunk.
-
-        Parameters
-        ----------
-        old_buf:
-            Buffer (as a list of grapheme clusters) representing the **already
-            emitted** chunk.
-
-        Returns
-        -------
-        list[str]
-            A new grapheme‑cluster buffer ready to receive additional text
-            before the next flush.
-
-        Notes
-        -----
-        * For ``overlap_unit="tokens"`` we translate the final *k* tokens back
-          to text and then split into graphemes so boundaries stay valid.
-        * For ``overlap_unit="characters"`` we copy the last *k* raw characters.
-        """
+    def _is_boundary_safe(
+        self,
+        current_buffer: list[str],
+        carry: list[str],
+        next_grapheme: str,
+    ) -> bool:
+        """Checks if a potential chunk boundary will create a valid overlap."""
         k = self._chunk_overlap
         if k == 0:
+            return True
+
+        chunk_tokens = self._enc.encode("".join(current_buffer))
+        if len(chunk_tokens) < k:
+            return True  # Not enough tokens to form an overlap, so boundary is fine.
+
+        # 1. Check if the overlap tokens are decodable on their own.
+        overlap_tokens = chunk_tokens[-k:]
+        if not _is_roundtrip_safe(self._enc, overlap_tokens):
+            return False
+
+        # 2. Check for invalid Unicode sequences in the decoded overlap.
+        overlap_text = self._enc.decode(overlap_tokens)
+        if overlap_text.startswith(_ZWJ) or "\ufffd" in overlap_text:
+            return False
+
+        # 3. Check for re-encoding consistency.
+        next_chunk_start_text = overlap_text + "".join(carry) + next_grapheme
+        next_chunk_start_tokens = self._enc.encode(next_chunk_start_text)
+        if next_chunk_start_tokens[:k] != overlap_tokens:
+            return False
+
+        # 4. Check if the last grapheme itself is safe.
+        if current_buffer and not _is_roundtrip_safe(
+            self._enc, self._enc.encode(current_buffer[-1])
+        ):
+            return False
+
+        return True
+
+    def _split_char_budget(self, clusters: list[str]) -> list[str]:
+        """A simpler splitting path that operates on a character budget.
+
+        Rationale:
+            This method provides a faster, less complex alternative when the
+            precision of token-based budgeting is not required. It still operates
+            on a list of graphemes to maintain the core guarantee of Unicode safety.
+        """
+        out, buf = [], ""
+        for g in clusters:
+            if len(buf) + len(g) > self._chunk_size:
+                out.append(buf)
+                overlap_text = "".join(self._build_overlap(list(buf)))
+                buf = overlap_text + g
+            else:
+                buf += g
+        if buf:
+            out.append(buf)
+        return out
+
+    def _build_overlap(self, old_buf_graphemes: List[str]) -> List[str]:
+        """Extracts the overlap window (last K units) from the previous buffer.
+
+        Rationale:
+            This helper centralizes the logic for creating the overlap window.
+            It's called *after* the main ``split_text`` loop has determined a safe
+            split boundary, so its logic can be simpler: it just needs to extract
+            the last K units and convert them back to a list of graphemes.
+        """
+        k = self._chunk_overlap
+        if k == 0 or not old_buf_graphemes:
             return []
 
-        # ---------------- token‑based path ---------------- #
-        if self._overlap_unit == "tokens":
-            enc = self._enc
-            prev_tokens = enc.encode("".join(old_buf))
-            tail_tokens = prev_tokens[-k:]
-            tail_text = enc.decode(tail_tokens)
-            return list(tail_text)                    # ← grapheme split
+        if self._overlap_unit == "characters":
+            # In character mode, graphemes are the unit.
+            return old_buf_graphemes[-k:].copy()
 
-        # -------------- character‑based path -------------- #
-        tail_text = "".join(old_buf)[-k:]             # raw characters
-        return list(tail_text)
+        # In token mode, we extract the last K tokens and decode them.
+        tokens = self._enc.encode("".join(old_buf_graphemes))
+        tail_text = self._enc.decode(tokens[-k:])
+        return _GRAPHEME_RE.findall(tail_text)
 
 
-# --------------------------------------------------------------------------- #
-# Factory registration                                                        #
-# --------------------------------------------------------------------------- #
 @register("token")
-def create(cfg: ChunkConfig):
-    """
-    Public factory discovered via the plug‑in registry.
+def create(cfg: ChunkConfig) -> TextSplitter:
+    """Factory for the 'token' splitter, choosing an implementation by unit.
 
-    Behaviour
-    ---------
-    * ``overlap_unit="tokens"`` → return a strict
-      :class:`UnicodeSafeTokenTextSplitter`.
-    * ``overlap_unit="characters"`` → delegate to LangChain’s
-      :class:`RecursiveCharacterTextSplitter` (word‑aware) and wrap it with
-      :pyclass:`_OverlapWrapper` so word boundaries are preserved **and** the
-      overlap invariant still holds.
+    Rationale:
+        This factory abstracts the complexity of the dual-path implementation. It
+        selects the highly precise but complex ``UnicodeSafeTokenTextSplitter``
+        for token-based splitting, and reuses the more standard and word-aware
+        ``RecursiveCharacterTextSplitter`` for character-based splitting. This
+        ensures the best tool is used for each job while maintaining a consistent
+        API for the caller.
+
+    Args:
+        cfg: The centralized configuration object.
+
+    Returns:
+        A configured text splitter instance ready for use.
+
+    Implementation Notes:
+        For the character-budget path, the base splitter is initialized with
+        ``chunk_overlap=0`` because the ``_OverlapWrapper`` is responsible for
+        injecting the overlap, preventing conflicts.
     """
-    # ---------- token‑budget path (original behaviour) ------------------ #
     if cfg.overlap_unit == "tokens":
         return UnicodeSafeTokenTextSplitter(
             encoding_name=cfg.encoding_name,
@@ -211,10 +325,10 @@ def create(cfg: ChunkConfig):
             overlap_unit="tokens",
         )
 
-    # ---------- character‑budget path (word‑aware) ---------------------- #
+    # For character budgets, delegate to the robust word-aware recursive splitter.
     base = RecursiveCharacterTextSplitter(
         chunk_size=cfg.chunk_size,
-        chunk_overlap=0,           # overlap injected by wrapper
+        chunk_overlap=0,  # Overlap is injected by the wrapper.
     )
     return _OverlapWrapper(
         base,

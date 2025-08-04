@@ -1,5 +1,7 @@
 from typer.testing import CliRunner
+
 from ingenious.chunk.cli import cli
+
 
 def test_cli_no_matching_files(tmp_path):
     """`ingen chunk run` should exit 1 with a friendly ❌ when nothing matches."""

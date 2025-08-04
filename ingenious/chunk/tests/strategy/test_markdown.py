@@ -1,5 +1,6 @@
-from ingenious.chunk.factory import build_splitter
 from ingenious.chunk.config import ChunkConfig
+from ingenious.chunk.factory import build_splitter
+
 
 def test_markdown_respects_headings(sample_md):
     cfg = ChunkConfig(strategy="markdown", chunk_size=40, chunk_overlap=0)

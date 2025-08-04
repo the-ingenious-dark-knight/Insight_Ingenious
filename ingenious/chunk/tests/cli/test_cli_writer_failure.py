@@ -1,10 +1,12 @@
 import jsonlines
 from typer.testing import CliRunner
+
 from ingenious.chunk.cli import cli
 
 
 def test_cli_write_failure(monkeypatch, sample_text, tmp_path):
     """Simulate disk‑write OSError → CLI must exit 1 with friendly message."""
+
     def _boom(*_, **__):
         raise OSError("disk full")
 

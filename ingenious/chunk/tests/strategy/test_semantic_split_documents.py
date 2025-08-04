@@ -2,6 +2,7 @@
 Smoke‑test `SemanticOverlapChunker.split_documents` including metadata
 round‑trip and overlap invariant.
 """
+
 from unittest.mock import MagicMock, patch
 
 from langchain_core.documents import Document
@@ -22,11 +23,17 @@ class _DummySemanticChunker:
         pass
 
     def split_documents(self, docs):
-        return docs                      # passthrough – keeps test simple
+        return docs  # passthrough – keeps test simple
 
 
-@patch("ingenious.chunk.strategy.langchain_semantic.SemanticChunker", new=_DummySemanticChunker)
-@patch("ingenious.chunk.strategy.langchain_semantic.OpenAIEmbeddings", return_value=_fake_embedder())
+@patch(
+    "ingenious.chunk.strategy.langchain_semantic.SemanticChunker",
+    new=_DummySemanticChunker,
+)
+@patch(
+    "ingenious.chunk.strategy.langchain_semantic.OpenAIEmbeddings",
+    return_value=_fake_embedder(),
+)
 def test_semantic_split_documents(mock_openai):
     cfg = ChunkConfig(strategy="semantic", chunk_size=20, chunk_overlap=5)
     splitter = build_splitter(cfg)

@@ -2,8 +2,10 @@
 Happy‑path smoke‑test for LazyGroup: verifies that a correctly installed
 [chunk] extra is imported, the sub‑command is discovered, and runs.
 """
-from types import ModuleType
+
 import sys
+from types import ModuleType
+
 import typer
 from typer.testing import CliRunner
 

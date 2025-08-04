@@ -5,6 +5,7 @@ Unit-tests for the *semantic* chunking strategy.
 • `test_semantic_azure_path`     – Azure OpenAI path
 • `test_semantic_overlap_applied`– character-overlap post-processing
 """
+
 from unittest.mock import MagicMock, patch
 
 from langchain_core.documents import Document
@@ -80,13 +81,14 @@ class _DummySemanticChunker:
         for doc in docs:
             txt = doc.page_content
             for i in range(0, len(txt), 4):
-                out.append(
-                    Document(page_content=txt[i : i + 4], metadata=doc.metadata)
-                )
+                out.append(Document(page_content=txt[i : i + 4], metadata=doc.metadata))
         return out
 
 
-@patch("ingenious.chunk.strategy.langchain_semantic.SemanticChunker", new=_DummySemanticChunker)
+@patch(
+    "ingenious.chunk.strategy.langchain_semantic.SemanticChunker",
+    new=_DummySemanticChunker,
+)
 @patch("ingenious.chunk.strategy.langchain_semantic.OpenAIEmbeddings")
 def test_semantic_overlap_applied(mock_openai):
     """
@@ -102,14 +104,13 @@ def test_semantic_overlap_applied(mock_openai):
     actual = splitter.split_text(text)
 
     # Build the expected output via the shared overlap helper.
-    base_chunks = _DummySemanticChunker().split_documents(
-        [Document(page_content=text)]
-    )
-    
+    base_chunks = _DummySemanticChunker().split_documents([Document(page_content=text)])
+
     expected = [
         c.page_content
-        for c in inject_overlap(base_chunks, cfg.chunk_overlap,
-                                unit="tokens", enc_name=cfg.encoding_name)
+        for c in inject_overlap(
+            base_chunks, cfg.chunk_overlap, unit="tokens", enc_name=cfg.encoding_name
+        )
     ]
 
     assert actual == expected

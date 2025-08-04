@@ -1,5 +1,7 @@
 # tests/utils/test_soft_delimiter_fuzz.py
-from hypothesis import given, strategies as st
+from hypothesis import given
+from hypothesis import strategies as st
+
 from ingenious.chunk.utils.overlap import inject_overlap
 
 

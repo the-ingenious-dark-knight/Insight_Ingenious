@@ -1,6 +1,7 @@
 # ingenious/chunk/tests/strategy/test_token_unicode_property.py
 import regex as re
-from hypothesis import given, strategies as st
+from hypothesis import given
+from hypothesis import strategies as st
 from tiktoken import get_encoding
 
 from ingenious.chunk.strategy.langchain_token import UnicodeSafeTokenTextSplitter
@@ -11,7 +12,9 @@ _GRAPHEME_RE = re.compile(r"\X", re.UNICODE)
 
 @given(
     text=st.text(min_size=1, max_size=200),
-    budget=st.integers(min_value=2, max_value=40),  # min-budget 2 avoids trivial 1-token clash
+    budget=st.integers(
+        min_value=2, max_value=40
+    ),  # min-budget 2 avoids trivial 1-token clash
 )
 def test_unicode_splitter_fuzz(text: str, budget: int):
     splitter = UnicodeSafeTokenTextSplitter(

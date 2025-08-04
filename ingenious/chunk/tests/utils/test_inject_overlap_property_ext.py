@@ -1,5 +1,6 @@
-from hypothesis import given, strategies as st
 import tiktoken
+from hypothesis import given
+from hypothesis import strategies as st
 
 from ingenious.chunk.utils.overlap import inject_overlap
 

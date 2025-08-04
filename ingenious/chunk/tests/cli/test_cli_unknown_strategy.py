@@ -1,4 +1,5 @@
 from typer.testing import CliRunner
+
 from ingenious.chunk.cli import cli
 
 

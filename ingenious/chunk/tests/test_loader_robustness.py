@@ -1,17 +1,20 @@
 # tests/test_loader_robustness.py
-import os
-import pytest
 import stat
 import sys
-from pathlib import Path
+
+import pytest
 
 from ingenious.chunk.loader import load_documents
 
-@pytest.mark.skipif(sys.platform.startswith("win"), reason="File permissions are not enforced on Windows")
+
+@pytest.mark.skipif(
+    sys.platform.startswith("win"),
+    reason="File permissions are not enforced on Windows",
+)
 def test_loader_skips_unreadable(tmp_path):
     unreadable = tmp_path / "secret.txt"
     unreadable.write_text("top‑secret", encoding="utf-8")
-    unreadable.chmod(0)           # remove all perms
+    unreadable.chmod(0)  # remove all perms
 
     readable = tmp_path / "ok.txt"
     readable.write_text("hello", encoding="utf-8")

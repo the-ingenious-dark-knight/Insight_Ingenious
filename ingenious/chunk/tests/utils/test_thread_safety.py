@@ -1,10 +1,11 @@
 """
 Basic thread-safety smoke test – helpers should be re-entrant.
 """
+
 import concurrent.futures
 
-from ingenious.chunk.utils.token_len import token_len
 from ingenious.chunk.utils.overlap import inject_overlap
+from ingenious.chunk.utils.token_len import token_len
 
 
 def _task(idx: int):

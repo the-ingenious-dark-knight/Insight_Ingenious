@@ -1,17 +1,17 @@
 """
 Hypothesis fuzzing – verify the overlap invariant for arbitrary inputs.
 """
+
 import regex as re
-from hypothesis import given, strategies as st
 import tiktoken
+from hypothesis import given
+from hypothesis import strategies as st
 
 from ingenious.chunk.utils.overlap import inject_overlap
 
 
 @given(
-    chunks=st.lists(
-        st.text(min_size=1, max_size=60), min_size=2, max_size=6
-    ),
+    chunks=st.lists(st.text(min_size=1, max_size=60), min_size=2, max_size=6),
     k=st.integers(min_value=1, max_value=12),
     unit=st.sampled_from(["tokens", "characters"]),
 )
@@ -24,7 +24,7 @@ def test_inject_overlap_fuzz(chunks, k, unit):
     for i in range(1, len(out)):
         if unit == "characters":
             tail = out[i - 1][-k:]
-            head = out[i][: k + 2]          # allow possible extra space
+            head = out[i][: k + 2]  # allow possible extra space
             assert head.lstrip().startswith(tail.lstrip())
         else:  # tokens
             tail_text = enc.decode(enc.encode(out[i - 1])[-k:])

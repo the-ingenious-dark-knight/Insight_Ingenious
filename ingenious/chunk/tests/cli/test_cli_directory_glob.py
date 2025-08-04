@@ -1,6 +1,7 @@
 """
 End‑to‑end CLI test covering directory recursion *and* glob patterns.
 """
+
 import jsonlines
 from typer.testing import CliRunner
 
@@ -19,7 +20,7 @@ def test_cli_directory_and_glob(tmp_path):
         cli,
         [
             "run",
-            f"{data_dir}/**/*.txt",   # glob retained (no shell expansion)
+            f"{data_dir}/**/*.txt",  # glob retained (no shell expansion)
             "--chunk-size",
             "10",
             "--chunk-overlap",

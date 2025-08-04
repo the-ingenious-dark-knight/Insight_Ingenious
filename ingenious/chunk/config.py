@@ -1,6 +1,8 @@
 # ingenious/chunk/config.py
-from typing import List, Literal
+import warnings
 from pathlib import Path
+from typing import List, Literal
+
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
@@ -29,12 +31,26 @@ class ChunkConfig(BaseModel):
     )
 
     # ------------------------------------------------------------------
+    # Digest truncation – collision domain
+    # ------------------------------------------------------------------
+    id_hash_bits: int = Field(
+        64,
+        ge=32,
+        le=256,
+        description=(
+            "Number of **SHA‑256 bits** kept when truncating the hexadecimal "
+            "digest that forms a chunk‑ or path‑hash.  Must be a multiple of 4 "
+            "(1 hex digit = 4 bits)."
+        ),
+    )
+
+    # ------------------------------------------------------------------
     # Shared knobs
     # ------------------------------------------------------------------
     chunk_size: int = Field(
         1024,
         ge=1,
-        description="Max tokens/characters allowed in a single chunk.",
+        description="Max tokens/characters allowed in a single chunk. NOTE: This is ignored by the 'semantic' strategy.",
     )
     chunk_overlap: int = Field(
         128,
@@ -56,10 +72,34 @@ class ChunkConfig(BaseModel):
     # semantic splitter
     embed_model: str | None = None
     azure_openai_deployment: str | None = None
+    semantic_threshold_percentile: int = Field(
+        95,
+        ge=0,
+        le=100,
+        description="The percentile of similarity scores to use as a threshold for splitting chunks in the 'semantic' strategy.",
+    )
 
     # ------------------------------------------------------------------
     # Validators
     # ------------------------------------------------------------------
+
+    @model_validator(mode="after")
+    def _validate_hash_bits(self):
+        if self.id_hash_bits % 4 != 0:
+            raise ValueError("id_hash_bits must be a multiple of 4")
+        return self
+
+    @model_validator(mode="after")
+    def _warn_small_hash_bits(self):
+        if self.id_hash_bits < 48:
+            warnings.warn(
+                "id_hash_bits < 48 increases the probability of prefix "
+                "collisions in large corpora. Consider using the default 64 "
+                "or higher.",
+                stacklevel=2,
+            )
+        return self
+
     @model_validator(mode="after")
     def _validate_id_mode(self):
         if self.id_path_mode == "rel":
@@ -73,21 +113,28 @@ class ChunkConfig(BaseModel):
                 )
         return self
 
-
     @model_validator(mode="after")
     def _validate_overlap(self):
         """
-        Enforce ``chunk_overlap < chunk_size``.
-
-        *Why raise instead of clamping?*  
-        Silent correction hides configuration mistakes and makes results
-        unpredictable across environments.  By surfacing an explicit
-        `ValidationError` we fail fast and give users immediate feedback.
+        Enforce ``chunk_overlap < chunk_size`` for non-semantic strategies.
         """
-        if self.chunk_overlap >= self.chunk_size:
+        # This validation does not apply to the semantic strategy, as chunk_size is not used for sizing.
+        if self.strategy != "semantic" and self.chunk_overlap >= self.chunk_size:
             raise ValueError(
                 f"chunk_overlap ({self.chunk_overlap}) must be smaller than "
                 f"chunk_size ({self.chunk_size})"
+            )
+        return self
+
+    @model_validator(mode="after")
+    def _validate_semantic_strategy(self):
+        """
+        Enforce constraints specific to the semantic strategy.
+        """
+        if self.strategy == "semantic" and self.overlap_unit == "characters":
+            raise ValueError(
+                "The 'semantic' strategy does not support 'characters' as an overlap_unit. "
+                "Please use 'tokens' for semantic chunking."
             )
         return self
 

@@ -1,8 +1,9 @@
-from ingenious.chunk.factory import build_splitter
 from ingenious.chunk.config import ChunkConfig
+from ingenious.chunk.factory import build_splitter
+
 
 def test_grapheme_boundaries_preserved():
-    text = "😀🇦🇺 café\n" * 5   # emojis + accented chars
+    text = "😀🇦🇺 café\n" * 5  # emojis + accented chars
     cfg = ChunkConfig(strategy="token", chunk_size=4, chunk_overlap=0)
     splitter = build_splitter(cfg)
 

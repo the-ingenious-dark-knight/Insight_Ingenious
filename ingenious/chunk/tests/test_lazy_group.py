@@ -1,8 +1,8 @@
 # ingenious/chunk/tests/test_lazy_group.py
 import importlib
-from typer.testing import CliRunner
+
 import typer
-import pytest
+from typer.testing import CliRunner
 
 from ingenious.utils.lazy_group import LazyGroup
 

@@ -1,49 +1,55 @@
 """
-End‑to‑end CLI tests that exercise the three **id‑path modes**:
+ingenious.chunk.tests.cli.test_cli_id_path_mode
+==============================================
 
-* ``rel``  – relative path when the source file is **inside** ``id_base``  
+End‑to‑end CLI tests that exercise the three **id‑path modes** implemented by
+:pyfunc:`ingenious.chunk.utils.id_path._norm_source`.
+
+* ``rel``  – relative path when the source file is **inside** ``id_base``
              **or** the current working directory (CWD); otherwise a
-             **12‑hex SHA‑256 digest** of the absolute path (collision‑safe).
-* ``hash`` – always a 12‑hex digest (salted with ``id_base`` when given).
-* ``abs``  – normalised absolute POSIX path.
+             **truncated SHA‑256 digest** of the absolute path
+             *(defaults to **16‑hex chars / 64 bits**, but honouring
+             ``ChunkConfig.id_hash_bits``)*.
+* ``hash`` – **always** a truncated digest (same length rule; salted with
+             ``id_base`` when given).
+* ``abs``  – normalised **absolute** POSIX path (no hashing).
 
-The tests spawn the real Typer application via :pymeth:`typer.testing.CliRunner`
-so they cover argument parsing, config‑object creation and writer
-behaviour—equivalent to running the command from a shell.
+The tests spawn the *real* Typer application via
+:pyclass:`typer.testing.CliRunner` so they cover **argument parsing, config
+validation, and writer behaviour**—equivalent to running the command from a
+shell.
 """
 
 from __future__ import annotations
 
 from collections import Counter
 from pathlib import Path
+
 import jsonlines
 from typer.testing import CliRunner
 
 from ingenious.chunk.cli import cli
+from ingenious.chunk.config import ChunkConfig  # ← for dynamic hash‑length
 
 # --------------------------------------------------------------------------- #
-# Helper – one-shot execution                                                 #
+# Constants                                                                   #
+# --------------------------------------------------------------------------- #
+# Hash prefix length expected by *default* configuration
+HEX_LEN = ChunkConfig().id_hash_bits // 4  # e.g. 64 bits → 16 hex
+
+HEX_CHARS = set("0123456789abcdef")  # quick membership test
+
+
+# --------------------------------------------------------------------------- #
+# Helper – one‑shot execution of the CLI                                      #
 # --------------------------------------------------------------------------- #
 def _run_once(src: Path, mode: str, base: str | None, out: Path) -> str:
     """
-    Invoke ``ingen chunk run`` once and return **the *prefix* of the first
-    chunk ID** (everything before the ``"#"`` separator).
+    Invoke ``ingen chunk run`` exactly *once* and return the **path/hash
+    prefix** (the part *before* ``"#"``) of the **first emitted chunk ID**.
 
-    Parameters
-    ----------
-    src : Path
-        Source file passed to the CLI.
-    mode : {"rel", "abs", "hash"}
-        ``--id-path-mode`` value under test.
-    base : str | None
-        Optional ``--id-base`` argument.  ``None`` ⇒ omit flag.
-    out : Path
-        Destination JSONL; parent dirs are created implicitly.
-
-    Returns
-    -------
-    str
-        The path/hash prefix of the first emitted chunk ID.
+    The helper keeps the test cases concise by performing all boiler‑plate:
+    CLI invocation, exit‑code assertion, and JSONL parsing.
     """
     cmd = [
         "run",
@@ -57,8 +63,13 @@ def _run_once(src: Path, mode: str, base: str | None, out: Path) -> str:
         "--output",
         str(out),
     ]
+
     if base:
         cmd += ["--id-base", base]
+
+    # `abs` mode requires an explicit acknowledgement flag
+    if mode == "abs":
+        cmd += ["--force-abs-path"]
 
     res = CliRunner().invoke(cli, cmd, catch_exceptions=False)
     assert res.exit_code == 0, res.output
@@ -69,46 +80,44 @@ def _run_once(src: Path, mode: str, base: str | None, out: Path) -> str:
 
 
 # --------------------------------------------------------------------------- #
-# 1. rel‑mode – hash *outside* base, path *inside* base                       #
+# 1. rel‑mode – digest *outside* base, path *inside* base                     #
 # --------------------------------------------------------------------------- #
 def test_rel_mode_stable_across_locations(tmp_path: Path, monkeypatch) -> None:
     """
-    • When *src* is **outside** ``id_base``/CWD the prefix must be a
-      12‑hex digest.  
-    • The **same‑named** file **inside** ``id_base`` must use the
-      human‑readable relative path.  
-    • The two prefixes therefore differ.
+    Expectations
+    ------------
+    1. A file **outside** ``id_base``/CWD hashes to a *HEX_LEN‑char* digest.
+    2. The **same‑named** file **inside** ``id_base`` yields a human‑readable
+       relative path.
+    3. The two prefixes are therefore *different*.
     """
-    # 1️⃣  File outside CWD  → digest
+    # 1️⃣ Outside CWD → digest
     src = tmp_path / "alpha.txt"
     src.write_text("lorem ipsum")
-    out1 = tmp_path / "out1.jsonl"
-    pref_outside = _run_once(src, "rel", None, out1)
+    pref_outside = _run_once(src, "rel", None, tmp_path / "out1.jsonl")
 
-    assert len(pref_outside) == 12 and all(
-        c in "0123456789abcdef" for c in pref_outside
-    )
+    assert len(pref_outside) == HEX_LEN
+    assert set(pref_outside) <= HEX_CHARS
 
-    # 2️⃣  Same file copied *inside* new repo root  → readable path
+    # 2️⃣ Inside a repo root → relative path
     repo = tmp_path / "repo"
     repo.mkdir()
     (repo / src.name).write_text("lorem ipsum")
-    monkeypatch.chdir(repo)  # CWD becomes repo
+    monkeypatch.chdir(repo)  # CWD ← repo
 
-    out2 = tmp_path / "out2.jsonl"
-    pref_inside = _run_once(repo / src.name, "rel", None, out2)
+    pref_inside = _run_once(repo / src.name, "rel", None, tmp_path / "out2.jsonl")
 
     assert pref_inside == "alpha.txt"
     assert pref_inside != pref_outside
 
 
 # --------------------------------------------------------------------------- #
-# 2. rel‑mode – two identically‑named files outside base must not collide     #
+# 2. rel‑mode – identically‑named files must hash to *different* digests      #
 # --------------------------------------------------------------------------- #
 def test_rel_mode_hash_uniqueness(tmp_path: Path) -> None:
     """
-    Two files with the **same file‑name** but in different directories that
-    are *both* outside ``id_base`` must hash to *different* 12‑hex digests.
+    Two files called ``dup.txt`` in different directories that are **both**
+    outside ``id_base`` must hash to *distinct* digests of length *HEX_LEN*.
     """
     a = tmp_path / "dirA" / "dup.txt"
     b = tmp_path / "dirB" / "dup.txt"
@@ -117,42 +126,45 @@ def test_rel_mode_hash_uniqueness(tmp_path: Path) -> None:
     a.write_text("foo")
     b.write_text("bar")
 
-    id_base = tmp_path / "unrelated_base"  # ensure *both* are outside base
-
+    id_base = tmp_path / "unrelated_base"  # ensure both are *outside*
     pref_a = _run_once(a, "rel", str(id_base), tmp_path / "o1.jsonl")
     pref_b = _run_once(b, "rel", str(id_base), tmp_path / "o2.jsonl")
 
     assert pref_a != pref_b
-    assert len(pref_a) == len(pref_b) == 12
+    assert len(pref_a) == len(pref_b) == HEX_LEN
+    assert set(pref_a) <= HEX_CHARS and set(pref_b) <= HEX_CHARS
 
 
 # --------------------------------------------------------------------------- #
-# 3. hash‑mode – global uniqueness check                                      #
+# 3. hash‑mode – global uniqueness smoke‑test                                 #
 # --------------------------------------------------------------------------- #
 def test_hash_mode_no_collision(tmp_path: Path) -> None:
     """
-    Smoke‑test: 50 one‑char files hashed with default salt must all differ.
+    Create **50** tiny files and assert that the hash‑mode prefix is unique
+    for each one.  This gives a quick regression check against accidental
+    digest truncation or salt mishandling.
     """
     for i in range(50):
         (tmp_path / f"f{i}.txt").write_text("x")
 
-    prefixes: list[str] = []
-    for p in tmp_path.glob("*.txt"):
-        prefixes.append(
-            _run_once(p, "hash", None, tmp_path / f"{p.stem}.jsonl")
-        )
+    prefixes: list[str] = [
+        _run_once(p, "hash", None, tmp_path / f"{p.stem}.jsonl")
+        for p in tmp_path.glob("*.txt")
+    ]
 
-    dupes = [v for v, c in Counter(prefixes).items() if c > 1]
+    dupes = [p for p, cnt in Counter(prefixes).items() if cnt > 1]
     assert not dupes, f"hash collision: {dupes!r}"
+    # Optional extra guard – all prefixes must have the expected length
+    assert all(len(p) == HEX_LEN for p in prefixes)
 
 
 # --------------------------------------------------------------------------- #
-# 4. abs‑mode – must include full normalised path                             #
+# 4. abs‑mode – prefix equals absolute POSIX path                             #
 # --------------------------------------------------------------------------- #
 def test_abs_mode_contains_full_path(tmp_path: Path) -> None:
     """
-    The prefix for ``id_path_mode="abs"`` is the *absolute* POSIX path of
-    the source file (no hashing).
+    For ``id_path_mode="abs"`` the prefix is the **full absolute path** to the
+    source file (converted to POSIX form).  No hashing should occur.
     """
     src = tmp_path / "zzz.txt"
     src.write_text("hello")

@@ -12,11 +12,9 @@
 from __future__ import annotations
 
 import os
-
 from functools import lru_cache
 
 from tiktoken import get_encoding
-
 
 # --------------------------------------------------------------------------- #
 # Configurable cache bound                                                    #
@@ -26,6 +24,7 @@ try:
     _CACHE_SIZE = max(1, int(os.getenv("INGENIOUS_TOKEN_CACHE_SIZE", "32")))
 except ValueError:  # non‑integer → fall back to default
     _CACHE_SIZE = 32
+
 
 @lru_cache(maxsize=_CACHE_SIZE)
 def _enc(name: str):

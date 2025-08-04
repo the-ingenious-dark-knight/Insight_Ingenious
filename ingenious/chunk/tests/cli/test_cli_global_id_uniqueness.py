@@ -1,6 +1,8 @@
 from collections import Counter
+
 import jsonlines
 from typer.testing import CliRunner
+
 from ingenious.chunk.cli import cli
 
 

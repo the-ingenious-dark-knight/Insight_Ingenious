@@ -1,14 +1,20 @@
 # ingenious/chunk/tests/strategy/test_overlap_consistency.py
+from unittest.mock import MagicMock, patch
+
 import pytest
 from tiktoken import get_encoding
 
-from unittest.mock import patch, MagicMock
 from ingenious.chunk.config import ChunkConfig
 from ingenious.chunk.factory import build_splitter
+
 _fake_embed = MagicMock()
 _fake_embed.embed_documents.side_effect = lambda texts: [[0.0] * 5 for _ in texts]
 
-@patch("ingenious.chunk.strategy.langchain_semantic.OpenAIEmbeddings", return_value=_fake_embed)
+
+@patch(
+    "ingenious.chunk.strategy.langchain_semantic.OpenAIEmbeddings",
+    return_value=_fake_embed,
+)
 @pytest.mark.parametrize("strategy", ["recursive", "markdown", "token", "semantic"])
 def test_token_overlap_consistency(_, strategy):
     cfg = ChunkConfig(

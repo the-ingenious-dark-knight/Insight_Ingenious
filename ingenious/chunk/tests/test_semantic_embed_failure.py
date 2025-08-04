@@ -1,4 +1,5 @@
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
 from typer.testing import CliRunner
 
 from ingenious.chunk.cli import cli

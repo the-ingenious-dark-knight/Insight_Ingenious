@@ -1,8 +1,10 @@
 from pathlib import Path
-from typer.testing import CliRunner
+
 import jsonlines
+from typer.testing import CliRunner
 
 from ingenious.chunk.cli import cli
+
 
 def test_cli_respects_custom_separator(tmp_path: Path):
     text = "A---B---C---D---E"
@@ -16,12 +18,18 @@ def test_cli_respects_custom_separator(tmp_path: Path):
         [
             "run",
             str(src),
-            "--strategy",      "recursive",
-            "--chunk-size",    "4",          # small char budget
-            "--chunk-overlap", "0",
-            "--overlap-unit",  "characters",
-            "--separators",    "---",
-            "--output",        str(out_file),
+            "--strategy",
+            "recursive",
+            "--chunk-size",
+            "4",  # small char budget
+            "--chunk-overlap",
+            "0",
+            "--overlap-unit",
+            "characters",
+            "--separators",
+            "---",
+            "--output",
+            str(out_file),
         ],
         catch_exceptions=False,
     )

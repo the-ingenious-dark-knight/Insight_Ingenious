@@ -1,5 +1,6 @@
 # ingenious/chunk/tests/strategy/test_semantic_warning.py
 import pytest
+
 from ingenious.chunk.config import ChunkConfig
 
 

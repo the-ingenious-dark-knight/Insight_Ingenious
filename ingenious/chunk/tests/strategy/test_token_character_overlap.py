@@ -1,6 +1,7 @@
 """
 Character-budget overlap invariant for the *token* strategy.
 """
+
 from ingenious.chunk.config import ChunkConfig
 from ingenious.chunk.factory import build_splitter
 

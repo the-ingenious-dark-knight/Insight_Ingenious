@@ -1,5 +1,6 @@
-import pytest
 import pydantic
+import pytest
+
 from ingenious.chunk.config import ChunkConfig
 
 

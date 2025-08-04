@@ -4,17 +4,19 @@ embedding client raises transport‑level exceptions (timeout, DNS, 5xx).
 The test must cope with constructor signatures that vary between
 OpenAI‑python versions.
 """
+
 from __future__ import annotations
 
 import importlib
 import inspect
 from typing import Any, Dict
+from unittest.mock import MagicMock, patch
 
-from unittest.mock import patch, MagicMock
 import pytest
 from typer.testing import CliRunner
 
 from ingenious.chunk.cli import cli
+
 
 # ---------------------------------------------------------------------------#
 # Helper – build a dummy instance even when __init__ has exotic signature   #
@@ -47,7 +49,8 @@ def _instantiate(exc_cls: type[BaseException]) -> BaseException:  # noqa: D401
         kwargs: Dict[str, Any] = {
             name: None
             for name, p in sig.parameters.items()
-            if p.default is inspect._empty and p.kind in (p.POSITIONAL_OR_KEYWORD, p.KEYWORD_ONLY)
+            if p.default is inspect._empty
+            and p.kind in (p.POSITIONAL_OR_KEYWORD, p.KEYWORD_ONLY)
         }
         return exc_cls(**kwargs)  # type: ignore[arg-type]
     except Exception:
