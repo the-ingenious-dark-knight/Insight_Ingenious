@@ -1,7 +1,8 @@
-from enum import Enum
 from typing import List, Optional
 
 from pydantic import BaseModel, Field, RootModel
+
+from ingenious.common import AuthenticationMethod
 
 
 class ModelConfig(BaseModel):
@@ -11,7 +12,9 @@ class ModelConfig(BaseModel):
     deployment: str = ""
     api_version: str = ""
     deployment: str = ""
-    authentication_mode: str = "default_credential"
+    authentication_method: AuthenticationMethod = (
+        AuthenticationMethod.DEFAULT_CREDENTIAL
+    )
 
 
 class ChatHistoryConfig(BaseModel):
@@ -54,13 +57,6 @@ class ReceiverConfig(BaseModel):
 
 class LoggingConfig(BaseModel):
     pass
-
-
-class AuthenticationMethod(str, Enum):
-    MSI = "msi"
-    CLIENT_ID_AND_SECRET = "client_id_and_secret"
-    DEFAULT_CREDENTIAL = "default_credential"
-    TOKEN = "token"
 
 
 class FileStorageContainer(BaseModel):

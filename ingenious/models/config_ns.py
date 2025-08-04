@@ -26,10 +26,6 @@ class ModelConfig(BaseModel):
     api_type: str = Field(..., description="Type of the API (e.g., rest, grpc)")
     api_version: str = Field(..., description="Version of the API")
     deployment: str = Field("", description="Azure deployment name")
-    authentication_mode: str = Field(
-        "default_credential",
-        description="Authentication mode: default_credential or TOKEN",
-    )
 
 
 class ChatServiceConfig(BaseModel):

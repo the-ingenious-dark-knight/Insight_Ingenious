@@ -7,11 +7,9 @@ from azure.identity import (
 )
 from azure.storage.blob import BlobServiceClient
 
+from ingenious.common import AuthenticationMethod as file_storage_AuthenticationMethod
 from ingenious.core.structured_logging import get_logger
 from ingenious.files.files_repository import IFileStorage
-from ingenious.models.config import (
-    AuthenticationMethod as file_storage_AuthenticationMethod,
-)
 from ingenious.models.config import Config, FileStorageContainer
 
 logger = get_logger(__name__)

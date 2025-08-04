@@ -3,6 +3,7 @@ from typing import Tuple, cast
 from autogen_agentchat.agents import AssistantAgent, UserProxyAgent
 from autogen_agentchat.teams import RoundRobinGroupChat
 
+from ingenious.common import AuthenticationMethod
 from ingenious.common.utils import (
     create_azure_openai_chat_completion_client_with_custom_config,
 )
@@ -36,9 +37,9 @@ class ConversationPattern:
                 base_url=str(self.default_llm_config["base_url"]),
                 api_version=str(self.default_llm_config["api_version"]),
                 deployment=str(self.default_llm_config.get("deployment")),
-                authentication_mode=str(
+                authentication_method=AuthenticationMethod(
                     self.default_llm_config.get(
-                        "authentication_mode", "default_credential"
+                        "authentication_method", AuthenticationMethod.DEFAULT_CREDENTIAL
                     )
                 ),
                 api_key=str(self.default_llm_config.get("api_key", "")),

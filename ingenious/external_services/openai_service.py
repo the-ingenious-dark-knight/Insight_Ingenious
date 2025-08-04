@@ -8,10 +8,10 @@ from openai.types.chat import (
     ChatCompletionToolParam,
 )
 
+from ingenious.common import AuthenticationMethod
 from ingenious.core.structured_logging import get_logger
 from ingenious.errors.content_filter_error import ContentFilterError
 from ingenious.errors.token_limit_exceeded_error import TokenLimitExceededError
-from ingenious.models.config import AuthenticationMethod
 
 logger = get_logger(__name__)
 
@@ -24,9 +24,9 @@ class OpenAIService:
         api_version: str,
         open_ai_model: str,
         deployment: str,
-        authentication_mode: AuthenticationMethod = AuthenticationMethod.DEFAULT_CREDENTIAL,
+        authentication_method: AuthenticationMethod = AuthenticationMethod.DEFAULT_CREDENTIAL,
     ):
-        if authentication_mode == AuthenticationMethod.DEFAULT_CREDENTIAL:
+        if authentication_method == AuthenticationMethod.DEFAULT_CREDENTIAL:
             try:
                 token_provider = get_bearer_token_provider(
                     DefaultAzureCredential(),
@@ -56,23 +56,25 @@ class OpenAIService:
                     "Make sure you're logged in with 'az login' or have proper environment variables set"
                 )
                 raise ValueError(f"Azure authentication failed: {e}")
-        elif authentication_mode == AuthenticationMethod.TOKEN:
+        elif authentication_method == AuthenticationMethod.TOKEN:
             self.client = AzureOpenAI(
                 azure_endpoint=azure_endpoint,
                 api_key=api_key,
                 api_version=api_version,
                 azure_deployment=deployment,
             )
-        elif authentication_mode == AuthenticationMethod.CLIENT_ID_AND_SECRET:
+        elif authentication_method == AuthenticationMethod.CLIENT_ID_AND_SECRET:
             # TODO: Implement CLIENT_ID_AND_SECRET authentication
             raise NotImplementedError(
                 "CLIENT_ID_AND_SECRET authentication not yet implemented"
             )
-        elif authentication_mode == AuthenticationMethod.MSI:
+        elif authentication_method == AuthenticationMethod.MSI:
             # TODO: Implement MSI authentication
             raise NotImplementedError("MSI authentication not yet implemented")
         else:
-            raise ValueError(f"Unsupported authentication mode: {authentication_mode}")
+            raise ValueError(
+                f"Unsupported authentication mode: {authentication_method}"
+            )
 
         self.model = open_ai_model
 

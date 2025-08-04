@@ -3,6 +3,7 @@ from typing import Any, Dict, Optional
 from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
 from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 
+from ingenious.common import AuthenticationMethod
 from ingenious.models.config import ModelConfig
 
 
@@ -27,7 +28,7 @@ def create_azure_openai_chat_completion_client_with_model_config(
         api_version=model_config.api_version,
         deployment=model_config.deployment,
         api_key=model_config.api_key,
-        authentication_mode=model_config.authentication_mode,
+        authentication_method=model_config.authentication_method,
     )
 
 
@@ -37,7 +38,7 @@ def create_azure_openai_chat_completion_client_with_custom_config(
     api_version: str,
     deployment: Optional[str] = None,
     api_key: Optional[str] = None,
-    authentication_mode: str = "default_credential",
+    authentication_method: AuthenticationMethod = AuthenticationMethod.DEFAULT_CREDENTIAL,
 ) -> AzureOpenAIChatCompletionClient:
     """
     Factory method to create an AzureOpenAIChatCompletionClient with custom parameters.
@@ -51,7 +52,7 @@ def create_azure_openai_chat_completion_client_with_custom_config(
         api_version (str): Azure OpenAI API version
         deployment (Optional[str]): Azure deployment name. If None, uses model name
         api_key (Optional[str]): API key for authentication. Required if not using default credential
-        authentication_mode (str): Authentication mode ("default_credential" or other)
+        authentication_method (str): Authentication mode ("default_credential" or other)
 
     Returns:
         AzureOpenAIChatCompletionClient: Configured client instance
@@ -74,8 +75,8 @@ def create_azure_openai_chat_completion_client_with_custom_config(
         "api_version": api_version,
     }
 
-    # Handle authentication based on authentication mode
-    if authentication_mode == "default_credential":
+    # Handle authentication based on authentication method
+    if authentication_method == AuthenticationMethod.DEFAULT_CREDENTIAL:
         # Use Azure Default Credential for authentication
         token_provider = get_bearer_token_provider(
             DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default"

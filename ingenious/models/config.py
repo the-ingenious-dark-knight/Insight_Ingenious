@@ -1,8 +1,8 @@
-from enum import Enum
 from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
+from ingenious.common import AuthenticationMethod
 from ingenious.models import config as config_models
 from ingenious.models import config_ns as config_ns_models
 from ingenious.models import profile as profile_models
@@ -31,7 +31,10 @@ class ModelConfig(config_ns_models.ModelConfig):
     api_key: str
     base_url: str
     deployment: str = ""
-    authentication_mode: str = "default_credential"
+    authentication_method: AuthenticationMethod = Field(
+        AuthenticationMethod.DEFAULT_CREDENTIAL,
+        description="OpenAI SAS Authentication Method",
+    )
 
     def __init__(
         self, config: config_ns_models.ModelConfig, profile: profile_models.ModelConfig
@@ -51,7 +54,7 @@ class ModelConfig(config_ns_models.ModelConfig):
             deployment=deployment,
             base_url=profile.base_url,
             api_key=profile.api_key,
-            authentication_mode=profile.authentication_mode,
+            authentication_method=profile.authentication_method,
         )
 
 
@@ -147,13 +150,6 @@ class LocaldbConfig(config_ns_models.LocaldbConfig):
             sample_csv_path=config.sample_csv_path,
             sample_database_name=config.sample_database_name,
         )
-
-
-class AuthenticationMethod(str, Enum):
-    MSI = "msi"
-    CLIENT_ID_AND_SECRET = "client_id_and_secret"
-    DEFAULT_CREDENTIAL = "default_credential"
-    TOKEN = "token"
 
 
 class FileStorageContainer(config_ns_models.FileStorageContainer):

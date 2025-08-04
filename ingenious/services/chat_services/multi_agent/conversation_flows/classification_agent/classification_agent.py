@@ -6,6 +6,7 @@ from autogen_agentchat.messages import TextMessage
 from autogen_core import EVENT_LOGGER_NAME, CancellationToken
 
 import ingenious.config.config as config
+from ingenious.common import AuthenticationMethod
 from ingenious.common.utils import (
     create_azure_openai_chat_completion_client_with_custom_config,
 )
@@ -74,9 +75,8 @@ class ConversationFlow:
             base_url=str(model_config.base_url),
             api_version=str(model_config.api_version),
             deployment=str(model_config.deployment or model_config.model),
-            authentication_mode=str(
-                model_config.authentication_mode or "default_credential"
-            ),
+            authentication_method=model_config.authentication_method
+            or AuthenticationMethod.DEFAULT_CREDENTIAL,
             api_key=str(model_config.api_key or ""),
         )
 
