@@ -1,6 +1,6 @@
 # Insight Ingenious
 
-[![Version](https://img.shields.io/badge/version-0.2.1-blue.svg)](https://github.com/Insight-Services-APAC/ingenious)
+[![Version](https://img.shields.io/badge/version-0.2.2-blue.svg)](https://github.com/Insight-Services-APAC/ingenious)
 [![Python](https://img.shields.io/badge/python-3.13+-green.svg)](https://www.python.org/downloads/)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Insight-Services-APAC/ingenious)
 [![License](https://img.shields.io/badge/license-MIT-purple.svg)](LICENSE)
