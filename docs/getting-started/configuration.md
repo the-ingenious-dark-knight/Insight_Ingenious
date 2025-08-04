@@ -242,7 +242,7 @@ INGENIOUS_MODELS__0__BASE_URL=https://your-resource.openai.azure.com/openai/depl
 INGENIOUS_MODELS__0__DEPLOYMENT=gpt-4o-mini
 
 # Additional models (if needed)
-INGENIOUS_MODELS__1__MODEL=gpt-4
+INGENIOUS_MODELS__1__MODEL=gpt-4.1-nano
 INGENIOUS_MODELS__1__API_KEY=your-api-key-2
 # ... etc
 ```
@@ -747,7 +747,7 @@ AZURE_OPENAI_API_KEY=your-api-key
 AZURE_OPENAI_BASE_URL=https://your-resource.openai.azure.com/
 AZURE_OPENAI_DEPLOYMENT=your-deployment-name
 AZURE_OPENAI_API_VERSION=2024-08-01-preview
-AZURE_OPENAI_MODEL_NAME=gpt-4
+AZURE_OPENAI_MODEL_NAME=gpt-4.1-nano
 ```
 
 ### Profile and Path Variables

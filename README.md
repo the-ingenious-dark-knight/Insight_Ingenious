@@ -49,7 +49,7 @@ Get up and running in 5 minutes with Azure OpenAI!
     **Required configuration (add to .env file)**:
     ```bash
     # Model Configuration (only INGENIOUS_* variables are used by the system)
-    INGENIOUS_MODELS__0__MODEL=gpt-4
+    INGENIOUS_MODELS__0__MODEL=gpt-4.1-nano
     INGENIOUS_MODELS__0__API_TYPE=rest
     INGENIOUS_MODELS__0__API_VERSION=2024-12-01-preview
     INGENIOUS_MODELS__0__DEPLOYMENT=your-gpt4-deployment-name

@@ -54,7 +54,7 @@ Create a `.env` file with your Azure OpenAI credentials:
 ```bash
 # .env
 # Configure AI model using nested environment variables format
-INGENIOUS_MODELS__0__MODEL=gpt-4
+INGENIOUS_MODELS__0__MODEL=gpt-4.1-nano
 INGENIOUS_MODELS__0__API_TYPE=rest
 INGENIOUS_MODELS__0__API_VERSION=2024-12-01-preview
 INGENIOUS_MODELS__0__DEPLOYMENT=your-gpt4-deployment-name
