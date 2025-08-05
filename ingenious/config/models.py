@@ -51,6 +51,9 @@ class ModelSettings(BaseModel):
     deployment: str = Field("", description="Azure OpenAI deployment name (optional)")
     api_key: str = Field("", description="API key for the model service")
     base_url: str = Field("", description="Base URL for the API endpoint")
+    client_id: str = Field(
+        "", description="Azure client ID for MSI authentication (optional)"
+    )
     authentication_method: AuthenticationMethod = Field(
         AuthenticationMethod.DEFAULT_CREDENTIAL,
         description="OpenAI SAS Authentication Method",
@@ -199,7 +202,11 @@ class WebSettings(BaseModel):
     asynchronous: bool = Field(
         False, description="Enable asynchronous response handling"
     )
-    authentication: WebAuthenticationSettings = WebAuthenticationSettings()
+    authentication: WebAuthenticationSettings = Field(
+        default_factory=lambda: WebAuthenticationSettings(
+            enable=False, username="admin", password="", type="basic"
+        )
+    )
 
     @field_validator("port")
     @classmethod
@@ -268,8 +275,32 @@ class FileStorageSettings(BaseModel):
     Supports local and cloud storage options.
     """
 
-    revisions: FileStorageContainerSettings = FileStorageContainerSettings()
-    data: FileStorageContainerSettings = FileStorageContainerSettings()
+    revisions: FileStorageContainerSettings = Field(
+        default_factory=lambda: FileStorageContainerSettings(
+            enable=True,
+            storage_type="local",
+            container_name="",
+            path="./",
+            add_sub_folders=True,
+            url="",
+            client_id="",
+            token="",
+            authentication_method=AuthenticationMethod.DEFAULT_CREDENTIAL,
+        )
+    )
+    data: FileStorageContainerSettings = Field(
+        default_factory=lambda: FileStorageContainerSettings(
+            enable=True,
+            storage_type="local",
+            container_name="",
+            path="./",
+            add_sub_folders=True,
+            url="",
+            client_id="",
+            token="",
+            authentication_method=AuthenticationMethod.DEFAULT_CREDENTIAL,
+        )
+    )
 
 
 class ReceiverSettings(BaseModel):

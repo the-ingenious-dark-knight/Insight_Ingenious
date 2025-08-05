@@ -7,11 +7,12 @@ from ingenious.common import AuthenticationMethod
 
 class ModelConfig(BaseModel):
     model: str
-    api_key: str
+    api_key: str = ""
     base_url: str
     deployment: str = ""
     api_version: str = ""
     deployment: str = ""
+    client_id: str = ""
     authentication_method: AuthenticationMethod = (
         AuthenticationMethod.DEFAULT_CREDENTIAL
     )
@@ -71,11 +72,21 @@ class FileStorageContainer(BaseModel):
 
 class FileStorage(BaseModel):
     revisions: FileStorageContainer = Field(
-        default_factory=lambda: FileStorageContainer(),
+        default_factory=lambda: FileStorageContainer(
+            url="",
+            client_id="",
+            token="",
+            authentication_method=AuthenticationMethod.DEFAULT_CREDENTIAL,
+        ),
         description="File Storage configuration for revisions",
     )
     data: FileStorageContainer = Field(
-        default_factory=lambda: FileStorageContainer(),
+        default_factory=lambda: FileStorageContainer(
+            url="",
+            client_id="",
+            token="",
+            authentication_method=AuthenticationMethod.DEFAULT_CREDENTIAL,
+        ),
         description="File Storage configuration for data",
     )
 
