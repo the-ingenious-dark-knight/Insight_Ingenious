@@ -1,4 +1,5 @@
-"""Implements the central registry for all text chunking strategies.
+"""
+Implements the central registry for all text chunking strategies.
 
 Purpose & Context
 -----------------
@@ -26,17 +27,6 @@ Key Algorithms & Design Choices
     sibling modules, it ensures that their ``@register`` decorators are executed
     when the ``ingenious.chunk.strategy`` package is first imported. This makes
     the entire registration process automatic and highly extensible.
-
-Dev-Guide Compliance Notes
---------------------------
--   **Architectural Pattern**: This module is a textbook example of an extensible,
-    pluggable architecture, a core principle of the Insight Ingenious design philosophy.
--   **Type Safety**: All functions and the registry itself are fully type-hinted
-    using ``typing.Callable`` and ``typing.Dict``, with forward references where
-    needed.
--   **Error Handling**: The ``get`` function provides robust error handling,
-    catching a ``KeyError`` and raising a more semantic ``ValueError`` to callers,
-    as recommended by DI-101.
 
 Usage Example
 -------------
@@ -80,7 +70,11 @@ if TYPE_CHECKING:
 _SPLITTER_REGISTRY: Dict[str, Callable[[ChunkConfig], "TextSplitter"]] = {}
 
 
-def register(name: str) -> Callable[[Callable], Callable]:
+def register(
+    name: str,
+) -> Callable[
+    [Callable[[ChunkConfig], "TextSplitter"]], Callable[[ChunkConfig], "TextSplitter"]
+]:
     """A decorator that registers a chunking strategy factory function.
 
     Rationale:
@@ -101,7 +95,9 @@ def register(name: str) -> Callable[[Callable], Callable]:
         decorator that performs the registration in the `_SPLITTER_REGISTRY`.
     """
 
-    def _decorator(fn: Callable) -> Callable:
+    def _decorator(
+        fn: Callable[[ChunkConfig], "TextSplitter"],
+    ) -> Callable[[ChunkConfig], "TextSplitter"]:
         _SPLITTER_REGISTRY[name] = fn
         return fn
 

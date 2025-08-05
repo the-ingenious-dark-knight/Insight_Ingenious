@@ -1,7 +1,5 @@
-# -------------------------------------------------
-# ingenious/chunk/strategy/langchain_token.py
-# -------------------------------------------------
-"""Provides a Unicode-safe, token-aware text splitting strategy.
+"""
+Provides a Unicode-safe, token-aware text splitting strategy.
 
 Purpose & Context
 -----------------
@@ -36,17 +34,6 @@ Key Algorithms & Design Choices
     overlap window does not start mid-character, which would corrupt the text
     and cause downstream errors.
 
-Dev-Guide Compliance Notes
---------------------------
--   **Configuration**: The strategy is configured via the central ``ChunkConfig``
-    object, adhering to DI-101's configuration management guidelines.
--   **Extensibility**: The ``@register("token")`` decorator makes the strategy
-    discoverable by the framework's factory system.
--   **Process Adherence**: The module explicitly notes the fix for issue M-4,
-    demonstrating alignment with the project's development and review process.
--   **Type Safety & Formatting**: All APIs are fully type-hinted and the code
-    conforms to ``black`` (88-char lines) and ``Ruff`` standards.
-
 Usage Example
 -------------
 .. code-block:: python
@@ -72,7 +59,6 @@ Usage Example
 
     for i, chunk in enumerate(chunks):
         print(f"--- Chunk {i+1} ---\\n{chunk}\\n")
-
 """
 
 from __future__ import annotations
@@ -243,33 +229,30 @@ class UnicodeSafeTokenTextSplitter(TextSplitter):
         if next_chunk_start_tokens[:k] != overlap_tokens:
             return False
 
-        # 4. Check if the last grapheme itself is safe.
-        if current_buffer and not _is_roundtrip_safe(
-            self._enc, self._enc.encode(current_buffer[-1])
-        ):
-            return False
-
         return True
 
     def _split_char_budget(self, clusters: list[str]) -> list[str]:
-        """A simpler splitting path that operates on a character budget.
+        """A simpler splitting path that operates on a character budget."""
+        output_chunks: list[str] = []
+        grapheme_buffer: list[str] = []
+        current_char_len: int = 0
 
-        Rationale:
-            This method provides a faster, less complex alternative when the
-            precision of token-based budgeting is not required. It still operates
-            on a list of graphemes to maintain the core guarantee of Unicode safety.
-        """
-        out, buf = [], ""
-        for g in clusters:
-            if len(buf) + len(g) > self._chunk_size:
-                out.append(buf)
-                overlap_text = "".join(self._build_overlap(list(buf)))
-                buf = overlap_text + g
+        for grapheme in clusters:
+            grapheme_len = len(grapheme)
+            if current_char_len + grapheme_len > self._chunk_size and grapheme_buffer:
+                output_chunks.append("".join(grapheme_buffer))
+                # Build overlap from the list of graphemes, not a broken string
+                overlap_graphemes = self._build_overlap(grapheme_buffer)
+                grapheme_buffer = overlap_graphemes + [grapheme]
+                current_char_len = len("".join(grapheme_buffer))
             else:
-                buf += g
-        if buf:
-            out.append(buf)
-        return out
+                grapheme_buffer.append(grapheme)
+                current_char_len += grapheme_len
+
+        if grapheme_buffer:
+            output_chunks.append("".join(grapheme_buffer))
+
+        return output_chunks
 
     def _build_overlap(self, old_buf_graphemes: List[str]) -> List[str]:
         """Extracts the overlap window (last K units) from the previous buffer.

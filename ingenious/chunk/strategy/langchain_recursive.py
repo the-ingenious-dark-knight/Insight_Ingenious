@@ -32,15 +32,6 @@ Key Algorithms & Design Choices
     overlap. This ensures that overlap behavior is identical across all chunking
     strategies in the framework, regardless of the underlying splitting logic.
 
-Dev-Guide Compliance Notes
---------------------------
--   **Configuration**: The strategy is driven by the ``ChunkConfig`` object,
-    respecting the project's centralized configuration principle (DI-101).
--   **Extensibility**: The ``@register("recursive")`` decorator makes the strategy
-    discoverable by the framework's factory system.
--   **Type Safety**: All public and private APIs are fully type-hinted.
--   **Formatting**: Code conforms to ``black`` (88-char lines) and ``Ruff``.
-
 Usage Example
 -------------
 .. code-block:: python
@@ -77,7 +68,7 @@ from types import MappingProxyType
 from typing import Any, Callable, Iterable, List, Optional
 
 from langchain_core.documents import Document
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter, TextSplitter
 
 from ingenious.chunk.utils.overlap import inject_overlap
 from ingenious.chunk.utils.token_len import token_len
@@ -88,7 +79,7 @@ from . import register
 __all__: list[str] = ["create"]
 
 
-class _OverlapWrapper:
+class _OverlapWrapper(TextSplitter):
     """A private helper that wraps a splitter to inject bidirectional overlap.
 
     Rationale:
@@ -200,7 +191,7 @@ class RecursiveTokenSplitter(RecursiveCharacterTextSplitter):
         else:  # "tokens" (default)
             self._measure = lambda s: token_len(s, self._encoding_name)
 
-    def split_text(self, text: str) -> List[str]:  # type: ignore[override]
+    def split_text(self, text: str) -> List[str]:
         """Splits text into chunks respecting a token or character budget.
 
         Implementation Notes:
@@ -258,7 +249,7 @@ class RecursiveTokenSplitter(RecursiveCharacterTextSplitter):
 
 
 @register("recursive")
-def create(cfg: ChunkConfig) -> _OverlapWrapper | RecursiveTokenSplitter:
+def create(cfg: ChunkConfig) -> TextSplitter:
     """Factory for the 'recursive' splitter, choosing an implementation by unit.
 
     Rationale:

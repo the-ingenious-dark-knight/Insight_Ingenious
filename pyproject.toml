@@ -80,7 +80,7 @@ dev = [
 # Minimal installation - basic API functionality only
 minimal = []
 
-dev = [
+test = [
   "httpx==0.28.1",
   "jsonpickle==4.1.1",
   "mypy==1.16.1",
@@ -99,7 +99,8 @@ dev = [
   "types-requests==2.32.4.20250611",
   "vulture==2.14",
   "reportlab==4.4.2",
-  "hypothesis==6.136.2"
+  "hypothesis==6.136.2",
+  "types-regex==2024.11.6.20250403"
 ]
 
 # Core features - common production functionality
@@ -296,6 +297,15 @@ ignore_errors = true
 module = ["tests.*"]
 disallow_untyped_defs = false
 disallow_incomplete_defs = false
+check_untyped_defs = false
+disallow_untyped_decorators = false
+
+[[tool.mypy.overrides]]
+# Relax mypy only for the *library-internal* test package
+module = ["ingenious.chunk.tests.*"]
+ignore_errors = true
+disallow_untyped_defs = false        # don’t require -> None, param hints, etc.
+ignore_missing_imports = true        # silence missing stubs (e.g. `regex`)
 check_untyped_defs = false
 disallow_untyped_decorators = false
 

@@ -80,10 +80,10 @@ from __future__ import annotations
 
 import copy
 from types import MappingProxyType
-from typing import Any, Iterable, List
+from typing import Any, Dict, Iterable, List
 
 from langchain_core.documents import Document
-from langchain_text_splitters import MarkdownTextSplitter
+from langchain_text_splitters import MarkdownTextSplitter, TextSplitter
 
 from ingenious.chunk.utils.overlap import inject_overlap
 
@@ -91,7 +91,7 @@ from ..config import ChunkConfig
 from . import register
 
 
-class MarkdownOverlapWrapper:
+class MarkdownOverlapWrapper(TextSplitter):
     """Wraps a LangChain MarkdownTextSplitter to inject bidirectional overlap.
 
     Rationale:
@@ -125,7 +125,7 @@ class MarkdownOverlapWrapper:
         self._enc = enc
         self._unit = unit
 
-    def split_text(self, text: str) -> list[str]:
+    def split_text(self, text: str) -> List[str]:
         """Splits text into Markdown-aware chunks and adds bidirectional overlap.
 
         Rationale:
@@ -186,7 +186,7 @@ class MarkdownOverlapWrapper:
         return self._split_text_with_metadata(texts, metadatas)
 
     def _split_text_with_metadata(
-        self, texts: List[str], metadatas: List[dict]
+        self, texts: List[str], metadatas: List[Dict[str, Any]]
     ) -> List[Document]:
         """Helper to split texts and re-associate metadata."""
         doc_chunks = []
@@ -252,7 +252,7 @@ class MarkdownOverlapWrapper:
 
 
 @register("markdown")
-def create(cfg: ChunkConfig) -> MarkdownOverlapWrapper:
+def create(cfg: ChunkConfig) -> TextSplitter:
     """Builds a Markdown splitter that respects custom overlap settings.
 
     Rationale:
