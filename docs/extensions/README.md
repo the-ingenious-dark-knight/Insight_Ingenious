@@ -55,10 +55,13 @@ ingenious/
 ## Best Practices
 
 - **Follow naming conventions** - Use descriptive, lowercase names with underscores
+- **Match directory structure** - Flow directories must match the flow name exactly
 - **Test thoroughly** - Test your extensions with different inputs and scenarios
+- **Handle errors gracefully** - Always provide fallback templates and error handling
 - **Document well** - Include clear instructions and examples
 - **Keep it modular** - Design extensions to be reusable and maintainable
 - **Version control** - Track changes to your custom extensions
+- **Test both patterns** - Verify your flows work with both local and Azure storage configurations
 
 ## Need Help?
 
