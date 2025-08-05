@@ -1,7 +1,4 @@
 """
-Insight Ingenious — End‑to‑End Tests for the *ingenious chunk* CLI
-=================================================================
-
 Purpose & Context
 -----------------
 This module houses a comprehensive **end‑to‑end test‑suite** for the

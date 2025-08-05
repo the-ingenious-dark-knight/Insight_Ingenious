@@ -1,7 +1,4 @@
 """
-ingenious.chunk.tests.test_cli_no_matching_files
-===============================================
-
 Quick smoke test for CLI ``ingen chunk run`` error handling.
 
 Purpose & context

@@ -1,4 +1,5 @@
-"""Tests for the Unicode-aware token-based text splitter.
+"""
+Tests for the Unicode-aware token-based text splitter.
 
 Purpose & Context:
     This module provides property-based tests for the `UnicodeSafeTokenTextSplitter`.

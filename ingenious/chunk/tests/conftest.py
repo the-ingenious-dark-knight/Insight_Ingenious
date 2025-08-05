@@ -1,4 +1,5 @@
-"""Provides shared session-scoped fixtures for pytest.
+"""
+Provides shared session-scoped fixtures for pytest.
 
 Purpose & Context
 -----------------

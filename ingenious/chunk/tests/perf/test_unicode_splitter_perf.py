@@ -1,4 +1,5 @@
-"""Guards UnicodeSafeTokenTextSplitter against performance regressions.
+"""
+Guards UnicodeSafeTokenTextSplitter against performance regressions.
 
 This module provides a performance regression test for the
 `UnicodeSafeTokenTextSplitter` class, ensuring its text-splitting algorithm
@@ -26,7 +27,6 @@ The test asserts that the number of calls is bound by a linear function of the
 input size ($4 \times N$, where $N$ is the number of graphemes). This provides a
 generous but firm upper bound that is orders of magnitude lower than the
 $O(N^2)$ behaviour we are guarding against.
-
 """
 
 from __future__ import annotations

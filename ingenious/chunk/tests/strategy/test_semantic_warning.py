@@ -1,4 +1,5 @@
-"""Tests configuration validation for the semantic chunking strategy.
+"""
+Tests configuration validation for the semantic chunking strategy.
 
 Purpose & context:
     This module tests the warning mechanisms within the `ChunkConfig` data class,

@@ -1,4 +1,5 @@
-"""Unit tests for edge cases in the `inject_overlap` utility.
+"""
+Unit tests for edge cases in the `inject_overlap` utility.
 
 This test suite validates the robustness of the `inject_overlap` utility, a
 critical component of the Insight Ingenious data preprocessing pipeline. The function's

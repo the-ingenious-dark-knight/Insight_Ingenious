@@ -1,4 +1,5 @@
-"""Unit tests for semantic document chunking configuration and logic.
+"""
+Unit tests for semantic document chunking configuration and logic.
 
 Purpose & Context:
     This module provides unit tests for the semantic chunking strategy within the

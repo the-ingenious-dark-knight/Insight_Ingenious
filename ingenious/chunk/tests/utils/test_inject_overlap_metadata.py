@@ -1,4 +1,5 @@
-"""insight ingenious ▸ chunk ▸ tests ▸ utils ▸ *test_inject_overlap_metadata*
+"""
+insight ingenious ▸ chunk ▸ tests ▸ utils ▸ *test_inject_overlap_metadata*
 ---------------------------------------------------------------------
 Regression‑test module ensuring that the *inject_overlap* utility does **not**
 introduce metadata aliasing across the chunks it produces.

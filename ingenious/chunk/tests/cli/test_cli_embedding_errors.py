@@ -1,4 +1,5 @@
-"""Tests for CLI resilience to OpenAI API network failures.
+"""
+Tests for CLI resilience to OpenAI API network failures.
 
 Purpose & Context
 -----------------

@@ -1,4 +1,5 @@
-"""Tests for ``ingenious.chunk.config.ChunkConfig``.
+"""
+Tests for ``ingenious.chunk.config.ChunkConfig``.
 
 Purpose & context
 -----------------

@@ -1,4 +1,5 @@
-"""End-to-end tests for the chunker CLI's ID path generation modes.
+"""
+End-to-end tests for the chunker CLI's ID path generation modes.
 
 Purpose & Context
 -----------------

@@ -1,4 +1,5 @@
-"""Integration tests for the chunking command-line interface (CLI).
+"""
+Integration tests for the chunking command-line interface (CLI).
 
 Purpose & Context:
 This module verifies the behavior of the CLI application defined in

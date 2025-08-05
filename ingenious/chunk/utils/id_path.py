@@ -1,7 +1,4 @@
 """
-ingenious.chunk.utils.id_path
-=============================
-
 Purpose & Context
 -----------------
 The helper converts an arbitrary *source* representation (file‑system path

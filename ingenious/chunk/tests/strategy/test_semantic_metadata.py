@@ -1,4 +1,5 @@
-"""Regression test for metadata preservation in the semantic chunker.
+"""
+Regression test for metadata preservation in the semantic chunker.
 
 Purpose & Context:
 ------------------

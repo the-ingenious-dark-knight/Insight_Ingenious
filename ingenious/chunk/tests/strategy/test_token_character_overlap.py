@@ -1,4 +1,5 @@
-"""Tests for text chunker invariants in the Insight Ingenious framework.
+"""
+Tests for text chunker invariants in the Insight Ingenious framework.
 
 Purpose & Context
 -----------------

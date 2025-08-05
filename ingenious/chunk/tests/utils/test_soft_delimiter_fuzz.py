@@ -1,4 +1,5 @@
-"""Fuzz tests for the soft delimiter logic in the `inject_overlap` utility.
+"""
+Fuzz tests for the soft delimiter logic in the `inject_overlap` utility.
 
 Purpose & Context:
     This module provides property-based tests for the `inject_overlap` function

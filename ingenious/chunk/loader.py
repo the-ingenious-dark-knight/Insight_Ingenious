@@ -1,7 +1,4 @@
 """
-ingenious.chunk.loader
-======================
-
 Memory‑robust document loader that **streams large JSON payloads** to keep
 peak RAM bounded – even on resource‑constrained workers.
 

@@ -1,6 +1,5 @@
-# -------------------------------------------------
-# ingenious/chunk/tests/test_tiny_chunks_invariants.py
-"""Tests invariants for the text chunking algorithm.
+"""
+Tests invariants for the text chunking algorithm.
 
 Purpose & Context:
     This module contains pytest tests that verify critical invariants of the output

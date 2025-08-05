@@ -1,4 +1,5 @@
-"""Tests grapheme cluster integrity during text chunking.
+"""
+Tests grapheme cluster integrity during text chunking.
 
 Purpose & Context:
     This module contains unit tests for the `ingenious.chunk` subsystem,

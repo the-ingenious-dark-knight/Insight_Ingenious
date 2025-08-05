@@ -1,4 +1,5 @@
-"""Comprehensive tests for the text chunk overlapping utility (`inject_overlap`).
+"""
+Comprehensive tests for the text chunk overlapping utility (`inject_overlap`).
 
 Purpose & Context:
 This module provides a complete test suite for the chunk overlapping utility,

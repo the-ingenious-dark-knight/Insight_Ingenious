@@ -1,4 +1,5 @@
-"""Tests the Command Line Interface (CLI) for the ingenious.chunk module.
+"""
+Tests the Command Line Interface (CLI) for the ingenious.chunk module.
 
 This test module validates the core document ingestion and chunking CLI, which is a
 foundational step in the Insight Ingenious RAG pipeline. These tests ensure that the

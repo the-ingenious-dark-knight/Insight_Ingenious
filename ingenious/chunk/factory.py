@@ -1,7 +1,4 @@
 """
-ingenious.chunk.factory
-=======================
-
 Build an **independent**, LangChain‑compatible ``TextSplitter`` from a frozen
 :class:`~ingenious.chunk.config.ChunkConfig`.
 
