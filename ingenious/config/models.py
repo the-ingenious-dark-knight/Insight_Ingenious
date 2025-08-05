@@ -5,7 +5,7 @@ This module contains all the BaseModel classes that define
 the structure and validation for different configuration sections.
 """
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from ingenious.common import AuthenticationMethod
 
@@ -54,6 +54,14 @@ class ModelSettings(BaseModel):
     client_id: str = Field(
         "", description="Azure client ID for MSI authentication (optional)"
     )
+    client_secret: str = Field(
+        "",
+        description="Azure client secret for CLIENT_ID_AND_SECRET authentication (optional)",
+    )
+    tenant_id: str = Field(
+        "",
+        description="Azure tenant ID for CLIENT_ID_AND_SECRET authentication (optional)",
+    )
     authentication_method: AuthenticationMethod = Field(
         AuthenticationMethod.DEFAULT_CREDENTIAL,
         description="OpenAI SAS Authentication Method",
@@ -97,6 +105,34 @@ class ModelSettings(BaseModel):
         if v and not v.startswith(("http://", "https://")):
             raise ValueError("Base URL must start with 'http://' or 'https://'")
         return v
+
+    @model_validator(mode="after")
+    def validate_client_credentials(self):
+        """Validate client credentials for CLIENT_ID_AND_SECRET authentication."""
+        if self.authentication_method == AuthenticationMethod.CLIENT_ID_AND_SECRET:
+            if not self.client_id:
+                raise ValueError(
+                    "client_id is required when authentication_method is 'client_id_and_secret'. "
+                    "Set the appropriate environment variable (e.g., AZURE_CLIENT_ID) "
+                    "or provide a valid client ID."
+                )
+            if not self.client_secret:
+                raise ValueError(
+                    "client_secret is required when authentication_method is 'client_id_and_secret'. "
+                    "Set the appropriate environment variable (e.g., AZURE_CLIENT_SECRET) "
+                    "or provide a valid client secret."
+                )
+            # For tenant_id, we allow it to be empty if AZURE_TENANT_ID env var is available
+            if not self.tenant_id:
+                import os
+
+                if not os.getenv("AZURE_TENANT_ID"):
+                    raise ValueError(
+                        "tenant_id is required when authentication_method is 'client_id_and_secret'. "
+                        "Set the appropriate environment variable (AZURE_TENANT_ID) "
+                        "or provide a valid tenant ID in configuration."
+                    )
+        return self
 
 
 class ChatServiceSettings(BaseModel):

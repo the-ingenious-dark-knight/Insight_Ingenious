@@ -13,6 +13,8 @@ class ModelConfig(BaseModel):
     api_version: str = ""
     deployment: str = ""
     client_id: str = ""
+    client_secret: str = ""
+    tenant_id: str = ""
     authentication_method: AuthenticationMethod = (
         AuthenticationMethod.DEFAULT_CREDENTIAL
     )

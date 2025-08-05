@@ -375,26 +375,54 @@ class ValidateCommand(BaseCommand):
                     # Check if first model has required fields based on authentication method
                     first_model = settings.models[0]
 
-                    # API key is only required for TOKEN authentication
-                    api_key_required = (
-                        first_model.authentication_method == AuthenticationMethod.TOKEN
-                    )
-
                     # Check required fields based on authentication method
+                    auth_method = first_model.authentication_method
+
+                    # Base fields required for all authentication methods
+                    required_fields_check = first_model.base_url and first_model.model
+
+                    # Additional validation based on authentication method
+                    auth_validation_passed = True
+                    auth_validation_message = ""
+
+                    if auth_method == AuthenticationMethod.DEFAULT_CREDENTIAL:
+                        # No additional fields required for default credential
+                        auth_validation_message = "default_credential authentication (no additional credentials required)"
+                    elif auth_method == AuthenticationMethod.MSI:
+                        # MSI requires client_id
+                        if not first_model.client_id:
+                            auth_validation_passed = False
+                        else:
+                            auth_validation_message = (
+                                "MSI authentication with client_id"
+                            )
+                    elif auth_method == AuthenticationMethod.TOKEN:
+                        # TOKEN requires api_key
+                        if not first_model.api_key:
+                            auth_validation_passed = False
+                        else:
+                            auth_validation_message = (
+                                "token authentication with API key"
+                            )
+                    elif auth_method == AuthenticationMethod.CLIENT_ID_AND_SECRET:
+                        # CLIENT_ID_AND_SECRET requires both client_id and client_secret
+                        if not first_model.client_id or not first_model.client_secret:
+                            auth_validation_passed = False
+                        else:
+                            auth_validation_message = (
+                                "client_id_and_secret authentication"
+                            )
+
+                    # Overall validation check
                     required_fields_check = (
-                        first_model.base_url
-                        and first_model.model
-                        and (not api_key_required or first_model.api_key)
+                        required_fields_check and auth_validation_passed
                     )
 
                     if required_fields_check:
                         self.print_success(
                             "Primary model environment configuration is complete"
                         )
-                        if not api_key_required:
-                            self.console.print(
-                                f"    📋 Using {first_model.authentication_method.value} authentication (no API key required)"
-                            )
+                        self.console.print(f"    📋 Using {auth_validation_message}")
                         return True, issues
                     else:
                         missing_fields = []
@@ -402,8 +430,39 @@ class ValidateCommand(BaseCommand):
                             missing_fields.append("base_url")
                         if not first_model.model:
                             missing_fields.append("model")
-                        if api_key_required and not first_model.api_key:
-                            missing_fields.append("api_key")
+
+                        # Check authentication-specific required fields
+                        if (
+                            auth_method == AuthenticationMethod.MSI
+                            and not first_model.client_id
+                        ):
+                            missing_fields.append(
+                                "client_id (required for MSI authentication)"
+                            )
+                        elif (
+                            auth_method == AuthenticationMethod.TOKEN
+                            and not first_model.api_key
+                        ):
+                            missing_fields.append(
+                                "api_key (required for TOKEN authentication)"
+                            )
+                        elif auth_method == AuthenticationMethod.CLIENT_ID_AND_SECRET:
+                            if not first_model.client_id:
+                                missing_fields.append(
+                                    "client_id (required for CLIENT_ID_AND_SECRET authentication)"
+                                )
+                            if not first_model.client_secret:
+                                missing_fields.append(
+                                    "client_secret (required for CLIENT_ID_AND_SECRET authentication)"
+                                )
+                            # Check tenant_id - allow empty if AZURE_TENANT_ID env var exists
+                            if not first_model.tenant_id:
+                                import os
+
+                                if not os.getenv("AZURE_TENANT_ID"):
+                                    missing_fields.append(
+                                        "tenant_id (required for CLIENT_ID_AND_SECRET authentication, can use AZURE_TENANT_ID env var)"
+                                    )
 
                         self.print_error(
                             f"Model missing required configuration: {', '.join(missing_fields)}"
@@ -454,33 +513,77 @@ class ValidateCommand(BaseCommand):
 
                 # Validate first model has required fields based on authentication method
                 first_model = settings.models[0]
+                auth_method = first_model.authentication_method
 
-                # API key is only required for TOKEN authentication
-                api_key_required = (
-                    first_model.authentication_method == AuthenticationMethod.TOKEN
-                )
+                # Base fields required for all authentication methods
+                required_fields_check = first_model.base_url and first_model.model
 
-                # Check required fields based on authentication method
-                required_fields_check = (
-                    first_model.base_url
-                    and first_model.model
-                    and (not api_key_required or first_model.api_key)
-                )
+                # Additional validation based on authentication method
+                auth_validation_passed = True
+
+                if auth_method == AuthenticationMethod.DEFAULT_CREDENTIAL:
+                    # No additional fields required for default credential
+                    pass
+                elif auth_method == AuthenticationMethod.MSI:
+                    # MSI requires client_id
+                    if not first_model.client_id:
+                        auth_validation_passed = False
+                elif auth_method == AuthenticationMethod.TOKEN:
+                    # TOKEN requires api_key
+                    if not first_model.api_key:
+                        auth_validation_passed = False
+                elif auth_method == AuthenticationMethod.CLIENT_ID_AND_SECRET:
+                    # CLIENT_ID_AND_SECRET requires both client_id and client_secret
+                    if not first_model.client_id or not first_model.client_secret:
+                        auth_validation_passed = False
+
+                # Overall validation check
+                required_fields_check = required_fields_check and auth_validation_passed
 
                 if required_fields_check:
                     self.print_success("Primary model configuration is complete")
-                    if not api_key_required:
-                        self.console.print(
-                            f"    📋 Using {first_model.authentication_method.value} authentication (no API key required)"
-                        )
+                    self.console.print(
+                        f"    📋 Using {auth_method.value} authentication"
+                    )
                 else:
                     missing_fields = []
                     if not first_model.base_url:
                         missing_fields.append("base_url")
                     if not first_model.model:
                         missing_fields.append("model")
-                    if api_key_required and not first_model.api_key:
-                        missing_fields.append("api_key")
+
+                    # Check authentication-specific required fields
+                    if (
+                        auth_method == AuthenticationMethod.MSI
+                        and not first_model.client_id
+                    ):
+                        missing_fields.append(
+                            "client_id (required for MSI authentication)"
+                        )
+                    elif (
+                        auth_method == AuthenticationMethod.TOKEN
+                        and not first_model.api_key
+                    ):
+                        missing_fields.append(
+                            "api_key (required for TOKEN authentication)"
+                        )
+                    elif auth_method == AuthenticationMethod.CLIENT_ID_AND_SECRET:
+                        if not first_model.client_id:
+                            missing_fields.append(
+                                "client_id (required for CLIENT_ID_AND_SECRET authentication)"
+                            )
+                        if not first_model.client_secret:
+                            missing_fields.append(
+                                "client_secret (required for CLIENT_ID_AND_SECRET authentication)"
+                            )
+                        # Check tenant_id - allow empty if AZURE_TENANT_ID env var exists
+                        if not first_model.tenant_id:
+                            import os
+
+                            if not os.getenv("AZURE_TENANT_ID"):
+                                missing_fields.append(
+                                    "tenant_id (required for CLIENT_ID_AND_SECRET authentication, can use AZURE_TENANT_ID env var)"
+                                )
 
                     self.print_error(
                         f"Primary model missing required fields: {', '.join(missing_fields)}"
@@ -570,20 +673,62 @@ class ValidateCommand(BaseCommand):
 
             # Check first model configuration based on authentication method
             first_model = settings.models[0]
+            auth_method = first_model.authentication_method
 
-            # API key is only required for TOKEN authentication
-            api_key_required = (
-                first_model.authentication_method == AuthenticationMethod.TOKEN
-            )
+            # Validate credentials based on authentication method
+            auth_validation_passed = True
 
-            if api_key_required and not first_model.api_key:
-                self.print_error("Azure OpenAI API key not configured")
-                issues.append("Azure OpenAI API key not configured")
-                return False, issues
-            elif not api_key_required:
+            if auth_method == AuthenticationMethod.DEFAULT_CREDENTIAL:
+                # No additional credentials required
                 self.print_success(
-                    f"Using {first_model.authentication_method.value} authentication (no API key required)"
+                    "Using default_credential authentication (no API key required)"
                 )
+            elif auth_method == AuthenticationMethod.MSI:
+                if not first_model.client_id:
+                    self.print_error(
+                        "MSI authentication requires client_id but it's not configured"
+                    )
+                    issues.append("MSI authentication client_id not configured")
+                    auth_validation_passed = False
+                else:
+                    self.print_success(
+                        f"Using MSI authentication with client_id: {first_model.client_id}"
+                    )
+            elif auth_method == AuthenticationMethod.TOKEN:
+                if not first_model.api_key:
+                    self.print_error(
+                        "TOKEN authentication requires api_key but it's not configured"
+                    )
+                    issues.append("TOKEN authentication API key not configured")
+                    auth_validation_passed = False
+                else:
+                    self.print_success("Using TOKEN authentication with API key")
+            elif auth_method == AuthenticationMethod.CLIENT_ID_AND_SECRET:
+                missing_creds = []
+                if not first_model.client_id:
+                    missing_creds.append("client_id")
+                if not first_model.client_secret:
+                    missing_creds.append("client_secret")
+                # Check tenant_id - allow empty if AZURE_TENANT_ID env var exists
+                if not first_model.tenant_id:
+                    import os
+
+                    if not os.getenv("AZURE_TENANT_ID"):
+                        missing_creds.append("tenant_id (or AZURE_TENANT_ID env var)")
+
+                if missing_creds:
+                    self.print_error(
+                        f"CLIENT_ID_AND_SECRET authentication requires {', '.join(missing_creds)} but they're not configured"
+                    )
+                    issues.append(
+                        f"CLIENT_ID_AND_SECRET authentication missing: {', '.join(missing_creds)}"
+                    )
+                    auth_validation_passed = False
+                else:
+                    self.print_success("Using CLIENT_ID_AND_SECRET authentication")
+
+            if not auth_validation_passed:
+                return False, issues
 
             if not first_model.base_url:
                 self.print_error("Azure OpenAI endpoint not configured")

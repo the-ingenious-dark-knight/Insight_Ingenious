@@ -32,6 +32,8 @@ class ModelConfig(config_ns_models.ModelConfig):
     base_url: str
     deployment: str = ""
     client_id: str = ""
+    client_secret: str = ""
+    tenant_id: str = ""
     authentication_method: AuthenticationMethod = Field(
         AuthenticationMethod.DEFAULT_CREDENTIAL,
         description="OpenAI SAS Authentication Method",
@@ -59,6 +61,8 @@ class ModelConfig(config_ns_models.ModelConfig):
         self.base_url = profile.base_url
         self.api_key = profile.api_key
         self.client_id = profile.client_id
+        self.client_secret = profile.client_secret
+        self.tenant_id = profile.tenant_id
         self.authentication_method = profile.authentication_method
 
 

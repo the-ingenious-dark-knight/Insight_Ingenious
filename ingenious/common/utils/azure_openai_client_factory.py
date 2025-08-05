@@ -2,6 +2,7 @@ from typing import Any, Dict, Optional
 
 from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
 from azure.identity import (
+    ClientSecretCredential,
     DefaultAzureCredential,
     ManagedIdentityCredential,
     get_bearer_token_provider,
@@ -35,6 +36,8 @@ def create_aoai_chat_completion_client_from_config(
         api_key=model_config.api_key,
         authentication_method=model_config.authentication_method,
         client_id=model_config.client_id,
+        client_secret=model_config.client_secret,
+        tenant_id=model_config.tenant_id,
     )
 
 
@@ -61,6 +64,8 @@ def create_aoai_chat_completion_client_from_settings(
         api_key=model_settings.api_key,
         authentication_method=model_settings.authentication_method,
         client_id=model_settings.client_id,
+        client_secret=model_settings.client_secret,
+        tenant_id=model_settings.tenant_id,
     )
 
 
@@ -72,6 +77,8 @@ def create_aoai_chat_completion_client_from_params(
     api_key: Optional[str] = None,
     authentication_method: AuthenticationMethod = AuthenticationMethod.DEFAULT_CREDENTIAL,
     client_id: Optional[str] = None,
+    client_secret: Optional[str] = None,
+    tenant_id: Optional[str] = None,
 ) -> AzureOpenAIChatCompletionClient:
     """
     Factory method to create an AzureOpenAIChatCompletionClient with custom parameters.
@@ -85,8 +92,10 @@ def create_aoai_chat_completion_client_from_params(
         api_version (str): Azure OpenAI API version
         deployment (Optional[str]): Azure deployment name. If None, uses model name
         api_key (Optional[str]): API key for authentication. Required if not using default credential
-        authentication_method (str): Authentication mode ("default_credential", "token", or "msi")
-        client_id (Optional[str]): Client ID for MSI authentication
+        authentication_method (str): Authentication mode ("default_credential", "token", "msi", or "client_id_and_secret")
+        client_id (Optional[str]): Client ID for MSI or CLIENT_ID_AND_SECRET authentication
+        client_secret (Optional[str]): Client secret for CLIENT_ID_AND_SECRET authentication
+        tenant_id (Optional[str]): Tenant ID for CLIENT_ID_AND_SECRET authentication (will fallback to AZURE_TENANT_ID env var)
 
     Returns:
         AzureOpenAIChatCompletionClient: Configured client instance
@@ -122,6 +131,39 @@ def create_aoai_chat_completion_client_from_params(
             ManagedIdentityCredential(client_id=client_id)
             if client_id
             else ManagedIdentityCredential()
+        )
+        token_provider = get_bearer_token_provider(
+            credential, "https://cognitiveservices.azure.com/.default"
+        )
+        azure_config["azure_ad_token_provider"] = token_provider
+    elif authentication_method == AuthenticationMethod.CLIENT_ID_AND_SECRET:
+        # Use Client Secret Credential for authentication
+        if not client_id:
+            raise ValueError(
+                "client_id is required when using CLIENT_ID_AND_SECRET authentication"
+            )
+        if not client_secret:
+            raise ValueError(
+                "client_secret is required when using CLIENT_ID_AND_SECRET authentication"
+            )
+
+        # Handle tenant_id: use provided value or fallback to environment variable
+        effective_tenant_id = tenant_id
+        if not effective_tenant_id:
+            import os
+
+            effective_tenant_id = os.getenv("AZURE_TENANT_ID")
+
+        if not effective_tenant_id:
+            raise ValueError(
+                "tenant_id is required when using CLIENT_ID_AND_SECRET authentication. "
+                "Provide tenant_id in configuration or set AZURE_TENANT_ID environment variable"
+            )
+
+        credential = ClientSecretCredential(
+            tenant_id=effective_tenant_id,
+            client_id=client_id,
+            client_secret=client_secret,
         )
         token_provider = get_bearer_token_provider(
             credential, "https://cognitiveservices.azure.com/.default"
