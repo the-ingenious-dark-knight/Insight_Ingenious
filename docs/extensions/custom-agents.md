@@ -43,7 +43,7 @@ The preferred approach is to create agents **outside** the library code using th
    from ingenious.models.chat import ChatRequest, ChatResponse
    from ingenious.services.interfaces.IConversationFlow import IConversationFlow
    from autogen_agentchat import AssistantAgent, UserProxyAgent
-   
+
    class ConversationFlow(IConversationFlow):
        async def get_conversation_response(
            self, chat_request: ChatRequest
@@ -94,7 +94,7 @@ class ConversationFlow(IConversationFlow):
     def __init__(self, parent_service):
         super().__init__(parent_service)
         self.template_service = parent_service.template_service
-    
+
     async def get_conversation_response(
         self, chat_request: ChatRequest
     ) -> ChatResponse:
@@ -103,46 +103,46 @@ class ConversationFlow(IConversationFlow):
             market_template = await self._load_template_with_fallback("market_research_agent_prompt.jinja")
             technical_template = await self._load_template_with_fallback("technical_analysis_agent_prompt.jinja")
             recommendation_template = await self._load_template_with_fallback("recommendation_agent_prompt.jinja")
-            
+
             # Create specialized agents
             market_agent = AssistantAgent(
                 name="market_research_agent",
                 model_client=self.parent_service.model_client,
                 system_message=market_template,
             )
-            
+
             technical_agent = AssistantAgent(
-                name="technical_analysis_agent", 
+                name="technical_analysis_agent",
                 model_client=self.parent_service.model_client,
                 system_message=technical_template,
             )
-            
+
             recommendation_agent = AssistantAgent(
                 name="recommendation_agent",
                 model_client=self.parent_service.model_client,
                 system_message=recommendation_template,
             )
-            
+
             user_proxy = UserProxyAgent(name="user_proxy")
-            
+
             # Execute multi-agent workflow
             result = await user_proxy.a_send_message(
                 message=chat_request.user_prompt,
                 recipient=market_agent,
                 request_reply=True,
             )
-            
+
             return ChatResponse(
                 response=result.chat_message.content,
                 conversation_flow="product-research"
             )
-            
+
         except Exception as e:
             return ChatResponse(
                 response=f"Error in product research workflow: {str(e)}",
                 conversation_flow="product-research"
             )
-    
+
     async def _load_template_with_fallback(self, template_name: str) -> str:
         """Load template with fallback to default content if Azure storage fails"""
         try:
@@ -150,7 +150,7 @@ class ConversationFlow(IConversationFlow):
         except Exception as e:
             print(f"Failed to load template {template_name}: {e}, using fallback")
             return self._get_fallback_template(template_name)
-    
+
     def _get_fallback_template(self, template_name: str) -> str:
         """Provide fallback templates when Azure storage is unavailable"""
         fallbacks = {

@@ -13,12 +13,12 @@ docs:
         url: /development/
       - title: "Architecture Overview"
         url: /architecture/
-      # - title: "Memory & Token Architecture"
-      #   url: /architecture/memory-and-tokens/
-      # - title: "Streaming Responses Architecture"
-      #   url: /architecture/streaming-responses/
-      # - title: "Components Reference"
-      #   url: /components/
+        # - title: "Memory & Token Architecture"
+        #   url: /architecture/memory-and-tokens/
+        # - title: "Streaming Responses Architecture"
+        #   url: /architecture/streaming-responses/
+        # - title: "Components Reference"
+        #   url: /components/
   - title: "Data Preprocessing"
     children:
       - title: "Data Preparation"
@@ -35,9 +35,9 @@ docs:
         url: /CLI_REFERENCE
       - title: "Configuration Reference"
         url: /getting-started/configuration/
-      # - title: "Workflow Requirements"
-      #   url: /workflows/
-  # - title: "Additional Resources"
-  #   children:
-  #     - title: "Comprehensive Troubleshooting"
-  #       url: /troubleshooting/
+        # - title: "Workflow Requirements"
+        #   url: /workflows/
+# - title: "Additional Resources"
+#   children:
+#     - title: "Comprehensive Troubleshooting"
+#       url: /troubleshooting/

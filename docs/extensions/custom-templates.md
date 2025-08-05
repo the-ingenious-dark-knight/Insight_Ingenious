@@ -80,10 +80,10 @@ async def get_conversation_response(self, chat_request: ChatRequest) -> ChatResp
     except Exception as e:
         # Log the error for debugging
         self._logger.warning(f"Failed to load template: {str(e)}")
-        
+
         # Provide fallback template
         template_content = """You are a helpful assistant.
-        
+
 User Request: {{ user_input }}
 
 Please provide a helpful response."""

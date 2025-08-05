@@ -158,7 +158,7 @@ class ConversationFlow(IConversationFlow):
             # Get model configuration
             models = self.Get_Models()
             model_config = models[0]
-            
+
             # Load and render template
             try:
                 template_content = await self.Get_Template(
@@ -167,14 +167,14 @@ class ConversationFlow(IConversationFlow):
             except Exception:
                 # Fallback template
                 template_content = "You are a helpful assistant. User: {{ user_input }}"
-            
+
             env = Environment()
             template = env.from_string(template_content)
             rendered_prompt = template.render(
                 user_input=chat_request.user_prompt,
                 thread_memory=getattr(chat_request, 'thread_memory', '')
             )
-            
+
             # Create Azure OpenAI client
             model_client = AzureOpenAIChatCompletionClient(
                 model=model_config.model,
@@ -183,21 +183,21 @@ class ConversationFlow(IConversationFlow):
                 azure_deployment=model_config.deployment or model_config.model,
                 api_version=model_config.api_version,
             )
-            
+
             # Create agent and get response
             agent = AssistantAgent(
                 name="advanced_helper",
                 system_message=rendered_prompt,
                 model_client=model_client,
             )
-            
+
             response = await agent.on_messages(
                 messages=[TextMessage(content=chat_request.user_prompt, source="user")],
                 cancellation_token=None,  # Add proper cancellation token
             )
-            
+
             await model_client.close()
-            
+
             return ChatResponse(
                 thread_id=chat_request.thread_id,
                 message_id=str(uuid.uuid4()),
@@ -206,7 +206,7 @@ class ConversationFlow(IConversationFlow):
                 max_token_count=0,
                 memory_summary=f"Advanced help: {chat_request.user_prompt[:50]}...",
             )
-            
+
         except Exception as e:
             self._logger.error(f"Error in advanced helper: {str(e)}")
             return ChatResponse(
