@@ -112,18 +112,12 @@ def _select_embeddings(
     """
     model_name = cfg.embed_model or "text-embedding-3-small"
 
-    # NEW: Add a print statement for visibility
-    print("\n--- Selecting Embedding Backend ---")
-
     if cfg.azure_openai_deployment:
         return AzureOpenAIEmbeddings(
             model=model_name,
             **{"deployment": cfg.azure_openai_deployment},
         )
 
-    # NEW: Print the alternative flow
-    print(">>> Standard OpenAI provider selected.")
-    print("---------------------------------")
     return OpenAIEmbeddings(model=model_name)
 
 

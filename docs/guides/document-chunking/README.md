@@ -47,14 +47,10 @@ The primary entry‑point is `ingen chunk run`.
 
 ### Basic Recursive Splitting
 
-Split a text file into 512‑token chunks with a 64‑token overlap:
+Split a text file into 100‑token chunks with a 10‑token overlap:
 
 ```bash
-ingen chunk run my_document.txt \
-  --strategy recursive \
-  --chunk-size 512 \
-  --chunk-overlap 64 \
-  --output chunks.jsonl
+ingen chunk run test_files/git_repo_docs.txt --strategy token --overlap-unit tokens --chunk-size 100 --chunk-overlap 10 --encoding-name cl100k_base --output test_integration_chunking_folder_2/git_repo_docs-token-tokens.jsonl
 ```
 
 ### Processing JSONL Input
@@ -62,15 +58,36 @@ ingen chunk run my_document.txt \
 Chunk each record from a JSON Lines file (e.g. output from *ingen document‑processing*):
 
 ```bash
-ingen chunk run extracted_pages.jsonl -o chunks.jsonl
+ingen chunk run test_files/pages_pdfminer_local_patientbrochure.jsonl --strategy token --overlap-unit tokens --chunk-size 100 --chunk-overlap 10 --encoding-name cl100k_base --output test_integration_chunking_folder_2/pages_pdfminer_local_patientbrochure-token-tokens.jsonl
 ```
 
-### Semantic Splitting *(requires `OPENAI_API_KEY`)*
+### Semantic Splitting the Azure variables below or, alternatively, *(requires `OPENAI_API_KEY`)*
+
+#### Azure OpenAI Service
 
 ```bash
-ingen chunk run research_paper.md --strategy semantic -o semantic_chunks.jsonl
+export AZURE_OPENAI_API_KEY="ae7a5e4566yheayse5y754223ryaergarg"
+export AZURE_OPENAI_ENDPOINT="https://testsemanticchunking.openai.azure.com/"
+export AZURE_EMBEDDING_DEPLOYMENT="text-embedding-3-small"
 ```
 
+#### Standard OpenAI Key (alternative)
+
+```bash
+export OPENAI_API_KEY="your-openai-api-key"
+```
+
+Example command:
+
+```bash
+ingen chunk run test_files/git_repo_docs.txt \
+  --strategy semantic \
+  --overlap-unit tokens \
+  --chunk-size 100 \
+  --chunk-overlap 10 \
+  --encoding-name cl100k_base \
+  --output test_integration_chunking_folder_2/git_repo_docs-semantic-tokens.jsonl
+```
 ---
 
 ## Python API
@@ -156,9 +173,5 @@ ingen chunk run my_document.txt --id-path-mode hash
 a uv pip install -e ".[chunk,test]"
 
 # Run the test suite
-pytest ingenious/chunk/tests
+uv run pytest ingenious/chunk/tests
 ```
-
----
-
-**Happy Chunking!** 🚀
