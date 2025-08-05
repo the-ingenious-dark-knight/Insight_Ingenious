@@ -39,6 +39,9 @@ def get_openai_service(
         authentication_method=AuthenticationMethod(
             config.models[0].authentication_method
         ),
+        client_id=str(config.models[0].client_id),
+        client_secret=str(config.models[0].client_secret),
+        tenant_id=str(config.models[0].tenant_id),
     )
 
 

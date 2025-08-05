@@ -1,6 +1,11 @@
 import re
 
-from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+from azure.identity import (
+    ClientSecretCredential,
+    DefaultAzureCredential,
+    ManagedIdentityCredential,
+    get_bearer_token_provider,
+)
 from openai import NOT_GIVEN, AzureOpenAI, BadRequestError
 from openai.types.chat import (
     ChatCompletionMessage,
@@ -23,9 +28,16 @@ class OpenAIService:
         api_key: str,
         api_version: str,
         open_ai_model: str,
-        deployment: str,
+        deployment: str = "",
         authentication_method: AuthenticationMethod = AuthenticationMethod.DEFAULT_CREDENTIAL,
+        client_id: str = "",
+        client_secret: str = "",
+        tenant_id: str = "",
     ):
+        # Use model name as deployment if not provided
+        if not deployment:
+            deployment = open_ai_model
+
         if authentication_method == AuthenticationMethod.DEFAULT_CREDENTIAL:
             try:
                 token_provider = get_bearer_token_provider(
@@ -64,13 +76,65 @@ class OpenAIService:
                 azure_deployment=deployment,
             )
         elif authentication_method == AuthenticationMethod.CLIENT_ID_AND_SECRET:
-            # TODO: Implement CLIENT_ID_AND_SECRET authentication
-            raise NotImplementedError(
-                "CLIENT_ID_AND_SECRET authentication not yet implemented"
+            # Use Client Secret Credential for authentication
+            if not client_id:
+                raise ValueError(
+                    "client_id is required when using CLIENT_ID_AND_SECRET authentication"
+                )
+            if not client_secret:
+                raise ValueError(
+                    "client_secret is required when using CLIENT_ID_AND_SECRET authentication"
+                )
+
+            # Handle tenant_id: use provided value or fallback to environment variable
+            effective_tenant_id = tenant_id
+            if not effective_tenant_id:
+                import os
+
+                effective_tenant_id = os.getenv("AZURE_TENANT_ID")
+
+            if not effective_tenant_id:
+                raise ValueError(
+                    "tenant_id is required when using CLIENT_ID_AND_SECRET authentication. "
+                    "Provide tenant_id in configuration or set AZURE_TENANT_ID environment variable"
+                )
+
+            credential = ClientSecretCredential(
+                tenant_id=effective_tenant_id,
+                client_id=client_id,
+                client_secret=client_secret,
+            )
+            token_provider = get_bearer_token_provider(
+                credential, "https://cognitiveservices.azure.com/.default"
+            )
+            self.client = AzureOpenAI(
+                azure_endpoint=azure_endpoint,
+                api_version=api_version,
+                azure_ad_token_provider=token_provider,
+                azure_deployment=deployment,
+            )
+            logger.info(
+                "AzureOpenAI client initialized successfully with CLIENT_ID_AND_SECRET authentication"
             )
         elif authentication_method == AuthenticationMethod.MSI:
-            # TODO: Implement MSI authentication
-            raise NotImplementedError("MSI authentication not yet implemented")
+            # Use Managed Service Identity for authentication
+            credential = (
+                ManagedIdentityCredential(client_id=client_id)
+                if client_id
+                else ManagedIdentityCredential()
+            )
+            token_provider = get_bearer_token_provider(
+                credential, "https://cognitiveservices.azure.com/.default"
+            )
+            self.client = AzureOpenAI(
+                azure_endpoint=azure_endpoint,
+                api_version=api_version,
+                azure_ad_token_provider=token_provider,
+                azure_deployment=deployment,
+            )
+            logger.info(
+                "AzureOpenAI client initialized successfully with MSI authentication"
+            )
         else:
             raise ValueError(
                 f"Unsupported authentication mode: {authentication_method}"
