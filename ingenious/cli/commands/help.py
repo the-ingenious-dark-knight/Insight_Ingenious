@@ -14,6 +14,7 @@ from rich.panel import Panel
 
 from ingenious.cli.base import BaseCommand, CommandError, ExitCode
 from ingenious.cli.utilities import OutputFormatters, ValidationUtils
+from ingenious.common import AuthenticationMethod
 
 
 class HelpCommand(BaseCommand):
@@ -371,25 +372,38 @@ class ValidateCommand(BaseCommand):
                         "Configuration loaded successfully from environment"
                     )
 
-                    # Check if first model has required fields
+                    # Check if first model has required fields based on authentication method
                     first_model = settings.models[0]
-                    if (
-                        first_model.api_key
-                        and first_model.base_url
+
+                    # API key is only required for TOKEN authentication
+                    api_key_required = (
+                        first_model.authentication_method == AuthenticationMethod.TOKEN
+                    )
+
+                    # Check required fields based on authentication method
+                    required_fields_check = (
+                        first_model.base_url
                         and first_model.model
-                    ):
+                        and (not api_key_required or first_model.api_key)
+                    )
+
+                    if required_fields_check:
                         self.print_success(
                             "Primary model environment configuration is complete"
                         )
+                        if not api_key_required:
+                            self.console.print(
+                                f"    📋 Using {first_model.authentication_method.value} authentication (no API key required)"
+                            )
                         return True, issues
                     else:
                         missing_fields = []
-                        if not first_model.api_key:
-                            missing_fields.append("api_key")
                         if not first_model.base_url:
                             missing_fields.append("base_url")
                         if not first_model.model:
                             missing_fields.append("model")
+                        if api_key_required and not first_model.api_key:
+                            missing_fields.append("api_key")
 
                         self.print_error(
                             f"Model missing required configuration: {', '.join(missing_fields)}"
@@ -438,18 +452,35 @@ class ValidateCommand(BaseCommand):
             if settings.models and len(settings.models) > 0:
                 self.print_success(f"Found {len(settings.models)} configured model(s)")
 
-                # Validate first model has required fields
+                # Validate first model has required fields based on authentication method
                 first_model = settings.models[0]
-                if first_model.api_key and first_model.base_url and first_model.model:
+
+                # API key is only required for TOKEN authentication
+                api_key_required = (
+                    first_model.authentication_method == AuthenticationMethod.TOKEN
+                )
+
+                # Check required fields based on authentication method
+                required_fields_check = (
+                    first_model.base_url
+                    and first_model.model
+                    and (not api_key_required or first_model.api_key)
+                )
+
+                if required_fields_check:
                     self.print_success("Primary model configuration is complete")
+                    if not api_key_required:
+                        self.console.print(
+                            f"    📋 Using {first_model.authentication_method.value} authentication (no API key required)"
+                        )
                 else:
                     missing_fields = []
-                    if not first_model.api_key:
-                        missing_fields.append("api_key")
                     if not first_model.base_url:
                         missing_fields.append("base_url")
                     if not first_model.model:
                         missing_fields.append("model")
+                    if api_key_required and not first_model.api_key:
+                        missing_fields.append("api_key")
 
                     self.print_error(
                         f"Primary model missing required fields: {', '.join(missing_fields)}"
@@ -537,13 +568,22 @@ class ValidateCommand(BaseCommand):
                 issues.append("No Azure OpenAI models configured")
                 return False, issues
 
-            # Check first model configuration
+            # Check first model configuration based on authentication method
             first_model = settings.models[0]
 
-            if not first_model.api_key:
+            # API key is only required for TOKEN authentication
+            api_key_required = (
+                first_model.authentication_method == AuthenticationMethod.TOKEN
+            )
+
+            if api_key_required and not first_model.api_key:
                 self.print_error("Azure OpenAI API key not configured")
                 issues.append("Azure OpenAI API key not configured")
                 return False, issues
+            elif not api_key_required:
+                self.print_success(
+                    f"Using {first_model.authentication_method.value} authentication (no API key required)"
+                )
 
             if not first_model.base_url:
                 self.print_error("Azure OpenAI endpoint not configured")
@@ -584,22 +624,24 @@ class ValidateCommand(BaseCommand):
                         f"Azure service returned unexpected status: {response.status_code}"
                     )
 
-            except requests.exceptions.ConnectTimeout:
-                self.print_warning(
-                    "Azure OpenAI service connection timeout - check network connectivity"
-                )
-                issues.append("Azure OpenAI service connection timeout")
-            except requests.exceptions.ConnectionError:
-                self.print_warning(
-                    "Cannot connect to Azure OpenAI service - check endpoint URL and network"
-                )
-                issues.append("Cannot connect to Azure OpenAI service")
             except ImportError:
                 self.print_info(
                     "Skipping connectivity test - requests library not available"
                 )
             except Exception as conn_e:
-                self.print_warning(f"Azure connectivity test failed: {conn_e}")
+                # Handle all other connectivity errors (timeout, connection error, etc.)
+                if "ConnectTimeout" in str(type(conn_e)):
+                    self.print_warning(
+                        "Azure OpenAI service connection timeout - check network connectivity"
+                    )
+                    issues.append("Azure OpenAI service connection timeout")
+                elif "ConnectionError" in str(type(conn_e)):
+                    self.print_warning(
+                        "Cannot connect to Azure OpenAI service - check endpoint URL and network"
+                    )
+                    issues.append("Cannot connect to Azure OpenAI service")
+                else:
+                    self.print_warning(f"Azure connectivity test failed: {conn_e}")
                 # Don't treat connectivity test failures as critical errors
 
             self.print_success("Azure OpenAI configuration found")
@@ -715,11 +757,7 @@ class ValidateCommand(BaseCommand):
                             if proc_result.stdout:
                                 self.print_info(f"Process using port {port}:")
                                 self.console.print(f"    {proc_result.stdout.strip()}")
-                    except (
-                        subprocess.TimeoutExpired,
-                        FileNotFoundError,
-                        subprocess.SubprocessError,
-                    ):
+                    except (FileNotFoundError, Exception):
                         pass  # lsof not available or failed
 
                     return False, issues
