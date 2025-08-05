@@ -5,7 +5,7 @@ docs:
         url: /getting-started/
       - title: "Complete Azure Deployment"
         url: /guides/complete-azure-deployment/
-      - title: "Configure Custom Agents"
+      - title: "Custom Agents Configuration"
         url: /extensions/
   - title: "Developer Guides"
     children:
