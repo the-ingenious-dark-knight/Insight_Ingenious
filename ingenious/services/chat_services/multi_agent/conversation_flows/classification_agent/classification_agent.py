@@ -6,10 +6,7 @@ from autogen_agentchat.messages import TextMessage
 from autogen_core import EVENT_LOGGER_NAME, CancellationToken
 
 import ingenious.config.config as config
-from ingenious.common import AuthenticationMethod
-from ingenious.common.utils import (
-    create_azure_openai_chat_completion_client_with_custom_config,
-)
+from ingenious.common.utils import create_aoai_chat_completion_client_from_settings
 from ingenious.models.agent import LLMUsageTracker
 from ingenious.models.chat import ChatRequest
 
@@ -70,15 +67,7 @@ class ConversationFlow:
                 )
 
         # Create the Azure OpenAI client using the provided model configuration
-        model_client = create_azure_openai_chat_completion_client_with_custom_config(
-            model=str(model_config.model),
-            base_url=str(model_config.base_url),
-            api_version=str(model_config.api_version),
-            deployment=str(model_config.deployment or model_config.model),
-            authentication_method=model_config.authentication_method
-            or AuthenticationMethod.DEFAULT_CREDENTIAL,
-            api_key=str(model_config.api_key or ""),
-        )
+        model_client = create_aoai_chat_completion_client_from_settings(model_config)
 
         # Create classification system prompt with memory context
         classification_system_prompt = f"""

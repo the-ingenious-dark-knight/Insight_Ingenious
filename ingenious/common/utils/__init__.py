@@ -6,11 +6,13 @@ parts of the application, including client factories and helper functions.
 """
 
 from .azure_openai_client_factory import (
-    create_azure_openai_chat_completion_client_with_custom_config,
-    create_azure_openai_chat_completion_client_with_model_config,
+    create_aoai_chat_completion_client_from_config,
+    create_aoai_chat_completion_client_from_params,
+    create_aoai_chat_completion_client_from_settings,
 )
 
 __all__ = [
-    "create_azure_openai_chat_completion_client_with_model_config",
-    "create_azure_openai_chat_completion_client_with_custom_config",
+    "create_aoai_chat_completion_client_from_config",
+    "create_aoai_chat_completion_client_from_params",
+    "create_aoai_chat_completion_client_from_settings",
 ]

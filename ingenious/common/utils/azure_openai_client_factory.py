@@ -4,10 +4,11 @@ from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
 from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 
 from ingenious.common import AuthenticationMethod
+from ingenious.config.models import ModelSettings
 from ingenious.models.config import ModelConfig
 
 
-def create_azure_openai_chat_completion_client_with_model_config(
+def create_aoai_chat_completion_client_from_config(
     model_config: ModelConfig,
 ) -> AzureOpenAIChatCompletionClient:
     """
@@ -22,7 +23,7 @@ def create_azure_openai_chat_completion_client_with_model_config(
     Raises:
         ValueError: If required configuration is missing
     """
-    return create_azure_openai_chat_completion_client_with_custom_config(
+    return create_aoai_chat_completion_client_from_params(
         model=model_config.model,
         base_url=model_config.base_url,
         api_version=model_config.api_version,
@@ -32,7 +33,32 @@ def create_azure_openai_chat_completion_client_with_model_config(
     )
 
 
-def create_azure_openai_chat_completion_client_with_custom_config(
+def create_aoai_chat_completion_client_from_settings(
+    model_settings: ModelSettings,
+) -> AzureOpenAIChatCompletionClient:
+    """
+    Factory method to create an AzureOpenAIChatCompletionClient from ModelSettings.
+
+    Args:
+        model_settings (ModelSettings): Model settings object containing configuration
+
+    Returns:
+        AzureOpenAIChatCompletionClient: Configured client instance
+
+    Raises:
+        ValueError: If required configuration is missing
+    """
+    return create_aoai_chat_completion_client_from_params(
+        model=model_settings.model,
+        base_url=model_settings.base_url,
+        api_version=model_settings.api_version,
+        deployment=model_settings.deployment,
+        api_key=model_settings.api_key,
+        authentication_method=model_settings.authentication_method,
+    )
+
+
+def create_aoai_chat_completion_client_from_params(
     model: str,
     base_url: str,
     api_version: str,
