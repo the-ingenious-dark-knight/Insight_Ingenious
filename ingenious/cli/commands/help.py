@@ -379,7 +379,9 @@ class ValidateCommand(BaseCommand):
                     auth_method = first_model.authentication_method
 
                     # Base fields required for all authentication methods
-                    required_fields_check = first_model.base_url and first_model.model
+                    required_fields_check = bool(
+                        first_model.base_url and first_model.model
+                    )
 
                     # Additional validation based on authentication method
                     auth_validation_passed = True
@@ -516,7 +518,7 @@ class ValidateCommand(BaseCommand):
                 auth_method = first_model.authentication_method
 
                 # Base fields required for all authentication methods
-                required_fields_check = first_model.base_url and first_model.model
+                required_fields_check = bool(first_model.base_url and first_model.model)
 
                 # Additional validation based on authentication method
                 auth_validation_passed = True

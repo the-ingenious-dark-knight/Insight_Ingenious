@@ -5,7 +5,7 @@ This module contains all the BaseModel classes that define
 the structure and validation for different configuration sections.
 """
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, ValidationInfo, field_validator, model_validator
 
 from ingenious.common import AuthenticationMethod
 
@@ -69,7 +69,7 @@ class ModelSettings(BaseModel):
 
     @field_validator("api_key")
     @classmethod
-    def validate_api_key(cls, v: str, info) -> str:
+    def validate_api_key(cls, v: str, info: ValidationInfo) -> str:
         """Validate that API key is provided when using token authentication."""
         # Get authentication_method from the values being validated
         auth_mode = info.data.get(
@@ -107,7 +107,7 @@ class ModelSettings(BaseModel):
         return v
 
     @model_validator(mode="after")
-    def validate_client_credentials(self):
+    def validate_client_credentials(self) -> "ModelSettings":
         """Validate client credentials for CLIENT_ID_AND_SECRET authentication."""
         if self.authentication_method == AuthenticationMethod.CLIENT_ID_AND_SECRET:
             if not self.client_id:
