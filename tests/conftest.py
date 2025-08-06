@@ -21,7 +21,7 @@ def sample_env_vars():
         "AZURE_OPENAI_ENDPOINT": "https://test.openai.azure.com/",
         "AZURE_OPENAI_API_KEY": "test_key",
         "AZURE_OPENAI_API_VERSION": "2023-03-15-preview",
-        "AZURE_OPENAI_DEPLOYMENT_NAME": "gpt-4",
+        "AZURE_OPENAI_DEPLOYMENT_NAME": "gpt-4.1-nano",
     }
 
 
@@ -51,7 +51,7 @@ def sample_config_data():
     """Sample configuration data for testing"""
     return {
         "agents": [
-            {"name": "test_agent", "description": "Test agent", "model": "gpt-4"}
+            {"name": "test_agent", "description": "Test agent", "model": "gpt-4.1-nano"}
         ],
         "workflows": {
             "test_workflow": {"agents": ["test_agent"], "description": "Test workflow"}
@@ -106,7 +106,7 @@ def mock_openai_response():
         id="test_completion_id",
         choices=[mock_choice],
         created=1234567890,
-        model="gpt-4",
+        model="gpt-4.1-nano",
         object="chat.completion",
         usage={"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15},
     )
@@ -180,7 +180,7 @@ def sample_agent_config():
     return {
         "name": "test_agent",
         "description": "Test agent for unit testing",
-        "model": "gpt-4",
+        "model": "gpt-4.1-nano",
         "temperature": 0.7,
         "max_tokens": 1000,
         "system_prompt": "You are a helpful test assistant.",

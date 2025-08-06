@@ -30,6 +30,9 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 ### Install from PyPI
 
 ```bash
+# Initialize uv project
+uv init
+
 # Using uv (recommended)
 uv add ingenious
 
@@ -62,7 +65,7 @@ uv add ingenious[full]
 - Data collection from various web sources
 - Automated content gathering
 
-**Documentation:** [Data Preparation Guide](../guides/data-preparation/)
+**Documentation:** [Data Preparation Guide](../guides/data-preparation/README.md)
 
 ### Document Processing
 
@@ -88,7 +91,7 @@ uv add ingenious[full]
 | `document-processing` | PyMuPDF extractor, Azure DI client & CLI     | `pymupdf`, `azure-ai-documentintelligence` |
 | `document-advanced`   | PDFMiner + Unstructured extractors            | `pdfminer.six`, `unstructured[all-docs]`   |
 
-**Documentation:** [Document Processing Guide](../guides/document-processing/)
+**Documentation:** [Document Processing Guide](../guides/document-processing/README.md)
 
 ### Azure SQL Database Support
 
@@ -136,7 +139,7 @@ Download and install the ODBC Driver 18 for SQL Server from the [Microsoft websi
 - Environment variable support via python-dotenv
 - LOCAL_SQL_CSV_PATH configuration for sample data
 
-**Documentation:** [Azure SQL Configuration Guide](/getting-started/configuration#chat-history)
+**Documentation:** [Azure SQL Configuration Guide](./configuration.md#chat-history)
 
 ### Complete Installation
 
@@ -162,7 +165,7 @@ python -c "import ingenious; print('Insight Ingenious installed successfully')"
 
 ## Next Steps
 
-1. **Configure the system** - See [Configuration Guide](/getting-started/configuration)
+1. **Configure the system** - See [Configuration Guide](./configuration.md)
 2. **Understand workflows** - See [Workflows Guide](../workflows/README.md)
 3. **Try the quick start** - See [Quick Start Guide](./README.md)
 
@@ -183,7 +186,7 @@ python -c "import ingenious; print('Insight Ingenious installed successfully')"
 - Check your internet connection
 - If behind a corporate firewall, configure proxy settings
 
-For more troubleshooting help, see the [Troubleshooting Guide](/troubleshooting/).
+For more troubleshooting help, see the [Troubleshooting Guide](./troubleshooting.md).
 
 ## Development Installation
 

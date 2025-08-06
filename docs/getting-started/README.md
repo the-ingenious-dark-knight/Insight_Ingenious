@@ -11,66 +11,165 @@ toc_icon: "rocket"
 
 ## Quick Start
 
-Get Insight Ingenious running in 5 minutes!
+Get up and running in 5 minutes with Azure OpenAI!
 
 ### Prerequisites
-- Python 3.13+
+- Python 3.13 or higher (required - earlier versions are not supported)
 - Azure OpenAI API credentials
 - [uv package manager](https://docs.astral.sh/uv/)
 
-### 1. Install and Initialize
-```bash
-uv add ingenious
-uv run ingen init
-```
+### 5-Minute Setup
 
-### 2. Configure Azure OpenAI
-```bash
-cp .env.example .env
-# Edit .env to add your Azure OpenAI credentials:
-# AZURE_OPENAI_API_KEY=your-key-here
-# AZURE_OPENAI_BASE_URL=https://your-resource.openai.azure.com/
-```
+1. **Install and Initialize**:
+    ```bash
+    # Navigate to your desired project directory first
+    cd /path/to/your/project
 
-### 3. Start the Server
-```bash
-uv run ingen validate  # Optional: verify configuration
-uv run ingen serve
-```
+    # Initialize uv project
+    uv init
 
-### 4. Test the API
-```bash
-curl http://localhost:8000/api/v1/health
-```
+    # Choose installation based on features needed
+    uv add ingenious[standard] # Most common: includes SQL agent support (core, auth, ai, database)
+    # OR
+    uv add ingenious[azure-full] # Full Azure integration (core, auth, azure, ai, database, ui)
+    # OR
+    uv add ingenious # Minimal installation (base dependencies only)
 
-That's it! The server is now running. The `ingen init` command creates a sample `bike-insights` workflow to get you started.
+    # Initialize project in the current directory
+    uv run ingen init
+    ```
 
-## Available Workflows
+2. **Configure Credentials**:
+    Create a `.env` file with your Azure OpenAI credentials:
+    ```bash
+    # Create .env file in current directory
+    touch .env
 
-- **bike-insights** - Sample workflow created by `ingen init` for testing
-- **classification-agent** - Routes input to specialized agents
-- **knowledge-base-agent** - Searches knowledge bases (ChromaDB)
-- **sql-manipulation-agent** - Executes SQL queries (SQLite)
+    # Edit .env file with your actual credentials
+    ```
 
-> **Note**: Azure Search and Azure SQL integrations are experimental.
+    **Required configuration (add to .env file)**:
+    ```bash
+    # Model Configuration (only INGENIOUS_* variables are used by the system)
+    INGENIOUS_MODELS__0__MODEL=gpt-4.1-nano
+    INGENIOUS_MODELS__0__API_TYPE=rest
+    INGENIOUS_MODELS__0__API_VERSION=2024-12-01-preview
+    INGENIOUS_MODELS__0__DEPLOYMENT=your-gpt4-deployment-name
+    INGENIOUS_MODELS__0__API_KEY=your-actual-api-key-here
+    INGENIOUS_MODELS__0__BASE_URL=https://your-resource.openai.azure.com/
+
+    # Basic required settings
+    INGENIOUS_CHAT_SERVICE__TYPE=multi_agent
+    INGENIOUS_CHAT_HISTORY__DATABASE_TYPE=sqlite
+    INGENIOUS_CHAT_HISTORY__DATABASE_PATH=./.tmp/chat_history.db
+    INGENIOUS_CHAT_HISTORY__MEMORY_PATH=./.tmp
+
+    # Optional: Authentication settings (enabled by default)
+    # INGENIOUS_WEB_CONFIGURATION__ENABLE_AUTHENTICATION=false  # To disable auth
+    ```
+
+3. **Validate Configuration**:
+    ```bash
+    uv run ingen validate  # Check configuration before starting
+    ```
+
+    > **⚠️ BREAKING CHANGE**: Ingenious now uses **pydantic-settings** for configuration via environment variables. Legacy YAML configuration files (`config.yml`, `profiles.yml`) are **no longer supported** and must be migrated to environment variables with `INGENIOUS_` prefixes. Use the migration script:
+    > ```bash
+    > uv run python scripts/migrate_config.py --yaml-file config.yml --output .env
+    > uv run python scripts/migrate_config.py --yaml-file profiles.yml --output .env.profiles
+    > ```
+
+4. **Start the Server**:
+    ```bash
+    # Start server on port 8000 (recommended for development)
+    uv run ingen serve --port 8000
+
+    # Additional options:
+    # --host 0.0.0.0         # Bind host (default: 0.0.0.0)
+    # --port                 # Port to bind (default: 80 or $WEB_PORT env var)
+    # --config config.yml    # Legacy config file (deprecated - use environment variables)
+    # --profile production   # Legacy profile (deprecated - use environment variables)
+    ```
+
+5. **Verify Health**:
+    ```bash
+    # Check server health
+    curl http://localhost:8000/api/v1/health
+    ```
+
+6. **Test with Core Workflows**:
+
+    Create test files to avoid JSON escaping issues:
+    ```bash
+    # Create test files for each workflow
+    echo '{"user_prompt": "Analyze this customer feedback: Great product", "conversation_flow": "classification-agent"}' > test_classification.json
+    echo '{"user_prompt": "Search for documentation about setup", "conversation_flow": "knowledge-base-agent"}' > test_knowledge.json
+    echo '{"user_prompt": "Show me all tables in the database", "conversation_flow": "sql-manipulation-agent"}' > test_sql.json
+
+    # Test each workflow
+    curl -X POST http://localhost:8000/api/v1/chat -H "Content-Type: application/json" -d @test_classification.json
+    curl -X POST http://localhost:8000/api/v1/chat -H "Content-Type: application/json" -d @test_knowledge.json
+    curl -X POST http://localhost:8000/api/v1/chat -H "Content-Type: application/json" -d @test_sql.json
+    ```
+
+That's it! You should see a JSON response with AI analysis of the input.
+
+**Next Steps - Test Additional Workflows**:
+
+7. **Test bike-insights Workflow (Requires `ingen init` first)**:
+
+    The `bike-insights` workflow is part of the project template and must be initialized first:
+    ```bash
+    # First initialize project to get bike-insights workflow
+    uv run ingen init
+
+    # Create bike-insights test data file
+    # Note: bike-insights requires JSON data in the user_prompt field (double-encoded JSON)
+    cat > test_bike_insights.json << 'EOF'
+    {
+      "user_prompt": "{\"revision_id\": \"test-v1\", \"identifier\": \"test-001\", \"stores\": [{\"name\": \"Test Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"MB-TREK-2021-XC\", \"quantity_sold\": 2, \"sale_date\": \"2023-04-01\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 4.5, \"comment\": \"Great bike\"}}], \"bike_stock\": []}]}",
+      "conversation_flow": "bike-insights"
+    }
+    EOF
+
+    # Test bike-insights workflow
+    curl -X POST http://localhost:8000/api/v1/chat -H "Content-Type: application/json" -d @test_bike_insights.json
+    ```
+
+**Important Notes**:
+- **Core Library Workflows** (`classification-agent`, `knowledge-base-agent`, `sql-manipulation-agent`) are always available and accept simple text prompts
+- **Template Workflows** like `bike-insights` require JSON-formatted data with specific fields and are only available after running `ingen init`
+- The `bike-insights` workflow is the recommended "Hello World" example for new users
+
+## Workflow Categories
+
+Insight Ingenious provides multiple conversation workflows with different configuration requirements:
+
+### Core Library Workflows (Always Available)
+These workflows are built into the Ingenious library and available immediately:
+
+- `classification-agent` - Simple text classification and routing to categories (minimal config required)
+- `knowledge-base-agent` - Search and retrieve information from knowledge bases (requires Azure Search or uses local ChromaDB by default)
+- `sql-manipulation-agent` - Execute SQL queries based on natural language (requires Azure SQL or uses local SQLite by default)
+
+> **Note**: Core workflows support both hyphenated (`classification-agent`) and underscored (`classification_agent`) naming formats for backward compatibility.
+
+### Template Workflows (Created by `ingen init`)
+These workflows are provided as examples in the project template when you run `ingen init`:
+
+- `bike-insights` - Comprehensive bike sales analysis showcasing multi-agent coordination (**ONLY available after `ingen init`** - not included in the core library)
+
+> **Important**: The `bike-insights` workflow is NOT part of the core library. It's a template example that's created when you initialize a new project with `ingen init`. This is the recommended "Hello World" example for learning how to build custom workflows.
+
+### Configuration Requirements by Workflow
+- **Minimal setup** (Azure OpenAI only): `classification-agent`, `bike-insights` (after `ingen init`)
+- **Local implementations**: `knowledge-base-agent` (ChromaDB), `sql-manipulation-agent` (SQLite) - stable and work out-of-the-box
+- **Azure integrations**: Azure Search for knowledge base, Azure SQL for database queries - fully supported with proper configuration
+
+> **Note**: Both local (ChromaDB, SQLite) and Azure (Azure Search, Azure SQL) implementations are production-ready. Choose based on your infrastructure requirements. Use `uv run ingen workflows` to check configuration requirements for each workflow.
 
 ## Next Steps
 
 - **[Installation Guide](./installation.md)** - Detailed installation options
 - **[Configuration Guide](./configuration.md)** - Complete configuration reference
-- **[Azure SQL Setup](../guides/sql-agent-setup.md)** - Production database setup
-- **[API Integration](../guides/api-integration.md)** - Using the REST API
-
-## Sample API Request
-
-```bash
-# Test the bike-insights workflow
-curl -X POST http://localhost:8000/api/v1/chat \
-  -H "Content-Type: application/json" \
-  -d '{
-    "user_prompt": "{\"stores\": [{\"name\": \"Test Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"B-001\", \"quantity_sold\": 1, \"sale_date\": \"2024-01-15\", \"year\": 2024, \"month\": \"January\", \"customer_review\": {\"rating\": 5.0, \"comment\": \"Great bike!\"}}]}]}",
-    "conversation_flow": "bike-insights"
-  }'
-```
-
-For more examples and detailed API documentation, see the [API Integration Guide](../guides/api-integration.md).
+- **[Troubleshooting Guide](./troubleshooting.md)** - Common issues and solutions

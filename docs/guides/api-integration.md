@@ -54,14 +54,15 @@ curl -X POST http://localhost:80/api/v1/chat \
   }'
 ```
 
-#### Bike Insights
-Sample domain-specific workflow for business analysis:
+#### Bike Insights (Template Workflow - Requires `ingen init`)
+Sample domain-specific workflow for business analysis (only available after running `ingen init`):
 
 ```bash
+# Note: bike-insights requires JSON data in the user_prompt field
 curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
-    "user_prompt": "Show me bike sales trends for April 2023",
+    "user_prompt": "{\"revision_id\": \"test-v1\", \"identifier\": \"test-001\", \"stores\": [{\"name\": \"Test Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"MB-TREK-2021-XC\", \"quantity_sold\": 2, \"sale_date\": \"2023-04-01\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 4.5, \"comment\": \"Great bike\"}}], \"bike_stock\": []}]}",
     "conversation_flow": "bike-insights"
   }'
 ```
@@ -99,7 +100,7 @@ curl -X POST http://localhost:80/api/v1/chat \
 ```
 
 **Requirements:**
-- Set `database_name: "skip"` in profiles.yml for SQLite mode
+- Set `INGENIOUS_AZURE_SQL_SERVICES__DATABASE_NAME=skip` in environment for SQLite mode
 - Local SQLite database automatically created
 
 ### Experimental Azure Integrations (May contain bugs)
@@ -132,7 +133,7 @@ Example response:
   "workflow": "knowledge-base-agent",
   "configured": false,
   "missing_config": [
-    "azure_search_services.key: Missing in profiles.yml"
+    "azure_search_services.key: Missing in environment variables"
   ],
   "required_config": ["models", "chat_service", "azure_search_services"],
   "external_services": ["Azure OpenAI", "Azure Cognitive Search"],
@@ -161,12 +162,11 @@ curl -X POST http://localhost:80/api/v1/chat \
 
 ### Disable Authentication
 
-For development, disable in `profiles.yml`:
+For development, disable with environment variables:
 
-```yaml
-web_configuration:
-  authentication:
-    enable: false
+```bash
+# .env
+INGENIOUS_WEB_CONFIGURATION__AUTHENTICATION__ENABLE=false
 ```
 
 ## Conversation Management
@@ -527,9 +527,9 @@ def monitor_api_call(prompt, workflow):
 ## Additional Resources
 
 - [Workflow Requirements](../workflows/README.md) - Understand configuration needs
-- [Configuration Guide](/getting-started/configuration) - Detailed setup instructions
+- [Configuration Guide](../getting-started/configuration.md) - Detailed setup instructions
 - [Custom Agents](../extensions/custom-agents.md) - Create your own workflows
-- [Troubleshooting](/troubleshooting/) - Common issues and solutions
+- [Troubleshooting](../troubleshooting/README.md) - Common issues and solutions
 
 ---
 

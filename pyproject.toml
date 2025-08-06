@@ -1,6 +1,6 @@
 [project]
 name = "ingenious"
-version = "0.2.1"
+version = "0.2.2"
 description = "An enterprise-grade Python library for quickly setting up APIs to interact with AI Agents"
 readme = "README.md"
 license = { text = "MIT" }
@@ -38,6 +38,7 @@ dependencies = [
   "openai>=1.82.0",
   "pandas>=2.3.1",
   "passlib>=1.7.4",
+  "psutil>=7.0.0",
   "pydantic==2.11.5",
   "pydantic-settings>=2.10.1",
   "pyodbc>=5.2.0",
@@ -193,6 +194,9 @@ strict = true
 namespace_packages = true
 explicit_package_bases = true
 
+# Exclude test_dir and its subdirectories from type checking
+exclude = ["test_dir/.*"]
+
 # Plugins
 plugins = ["pydantic.mypy"]
 
@@ -299,3 +303,6 @@ filterwarnings = [
   "ignore::PendingDeprecationWarning",
   "ignore:.*(SwigPy|swigvarlink).* has no __module__ attribute:DeprecationWarning",
 ]
+
+[tool.uv.workspace]
+members = ["test_dir"]

@@ -815,7 +815,7 @@ class ValidateCommand(BaseCommand):
                     workflows_checked = 0
                     workflows_working = 0
 
-                    # Check bike-insights workflow
+                    # Check bike-insights workflow (template workflow)
                     bike_insights_path = (
                         services_path
                         / "chat_services"
@@ -833,20 +833,40 @@ class ValidateCommand(BaseCommand):
                         issues.append("bike-insights workflow not found")
 
                     # Check core workflows import
-                    try:
-                        import importlib.util
+                    import importlib.util
 
-                        spec = importlib.util.find_spec(
-                            "ingenious.services.chat_services.multi_agent.conversation_flows.classification_agent"
-                        )
-                        if spec is not None:
-                            self.console.print("    ✅ classification-agent: Available")
-                        workflows_checked += 1
-                        workflows_working += 1
-                    except ImportError as e:
-                        self.console.print("    ❌ classification-agent: Import failed")
-                        workflows_checked += 1
-                        issues.append(f"classification-agent import failed: {e}")
+                    core_workflows = [
+                        "classification_agent",
+                        "knowledge_base_agent",
+                        "sql_manipulation_agent",
+                    ]
+
+                    for workflow in core_workflows:
+                        try:
+                            spec = importlib.util.find_spec(
+                                f"ingenious.services.chat_services.multi_agent.conversation_flows.{workflow}"
+                            )
+                            if spec is not None:
+                                self.console.print(
+                                    f"    ✅ {workflow.replace('_', '-')}: Available"
+                                )
+                                workflows_working += 1
+                            else:
+                                self.console.print(
+                                    f"    ❌ {workflow.replace('_', '-')}: Not found"
+                                )
+                                issues.append(
+                                    f"{workflow.replace('_', '-')} workflow not found"
+                                )
+                            workflows_checked += 1
+                        except ImportError as e:
+                            self.console.print(
+                                f"    ❌ {workflow.replace('_', '-')}: Import failed"
+                            )
+                            workflows_checked += 1
+                            issues.append(
+                                f"{workflow.replace('_', '-')} import failed: {e}"
+                            )
 
                     self.console.print(
                         f"    📊 Workflows status: {workflows_working}/{workflows_checked} working"

@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = ">=3.13"
 resolution-markers = [
     "sys_platform == 'darwin'",
@@ -1207,7 +1207,7 @@ wheels = [
 
 [[package]]
 name = "ingenious"
-version = "0.2.1"
+version = "0.2.2"
 source = { editable = "." }
 dependencies = [
     { name = "aiofiles" },
@@ -1226,6 +1226,7 @@ dependencies = [
     { name = "openai" },
     { name = "pandas" },
     { name = "passlib" },
+    { name = "psutil" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
     { name = "pyodbc" },
@@ -1434,6 +1435,7 @@ requires-dist = [
     { name = "passlib", specifier = ">=1.7.4" },
     { name = "passlib", marker = "extra == 'auth'", specifier = "==1.7.4" },
     { name = "pdfminer-six", marker = "extra == 'document-advanced'", specifier = "==20250506" },
+    { name = "psutil", specifier = ">=7.0.0" },
     { name = "psutil", marker = "extra == 'database'", specifier = "==7.0.0" },
     { name = "psutil", marker = "extra == 'document-processing'", specifier = "==7.0.0" },
     { name = "pydantic", specifier = "==2.11.5" },

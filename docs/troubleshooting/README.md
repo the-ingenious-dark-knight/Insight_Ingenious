@@ -16,8 +16,8 @@ This guide helps you resolve common issues when setting up and using Insight Ing
 ### Hello World Test (bike-insights)
 ```bash
 # The "Hello World" of Ingenious - try this first!
-# Note: Adjust port (80 is default) based on your server configuration
-curl -X POST http://localhost:8000/api/v1/chat \
+# Note: Default port is 80, but use 8000 for development to avoid permission issues
+curl -X POST http://localhost:80/api/v1/chat \
    -H "Content-Type: application/json" \
    -d '{
    "user_prompt": "{\"stores\": [{\"name\": \"Hello Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"HELLO-001\", \"quantity_sold\": 1, \"sale_date\": \"2023-04-01\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 5.0, \"comment\": \"Perfect introduction!\"}}], \"bike_stock\": []}], \"revision_id\": \"hello-1\", \"identifier\": \"world\"}",
@@ -28,7 +28,7 @@ curl -X POST http://localhost:8000/api/v1/chat \
 ### Simple Alternative Test (classification-agent)
 ```bash
 # If bike-insights seems too complex, try this simpler workflow
-curl -X POST http://localhost:8000/api/v1/chat \
+curl -X POST http://localhost:80/api/v1/chat \
    -H "Content-Type: application/json" \
    -d '{
    "user_prompt": "Analyze this feedback: Great product!",
@@ -37,6 +37,15 @@ curl -X POST http://localhost:8000/api/v1/chat \
 ```
 
 ---
+
+## Important Configuration Notes
+
+### Environment Variable Prefix
+All Ingenious configuration uses the `INGENIOUS_` prefix with double underscores (`__`) for nested settings:
+- ✅ `INGENIOUS_WEB_CONFIGURATION__PORT=8080`
+- ❌ `WEB_PORT=8080` (legacy, not recommended)
+- ✅ `INGENIOUS_MODELS__0__API_KEY=your-key`
+- ❌ `AZURE_OPENAI_API_KEY=your-key` (not used by Ingenious)
 
 ## Common Setup Issues
 
@@ -87,7 +96,11 @@ models.0.api_key
 3. **Load environment variables**:
    ```bash
    # Source the .env file or export variables
+   # For bash/zsh
    export $(grep -v '^#' .env | xargs)
+
+   # Or use dotenv to load .env automatically
+   # The .env file is loaded automatically by Ingenious
    ```
 
 ---
@@ -104,21 +117,23 @@ models.0.api_key
 
 1. **Use alternative port (Recommended for development)**:
    ```bash
-   # Use port 8000 instead of 80 (no admin privileges required)
+   # Use port 8000 for development (no admin privileges required)
    uv run ingen serve --port 8000
 
    # Update your test commands to use the new port
    curl http://localhost:8000/api/v1/health
    ```
 
-2. **Set port in environment variables**:
+2. **Set port in environment variables (PREFERRED METHOD)**:
    ```bash
+   # The correct environment variable is INGENIOUS_WEB_CONFIGURATION__PORT
    export INGENIOUS_WEB_CONFIGURATION__PORT=8080
    uv run ingen serve
    ```
 
-3. **Or set in .env file**:
+3. **Or set in .env file (RECOMMENDED)**:
    ```bash
+   # Add to your .env file
    INGENIOUS_WEB_CONFIGURATION__PORT=8080
    ```
 
@@ -183,17 +198,15 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
 
 1. **Use correct workflow names**:
    ```bash
-   #  Correct (preferred)
-   "conversation_flow": "bike-insights"
-
-   #  Also supported (underscore format)
-   "conversation_flow": "bike_insights"
+   #  Correct formats (both work)
+   "conversation_flow": "bike-insights"  # Hyphenated (recommended)
+   "conversation_flow": "bike_insights"   # Underscore (also supported)
    ```
 
 2. **Check bike-insights input format**:
    ```bash
    # bike-insights needs JSON in user_prompt
-   curl -X POST http://localhost:8000/api/v1/chat \
+   curl -X POST http://localhost:80/api/v1/chat \
      -H "Content-Type: application/json" \
      -d '{
        "user_prompt": "{\"stores\": [...], \"revision_id\": \"test\", \"identifier\": \"test\"}",
@@ -217,6 +230,7 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
    ```bash
    odbcinst -q -d
    # Should show: [ODBC Driver 18 for SQL Server]
+   # If not, install using the instructions below
    ```
 
 2. **Install ODBC Driver (if missing)**:
@@ -239,8 +253,9 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
 
 1. **Install required dependencies**:
    ```bash
-   # Required for environment variable loading
-   uv add python-dotenv
+   # pyodbc is required for Azure SQL
+   uv add pyodbc
+   # python-dotenv is included with ingenious
    ```
 
 2. **Check environment variable is set**:
@@ -252,22 +267,27 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
    cat .env | grep AZURE_SQL
    ```
 
-3. **Verify .env file format** (critical):
+3. **Configure Azure SQL connection** (critical):
    ```bash
-   # .env file should have NO SPACES around = and quotes for complex values
+   # Method 1: Using AZURE_SQL_CONNECTION_STRING environment variable
+   # Add to .env file (NO SPACES around = and use quotes for complex values)
    AZURE_SQL_CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
-   LOCAL_SQL_CSV_PATH=./sample_data.csv
-   ```
 
-4. **Verify environment variables**:
-   ```bash
-   # Check .env file or environment variables
+   # Method 2: Using INGENIOUS_ prefixed variables
    INGENIOUS_CHAT_HISTORY__DATABASE_TYPE=azuresql
+   INGENIOUS_CHAT_HISTORY__DATABASE_CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
    INGENIOUS_CHAT_HISTORY__DATABASE_NAME=your_database_name
-   INGENIOUS_CHAT_HISTORY__DATABASE_CONNECTION_STRING=$AZURE_SQL_CONNECTION_STRING
    ```
 
-   **Note**: Remove `:REQUIRED_SET_IN_ENV` suffix - it can cause issues with environment variable substitution.
+4. **Verify environment variables are loaded**:
+   ```bash
+   # Check if environment variables are set correctly
+   echo $INGENIOUS_CHAT_HISTORY__DATABASE_TYPE
+   # Should output: azuresql
+
+   echo $INGENIOUS_CHAT_HISTORY__DATABASE_CONNECTION_STRING
+   # Should output your connection string
+   ```
 
 5. **Test environment variable loading**:
    ```bash
@@ -330,6 +350,7 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
 - **Port issues**: Use `Server=tcp:your-server.database.windows.net,1433`
 - **Encryption**: Include `Encrypt=yes;TrustServerCertificate=no`
 - **Timeout**: Add `Connection Timeout=30` for slow networks
+- **Environment variable substitution**: The `$AZURE_SQL_CONNECTION_STRING` syntax works in .env files but may not work in all shells
 
 **Security Notes**:
 - Never commit connection strings to version control
@@ -367,23 +388,33 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
    - Note the Account Name and Account Key
    - Get the Connection String from "Access keys" section
 
-2. **Configure environment variables**:
+2. **Configure Azure Blob Storage**:
    ```bash
-   # Add to .env file
-   AZURE_STORAGE_CONNECTION_STRING="DefaultEndpointsProtocol=https;AccountName=yourstorageaccount;AccountKey=your_key;EndpointSuffix=core.windows.net"
-   AZURE_STORAGE_ACCOUNT_NAME="yourstorageaccount"
-   AZURE_STORAGE_ACCOUNT_KEY="your_account_key"
+   # Method 1: Using connection string in token field (RECOMMENDED)
+   # The library detects connection strings automatically
+   INGENIOUS_FILE_STORAGE__REVISIONS__STORAGE_TYPE=azure
+   INGENIOUS_FILE_STORAGE__REVISIONS__URL=https://yourstorageaccount.blob.core.windows.net/
+   INGENIOUS_FILE_STORAGE__REVISIONS__CONTAINER_NAME=ingenious-revisions
+   INGENIOUS_FILE_STORAGE__REVISIONS__TOKEN="DefaultEndpointsProtocol=https;AccountName=yourstorageaccount;AccountKey=your_key;EndpointSuffix=core.windows.net"
+
+   # Method 2: Using DefaultAzureCredential (for production)
+   INGENIOUS_FILE_STORAGE__REVISIONS__STORAGE_TYPE=azure
+   INGENIOUS_FILE_STORAGE__REVISIONS__URL=https://yourstorageaccount.blob.core.windows.net/
+   INGENIOUS_FILE_STORAGE__REVISIONS__AUTHENTICATION_METHOD=default_credential
+   INGENIOUS_FILE_STORAGE__REVISIONS__CONTAINER_NAME=ingenious-revisions
+
+   # Also configure DATA storage similarly
+   INGENIOUS_FILE_STORAGE__DATA__STORAGE_TYPE=azure
+   INGENIOUS_FILE_STORAGE__DATA__URL=https://yourstorageaccount.blob.core.windows.net/
+   INGENIOUS_FILE_STORAGE__DATA__CONTAINER_NAME=ingenious-data
+   INGENIOUS_FILE_STORAGE__DATA__TOKEN="<same-connection-string>"
    ```
 
-3. **Update environment variables**:
+3. **Set AZURE_STORAGE_CONNECTION_STRING (if using environment variable reference)**:
    ```bash
-   # .env file or environment variables
-   INGENIOUS_FILE_STORAGE__REVISIONS__STORAGE_TYPE=azure
-   INGENIOUS_FILE_STORAGE__REVISIONS__URL=https://your-storage.blob.core.windows.net/
-   INGENIOUS_FILE_STORAGE__REVISIONS__AUTHENTICATION_METHOD=default_credential
-   INGENIOUS_FILE_STORAGE__DATA__STORAGE_TYPE=azure
-   INGENIOUS_FILE_STORAGE__DATA__URL=https://your-storage.blob.core.windows.net/
-   INGENIOUS_FILE_STORAGE__DATA__AUTHENTICATION_METHOD=default_credential
+   # If you want to reference $AZURE_STORAGE_CONNECTION_STRING in your config
+   # Add this to your .env file
+   AZURE_STORAGE_CONNECTION_STRING="DefaultEndpointsProtocol=https;AccountName=yourstorageaccount;AccountKey=your_key;EndpointSuffix=core.windows.net"
    ```
 
 4. **Test environment variable loading**:
@@ -406,9 +437,21 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
    uv run python -c "
    from azure.storage.blob import BlobServiceClient
    import os
+   from dotenv import load_dotenv
+   load_dotenv()
+
+   # Try to get connection string from environment
    conn_str = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
    if not conn_str:
-       print(' AZURE_STORAGE_CONNECTION_STRING not set')
+       # Try from INGENIOUS settings
+       token = os.getenv('INGENIOUS_FILE_STORAGE__REVISIONS__TOKEN')
+       if token and 'DefaultEndpointsProtocol' in token:
+           conn_str = token
+
+   if not conn_str:
+       print(' Azure Storage connection string not found')
+       print(' Set either AZURE_STORAGE_CONNECTION_STRING or')
+       print(' INGENIOUS_FILE_STORAGE__REVISIONS__TOKEN')
    else:
        try:
            client = BlobServiceClient.from_connection_string(conn_str)
@@ -446,7 +489,13 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
    "
    ```
 
-7. **Test Memory and Prompts Integration**:
+7. **Container naming requirements**:
+   - Container names must be lowercase
+   - Use only letters, numbers, and hyphens
+   - Must start with a letter or number
+   - Examples: `ingenious-data`, `ingenious-revisions`
+
+8. **Test Memory and Prompts Integration**:
    ```bash
    uv run python -c "
    from ingenious.services.memory_manager import MemoryManager
@@ -461,9 +510,9 @@ ModuleNotFoundError: No module named 'ingenious_extensions'
        loaded_data = memory_manager.load_memory('test_conversation')
        print(f' Memory operations working: {loaded_data == test_data}')
 
-       # Test prompts API
+       # Test prompts API (adjust port as needed)
        import requests
-       response = requests.get('http://localhost:8000/api/v1/prompts')
+       response = requests.get('http://localhost:80/api/v1/prompts')
        if response.status_code == 200:
            print(' Prompts API accessible')
        else:
@@ -614,10 +663,10 @@ Class ConversationFlow not found in module
 ### Minimal Test
 ```bash
 # Test server is running
-curl -s http://localhost:8000/api/v1/health || echo "Server not responding"
+curl -s http://localhost:80/api/v1/health || echo "Server not responding"
 
 # Test bike-insights workflow
-curl -X POST http://localhost:8000/api/v1/chat \
+curl -X POST http://localhost:80/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "user_prompt": "{\"stores\": [], \"revision_id\": \"test\", \"identifier\": \"test\"}",
@@ -698,7 +747,7 @@ uv run ingen workflows
 | Import errors | `uv add ingenious` |
 | Configuration validation | Check INGENIOUS_ prefixed env vars |
 | Port not working | Set `INGENIOUS_WEB_CONFIGURATION__PORT` |
-| Workflow not found | Use `bike-insights` (preferred) or `bike_insights` (legacy) |
+| Workflow not found | Use `bike-insights` (recommended) or `bike_insights` (also supported) |
 | JSON parse error | Escape quotes in `user_prompt` for bike-insights |
 | Server won't start | Check port availability and .env file |
 

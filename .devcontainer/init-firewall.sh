@@ -56,7 +56,11 @@ for domain in \
     "api.anthropic.com" \
     "sentry.io" \
     "statsig.anthropic.com" \
-    "statsig.com"; do
+    "statsig.com" \
+    "pypi.org" \
+    "files.pythonhosted.org" \
+    "pypi.python.org" \
+    "astral.sh"; do
     echo "Resolving $domain..."
     ips=$(dig +short A "$domain")
     if [ -z "$ips" ]; then
@@ -115,4 +119,12 @@ if ! curl --connect-timeout 5 https://api.github.com/zen >/dev/null 2>&1; then
     exit 1
 else
     echo "Firewall verification passed - able to reach https://api.github.com as expected"
+fi
+
+# Verify PyPI access
+if ! curl --connect-timeout 5 https://pypi.org/simple/ >/dev/null 2>&1; then
+    echo "ERROR: Firewall verification failed - unable to reach https://pypi.org"
+    exit 1
+else
+    echo "Firewall verification passed - able to reach https://pypi.org as expected"
 fi

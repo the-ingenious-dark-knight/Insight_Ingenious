@@ -38,17 +38,20 @@ flowchart TD
 ```
 
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/Insight-Services-APAC/ingenious.git
    cd ingenious
    ```
 
 2. **Install dependencies and set up development environment:**
+
    ```bash
-   uv sync --extra dev
+   uv sync --group dev
    ```
 
 3. **Set up pre-commit hooks:**
+
    ```bash
    uv run pre-commit install
    ```
@@ -66,8 +69,10 @@ flowchart TD
 graph TB
     subgraph "Core Framework"
         API[API Layer<br/>FastAPI Routes]
-        CHAINLIT[Chainlit UI<br/>Web Interface]
+        AUTH[Authentication<br/>JWT & Security]
+        CLI[CLI Interface<br/>Management Tools]
         CONFIG[Configuration<br/>Management]
+        CORE[Core Utilities<br/>Logging & Errors]
         DB[Database<br/>Integration]
         FILES[File Storage<br/>Utilities]
         MODELS[Data Models<br/>& Schemas]
@@ -86,8 +91,8 @@ graph TB
     end
 
     subgraph "Development Tools"
-        PROMPT_TUNER[Prompt Tuner<br/>Testing Tool]
-        CLI[CLI Tools<br/>Management]
+        DATAPREP[Data Preparation<br/>Crawl & Process]
+        DOCPROC[Document Processing<br/>Extract & Parse]
         DOCS[Documentation<br/>Jekyll Site]
     end
 
@@ -96,29 +101,37 @@ graph TB
     SERVICES --> EXT_SERVICES
     TEMPLATES --> EXT_TEMPLATES
 
-    SERVICES --> PROMPT_TUNER
     CLI --> CONFIG
+    DATAPREP --> FILES
+    DOCPROC --> FILES
     DOCS --> TEMPLATES
 
     classDef core fill:#e3f2fd
     classDef extensions fill:#f1f8e9
     classDef tools fill:#fff3e0
 
-    class API,CHAINLIT,CONFIG,DB,FILES,MODELS,SERVICES,TEMPLATES,UTILS core
+    class API,AUTH,CLI,CONFIG,CORE,DB,FILES,MODELS,SERVICES,TEMPLATES,UTILS core
     class EXT_API,EXT_MODELS,EXT_SERVICES,EXT_TEMPLATES,SAMPLE_DATA,TESTS extensions
-    class PROMPT_TUNER,CLI,DOCS tools
+    class DATAPREP,DOCPROC,DOCS tools
 ```
 
-###  Directory Structure
+### Directory Structure
 
 ```mermaid
 graph LR
     subgraph "ingenious/"
         CORE_API[ api/]
-        CORE_CHAINLIT[ chainlit/]
+        CORE_AUTH[ auth/]
+        CORE_CLI[ cli/]
         CORE_CONFIG[ config/]
+        CORE_CORE[ core/]
+        CORE_DATAPREP[ dataprep/]
         CORE_DB[ db/]
+        CORE_DOCPROC[ document_processing/]
+        CORE_ERRORS[ errors/]
+        CORE_EXTSERV[ external_services/]
         CORE_FILES[ files/]
+        CORE_MAIN[ main/]
         CORE_MODELS[ models/]
         CORE_SERVICES[ services/]
         CORE_TEMPLATES[ templates/]
@@ -134,20 +147,12 @@ graph LR
         EXT_TESTS[ tests/]
     end
 
-    subgraph "ingenious_prompt_tuner/"
-        TUNER_AUTH[ auth.py]
-        TUNER_PROCESSOR[ event_processor.py]
-        TUNER_PAYLOAD[ payload.py]
-        TUNER_WRAPPER[response_wrapper.py]
-    end
 
     classDef core fill:#e3f2fd
     classDef extensions fill:#f1f8e9
-    classDef tuner fill:#fff3e0
 
-    class CORE_API,CORE_CHAINLIT,CORE_CONFIG,CORE_DB,CORE_FILES,CORE_MODELS,CORE_SERVICES,CORE_TEMPLATES,CORE_UTILS core
+    class CORE_API,CORE_AUTH,CORE_CLI,CORE_CONFIG,CORE_CORE,CORE_DATAPREP,CORE_DB,CORE_DOCPROC,CORE_ERRORS,CORE_EXTSERV,CORE_FILES,CORE_MAIN,CORE_MODELS,CORE_SERVICES,CORE_TEMPLATES,CORE_UTILS core
     class EXT_API,EXT_MODELS,EXT_SAMPLE,EXT_SERVICES,EXT_TEMPLATES,EXT_TESTS extensions
-    class TUNER_AUTH,TUNER_PROCESSOR,TUNER_PAYLOAD,TUNER_WRAPPER tuner
 ```
 
 ## Core Components
@@ -165,35 +170,37 @@ The multi-agent framework is the heart of Insight Ingenious:
 
 - `multi_agent_chat_service`: Service managing agent conversations
 
-#### Patterns
+#### Patterns and Flows
 
-Conversation patterns define how agents interact:
+The multi-agent framework uses a two-layer architecture:
 
-- `conversation_patterns/`: Contains different conversation pattern implementations
-  - `classification_agent/`: Pattern for classifying inputs and routing to specialized agents (API: `classification-agent`)
-  - `knowledge_base_agent/`: Pattern for knowledge retrieval and question answering (API: `knowledge-base-agent`)
-  - `sql_manipulation_agent/`: Pattern for SQL query generation and execution (API: `sql-manipulation-agent`)
-  - `education_expert/`: Pattern for educational content generation (pattern only, no direct API)
+**Conversation Patterns** (`conversation_patterns/`): Define the core logic for how agents interact and process messages. Each pattern implements the conversation mechanics and agent orchestration.
 
-#### Flows
+**Conversation Flows** (`conversation_flows/`): Provide the entry points for API integration. Flows instantiate and configure patterns, then expose them through standardized interfaces.
 
-Conversation flows implement specific use cases:
+Current implementations:
 
-- `conversation_flows/`: Contains flow implementations that use the patterns
-  - `classification_agent/`: Flow for classification and routing (API: `classification-agent`)
-  - `knowledge_base_agent/`: Flow for knowledge base interactions (API: `knowledge-base-agent`)
-  - `sql_manipulation_agent/`: Flow for SQL queries (API: `sql-manipulation-agent`)
+- **Classification Agent** (`classification_agent/`): Classifies inputs and routes to specialized agents
+  - Pattern: Implements classification logic and routing mechanics
+  - Flow: Exposes via API endpoint (`classification-agent`)
 
-Note:
-- `education_expert` exists as a pattern but does not have a corresponding flow implementation
-- Folder names use underscores for historical reasons, but API calls should use hyphens (e.g., `classification-agent`)
+- **Knowledge Base Agent** (`knowledge_base_agent/`): Handles knowledge retrieval and question answering
+  - Pattern: Implements RAG (Retrieval-Augmented Generation) logic
+  - Flow: Exposes via API endpoint (`knowledge-base-agent`)
+
+- **SQL Manipulation Agent** (`sql_manipulation_agent/`): Generates and executes SQL queries
+  - Pattern: Implements SQL generation and execution logic
+  - Flow: Exposes via API endpoint (`sql-manipulation-agent`)
+
+- **Education Expert** (`education_expert/`): Educational content generation
+  - Pattern: Implements educational content generation logic
+  - Flow: Not implemented (pattern only, no API endpoint)
+
+Note: Folder names use underscores, but API endpoints use hyphens (e.g., `classification-agent`)
 
 ### Configuration System
 
-The configuration system uses:
-
-- `config.yml`: Project-specific, non-sensitive configuration
-- `profiles.yml`: Environment-specific, sensitive configuration
+The configuration system uses environment variables with `INGENIOUS_` prefixes.
 
 Configuration is handled by:
 
@@ -225,6 +232,7 @@ Models:
    __path__ = extend_path(__path__, __name__)
    ```
 3. Create the pattern implementation:
+
    ```python
    # your_pattern_name.py
    import autogen
@@ -247,6 +255,7 @@ Models:
    __path__ = extend_path(__path__, __name__)
    ```
 3. Create the flow implementation:
+
    ```python
    # your_flow_name.py
    import ingenious.config.config as config
@@ -263,6 +272,7 @@ Models:
 
 1. Create a module in `ingenious_extensions_template/api/routes/custom.py`
 2. Implement the `Api_Routes` class:
+
    ```python
    from fastapi import APIRouter, Depends, FastAPI
    from ingenious.models.api_routes import IApiRoutes
@@ -296,28 +306,16 @@ Use the test harness to test agent behavior:
 uv run ingen test
 ```
 
-### Testing Prompts
-
-Use the prompt tuner for interactive testing:
-
-1. Start the server:
-   ```bash
-   uv run ingen serve
-   ```
-2. Navigate to http://localhost:80/prompt-tuner (or your configured port)
-3. Select a prompt to test
-4. Provide sample inputs and evaluate responses
 
 ## Debugging
 
 ### Logging
 
-Configure logging in `config.yml`:
+Configure logging with environment variables:
 
-```yaml
-logging:
-  root_log_level: "DEBUG"
-  log_level: "DEBUG"
+```bash
+export INGENIOUS_LOGGING__ROOT_LOG_LEVEL="DEBUG"
+export INGENIOUS_LOGGING__LOG_LEVEL="DEBUG"
 ```
 
 Logs are printed to the console and can be redirected to files.
@@ -327,14 +325,13 @@ Logs are printed to the console and can be redirected to files.
 When running in development mode, you can access:
 
 - http://localhost:80/docs - API documentation (or your configured port)
-- http://localhost:80/prompt-tuner - Prompt tuning interface
 
 ### Common Issues
 
 - **Missing Configuration**: Ensure environment variables are set correctly
 - **Agent Not Found**: Check module naming and imports
 - **Pattern Registration**: Ensure conversation patterns are properly registered
-- **API Key Issues**: Verify profiles.yml contains valid API keys
+- **API Key Issues**: Verify environment variables contain valid API keys
 
 ## Best Practices
 
@@ -493,7 +490,7 @@ flowchart TD
     class SEQ_LOGIC,PAR_LOGIC,COND_LOGIC,CUSTOM_LOGIC pattern
 ```
 
-###  Testing Framework
+### Testing Framework
 
 #### Test Architecture
 
@@ -552,7 +549,7 @@ graph TB
 5. **Mocking**: Mock external services and dependencies
 6. ** Fixtures**: Use consistent test data
 
-###  Deployment Pipeline
+### Deployment Pipeline
 
 ```mermaid
 flowchart LR
@@ -605,7 +602,7 @@ flowchart LR
     class DEPLOY_PROD,MONITOR,ROLLBACK prod
 ```
 
-###  Extension Development Guide
+### Extension Development Guide
 
 #### Step-by-Step Extension Creation
 
@@ -636,7 +633,6 @@ graph TD
     classDef process fill:#e1f5fe
     classDef decision fill:#fff9c4
     classDef create fill:#f3e5f5
-    classDef end fill:#dcedc8
 
     class START start
     class PLAN,TEMPLATE,IMPLEMENT,TEST_EXT,REGISTER,DEPLOY,MONITOR process
@@ -644,7 +640,7 @@ graph TD
     class CREATE_AGENT,CREATE_PATTERN,CREATE_API create
 ```
 
-###  Key Development Concepts
+### Key Development Concepts
 
 #### Agent Lifecycle
 
@@ -667,7 +663,7 @@ stateDiagram-v2
     Error --> Ready: Handle Error
 ```
 
-###  Debugging and Troubleshooting
+### Debugging and Troubleshooting
 
 #### Debug Flow
 
@@ -719,7 +715,7 @@ flowchart TD
 7. ** Code Review**: Address reviewer feedback
 8. **Merge**: Celebrate your contribution!
 
-###  Code Style Guidelines
+### Code Style Guidelines
 
 - **Python**: Follow PEP 8 standards
 - **Line Length**: Maximum 88 characters
@@ -730,8 +726,7 @@ flowchart TD
 
 ## Next Steps
 
--  Read the [Architecture Guide](/architecture/) for system design
--  Check the [Configuration Guide](/getting-started/configuration) for setup
--  Try the [Getting Started Guide](/getting-started/) for quick setup
-- Explore the [API Documentation](/api/) for integration
-- Explore the [API Documentation](/api/) for integration
+- Read the [Architecture Guide](../architecture/README.md) for system design
+- Check the [Configuration Guide](../getting-started/configuration.md) for setup
+- Try the [Getting Started Guide](../getting-started/README.md) for quick setup
+- Explore the [API Documentation](../api/README.md) for integration

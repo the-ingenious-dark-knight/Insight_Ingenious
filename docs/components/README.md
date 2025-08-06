@@ -24,6 +24,7 @@ The `ConversationPattern` class is the foundation for defining how agents intera
 | `classification-agent` | Classifies input and routes to topic-specific agents | Content classification, intent detection |
 | `knowledge-base-agent` | Searches and retrieves information from knowledge bases | Question answering, information retrieval |
 | `sql-manipulation-agent` | Generates and executes SQL queries | Database interactions, data querying |
+| `education-expert` | Educational content generation and tutoring | Educational interactions, learning assistance |
 | `bike-insights` | Multi-agent bike sales analysis | Template workflow example |
 
 #### Key Methods
@@ -42,6 +43,7 @@ The `ConversationFlow` class implements specific use cases using conversation pa
 | `classification-agent` | Routes inputs to specialized agents | `classification-agent` |
 | `knowledge-base-agent` | Answers questions using knowledge bases | `knowledge-base-agent` |
 | `sql-manipulation-agent` | Executes SQL queries based on natural language | `sql-manipulation-agent` |
+| `education-expert` | Provides educational content and tutoring | `education-expert` |
 
 #### Key Methods
 
@@ -169,8 +171,8 @@ The `FileStorage` class manages file operations:
 
 #### Implementations
 
-- `LocalFileStorage`: Stores files on the local filesystem
-- `AzureFileStorage`: Stores files in Azure Blob Storage
+- `local_FileStorageRepository`: Stores files on the local filesystem
+- `azure_FileStorageRepository`: Stores files in Azure Blob Storage
 
 ### MemoryManager
 
@@ -214,21 +216,17 @@ await memory_manager.maintain_memory("New interaction data", max_words=150)
 
 ## Web Interface
 
-### Chainlit Integration
+### Web UI Integration
 
-The Chainlit integration provides a web UI for chat interactions:
-
-- `app.py`: Chainlit application definition
-- `datalayer.py`: Data layer for Chainlit
-- `index.html`: Landing page
+The framework supports web UI integration for chat interactions. Please refer to the specific deployment documentation for web UI setup.
 
 ### Prompt Tuner
 
-The prompt tuner provides tools for developing and testing prompts:
+The prompt tuner is integrated into the CLI and provides tools for developing and testing prompts:
 
-- `run_flask_app.py`: Flask app for the prompt tuner
-- `event_processor.py`: Processes prompt testing events
-- `payload.py`: Handles test payloads
+- Available via `ingenious prompt-tuner` command
+- Provides interactive prompt testing and development interface
+- Integrated with the test command for automated prompt validation
 
 ## Command Line Interface
 
@@ -248,12 +246,17 @@ The CLI provides commands for managing the framework:
 
 ### FastAPI Integration
 
-The API layer is built with FastAPI:
+The API layer is built with FastAPI using a modular architecture:
 
-- `main.py`: Main FastAPI application
+- `main/`: Core application infrastructure
+  - `app_factory.py`: FastAPI application factory
+  - `routing.py`: Route registration and configuration
 - `api/routes/`: API route definitions
+  - `auth.py`: Authentication and authorization endpoints
   - `chat.py`: Chat endpoint for conversation workflows
+  - `conversation.py`: Conversation management endpoints
   - `diagnostic.py`: System diagnostics and workflow status endpoints
+  - `events.py`: Event handling and streaming endpoints
   - `message_feedback.py`: Feedback endpoint
   - `prompts.py`: Prompt management endpoints
 
@@ -261,7 +264,13 @@ The API layer is built with FastAPI:
 
 | Endpoint | Purpose | Description |
 |----------|---------|-------------|
+| `POST /api/v1/auth/login` | Authentication | Authenticate users and obtain access tokens |
+| `POST /api/v1/auth/logout` | Authentication | Logout and invalidate tokens |
+| `GET /api/v1/auth/verify` | Authentication | Verify authentication status |
 | `POST /api/v1/chat` | Execute workflows | Send messages to conversation workflows |
+| `GET /api/v1/conversation/{thread_id}` | Conversation management | Retrieve conversation history for a thread |
+| `DELETE /api/v1/conversation/{thread_id}` | Conversation management | Delete a conversation thread |
+| `GET /api/v1/events/stream` | Event streaming | Subscribe to real-time events |
 | `GET /api/v1/workflows` | List workflows | Get all workflows and their configuration status |
 | `GET /api/v1/workflow-status/{workflow}` | Check status | Check if a specific workflow is properly configured |
 | `GET /api/v1/diagnostic` | System status | Get system diagnostic information |
@@ -283,7 +292,7 @@ Example response:
 {
   "workflow": "knowledge-base-agent",
   "configured": false,
-  "missing_config": ["azure_search_services.key: Missing in profiles.yml"],
+  "missing_config": ["azure_search_services.key: Missing in environment variables"],
   "required_config": ["models", "chat_service", "azure_search_services"],
   "external_services": ["Azure OpenAI", "Azure Cognitive Search"],
   "ready": false,

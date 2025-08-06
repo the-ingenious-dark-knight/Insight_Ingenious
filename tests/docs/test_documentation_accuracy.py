@@ -10,7 +10,7 @@ accuracy is maintained.
 
 import re
 from pathlib import Path
-from typing import Dict, List, Set
+from typing import Any, Dict, List, Set, Tuple
 
 import pytest
 
@@ -18,12 +18,14 @@ import pytest
 class DocumentationValidator:
     """Validates documentation claims against implementation."""
 
-    def __init__(self):
-        self.workspace_root = Path("/workspace")
+    def __init__(self) -> None:
+        self.workspace_root = Path(
+            __file__
+        ).parent.parent.parent  # Go up from tests/docs/ to root
         self.docs_dir = self.workspace_root / "docs"
         self.ingenious_dir = self.workspace_root / "ingenious"
 
-    def extract_api_endpoints_from_code(self) -> Dict[str, List[str]]:
+    def extract_api_endpoints_from_code(self) -> Dict[str, List[Tuple[str, str]]]:
         """Extract API endpoints from route files."""
         endpoints = {}
         routes_dir = self.ingenious_dir / "api" / "routes"
@@ -35,9 +37,11 @@ class DocumentationValidator:
             with open(route_file, "r") as f:
                 content = f.read()
 
-            # Extract route decorators
-            route_pattern = r'@router\.(get|post|put|delete|patch|api_route)\("([^"]+)"'
-            matches = re.findall(route_pattern, content)
+            # Extract route decorators - handle both single-line and multi-line formats
+            route_pattern = (
+                r'@router\.(get|post|put|delete|patch|api_route)\(\s*"([^"]+)"'
+            )
+            matches = re.findall(route_pattern, content, re.MULTILINE | re.DOTALL)
 
             module_name = route_file.stem
             endpoints[module_name] = [(method, path) for method, path in matches]
@@ -54,10 +58,19 @@ class DocumentationValidator:
             with open(cli_file, "r") as f:
                 content = f.read()
 
-            # Extract command names
-            command_pattern = r'@app\.command\((?:name=)?["\']([^"\']+)["\']'
-            matches = re.findall(command_pattern, content)
+            # Extract command names - handle both name= and no name format
+            command_pattern = r'@app\.command\(\s*(?:name=)?"([^"]+)"'
+            matches = re.findall(command_pattern, content, re.MULTILINE | re.DOTALL)
             commands.update(matches)
+
+            # Also look for @app.command() without name (function name is used)
+            function_command_pattern = (
+                r"@app\.command\([^)]*\)\s*def\s+([a-zA-Z_][a-zA-Z0-9_]*)"
+            )
+            function_matches = re.findall(
+                function_command_pattern, content, re.MULTILINE | re.DOTALL
+            )
+            commands.update(function_matches)
 
         return commands
 
@@ -112,7 +125,7 @@ class DocumentationValidator:
 
         return workflows
 
-    def validate_pyproject_toml(self) -> Dict[str, any]:
+    def validate_pyproject_toml(self) -> Dict[str, Any]:
         """Extract key information from pyproject.toml."""
         pyproject_path = self.workspace_root / "pyproject.toml"
         info = {}
@@ -182,7 +195,7 @@ class TestDocumentationAccuracy:
         """Verify all CLI commands are correctly documented."""
         code_commands = validator.extract_cli_commands_from_code()
 
-        # Expected commands based on documentation
+        # Expected commands based on documentation and actual CLI output
         expected_commands = {
             "init",
             "serve",
@@ -191,15 +204,27 @@ class TestDocumentationAccuracy:
             "validate",
             "status",
             "version",
-            "help",
-            "dataprep",
-            "document-processing",
+            "help",  # This should be found as help_command function
+            "prompt-tuner",  # This should be found as prompt_tuner function
         }
+
+        # Map function names to command names for more flexible matching
+        command_mappings = {
+            "help_command": "help",
+            "prompt_tuner": "prompt-tuner",
+            "help": "help",
+            "prompt-tuner": "prompt-tuner",
+        }
+
+        # Create a set of normalized command names
+        normalized_commands = set()
+        for cmd in code_commands:
+            normalized_commands.add(command_mappings.get(cmd, cmd))
 
         # Verify documented commands exist (allow for more commands in code)
         for cmd in expected_commands:
-            assert cmd in code_commands, (
-                f"Command '{cmd}' documented but not found in code"
+            assert cmd in normalized_commands or cmd in code_commands, (
+                f"Command '{cmd}' documented but not found in code. Available: {sorted(normalized_commands | code_commands)}"
             )
 
     def test_environment_variables_documented(self, validator):
@@ -239,14 +264,14 @@ class TestDocumentationAccuracy:
             f"Python version requirement mismatch: {pyproject_info['python_version']}"
         )
 
-    def test_migration_script_exists(self):
+    def test_migration_script_exists(self, validator):
         """Verify migration script mentioned in docs exists."""
-        migration_script = Path("/workspace/scripts/migrate_config.py")
+        migration_script = validator.workspace_root / "scripts" / "migrate_config.py"
         assert migration_script.exists(), (
             "Migration script not found at scripts/migrate_config.py"
         )
 
-    def test_project_structure_matches_docs(self):
+    def test_project_structure_matches_docs(self, validator):
         """Verify key project directories exist as documented."""
         expected_dirs = [
             "ingenious",
@@ -259,9 +284,8 @@ class TestDocumentationAccuracy:
             "ingenious/services/chat_services",
         ]
 
-        workspace_root = Path("/workspace")
         for dir_path in expected_dirs:
-            full_path = workspace_root / dir_path
+            full_path = validator.workspace_root / dir_path
             assert full_path.exists(), f"Expected directory not found: {dir_path}"
 
     def test_api_base_path(self, validator):

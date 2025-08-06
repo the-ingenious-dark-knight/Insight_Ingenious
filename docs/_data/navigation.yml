@@ -1,57 +1,43 @@
 docs:
-  - title: "Getting Started"
+  - title: "Core Guides"
     children:
       - title: "Quick Start Guide"
         url: /getting-started/
-      - title: "Installation"
-        url: /getting-started/installation/
-      - title: "Basic Configuration"
-        url: /getting-started/configuration/
-      - title: "Quick Troubleshooting"
-        url: /getting-started/troubleshooting/
-  - title: "User Guides"
-    children:
-      - title: "All Guides"
-        url: /guides/
       - title: "Complete Azure Deployment"
-        url: /guides/full-azure-deployment/
-      - title: "API Integration"
-        url: /guides/api-integration/
-      - title: "Web Interface"
-        url: /guides/web-interface/
-      - title: "SQL Agent Setup"
-        url: /guides/sql-agent-setup/
+        url: /guides/complete-azure-deployment/
+      - title: "Custom Agents Configuration"
+        url: /extensions/
+  - title: "Developer Guides"
+    children:
+      - title: "Development Setup"
+        url: /development/
+      - title: "Architecture Overview"
+        url: /architecture/
+        # - title: "Memory & Token Architecture"
+        #   url: /architecture/memory-and-tokens/
+        # - title: "Streaming Responses Architecture"
+        #   url: /architecture/streaming-responses/
+        # - title: "Components Reference"
+        #   url: /components/
+  - title: "Data Preprocessing"
+    children:
       - title: "Data Preparation"
         url: /guides/data-preparation/
       - title: "Document Processing"
         url: /guides/document-processing/
-  - title: "Developer Guides"
-    children:
-      - title: "Architecture Overview"
-        url: /architecture/
-      - title: "Development Setup"
-        url: /development/
-      - title: "Extensions & Customization"
-        url: /extensions/
-      - title: "Components Reference"
-        url: /components/
   - title: "Reference"
     children:
       - title: "API Reference"
         url: /api/
-      - title: "Workflow API"
-        url: /api/workflows
+      # - title: "Workflow API"
+      #   url: /api/workflows
       - title: "CLI Reference"
         url: /CLI_REFERENCE
-      - title: "Complete Configuration Reference"
+      - title: "Configuration Reference"
         url: /getting-started/configuration/
-      - title: "Workflow Requirements"
-        url: /workflows/
-  - title: "Additional Resources"
-    children:
-      - title: "Quick Onboarding"
-        url: /quick_onboarding/
-      - title: "Usage Examples"
-        url: /usage/
-      - title: "Comprehensive Troubleshooting"
-        url: /troubleshooting/
+        # - title: "Workflow Requirements"
+        #   url: /workflows/
+# - title: "Additional Resources"
+#   children:
+#     - title: "Comprehensive Troubleshooting"
+#       url: /troubleshooting/

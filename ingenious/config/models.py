@@ -43,7 +43,9 @@ class ModelSettings(BaseModel):
     Supports Azure OpenAI, OpenAI, and other compatible endpoints.
     """
 
-    model: str = Field(..., description="Model name (e.g., 'gpt-4', 'gpt-3.5-turbo')")
+    model: str = Field(
+        ..., description="Model name (e.g., 'gpt-4.1-nano', 'gpt-3.5-turbo')"
+    )
     api_type: str = Field("rest", description="API type: 'rest' for HTTP APIs")
     api_version: str = Field(
         "2023-03-15-preview", description="API version for Azure OpenAI"
@@ -238,11 +240,16 @@ class WebSettings(BaseModel):
     asynchronous: bool = Field(
         False, description="Enable asynchronous response handling"
     )
-    authentication: WebAuthenticationSettings = Field(
-        default_factory=lambda: WebAuthenticationSettings(
-            enable=False, username="admin", password="", type="basic"
-        )
+    enable_streaming: bool = Field(
+        True, description="Enable streaming responses for chat endpoints"
     )
+    streaming_chunk_size: int = Field(
+        100, description="Maximum characters per streaming chunk"
+    )
+    streaming_delay_ms: int = Field(
+        50, description="Delay between streaming chunks in milliseconds"
+    )
+    authentication: WebAuthenticationSettings = WebAuthenticationSettings()
 
     @field_validator("port")
     @classmethod

@@ -1,7 +1,8 @@
 # Insight Ingenious
 
-[![Version](https://img.shields.io/badge/version-0.2.1-blue.svg)](https://github.com/Insight-Services-APAC/ingenious)
+[![Version](https://img.shields.io/badge/version-0.2.2-blue.svg)](https://github.com/Insight-Services-APAC/ingenious)
 [![Python](https://img.shields.io/badge/python-3.13+-green.svg)](https://www.python.org/downloads/)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Insight-Services-APAC/ingenious)
 [![License](https://img.shields.io/badge/license-MIT-purple.svg)](LICENSE)
 
 An enterprise-grade Python library for quickly setting up APIs to interact with AI Agents. Features multi-agent conversation flows using Microsoft's AutoGen, JWT authentication, and comprehensive Azure service integrations with support for both cloud and local implementations.
@@ -21,6 +22,9 @@ Get up and running in 5 minutes with Azure OpenAI!
     ```bash
     # Navigate to your desired project directory first
     cd /path/to/your/project
+
+    # Set up the uv project
+    uv init
 
     # Choose installation based on features needed
     uv add ingenious[standard] # Most common: includes SQL agent support (core, auth, ai, database)
@@ -45,7 +49,7 @@ Get up and running in 5 minutes with Azure OpenAI!
     **Required configuration (add to .env file)**:
     ```bash
     # Model Configuration (only INGENIOUS_* variables are used by the system)
-    INGENIOUS_MODELS__0__MODEL=gpt-4
+    INGENIOUS_MODELS__0__MODEL=gpt-4.1-nano
     INGENIOUS_MODELS__0__API_TYPE=rest
     INGENIOUS_MODELS__0__API_VERSION=2024-12-01-preview
     INGENIOUS_MODELS__0__DEPLOYMENT=your-gpt4-deployment-name
@@ -65,6 +69,16 @@ Get up and running in 5 minutes with Azure OpenAI!
 3. **Validate Configuration**:
     ```bash
     uv run ingen validate  # Check configuration before starting
+    ```
+
+    **If validation fails with port conflicts**:
+    ```bash
+    # Check if validation passes with different port
+    INGENIOUS_WEB_CONFIGURATION__PORT=8001 uv run ingen validate
+
+    # Or update your .env file before validating:
+    echo "INGENIOUS_WEB_CONFIGURATION__PORT=8001" >> .env
+    uv run ingen validate
     ```
 
     > **⚠️ BREAKING CHANGE**: Ingenious now uses **pydantic-settings** for configuration via environment variables. Legacy YAML configuration files (`config.yml`, `profiles.yml`) are **no longer supported** and must be migrated to environment variables with `INGENIOUS_` prefixes. Use the migration script:
@@ -91,6 +105,35 @@ Get up and running in 5 minutes with Azure OpenAI!
     curl http://localhost:8000/api/v1/health
     ```
 
+### Common Issues
+
+#### Port Conflicts
+If you encounter "Address already in use" or validation fails with port conflicts:
+
+1. **Check what's using the port**:
+   ```bash
+   lsof -i :8000  # Check if port 8000 is in use
+   ```
+
+2. **Use a different port**:
+   ```bash
+   uv run ingen serve --port 8001  # Try port 8001 instead
+   ```
+
+3. **Set port via environment variable** (recommended):
+   ```bash
+   # Add to your .env file
+   INGENIOUS_WEB_CONFIGURATION__PORT=8001
+   ```
+
+4. **Update your test commands accordingly**:
+   ```bash
+   # Update health check
+   curl http://localhost:8001/api/v1/health
+
+   # Update workflow tests (use the new port in all examples below)
+   ```
+
 6. **Test with Core Workflows**:
 
     Create test files to avoid JSON escaping issues:
@@ -106,6 +149,13 @@ Get up and running in 5 minutes with Azure OpenAI!
     curl -X POST http://localhost:8000/api/v1/chat -H "Content-Type: application/json" -d @test_sql.json
     ```
 
+**Expected Responses**:
+- **Successful classification-agent response**: JSON with message analysis and categories
+- **Successful knowledge-base-agent response**: JSON with relevant information retrieved (may indicate empty knowledge base initially)
+- **Successful sql-manipulation-agent response**: JSON with query results or confirmation
+
+**If you see error responses**, check the troubleshooting section above or the detailed [troubleshooting guide](docs/getting-started/troubleshooting.md).
+
 That's it! You should see a JSON response with AI analysis of the input.
 
 **Next Steps - Test Additional Workflows**:
@@ -118,17 +168,32 @@ That's it! You should see a JSON response with AI analysis of the input.
     uv run ingen init
 
     # Create bike-insights test data file
-    # Note: bike-insights requires JSON data in the user_prompt field (double-encoded JSON)
-    cat > test_bike_insights.json << 'EOF'
-    {
+    # IMPORTANT: bike-insights requires JSON data in the user_prompt field (double-encoded JSON)
+    # Method 1: Use printf for precise formatting (recommended)
+    printf '%s\n' '{
       "user_prompt": "{\"revision_id\": \"test-v1\", \"identifier\": \"test-001\", \"stores\": [{\"name\": \"Test Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"MB-TREK-2021-XC\", \"quantity_sold\": 2, \"sale_date\": \"2023-04-01\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 4.5, \"comment\": \"Great bike\"}}], \"bike_stock\": []}]}",
       "conversation_flow": "bike-insights"
+    }' > test_bike_insights.json
+
+    # Method 2: Alternative using echo (simpler but watch for shell differences)
+    echo '{
+      "user_prompt": "{\"revision_id\": \"test-v1\", \"identifier\": \"test-001\", \"stores\": [{\"name\": \"Test Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"MB-TREK-2021-XC\", \"quantity_sold\": 2, \"sale_date\": \"2023-04-01\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 4.5, \"comment\": \"Great bike\"}}], \"bike_stock\": []}]}",
+      "conversation_flow": "bike-insights"
+    }' > test_bike_insights.json
+
+    # Method 3: If heredoc is preferred, ensure proper EOF placement
+    cat > test_bike_insights.json << 'EOF'
+    {
+    "user_prompt": "{\"revision_id\": \"test-v1\", \"identifier\": \"test-001\", \"stores\": [{\"name\": \"Test Store\", \"location\": \"NSW\", \"bike_sales\": [{\"product_code\": \"MB-TREK-2021-XC\", \"quantity_sold\": 2, \"sale_date\": \"2023-04-01\", \"year\": 2023, \"month\": \"April\", \"customer_review\": {\"rating\": 4.5, \"comment\": \"Great bike\"}}], \"bike_stock\": []}]}",
+    "conversation_flow": "bike-insights"
     }
     EOF
 
     # Test bike-insights workflow
     curl -X POST http://localhost:8000/api/v1/chat -H "Content-Type: application/json" -d @test_bike_insights.json
     ```
+
+    **Expected bike-insights response**: JSON with comprehensive bike sales analysis from multiple agents (fiscal analysis, customer sentiment, summary, and bike lookup).
 
 **Important Notes**:
 - **Core Library Workflows** (`classification-agent`, `knowledge-base-agent`, `sql-manipulation-agent`) are always available and accept simple text prompts
@@ -161,6 +226,17 @@ These workflows are provided as examples in the project template when you run `i
 - **Azure integrations**: Azure Search for knowledge base, Azure SQL for database queries - fully supported with proper configuration
 
 > **Note**: Both local (ChromaDB, SQLite) and Azure (Azure Search, Azure SQL) implementations are production-ready. Choose based on your infrastructure requirements. Use `uv run ingen workflows` to check configuration requirements for each workflow.
+
+## Troubleshooting
+
+For common issues like port conflicts, configuration errors, or workflow problems, see the [detailed troubleshooting guide](docs/getting-started/troubleshooting.md).
+
+**Quick fixes for common issues**:
+- **Port conflicts**: Use `--port 8001` or set `INGENIOUS_WEB_CONFIGURATION__PORT=8001` in .env
+- **JSON escaping errors**: Use file-based approach with heredoc as shown in bike-insights example above
+- **Validation failures**: Check the troubleshooting guide for specific error solutions
+- **Workflow not found**: Ensure you've run `uv run ingen init` for template workflows like bike-insights
+- **Azure OpenAI connection issues**: Verify your API key, endpoint, and deployment name in .env file
 
 ## Documentation
 

@@ -14,69 +14,67 @@ Complete API documentation for Insight Ingenious - an enterprise-grade Python li
 ## API Architecture Overview
 
 ```mermaid
-graph TB
-    subgraph "Client Applications"
-        WEB_CLIENT[Web Applications]
-        MOBILE_CLIENT[Mobile Apps]
-        API_CLIENT[API Integrations]
-        CLI_CLIENT[CLI Tools]
-    end
-
-    subgraph "API Layer"
-        FASTAPI[FastAPI Application]
-        CHAT_API[Chat API\n/api/v1/chat]
-        DIAGNOSTIC_API[Diagnostic API\n/api/v1/workflow-status/{workflow_name}\n/api/v1/workflows\n/api/v1/diagnostic\n/api/v1/health]
-        PROMPTS_API[Prompts API\n/api/v1/prompts]
-        FEEDBACK_API[Feedback API\n/api/v1/messages/{message_id}/feedback]
-        AUTH_API[Auth API\n/api/v1/auth]
-    end
-
-    subgraph "Backend Services"
-        CHAT_SERVICE[Chat Service]
-        MULTI_AGENT_SERVICE[Multi-Agent Service]
-        CONFIG_SERVICE[Config Service]
-        FILE_STORAGE[File Storage]
-    end
-
-    subgraph "External Services"
-        AZURE_OPENAI[Azure OpenAI]
-        AZURE_SEARCH[Azure Search]
-        AZURE_SQL[Azure SQL]
-    end
-
+flowchart TB
+ subgraph subGraph0["Client Applications"]
+        WEB_CLIENT["Web Applications"]
+        MOBILE_CLIENT["Mobile Apps"]
+        API_CLIENT["API Integrations"]
+        CLI_CLIENT["CLI Tools"]
+  end
+ subgraph subGraph1["API Layer"]
+        FASTAPI["FastAPI Application"]
+        CHAT_API["Chat API - <br>/api/v1/chat"]
+        DIAGNOSTIC_API["Diagnostic API - /api/v1/workflow-status/{workflow_name}"]
+        PROMPTS_API["Prompts API -<br>/api/v1/prompts"]
+        FEEDBACK_API["Feedback API - /api/v1/messages/{message_id}/feedback"]
+        AUTH_API["Auth API - <br>/api/v1/auth"]
+  end
+ subgraph subGraph2["Backend Services"]
+        CHAT_SERVICE["Chat Service"]
+        MULTI_AGENT_SERVICE["Multi-Agent Service"]
+        CONFIG_SERVICE["Config Service"]
+        FILE_STORAGE["File Storage"]
+  end
+ subgraph subGraph3["External Services"]
+        AZURE_OPENAI["Azure OpenAI"]
+        AZURE_SEARCH["Azure Search"]
+        AZURE_SQL["Azure SQL"]
+  end
     WEB_CLIENT --> FASTAPI
     MOBILE_CLIENT --> FASTAPI
     API_CLIENT --> FASTAPI
     CLI_CLIENT --> FASTAPI
-
-    FASTAPI --> CHAT_API
-    FASTAPI --> DIAGNOSTIC_API
-    FASTAPI --> PROMPTS_API
-    FASTAPI --> FEEDBACK_API
-    FASTAPI --> AUTH_API
-
+    FASTAPI --> CHAT_API & DIAGNOSTIC_API & PROMPTS_API & FEEDBACK_API & AUTH_API
     CHAT_API --> CHAT_SERVICE
     DIAGNOSTIC_API --> CONFIG_SERVICE
     PROMPTS_API --> FILE_STORAGE
     FEEDBACK_API --> CHAT_SERVICE
     AUTH_API --> CHAT_SERVICE
-
     CHAT_SERVICE --> MULTI_AGENT_SERVICE
-    MULTI_AGENT_SERVICE --> FILE_STORAGE
-    MULTI_AGENT_SERVICE --> AZURE_OPENAI
+    MULTI_AGENT_SERVICE --> FILE_STORAGE & AZURE_OPENAI
+    CONFIG_SERVICE --> AZURE_SEARCH & AZURE_SQL
 
-    CONFIG_SERVICE --> AZURE_SEARCH
-    CONFIG_SERVICE --> AZURE_SQL
-
+     WEB_CLIENT:::client
+     MOBILE_CLIENT:::client
+     API_CLIENT:::client
+     CLI_CLIENT:::client
+     FASTAPI:::api
+     CHAT_API:::api
+     DIAGNOSTIC_API:::api
+     PROMPTS_API:::api
+     FEEDBACK_API:::api
+     AUTH_API:::api
+     CHAT_SERVICE:::service
+     MULTI_AGENT_SERVICE:::service
+     CONFIG_SERVICE:::service
+     FILE_STORAGE:::service
+     AZURE_OPENAI:::external
+     AZURE_SEARCH:::external
+     AZURE_SQL:::external
     classDef client fill:#e8f5e8
     classDef api fill:#fff3e0
     classDef service fill:#e3f2fd
     classDef external fill:#fce4ec
-
-    class WEB_CLIENT,MOBILE_CLIENT,API_CLIENT,CLI_CLIENT client
-    class FASTAPI,CHAT_API,DIAGNOSTIC_API,PROMPTS_API,FEEDBACK_API,AUTH_API api
-    class CHAT_SERVICE,MULTI_AGENT_SERVICE,CONFIG_SERVICE,FILE_STORAGE service
-    class AZURE_OPENAI,AZURE_SEARCH,AZURE_SQL external
 ```
 
 ## API Request Flow
@@ -120,33 +118,33 @@ sequenceDiagram
 ```mermaid
 graph LR
     subgraph "Chat Endpoints"
-        CHAT_POST[POST /api/v1/chat\nSend Message]
+        CHAT_POST[POST <br>/api/v1/chat<br>Send Message]
     end
 
     subgraph "Diagnostic Endpoints"
-        WORKFLOW_STATUS[GET /api/v1/workflow-status/{workflow_name}\nCheck Workflow Status]
-        WORKFLOWS_LIST[GET /api/v1/workflows\nList All Workflows]
-        DIAGNOSTIC[GET /api/v1/diagnostic\nSystem Diagnostic]
+        WORKFLOW_STATUS["GET <br>/api/v1/workflow-status/{workflow_name}<br>Check Workflow Status"]
+        WORKFLOWS_LIST[GET <br>/api/v1/workflows<br>List All Workflows]
+        DIAGNOSTIC[GET <br>/api/v1/diagnostic<br>System Diagnostic]
     end
 
     subgraph "System Endpoints"
-        HEALTH[GET /api/v1/health\nHealth Check]
+        HEALTH[GET <br>/api/v1/health<br>Health Check]
     end
 
     subgraph "Management Endpoints"
-        PROMPTS_VIEW[GET /api/v1/prompts/view/{revision_id}/{filename}\nView Prompt]
-        PROMPTS_LIST[GET /api/v1/prompts/list/{revision_id}\nList Prompts]
-        PROMPTS_UPDATE[POST /api/v1/prompts/update/{revision_id}/{filename}\nUpdate Prompt]
-        PROMPTS_REVISIONS[GET /api/v1/revisions/list\nList All Revisions]
-        PROMPTS_WORKFLOWS[GET /api/v1/workflows/list\nList Workflows with Prompts]
-        FEEDBACK[PUT /api/v1/messages/{message_id}/feedback\nMessage Feedback]
-        CONVERSATIONS[GET /api/v1/conversations/{thread_id}\nGet Conversation History]
+        PROMPTS_VIEW["GET <br>/api/v1/prompts/view/{revision_id}/{filename}<br>View Prompt"]
+        PROMPTS_LIST["GET <br>/api/v1/prompts/list/{revision_id}<br>List Prompts"]
+        PROMPTS_UPDATE["POST <br>/api/v1/prompts/update/{revision_id}/{filename}<br>Update Prompt"]
+        PROMPTS_REVISIONS[GET <br>/api/v1/revisions/list <br>List All Revisions]
+        PROMPTS_WORKFLOWS["GET <br>/api/v1/workflows/list<br>List Workflows with Prompts"]
+        FEEDBACK["PUT <br>/api/v1/messages/{message_id}/feedback<br>Message Feedback"]
+        CONVERSATIONS["GET /api/v1/conversations/{thread_id}<br>Get Conversation History"]
     end
 
     subgraph "Authentication Endpoints"
-        AUTH_LOGIN[POST /api/v1/auth/login\nJWT Login]
-        AUTH_REFRESH[POST /api/v1/auth/refresh\nRefresh Token]
-        AUTH_VERIFY[GET /api/v1/auth/verify\nVerify Token]
+        AUTH_LOGIN[POST <br>/api/v1/auth/login <br>JWT Login]
+        AUTH_REFRESH[POST <br>/api/v1/auth/refresh<br>Refresh Token]
+        AUTH_VERIFY[GET <br>/api/v1/auth/verify<br>Verify Token]
     end
 
     classDef chat fill:#e8f5e8
@@ -322,7 +320,7 @@ The Insight Ingenious API provides powerful endpoints for creating and managing 
 - **Content-Type**: `application/json`
 - **Authentication**: JWT Bearer Token (configurable - disabled by default)
 
-### [Workflow API](/api/workflows)
+### [Workflow API](./WORKFLOWS.md)
 Complete documentation for all available workflow endpoints, including:
 - Classification and routing workflows
 - Multi-agent bike sales analysis (template workflow)
@@ -402,6 +400,12 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 GET /api/v1/health
 ```
 Returns the health status of the API service.
+
+#### System Diagnostic
+```bash
+GET /api/v1/diagnostic
+```
+Returns diagnostic information about the system including directory paths for prompts, data, output, and events.
 
 #### List Available Workflows
 ```bash
@@ -902,13 +906,13 @@ Example error response:
 
 ## Additional Resources
 
-- [Workflow API Documentation](/api/workflows)
-- [Configuration Guide](/getting-started/configuration)
-- [Development Setup](/development/)
-- [CLI Reference](/CLI_REFERENCE)
+- [Workflow API Documentation](./WORKFLOWS.md)
+- [Configuration Guide](../getting-started/configuration.md)
+- [Development Setup](../development/README.md)
+- [CLI Reference](../CLI_REFERENCE.md)
 
 ## Need Help?
 
-- Check the [troubleshooting guide](/troubleshooting/)
-- Review the [workflow examples](/api/workflows)
+- Check the [troubleshooting guide](../troubleshooting/README.md)
+- Review the [workflow examples](./WORKFLOWS.md)
 - Open an issue on [GitHub](https://github.com/Insight-Services-APAC/ingenious/issues)

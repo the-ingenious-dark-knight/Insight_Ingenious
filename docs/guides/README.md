@@ -9,12 +9,12 @@ toc_label: "Available Guides"
 toc_icon: "book"
 ---
 
-This section provides detailed guides for using specific features and capabilities of Insight Ingenious - an enterprise-grade Python library for building AI agent APIs with Microsoft Azure integrations, debugging utilities, and extensive customization options.
+This section provides detailed guides for using specific features and capabilities of Insight Ingenious - an enterprise-grade Python library for quickly setting up APIs to interact with AI Agents.
 
 ## Available Guides
 
 ### Integration and Interfaces
-- **[Complete Azure Deployment](./full-azure-deployment.md)** - Complete enterprise deployment instructions
+- **[Complete Azure Deployment](./complete-azure-deployment.md)** - Complete enterprise deployment instructions
 - **[API Integration](./api-integration.md)** - Using the REST API programmatically
 - **[Web Interface](./web-interface.md)** - Using the web-based interface
 - **[SQL Agent Setup](./sql-agent-setup.md)** - Complete setup guide for SQL manipulation agent with SQLite and Azure SQL

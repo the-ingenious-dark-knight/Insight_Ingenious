@@ -58,8 +58,8 @@ graph TB
     classDef external fill:#fff3e0
 
     class CLASSIFICATION,KNOWLEDGE,SQL,BIKE_INSIGHTS workflow
-    class MINIMAL,SEARCH,DATABASE config
-    class AZURE_OPENAI,AZURE_SEARCH,AZURE_SQL external
+    class MINIMAL,LOCAL_IMPL,AZURE_EXPERIMENTAL config
+    class AZURE_OPENAI,CHROMADB,SQLITE,AZURE_SEARCH,AZURE_SQL external
 ```
 
 ## Core vs Template Workflows
@@ -169,7 +169,7 @@ graph TB
     end
 
     subgraph "Search & Retrieval"
-        CHROMADB[ChromaDB (Local)]
+        CHROMADB["ChromaDB (Local)"]
         VECTOR_SEARCH[Vector Search]
         KEYWORD_SEARCH[Keyword Search]
         HYBRID_SEARCH[Hybrid Search]
@@ -383,8 +383,7 @@ uv add chromadb aiofiles autogen-ext
 
 **Alternative: Azure Search (Production-ready)**
 ```bash
-# Additional Azure Search configuration (experimental)
-INGENIOUS_AZURE_SEARCH_SERVICES__0__SERVICE=default
+# Additional Azure Search configuration
 INGENIOUS_AZURE_SEARCH_SERVICES__0__ENDPOINT=https://your-search-service.search.windows.net
 INGENIOUS_AZURE_SEARCH_SERVICES__0__KEY=your-search-api-key
 ```
@@ -437,12 +436,9 @@ graph TB
 **Local SQLite (Recommended - Stable):**
 ```bash
 # Local SQLite configuration
-INGENIOUS_LOCAL_SQL_DB__DATABASE_PATH=/tmp/sample_sql_db
-INGENIOUS_LOCAL_SQL_DB__SAMPLE_CSV_PATH=./data/your_data.csv
-INGENIOUS_LOCAL_SQL_DB__SAMPLE_DATABASE_NAME=sample_sql_db
+INGENIOUS_LOCAL_SQL_DB__DATABASE_PATH=/tmp/sample_sql.db
 
-# To use sql-manipulation-agent, ensure these dependencies are installed:
-uv add aiofiles
+# No additional dependencies required - SQLite support is built-in
 ```
 
 **Azure SQL (Production-ready):**
@@ -461,21 +457,21 @@ INGENIOUS_AZURE_SQL_SERVICES__DATABASE_CONNECTION_STRING="Driver={ODBC Driver 18
 
 ```mermaid
 flowchart TD
-    START([What do you want to do?]) --> DECISION{Choose your use case}
+    START(["What do you want to do?"]) --> DECISION{"Choose your use case"}
 
-    DECISION -->|Route user queries<br/>to different specialists| CLASSIFICATION[Classification Agent]
-    DECISION -->|Analyze business data<br/>with multiple perspectives| BIKE_INSIGHTS[Bike Insights<br/>(Template only)]
-    DECISION -->|Search through<br/>documents and knowledge| KNOWLEDGE[Knowledge Base Agent]
-    DECISION -->|Query databases<br/>with natural language| SQL[SQL Manipulation]
+    DECISION -->|Route user queries to different specialists| CLASSIFICATION["Classification Agent"]
+    DECISION -->|Analyze business data with multiple perspectives| BIKE_INSIGHTS["Bike Insights (Template only)"]
+    DECISION -->|Search through documents and knowledge| KNOWLEDGE["Knowledge Base Agent"]
+    DECISION -->|Query databases with natural language| SQL["SQL Manipulation"]
 
-    CLASSIFICATION --> SETUP_MINIMAL[Minimal Setup<br/>Azure OpenAI only]
+    CLASSIFICATION --> SETUP_MINIMAL["Minimal Setup Azure OpenAI only"]
     BIKE_INSIGHTS --> SETUP_MINIMAL
 
-    KNOWLEDGE --> SETUP_SEARCH[Search Setup<br/>+ Azure Cognitive Search]
+    KNOWLEDGE --> SETUP_SEARCH["Search Setup + Azure Cognitive Search"]
 
-    SQL --> SETUP_DATABASE[Database Setup<br/>+ Database Connection]
+    SQL --> SETUP_DATABASE["Database Setup + Database Connection"]
 
-    SETUP_MINIMAL --> READY[Ready to Use]
+    SETUP_MINIMAL --> READY["Ready to Use"]
     SETUP_SEARCH --> READY
     SETUP_DATABASE --> READY
 
@@ -501,7 +497,7 @@ flowchart TD
 5. **Monitor**: Track performance and optimize as needed
 
 For detailed setup instructions, see:
-- [Configuration Guide](/getting-started/configuration) - Complete setup instructions
-- [Getting Started](/getting-started/) - Quick start tutorial
-- [Development Guide](/development/) - Advanced customization
-- [API Documentation](/api/) - Integration details
+- [Configuration Guide](../getting-started/configuration.md) - Complete setup instructions
+- [Getting Started](../getting-started/README.md) - Quick start tutorial
+- [Development Guide](../development/README.md) - Advanced customization
+- [API Documentation](../api/README.md) - Integration details

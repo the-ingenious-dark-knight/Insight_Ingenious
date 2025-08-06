@@ -25,7 +25,7 @@ class TestOpenAIService:
         azure_endpoint = "https://test.openai.azure.com/"
         api_key = "test_key"
         api_version = "2023-03-15-preview"
-        model = "gpt-4"
+        model = "gpt-4.1-nano"
 
         with patch(
             "ingenious.external_services.openai_service.AzureOpenAI"
@@ -42,7 +42,7 @@ class TestOpenAIService:
             )
 
             assert service.client == mock_client
-            assert service.model == "gpt-4"
+            assert service.model == "gpt-4.1-nano"
             mock_azure.assert_called_once_with(
                 azure_endpoint=azure_endpoint,
                 api_key=api_key,
@@ -55,7 +55,7 @@ class TestOpenAIService:
         azure_endpoint = "https://test.openai.azure.com/"
         api_key = "test_key"
         api_version = "2023-03-15-preview"
-        model = "gpt-4"
+        model = "gpt-4.1-nano"
 
         with patch(
             "ingenious.external_services.openai_service.AzureOpenAI"
@@ -72,7 +72,7 @@ class TestOpenAIService:
             )
 
             assert service.client == mock_client
-            assert service.model == "gpt-4"
+            assert service.model == "gpt-4.1-nano"
 
     def test_init_missing_config(self):
         """Test OpenAI service initialization with missing configuration."""
@@ -86,7 +86,7 @@ class TestOpenAIService:
         azure_endpoint = "https://test.openai.azure.com/"
         api_key = "test_key"
         api_version = "2023-03-15-preview"
-        model = "gpt-4"
+        model = "gpt-4.1-nano"
 
         # Mock response
         mock_message = ChatCompletionMessage(role="assistant", content="Test response")
@@ -95,7 +95,7 @@ class TestOpenAIService:
             id="test_id",
             choices=[mock_choice],
             created=1234567890,
-            model="gpt-4",
+            model="gpt-4.1-nano",
             object="chat.completion",
             usage={"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15},
         )
@@ -121,7 +121,7 @@ class TestOpenAIService:
         azure_endpoint = "https://test.openai.azure.com/"
         api_key = "test_key"
         api_version = "2023-03-15-preview"
-        model = "gpt-4"
+        model = "gpt-4.1-nano"
 
         # Mock response
         mock_message = ChatCompletionMessage(role="assistant", content="Test response")
@@ -130,7 +130,7 @@ class TestOpenAIService:
             id="test_id",
             choices=[mock_choice],
             created=1234567890,
-            model="gpt-4",
+            model="gpt-4.1-nano",
             object="chat.completion",
             usage={"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15},
         )
@@ -156,7 +156,7 @@ class TestOpenAIService:
         azure_endpoint = "https://test.openai.azure.com/"
         api_key = "test_key"
         api_version = "2023-03-15-preview"
-        model = "gpt-4"
+        model = "gpt-4.1-nano"
 
         with patch(
             "ingenious.external_services.openai_service.AzureOpenAI"
@@ -189,7 +189,7 @@ class TestOpenAIService:
         azure_endpoint = "https://test.openai.azure.com/"
         api_key = "test_key"
         api_version = "2023-03-15-preview"
-        model = "gpt-4"
+        model = "gpt-4.1-nano"
 
         with patch(
             "ingenious.external_services.openai_service.AzureOpenAI"
@@ -216,7 +216,7 @@ class TestOpenAIService:
         azure_endpoint = "https://test.openai.azure.com/"
         api_key = "test_key"
         api_version = "2023-03-15-preview"
-        model = "gpt-4"
+        model = "gpt-4.1-nano"
 
         with patch(
             "ingenious.external_services.openai_service.AzureOpenAI"
@@ -244,7 +244,7 @@ class TestOpenAIService:
         azure_endpoint = "https://test.openai.azure.com/"
         api_key = "test_key"
         api_version = "2023-03-15-preview"
-        model = "gpt-4"
+        model = "gpt-4.1-nano"
 
         # Mock response
         mock_message = ChatCompletionMessage(role="assistant", content="Test response")
@@ -253,7 +253,7 @@ class TestOpenAIService:
             id="test_id",
             choices=[mock_choice],
             created=1234567890,
-            model="gpt-4",
+            model="gpt-4.1-nano",
             object="chat.completion",
             usage={"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15},
         )
@@ -280,7 +280,7 @@ class TestOpenAIService:
         azure_endpoint = "https://test.openai.azure.com/"
         api_key = "test_key"
         api_version = "2023-03-15-preview"
-        model = "gpt-4"
+        model = "gpt-4.1-nano"
 
         # Mock response with empty content
         mock_message = ChatCompletionMessage(role="assistant", content="")
@@ -289,7 +289,7 @@ class TestOpenAIService:
             id="test_id",
             choices=[mock_choice],
             created=1234567890,
-            model="gpt-4",
+            model="gpt-4.1-nano",
             object="chat.completion",
             usage={"prompt_tokens": 10, "completion_tokens": 0, "total_tokens": 10},
         )
@@ -314,14 +314,14 @@ class TestOpenAIService:
         azure_endpoint = "https://test.openai.azure.com/"
         api_key = "test_key"
         api_version = "2023-03-15-preview"
-        model = "gpt-4"
+        model = "gpt-4.1-nano"
 
         # Mock response with no choices
         mock_response = ChatCompletion(
             id="test_id",
             choices=[],
             created=1234567890,
-            model="gpt-4",
+            model="gpt-4.1-nano",
             object="chat.completion",
             usage={"prompt_tokens": 10, "completion_tokens": 0, "total_tokens": 10},
         )
@@ -345,7 +345,7 @@ class TestOpenAIService:
         azure_endpoint = "https://test.openai.azure.com/"
         api_key = "test_key"
         api_version = "2023-03-15-preview"
-        model = "gpt-4"
+        model = "gpt-4.1-nano"
 
         # Mock response
         mock_message = ChatCompletionMessage(
@@ -356,7 +356,7 @@ class TestOpenAIService:
             id="test_id",
             choices=[mock_choice],
             created=1234567890,
-            model="gpt-4",
+            model="gpt-4.1-nano",
             object="chat.completion",
             usage={"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15},
         )
@@ -382,7 +382,7 @@ class TestOpenAIService:
         azure_endpoint = "https://test.openai.azure.com/"
         api_key = "test_key"
         api_version = "2023-03-15-preview"
-        model = "gpt-4"
+        model = "gpt-4.1-nano"
 
         # Mock response
         mock_message = ChatCompletionMessage(
@@ -401,7 +401,7 @@ class TestOpenAIService:
             id="test_id",
             choices=[mock_choice],
             created=1234567890,
-            model="gpt-4",
+            model="gpt-4.1-nano",
             object="chat.completion",
             usage={"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15},
         )

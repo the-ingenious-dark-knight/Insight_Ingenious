@@ -84,7 +84,13 @@ graph TB
 
 ### Multi-Agent Framework
 
-The heart of Insight Ingenious is its multi-agent framework, which enables sophisticated AI conversations:
+The heart of Insight Ingenious is its multi-agent framework, which enables sophisticated AI conversations.
+
+**Note on Architecture**: The system has two parallel structures:
+- **Conversation Flows**: Located in `conversation_flows/` directory, these implement the actual agent logic
+- **Conversation Patterns**: Located in `conversation_patterns/` directory, these appear to be legacy or alternative implementations
+
+Most active development uses the Conversation Flows approach:
 
 ```mermaid
 graph LR
@@ -197,7 +203,7 @@ graph TD
 
 ### Storage Architecture
 
-The storage layer provides flexible, cloud-aware persistence and configuration management:
+The storage layer provides flexible, cloud-aware persistence and configuration management. For detailed information about chat history, memory persistence, and token counting, see the [Memory & Token Architecture](./memory-and-tokens.md) documentation.
 
 ```mermaid
 graph TB
@@ -326,7 +332,7 @@ flowchart TD
     SELECT_WORKFLOW --> CLASSIFICATION_WORKFLOW[Classification Agent]
     SELECT_WORKFLOW --> KNOWLEDGE_WORKFLOW[Knowledge Base Agent]
     SELECT_WORKFLOW --> SQL_WORKFLOW[SQL Manipulation Agent]
-    SELECT_WORKFLOW --> BIKE_INSIGHTS_WORKFLOW[Bike Insights (Template)]
+    SELECT_WORKFLOW --> BIKE_INSIGHTS_WORKFLOW["Bike Insights Template"]
 
     CLASSIFICATION_WORKFLOW --> AGENT_COORDINATION[Agent Coordination]
     KNOWLEDGE_WORKFLOW --> AGENT_COORDINATION
@@ -407,8 +413,9 @@ graph TB
 
     subgraph "Extension Interface"
         FLOW_INTERFACE[IConversationFlow Interface]
-        PATTERN_INTERFACE[IConversationPattern Interface]
-        CHAT_INTERFACE[IChatService Interface]
+        CHAT_INTERFACE[ChatServiceProtocol]
+        FLOW_PROTOCOL[ConversationFlowProtocol]
+        AGENT_PROTOCOL[AgentProtocol]
     end
 
     subgraph "Custom Extensions"
@@ -425,11 +432,12 @@ graph TB
 
     CORE_API --> FLOW_INTERFACE
     CORE_FLOWS --> FLOW_INTERFACE
-    CORE_PATTERNS --> PATTERN_INTERFACE
+    CORE_PATTERNS --> FLOW_PROTOCOL
 
     FLOW_INTERFACE --> CUSTOM_FLOW
-    PATTERN_INTERFACE --> CUSTOM_PATTERN
+    FLOW_PROTOCOL --> CUSTOM_PATTERN
     CHAT_INTERFACE --> CUSTOM_TOOLS
+    AGENT_PROTOCOL --> CUSTOM_TOOLS
 
     CUSTOM_FLOW --> NAMESPACE_LOADER
     CUSTOM_PATTERN --> NAMESPACE_LOADER
@@ -444,7 +452,7 @@ graph TB
     classDef registry fill:#fce4ec
 
     class CORE_API,CORE_FLOWS,CORE_PATTERNS core
-    class FLOW_INTERFACE,PATTERN_INTERFACE,CHAT_INTERFACE interface
+    class FLOW_INTERFACE,CHAT_INTERFACE,FLOW_PROTOCOL,AGENT_PROTOCOL interface
     class CUSTOM_FLOW,CUSTOM_PATTERN,CUSTOM_TOOLS custom
     class NAMESPACE_LOADER,DYNAMIC_LOADER,CONFIG_VALIDATOR registry
 ```
@@ -455,26 +463,61 @@ graph TB
 
 ```mermaid
 classDiagram
-    class IConversationPattern {
-        <<interface>>
-        +execute(context: ConversationContext)
-        +validate(input: Any)
-        +get_pattern_type()
-    }
+    note for ClassificationAgentFlow "Uses static method pattern
+    Does not inherit from IConversationFlow
+    Located in conversation_flows directory"
 
     class IConversationFlow {
-        <<interface>>
-        +start_conversation(query: str)
-        +process_step(step: ConversationStep)
-        +finalize_conversation()
+        <<abstract>>
+        +_config: Config
+        +_memory_path: str
+        +_memory_file_path: str
+        +_logger: Logger
+        +_chat_service: multi_agent_chat_service
+        +_memory_manager: Any
+        +__init__(parent_multi_agent_chat_service)
+        +get_conversation_response(chat_request: ChatRequest)*
     }
 
-    class IChatService {
-        <<interface>>
-        +get_chat_response(request: ChatRequest)
-        +process_message(message: str)
+    class ChatServiceProtocol {
+        <<protocol>>
+        +get_chat_response(chat_request: ChatRequest) ChatResponse
     }
 
+    class ConversationFlowProtocol {
+        <<protocol>>
+        +__init__(chat_history_repository, config, **kwargs)
+        +get_chat_response(chat_request: ChatRequest) ChatResponse
+    }
+
+    class multi_agent_chat_service {
+        +config: Config
+        +chat_history_repository: ChatHistoryRepository
+        +conversation_flow: str
+        +openai_service: ChatCompletionMessageParam
+        +get_chat_response(chat_request: IChatRequest) IChatResponse
+    }
+
+    class KnowledgeBaseAgentFlow {
+        +get_conversation_response(chat_request: ChatRequest) ChatResponse
+        +search_knowledge()
+        +retrieve_information()
+        +format_results()
+    }
+
+    class SqlManipulationAgentFlow {
+        +get_conversation_response(chat_request: ChatRequest) ChatResponse
+        +parse_nl_query()
+        +generate_sql()
+        +execute_query()
+        +format_results()
+    }
+
+    class ClassificationAgentFlow {
+        +get_conversation_response(message, topics, thread_memory, memory_record_switch, thread_chat_history, chatrequest)$
+        +classify_intent()$
+        +route_to_agent()$
+    }
 
     class CustomExtensionFlow {
         +custom_domain_logic()
@@ -482,43 +525,13 @@ classDiagram
         +implement_patterns()
     }
 
-    class KnowledgeBaseAgentFlow {
-        +search_knowledge()
-        +retrieve_information()
-        +format_results()
-    }
-
-    class SqlManipulationAgentFlow {
-        +parse_nl_query()
-        +generate_sql()
-        +execute_query()
-        +format_results()
-    }
-
-    class MultiAgentChatService {
-        +conversation_flows: Dict[str, IConversationFlow]
-        +patterns: Dict[str, IConversationPattern]
-        +orchestrate_conversation()
-        +manage_state()
-    }
-
-    class ConversationPattern {
-        +execute_in_sequence()
-        +handle_dependencies()
-    }
-
-    class ClassificationAgentFlow {
-        +classify_intent()
-        +route_to_agent()
-        +handle_routing()
-    }
-    IConversationFlow <|.. CustomExtensionFlow
-    IConversationFlow <|.. KnowledgeBaseAgentFlow
-    IConversationFlow <|.. SqlManipulationAgentFlow
-    IConversationPattern <|.. ConversationPattern
-    IChatService <|.. MultiAgentChatService
-    MultiAgentChatService --> IConversationFlow
-    MultiAgentChatService --> IConversationPattern
+    IConversationFlow <|-- KnowledgeBaseAgentFlow
+    IConversationFlow <|-- SqlManipulationAgentFlow
+    IConversationFlow <|-- CustomExtensionFlow
+    ChatServiceProtocol <|.. multi_agent_chat_service
+    ConversationFlowProtocol <|.. KnowledgeBaseAgentFlow
+    ConversationFlowProtocol <|.. SqlManipulationAgentFlow
+    multi_agent_chat_service --> IConversationFlow
 ```
 
 ## Configuration Architecture
@@ -687,7 +700,7 @@ graph TB
     subgraph "Caching Strategy"
         MEMORY[In-Memory Cache]
         FILE_CACHE[File-based Cache]
-        DISTRIBUTED[Distributed Cache (Future)]
+        DISTRIBUTED[Distributed Cache Future]
     end
 
     subgraph "Load Balancing"
@@ -735,6 +748,39 @@ graph TB
     class METRICS,ALERTS,DASHBOARDS monitor
 ```
 
+## Protocol Registry
+
+The system defines a comprehensive set of protocols (interfaces) for dynamic imports and extensions:
+
+### Available Protocols
+
+- **WorkflowProtocol**: For workflow classes with `execute()` method
+- **ConversationFlowProtocol**: For conversation flow classes in multi-agent systems
+- **ChatServiceProtocol**: For chat service implementations
+- **ExtractorProtocol**: For document extractor classes
+- **RepositoryProtocol**: For repository pattern implementations
+- **FileStorageProtocol**: For file storage backends (local, Azure)
+- **AgentProtocol**: For AI agent implementations
+- **ToolProtocol**: For tool implementations in multi-agent systems
+- **ValidatorProtocol**: For data validator classes
+- **ProcessorProtocol**: For data processor classes
+- **ConfigurableProtocol**: For configurable objects
+- **ExtensionProtocol**: For extension modules
+
+### Protocol Validation
+
+The system provides utilities to validate protocol compliance:
+
+```python
+from ingenious.utils.protocols import validate_protocol_compliance, get_missing_protocol_methods
+
+# Check if an object implements a protocol
+is_valid = validate_protocol_compliance(my_object, ChatServiceProtocol)
+
+# Get missing methods for protocol compliance
+missing = get_missing_protocol_methods(my_object, ChatServiceProtocol)
+```
+
 ## Extension Development
 
 The system is designed for extensibility at several key points:
@@ -746,20 +792,44 @@ The system is designed for extensibility at several key points:
 - **Custom Models**: Define domain-specific data models
 - **Custom Tools**: Integrate with external systems and APIs
 
+### Dynamic Import System
+
+The framework uses a sophisticated namespace-based dynamic import system:
+
+- **Namespace Utils**: Handles dynamic loading of flows, patterns, and extensions
+- **Import Fallback**: Supports both core and extension module imports
+- **Workflow Normalization**: Automatically normalizes workflow names (e.g., "classification-agent" → "classification_agent")
+- **Safe Imports**: Validates imports against defined protocols
+
+Example usage:
+```python
+from ingenious.utils.namespace_utils import import_class_with_fallback
+
+# Import a conversation flow with fallback support
+flow_class = import_class_with_fallback(
+    "my_custom_flow",
+    "conversation_flows",
+    fallback_module="ingenious_extensions_template.services.chat_services.multi_agent"
+)
+```
+
 ### Development Best Practices
 
 1. **Modular Design**: Keep components loosely coupled
-2. **Test Coverage**: Maintain comprehensive test suites
-3. **Documentation**: Document all public APIs and interfaces
-4. **Security**: Follow security best practices for all extensions
-5. **Performance**: Consider performance implications of custom code
-6. **Compatibility**: Ensure backward compatibility when possible
+2. **Protocol Compliance**: Implement required protocols for extensions
+3. **Test Coverage**: Maintain comprehensive test suites
+4. **Documentation**: Document all public APIs and interfaces
+5. **Security**: Follow security best practices for all extensions
+6. **Performance**: Consider performance implications of custom code
+7. **Compatibility**: Ensure backward compatibility when possible
 
-For detailed development instructions, see the [Development Guide](/development/).
+For detailed development instructions, see the [Development Guide](../development/README.md).
 
 ## Next Steps
 
-- Read the [Getting Started Guide](/getting-started/) to begin using the system
-- Follow the [Development Guide](/development/) to start extending the framework
-- Check the [Configuration Guide](/getting-started/configuration) for setup details
-- Explore the [API Documentation](/api/) for integration options
+- Read the [Getting Started Guide](../getting-started/README.md) to begin using the system
+- Review the [Memory & Token Architecture](./memory-and-tokens.md) for detailed persistence mechanisms
+- Explore the [Streaming Responses Architecture](./streaming-responses.md) for real-time response capabilities
+- Follow the [Development Guide](../development/README.md) to start extending the framework
+- Check the [Configuration Guide](../getting-started/configuration.md) for setup details
+- Explore the [API Documentation](../api/README.md) for integration options

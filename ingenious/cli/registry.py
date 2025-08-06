@@ -251,49 +251,6 @@ class CommandRegistry:
 
         return errors
 
-    def get_command_help(self, name: str) -> Optional[str]:
-        """
-        Get help text for a specific command.
-
-        Args:
-            name: Command name
-
-        Returns:
-            Help text if command exists, None otherwise
-        """
-        command_info = self.get_command(name)
-        if not command_info:
-            return None
-
-        # Try to get help from docstring or description
-        help_text = command_info.description
-        if not help_text and command_info.command_class.__doc__:
-            help_text = command_info.command_class.__doc__.strip()
-
-        return help_text or f"No help available for command '{name}'"
-
-    def print_command_list(self, include_hidden: bool = False) -> None:
-        """
-        Print a formatted list of all registered commands.
-
-        Args:
-            include_hidden: Whether to include hidden commands
-        """
-        commands = self.list_commands(include_hidden)
-
-        if not commands:
-            self.console.print("[yellow]No commands registered[/yellow]")
-            return
-
-        self.console.print("[bold]Registered Commands:[/bold]\n")
-
-        for cmd in commands:
-            status = "[dim](hidden)[/dim]" if cmd.hidden else ""
-            self.console.print(f"  [bold cyan]{cmd.name}[/bold cyan] {status}")
-            if cmd.description:
-                self.console.print(f"    {cmd.description}")
-            self.console.print()
-
 
 # Global registry instance
 _registry: Optional[CommandRegistry] = None

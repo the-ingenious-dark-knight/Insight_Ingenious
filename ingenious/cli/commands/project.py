@@ -94,6 +94,9 @@ class InitCommand(BaseCommand):
         # Create Docker files
         self._create_docker_files(base_path)
 
+        # Create standalone templates directory
+        self._create_templates_directory(base_path)
+
     def _create_env_files(self, base_path: Path) -> None:
         """Create environment configuration files in the project root."""
         env_files = {
@@ -159,7 +162,7 @@ class InitCommand(BaseCommand):
 INGENIOUS_MODELS__0__API_KEY=your-api-key-here
 # Base URL for Azure OpenAI (e.g., https://your-resource.openai.azure.com/)
 INGENIOUS_MODELS__0__BASE_URL=https://your-resource.openai.azure.com/
-# Model name (e.g., gpt-4o-mini, gpt-4, gpt-3.5-turbo)
+# Model name (e.g., gpt-4o-mini, gpt-4.1-nano, gpt-3.5-turbo)
 INGENIOUS_MODELS__0__MODEL=gpt-4o-mini
 # Azure OpenAI API version
 INGENIOUS_MODELS__0__API_VERSION=2024-02-01
@@ -231,18 +234,30 @@ INGENIOUS_LOGGING__LOG_LEVEL=info
     def _create_default_docker_file(self, filename: str, destination: Path) -> None:
         """Create a default Docker file if template is missing."""
         if filename == "Dockerfile":
-            content = """FROM python:3.11-slim
+            content = """FROM python:3.13-slim
 
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies including ODBC driver for Azure SQL
 RUN apt-get update && apt-get install -y \\
     git \\
+    curl \\
+    gnupg2 \\
+    unixodbc-dev \\
+    && curl -sSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /usr/share/keyrings/microsoft-archive-keyring.gpg \\
+    && echo "deb [arch=amd64,arm64,armhf signed-by=/usr/share/keyrings/microsoft-archive-keyring.gpg] https://packages.microsoft.com/debian/12/prod bookworm main" > /etc/apt/sources.list.d/mssql-release.list \\
+    && apt-get update \\
+    && ACCEPT_EULA=Y apt-get install -y msodbcsql18 \\
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Install uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
+
+# Copy project files
+COPY pyproject.toml .
+
+# Install dependencies with uv
+RUN uv sync
 
 # Copy application code
 COPY . .
@@ -250,13 +265,15 @@ COPY . .
 # Expose port
 EXPOSE 80
 
+# Set environment variable to use port 80 for production
+ENV INGENIOUS_WEB_CONFIGURATION__PORT=80
+
 # Run the application
-CMD ["python", "-m", "ingenious.cli", "serve"]
+CMD ["uv", "run", "python", "-m", "ingenious.cli", "serve"]
 """
         elif filename == ".dockerignore":
             content = """.git
 .gitignore
-README.md
 .env
 .env.*
 __pycache__
@@ -278,12 +295,50 @@ coverage.xml
 .venv
 .pytest_cache
 .mypy_cache
+functional_test_outputs/
+tmp/
+.tmp/
 """
         else:
             content = f"# {filename} - Created by Insight Ingenious\n"
 
         with open(destination, "w") as f:
             f.write(content)
+
+    def _create_templates_directory(self, base_path: Path) -> None:
+        """Create standalone templates/prompts/quickstart-1/ directory with bike-insights templates."""
+        templates_dir = Path.cwd() / "templates" / "prompts" / "quickstart-1"
+
+        if templates_dir.exists():
+            self.print_warning("Templates directory already exists. Skipping...")
+            return
+
+        try:
+            # Create the directory structure
+            templates_dir.mkdir(parents=True, exist_ok=True)
+
+            # Copy prompt template files from ingenious_extensions_template
+            source_templates = (
+                base_path / "ingenious_extensions_template" / "templates" / "prompts"
+            )
+
+            if source_templates.exists():
+                for template_file in source_templates.glob("*.jinja"):
+                    destination_file = templates_dir / template_file.name
+                    shutil.copy2(template_file, destination_file)
+
+                self.print_success(
+                    f"Created 'templates/prompts/quickstart-1/' with {len(list(source_templates.glob('*.jinja')))} template files"
+                )
+            else:
+                # Create the directory but warn about missing templates
+                self.print_warning(
+                    "Source templates not found, created empty templates directory"
+                )
+
+        except Exception as e:
+            self.logger.error(f"Failed to create templates directory: {e}")
+            # Don't fail the entire operation for templates
 
     def _show_next_steps(self) -> None:
         """Show next steps after project initialization."""
@@ -299,6 +354,12 @@ coverage.xml
             "   curl -X POST http://localhost:80/api/v1/chat \\",
             "     -H 'Content-Type: application/json' \\",
             '     -d \'{"user_prompt": "Analyze bike sales", "conversation_flow": "bike-insights"}\'',
+            "",
+            "🐳 Docker Deployment:",
+            "6. Build production container:",
+            "   docker build -t ingenious-app .",
+            "7. Run with environment:",
+            "   docker run --env-file .env -p 8080:80 ingenious-app",
         ]
 
         panel = OutputFormatters.create_info_panel(

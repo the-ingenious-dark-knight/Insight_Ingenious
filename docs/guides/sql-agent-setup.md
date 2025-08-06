@@ -34,19 +34,17 @@ uv add ingenious
 # Initialize a new Ingenious project
 ingen init
 
-# This creates config.yml and profiles.yml files
+# This creates a .env.example file
 ```
 
 ### Step 3: Configure SQLite Mode
 
-Edit your `profiles.yml` file to enable SQLite mode:
+Add these environment variables to enable SQLite mode:
 
-```yaml
-# profiles.yml
-azure_sql_services:
-  database_name: "skip"  # This enables SQLite mode
-local_sql_db:
-  database_path: "/tmp/sample_sql.db"
+```bash
+# .env
+INGENIOUS_AZURE_SQL_SERVICES__DATABASE_NAME=skip  # This enables SQLite mode
+INGENIOUS_LOCAL_SQL_DB__DATABASE_PATH=/tmp/sample_sql.db
 ```
 
 ### Step 4: Set Environment Variables
@@ -55,10 +53,16 @@ Create a `.env` file with your Azure OpenAI credentials:
 
 ```bash
 # .env
-AZURE_OPENAI_API_KEY=your-api-key
-AZURE_OPENAI_BASE_URL=your-endpoint
-AZURE_OPENAI_DEPLOYMENT=your-deployment-name
-AZURE_OPENAI_API_VERSION=2024-12-01-preview
+# Configure AI model using nested environment variables format
+INGENIOUS_MODELS__0__MODEL=gpt-4.1-nano
+INGENIOUS_MODELS__0__API_TYPE=rest
+INGENIOUS_MODELS__0__API_VERSION=2024-12-01-preview
+INGENIOUS_MODELS__0__DEPLOYMENT=your-gpt4-deployment-name
+INGENIOUS_MODELS__0__API_KEY=your-api-key-here
+INGENIOUS_MODELS__0__BASE_URL=https://your-resource.openai.azure.com/
+
+# Chat service type
+INGENIOUS_CHAT_SERVICE__TYPE=multi_agent
 ```
 
 ### Step 5: Create Sample Database
@@ -76,7 +80,7 @@ print('Sample SQLite database created at /tmp/sample_sql.db')
 
 ```bash
 # Start the Ingenious API server
-ingen serve
+uv run ingen serve
 ```
 
 ### Step 7: Test SQL Queries
@@ -103,6 +107,8 @@ curl -X POST http://localhost:80/api/v1/chat \
 
 For production deployments, you can connect to Azure SQL Database.
 
+> **Important:** When configuring Azure SQL, always use the connection string from the **ODBC** tab in the Azure Portal. Do **not** use ADO.NET or JDBC connection strings, as these formats are incompatible and will cause connection errors.
+
 ### Prerequisites
 
 - Azure SQL Database instance
@@ -111,15 +117,14 @@ For production deployments, you can connect to Azure SQL Database.
 
 ### Configuration
 
-1. **Configure profiles.yml** for Azure SQL:
+1. **Configure environment variables** for Azure SQL:
 
-```yaml
-# profiles.yml
-azure_sql_services:
-  database_name: "your-database-name"
-  server_name: "your-server.database.windows.net"
-  driver: "ODBC Driver 18 for SQL Server"
-  connection_string: "Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+```bash
+# .env
+INGENIOUS_AZURE_SQL_SERVICES__DATABASE_NAME=your-database-name
+INGENIOUS_AZURE_SQL_SERVICES__SERVER_NAME=your-server.database.windows.net
+INGENIOUS_AZURE_SQL_SERVICES__DRIVER="ODBC Driver 18 for SQL Server"
+INGENIOUS_AZURE_SQL_SERVICES__CONNECTION_STRING="Driver={ODBC Driver 18 for SQL Server};Server=tcp:your-server.database.windows.net,1433;Database=your-database;Uid=your-username;Pwd=your-password;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
 ```
 
 2. **Set environment variables**:
@@ -134,8 +139,8 @@ export AZURE_SQL_PASSWORD="your-password"
 ```bash
 # Validate configuration
 uv run python -c "
-from ingenious.config.config import load_app_config
-config = load_app_config()
+from ingenious.config import get_config
+config = get_config()
 print('Azure SQL Config:', config.azure_sql_services)
 if config.azure_sql_services and config.azure_sql_services.database_name != 'skip':
     print('Azure SQL mode enabled')
@@ -225,7 +230,7 @@ curl -s -X POST http://localhost:80/api/v1/chat \
   -d '{
     "user_prompt": "List all tables in the database",
     "conversation_flow": "sql-manipulation-agent"
-  }' | jq -r '.response // .error'
+  }' | jq -r '.agent_response // .error'
 
 echo ""
 
@@ -236,7 +241,7 @@ curl -s -X POST http://localhost:80/api/v1/chat \
   -d '{
     "user_prompt": "Describe the columns in the first table",
     "conversation_flow": "sql-manipulation-agent"
-  }' | jq -r '.response // .error'
+  }' | jq -r '.agent_response // .error'
 
 echo ""
 
@@ -247,7 +252,7 @@ curl -s -X POST http://localhost:80/api/v1/chat \
   -d '{
     "user_prompt": "Show me 3 sample rows from any table",
     "conversation_flow": "sql-manipulation-agent"
-  }' | jq -r '.response // .error'
+  }' | jq -r '.agent_response // .error'
 
 echo ""
 echo "SQL Agent tests completed!"
@@ -267,7 +272,7 @@ chmod +x test_sql_agent.sh
 #### 1. "Database connection failed"
 
 **For SQLite mode:**
-- Ensure `database_name: "skip"` is set in profiles.yml
+- Ensure `INGENIOUS_AZURE_SQL_SERVICES__DATABASE_NAME=skip` is set in environment
 - Check that the database file path is writable
 - Run the sample data creation script
 
@@ -298,8 +303,8 @@ print('Sample data created')
 ```bash
 # Check configuration
 uv run python -c "
-from ingenious.config.config import load_app_config
-config = load_app_config()
+from ingenious.config import get_config
+config = get_config()
 print('Config valid:', config is not None)
 print('SQL config:', getattr(config, 'azure_sql_services', 'Not found'))
 "
@@ -324,7 +329,7 @@ Enable detailed logging for troubleshooting:
 
 ```bash
 # Set debug environment
-export INGENIOUS_LOG_LEVEL=DEBUG
+export INGENIOUS_LOGGING__LOG_LEVEL=debug
 
 # Check SQL tool functions
 uv run python -c "
@@ -341,22 +346,16 @@ Validate your complete setup:
 ```bash
 # Complete configuration check
 uv run python -c "
-from ingenious.config.config import load_app_config
-from ingenious.config.profile import load_profile_config
+from ingenious.config import get_config
 
-config = load_app_config()
-profile = load_profile_config()
+config = get_config()
 
 print('=== Configuration Check ===')
 print('Config loaded:', config is not None)
-print('Profile loaded:', profile is not None)
 
 if config:
     print('Azure SQL Services:', getattr(config, 'azure_sql_services', 'Not configured'))
     print('Local SQL DB:', getattr(config, 'local_sql_db', 'Not configured'))
-
-if profile:
-    print('Profile Azure SQL:', getattr(profile, 'azure_sql_services', 'Not configured'))
 
 print('=== End Check ===')
 "
