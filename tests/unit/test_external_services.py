@@ -1,5 +1,8 @@
 """
 Unit tests for external services.
+
+This module tests external service integrations, including OpenAI service
+which uses Azure OpenAI client builder functions for authentication.
 """
 
 from unittest.mock import Mock, patch
@@ -8,6 +11,7 @@ import pytest
 from openai.types.chat import ChatCompletion, ChatCompletionMessage
 from openai.types.chat.chat_completion import Choice
 
+from ingenious.common.enums import AuthenticationMethod
 from ingenious.errors.content_filter_error import ContentFilterError
 from ingenious.errors.token_limit_exceeded_error import TokenLimitExceededError
 from ingenious.external_services.openai_service import OpenAIService
@@ -29,12 +33,21 @@ class TestOpenAIService:
             mock_client = Mock()
             mock_azure.return_value = mock_client
 
-            service = OpenAIService(azure_endpoint, api_key, api_version, model)
+            service = OpenAIService(
+                azure_endpoint,
+                api_key,
+                api_version,
+                model,
+                authentication_method=AuthenticationMethod.TOKEN,
+            )
 
             assert service.client == mock_client
             assert service.model == "gpt-4.1-nano"
             mock_azure.assert_called_once_with(
-                azure_endpoint=azure_endpoint, api_key=api_key, api_version=api_version
+                azure_endpoint=azure_endpoint,
+                api_key=api_key,
+                api_version=api_version,
+                azure_deployment=model,
             )
 
     def test_init_with_openai_config(self):
@@ -50,7 +63,13 @@ class TestOpenAIService:
             mock_client = Mock()
             mock_azure.return_value = mock_client
 
-            service = OpenAIService(azure_endpoint, api_key, api_version, model)
+            service = OpenAIService(
+                azure_endpoint,
+                api_key,
+                api_version,
+                model,
+                authentication_method=AuthenticationMethod.TOKEN,
+            )
 
             assert service.client == mock_client
             assert service.model == "gpt-4.1-nano"

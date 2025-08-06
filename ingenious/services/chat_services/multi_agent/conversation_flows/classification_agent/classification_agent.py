@@ -4,9 +4,9 @@ import uuid
 from autogen_agentchat.agents import AssistantAgent
 from autogen_agentchat.messages import TextMessage
 from autogen_core import EVENT_LOGGER_NAME, CancellationToken
-from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
 
 import ingenious.config.config as config
+from ingenious.common.utils import create_aoai_chat_completion_client_from_settings
 from ingenious.models.agent import LLMUsageTracker
 from ingenious.models.chat import ChatRequest
 
@@ -66,17 +66,8 @@ class ConversationFlow:
                     "Previous conversation:\n" + "\n".join(memory_parts) + "\n\n"
                 )
 
-        # Configure Azure OpenAI client for v0.4
-        azure_config = {
-            "model": model_config.model,
-            "api_key": model_config.api_key,
-            "azure_endpoint": model_config.base_url,
-            "azure_deployment": model_config.deployment or model_config.model,
-            "api_version": model_config.api_version,
-        }
-
-        # Create the model client
-        model_client = AzureOpenAIChatCompletionClient(**azure_config)
+        # Create the Azure OpenAI client using the provided model configuration
+        model_client = create_aoai_chat_completion_client_from_settings(model_config)
 
         # Create classification system prompt with memory context
         classification_system_prompt = f"""

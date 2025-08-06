@@ -6,8 +6,8 @@ import uuid
 from autogen_agentchat.agents import AssistantAgent
 from autogen_core import EVENT_LOGGER_NAME, CancellationToken
 from autogen_core.tools import FunctionTool
-from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
 
+from ingenious.common.utils import create_aoai_chat_completion_client_from_config
 from ingenious.models.agent import LLMUsageTracker
 from ingenious.models.chat import ChatRequest, ChatResponse
 from ingenious.services.chat_services.multi_agent.service import IConversationFlow
@@ -67,17 +67,8 @@ class ConversationFlow(IConversationFlow):
             except Exception as e:
                 logger.warning(f"Failed to retrieve thread memory: {e}")
 
-        # Configure Azure OpenAI client for v0.4
-        azure_config = {
-            "model": model_config.model,
-            "api_key": model_config.api_key,
-            "azure_endpoint": model_config.base_url,
-            "azure_deployment": model_config.deployment or model_config.model,
-            "api_version": model_config.api_version,
-        }
-
         # Create the model client
-        model_client = AzureOpenAIChatCompletionClient(**azure_config)
+        model_client = create_aoai_chat_completion_client_from_config(model_config)
 
         # Set up context for conversation
         context = "SQL Expert Assistant for analyzing data."

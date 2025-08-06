@@ -1,8 +1,8 @@
-from enum import Enum
 from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
+from ingenious.common.enums import AuthenticationMethod
 from ingenious.models import config as config_models
 from ingenious.models import config_ns as config_ns_models
 from ingenious.models import profile as profile_models
@@ -28,9 +28,16 @@ class ChatHistoryConfig(config_ns_models.ChatHistoryConfig):
 
 
 class ModelConfig(config_ns_models.ModelConfig):
-    api_key: str
+    api_key: str = ""
     base_url: str
     deployment: str = ""
+    client_id: str = ""
+    client_secret: str = ""
+    tenant_id: str = ""
+    authentication_method: AuthenticationMethod = Field(
+        AuthenticationMethod.DEFAULT_CREDENTIAL,
+        description="OpenAI SAS Authentication Method",
+    )
 
     def __init__(
         self, config: config_ns_models.ModelConfig, profile: profile_models.ModelConfig
@@ -48,9 +55,15 @@ class ModelConfig(config_ns_models.ModelConfig):
             api_type=config.api_type,
             api_version=api_version,
             deployment=deployment,
-            base_url=profile.base_url,
-            api_key=profile.api_key,
         )
+
+        # Set additional fields from profile that aren't in the parent class
+        self.base_url = profile.base_url
+        self.api_key = profile.api_key
+        self.client_id = profile.client_id
+        self.client_secret = profile.client_secret
+        self.tenant_id = profile.tenant_id
+        self.authentication_method = profile.authentication_method
 
 
 class ChatServiceConfig(config_ns_models.ChatServiceConfig):
@@ -90,9 +103,10 @@ class AzureSearchConfig(config_ns_models.AzureSearchConfig):
         config: config_ns_models.AzureSearchConfig,
         profile: profile_models.AzureSearchConfig,
     ):
-        super().__init__(
-            service=config.service, endpoint=config.endpoint, key=profile.key
-        )
+        super().__init__(service=config.service, endpoint=config.endpoint)
+
+        # Set additional fields from profile
+        self.key = profile.key
 
 
 class AzureSqlConfig(config_ns_models.AzureSqlConfig):
@@ -134,8 +148,10 @@ class WebConfig(config_ns_models.WebConfig):
             port=config.port,
             type=config.type,
             asynchronous=config.asynchronous,
-            authentication=profile.authentication,
         )
+
+        # Set additional fields from profile
+        self.authentication = profile.authentication
 
 
 class LocaldbConfig(config_ns_models.LocaldbConfig):
@@ -145,13 +161,6 @@ class LocaldbConfig(config_ns_models.LocaldbConfig):
             sample_csv_path=config.sample_csv_path,
             sample_database_name=config.sample_database_name,
         )
-
-
-class AuthenticationMethod(str, Enum):
-    MSI = "msi"
-    CLIENT_ID_AND_SECRET = "client_id_and_secret"
-    DEFAULT_CREDENTIAL = "default_credential"
-    TOKEN = "token"
 
 
 class FileStorageContainer(config_ns_models.FileStorageContainer):

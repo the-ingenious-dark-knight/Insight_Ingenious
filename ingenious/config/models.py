@@ -5,7 +5,9 @@ This module contains all the BaseModel classes that define
 the structure and validation for different configuration sections.
 """
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, ValidationInfo, field_validator, model_validator
+
+from ingenious.common.enums import AuthenticationMethod
 
 
 class ChatHistorySettings(BaseModel):
@@ -51,16 +53,46 @@ class ModelSettings(BaseModel):
     deployment: str = Field("", description="Azure OpenAI deployment name (optional)")
     api_key: str = Field("", description="API key for the model service")
     base_url: str = Field("", description="Base URL for the API endpoint")
+    client_id: str = Field(
+        "", description="Azure client ID for MSI authentication (optional)"
+    )
+    client_secret: str = Field(
+        "",
+        description="Azure client secret for CLIENT_ID_AND_SECRET authentication (optional)",
+    )
+    tenant_id: str = Field(
+        "",
+        description="Azure tenant ID for CLIENT_ID_AND_SECRET authentication (optional)",
+    )
+    authentication_method: AuthenticationMethod = Field(
+        AuthenticationMethod.DEFAULT_CREDENTIAL,
+        description="OpenAI SAS Authentication Method",
+    )
 
     @field_validator("api_key")
     @classmethod
-    def validate_api_key(cls, v: str) -> str:
-        """Validate that API key is provided for production use."""
+    def validate_api_key(cls, v: str, info: ValidationInfo) -> str:
+        """Validate that API key is provided when using token authentication."""
+        # Get authentication_method from the values being validated
+        auth_mode = info.data.get(
+            "authentication_method", AuthenticationMethod.DEFAULT_CREDENTIAL
+        )
+
+        # Check for placeholder values
         if v and "placeholder" in v.lower():
             raise ValueError(
                 "API key is required. Set the appropriate environment variable "
                 "(e.g., AZURE_OPENAI_API_KEY) or provide a valid key."
             )
+
+        # If authentication mode is token, api_key is required
+        if auth_mode == AuthenticationMethod.TOKEN and not v:
+            raise ValueError(
+                "API key is required when authentication_method is 'token'. "
+                "Set the appropriate environment variable (e.g., AZURE_OPENAI_API_KEY) "
+                "or provide a valid key."
+            )
+
         return v
 
     @field_validator("base_url")
@@ -75,6 +107,34 @@ class ModelSettings(BaseModel):
         if v and not v.startswith(("http://", "https://")):
             raise ValueError("Base URL must start with 'http://' or 'https://'")
         return v
+
+    @model_validator(mode="after")
+    def validate_client_credentials(self) -> "ModelSettings":
+        """Validate client credentials for CLIENT_ID_AND_SECRET authentication."""
+        if self.authentication_method == AuthenticationMethod.CLIENT_ID_AND_SECRET:
+            if not self.client_id:
+                raise ValueError(
+                    "client_id is required when authentication_method is 'client_id_and_secret'. "
+                    "Set the appropriate environment variable (e.g., AZURE_CLIENT_ID) "
+                    "or provide a valid client ID."
+                )
+            if not self.client_secret:
+                raise ValueError(
+                    "client_secret is required when authentication_method is 'client_id_and_secret'. "
+                    "Set the appropriate environment variable (e.g., AZURE_CLIENT_SECRET) "
+                    "or provide a valid client secret."
+                )
+            # For tenant_id, we allow it to be empty if AZURE_TENANT_ID env var is available
+            if not self.tenant_id:
+                import os
+
+                if not os.getenv("AZURE_TENANT_ID"):
+                    raise ValueError(
+                        "tenant_id is required when authentication_method is 'client_id_and_secret'. "
+                        "Set the appropriate environment variable (AZURE_TENANT_ID) "
+                        "or provide a valid tenant ID in configuration."
+                    )
+        return self
 
 
 class ChatServiceSettings(BaseModel):
@@ -245,8 +305,8 @@ class FileStorageContainerSettings(BaseModel):
         "", description="Azure client ID for authentication (for Azure storage only)"
     )
     token: str = Field("", description="Azure access token (for Azure storage only)")
-    authentication_method: str = Field(
-        "default_credential",
+    authentication_method: AuthenticationMethod = Field(
+        AuthenticationMethod.DEFAULT_CREDENTIAL,
         description="Authentication method for Azure: 'default_credential', 'msi', etc.",
     )
 
@@ -258,8 +318,32 @@ class FileStorageSettings(BaseModel):
     Supports local and cloud storage options.
     """
 
-    revisions: FileStorageContainerSettings = FileStorageContainerSettings()
-    data: FileStorageContainerSettings = FileStorageContainerSettings()
+    revisions: FileStorageContainerSettings = Field(
+        default_factory=lambda: FileStorageContainerSettings(
+            enable=True,
+            storage_type="local",
+            container_name="",
+            path="./",
+            add_sub_folders=True,
+            url="",
+            client_id="",
+            token="",
+            authentication_method=AuthenticationMethod.DEFAULT_CREDENTIAL,
+        )
+    )
+    data: FileStorageContainerSettings = Field(
+        default_factory=lambda: FileStorageContainerSettings(
+            enable=True,
+            storage_type="local",
+            container_name="",
+            path="./",
+            add_sub_folders=True,
+            url="",
+            client_id="",
+            token="",
+            authentication_method=AuthenticationMethod.DEFAULT_CREDENTIAL,
+        )
+    )
 
 
 class ReceiverSettings(BaseModel):
