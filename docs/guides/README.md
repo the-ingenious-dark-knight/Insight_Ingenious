@@ -14,7 +14,7 @@ This section provides detailed guides for using specific features and capabiliti
 ## Available Guides
 
 - **[Complete Azure Deployment](./complete-azure-deployment.md)** - Complete enterprise deployment instructions
-- **[Data and Document Preparation](./data-preparation/)** - Preparing and processing data and documents for analysis
+- **[Data and Document Preparation](./data-document-preparation/)** - Preparing and processing data and documents for analysis
 
 ## Prerequisites
 
