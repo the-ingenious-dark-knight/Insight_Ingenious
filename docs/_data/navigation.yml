@@ -1,5 +1,5 @@
 docs:
-  - title: "Core Guides"
+  - title: "Core Documentation"
     children:
       - title: "Quick Start Guide"
         url: /getting-started/
@@ -13,31 +13,5 @@ docs:
         url: /development/
       - title: "Architecture Overview"
         url: /architecture/
-        # - title: "Memory & Token Architecture"
-        #   url: /architecture/memory-and-tokens/
-        # - title: "Streaming Responses Architecture"
-        #   url: /architecture/streaming-responses/
-        # - title: "Components Reference"
-        #   url: /components/
-  - title: "Data Preprocessing"
-    children:
-      - title: "Data Preparation"
-        url: /guides/data-preparation/
-      - title: "Document Processing"
-        url: /guides/document-processing/
-  - title: "Reference"
-    children:
-      - title: "API Reference"
-        url: /api/
-      # - title: "Workflow API"
-      #   url: /api/workflows
-      - title: "CLI Reference"
-        url: /CLI_REFERENCE
-      - title: "Configuration Reference"
-        url: /getting-started/configuration/
-        # - title: "Workflow Requirements"
-        #   url: /workflows/
-# - title: "Additional Resources"
-#   children:
-#     - title: "Comprehensive Troubleshooting"
-#       url: /troubleshooting/
+      - title: "Data and Document Preprocessing"
+        url: /guides/data-document-preparation/
