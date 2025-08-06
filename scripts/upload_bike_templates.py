@@ -2,11 +2,8 @@
 """
 Upload bike-insights template files to Azure Blob Storage via Ingenious API
 
-This script solves the common issue where bike-insights workflow fails with
-"The specified blob does not exist" error due to missing prompt templates.
-
 Usage:
-    python scripts/upload_bike_templates.py
+    uv run scripts/upload_bike_templates.py
 
 Prerequisites:
     - Ingenious server running with Azure Blob Storage configured
@@ -19,7 +16,7 @@ import requests
 
 # Configuration
 API_BASE = "http://localhost:8000"
-REVISION_ID = "test-v1"
+REVISION_ID = "test-v1" #change this to a unique identifier
 
 # Templates needed for bike-insights workflow
 TEMPLATE_FILES = [
