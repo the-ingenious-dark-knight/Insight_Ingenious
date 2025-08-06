@@ -2,8 +2,11 @@ from typing import Tuple, cast
 
 from autogen_agentchat.agents import AssistantAgent, UserProxyAgent
 from autogen_agentchat.teams import RoundRobinGroupChat
-from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
 
+from ingenious.common.enums import AuthenticationMethod
+from ingenious.common.utils import (
+    create_aoai_chat_completion_client_from_params,
+)
 from ingenious.config import get_config
 from ingenious.core.structured_logging import get_logger
 from ingenious.models.config import Config
@@ -28,19 +31,17 @@ class ConversationPattern:
         self.context = ""
 
         # Create Azure OpenAI model client from config
-        self.model_client = AzureOpenAIChatCompletionClient(
-            model=str(
-                default_llm_config.get(
-                    "azure_deployment", default_llm_config.get("model", "gpt-4.1-nano")
+        self.model_client = create_aoai_chat_completion_client_from_params(
+            model=str(self.default_llm_config["model"]),
+            base_url=str(self.default_llm_config["base_url"]),
+            api_version=str(self.default_llm_config["api_version"]),
+            deployment=str(self.default_llm_config.get("deployment")),
+            authentication_method=AuthenticationMethod(
+                self.default_llm_config.get(
+                    "authentication_method", AuthenticationMethod.DEFAULT_CREDENTIAL
                 )
             ),
-            api_key=str(default_llm_config.get("api_key", "mock-openai-key")),
-            azure_endpoint=str(
-                default_llm_config.get("azure_endpoint", "http://127.0.0.1:3001")
-            ),
-            api_version=str(
-                default_llm_config.get("api_version", "2024-08-01-preview")
-            ),
+            api_key=str(self.default_llm_config.get("api_key", "")),
         )
 
         # Initialize memory manager for cloud storage support

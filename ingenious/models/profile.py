@@ -1,15 +1,23 @@
-from enum import Enum
 from typing import List, Optional
 
 from pydantic import BaseModel, Field, RootModel
 
+from ingenious.common.enums import AuthenticationMethod
+
 
 class ModelConfig(BaseModel):
     model: str
-    api_key: str
+    api_key: str = ""
     base_url: str
     deployment: str = ""
     api_version: str = ""
+    deployment: str = ""
+    client_id: str = ""
+    client_secret: str = ""
+    tenant_id: str = ""
+    authentication_method: AuthenticationMethod = (
+        AuthenticationMethod.DEFAULT_CREDENTIAL
+    )
 
 
 class ChatHistoryConfig(BaseModel):
@@ -54,13 +62,6 @@ class LoggingConfig(BaseModel):
     pass
 
 
-class AuthenticationMethod(str, Enum):
-    MSI = "msi"
-    CLIENT_ID_AND_SECRET = "client_id_and_secret"
-    DEFAULT_CREDENTIAL = "default_credential"
-    TOKEN = "token"
-
-
 class FileStorageContainer(BaseModel):
     url: str = Field("", description="File Storage SAS URL")
     client_id: str = Field("", description="File Storage SAS Client ID")
@@ -73,11 +74,21 @@ class FileStorageContainer(BaseModel):
 
 class FileStorage(BaseModel):
     revisions: FileStorageContainer = Field(
-        default_factory=lambda: FileStorageContainer(),
+        default_factory=lambda: FileStorageContainer(
+            url="",
+            client_id="",
+            token="",
+            authentication_method=AuthenticationMethod.DEFAULT_CREDENTIAL,
+        ),
         description="File Storage configuration for revisions",
     )
     data: FileStorageContainer = Field(
-        default_factory=lambda: FileStorageContainer(),
+        default_factory=lambda: FileStorageContainer(
+            url="",
+            client_id="",
+            token="",
+            authentication_method=AuthenticationMethod.DEFAULT_CREDENTIAL,
+        ),
         description="File Storage configuration for data",
     )
 

@@ -31,6 +31,7 @@ class ConversationFlow:
             "azure_deployment": _config.models[0].deployment,
             "api_version": _config.models[0].api_version,
             "api_type": "azure",
+            "authentication_method": _config.models[0].authentication_method,
         }
         memory_path = _config.chat_history.memory_path
 

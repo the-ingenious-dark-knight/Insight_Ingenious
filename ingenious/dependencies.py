@@ -19,6 +19,7 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials, HTTPBearer
 from typing_extensions import Annotated
 
 from ingenious.auth.jwt import get_username_from_token
+from ingenious.common.enums import AuthenticationMethod
 from ingenious.config.config import get_config as _get_config
 from ingenious.config.profile import Profiles
 from ingenious.config.settings import IngeniousSettings
@@ -64,6 +65,11 @@ def get_openai_service() -> OpenAIService:
         api_key=str(model.api_key),
         api_version=str(model.api_version),
         open_ai_model=str(model.model),
+        deployment=str(model.deployment),
+        authentication_method=AuthenticationMethod(model.authentication_method),
+        client_id=str(model.client_id),
+        client_secret=str(model.client_secret),
+        tenant_id=str(model.tenant_id),
     )
 
 

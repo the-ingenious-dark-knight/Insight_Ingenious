@@ -12,12 +12,11 @@ toc_icon: "book"
 This section provides detailed guides for using specific features and capabilities of Ingenious.
 
 ## Available Guides
-
 - **[Complete Azure Deployment](./complete-azure-deployment.md)** - Complete enterprise deployment instructions
-- **[Data and Document Preparation](./data-document-preparation/)** - Preparing and processing data and documents for analysis
+- **[Document Processing](./document-processing/)** - Working with document analysis workflows
+- **[Document Chunking](./document-chunking/)** - Splitting documents into context‑aware chunks for RAG pipelines
 
 ## Prerequisites
-
 Most guides assume you have:
 1. Insight Ingenious installed and configured
 2. Basic familiarity with the core concepts

@@ -5,6 +5,7 @@ from typing import Any
 
 from fastapi import Depends, Request
 
+from ingenious.common.enums import AuthenticationMethod
 from ingenious.config.config import get_config as _get_config
 from ingenious.config.main_settings import IngeniousSettings
 from ingenious.core.structured_logging import get_logger
@@ -34,6 +35,13 @@ def get_openai_service(
         api_key=str(config.models[0].api_key),
         api_version=str(config.models[0].api_version),
         open_ai_model=str(config.models[0].model),
+        deployment=str(config.models[0].deployment),
+        authentication_method=AuthenticationMethod(
+            config.models[0].authentication_method
+        ),
+        client_id=str(config.models[0].client_id),
+        client_secret=str(config.models[0].client_secret),
+        tenant_id=str(config.models[0].tenant_id),
     )
 
 

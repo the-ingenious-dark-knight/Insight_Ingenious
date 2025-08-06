@@ -13,8 +13,8 @@ from autogen_core.models import (
     SystemMessage,
     UserMessage,
 )
-from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
 
+from ingenious.common.utils import create_aoai_chat_completion_client_from_config
 from ingenious.models.agent import (
     Agent,
     AgentChat,
@@ -28,16 +28,9 @@ class RoutedAssistantAgent(RoutedAgent, ABC):
     ) -> None:
         super().__init__(agent.agent_name)
 
-        # Map model config parameters to AzureOpenAIChatCompletionClient parameters
-        azure_config = {
-            "model": agent.model.model,
-            "api_key": agent.model.api_key,
-            "azure_endpoint": agent.model.base_url,
-            "azure_deployment": agent.model.deployment or agent.model.model,
-            "api_version": agent.model.api_version,
-        }
+        # Create the Azure OpenAI client using the provided model configuration
+        self._model_client = create_aoai_chat_completion_client_from_config(agent.model)
 
-        self._model_client = AzureOpenAIChatCompletionClient(**azure_config)
         assistant_agent = AssistantAgent(
             name=agent.agent_name,
             system_message=agent.system_prompt,
@@ -187,16 +180,7 @@ class RoutedResponseOutputAgent(RoutedAgent, ABC):
         super().__init__(agent.agent_name)
         self._next_agent_topic = next_agent_topic
 
-        # Map model config parameters to AzureOpenAIChatCompletionClient parameters
-        azure_config = {
-            "model": agent.model.model,
-            "api_key": agent.model.api_key,
-            "azure_endpoint": agent.model.base_url,
-            "azure_deployment": agent.model.deployment or agent.model.model,
-            "api_version": agent.model.api_version,
-        }
-
-        model_client = AzureOpenAIChatCompletionClient(**azure_config)
+        model_client = create_aoai_chat_completion_client_from_config(agent.model)
         assistant_agent = AssistantAgent(
             name=agent.agent_name,
             system_message=agent.system_prompt,
