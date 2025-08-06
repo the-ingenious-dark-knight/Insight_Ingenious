@@ -24,13 +24,3 @@ Most guides assume you have:
 3. Access to required external services (where applicable)
 
 If you're new to Insight Ingenious, start with the [Quick Start Guide](../getting-started/README.md).
-
-## Contributing to Guides
-
-Help improve these guides:
-- Report issues or unclear instructions
-- Suggest additional examples
-- Contribute new guides for missing topics
-- Update guides when features change
-
-See [CONTRIBUTING.md](../../CONTRIBUTING.md) for contribution guidelines.

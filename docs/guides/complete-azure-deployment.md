@@ -11,7 +11,6 @@ toc_icon: "database"
 
 This guide provides step-by-step instructions for deploying the Ingenious bike-insights workflow with full Azure integration, including Azure SQL Database for chat history and Azure Blob Storage for prompt management.
 
-> **Important:** When configuring Azure SQL, always use the connection string from the **ODBC** tab in the Azure Portal. Do **not** use ADO.NET or JDBC connection strings, as these formats are incompatible and will cause connection errors.
 
 ##  Overview
 
@@ -24,10 +23,9 @@ This deployment includes:
 ##  Prerequisites
 
 ### Required Azure Resources
-- Azure subscription with sufficient permissions
 - Azure SQL Database instance
 - Azure Storage Account with Blob service
-- Azure OpenAI service with GPT-4 deployment
+- Azure OpenAI service with GPT-4.1-nano deployment
 
 ### Local Development Requirements
 - Python 3.13+
@@ -39,11 +37,11 @@ This deployment includes:
 ### Step 1: Install Ingenious Library
 
 ```bash
-#Install as package
-uv add ingenious
+# Set up uv project
+uv init
 
-# or from your project directory for maximum control
-uv pip install -e ./ingenious
+# Install as package
+uv add "ingenious[azure-full]"
 ```
 
 ### Step 2: Initialize Project
@@ -104,17 +102,7 @@ AZURE_STORAGE_DATA_URL=https://your-account.blob.core.windows.net/
 INGENIOUS_WEB_CONFIGURATION__IP_ADDRESS=0.0.0.0
 INGENIOUS_WEB_CONFIGURATION__PORT=8080
 ```
-
-### Step 4: Configure Azure SQL Integration
-
-Add these environment variables to your `.env` file:
-
-```bash
-# Azure SQL configuration for chat history
-INGENIOUS_CHAT_HISTORY__DATABASE_TYPE=azuresql
-INGENIOUS_CHAT_HISTORY__DATABASE_NAME=ChatHistory
-INGENIOUS_CHAT_HISTORY__DATABASE_CONNECTION_STRING=${AZURE_SQL_CONNECTION_STRING}
-```
+> **Important:** When configuring Azure SQL, always use the connection string from the **ODBC** tab in the Azure Portal. Do **not** use ADO.NET or JDBC connection strings, as these formats are incompatible and will cause connection errors.
 
 ### Step 5: Configure Azure Blob Storage Integration
 
@@ -164,9 +152,9 @@ ACCEPT_EULA=Y apt-get install msodbcsql18
 
 ### Step 7: Upload Prompt Templates to Azure Blob Storage
 
-#### Option A: Use the Provided Upload Script (Recommended for bike-insights)
+#### Use the Provided Upload Script (Recommended for bike-insights)
 
-For bike-insights workflow, use the dedicated upload script:
+For bike-insights workflow, use the dedicated [upload script](https://github.com/Insight-Services-APAC/ingenious/blob/main/scripts/upload_bike_templates.py):
 ```bash
 # Ensure server is running first
 uv run ingen serve --port 8080 &
@@ -174,52 +162,7 @@ uv run ingen serve --port 8080 &
 # Upload bike-insights templates
 uv run python scripts/upload_bike_templates.py
 ```
-
-#### Option B: Create Custom Setup Script
-
-Create and run this setup script:
-
-```python
-# setup_azure_prompts.py
-import asyncio
-import os
-from pathlib import Path
-from dotenv import load_dotenv
-
-load_dotenv()
-
-# Environment variables are loaded from .env file
-
-async def setup_azure_prompts():
-    from ingenious.dependencies import get_config
-    from ingenious.files.files_repository import FileStorage
-
-    config = get_config()
-    storage = FileStorage(config, "revisions")
-
-    source_templates = Path("templates/prompts/quickstart-1")
-
-    for template_file in source_templates.glob("*.jinja"):
-        content = template_file.read_text()
-        await storage.write_file(
-            contents=content,
-            file_name=template_file.name,
-            file_path="templates/prompts/quickstart-1"
-        )
-        print(f" Uploaded {template_file.name} to Azure Blob Storage")
-
-    files = await storage.list_files("templates/prompts/quickstart-1")
-    print(f" Verified {len(files)} files in Azure Blob Storage")
-
-if __name__ == "__main__":
-    asyncio.run(setup_azure_prompts())
-```
-
-Run the setup:
-```bash
-uv run python setup_azure_prompts.py
-```
-
+        
 ### Step 8: Validate Configuration
 
 ```bash
