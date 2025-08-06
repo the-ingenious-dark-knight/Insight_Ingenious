@@ -99,8 +99,7 @@ test = [
   "types-requests==2.32.4.20250611",
   "vulture==2.14",
   "reportlab==4.4.2",
-  "hypothesis==6.136.2",
-  "types-regex==2024.11.6.20250403"
+  "hypothesis==6.136.2"
 ]
 
 # Core features - common production functionality
