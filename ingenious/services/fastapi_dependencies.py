@@ -5,7 +5,7 @@ from typing import Any
 
 from fastapi import Depends, Request
 
-from ingenious.common import AuthenticationMethod
+from ingenious.common.enums import AuthenticationMethod
 from ingenious.config.config import get_config as _get_config
 from ingenious.config.main_settings import IngeniousSettings
 from ingenious.core.structured_logging import get_logger

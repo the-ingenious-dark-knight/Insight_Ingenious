@@ -1,8 +1,8 @@
 """
-Common enums used across the Ingenious framework.
+Authentication method enumeration for Azure services.
 
-This module contains enum definitions that are shared across different
-parts of the application.
+This module defines the authentication methods available for connecting
+to Azure services, particularly Azure OpenAI services.
 """
 
 from enum import Enum

@@ -2,7 +2,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
-from ingenious.common import AuthenticationMethod
+from ingenious.common.enums import AuthenticationMethod
 from ingenious.models import config as config_models
 from ingenious.models import config_ns as config_ns_models
 from ingenious.models import profile as profile_models

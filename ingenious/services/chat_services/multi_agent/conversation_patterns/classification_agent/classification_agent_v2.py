@@ -3,7 +3,7 @@ from typing import Tuple, cast
 from autogen_agentchat.agents import AssistantAgent, UserProxyAgent
 from autogen_agentchat.teams import RoundRobinGroupChat
 
-from ingenious.common import AuthenticationMethod
+from ingenious.common.enums import AuthenticationMethod
 from ingenious.common.utils import (
     create_aoai_chat_completion_client_from_params,
 )

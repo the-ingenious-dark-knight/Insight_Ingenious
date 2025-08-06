@@ -14,7 +14,7 @@ from rich.panel import Panel
 
 from ingenious.cli.base import BaseCommand, CommandError, ExitCode
 from ingenious.cli.utilities import OutputFormatters, ValidationUtils
-from ingenious.common import AuthenticationMethod
+from ingenious.common.enums import AuthenticationMethod
 
 
 class HelpCommand(BaseCommand):

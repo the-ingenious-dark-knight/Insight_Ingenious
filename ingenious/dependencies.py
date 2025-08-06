@@ -19,7 +19,7 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials, HTTPBearer
 from typing_extensions import Annotated
 
 from ingenious.auth.jwt import get_username_from_token
-from ingenious.common import AuthenticationMethod
+from ingenious.common.enums import AuthenticationMethod
 from ingenious.config.config import get_config as _get_config
 from ingenious.config.profile import Profiles
 from ingenious.config.settings import IngeniousSettings

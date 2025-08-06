@@ -7,7 +7,7 @@ the structure and validation for different configuration sections.
 
 from pydantic import BaseModel, Field, ValidationInfo, field_validator, model_validator
 
-from ingenious.common import AuthenticationMethod
+from ingenious.common.enums import AuthenticationMethod
 
 
 class ChatHistorySettings(BaseModel):

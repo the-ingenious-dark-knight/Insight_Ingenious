@@ -1,13 +1,19 @@
 #!/usr/bin/env python3
-"""Test script to verify authentication validation logic."""
+"""
+Test script to verify authentication validation logic for Azure OpenAI client builder.
 
-from ingenious.common import AuthenticationMethod
+This module tests the authentication requirements and validation scenarios
+for the Azure OpenAI client builder functions, ensuring that different
+authentication methods work correctly with proper credentials.
+"""
+
+from ingenious.common.enums import AuthenticationMethod
 
 
 def test_authentication_requirements():
-    """Test the authentication requirements for different methods."""
+    """Test the authentication requirements for different methods used by the client builder."""
 
-    print("🔍 Testing Authentication Method Requirements\n")
+    print("🔍 Testing Azure OpenAI Client Builder Authentication Methods\n")
 
     auth_methods = [
         AuthenticationMethod.DEFAULT_CREDENTIAL,
@@ -40,8 +46,13 @@ def test_authentication_requirements():
 
 
 def test_validation_scenarios():
-    """Test validation scenarios."""
-    print("🧪 Validation Scenarios:\n")
+    """
+    Test validation scenarios for Azure OpenAI client builder authentication.
+
+    These scenarios validate that the client builder functions properly handle
+    different authentication configurations and reject invalid combinations.
+    """
+    print("🧪 Client Builder Validation Scenarios:\n")
 
     scenarios = [
         {

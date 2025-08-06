@@ -1,3 +1,34 @@
+"""
+Azure OpenAI Client Builder Utilities
+
+This module provides builder functions for creating AzureOpenAIChatCompletionClient instances
+with different configuration sources and authentication methods.
+
+Builder Functions:
+- create_aoai_chat_completion_client_from_config(): Build from ModelConfig object
+- create_aoai_chat_completion_client_from_settings(): Build from ModelSettings object
+- create_aoai_chat_completion_client_from_params(): Build from direct parameters
+
+These functions handle multiple authentication strategies:
+- DEFAULT_CREDENTIAL: Uses Azure DefaultAzureCredential
+- TOKEN: Uses API key authentication
+- MSI: Uses Managed Identity (system or user-assigned)
+- CLIENT_ID_AND_SECRET: Uses Service Principal authentication
+
+Example usage:
+    from ingenious.common.utils import create_aoai_chat_completion_client_from_config
+
+    client = create_aoai_chat_completion_client_from_config(model_config)
+
+    # Or with parameters directly:
+    client = create_aoai_chat_completion_client_from_params(
+        model="gpt-4",
+        base_url="https://your-endpoint.openai.azure.com/",
+        api_version="2024-02-01",
+        authentication_method=AuthenticationMethod.DEFAULT_CREDENTIAL
+    )
+"""
+
 from typing import Any, Dict, Optional
 
 from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
@@ -8,16 +39,21 @@ from azure.identity import (
     get_bearer_token_provider,
 )
 
-from ingenious.common import AuthenticationMethod
+from ingenious.common.enums import AuthenticationMethod
 from ingenious.config.models import ModelSettings
 from ingenious.models.config import ModelConfig
+
+# Builder Pattern Implementation
+# These functions implement the Builder pattern by providing static utility functions
+# that construct AzureOpenAIChatCompletionClient objects step-by-step with different
+# parameter sources and authentication configurations.
 
 
 def create_aoai_chat_completion_client_from_config(
     model_config: ModelConfig,
 ) -> AzureOpenAIChatCompletionClient:
     """
-    Factory method to create an AzureOpenAIChatCompletionClient instance.
+    Builder function to create an AzureOpenAIChatCompletionClient instance from ModelConfig.
 
     Args:
         model_config (ModelConfig): Configuration object containing model settings
@@ -45,7 +81,7 @@ def create_aoai_chat_completion_client_from_settings(
     model_settings: ModelSettings,
 ) -> AzureOpenAIChatCompletionClient:
     """
-    Factory method to create an AzureOpenAIChatCompletionClient from ModelSettings.
+    Builder function to create an AzureOpenAIChatCompletionClient from ModelSettings.
 
     Args:
         model_settings (ModelSettings): Model settings object containing configuration
@@ -81,9 +117,9 @@ def create_aoai_chat_completion_client_from_params(
     tenant_id: Optional[str] = None,
 ) -> AzureOpenAIChatCompletionClient:
     """
-    Factory method to create an AzureOpenAIChatCompletionClient with custom parameters.
+    Builder function to create an AzureOpenAIChatCompletionClient with custom parameters.
 
-    This method is useful when you don't have a ModelConfig object but want to
+    This function is useful when you don't have a ModelConfig object but want to
     create a client with specific parameters.
 
     Args:

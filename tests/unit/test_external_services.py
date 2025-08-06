@@ -1,5 +1,8 @@
 """
 Unit tests for external services.
+
+This module tests external service integrations, including OpenAI service
+which uses Azure OpenAI client builder functions for authentication.
 """
 
 from unittest.mock import Mock, patch
@@ -8,7 +11,7 @@ import pytest
 from openai.types.chat import ChatCompletion, ChatCompletionMessage
 from openai.types.chat.chat_completion import Choice
 
-from ingenious.common import AuthenticationMethod
+from ingenious.common.enums import AuthenticationMethod
 from ingenious.errors.content_filter_error import ContentFilterError
 from ingenious.errors.token_limit_exceeded_error import TokenLimitExceededError
 from ingenious.external_services.openai_service import OpenAIService

@@ -13,7 +13,7 @@ from openai.types.chat import (
     ChatCompletionToolParam,
 )
 
-from ingenious.common import AuthenticationMethod
+from ingenious.common.enums import AuthenticationMethod
 from ingenious.core.structured_logging import get_logger
 from ingenious.errors.content_filter_error import ContentFilterError
 from ingenious.errors.token_limit_exceeded_error import TokenLimitExceededError

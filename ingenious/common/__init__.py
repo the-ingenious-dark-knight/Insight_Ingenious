@@ -1,12 +1,3 @@
-"""
-Common utilities and types for the Ingenious framework.
+from pkgutil import extend_path
 
-This package contains shared enums, utilities, and types used across
-different parts of the application.
-"""
-
-from .enums import AuthenticationMethod
-
-__all__ = [
-    "AuthenticationMethod",
-]
+__path__ = extend_path(__path__, __name__)
