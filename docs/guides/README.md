@@ -21,8 +21,8 @@ This section provides detailed guides for using specific features and capabiliti
 - **[Web Interface](./web-interface.md)** - Using the web-based interface
 - **[SQL Agent Setup](./sql-agent-setup.md)** - Complete setup guide for SQL manipulation agent with SQLite and Azure SQL
 - **[Data Preparation](./data-preparation/)** - Preparing and processing data for analysis
-- **[Document Processing](./document-processing/)** - Splitting documents into context‑aware chunks for RAG pipelines.
-- **[Document Chunking](./document-chunking/)** - Working with document analysis workflows
+- **[Document Processing](./document-processing/)** - Working with document analysis workflows
+- **[Document Chunking](./document-chunking/)** - Splitting documents into context‑aware chunks for RAG pipelines
 
 ## Guide Categories
 
