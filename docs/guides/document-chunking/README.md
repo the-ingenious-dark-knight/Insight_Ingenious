@@ -33,7 +33,7 @@ The **`chunk`** module provides the core text‑splitting capabilities within th
 The chunking capabilities are an **optional extra**.
 
 ```bash
-# Install the core ingenious package with the chunking extra
+# Install the core Ingenious package with the chunking extra—assuming you’ve already run pip install uv, created your environment with uv venv, and activated it.
 uv pip install -e ".[chunk]"
 ```
 
@@ -170,7 +170,7 @@ ingen chunk run my_document.txt --id-path-mode hash
 
 ```bash
 # Install testing dependencies
-a uv pip install -e ".[chunk,test]"
+uv pip install -e ".[chunk,test]"
 
 # Run the test suite
 uv run pytest ingenious/chunk/tests
