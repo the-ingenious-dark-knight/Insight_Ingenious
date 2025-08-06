@@ -9,7 +9,7 @@ header:
       url: "/getting-started/"
     - label: "View on GitHub"
       url: "https://github.com/Insight-Services-APAC/ingenious"
-excerpt: "An enterprise-grade Python library for quickly setting up APIs to interact with AI Agents, featuring tight integrations with Microsoft Azure services and comprehensive utilities for debugging and customization."
+excerpt: "Ingenious is a tool for quickly setting up APIs to interact with AI Agents. It features multi-agent conversation flows using Microsoft's AutoGen, JWT authentication, and comprehensive Azure service integrations."
 feature_row:
   - alt: "Quick Start"
     title: "Quick Start"

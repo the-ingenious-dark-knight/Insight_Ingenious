@@ -5,7 +5,7 @@
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Insight-Services-APAC/ingenious)
 [![License](https://img.shields.io/badge/license-MIT-purple.svg)](LICENSE)
 
-An enterprise-grade Python library for quickly setting up APIs to interact with AI Agents. Features multi-agent conversation flows using Microsoft's AutoGen, JWT authentication, and comprehensive Azure service integrations with support for both cloud and local implementations.
+Ingenious is a tool for quickly setting up APIs to interact with AI Agents. It features multi-agent conversation flows using Microsoft's AutoGen, JWT authentication, and comprehensive Azure service integrations.
 
 ## Quick Start
 
@@ -27,11 +27,9 @@ Get up and running in 5 minutes with Azure OpenAI!
     uv init
 
     # Choose installation based on features needed
-    uv add ingenious[standard] # Most common: includes SQL agent support (core, auth, ai, database)
+    uv add "ingenious[azure-full]" # Recommended: Full Azure integration (core, auth, azure, ai, database, ui)
     # OR
-    uv add ingenious[azure-full] # Full Azure integration (core, auth, azure, ai, database, ui)
-    # OR
-    uv add ingenious # Minimal installation (base dependencies only)
+    uv add "ingenious[standard]" # for local testing: includes SQL agent support (core, auth, ai, database)
 
     # Initialize project in the current directory
     uv run ingen init
@@ -52,7 +50,7 @@ Get up and running in 5 minutes with Azure OpenAI!
     INGENIOUS_MODELS__0__MODEL=gpt-4.1-nano
     INGENIOUS_MODELS__0__API_TYPE=rest
     INGENIOUS_MODELS__0__API_VERSION=2024-12-01-preview
-    INGENIOUS_MODELS__0__DEPLOYMENT=your-gpt4-deployment-name
+    INGENIOUS_MODELS__0__DEPLOYMENT=your-gpt4.1-nano-deployment-name
     INGENIOUS_MODELS__0__API_KEY=your-actual-api-key-here
     INGENIOUS_MODELS__0__BASE_URL=https://your-resource.openai.azure.com/
 
@@ -104,35 +102,6 @@ Get up and running in 5 minutes with Azure OpenAI!
     # Check server health
     curl http://localhost:8000/api/v1/health
     ```
-
-### Common Issues
-
-#### Port Conflicts
-If you encounter "Address already in use" or validation fails with port conflicts:
-
-1. **Check what's using the port**:
-   ```bash
-   lsof -i :8000  # Check if port 8000 is in use
-   ```
-
-2. **Use a different port**:
-   ```bash
-   uv run ingen serve --port 8001  # Try port 8001 instead
-   ```
-
-3. **Set port via environment variable** (recommended):
-   ```bash
-   # Add to your .env file
-   INGENIOUS_WEB_CONFIGURATION__PORT=8001
-   ```
-
-4. **Update your test commands accordingly**:
-   ```bash
-   # Update health check
-   curl http://localhost:8001/api/v1/health
-
-   # Update workflow tests (use the new port in all examples below)
-   ```
 
 6. **Test with Core Workflows**:
 
@@ -220,23 +189,9 @@ These workflows are provided as examples in the project template when you run `i
 
 > **Important**: The `bike-insights` workflow is NOT part of the core library. It's a template example that's created when you initialize a new project with `ingen init`. This is the recommended "Hello World" example for learning how to build custom workflows.
 
-### Configuration Requirements by Workflow
-- **Minimal setup** (Azure OpenAI only): `classification-agent`, `bike-insights` (after `ingen init`)
-- **Local implementations**: `knowledge-base-agent` (ChromaDB), `sql-manipulation-agent` (SQLite) - stable and work out-of-the-box
-- **Azure integrations**: Azure Search for knowledge base, Azure SQL for database queries - fully supported with proper configuration
-
-> **Note**: Both local (ChromaDB, SQLite) and Azure (Azure Search, Azure SQL) implementations are production-ready. Choose based on your infrastructure requirements. Use `uv run ingen workflows` to check configuration requirements for each workflow.
-
 ## Troubleshooting
 
 For common issues like port conflicts, configuration errors, or workflow problems, see the [detailed troubleshooting guide](docs/getting-started/troubleshooting.md).
-
-**Quick fixes for common issues**:
-- **Port conflicts**: Use `--port 8001` or set `INGENIOUS_WEB_CONFIGURATION__PORT=8001` in .env
-- **JSON escaping errors**: Use file-based approach with heredoc as shown in bike-insights example above
-- **Validation failures**: Check the troubleshooting guide for specific error solutions
-- **Workflow not found**: Ensure you've run `uv run ingen init` for template workflows like bike-insights
-- **Azure OpenAI connection issues**: Verify your API key, endpoint, and deployment name in .env file
 
 ## Documentation
 
