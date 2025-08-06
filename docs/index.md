@@ -23,30 +23,11 @@ feature_row:
     url: "/guides/"
     btn_label: "Read Guides"
     btn_class: "btn--primary"
-  - alt: "API Reference"
-    title: "API Reference"
-    excerpt: "Complete API documentation and technical reference."
-    url: "/api/"
-    btn_label: "View API"
-    btn_class: "btn--primary"
-feature_row2:
-  - alt: "Architecture"
-    title: "Architecture Overview"
-    excerpt: "Understand the system design and components of Insight Ingenious."
-    url: "/architecture/"
-    btn_label: "Learn Architecture"
-    btn_class: "btn--primary"
-  - alt: "Development"
-    title: "Development Guide"
-    excerpt: "Set up your development environment and contribute to the project."
+  - alt: "Contribution Guide"
+    title: "Developer Guide"
+    excerpt: "Onboarding guide for developing Insight Ingenious."
     url: "/development/"
-    btn_label: "Start Developing"
-    btn_class: "btn--primary"
-  - alt: "Extensions"
-    title: "Extensions"
-    excerpt: "Create custom agents, patterns, and templates to extend functionality."
-    url: "/extensions/"
-    btn_label: "Build Extensions"
+    btn_label: "Start Contributing"
     btn_class: "btn--primary"
 ---
 
@@ -55,11 +36,9 @@ feature_row2:
 Insight Ingenious offers enterprise-grade capabilities for building sophisticated AI agent APIs:
 
 - **Enterprise-Ready API Library**: Quick deployment of production-ready AI agent APIs with minimal configuration
-- **Microsoft Azure Integration**: Seamless integration with Azure OpenAI, Azure AI Search, Azure SQL, and Azure Blob
-- **Multi-Agent Orchestration**: Create complex conversation flows with specialized AI agents working in coordination
+- **Microsoft Azure Integration**: Seamless integration with Azure OpenAI, Azure AI Search, Azure SQL, Azure Blob, and more!
+- **Multi-Agent Orchestration**: Create complex conversation flows using the familiar AutoGen API with specialized AI agents, optionally connected to tools, working in coordination
 
 {% include feature_row %}
-
-{% include feature_row id="feature_row2" %}
 
 Built with care by the Insight Services APAC team
