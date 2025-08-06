@@ -16,7 +16,7 @@ import requests
 
 # Configuration
 API_BASE = "http://localhost:8000"
-REVISION_ID = "test-v1" #change this to a unique identifier
+REVISION_ID = "test-v1"  # change this to a unique identifier
 
 # Templates needed for bike-insights workflow
 TEMPLATE_FILES = [

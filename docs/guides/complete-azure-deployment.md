@@ -161,7 +161,7 @@ uv run ingen serve --port 8080 &
 # Upload bike-insights templates
 uv run python scripts/upload_bike_templates.py
 ```
-        
+
 ### Step 8: Validate Configuration
 
 ```bash
