@@ -13,13 +13,13 @@ from ingenious.common.enums import AuthenticationMethod
 class ChatHistorySettings(BaseModel):
     """Configuration for chat history storage.
 
-    Supports both SQLite (local) and Azure SQL (cloud) storage options.
-    For local development, SQLite is recommended. For production, use Azure SQL.
+    Supports SQLite (local), Azure SQL (cloud), and Cosmos DB storage options.
+    For local development, SQLite is recommended. For production, use Azure SQL or Cosmos DB.
     """
 
     database_type: str = Field(
         "sqlite",
-        description="Type of database: 'sqlite' for local, 'azuresql' for cloud",
+        description="Type of database: 'sqlite' for local, 'azuresql' for cloud SQL, 'cosmos' for Cosmos DB",
     )
     database_path: str = Field(
         "./tmp/high_level_logs.db",

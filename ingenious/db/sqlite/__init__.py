@@ -15,7 +15,10 @@ from ingenious.core.structured_logging import get_logger
 from ingenious.db.base_sql import BaseSQLRepository
 from ingenious.db.chat_history_repository import IChatHistoryRepository
 from ingenious.db.connection_pool import ConnectionPool, SQLiteConnectionFactory
-from ingenious.db.query_builder import QueryBuilder, SQLiteDialect
+from ingenious.db.query_builder import (
+    QueryBuilder,
+    SQLiteDialect,
+)
 from ingenious.errors import (
     DatabaseQueryError,
 )

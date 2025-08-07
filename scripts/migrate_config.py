@@ -101,7 +101,7 @@ def get_setting_description(key: str) -> str:
         "INGENIOUS_MODELS__0__API_VERSION": "API version for Azure OpenAI",
         "INGENIOUS_MODELS__0__DEPLOYMENT": "Azure OpenAI deployment name",
         "INGENIOUS_MODELS__0__API_TYPE": "API type (usually 'rest')",
-        "INGENIOUS_CHAT_HISTORY__DATABASE_TYPE": "Database type: 'sqlite' or 'azuresql'",
+        "INGENIOUS_CHAT_HISTORY__DATABASE_TYPE": "Database type: 'sqlite', 'azuresql', or 'cosmos'",
         "INGENIOUS_CHAT_HISTORY__DATABASE_PATH": "Path to SQLite database file",
         "INGENIOUS_CHAT_HISTORY__DATABASE_CONNECTION_STRING": "Azure SQL connection string",
         "INGENIOUS_CHAT_HISTORY__MEMORY_PATH": "Path for memory storage",

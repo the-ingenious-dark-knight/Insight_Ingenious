@@ -135,6 +135,44 @@ class AzureSQLDialect(Dialect):
         }
 
 
+class CosmosDialect(Dialect):
+    """Cosmos DB-specific dialect implementation."""
+
+    def get_create_table_if_not_exists_prefix(self) -> str:
+        # Cosmos DB doesn't use SQL DDL - containers are created programmatically
+        return "-- Cosmos DB container creation handled programmatically"
+
+    def get_limit_clause(self, limit: int) -> str:
+        return f"OFFSET 0 LIMIT {limit}"
+
+    def get_upsert_query(
+        self, table: str, columns: List[str], conflict_column: str
+    ) -> str:
+        # Cosmos DB uses upsert operations via SDK, not SQL
+        return f"-- Cosmos DB upsert for {table} handled via SDK"
+
+    def get_temp_table_syntax(self, table_name: str, select_query: str) -> str:
+        # Cosmos DB doesn't support temp tables - use in-memory operations
+        return f"-- Cosmos DB doesn't support temp tables for {table_name}"
+
+    def get_drop_temp_table_syntax(self, table_name: str) -> str:
+        # No temp tables to drop in Cosmos DB
+        return f"-- No temp table to drop for {table_name}"
+
+    def get_data_types(self) -> Dict[str, str]:
+        # Cosmos DB is schema-less, but we can define logical mappings
+        return {
+            "uuid": "string",
+            "varchar": "string",
+            "text": "string",
+            "boolean": "boolean",
+            "datetime": "string",  # ISO 8601 format
+            "int": "number",
+            "json": "object",
+            "array": "array",
+        }
+
+
 class QueryBuilder:
     """Centralized query builder that generates database-specific SQL queries."""
 
