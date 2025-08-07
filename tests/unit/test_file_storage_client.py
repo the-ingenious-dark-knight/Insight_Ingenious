@@ -1,6 +1,7 @@
 """
 Tests for ingenious.models.file_storage_client module
 """
+
 import pytest
 
 from ingenious.models.file_storage_client import FileStorageClientType
@@ -25,7 +26,7 @@ class TestFileStorageClientType:
         """Test creating enum instance from value"""
         azure_type = FileStorageClientType("azure")
         local_type = FileStorageClientType("local")
-        
+
         assert azure_type == FileStorageClientType.AZURE
         assert local_type == FileStorageClientType.LOCAL
 

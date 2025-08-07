@@ -1,6 +1,7 @@
 """
 Tests for ingenious.models.search module
 """
+
 import pytest
 from pydantic import ValidationError
 
@@ -80,7 +81,7 @@ class TestSearchResult:
             {"simple": "value"},
             {"nested": {"key": "value"}},
             {"list_value": [1, 2, 3]},
-            {"mixed": {"string": "val", "number": 42, "bool": True}}
+            {"mixed": {"string": "val", "number": 42, "bool": True}},
         ]
         result = SearchResult(results=various_results)
         assert result.results == various_results

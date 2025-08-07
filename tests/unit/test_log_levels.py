@@ -1,7 +1,6 @@
 """
 Tests for ingenious.utils.log_levels module
 """
-import pytest
 
 from ingenious.utils.log_levels import LogLevel
 
@@ -83,7 +82,7 @@ class TestLogLevel:
     def test_round_trip_conversion(self):
         """Test converting from string to int and back to string"""
         test_levels = ["DEBUG", "INFO", "WARNING", "ERROR"]
-        
+
         for level_str in test_levels:
             level_int = LogLevel.from_string(level_str)
             converted_back = LogLevel.to_string(level_int)
@@ -99,7 +98,7 @@ class TestLogLevel:
         """Test round trip conversion with different cases"""
         lowercase_levels = ["debug", "info", "warning", "error"]
         expected_uppercase = ["DEBUG", "INFO", "WARNING", "ERROR"]
-        
+
         for lower, upper in zip(lowercase_levels, expected_uppercase):
             level_int = LogLevel.from_string(lower)
             converted_back = LogLevel.to_string(level_int)

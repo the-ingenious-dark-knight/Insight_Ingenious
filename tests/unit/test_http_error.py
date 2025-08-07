@@ -1,6 +1,7 @@
 """
 Tests for ingenious.models.http_error module
 """
+
 import pytest
 from pydantic import ValidationError
 
@@ -45,6 +46,7 @@ class TestHTTPError:
     def test_inherits_from_base_model(self):
         """Test that HTTPError inherits from BaseModel"""
         from pydantic import BaseModel
+
         error = HTTPError(detail="Test error")
         assert isinstance(error, BaseModel)
 
@@ -52,7 +54,7 @@ class TestHTTPError:
         """Test that the model has the expected fields"""
         error = HTTPError(detail="Test error")
         fields = error.model_fields
-        assert 'detail' in fields
+        assert "detail" in fields
         assert len(fields) == 1
 
     def test_model_json_serialization(self):
@@ -68,7 +70,7 @@ class TestHTTPError:
         except ValidationError as e:
             error_details = e.errors()
             assert len(error_details) > 0
-            assert 'detail' in str(error_details[0])
+            assert "detail" in str(error_details[0])
 
     def test_different_detail_types_converted_to_string(self):
         """Test that numeric detail gets converted to string if possible"""
@@ -94,6 +96,6 @@ class TestHTTPError:
         error1 = HTTPError(detail="Same error")
         error2 = HTTPError(detail="Same error")
         error3 = HTTPError(detail="Different error")
-        
+
         assert error1 == error2
         assert error1 != error3

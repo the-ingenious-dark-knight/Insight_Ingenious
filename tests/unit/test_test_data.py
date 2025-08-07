@@ -1,8 +1,10 @@
 """
 Tests for ingenious.models.test_data module
 """
+
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, AsyncMock, patch
 import yaml
 
 from ingenious.models.test_data import Event, Events
@@ -18,7 +20,7 @@ class TestEvent:
             event_type="create",
             file_name="test.txt",
             conversation_flow="main_flow",
-            response_content="File created successfully"
+            response_content="File created successfully",
         )
         assert event.identifier == "test_123"
         assert event.event_type == "create"
@@ -35,17 +37,17 @@ class TestEvent:
             file_name="test.txt",
             conversation_flow="main_flow",
             response_content="File created successfully",
-            identifier_group="custom_group"
+            identifier_group="custom_group",
         )
         assert event.identifier_group == "custom_group"
 
     def test_init_missing_required_fields(self):
         """Test Event initialization fails without required fields"""
         from pydantic import ValidationError
-        
+
         with pytest.raises(ValidationError):
             Event()  # missing all required fields
-        
+
         with pytest.raises(ValidationError):
             Event(identifier="test")  # missing other required fields
 
@@ -57,7 +59,7 @@ class TestEvent:
             file_name="test.txt",
             conversation_flow="main_flow",
             response_content="File created successfully",
-            identifier_group="custom_group"
+            identifier_group="custom_group",
         )
         data = event.model_dump()
         expected = {
@@ -66,7 +68,7 @@ class TestEvent:
             "file_name": "test.txt",
             "conversation_flow": "main_flow",
             "response_content": "File created successfully",
-            "identifier_group": "custom_group"
+            "identifier_group": "custom_group",
         }
         assert data == expected
 
@@ -77,7 +79,7 @@ class TestEvent:
             "event_type": "update",
             "file_name": "update.txt",
             "conversation_flow": "update_flow",
-            "response_content": "File updated successfully"
+            "response_content": "File updated successfully",
         }
         event = Event(**data)
         assert event.identifier == "test_456"
@@ -107,9 +109,9 @@ class TestEvents:
             event_type="create",
             file_name="test.txt",
             conversation_flow="main",
-            response_content="Created"
+            response_content="Created",
         )
-        
+
         self.events.add_event(event)
         assert len(self.events._events) == 1
         assert self.events._events[0] is event
@@ -121,19 +123,19 @@ class TestEvents:
             event_type="create",
             file_name="test1.txt",
             conversation_flow="main",
-            response_content="Created 1"
+            response_content="Created 1",
         )
         event2 = Event(
             identifier="test_2",
             event_type="update",
             file_name="test2.txt",
             conversation_flow="main",
-            response_content="Updated 2"
+            response_content="Updated 2",
         )
-        
+
         self.events.add_event(event1)
         self.events.add_event(event2)
-        
+
         assert len(self.events._events) == 2
         assert self.events._events[0] is event1
         assert self.events._events[1] is event2
@@ -150,19 +152,19 @@ class TestEvents:
             event_type="create",
             file_name="test1.txt",
             conversation_flow="main",
-            response_content="Created 1"
+            response_content="Created 1",
         )
         event2 = Event(
             identifier="test_2",
-            event_type="update", 
+            event_type="update",
             file_name="test2.txt",
             conversation_flow="main",
-            response_content="Updated 2"
+            response_content="Updated 2",
         )
-        
+
         self.events.add_event(event1)
         self.events.add_event(event2)
-        
+
         events = self.events.get_events()
         assert len(events) == 2
         assert events[0] is event1
@@ -175,19 +177,19 @@ class TestEvents:
             event_type="create",
             file_name="test1.txt",
             conversation_flow="main",
-            response_content="Created 1"
+            response_content="Created 1",
         )
         event2 = Event(
             identifier="test_2",
             event_type="update",
             file_name="test2.txt",
             conversation_flow="main",
-            response_content="Updated 2"
+            response_content="Updated 2",
         )
-        
+
         self.events.add_event(event1)
         self.events.add_event(event2)
-        
+
         found_event = self.events.get_event_by_identifier("test_2")
         assert found_event is event2
 
@@ -198,11 +200,13 @@ class TestEvents:
             event_type="create",
             file_name="test1.txt",
             conversation_flow="main",
-            response_content="Created 1"
+            response_content="Created 1",
         )
         self.events.add_event(event)
-        
-        with pytest.raises(ValueError, match="Event with identifier nonexistent not found"):
+
+        with pytest.raises(
+            ValueError, match="Event with identifier nonexistent not found"
+        ):
             self.events.get_event_by_identifier("nonexistent")
 
     def test_get_events_by_identifier_success(self):
@@ -212,27 +216,27 @@ class TestEvents:
             event_type="create",
             file_name="test1.txt",
             conversation_flow="main",
-            response_content="Created 1"
+            response_content="Created 1",
         )
         event2 = Event(
             identifier="test_same",
             event_type="update",
             file_name="test2.txt",
             conversation_flow="main",
-            response_content="Updated 2"
+            response_content="Updated 2",
         )
         event3 = Event(
             identifier="test_different",
             event_type="delete",
             file_name="test3.txt",
             conversation_flow="main",
-            response_content="Deleted 3"
+            response_content="Deleted 3",
         )
-        
+
         self.events.add_event(event1)
         self.events.add_event(event2)
         self.events.add_event(event3)
-        
+
         found_events = self.events.get_events_by_identifier("test_same")
         assert len(found_events) == 2
         assert event1 in found_events
@@ -246,10 +250,10 @@ class TestEvents:
             event_type="create",
             file_name="test1.txt",
             conversation_flow="main",
-            response_content="Created 1"
+            response_content="Created 1",
         )
         self.events.add_event(event)
-        
+
         found_events = self.events.get_events_by_identifier("nonexistent")
         assert found_events == []
 
@@ -264,21 +268,21 @@ class TestEvents:
                 "event_type": "create",
                 "file_name": "test1.txt",
                 "conversation_flow": "main",
-                "response_content": "Created 1"
+                "response_content": "Created 1",
             },
             {
-                "identifier": "test_2", 
+                "identifier": "test_2",
                 "event_type": "update",
                 "file_name": "test2.txt",
                 "conversation_flow": "main",
                 "response_content": "Updated 2",
-                "identifier_group": "custom"
-            }
+                "identifier_group": "custom",
+            },
         ]
         self.mock_fs.read_file = AsyncMock(return_value=yaml.dump(yaml_content))
-        
+
         await self.events.load_events_from_file("/test/path")
-        
+
         # Verify file system calls
         self.mock_fs.check_if_file_exists.assert_called_once_with(
             file_name="events.yml", file_path="/test/path"
@@ -286,7 +290,7 @@ class TestEvents:
         self.mock_fs.read_file.assert_called_once_with(
             file_name="events.yml", file_path="/test/path"
         )
-        
+
         # Verify events were loaded
         events = self.events.get_events()
         assert len(events) == 2
@@ -301,30 +305,30 @@ class TestEvents:
     async def test_load_events_from_file_no_file(self):
         """Test loading events when file doesn't exist"""
         self.mock_fs.check_if_file_exists = AsyncMock(return_value=False)
-        
+
         # Add an existing event to test it gets cleared
         existing_event = Event(
             identifier="existing",
             event_type="create",
             file_name="existing.txt",
             conversation_flow="main",
-            response_content="Existing"
+            response_content="Existing",
         )
         self.events.add_event(existing_event)
-        
-        with patch('builtins.print') as mock_print:
+
+        with patch("builtins.print") as mock_print:
             await self.events.load_events_from_file("/test/path")
-        
+
         # Verify file system calls
         self.mock_fs.check_if_file_exists.assert_called_once_with(
             file_name="events.yml", file_path="/test/path"
         )
         self.mock_fs.read_file.assert_not_called()
-        
+
         # Verify events were cleared and none loaded
         events = self.events.get_events()
         assert len(events) == 0
-        
+
         # Verify print message
         mock_print.assert_called_with("No events.yml found at /test/path")
 
@@ -332,24 +336,24 @@ class TestEvents:
     async def test_load_events_from_file_no_fs(self):
         """Test loading events when file system is None"""
         events_no_fs = Events(None)
-        
+
         # Add an existing event to test it gets cleared
         existing_event = Event(
             identifier="existing",
             event_type="create",
             file_name="existing.txt",
             conversation_flow="main",
-            response_content="Existing"
+            response_content="Existing",
         )
         events_no_fs.add_event(existing_event)
-        
-        with patch('builtins.print') as mock_print:
+
+        with patch("builtins.print") as mock_print:
             await events_no_fs.load_events_from_file("/test/path")
-        
+
         # Verify events were cleared and none loaded
         events = events_no_fs.get_events()
         assert len(events) == 0
-        
+
         # Verify print message
         mock_print.assert_called_with("No events.yml found at /test/path")
 
@@ -358,9 +362,9 @@ class TestEvents:
         """Test loading events from empty YAML file"""
         self.mock_fs.check_if_file_exists = AsyncMock(return_value=True)
         self.mock_fs.read_file = AsyncMock(return_value=yaml.dump([]))  # Empty list
-        
+
         await self.events.load_events_from_file("/test/path")
-        
+
         # Verify events were cleared and empty list was processed
         events = self.events.get_events()
         assert len(events) == 0
@@ -368,10 +372,14 @@ class TestEvents:
     @pytest.mark.asyncio
     async def test_load_events_from_file_value_error(self):
         """Test loading events with ValueError"""
-        self.mock_fs.check_if_file_exists = AsyncMock(side_effect=ValueError("Test error"))
-        
-        with patch('builtins.print') as mock_print:
+        self.mock_fs.check_if_file_exists = AsyncMock(
+            side_effect=ValueError("Test error")
+        )
+
+        with patch("builtins.print") as mock_print:
             await self.events.load_events_from_file("/test/path")
-        
+
         # Verify print message includes the error
-        mock_print.assert_called_with("No events.yml found at /test/path and error is Test error")
+        mock_print.assert_called_with(
+            "No events.yml found at /test/path and error is Test error"
+        )
