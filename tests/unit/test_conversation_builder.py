@@ -215,7 +215,7 @@ class TestSyncPromptTemplates:
         mock_config = Mock()
         mock_config.file_storage.revisions.storage_type = "local"
 
-        with patch("ingenious.utils.conversation_builder.FileStorage") as mock_fs_cls:
+        with patch("ingenious.utils.conversation_builder.FileStorage"):
             with patch("ingenious.utils.conversation_builder.logger") as mock_logger:
                 await Sync_Prompt_Templates(mock_config, "v1.0")
 

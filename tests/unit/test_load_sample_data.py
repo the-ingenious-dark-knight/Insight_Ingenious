@@ -87,7 +87,7 @@ class TestSqliteSampleDb:
         mock_read_csv.return_value = mock_df
 
         # Initialize
-        db = sqlite_sample_db()
+        sqlite_sample_db()
 
         # Verify directory creation
         mock_makedirs.assert_called_once_with("/tmp/new_dir", exist_ok=True)
@@ -111,7 +111,7 @@ class TestSqliteSampleDb:
         mock_connect.return_value = mock_connection
 
         # Initialize
-        db = sqlite_sample_db()
+        sqlite_sample_db()
 
         # Verify fallback table creation
         mock_connection.execute.assert_called()
@@ -295,7 +295,7 @@ class TestSqliteSampleDb:
 
         # Initialize
         with patch("builtins.print") as mock_print:
-            db = sqlite_sample_db()
+            sqlite_sample_db()
 
             # Verify table creation call
             create_call = mock_connection.execute.call_args_list[0][0][0]
@@ -334,7 +334,7 @@ class TestSqliteSampleDb:
 
         # Initialize
         with patch("builtins.print") as mock_print:
-            db = sqlite_sample_db()
+            sqlite_sample_db()
 
             # Verify CSV data loading
             mock_df.to_sql.assert_called_with(
@@ -364,7 +364,7 @@ class TestSqliteSampleDb:
 
         # Initialize
         with patch("builtins.print") as mock_print:
-            db = sqlite_sample_db()
+            sqlite_sample_db()
 
             # Verify error message
             mock_print.assert_any_call("CSV file not found at /tmp/nonexistent.csv.")

@@ -163,3 +163,98 @@ class TestTokenCounter:
 
         assert result_0301 > 0
         assert result_4_0613 > 0
+
+    @patch("ingenious.utils.token_counter.tiktoken")
+    @patch("ingenious.utils.token_counter.logger")
+    def test_num_tokens_from_messages_keyerror_fallback(
+        self, mock_logger, mock_tiktoken
+    ):
+        """Test fallback when model encoding not found"""
+        mock_encoding = Mock()
+        mock_encoding.encode.return_value = [1, 2, 3]
+        mock_tiktoken.encoding_for_model.side_effect = KeyError("Model not found")
+        mock_tiktoken.get_encoding.return_value = mock_encoding
+
+        messages = [{"role": "user", "content": "Hello"}]
+
+        # This should use cl100k_base fallback for supported models
+        result = num_tokens_from_messages(messages, "gpt-3.5-turbo-0613")
+
+        # Should log warning about model not found
+        mock_logger.warning.assert_called()
+        assert result > 0
+        mock_tiktoken.get_encoding.assert_called_with("cl100k_base")
+
+    @patch("ingenious.utils.token_counter.tiktoken")
+    @patch("ingenious.utils.token_counter.logger")
+    def test_num_tokens_from_messages_gpt35_turbo_warning(
+        self, mock_logger, mock_tiktoken
+    ):
+        """Test warning is logged for generic gpt-3.5-turbo model"""
+        mock_encoding = Mock()
+        mock_encoding.encode.return_value = [1, 2, 3]
+        mock_tiktoken.encoding_for_model.return_value = mock_encoding
+
+        messages = [{"role": "user", "content": "Hello"}]
+
+        result = num_tokens_from_messages(messages, "gpt-3.5-turbo-latest")
+
+        # Should log warning about model update
+        mock_logger.warning.assert_called()
+        assert result > 0
+
+    @patch("ingenious.utils.token_counter.tiktoken")
+    @patch("ingenious.utils.token_counter.logger")
+    def test_num_tokens_from_messages_gpt4_warning(self, mock_logger, mock_tiktoken):
+        """Test warning is logged for generic gpt-4 model"""
+        mock_encoding = Mock()
+        mock_encoding.encode.return_value = [1, 2, 3]
+        mock_tiktoken.encoding_for_model.return_value = mock_encoding
+
+        messages = [{"role": "user", "content": "Hello"}]
+
+        result = num_tokens_from_messages(messages, "gpt-4-latest")
+
+        # Should log warning about model update
+        mock_logger.warning.assert_called()
+        assert result > 0
+
+    @patch("ingenious.utils.token_counter.tiktoken")
+    def test_num_tokens_from_messages_all_supported_models(self, mock_tiktoken):
+        """Test token counting works for all explicitly supported models"""
+        mock_encoding = Mock()
+        mock_encoding.encode.return_value = [1, 2, 3]
+        mock_tiktoken.encoding_for_model.return_value = mock_encoding
+
+        messages = [{"role": "user", "content": "Hello"}]
+
+        supported_models = [
+            "gpt-3.5-turbo-0613",
+            "gpt-3.5-turbo-16k-0125",
+            "gpt-4-0314",
+            "gpt-4-32k-0314",
+            "gpt-4-0613",
+            "gpt-4-32k-0613",
+        ]
+
+        for model in supported_models:
+            result = num_tokens_from_messages(messages, model)
+            assert result > 0
+
+    @patch("ingenious.utils.token_counter.tiktoken")
+    def test_num_tokens_from_messages_gpt35_turbo_0301_special_case(
+        self, mock_tiktoken
+    ):
+        """Test special case for gpt-3.5-turbo-0301 with different token calculations"""
+        mock_encoding = Mock()
+        mock_encoding.encode.return_value = [1, 2, 3]  # 3 tokens per string
+        mock_tiktoken.encoding_for_model.return_value = mock_encoding
+
+        messages = [{"role": "user", "content": "Hello", "name": "testuser"}]
+
+        result = num_tokens_from_messages(messages, "gpt-3.5-turbo-0301")
+
+        # For gpt-3.5-turbo-0301: tokens_per_message=4, tokens_per_name=-1
+        # Expected: (3 tokens * 3 strings) + (4 tokens per message) + (-1 tokens for name) + 3 base = 15
+        expected_tokens = 9 + 4 - 1 + 3  # 15
+        assert result == expected_tokens

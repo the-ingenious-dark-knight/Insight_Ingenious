@@ -178,7 +178,7 @@ class TestServicesCoverage:
     def test_container_coverage(self):
         """Test container functionality"""
         try:
-            from ingenious.services.container import Container, get_container
+            from ingenious.services.container import get_container
 
             # Test container instantiation
             container = get_container()
@@ -391,7 +391,7 @@ class TestConfigurationCoverage:
     def test_main_middleware_coverage(self):
         """Test middleware functionality"""
         try:
-            from ingenious.main.middleware import ContextMiddleware, setup_middleware
+            from ingenious.main.middleware import setup_middleware
 
             mock_app = Mock()
 

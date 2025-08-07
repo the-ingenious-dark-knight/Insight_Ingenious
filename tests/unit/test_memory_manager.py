@@ -203,9 +203,7 @@ class TestMemoryManager:
 
             long_content = "word1 word2 word3 word4 word5"
             with (
-                patch.object(
-                    manager, "read_memory", return_value=long_content
-                ) as mock_read,
+                patch.object(manager, "read_memory", return_value=long_content),
                 patch.object(manager, "write_memory", return_value=True) as mock_write,
             ):
                 await manager.maintain_memory("new_word", max_words=3)
