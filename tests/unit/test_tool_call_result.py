@@ -1,16 +1,17 @@
 """
 Tests for ingenious.models.tool_call_result module
 """
+
 import pytest
 from pydantic import ValidationError
 
-from ingenious.models.tool_call_result import (
-    ToolCallResult,
-    ProductToolCallResult,
-    KnowledgeBaseToolCallResult,
-    ActionToolCallResult
-)
 from ingenious.models.chat import Action, KnowledgeBaseLink, Product
+from ingenious.models.tool_call_result import (
+    ActionToolCallResult,
+    KnowledgeBaseToolCallResult,
+    ProductToolCallResult,
+    ToolCallResult,
+)
 
 
 class TestToolCallResult:
@@ -45,7 +46,7 @@ class TestProductToolCallResult:
         """Test ProductToolCallResult initialization with valid data"""
         products = [
             Product(name="Product 1", id="p1", description="Description 1"),
-            Product(name="Product 2", id="p2", description="Description 2")
+            Product(name="Product 2", id="p2", description="Description 2"),
         ]
         result = ProductToolCallResult(results="Found products", products=products)
         assert result.results == "Found products"
@@ -76,15 +77,19 @@ class TestKnowledgeBaseToolCallResult:
         """Test KnowledgeBaseToolCallResult initialization with valid data"""
         kb_links = [
             KnowledgeBaseLink(title="Link 1", url="http://example.com/1"),
-            KnowledgeBaseLink(title="Link 2", url="http://example.com/2")
+            KnowledgeBaseLink(title="Link 2", url="http://example.com/2"),
         ]
-        result = KnowledgeBaseToolCallResult(results="Found links", knowledge_base_links=kb_links)
+        result = KnowledgeBaseToolCallResult(
+            results="Found links", knowledge_base_links=kb_links
+        )
         assert result.results == "Found links"
         assert result.knowledge_base_links == kb_links
 
     def test_init_with_empty_knowledge_base_links(self):
         """Test KnowledgeBaseToolCallResult with empty knowledge base links list"""
-        result = KnowledgeBaseToolCallResult(results="No links", knowledge_base_links=[])
+        result = KnowledgeBaseToolCallResult(
+            results="No links", knowledge_base_links=[]
+        )
         assert result.results == "No links"
         assert result.knowledge_base_links == []
 
@@ -96,7 +101,9 @@ class TestKnowledgeBaseToolCallResult:
     def test_inherits_from_tool_call_result(self):
         """Test that KnowledgeBaseToolCallResult inherits from ToolCallResult"""
         kb_links = [KnowledgeBaseLink(title="Link 1", url="http://example.com/1")]
-        result = KnowledgeBaseToolCallResult(results="Found links", knowledge_base_links=kb_links)
+        result = KnowledgeBaseToolCallResult(
+            results="Found links", knowledge_base_links=kb_links
+        )
         assert isinstance(result, ToolCallResult)
 
 
@@ -107,7 +114,7 @@ class TestActionToolCallResult:
         """Test ActionToolCallResult initialization with valid data"""
         actions = [
             Action(name="Action 1", description="Description 1"),
-            Action(name="Action 2", description="Description 2")
+            Action(name="Action 2", description="Description 2"),
         ]
         result = ActionToolCallResult(results="Found actions", actions=actions)
         assert result.results == "Found actions"

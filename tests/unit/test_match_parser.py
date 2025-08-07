@@ -1,8 +1,6 @@
 """
 Tests for ingenious.utils.match_parser module
 """
-import pytest
-from datetime import datetime
 
 from ingenious.utils.match_parser import MatchDataParser
 
@@ -27,8 +25,10 @@ class TestMatchDataParser:
     def test_create_detailed_summary_default(self):
         """Test create_detailed_summary with default values"""
         parser = MatchDataParser()
-        message, over_ball, timestamp, match_id, feed_id = parser.create_detailed_summary()
-        
+        message, over_ball, timestamp, match_id, feed_id = (
+            parser.create_detailed_summary()
+        )
+
         assert message == "test payload"
         assert over_ball == "test_over"
         assert match_id == "test_match_123"
@@ -40,8 +40,10 @@ class TestMatchDataParser:
         """Test create_detailed_summary with custom payload"""
         payload = {"player": "Smith", "runs": 4}
         parser = MatchDataParser(payload=payload)
-        message, over_ball, timestamp, match_id, feed_id = parser.create_detailed_summary()
-        
+        message, over_ball, timestamp, match_id, feed_id = (
+            parser.create_detailed_summary()
+        )
+
         assert message == str(payload)
         assert over_ball == "test_over"
         assert match_id == "test_match_123"
@@ -51,8 +53,10 @@ class TestMatchDataParser:
     def test_create_detailed_summary_with_none_payload(self):
         """Test create_detailed_summary with None payload"""
         parser = MatchDataParser(payload=None)
-        message, over_ball, timestamp, match_id, feed_id = parser.create_detailed_summary()
-        
+        message, over_ball, timestamp, match_id, feed_id = (
+            parser.create_detailed_summary()
+        )
+
         assert message == "test payload"
         assert over_ball == "test_over"
         assert match_id == "test_match_123"
@@ -63,8 +67,10 @@ class TestMatchDataParser:
         """Test create_detailed_summary with string payload"""
         payload = "boundary hit for four"
         parser = MatchDataParser(payload=payload)
-        message, over_ball, timestamp, match_id, feed_id = parser.create_detailed_summary()
-        
+        message, over_ball, timestamp, match_id, feed_id = (
+            parser.create_detailed_summary()
+        )
+
         assert message == payload
         assert over_ball == "test_over"
         assert match_id == "test_match_123"
@@ -75,7 +81,7 @@ class TestMatchDataParser:
         """Test that create_detailed_summary returns correct types"""
         parser = MatchDataParser()
         result = parser.create_detailed_summary()
-        
+
         assert isinstance(result, tuple)
         assert len(result) == 5
         for item in result:

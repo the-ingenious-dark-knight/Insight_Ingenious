@@ -1,13 +1,11 @@
 """
 Tests for ingenious.main module
 """
-import pytest
-from unittest.mock import Mock, patch
-import warnings
 
-import sys
 import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 import ingenious.main as main_module
 
 
@@ -23,13 +21,13 @@ class TestMainModule:
     def test_imports_exist(self):
         """Test that all required imports are available"""
         # Test that imports work without error
-        assert hasattr(main_module, 'create_app')
-        assert hasattr(main_module, 'FastAgentAPI')
+        assert hasattr(main_module, "create_app")
+        assert hasattr(main_module, "FastAgentAPI")
 
     def test_backward_compatibility_imports(self):
         """Test that backward compatibility imports work"""
         from ingenious.main import FastAgentAPI, create_app
-        
+
         assert FastAgentAPI is not None
         assert callable(create_app)
 
@@ -47,6 +45,7 @@ class TestMainModule:
         """Test that module can be imported without errors"""
         # This test ensures the module imports cleanly
         import ingenious.main
+
         assert ingenious.main is not None
 
     def test_logger_initialization(self):
@@ -67,10 +66,10 @@ class TestMainModule:
 
     def test_fast_agent_api_available(self):
         """Test that FastAgentAPI is available"""
-        assert hasattr(main_module, 'FastAgentAPI')
+        assert hasattr(main_module, "FastAgentAPI")
         assert main_module.FastAgentAPI is not None
 
     def test_create_app_available(self):
         """Test that create_app is available"""
-        assert hasattr(main_module, 'create_app')
+        assert hasattr(main_module, "create_app")
         assert callable(main_module.create_app)

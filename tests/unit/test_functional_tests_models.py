@@ -1,6 +1,7 @@
 """
 Tests for ingenious.models.functional_tests module
 """
+
 import pytest
 from pydantic import ValidationError
 
@@ -16,7 +17,7 @@ class TestEvent:
             file_name="test.txt",
             event_type="create",
             response_content="File created successfully",
-            identifier="test-123"
+            identifier="test-123",
         )
         assert event.file_name == "test.txt"
         assert event.event_type == "create"
@@ -29,7 +30,7 @@ class TestEvent:
             Event(
                 event_type="create",
                 response_content="File created successfully",
-                identifier="test-123"
+                identifier="test-123",
             )
 
     def test_init_with_missing_event_type(self):
@@ -38,17 +39,13 @@ class TestEvent:
             Event(
                 file_name="test.txt",
                 response_content="File created successfully",
-                identifier="test-123"
+                identifier="test-123",
             )
 
     def test_init_with_missing_response_content(self):
         """Test Event initialization fails without response_content"""
         with pytest.raises(ValidationError):
-            Event(
-                file_name="test.txt",
-                event_type="create",
-                identifier="test-123"
-            )
+            Event(file_name="test.txt", event_type="create", identifier="test-123")
 
     def test_init_with_missing_identifier(self):
         """Test Event initialization fails without identifier"""
@@ -56,7 +53,7 @@ class TestEvent:
             Event(
                 file_name="test.txt",
                 event_type="create",
-                response_content="File created successfully"
+                response_content="File created successfully",
             )
 
     def test_all_fields_must_be_strings(self):
@@ -66,31 +63,31 @@ class TestEvent:
                 file_name=123,
                 event_type="create",
                 response_content="File created successfully",
-                identifier="test-123"
+                identifier="test-123",
             )
-        
+
         with pytest.raises(ValidationError):
             Event(
                 file_name="test.txt",
                 event_type=123,
                 response_content="File created successfully",
-                identifier="test-123"
+                identifier="test-123",
             )
-        
+
         with pytest.raises(ValidationError):
             Event(
                 file_name="test.txt",
                 event_type="create",
                 response_content=123,
-                identifier="test-123"
+                identifier="test-123",
             )
-        
+
         with pytest.raises(ValidationError):
             Event(
                 file_name="test.txt",
                 event_type="create",
                 response_content="File created successfully",
-                identifier=123
+                identifier=123,
             )
 
     def test_model_serialization(self):
@@ -99,14 +96,14 @@ class TestEvent:
             file_name="test.txt",
             event_type="create",
             response_content="File created successfully",
-            identifier="test-123"
+            identifier="test-123",
         )
         data = event.model_dump()
         expected = {
             "file_name": "test.txt",
             "event_type": "create",
             "response_content": "File created successfully",
-            "identifier": "test-123"
+            "identifier": "test-123",
         }
         assert data == expected
 
@@ -116,7 +113,7 @@ class TestEvent:
             "file_name": "test.txt",
             "event_type": "update",
             "response_content": "File updated successfully",
-            "identifier": "test-456"
+            "identifier": "test-456",
         }
         event = Event(**data)
         assert event.file_name == "test.txt"
@@ -126,12 +123,7 @@ class TestEvent:
 
     def test_empty_strings_are_valid(self):
         """Test that empty strings are valid for all fields"""
-        event = Event(
-            file_name="",
-            event_type="",
-            response_content="",
-            identifier=""
-        )
+        event = Event(file_name="", event_type="", response_content="", identifier="")
         assert event.file_name == ""
         assert event.event_type == ""
         assert event.response_content == ""
@@ -140,12 +132,12 @@ class TestEvent:
     def test_different_event_types(self):
         """Test Event with different event types"""
         event_types = ["create", "update", "delete", "read", "custom_event"]
-        
+
         for event_type in event_types:
             event = Event(
                 file_name="test.txt",
                 event_type=event_type,
                 response_content=f"Event {event_type} processed",
-                identifier=f"test-{event_type}"
+                identifier=f"test-{event_type}",
             )
             assert event.event_type == event_type
