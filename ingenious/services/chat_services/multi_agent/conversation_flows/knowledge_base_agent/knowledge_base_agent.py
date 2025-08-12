@@ -7,18 +7,11 @@ from autogen_agentchat.agents import AssistantAgent
 from autogen_core import EVENT_LOGGER_NAME, CancellationToken
 from autogen_core.tools import FunctionTool
 
+from ingenious.common.enums import AuthenticationMethod
 from ingenious.common.utils import create_aoai_chat_completion_client_from_config
 from ingenious.models.agent import LLMUsageTracker
 from ingenious.models.chat import ChatRequest, ChatResponse, ChatResponseChunk
 from ingenious.services.chat_services.multi_agent.service import IConversationFlow
-
-try:
-    from azure.core.credentials import AzureKeyCredential
-    from azure.search.documents import SearchClient
-
-    AZURE_SEARCH_AVAILABLE = True
-except ImportError:
-    AZURE_SEARCH_AVAILABLE = False
 
 
 class ConversationFlow(IConversationFlow):
@@ -76,7 +69,6 @@ class ConversationFlow(IConversationFlow):
             hasattr(self._config, "azure_search_services")
             and self._config.azure_search_services
             and len(self._config.azure_search_services) > 0
-            and AZURE_SEARCH_AVAILABLE
             and self._config.azure_search_services[0].endpoint
             and self._config.azure_search_services[0].key
             and self._config.azure_search_services[0].key != "mock-search-key-12345"
@@ -99,10 +91,21 @@ class ConversationFlow(IConversationFlow):
                 if use_azure_search:
                     # Use Azure AI Search
                     try:
-                        search_client = SearchClient(
+                        # Prefer builder for consistent auth handling
+                        from ingenious.common.utils import (
+                            create_search_client_from_params,
+                        )
+
+                        search_client = create_search_client_from_params(
                             endpoint=search_config.endpoint,
-                            index_name="test-index",  # Use default index for now
-                            credential=AzureKeyCredential(search_config.key),
+                            index_name="test-index",
+                            authentication_method=(
+                                # Use API key if provided, else default credential
+                                AuthenticationMethod.TOKEN
+                                if getattr(search_config, "key", None)
+                                else AuthenticationMethod.DEFAULT_CREDENTIAL
+                            ),
+                            api_key=getattr(search_config, "key", None),
                         )
 
                         # Perform search
@@ -376,7 +379,6 @@ TERMINATE your response when the task is complete.
                 hasattr(self._config, "azure_search_services")
                 and self._config.azure_search_services
                 and len(self._config.azure_search_services) > 0
-                and AZURE_SEARCH_AVAILABLE
                 and self._config.azure_search_services[0].endpoint
                 and self._config.azure_search_services[0].key
                 and self._config.azure_search_services[0].key != "mock-search-key-12345"
@@ -394,10 +396,19 @@ TERMINATE your response when the task is complete.
                 try:
                     if use_azure_search:
                         # Azure Search implementation (same as non-streaming)
-                        search_client = SearchClient(
+                        from ingenious.common.utils import (
+                            create_search_client_from_params,
+                        )
+
+                        search_client = create_search_client_from_params(
                             endpoint=search_config.endpoint,
                             index_name=search_config.index_name,
-                            credential=AzureKeyCredential(search_config.key),
+                            authentication_method=(
+                                AuthenticationMethod.TOKEN
+                                if getattr(search_config, "key", None)
+                                else AuthenticationMethod.DEFAULT_CREDENTIAL
+                            ),
+                            api_key=getattr(search_config, "key", None),
                         )
                         results = search_client.search(
                             search_text=search_query, top=5, include_total_count=True

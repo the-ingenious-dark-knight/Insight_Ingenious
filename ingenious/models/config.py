@@ -30,14 +30,9 @@ class ChatHistoryConfig(config_ns_models.ChatHistoryConfig):
 class ModelConfig(config_ns_models.ModelConfig):
     api_key: str = ""
     base_url: str
-    deployment: str = ""
     client_id: str = ""
     client_secret: str = ""
     tenant_id: str = ""
-    authentication_method: AuthenticationMethod = Field(
-        AuthenticationMethod.DEFAULT_CREDENTIAL,
-        description="OpenAI SAS Authentication Method",
-    )
 
     def __init__(
         self, config: config_ns_models.ModelConfig, profile: profile_models.ModelConfig
@@ -55,6 +50,9 @@ class ModelConfig(config_ns_models.ModelConfig):
             api_type=config.api_type,
             api_version=api_version,
             deployment=deployment,
+            authentication_method=getattr(
+                config, "authentication_method", AuthenticationMethod.DEFAULT_CREDENTIAL
+            ),
         )
 
         # Set additional fields from profile that aren't in the parent class
@@ -63,7 +61,6 @@ class ModelConfig(config_ns_models.ModelConfig):
         self.client_id = profile.client_id
         self.client_secret = profile.client_secret
         self.tenant_id = profile.tenant_id
-        self.authentication_method = profile.authentication_method
 
 
 class ChatServiceConfig(config_ns_models.ChatServiceConfig):
@@ -97,16 +94,28 @@ class LoggingConfig(config_ns_models.LoggingConfig):
 
 class AzureSearchConfig(config_ns_models.AzureSearchConfig):
     key: str = ""
+    client_id: str = ""
+    client_secret: str = ""
+    tenant_id: str = ""
 
     def __init__(
         self,
         config: config_ns_models.AzureSearchConfig,
         profile: profile_models.AzureSearchConfig,
     ):
-        super().__init__(service=config.service, endpoint=config.endpoint)
+        super().__init__(
+            service=config.service,
+            endpoint=config.endpoint,
+            authentication_method=getattr(
+                config, "authentication_method", AuthenticationMethod.DEFAULT_CREDENTIAL
+            ),
+        )
 
         # Set additional fields from profile
         self.key = profile.key
+        self.client_id = getattr(profile, "client_id", "")
+        self.client_secret = getattr(profile, "client_secret", "")
+        self.tenant_id = getattr(profile, "tenant_id", "")
 
 
 class AzureSqlConfig(config_ns_models.AzureSqlConfig):

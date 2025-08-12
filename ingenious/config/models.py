@@ -195,6 +195,115 @@ class AzureSearchSettings(BaseModel):
     service: str = Field("", description="Azure Search service name")
     endpoint: str = Field("", description="Azure Search service endpoint URL")
     key: str = Field("", description="Azure Search service API key")
+    authentication_method: AuthenticationMethod = Field(
+        AuthenticationMethod.DEFAULT_CREDENTIAL,
+        description="Azure Search authentication method",
+    )
+    client_id: str = Field(
+        "",
+        description="Azure client ID for MSI or CLIENT_ID_AND_SECRET authentication (optional)",
+    )
+    client_secret: str = Field(
+        "",
+        description="Client secret for CLIENT_ID_AND_SECRET authentication (optional)",
+    )
+    tenant_id: str = Field(
+        "",
+        description="Tenant ID for CLIENT_ID_AND_SECRET authentication (optional; falls back to AZURE_TENANT_ID)",
+    )
+
+    @field_validator("key")
+    @classmethod
+    def validate_key(cls, v: str, info: ValidationInfo) -> str:
+        """Validate that API key is provided when using token authentication."""
+        # Get authentication_method from the values being validated
+        auth_mode = info.data.get(
+            "authentication_method", AuthenticationMethod.DEFAULT_CREDENTIAL
+        )
+
+        # Check for placeholder values
+        if v and "placeholder" in v.lower():
+            raise ValueError(
+                "Azure Search API key is required. Set the appropriate environment variable "
+                "(e.g., AZURE_AI_SEARCH_KEY) or provide a valid key."
+            )
+
+        # If authentication mode is token, api_key is required
+        if auth_mode == AuthenticationMethod.TOKEN and not v:
+            raise ValueError(
+                "API key is required when authentication_method is 'token' for Azure Search. "
+                "Set the appropriate environment variable (e.g., AZURE_AI_SEARCH_KEY) "
+                "or provide a valid key."
+            )
+
+        return v
+
+    @field_validator("endpoint")
+    @classmethod
+    def validate_endpoint(cls, v: str) -> str:
+        """Validate that endpoint is provided and properly formatted."""
+        if v and "placeholder" in v.lower():
+            raise ValueError(
+                "Azure Search endpoint is required. Set the appropriate environment variable "
+                "(e.g., AZURE_AI_SEARCH_ENDPOINT) or provide a valid URL."
+            )
+        if v and not v.startswith(("http://", "https://")):
+            raise ValueError(
+                "Azure Search endpoint must start with 'http://' or 'https://'"
+            )
+        return v
+
+    @model_validator(mode="after")
+    def validate_authentication_requirements(self) -> "AzureSearchSettings":
+        """Validate authentication requirements for different authentication methods."""
+        if self.authentication_method == AuthenticationMethod.CLIENT_ID_AND_SECRET:
+            if not self.client_id:
+                raise ValueError(
+                    "client_id is required when authentication_method is 'client_id_and_secret' for Azure Search."
+                )
+            if not self.client_secret:
+                raise ValueError(
+                    "client_secret is required when authentication_method is 'client_id_and_secret' for Azure Search."
+                )
+            if not self.tenant_id:
+                import os
+
+                if not os.getenv("AZURE_TENANT_ID"):
+                    raise ValueError(
+                        "tenant_id is required when authentication_method is 'client_id_and_secret' for Azure Search (or set AZURE_TENANT_ID)."
+                    )
+
+        elif self.authentication_method == AuthenticationMethod.TOKEN:
+            if not self.key:
+                raise ValueError(
+                    "API key is required when authentication_method is 'token' for Azure Search. "
+                    "Set the appropriate environment variable (e.g., AZURE_AI_SEARCH_KEY) "
+                    "or provide a valid key."
+                )
+
+        elif self.authentication_method == AuthenticationMethod.MSI:
+            # For MSI, client_id is optional (if not provided, system-assigned MSI is used)
+            # No additional validation needed for system-assigned MSI
+            pass
+
+        elif self.authentication_method == AuthenticationMethod.DEFAULT_CREDENTIAL:
+            # For default credential, no additional validation needed
+            # It will try multiple auth methods in sequence
+            pass
+
+        else:
+            raise ValueError(
+                f"Unsupported authentication method '{self.authentication_method}' for Azure Search. "
+                f"Supported methods: {[method.value for method in AuthenticationMethod]}"
+            )
+
+        # Validate that either service name or endpoint is provided
+        if not self.service and not self.endpoint:
+            raise ValueError(
+                "Either 'service' name or 'endpoint' URL must be provided for Azure Search configuration."
+            )
+
+        return self
 
 
 class AzureSqlSettings(BaseModel):

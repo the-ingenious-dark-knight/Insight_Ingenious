@@ -5,10 +5,9 @@ from typing import Dict
 
 import matplotlib.pyplot as plt  # type: ignore
 import pandas as pd
-from azure.core.credentials import AzureKeyCredential
-from azure.search.documents import SearchClient
 
 import ingenious.config.config as ingen_config
+from ingenious.common.utils import create_search_client_from_settings
 from ingenious.core.structured_logging import get_logger
 from ingenious.utils.load_sample_data import sqlite_sample_db
 
@@ -35,11 +34,9 @@ if _config.azure_sql_services and _config.azure_sql_services.database_name != "s
 class ToolFunctions:
     @staticmethod
     def aisearch(search_query: str, index_name: str) -> str:
-        credential = AzureKeyCredential(_config.azure_search_services[0].key)
-        client = SearchClient(
-            endpoint=_config.azure_search_services[0].endpoint,
+        client = create_search_client_from_settings(
+            search_settings=_config.azure_search_services[0],
             index_name=index_name,
-            credential=credential,
         )
         results = client.search(
             search_text=search_query,

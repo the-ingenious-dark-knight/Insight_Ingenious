@@ -9,15 +9,9 @@ class ModelConfig(BaseModel):
     model: str
     api_key: str = ""
     base_url: str
-    deployment: str = ""
-    api_version: str = ""
-    deployment: str = ""
     client_id: str = ""
     client_secret: str = ""
     tenant_id: str = ""
-    authentication_method: AuthenticationMethod = (
-        AuthenticationMethod.DEFAULT_CREDENTIAL
-    )
 
 
 class ChatHistoryConfig(BaseModel):
@@ -31,6 +25,9 @@ class AzureSqlConfig(BaseModel):
 class AzureSearchConfig(BaseModel):
     service: str = "default"
     key: str = ""
+    client_id: str = ""
+    client_secret: str = ""
+    tenant_id: str = ""
 
 
 class ToolServiceConfig(BaseModel):

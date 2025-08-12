@@ -2,6 +2,8 @@ from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
+from ingenious.common.enums import AuthenticationMethod
+
 
 class ChatHistoryConfig(BaseModel):
     database_type: str = Field(
@@ -26,6 +28,10 @@ class ModelConfig(BaseModel):
     api_type: str = Field(..., description="Type of the API (e.g., rest, grpc)")
     api_version: str = Field(..., description="Version of the API")
     deployment: str = Field("", description="Azure deployment name")
+    authentication_method: AuthenticationMethod = Field(
+        AuthenticationMethod.DEFAULT_CREDENTIAL,
+        description="Authentication method for Azure Open AI",
+    )
 
 
 class ChatServiceConfig(BaseModel):
@@ -44,8 +50,12 @@ class LoggingConfig(BaseModel):
 
 
 class AzureSearchConfig(BaseModel):
-    service: str = Field(..., description="Name of the service")
-    endpoint: str = Field(..., description="Endpoint of the service")
+    service: str = Field(..., description="Name of the Azure AI Search service")
+    endpoint: str = Field(..., description="Endpoint of the Azure AI Search service")
+    authentication_method: AuthenticationMethod = Field(
+        AuthenticationMethod.DEFAULT_CREDENTIAL,
+        description="Authentication method for Azure Search",
+    )
 
 
 class AzureSqlConfig(BaseModel):

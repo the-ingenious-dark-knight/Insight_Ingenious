@@ -14,9 +14,15 @@ from .azure_openai_client_builder import (
     create_aoai_chat_completion_client_from_params,
     create_aoai_chat_completion_client_from_settings,
 )
+from .azure_search_client_builder import (
+    create_search_client_from_params,
+    create_search_client_from_settings,
+)
 
 __all__ = [
     "create_aoai_chat_completion_client_from_config",
     "create_aoai_chat_completion_client_from_params",
     "create_aoai_chat_completion_client_from_settings",
+    "create_search_client_from_params",
+    "create_search_client_from_settings",
 ]

@@ -12,8 +12,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import uuid
 
-from azure.core.credentials import AzureKeyCredential
-from azure.search.documents import SearchClient
 from azure.search.documents.indexes import SearchIndexClient
 from azure.search.documents.indexes.models import (
     SearchableField,
@@ -39,10 +37,18 @@ if not service_endpoint or not key:
     sys.exit(1)
 
 # Create clients
+from azure.core.credentials import AzureKeyCredential
+
+from ingenious.common.enums import AuthenticationMethod
+from ingenious.common.utils import create_search_client_from_params
+
 credential = AzureKeyCredential(key)
 index_client = SearchIndexClient(endpoint=service_endpoint, credential=credential)
-search_client = SearchClient(
-    endpoint=service_endpoint, index_name=index_name, credential=credential
+search_client = create_search_client_from_params(
+    endpoint=service_endpoint,
+    index_name=index_name,
+    authentication_method=AuthenticationMethod.TOKEN,  # use API key for this script
+    api_key=key,
 )
 
 
