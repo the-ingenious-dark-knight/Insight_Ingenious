@@ -220,6 +220,22 @@ class WebAuthenticationSettings(BaseModel):
     type: str = Field(
         "basic", description="Authentication type: 'basic' for HTTP basic auth"
     )
+    enable_global_middleware: bool = Field(
+        False,
+        description="Enable global authentication middleware to protect all endpoints",
+    )
+    jwt_secret_key: str = Field(
+        "",
+        description="Secret key for JWT token signing. If empty, uses INGENIOUS_JWT_SECRET_KEY env var",
+    )
+    jwt_algorithm: str = Field("HS256", description="Algorithm for JWT token signing")
+    jwt_access_token_expire_minutes: int = Field(
+        1440,
+        description="JWT access token expiration time in minutes (default: 24 hours)",
+    )
+    jwt_refresh_token_expire_days: int = Field(
+        7, description="JWT refresh token expiration time in days (default: 7 days)"
+    )
 
 
 class WebSettings(BaseModel):
