@@ -13,13 +13,13 @@ from ingenious.common.enums import AuthenticationMethod
 class ChatHistorySettings(BaseModel):
     """Configuration for chat history storage.
 
-    Supports both SQLite (local) and Azure SQL (cloud) storage options.
-    For local development, SQLite is recommended. For production, use Azure SQL.
+    Supports SQLite (local), Azure SQL (cloud), and Azure Cosmos DB (cloud).
+    For local development, SQLite is recommended. For production, use Azure SQL or Cosmos DB.
     """
 
     database_type: str = Field(
         "sqlite",
-        description="Type of database: 'sqlite' for local, 'azuresql' for cloud",
+        description="Type of database: 'sqlite' for local, 'azuresql' or 'cosmos' for cloud",
     )
     database_path: str = Field(
         "./tmp/high_level_logs.db",
@@ -372,4 +372,28 @@ class ReceiverSettings(BaseModel):
     api_url: str = Field("", description="URL for receiving external events")
     api_key: str = Field(
         "DevApiKey", description="API key for authenticating external events"
+    )
+
+
+class CosmosSettings(BaseModel):
+    """Configuration for Azure Cosmos DB service."""
+
+    uri: str = Field(..., description="Azure Cosmos DB account endpoint URL")
+    database_name: str = Field(..., description="Azure Cosmos DB database name")
+    api_key: str = Field("", description="API key for the Cosmos service")
+    client_id: str = Field(
+        "",
+        description="Azure client ID for MSI authentication (optional) or CLIENT_ID_AND_SECRET authentication",
+    )
+    client_secret: str = Field(
+        "",
+        description="Azure client secret for CLIENT_ID_AND_SECRET authentication (optional)",
+    )
+    tenant_id: str = Field(
+        "",
+        description="Azure tenant ID for CLIENT_ID_AND_SECRET authentication (optional)",
+    )
+    authentication_method: AuthenticationMethod = Field(
+        AuthenticationMethod.DEFAULT_CREDENTIAL,
+        description="Cosmos SAS Authentication Method",
     )

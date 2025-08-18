@@ -44,12 +44,14 @@ from ingenious.common.enums import AuthenticationMethod
 from ingenious.config.models import (
     AzureSearchSettings,
     AzureSqlSettings,
+    CosmosSettings,
     FileStorageContainerSettings,
     ModelSettings,
 )
 from ingenious.models.config import (
     AzureSearchConfig,
     AzureSqlConfig,
+    CosmosConfig,
     FileStorageContainer,
     ModelConfig,
 )
@@ -68,6 +70,11 @@ try:
     from .builder.search_client import AzureSearchClientBuilder
 except ImportError:
     AzureSearchClientBuilder = None
+
+try:
+    from .builder.cosmos_client import CosmosClientBuilder
+except ImportError:
+    CosmosClientBuilder = None
 
 
 class AzureClientFactory:
@@ -313,12 +320,7 @@ class AzureClientFactory:
 
     @staticmethod
     def create_cosmos_client(
-        endpoint: str,
-        authentication_method: AuthenticationMethod = AuthenticationMethod.DEFAULT_CREDENTIAL,
-        api_key: Optional[str] = None,
-        client_id: Optional[str] = None,
-        client_secret: Optional[str] = None,
-        tenant_id: Optional[str] = None,
+        cosmos_config: Union[CosmosConfig, CosmosSettings],
     ) -> Any:
         """
         Create an Azure Cosmos DB client.
@@ -340,18 +342,14 @@ class AzureClientFactory:
                 "Install with: pip install azure-cosmos"
             )
 
-        # builder = CosmosClientBuilder(
-        #     endpoint=endpoint,
-        #     authentication_method=authentication_method,
-        #     api_key=api_key,
-        #     client_id=client_id,
-        #     client_secret=client_secret,
-        #     tenant_id=tenant_id
-        # )
+        if CosmosClientBuilder is None:
+            raise ImportError(
+                "CosmosClientBuilder is not available. "
+                "azure-cosmos package is required."
+            )
 
-        # return builder.build()
-
-        return NotImplemented
+        builder = CosmosClientBuilder(cosmos_config)
+        return builder.build()
 
     @staticmethod
     def create_search_client(

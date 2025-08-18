@@ -156,6 +156,28 @@ class AzureSqlConfig(config_ns_models.AzureSqlConfig, AzureAuthConfig):
         )
 
 
+class CosmosConfig(config_ns_models.CosmosConfig, AzureAuthConfig):
+    def __init__(
+        self,
+        config: config_ns_models.CosmosConfig,
+        profile: profile_models.CosmosConfig,
+    ):
+        # Initialize the config_ns_models.CosmosConfig part
+        config_ns_models.CosmosConfig.__init__(
+            self, uri=config.uri, database_name=config.database_name
+        )
+
+        # Initialize the AzureAuthConfig part
+        AzureAuthConfig.__init__(
+            self,
+            authentication_method=profile.authentication_method,
+            client_id=profile.client_id if profile.client_id else None,
+            client_secret=profile.client_secret if profile.client_secret else None,
+            tenant_id=profile.tenant_id if profile.tenant_id else None,
+            api_key=profile.api_key if profile.api_key else None,
+        )
+
+
 class ReceiverConfig(profile_models.ReceiverConfig):
     def __init__(self, profile: profile_models.ReceiverConfig):
         super().__init__(

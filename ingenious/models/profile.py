@@ -22,6 +22,11 @@ class AzureSqlConfig(AzureAuthConfig):
     database_connection_string: str = ""
 
 
+class CosmosConfig(AzureAuthConfig):
+    uri: str = Field(..., description="Azure Cosmos DB URI")
+    database_name: str = Field(..., description="Azure Cosmos DB database name")
+
+
 class AzureSearchConfig(AzureAuthConfig):
     service: str = "default"
     key: str = ""
@@ -98,6 +103,9 @@ class Profile(BaseModel):
     )
     azure_sql_services: Optional[AzureSqlConfig] = Field(
         default=None, description="Azure SQL services configuration (optional)"
+    )
+    cosmos_service: Optional[CosmosConfig] = Field(
+        default=None, description="Azure Cosmos DB service configuration (optional)"
     )
     web_configuration: WebConfig
     receiver_configuration: ReceiverConfig
