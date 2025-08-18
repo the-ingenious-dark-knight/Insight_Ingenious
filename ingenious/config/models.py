@@ -195,6 +195,21 @@ class AzureSearchSettings(BaseModel):
     service: str = Field("", description="Azure Search service name")
     endpoint: str = Field("", description="Azure Search service endpoint URL")
     key: str = Field("", description="Azure Search service API key")
+    client_id: str = Field(
+        "", description="Azure client ID for MSI authentication (optional)"
+    )
+    client_secret: str = Field(
+        "",
+        description="Azure client secret for CLIENT_ID_AND_SECRET authentication (optional)",
+    )
+    tenant_id: str = Field(
+        "",
+        description="Azure tenant ID for CLIENT_ID_AND_SECRET authentication (optional)",
+    )
+    authentication_method: AuthenticationMethod = Field(
+        AuthenticationMethod.DEFAULT_CREDENTIAL,
+        description="OpenAI SAS Authentication Method",
+    )
 
 
 class AzureSqlSettings(BaseModel):
