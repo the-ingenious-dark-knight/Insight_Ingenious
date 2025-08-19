@@ -28,10 +28,10 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
     """
 
     def __init__(
-        self, 
-        app: ASGIApp, 
+        self,
+        app: ASGIApp,
         config: IngeniousSettings,
-        exempt_paths: Optional[List[str]] = None
+        exempt_paths: Optional[List[str]] = None,
     ):
         super().__init__(app)
         self.config = config
@@ -58,11 +58,13 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
         try:
             # Validate authentication
             username = get_auth_user(request, self.config)
-            logger.debug(f"Authenticated user: {username}", extra={"username": username})
-            
+            logger.debug(
+                f"Authenticated user: {username}", extra={"username": username}
+            )
+
             # Add username to request state for downstream use
             request.state.username = username
-            
+
             response = await call_next(request)
             return response
         except HTTPException as e:
@@ -74,7 +76,7 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
             return JSONResponse(
                 content={"detail": e.detail},
                 status_code=e.status_code,
-                headers=e.headers if hasattr(e, 'headers') else {},
+                headers=e.headers if hasattr(e, "headers") else {},
             )
         except Exception as e:
             logger.error(
@@ -89,13 +91,11 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
 
 
 def setup_auth_middleware(
-    app: FastAPI, 
-    config: IngeniousSettings,
-    exempt_paths: Optional[List[str]] = None
+    app: FastAPI, config: IngeniousSettings, exempt_paths: Optional[List[str]] = None
 ) -> None:
     """
     Setup authentication middleware on the FastAPI app.
-    
+
     Args:
         app: FastAPI application instance
         config: Ingenious configuration settings
@@ -103,10 +103,10 @@ def setup_auth_middleware(
     """
     if config.web_configuration.authentication.enable_global_middleware:
         app.add_middleware(
-            AuthenticationMiddleware,
-            config=config,
-            exempt_paths=exempt_paths
+            AuthenticationMiddleware, config=config, exempt_paths=exempt_paths
         )
         logger.info("Global authentication middleware enabled")
     else:
-        logger.info("Global authentication middleware disabled - using per-route authentication")
+        logger.info(
+            "Global authentication middleware disabled - using per-route authentication"
+        )
